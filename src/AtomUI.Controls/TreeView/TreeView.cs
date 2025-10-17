@@ -428,6 +428,11 @@ public class TreeView : AvaloniaTreeView, IMotionAwareControl, IControlSharedTok
         {
             parent.IsChecked = false;
         }
+        
+        if (parent.Parent is TreeViewItem grandParent)
+        {
+            SetupParentNodeCheckedStatus(grandParent);
+        }
     }
 
     // 自己优先的查找，用于确认拖动发生的节点
