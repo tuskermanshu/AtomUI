@@ -11,6 +11,15 @@
 - Implementation
   - Derive the internal scroll progress from the `Target` ScrollViewer in `ScrollChanged` and `OnLoaded`; Avalonia `ScrollChanged` covers extent/viewport changes, so no dedicated resize listener is required.
 
+## 2026-08-16
+
+- Semantic Parts
+  - Add Ant Design-aligned Semantic Part descriptors for `FloatButton`, `BackTopFloatButton` and `FloatButtonGroup`.
+  - Add static template markers and generated owner-scoped style contracts without runtime discovery; `FloatButtonTheme` now owns its leaf shape templates so the generator can statically validate markers.
+  - Document the lazily materialized trigger-mode `list` part and the exclusion of badge adorners, tooltip and item-level group parts.
+- Gallery
+  - Add the Semantic Parts Preview and Ant Design-aligned custom styling example using AtomUI `v6.1.3` version metadata.
+
 ## 2026-07-09
 
 - Docs
