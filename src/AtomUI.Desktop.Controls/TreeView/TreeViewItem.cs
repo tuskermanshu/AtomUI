@@ -2,6 +2,7 @@
 using System.Reactive.Disposables;
 using AtomUI.Controls;
 using AtomUI.Controls.Utils;
+using AtomUI.Generated.AtomUIDesktopControls;
 using AtomUI.MotionScene;
 using AtomUI.Utils;
 using Avalonia;
@@ -20,7 +21,7 @@ namespace AtomUI.Desktop.Controls;
 using AvaloniaTreeItem = Avalonia.Controls.TreeViewItem;
 
 [PseudoClasses(TreeViewPseudoClass.NodeToggleTypeCheckBox, TreeViewPseudoClass.NodeToggleTypeRadio)]
-public class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
+public partial class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
 {
     #region 公共属性定义
     public static readonly StyledProperty<PathIcon?> IconProperty =
@@ -912,7 +913,9 @@ public class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
     
     protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
     {
-        return new TreeViewItem();
+        var treeViewItem = new TreeViewItem();
+        treeViewItem.Classes.Add(TreeViewItemSemanticParts.ItemClass);
+        return treeViewItem;
     }
     
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey)
@@ -925,6 +928,7 @@ public class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
         base.ContainerForItemPreparedOverride(container, item, index);
         if (container is TreeViewItem treeViewItem)
         {
+            treeViewItem.Classes.Add(TreeViewItemSemanticParts.ItemClass);
             treeViewItem.OwnerTreeView = OwnerTreeView;
 
             if (item != null && item is not Visual && item is ITreeItemNode treeViewItemData)
