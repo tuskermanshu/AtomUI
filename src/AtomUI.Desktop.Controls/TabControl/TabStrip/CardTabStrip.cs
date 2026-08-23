@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using AtomUI.Generated.AtomUIDesktopControls;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
@@ -8,7 +9,7 @@ using Avalonia.Layout;
 
 namespace AtomUI.Desktop.Controls;
 
-public class CardTabStrip : BaseTabStrip
+public partial class CardTabStrip : BaseTabStrip
 {
     #region 公共属性实现
 
@@ -79,10 +80,12 @@ public class CardTabStrip : BaseTabStrip
 
     protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
     {
-        return new TabStripItem
+        var tabStripItem = new TabStripItem
         {
             Shape = TabSharp.Card
         };
+        tabStripItem.Classes.Add(CardTabStripSemanticParts.ItemClass);
+        return tabStripItem;
     }
 
     internal override void ReleaseTabStripItemOwnerBindings(TabStripItem tabStripItem)
@@ -99,6 +102,7 @@ public class CardTabStrip : BaseTabStrip
         if (container is TabStripItem tabStripItem)
         {
             tabStripItem.Shape = TabSharp.Card;
+            tabStripItem.Classes.Add(CardTabStripSemanticParts.ItemClass);
             tabStripItem[!CornerRadiusProperty] = this[!EffectiveCardBorderRadiusProperty];
             tabStripItem[!BorderThicknessProperty] = this[!CardBorderThicknessProperty];
         }

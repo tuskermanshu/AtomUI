@@ -86,7 +86,7 @@ TabControl 的公共契约由 public/protected 类型成员、Avalonia 属性、
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:38`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:133`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -102,7 +102,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 通过 ItemSource 生成标签项
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:55`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:150`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -122,7 +122,7 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 禁用标签
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:147`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:242`
 
 Gallery key：`ExamplesContent` / item `4`
 
@@ -144,7 +144,7 @@ Gallery key：`ExamplesContent` / item `4`
 
 ### 居中显示
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:170`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:265`
 
 Gallery key：`ExamplesContent` / item `5`
 
@@ -278,9 +278,9 @@ TabControl Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - `src/AtomUI.Desktop.Controls/TabControl/TabOverflowMenu.cs`：默认菜单及其 internal item container；不承载 owner-specific 分支。
 - `src/AtomUI.Desktop.Controls/TabControl/Themes/TabScrollViewerTheme.axaml`：三个 indicator、更多按钮、滚动 presenter 与静态 `PART_OverflowPopup` shell。
 - `src/AtomUI.Desktop.Controls/TabControl/Themes/TabOverflowMenuTheme.axaml`：默认 menu-like 内容、selected/disabled/closable 视觉。
-- `src/AtomUI.Desktop.Controls/TabControl/TabControl.cs` 与 `CardTabControl.cs`：Line/Card 容器、选中指示器和 add button 外观接入。
+- `src/AtomUI.Desktop.Controls/TabControl/TabControl.cs` 与 `CardTabControl.cs`：Line/Card 容器、选中指示器和 add button 外观接入；两控件在容器创建与准备入口同步 `semantic-item` marker。
 - `src/AtomUI.Desktop.Controls/TabControl/TabStrip`：同一家族的无内容页 owner 与 Line/Card 外观，复用上述 overflow 基础设施。
-
+- `src/AtomUI.Desktop.Controls/TabControl` 下的 `TabControl.SemanticParts.cs`、`CardTabControl.SemanticParts.cs`、`TabItem.SemanticParts.cs` 与 `TabStrip` 目录下的 `TabStrip.SemanticParts.cs`、`CardTabStrip.SemanticParts.cs`、`TabStripItem.SemanticParts.cs`：各 owner 的公开 Semantic Part descriptor 与 marker class 常量。
 职责边界：
 
 - 控件主文件保留 public/protected API、Avalonia 属性注册、事件和主要生命周期入口。
@@ -296,6 +296,7 @@ TabControl Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 
 - 源设计文档：`docs/controls/desktop/navigation/tab-control/overview.md`
 - 实现文档：`docs/controls/desktop/navigation/tab-control/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/navigation/tab-control/semantic-part.md`
 - Token 文档：`docs/controls/desktop/navigation/tab-control/token.md`
 - 变更记录：`docs/controls/desktop/navigation/tab-control/changelog.md`
 - 语义结构：`./semantic-cn.md`
