@@ -86,7 +86,7 @@ TabControl 的公共契约由 public/protected 类型成员、Avalonia 属性、
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:131`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:138`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -102,7 +102,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 通过 ItemSource 生成标签项
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:148`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:155`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -122,7 +122,7 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 禁用标签
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:240`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:247`
 
 Gallery key：`ExamplesContent` / item `4`
 
@@ -144,7 +144,7 @@ Gallery key：`ExamplesContent` / item `4`
 
 ### 居中显示
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:263`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Views/TabControlShowCase.axaml:270`
 
 Gallery key：`ExamplesContent` / item `5`
 
