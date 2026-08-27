@@ -120,11 +120,7 @@ public class GalleryCatalogCoverageTests
                               .ToArray();
 
         sourceFiles.Length.ShouldBe(81);
-<<<<<<< HEAD
-        sourceFiles.Sum(CountUnits).ShouldBe(4331);
-=======
-        sourceFiles.Sum(CountUnits).ShouldBe(4301);
->>>>>>> 4e0255ba1 (feat(Semantic): add header and indicator semantic parts to TabControl and CardTabControl)
+        sourceFiles.Sum(CountUnits).ShouldBe(4337);
         foreach (var sourcePath in sourceFiles)
         {
             var targetPath = Path.Combine(
