@@ -9,6 +9,16 @@
 - Implementation
   - `ShadowsAwareContainer` degrades to `IsArrowVisible=false` and default corner radius when the provider cannot supply the arrow part, subscribes the provider's `TemplateApplied` while degraded, and re-probes on the next template application so arrow relay bindings are established once the part becomes available.
   - `Popup.ApplyCustomPlacement` treats an unavailable arrow part like a hidden arrow, reusing the existing shadow-thickness compensation path instead of dereferencing the part.
+## 2026-09-04
+
+- Motion
+  - Reconcile both `Opened -> PopupMotionActor ready` and `actor ready -> Opened` orderings so a lazily materialized popup cannot remain physically open but transparent until its second open.
+- Pinned open
+  - Suppress light-dismiss before first pinned open in shared Flyout, ComboBox, Mentions and InfoPickerInput owners; Flyout restores its configured Click/Hover/Focus value through `configured && !pinned` rather than a fixed default.
+- Tests
+  - Add a late-actor visual-state regression and first-open light-dismiss regressions for each newly covered direct owner.
+- Docs
+  - Record the incident and repository-wide audit in the long-lived [Semantic Part Popup first-open lifecycle case study](../../../../engineering/case-studies/semantic-part-popup-first-open-lifecycle-case-study.md).
 
 ## 2026-08-25
 
