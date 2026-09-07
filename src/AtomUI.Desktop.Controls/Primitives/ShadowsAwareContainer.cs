@@ -342,8 +342,21 @@ internal class ShadowsAwareContainer : Decorator
             var arrowDecoratedBox = arrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox();
             if (arrowDecoratedBox is not null)
             {
-                _surfaceBindings.Add(BindUtils.RelayBind(
-                    arrowDecoratedBox, ArrowDecoratedBox.CornerRadiusProperty, this, CornerRadiusProperty));
+                // 强制实例化 ArrowDecoratedBox 自身的模板，保证容器 Border 已就绪；
+                // 阴影圆角必须跟随真正可见的内容装饰器（容器 Border）：语义部件样式可能只覆盖
+                // 容器 Border 的圆角，此时 ArrowDecoratedBox 自身的 CornerRadius 与可见形状不一致，
+                // 直接绑定会导致角落出现白底空隙。
+                arrowDecoratedBox.ApplyTemplate();
+                if (arrowDecoratedBox.ContentDecorator is { } contentDecorator)
+                {
+                    _surfaceBindings.Add(BindUtils.RelayBind(
+                        contentDecorator, Border.CornerRadiusProperty, this, CornerRadiusProperty));
+                }
+                else
+                {
+                    _surfaceBindings.Add(BindUtils.RelayBind(
+                        arrowDecoratedBox, ArrowDecoratedBox.CornerRadiusProperty, this, CornerRadiusProperty));
+                }
                 _surfaceBindings.Add(BindUtils.RelayBind(
                     arrowDecoratedBox, ArrowDecoratedBox.ArrowSizeProperty, this, ArrowSizeProperty));
                 _surfaceBindings.Add(BindUtils.RelayBind(
