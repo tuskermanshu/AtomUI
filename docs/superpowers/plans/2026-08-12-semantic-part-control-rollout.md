@@ -60,7 +60,7 @@
 - [x] 第一批：基础控件，共 16 个家族。
 - [x] 第二批：集合与容器，共 16 个家族。（2026-08-27 复核：全部家族均已按用户授权提交）
 - [x] 第三批：输入与选择，共 15 个家族。（2026-09-10 复核：15 个家族全部按用户授权提交；视觉验收 NumericUpDown、Form、Transfer、AutoComplete、Cascader 已关闭，ColorPicker、Select、DatePicker 待视觉验收，Mentions、TimePicker、TreeSelect 尚无验收文档；本批次收尾测试尚未执行。）
-- [ ] 第四批：Popup 与独立宿主，共 10 个家族。（2026-09-11 范围复核：DropdownButton 正式映射上游 Dropdown 并纳入本批；ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton 已按用户授权提交；Message、Modal / Dialog、Notification、PopupConfirm 未开始。）
+- [ ] 第四批：Popup 与独立宿主，共 10 个家族。（2026-09-11 范围复核：DropdownButton 正式映射上游 Dropdown 并纳入本批；ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、PopupConfirm 已按用户授权提交；Message、Modal / Dialog、Notification 未开始。）
 - [ ] 第五批：高密度控件，共 2 个家族。（未开始：NavMenu、DataGrid。）
 
 合计待改造：59 个控件家族。
@@ -160,7 +160,7 @@
 
 **计划：** [第四批任务清单](2026-08-12-semantic-part-batch-4-hosts-windows.md)
 
-**进度（2026-09-11 范围复核）：** ImagePreviewer（`08aa3e6ef`、`f32e2b258`）、InfoFlyout（`e067b12a4`）、ToolTip（`5fe34ab8a`）、Tour（`b6ee2e315`）、Drawer（`e415b81f9`）、DropdownButton（`6abaf6100`）已按用户授权提交，共 6/10；Message、Modal / Dialog、Notification、PopupConfirm 未开始。已交付家族的 LLMS 生成产物在 2026-09-10 复核时补齐（Drawer、Tour 原提交遗漏 `docs/AI/generated` 重生成，且 Drawer 文档存在禁用外部项目名）。DropdownButton 以自身 public owner 直接拥有下拉命令弹层，语义契约映射上游 `Dropdown`，不映射 deprecated `Dropdown.Button`。
+**进度（2026-09-11 范围复核）：** ImagePreviewer（`08aa3e6ef`、`f32e2b258`）、InfoFlyout（`e067b12a4`）、ToolTip（`5fe34ab8a`）、Tour（`b6ee2e315`）、Drawer（`e415b81f9`）、DropdownButton（`6abaf6100`）、PopupConfirm（`62e4c4487`）已按用户授权提交，共 7/10；Message、Modal / Dialog、Notification 未开始。已交付家族的 LLMS 生成产物在 2026-09-10 复核时补齐（Drawer、Tour 原提交遗漏 `docs/AI/generated` 重生成，且 Drawer 文档存在禁用外部项目名）。DropdownButton 以自身 public owner 直接拥有下拉命令弹层，语义契约映射上游 `Dropdown`，不映射 deprecated `Dropdown.Button`。
 
 - [ ] 每项设计获批前，必须明确 Visual root ownership 和释放路径。
 - [ ] 测试多宿主隔离、关闭/detach 清理和 Gallery `AdditionalRoots`，不得引入生产 Preview API。

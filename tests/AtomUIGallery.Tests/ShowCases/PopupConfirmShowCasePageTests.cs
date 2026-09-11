@@ -107,6 +107,14 @@ public class PopupConfirmShowCasePageTests
         source.ShouldContain("<atom:PopupConfirmPopupRootStyle x:SetterTargetType=\"atom:FlyoutPresenter\">");
         source.ShouldContain("<atom:PopupConfirmPopupTitleStyle x:SetterTargetType=\"TextBlock\">");
         source.ShouldContain("<atom:PopupConfirmPopupActionsStyle x:SetterTargetType=\"StackPanel\">");
+        // 上游 PopupConfirm 在 title/content 上显式设置前景色；默认 ControlTheme 在 PART_Title
+        // 静态设置 ColorTextHeading，会压过 popup.root 的 Foreground 继承，因此标题颜色必须由
+        // PopupConfirmPopupTitleStyle 显式给出，否则 Function 分支标题仍是深色。
+        CountOccurrences(source, "<atom:PopupConfirmPopupTitleStyle x:SetterTargetType=\"TextBlock\">").ShouldBe(2);
+        CountOccurrences(source, "<Setter Property=\"Foreground\" Value=\"#262626\" />").ShouldBe(1);
+        // Function 分支的标题与弹层根都要显式设为 White：根负责内容区继承，标题因主题静态
+        // 前景色需要单独覆盖。
+        CountOccurrences(source, "<Setter Property=\"Foreground\" Value=\"White\" />").ShouldBe(2);
         source.ShouldContain("PopupConfirmShowCaseLangResource SemanticStyleObjectTrigger");
         source.ShouldContain("PopupConfirmShowCaseLangResource SemanticStyleFunctionTrigger");
         source.ShouldNotContain("Loaded=\"HandleSemanticStyleDemoLoaded\"");

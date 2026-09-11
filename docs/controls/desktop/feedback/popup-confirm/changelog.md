@@ -10,6 +10,10 @@
 - Theme
   - Declare `semantic-popup-icon` / `semantic-popup-title` / `semantic-popup-description` / `semantic-popup-actions` statically on `PopupConfirmContainerTheme.axaml`; the four popup frame parts reuse the shared `Flyout` / `FlyoutPresenter` code-injected markers.
   - Default themes still do not consume any `.semantic-*` selector; default rendering is unchanged.
+- Gallery
+  - Make the Placement example occupy an entire row and let the semantic style-class example switch the title foreground via `PopupConfirmPopupTitleStyle`, matching the upstream title/content color contract.
+  - Fix
+    - The semantic style-class demo kept the heading color on the dark popup because `PopupConfirmContainerTheme` sets `ColorTextHeading` directly on `PART_Title`; the title now needs an explicit `PopupConfirmPopupTitleStyle` foreground.
 
 ## 2026-08-25
 

@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -224,6 +225,70 @@ public class PopupConfirmSemanticPartTests
             TagOf<StackPanel>(presenter, PopupActionsClass).ShouldBe("popup.actions");
             TagOf<ContentPresenter>(presenter, PopupDescriptionClass).ShouldBe("popup.description");
             TagOf<ContentPresenter>(presenter, PopupContentClass).ShouldBe("popup.content");
+        }
+        finally
+        {
+            host.IsPopupPinnedOpen = false;
+            host.Flyout?.Hide();
+            window.Close();
+            Dispatcher.UIThread.RunJobs();
+        }
+    }
+
+    [Fact]
+    public void Title_Semantic_Style_Overrides_The_Default_Heading_Foreground()
+    {
+        // 回归：PopupConfirmContainerTheme 在 PART_Title 上静态设置 ColorTextHeading，
+        // 因此仅靠 popup.root 的 Foreground 继承无法改变标题颜色（Style 优先级低于
+        // Theme setter）。标题颜色必须由 PopupConfirmPopupTitleStyle 显式覆盖，
+        // 与上游 PopupConfirm 的 title.color 行为一致。
+        var registry = Application.Current.ShouldNotBeNull()
+                                  .GetThemeManager().ShouldNotBeNull()
+                                  .SemanticParts;
+        registry.TryGetControl(typeof(PopupConfirmControl), out var descriptor).ShouldBeTrue();
+        descriptor.ShouldNotBeNull();
+
+        var host = new PopupConfirmControl
+        {
+            Content         = new Border { Width = 100, Height = 30 },
+            Title           = "Function text",
+            ConfirmContent  = "Function description",
+            IsMotionEnabled = false,
+            ShouldUseOverlayPopup = true
+        };
+        host.Classes.Add("semantic-foreground-owner");
+        var ownerStyle = new Style(selector => selector.OfType<PopupConfirmControl>().Class("semantic-foreground-owner"));
+        var rootStyle = (Style)Activator.CreateInstance(
+            descriptor.Parts.Single(static part => part.Name == "popup.root").StyleType.ShouldNotBeNull()).ShouldNotBeNull();
+        rootStyle.Setters.Add(new Setter(TemplatedControl.ForegroundProperty, Brushes.White));
+        ownerStyle.Children.Add(rootStyle);
+        var titleStyle = (Style)Activator.CreateInstance(
+            descriptor.Parts.Single(static part => part.Name == "popup.title").StyleType.ShouldNotBeNull()).ShouldNotBeNull();
+        titleStyle.Setters.Add(new Setter(Avalonia.Controls.TextBlock.ForegroundProperty, Brushes.White));
+        ownerStyle.Children.Add(titleStyle);
+        host.Styles.Add(ownerStyle);
+
+        var window = new AtomUIWindow
+        {
+            Width   = 480,
+            Height  = 320,
+            Content = host
+        };
+
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            host.IsPopupPinnedOpen = true;
+            Dispatcher.UIThread.RunJobs();
+
+            var presenter = host.Flyout.ShouldNotBeNull().ShouldBeOfType<PopupConfirmFlyout>()
+                                .Popup.ShouldBeOfType<Popup>().Child.ShouldBeOfType<FlyoutPresenter>();
+            var title = presenter.GetSelfAndVisualDescendants()
+                                 .OfType<Avalonia.Controls.TextBlock>()
+                                 .Single(control => control.Classes.Contains(PopupTitleClass));
+            title.Foreground.ShouldBe(Brushes.White,
+                "the generated PopupConfirmPopupTitleStyle must win over the ControlTheme heading color");
         }
         finally
         {

@@ -138,6 +138,9 @@ SourceKey：`popupconfirm-semantic-part`
                 <Setter Property="Padding" Value="12" />
                 <Setter Property="CornerRadius" Value="4" />
             </atom:PopupConfirmPopupRootStyle>
+            <atom:PopupConfirmPopupTitleStyle x:SetterTargetType="TextBlock">
+                <Setter Property="Foreground" Value="White" />
+            </atom:PopupConfirmPopupTitleStyle>
             <atom:PopupConfirmPopupActionsStyle x:SetterTargetType="StackPanel">
                 <Setter Property="Spacing" Value="12" />
             </atom:PopupConfirmPopupActionsStyle>

@@ -272,6 +272,12 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 `PopupConfirmPopupIconStyle` / `PopupConfirmPopupTitleStyle` / `PopupConfirmPopupDescriptionStyle` /
 `PopupConfirmPopupActionsStyle` / `PopupConfirmPopupArrowStyle`。
 
+**标题前景色必须走 `PopupConfirmPopupTitleStyle`**：`PopupConfirmContainerTheme.axaml` 在
+`TextBlock#PART_Title` 上静态设置了 `SharedToken ColorTextHeading`，其优先级高于 `popup.root` 的
+`Foreground` 继承。因此在深色弹层上改变标题颜色（例如改为浅色文字）时只设置 `popup.root` 的 `Foreground`
+不会生效，必须用 `PopupConfirmPopupTitleStyle` 显式覆盖；`popup.description` 无静态前景色，继续跟随
+`popup.root` 的 `Foreground` 继承。
+
 不得使用以下写法：
 
 - `.semantic-root`、`PART_*`、Name selector、internal 类型（含 `PopupConfirmContainer`）或视觉祖先顺序

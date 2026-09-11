@@ -153,15 +153,15 @@
 
 **风险类型：** 派生自 FlyoutHost 的 Popup、运行时 presenter binding、action Button。
 
-- [ ] **Gate A 设计审核：** 审计 PopupConfirm host、PopupConfirmFlyout 和 container owner；确认 icon/title/content/actions/surface/arrow regions，避免穿透 nested Button descriptor，记录 relay binding acquire/release, Popup reopen 和 confirm loading。
-- [ ] 更新两份控件文档，写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
-- [ ] **Gate B 实现与验证：** 创建 `tests/AtomUI.Desktop.Controls.Tests/PopupConfirm/PopupConfirmSemanticPartTests.cs`，覆盖 status/icon/content/cancel visibility、confirm loading、open-close-reopen、presenter binding disposal 和 nested Button owner 隔离；NativeAOT。
-- [ ] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
-- [ ] **强制停止：** 保持 PopupConfirm 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
+- [x] **Gate A 设计审核：** 审计 PopupConfirm host、PopupConfirmFlyout 和 container owner；确认 icon/title/content/actions/surface/arrow regions，避免穿透 nested Button descriptor，记录 relay binding acquire/release, Popup reopen 和 confirm loading。
+- [x] 更新两份控件文档，写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
+- [x] **Gate B 实现与验证：** 创建 `tests/AtomUI.Desktop.Controls.Tests/PopupConfirm/PopupConfirmSemanticPartTests.cs`，覆盖 status/icon/content/cancel visibility、confirm loading、open-close-reopen、presenter binding disposal 和 nested Button owner 隔离；NativeAOT。
+- [x] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
+- [x] **强制停止：** 保持 PopupConfirm 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
 
 ## 批次收尾
 
-> 2026-09-11 范围复核：ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton 六个家族的单项任务框已置为已完成（均已按用户授权提交）。Message、Modal / Dialog、Notification、PopupConfirm 四个家族未开始，本批次仍未收尾。
+> 2026-09-11 范围复核：ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、PopupConfirm 七个家族的单项任务框已置为已完成（均已按用户授权提交；PopupConfirm 真机视觉验收见 `docs/superpowers/specs/2026-09-11-popupconfirm-semantic-visual-acceptance.md`）。Message、Modal / Dialog、Notification 三个家族未开始，本批次仍未收尾。
 
 - [ ] 确认 10 个控件家族分别拥有用户授权的独立提交。
 - [ ] 运行完整 Desktop Controls、Generator、GalleryBase 和 Gallery 测试，并执行 Popup/Overlay 生命周期筛选。
