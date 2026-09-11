@@ -1,0 +1,52 @@
+{
+  "6.1.8": {
+    "AtomUI.Desktop.Controls": {
+      "allowed": [
+        "buildTransitive/AtomUI.Build.Tasks.Process.cs",
+        "tools/net10.0/*",
+        "tools/netstandard2.0/AtomUI.Build.Tasks.dll"
+      ],
+      "reason": "6.1.9 moved the MSBuild task toolset from tools/netstandard2.0 to tools/net10.0 and added the SDK-compiled process adapter. Documented in docs/releases/6.1.9-api-changes.md."
+    },
+    "AtomUI.Desktop.Controls.DataGrid": {
+      "allowed": [
+        "buildTransitive/AtomUI.Build.Tasks.Process.cs",
+        "tools/net10.0/*",
+        "tools/netstandard2.0/AtomUI.Build.Tasks.dll"
+      ],
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md."
+    },
+    "AtomUI.Desktop.Controls.ColorPicker": {
+      "allowed": [
+        "buildTransitive/AtomUI.Build.Tasks.Process.cs",
+        "tools/net10.0/*",
+        "tools/netstandard2.0/AtomUI.Build.Tasks.dll"
+      ],
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md."
+    },
+    "AtomUI.Desktop.Controls.Extras": {
+      "allowed": [
+        "buildTransitive/AtomUI.Build.Tasks.Process.cs",
+        "tools/net10.0/*",
+        "tools/netstandard2.0/AtomUI.Build.Tasks.dll"
+      ],
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md."
+    },
+    "AtomUI.Generator": {
+      "allowed": [
+        "buildTransitive/AtomUI.Build.Tasks.Process.cs",
+        "tools/net10.0/*",
+        "tools/netstandard2.0/AtomUI.Build.Tasks.dll"
+      ],
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md."
+    },
+    "AtomUI.Toolkits.GalleryBase": {
+      "allowed": [
+        "buildTransitive/AtomUI.Build.Tasks.Process.cs",
+        "tools/net10.0/*",
+        "tools/netstandard2.0/AtomUI.Build.Tasks.dll"
+      ],
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md."
+    }
+  }
+}

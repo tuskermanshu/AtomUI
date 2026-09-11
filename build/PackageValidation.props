@@ -1,0 +1,35 @@
+<Project>
+    <!--
+        Package-version validation compares the C# public API of the packages about to be released
+        against the previously released baseline packages (ApiCompat, IL level). It covers lib/
+        assemblies and cross-target-framework consistency.
+
+        It does NOT see changes to tools/, buildTransitive/, build/ or the target-framework set.
+        Package-layout breaks are covered by scripts/verification/verify-package-layout.ps1, which
+        the release flow runs alongside this validation. Both layers are required: see
+        docs/engineering/workflows/release-preparation.md.
+
+        Validation is opt-in per invocation: pass
+        AtomUIPackageValidationBaselineVersion=<previously released version> as an MSBuild property.
+        The release script sets it from the previous release tag. Ordinary development builds stay
+        fast and require no baseline packages.
+
+        The baseline package must already be in the package cache. Restore with the same property
+        before packing, because the release flow packs with no-build and that skips restore. Use:
+        dotnet restore <project> with AtomUIPackageValidationBaselineVersion=<version>.
+    -->
+    <PropertyGroup Condition="'$(AtomUIPackageValidationBaselineVersion)' != ''">
+        <EnablePackageValidation Condition="'$(EnablePackageValidation)' == ''">true</EnablePackageValidation>
+        <PackageValidationBaselineVersion Condition="'$(PackageValidationBaselineVersion)' == ''">$(AtomUIPackageValidationBaselineVersion)</PackageValidationBaselineVersion>
+        <EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms>
+    </PropertyGroup>
+
+    <!--
+        Intentional, documented breaking API changes are acknowledged per package in
+        build/PackageValidationSuppressions/<ProjectName>.xml. Generate one with the MSBuild
+        property ApiCompatGenerateSuppressionFile=true, then review it before committing.
+    -->
+    <PropertyGroup Condition="'$(AtomUIPackageValidationBaselineVersion)' != '' and Exists('$(MSBuildThisFileDirectory)PackageValidationSuppressions/$(MSBuildProjectName).xml')">
+        <ApiCompatSuppressionFile>$(MSBuildThisFileDirectory)PackageValidationSuppressions/$(MSBuildProjectName).xml</ApiCompatSuppressionFile>
+    </PropertyGroup>
+</Project>

@@ -24,6 +24,7 @@ public sealed class BuildLayoutTests
         "MacOSHomebrewNativeAot.targets",
         "OutputPaths.props",
         "PackageMetadata.props",
+        "PackageValidation.props",
         "ProjectDefaults.props",
         "Versions.props"
     ];
@@ -59,8 +60,61 @@ public sealed class BuildLayoutTests
             "$(MSBuildThisFileDirectory)ProjectDefaults.props",
             "$(MSBuildThisFileDirectory)PackageMetadata.props",
             "$(MSBuildThisFileDirectory)OutputPaths.props",
+            "$(MSBuildThisFileDirectory)PackageValidation.props",
             "$(MSBuildThisFileDirectory)AtomUI.Generator.props"
         ]);
+    }
+
+    [Fact]
+    public void Package_Validation_Is_Opt_In_And_Mechanically_Enforced()
+    {
+        // The props file must be imported only for validation runs. An unconditional import would
+        // be evaluated for every project in the ordinary Debug loop, so keep it gated.
+        var repositoryProps = XDocument.Load(GetRepoFile("build/AtomUI.Repository.props"));
+        var validationImport = repositoryProps.Descendants("Import")
+                                              .Single(element =>
+                                                  ((string?)element.Attribute("Project") ?? string.Empty)
+                                                  .EndsWith("PackageValidation.props", StringComparison.Ordinal));
+        var importCondition = (string?)validationImport.Attribute("Condition");
+        importCondition.ShouldNotBeNullOrWhiteSpace();
+        importCondition.ShouldContain("AtomUIPackageValidationBaselineVersion");
+
+        var validationProps = XDocument.Load(GetRepoFile("build/PackageValidation.props"));
+
+        // Opt-in: validation only engages when the release flow supplies the baseline version, so
+        // ordinary development builds stay fast and need no baseline packages.
+        var enableValidation = validationProps.Descendants("EnablePackageValidation").ShouldHaveSingleItem();
+        enableValidation.Value.ShouldBe("true");
+        ((string?)enableValidation.Parent?.Attribute("Condition"))
+            .ShouldBe("'$(AtomUIPackageValidationBaselineVersion)' != ''");
+
+        var baselineVersion = validationProps.Descendants("PackageValidationBaselineVersion")
+                                             .ShouldHaveSingleItem();
+        ((string?)baselineVersion.Attribute("Condition"))
+            .ShouldBe("'$(PackageValidationBaselineVersion)' == ''");
+        baselineVersion.Value.ShouldBe("$(AtomUIPackageValidationBaselineVersion)");
+
+        // The release script must accept the baseline and must run both gates. ApiCompat only reads
+        // lib/, so verify-package-layout.ps1 is what covers tools/ and buildTransitive/.
+        var buildScript = File.ReadAllText(GetRepoFile("scripts/BuildNuGetPackages.ps1"));
+        buildScript.ShouldContain("$PackageValidationBaselineVersion");
+        buildScript.ShouldContain("AtomUIPackageValidationBaselineVersion=");
+        buildScript.ShouldContain("verification/verify-package-layout.ps1");
+
+        // Prerequisite tool projects are not published packages and must never be validated against
+        // a released baseline.
+        var prerequisiteBuild = buildScript.IndexOf(
+            "foreach ($project in $AtomUIReleaseBuildPrerequisiteProjects)", StringComparison.Ordinal);
+        var prerequisiteBlockEnd = buildScript.IndexOf(
+            "foreach ($project in $AtomUIReleasePackageProjects)", prerequisiteBuild, StringComparison.Ordinal);
+        prerequisiteBuild.ShouldBeGreaterThanOrEqualTo(0);
+        prerequisiteBlockEnd.ShouldBeGreaterThan(prerequisiteBuild);
+        buildScript[prerequisiteBuild..prerequisiteBlockEnd].ShouldNotContain("$validationArguments");
+
+        // The release workflow must expose the baseline input and forward it to the script.
+        var workflow = File.ReadAllText(GetRepoFile(".github/workflows/release-nuget-packages.yml"));
+        workflow.ShouldContain("PackageValidationBaselineVersion:");
+        workflow.ShouldContain("-PackageValidationBaselineVersion");
     }
 
     [Fact]

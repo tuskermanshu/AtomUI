@@ -3,6 +3,11 @@
     <Import Project="$(MSBuildThisFileDirectory)ProjectDefaults.props" />
     <Import Project="$(MSBuildThisFileDirectory)PackageMetadata.props" />
     <Import Project="$(MSBuildThisFileDirectory)OutputPaths.props" />
+    <!-- Imported only for validation runs. In ordinary Debug/Release development builds the
+         property below is unset, so this file is not read at all and adds no evaluation cost to
+         the inner development loop. -->
+    <Import Project="$(MSBuildThisFileDirectory)PackageValidation.props"
+            Condition="'$(AtomUIPackageValidationBaselineVersion)' != '' or '$(EnablePackageValidation)' == 'true'" />
 
     <PropertyGroup>
         <AtomUIRepositoryBuild>true</AtomUIRepositoryBuild>

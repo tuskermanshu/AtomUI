@@ -137,6 +137,32 @@ scripts/verification/verify-aot-trim-registration.sh --quick
 命令退出码：必须检查 `.nupkg` ZIP 条目，确认根自动导入入口、显式 build assets、Analyzer/Tools 位置正确，且不包含
 Repository 配置、`MacOSHomebrewNativeAot.targets` 或 `scripts/` 资产。
 
+## 破坏性变更门禁
+
+发布准备对上一版做两道机械化比对，避免只靠人工审计漏掉破坏性变更。两道门禁观测产物事实，不依赖提交的 `!` 标记。
+
+- **包 API 校验**：`build/PackageValidation.props` 在传入 `AtomUIPackageValidationBaselineVersion` 时启用
+  `EnablePackageValidation` 与 `PackageValidationBaselineVersion`，以 ApiCompat 做 `lib/` 公共 API 的 IL 级比对，
+  并覆盖跨 TFM 一致性。普通开发构建不传该属性，因此不拉取基线包、也不变慢。
+- **包布局校验**：`scripts/verification/verify-package-layout.ps1` 比对 `lib/` 的 TFM 集合、`tools/`、`build/`、
+  `buildTransitive/`。ApiCompat 看不到这些路径，而 6.1.9 的 `tools/netstandard2.0 → tools/net10.0` 正属于此类。
+
+`scripts/BuildNuGetPackages.ps1` 的 `-PackageValidationBaselineVersion` 同时驱动两者：它先对发布包项目 restore 以拉取
+基线包（pack 使用 `--no-build`，不会自行 restore），随后 pack，最后运行布局校验。前置工具项目不是发布包，不施加校验
+属性。有意变更的豁免分别是 `build/PackageValidationSuppressions/<ProjectName>.xml` 与
+`scripts/verification/package-layout-allowlist.json`（按基线版本与包 ID 记录，未命中的条目会导致失败）。
+
+本地验证：
+
+```bash
+pwsh -NoProfile -File scripts/verification/verify-package-layout.Tests.ps1
+pwsh -NoProfile -File scripts/verification/verify-package-layout.ps1 \
+    -PackageDirectory <release-dir> -BaselineVersion <previous-version>
+dotnet test tests/AtomUI.Generator.Tests/AtomUI.Generator.Tests.csproj --framework net10.0 --no-restore
+```
+
+判定口径与发布流程见 [版本发布准备规范](../../engineering/workflows/release-preparation.md)。
+
 ## 源生成输出
 
 需要把源生成结果写到仓库目录的项目只声明标准 SDK 属性：

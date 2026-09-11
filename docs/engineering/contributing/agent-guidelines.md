@@ -137,6 +137,7 @@ Gallery 改动时注意：
 - AOT、trim、source generator：`aot-programming-guidelines.md`。
 - Gallery 页面结构：`gallery-showcase-design-pattern.md`。
 - Gallery AOT 发布：`gallery-aot-release-workflow.md`。
+- 版本发布准备与破坏性变更判定：`../workflows/release-preparation.md`。
 - 控件研发标准：`control-development-guidelines.md`。
 - 模块架构：`docs/modules/**/overview.md`。
 - 控件用户文档：`docs/controls/**`。

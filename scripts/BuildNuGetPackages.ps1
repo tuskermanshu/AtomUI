@@ -2,7 +2,8 @@
 param(
     [ValidateSet("Debug", "Release")]
     [string]$BuildType = "Release",
-    [string]$PackageOutputDir = ""
+    [string]$PackageOutputDir = "",
+    [string]$PackageValidationBaselineVersion = ""
 )
 
 Set-StrictMode -Version Latest
@@ -36,12 +37,25 @@ $buildArguments = @(
     "/nr:false"
 )
 
+# When a baseline version is supplied, the packages are validated against that released version:
+# ApiCompat compares the C# public API (build/PackageValidation.props) and verify-package-layout.ps1
+# compares the consumer-visible package layout. The baseline packages are fetched by the build step
+# below, whose implicit restore carries the validation property; packing then reuses that restore
+# because it runs with --no-build. Do not add a separate `dotnet restore` here: a restore without
+# the Release configuration would overwrite the assets file with the Debug target frameworks.
+$validationArguments = @()
+if (-not [string]::IsNullOrWhiteSpace($PackageValidationBaselineVersion)) {
+    $validationArguments = @("-p:AtomUIPackageValidationBaselineVersion=$PackageValidationBaselineVersion")
+}
+
+# Prerequisite tool projects are not published packages, so they must never be validated against a
+# released baseline (AtomUI.Generator.LinkedPublish has no package on nuget.org).
 foreach ($project in $AtomUIReleaseBuildPrerequisiteProjects) {
     Invoke-AtomUIDotNet -Arguments (@("build", $project) + $buildArguments)
 }
 
 foreach ($project in $AtomUIReleasePackageProjects) {
-    Invoke-AtomUIDotNet -Arguments (@("build", $project) + $buildArguments)
+    Invoke-AtomUIDotNet -Arguments (@("build", $project) + $buildArguments + $validationArguments)
 }
 
 foreach ($project in $AtomUIReleasePackageProjects) {
@@ -50,7 +64,7 @@ foreach ($project in $AtomUIReleasePackageProjects) {
         $project,
         "--no-build",
         "--output", $PackageOutputDir
-    ) + $buildArguments)
+    ) + $buildArguments + $validationArguments)
 }
 
 [xml]$versionProps = Get-Content -LiteralPath (Join-Path $repositoryRoot "build/Versions.props")
@@ -75,3 +89,16 @@ if ($unexpectedPackages.Count -gt 0) {
 }
 
 Write-Output "Verified $($actualPackageNames.Count) AtomUI NuGet packages for version $version"
+
+# Consumer-visible package layout (tools/, buildTransitive/, build/, target-framework set). ApiCompat
+# does not see these, yet they are the class of break that shipped undocumented in 6.1.9. Run this
+# whenever a baseline is supplied; acknowledged changes live in package-layout-allowlist.json.
+if (-not [string]::IsNullOrWhiteSpace($PackageValidationBaselineVersion)) {
+    $layoutVerification = Join-Path $PSScriptRoot "verification/verify-package-layout.ps1"
+    & pwsh -NoLogo -NoProfile -File $layoutVerification `
+        -PackageDirectory $PackageOutputDir `
+        -BaselineVersion $PackageValidationBaselineVersion
+    if ($LASTEXITCODE -ne 0) {
+        throw "Package layout verification failed against $PackageValidationBaselineVersion."
+    }
+}
