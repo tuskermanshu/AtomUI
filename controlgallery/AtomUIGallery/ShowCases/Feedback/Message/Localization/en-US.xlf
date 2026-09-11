@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xliff version="2.1" srcLang="en-US" xmlns="urn:oasis:names:tc:xliff:document:2.0">
   <file id="AtomUIGallery.Localization.MessageShowCaseLangResourceKind">
+    
     <unit id="ApiMethodManagerShow">
       <segment>
         <source>Shows an IMessage instance and applies optional style classes.</source>
@@ -56,14 +57,14 @@
         <source>Other types of message</source>
       </segment>
     </unit>
-    <unit id="P2ContentDisplayALoadingIndicator">
-      <segment>
-        <source>Display a loading indicator</source>
-      </segment>
-    </unit>
     <unit id="P2ContentDestroyAll">
       <segment>
         <source>Destroy all</source>
+      </segment>
+    </unit>
+    <unit id="P2ContentDisplayALoadingIndicator">
+      <segment>
+        <source>Display a loading indicator</source>
       </segment>
     </unit>
     <unit id="P2ContentDisplayNormalMessage">
@@ -154,6 +155,46 @@
     <unit id="ScenarioExamples">
       <segment>
         <source>Examples</source>
+      </segment>
+    </unit>
+    <unit id="SemanticIconDescription">
+      <segment>
+        <source>The status icon of the message card. Customize its size, brush and line height.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticListContentDescription">
+      <segment>
+        <source>The notice arrangement container of the message list. Customize its direction, order and alignment.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticListRootDescription">
+      <segment>
+        <source>The message list root. It hosts the cards, queue, timeout and host layer lifecycle.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticPartStyleDescription">
+      <segment>
+        <source>Customize Message parts with the generated semantic style classes.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticPartStyleTitle">
+      <segment>
+        <source>Custom Semantic Part styling</source>
+      </segment>
+    </unit>
+    <unit id="SemanticRootDescription">
+      <segment>
+        <source>The message card root. It hosts the content, type, close state and enter/leave motion.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticTitleDescription">
+      <segment>
+        <source>The message text element. Customize its color, font size, line height and wrapping.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticWrapperDescription">
+      <segment>
+        <source>The wrapping element for the icon and title. Customize the layout, alignment and gap.</source>
       </segment>
     </unit>
     <unit id="StackDescription">

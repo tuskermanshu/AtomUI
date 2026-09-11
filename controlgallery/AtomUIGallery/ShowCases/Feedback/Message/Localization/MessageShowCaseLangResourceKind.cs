@@ -39,5 +39,13 @@ public enum MessageShowCaseLangResourceKind
     P2MessageActionInProgress,
     P2MessageLoadingFinished,
     P2MessageStackedFormat,
-    P2MessageLongStackedFormat
+    P2MessageLongStackedFormat,
+        SemanticIconDescription,
+    SemanticListContentDescription,
+    SemanticListRootDescription,
+    SemanticPartStyleDescription,
+    SemanticPartStyleTitle,
+    SemanticRootDescription,
+    SemanticTitleDescription,
+    SemanticWrapperDescription
 }

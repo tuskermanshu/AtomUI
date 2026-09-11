@@ -16,7 +16,7 @@ namespace AtomUI.Desktop.Controls;
     MessageCardPseudoClass.Success, 
     MessageCardPseudoClass.Warning, 
     MessageCardPseudoClass.Loading)]
-public class MessageCard : TemplatedControl, IMotionAwareControl, IFeedbackStackItem
+public partial class MessageCard : TemplatedControl, IMotionAwareControl, IFeedbackStackItem
 {
     #region 公共属性定义
 

@@ -24,7 +24,8 @@
                                 Width="{Binding FirstBackplateWidth, ElementName=PART_Items}"
                                 Margin="{Binding FirstBackplateMargin, ElementName=PART_Items}" />
                     </Panel>
-                    <atom:FeedbackStackPresenter Name="PART_Items" />
+                    <atom:FeedbackStackPresenter Name="PART_Items"
+                                          Classes.semantic-list-content="True" />
                 </Grid>
             </ControlTemplate>
         </Setter>
