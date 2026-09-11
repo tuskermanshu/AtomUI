@@ -4,6 +4,7 @@
     xmlns:atom="https://atomui.net"
     x:ClassModifier="internal">
     <ControlTheme x:Key="{x:Type atom:WindowMessageManager}" TargetType="atom:WindowMessageManager">
+        <Setter Property="Padding" Value="{atom:SharedTokenResource MarginLG}" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid Name="PART_StackHost" ClipToBounds="False">
