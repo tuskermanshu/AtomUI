@@ -178,18 +178,26 @@ Gallery 的 Stack 示例使用独立 manager，不与基础、类型、placement
 
 - [Notification 桌面版实现原理](implementation.md)
 - [Notification Token 设计](token.md)
+- [Notification Semantic Part 契约](semantic-part.md)
 - [Notification Changelog](changelog.md)
 - [Feedback 堆叠基础设施](../../../../architecture/systems/control-infrastructure/feedback-stack.md)
 
-LLMS 语义区域：
+Semantic Part 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Notification` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | `NotificationCard` / `WindowNotificationManager` owner | 通知项与通知列表根语义区域，承载 public API、状态与主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `wrapper` | `DockPanel#Wrapper` | 图标与内容区域的包裹元素，决定排列方向、对齐与图标间距。 | `Icon`、`Title`、`Content` | `NotificationIconMargin` | stable |
+| `icon` | `IconPresenter#IconPresenter` | 状态图标元素：尺寸、画刷与行高。 | `Icon`、`NotificationType` | `NotificationIconSize`、状态色 SharedToken | stable |
+| `section` | `StackPanel#Section` | 标题与描述的内容区域，决定两者纵向间距。 | `Title`、`Content` | `NotificationSectionSpacing` | stable |
+| `title` | `atom:SelectableTextBlock#HeaderTitle` | 标题元素：颜色、字号、行高与右侧留白。 | `Title` | `FontSizeLG`、`FontHeightLG`、`NotificationTitlePadding` | stable |
+| `description` | `ContentPresenter#Content` | 描述元素：颜色、字号、行高、换行与右侧留白。 | `Content`、`ContentTemplate` | `FontSize`、`FontHeight`、`NotificationTitlePadding` | stable |
+| `actions` | `ContentPresenter#ActionsContainer` | 操作组元素：notice 右下角的操作入口。 | `Actions`、`ActionsTemplate` | `NotificationActionsMargin` | stable |
+| `close` | `IconButton#PART_CloseButton` | 关闭按钮覆盖层：位置、尺寸、圆角与交互色。 | `Close()`、`NotificationClosed` | `NotificationCloseButtonSize`、`NotificationCloseButtonMargin` | stable |
+| `progress` | `NotificationProgressBar#ProgressBar`（运行时创建） | 进度覆盖元素：展示自动关闭剩余时间。 | `IsShowProgress`、`Expiration` | `NotificationProgressHeight`、`NotificationProgressBg` | stable |
+| `listContent` | `ReversibleStackPanel#PART_Items` | 通知列表排列容器：方向、顺序、对齐与项间距。 | `Position`、`MaxItems` | `UniformlyMargin` | stable |
+
+完整 Part 表、Selector 用法与定制边界见 [Notification Semantic Part 契约](semantic-part.md)。
 
 LLMS 导出来源：
 

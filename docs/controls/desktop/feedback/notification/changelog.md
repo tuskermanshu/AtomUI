@@ -39,6 +39,88 @@
   - Replace placement-specific oversized and scale-distorting entry motions with the shared Feedback 64 DIP translate/fade motion and full-duration Ant ease-in-out curve.
   - Animate existing cards to their new queue positions during add, remove, collapse and expand instead of jumping their layout bounds.
 
+## 2026-09-11
+
+- Semantic Part
+  - Publish two owner descriptors aligned with the upstream Notification semantic keys: `NotificationCard` exposes
+    `wrapper` / `icon` / `section` / `title` / `description` / `actions` / `close` / `progress` (plus implicit `root`),
+    and `WindowNotificationManager` exposes `listContent` (plus implicit `root`, which maps the upstream list).
+    `Since` is `6.0` for both.
+  - Restructure `NotificationCardTheme.axaml` to the upstream notice DOM
+    (`root > [wrapper > (icon, section > (title, description)), actions, close, progress]`): add a real `section`
+    (`StackPanel`) that owns the title/description gap, add an `actions` region, and express `close` / `progress` as
+    overlays on `Panel#PART_Layout` (`Panel` replaced `Grid#PART_Layout`) instead of in-flow children. This is an
+    authorized rendered-result and theme-contract change; the structural diff is documented in `semantic-part.md` §7.1.
+  - Add static `Classes.semantic-*` markers in `NotificationCardTheme.axaml` and `WindowNotificationManagerTheme.axaml`;
+    `progress` is RuntimeCreated and gets its marker injected by `ConfigureProgressBar` /
+    `NotificationCardSemanticParts.ProgressClass`. The built-in themes do not consume `.semantic-*` for default visuals.
+  - Add generated semantic style types `NotificationCardWrapperStyle`, `NotificationCardIconStyle`,
+    `NotificationCardSectionStyle`, `NotificationCardTitleStyle`, `NotificationCardDescriptionStyle`,
+    `NotificationCardActionsStyle`, `NotificationCardCloseStyle`, `NotificationCardProgressStyle` and
+    `WindowNotificationManagerListContentStyle`.
+  - Add `docs/controls/desktop/feedback/notification/semantic-part.md` as the authoritative Part contract, and document
+    the descriptor/marker mapping in `implementation.md` and `overview.md`.
+  - Add `tests/AtomUI.Desktop.Controls.Tests/Notifications/NotificationSemanticPartTests.cs` covering descriptor fields,
+    static markers, notice structure parenting, generated style hits, actions visibility, runtime progress marker
+    lifecycle, queue/close removal and host detach cleanup.
+- API
+  - Add `NotificationCard.Actions` / `NotificationCard.ActionsTemplate` (upstream notice `actions`), plus the matching
+    `INotification.Actions` / `INotification.ActionsTemplate` default interface members, `Notification.Actions` /
+    `Notification.ActionsTemplate` and the manager's `Show` projection. `INotification` default members keep existing implementers source-compatible.
+  - Add `NotificationCard.BoxShadowProperty` (`Border.BoxShadowProperty.AddOwner<NotificationCard>()`), so the `root`
+    surface shadow can be customized from owner-scoped Semantic Styles.
+  - Add a public parameterless `NotificationCard()` constructor alongside `NotificationCard(WindowNotificationManager)`,
+    mirroring `MessageCard`; a standalone card has no host manager, so hover-pause feedback does not apply.
+  - Add `WindowNotificationManager.OnDetachedFromVisualTree` to clear `PART_Items`, matching the `WindowMessageManager`
+    memory-leak fix for the sibling host layer.
+- Token
+  - Remove the control-local `× 2/3` scaling that was applied to every notice spacing token
+    (`NotificationPadding`, `NotificationSectionSpacing`, `NotificationActionsMargin`, `NotificationCloseButtonMargin`,
+    `NotificationIconMargin`). Upstream derives these directly from the global tokens
+    (`notificationPaddingVertical = paddingMD`, `notificationPaddingHorizontal = paddingLG`, `gap: marginSM` /
+    `marginXS`, `margin-top: marginSM`), so the card rendered shorter than antd. Measured before/after against the
+    antd reference: card height went from ~83 to ~90 logical units at width 384, matching antd's measured 89.
+  - `NotificationPadding` is now symmetric (upstream `padding: paddingMD paddingLG`).
+  - Add `NotificationSectionSpacing` (upstream `section` `gap: marginXS`), `NotificationTitlePadding` (upstream
+    `.notice-closable` `padding-inline-end`), `NotificationActionsMargin` (upstream `margin-top: marginSM`),
+    `NotificationCloseButtonMargin` and a `BorderRadiusLG`-inset `NotificationProgressMargin`.
+  - Remove `NotificationContentMargin` / `HeaderMargin` (replaced by `NotificationSectionSpacing`) and the card edge
+    margins `NotificationMarginBottom` / `NotificationTopMargin` / `NotificationBottomMargin`: list padding is now the
+    manager's `Padding` (`MarginLG`) and item spacing is `listContent`'s `Spacing` (`UniformlyMargin`), so the `root`
+    highlight box equals the visible card.
+  - Render the progress track: upstream's notice progress paints the full-width track (`rgba(0, 0, 0, 0.04)`) and then
+    the coloured value on top; `NotificationProgressBar.Render` drew only the coloured fill, so the remaining time was
+    invisible against the card background. Added `NotificationProgressTrackBg` (`ColorFillQuaternary`) and
+    `NotificationProgressBar.ProgressTrackBrush`, wired in `NotificationProgressBarTheme.axaml`.
+  - Align the notice icon vertically: upstream's notice wrapper is `display: flex; align-items: flex-start`, so the icon
+    top-aligns with the title line. Avalonia's `DockPanel` stretches children, and with an explicit `Height` the
+    `IconPresenter` was vertically centred (measured icon centre 37.0 vs antd 34.8 logical), so the theme now sets
+    `VerticalAlignment="Top"`. Covered by the icon/title top-offset assertion in `NotificationSemanticPartTests`.
+- Gallery
+  - Add the Semantic Parts tab (two-owner preview listing all 11 parts) via `GalleryShowCaseHost`, an `Actions` example
+    mirroring `notification/demo/with-btn.tsx`, and a `Custom Semantic Part styling` example mirroring
+    `notification/demo/style-class.tsx` (default green card and error-branch red card).
+  - Add localization units for the new titles, descriptions and example content (en-US / zh-CN / zh-TW / pt-BR) and
+    update the catalog member-order baseline and pt-BR unit total.
+- Fix
+  - `Custom Semantic Part styling` silently did nothing: `ApplySemanticStyleStyles` looked the `Styles` up through
+    `Application.Current.TryGetResource`, but the resource is declared in the page's `UserControl.Resources`, so the
+    lookup returned false, the attach was skipped, and the cards fell back to the default look. It now uses the page's
+    own `Resources.TryGetResource`, matching the working Message page. Covered by
+    `Notification_Semantic_Style_Buttons_Produce_Styled_Cards`, which clicks the real buttons and asserts the produced
+    cards' frame background / border / radius / shadow and the icon / title / description brushes in both branches
+    (it failed with `White` vs `#F6FFED` before the fix). The lookup-scope contract is documented in `semantic-part.md` §5.3.
+  - Align the demo's `Default Notification` branch with upstream `notification/demo/style-class.tsx`, which opens
+    `api.info`, so it now passes `NotificationType.Information` instead of `Success`.
+  - Fix the card's right/bottom `box-shadow` band being clipped to a 1-logical-pixel sliver. The template previously
+    nested `Panel#PART_Layout` between `LayoutAwareMotionActor` and `Border#Frame`, so the shadow — which `Frame`
+    paints — was clipped by the intermediate panel's bounds (measured 2 device pixels on the right/bottom vs antd's 8).
+    `Border#Frame` is now the motion actor's direct content (only `ContentControl`'s own `PART_ContentPresenter`
+    remains between them), exactly like `Message`'s working `Border#PART_Frame`. `Frame` keeps `Padding=0` and a new
+    inner `Border#ContentBox` consumes `NotificationPadding`, so `Panel#PART_Layout` stays identical to the CSS
+    padding box and the absolutely-positioned `close`/`progress` overlays line up with upstream. Covered by
+    `Frame_Sits_Directly_In_The_Motion_Actor_So_BoxShadow_Is_Not_Clipped`.
+
 ## 2026-08-24
 
 - Motion

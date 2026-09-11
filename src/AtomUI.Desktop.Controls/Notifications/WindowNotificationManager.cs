@@ -18,7 +18,7 @@ namespace AtomUI.Desktop.Controls;
     NotificationPseudoClass.BottomRight,
     NotificationPseudoClass.TopCenter,
     NotificationPseudoClass.BottomCenter)]
-public class WindowNotificationManager : TemplatedControl, INotificationManager, IMotionAwareControl, IDisposable
+public partial class WindowNotificationManager : TemplatedControl, INotificationManager, IMotionAwareControl, IDisposable
 {
     public static readonly StyledProperty<NotificationPosition> PositionProperty =
         AvaloniaProperty.Register<WindowNotificationManager, NotificationPosition>(
@@ -165,7 +165,9 @@ public class WindowNotificationManager : TemplatedControl, INotificationManager,
             Expiration = expiration == TimeSpan.Zero ? null : expiration,
             IsShowProgress = notification.ShowProgress,
             OnClick = notification.OnClick,
-            OnClose = notification.OnClose
+            OnClose = notification.OnClose,
+            Actions = notification.Actions,
+            ActionsTemplate = notification.ActionsTemplate
         };
         card[!NotificationCard.PositionProperty] = this[!PositionProperty];
         card[!NotificationCard.IsMotionEnabledProperty] = this[!IsMotionEnabledProperty];

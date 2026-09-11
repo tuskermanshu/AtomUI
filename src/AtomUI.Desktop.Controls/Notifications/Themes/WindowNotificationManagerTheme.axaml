@@ -4,9 +4,16 @@
     xmlns:atom="https://atomui.net"
     x:ClassModifier="internal">
     <ControlTheme x:Key="{x:Type atom:WindowNotificationManager}" TargetType="atom:WindowNotificationManager">
+        <!--
+            manager 自身承担列表内边距，`PART_Items`（listContent）承担卡片之间的间距，
+            卡片（root）自身零外边距。模板内的 `Border` 消费 owner 的 `Padding`，使 manager 的可视范围
+            比 `PART_Items` 大一圈，卡片高亮框与可见卡片重合。
+        -->
+        <Setter Property="Padding" Value="{atom:SharedTokenResource MarginLG}" />
         <Setter Property="Template">
             <ControlTemplate>
-                <atom:FeedbackStackPresenter Name="PART_Items" />
+                <atom:FeedbackStackPresenter Name="PART_Items"
+                                          Classes.semantic-list-content="True" />
             </ControlTemplate>
         </Setter>
 

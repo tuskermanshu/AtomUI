@@ -139,11 +139,11 @@
 
 **风险类型：** 服务创建的 Window 宿主、card/progress 运行时节点、queue 和 placement。
 
-- [ ] **Gate A 设计审核：** 审计 Notification/session、WindowNotificationManager、NotificationCard/ProgressBar owner；确认 icon/message/description/action/close/progress/surface regions，记录 placements、stack, duration/progress, manual close, replacement 和 Window detach。
-- [ ] 更新两份控件文档，写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
-- [ ] **Gate B 实现与验证：** 新增 `tests/AtomUI.Desktop.Controls.Tests/Notifications/NotificationSemanticPartTests.cs`，覆盖 type/placement、custom content/action、progress/duration、多项 queue、close/detach 和 card 保留检查；验证 Gallery additional root 和 NativeAOT。
-- [ ] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
-- [ ] **强制停止：** 保持 Notification 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
+- [x] **Gate A 设计审核：** 审计 Notification/session、WindowNotificationManager、NotificationCard/ProgressBar owner；确认 icon/message/description/action/close/progress/surface regions，记录 placements、stack, duration/progress, manual close, replacement 和 Window detach。用户已确认结构对齐（重构模板到上游 notice DOM）并一并引入 `Actions` API。
+- [x] 更新两份控件文档（并新增 `semantic-part.md`），写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`。
+- [x] **Gate B 实现与验证：** 新增 `tests/AtomUI.Desktop.Controls.Tests/Notifications/NotificationSemanticPartTests.cs`，覆盖 type/placement、custom content/action、progress/duration、多项 queue、close/detach 和 card 保留检查；Gallery 新增 Semantic Parts 双 owner 预览、Actions 与 Semantic Part styling 示例并完成 NativeAOT 验证。
+- [x] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`。
+- [x] **强制停止：** Notification 的实现改动已通过用户授权提交，真机视觉验收通过后不再保持未提交状态。
 
 ### 任务 10：PopupConfirm
 
@@ -161,7 +161,20 @@
 
 ## 批次收尾
 
-> 2026-09-11 范围复核：ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、PopupConfirm 七个家族的单项任务框已置为已完成（均已按用户授权提交；PopupConfirm 真机视觉验收见 `docs/superpowers/specs/2026-09-11-popupconfirm-semantic-visual-acceptance.md`）。Message、Modal / Dialog、Notification 三个家族未开始，本批次仍未收尾。
+> 2026-09-11 范围复核：ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、PopupConfirm、Notification 八个家族的单项任务框已置为已完成（均已按用户授权提交；PopupConfirm 真机视觉验收见 `docs/superpowers/specs/2026-09-11-popupconfirm-semantic-visual-acceptance.md`）。Message、Modal / Dialog 两个家族未开始，本批次仍未收尾。
+>
+> 2026-09-11 Notification 任务 9：Gate A、文档、Gate B 与全部验证已完成，实现改动经用户授权提交。
+>
+> 2026-09-11 Notification 视觉对齐补充：修复 `Border#Frame` 的 `BoxShadow` 被中间 `Panel#PART_Layout` 裁剪的问题
+> （右/下各只剩 1 逻辑像素，上游为 4），把 `Frame` 提升为 `LayoutAwareMotionActor` 的直接内容、新增 `Border#ContentBox`
+> 承担 `Padding`，并让 Gallery 示例的 error 分支补齐上游 `defaultStyles.root` 继承来的 `border: 2px solid` 与
+> `borderRadius: 16`。回归测试 `Frame_Sits_Directly_In_The_Motion_Actor_So_BoxShadow_Is_Not_Clipped` 锁定结构约束；
+> Desktop Controls 3715/3715、Gallery 615/615 通过。
+>
+> 2026-09-11 Notification 真机视觉验收：用户按步骤在自己桌面启动本地 Gallery 并回传截图确认，
+> `Custom Semantic Part styling` 两张绿色卡片的右侧/底部硬阴影带（`4px 4px 0 #D9F7BE`）与红色 error 卡片的
+> 加粗边框（2px `#FFCCC7`）、完整 `#FFCCC7` 硬阴影均已呈现，用户答复「解决了」。视觉验收判定通过，
+> 证据为用户回传截图（按约定不入库）。
 
 - [ ] 确认 10 个控件家族分别拥有用户授权的独立提交。
 - [ ] 运行完整 Desktop Controls、Generator、GalleryBase 和 Gallery 测试，并执行 Popup/Overlay 生命周期筛选。

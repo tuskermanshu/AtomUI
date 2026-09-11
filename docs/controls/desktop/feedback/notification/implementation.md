@@ -1,6 +1,6 @@
 # Notification 桌面版实现原理
 
-本文档描述 Notification 桌面版的内部实现范围、源码职责、状态流、生命周期、资源边界和维护规则。公共设计与 API 契约见 [Notification 桌面版架构设计](overview.md)，共用堆叠与计时算法见 [Feedback 堆叠基础设施](../../../../architecture/systems/control-infrastructure/feedback-stack.md)，变化记录见 [Notification Changelog](changelog.md)。涉及控件 Token 的实现应同时阅读 [Notification Token 设计](token.md)。
+本文档描述 Notification 桌面版的内部实现范围、源码职责、状态流、生命周期、资源边界和维护规则。公共设计与 API 契约见 [Notification 桌面版架构设计](overview.md)，共用堆叠与计时算法见 [Feedback 堆叠基础设施](../../../../architecture/systems/control-infrastructure/feedback-stack.md)，Semantic Part 契约见 [Notification Semantic Part 契约](semantic-part.md)，变化记录见 [Notification Changelog](changelog.md)。涉及控件 Token 的实现应同时阅读 [Notification Token 设计](token.md)。
 
 ## 1. 实现定位
 
@@ -14,6 +14,7 @@
 - `src/AtomUI.Desktop.Controls/Notifications/INotificationManager.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/Notification.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationCard.cs`
+- `src/AtomUI.Desktop.Controls/Notifications/NotificationCard.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationPosition.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationProgressBar.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationPseudoClass.cs`
@@ -30,6 +31,7 @@
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotion.cs`
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotionCoordinator.cs`
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/IFeedbackStackItem.cs`
+- `src/AtomUI.Desktop.Controls/Notifications/WindowNotificationManager.SemanticParts.cs`
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`
 
 职责边界：
@@ -53,6 +55,8 @@
 - `FeedbackLifetimeScheduler`：按单调 deadline 调度有限时长项，并只为可见进度项安排刷新。
 - `FeedbackCardMotion`：把 Position 归一为 64 DIP translate/fade 和统一 Ant easing，不改变 card scale。
 - `FeedbackCardMotionCoordinator`：协调当前 actor 的进入/退出状态、取消和完成提交，并在 retemplate、detach、dispose 时同步解除 transition 引用。
+- `NotificationCard.SemanticParts.cs` / `WindowNotificationManager.SemanticParts.cs`：只承载 `[SemanticPart]` 声明和空的
+  partial class 块，不承载模板节点、Setter 或运行时查找逻辑。
 
 核心协作规则：
 
@@ -110,6 +114,23 @@ Duration 变化不重启同一 actor，新值从下一次 motion 生效；Comple
 - `PART_CloseButton`：承载用户触发入口、导航或关闭动作。
 - `PART_Items`：`ItemsControl` 级稳定入口，承载共享 presenter 和 panel；不能再由 manager 直接修改 `Panel.Children`。
 - `PART_Layout`：稳定模板协作入口，重命名前必须同步主题和实现。
+
+## 5.1 Semantic Part marker 接入
+
+通知模板结构直接对齐上游 antd notice DOM，marker 的归属如下：
+
+- `Border#Frame` 通过 `TemplateBinding` 消费 owner 的 `Background` / `BorderBrush` / `BorderThickness` / `CornerRadius` /
+  `BoxShadow` / `Padding`，是隐式 `root` 表面的投影节点。
+- `DockPanel#Wrapper`、`IconPresenter#IconPresenter`、`StackPanel#Section`、`atom:SelectableTextBlock#HeaderTitle`、
+  `ContentPresenter#Content`、`ContentPresenter#ActionsContainer`、`IconButton#PART_CloseButton` 在
+  `NotificationCardTheme.axaml` 内用 `Classes.semantic-*="True"` 静态声明，由生成器静态校验 cardinality 与
+  `ContractType` 兼容性。
+- `progress` 是 RuntimeCreated Part：`ConfigureProgressBar` 创建 `NotificationProgressBar` 时注入
+  `NotificationCardSemanticParts.ProgressClass`，`ClearProgressBar` 在移除节点时一并释放 marker；生成器不通过源码文本
+  搜索证明调用，契约由控件行为测试覆盖。
+- `ReversibleStackPanel#PART_Items` 在 `WindowNotificationManagerTheme.axaml` 内静态声明 `semantic-list-content`。
+
+marker 只增加模板节点已有 `Classes` 集合中的稳定字符串，不引入 VisualTree 搜索、运行时 AXAML 解析或反射扫描。
 
 ## 6. 交互与事件处理
 

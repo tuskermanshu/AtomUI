@@ -79,7 +79,7 @@ Notification 的公共契约由 public/protected 类型成员、Avalonia 属性�
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml:32`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml:156`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -89,7 +89,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 自动关闭时长
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml:41`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml:165`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -99,7 +99,7 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 带图标通知
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml:50`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml:174`
 
 Gallery key：`ExamplesContent` / item `2`
 
@@ -114,7 +114,7 @@ Gallery key：`ExamplesContent` / item `2`
 
 ### 弹出位置
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml:64`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml:188`
 
 Gallery key：`ExamplesContent` / item `3`
 
@@ -218,6 +218,7 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 - `src/AtomUI.Desktop.Controls/Notifications/INotificationManager.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/Notification.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationCard.cs`
+- `src/AtomUI.Desktop.Controls/Notifications/NotificationCard.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationPosition.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationProgressBar.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationPseudoClass.cs`
@@ -234,6 +235,7 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotion.cs`
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotionCoordinator.cs`
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/IFeedbackStackItem.cs`
+- `src/AtomUI.Desktop.Controls/Notifications/WindowNotificationManager.SemanticParts.cs`
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`
 
 职责边界：
@@ -247,6 +249,7 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 
 - 源设计文档：`docs/controls/desktop/feedback/notification/overview.md`
 - 实现文档：`docs/controls/desktop/feedback/notification/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/feedback/notification/semantic-part.md`
 - Token 文档：`docs/controls/desktop/feedback/notification/token.md`
 - 变更记录：`docs/controls/desktop/feedback/notification/changelog.md`
 - 语义结构：`./semantic-cn.md`

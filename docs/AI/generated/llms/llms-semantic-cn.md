@@ -18964,13 +18964,218 @@ Source: ./controls/modal/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Dialog` / `MessageBox` | public 打开意图、内容、结果和事件入口。 | `IsOpen`, `OpenAsync`, `Result`, `BeforeCloseAsync` | `DialogToken` | stable |
-| `host` | Overlay presenter / native Window | 承载模态、placement、尺寸和宿主生命周期。 | `DialogHostType`, `IsModal`, `PlacementTarget` | SharedToken motion | internal-observable |
-| `surface` | `DialogSurface` | 共享标题、正文、Footer、按钮和 focus scope。 | `Content`, `StandardButtons`, `IsLoading` | `ContentBg`, padding/footer tokens | internal-observable |
-| `content` | Content / `MessageBoxContent` | 呈现任意 Dialog 内容或 MessageBox 语义内容。 | `Content`, `ContentTemplate`, `Style`, `Icon` | typography/color tokens | stable |
-| `motion` | Overlay `MotionActor` + `PART_SurfaceContentLayer` | Overlay 等待外层、前景内容和 mask 的关闭边界；Window 使用原生 Opened/Closed 边界。 | `IsMotionEnabled` | `MotionDurationMid` | internal-observable |
+Dialog 家族公开 8 个 Semantic Part，`root` 由生成器隐式加入（不要求 `.semantic-root`）。语义 owner 是 public 的
+`Dialog` 控件本身；`MessageBox : Dialog` 复用同一 `DialogSurface` 视觉树，因此单独声明同一组 Part（生成器按 public
+Control 生成 descriptor，不继承基类 descriptor，先例：`SimplePagination` 对 `Pagination`）。
+
+`Dialog` **没有 `ControlTemplate`**（`DialogTheme.axaml` 只定义默认属性与 `IsModal` 状态），全部视觉节点位于运行时
+创建并附加到 `DialogOverlayLayer` 或原生 `DialogWindow` 的 `DialogSurface` / `OverlayDialogPresenter` /
+`OverlayDialogHeader` 模板中。因此全部 Part 声明 `RuntimeCreated=true`、`CrossVisualRoot=true`、
+`CrossNestedOwners=true`，路由以 `>>` 从 owner 直接定位 marker 节点（先例：Drawer 的运行时容器部件）。
+
+与上游 Modal 语义 DOM（`_semantic.tsx`，9 个槽位）的映射：
+
+| 上游槽位 | 上游 since | AtomUI 部件 | 说明 |
+| --- | --- | --- | --- |
+| `root` | 6.0.0 | `root`（隐式，owner 契约） | 上游 `.ant-modal-root` 是最外层容器；AtomUI 遵循系统契约 root=owner 控件，上游 root 对应内部 `DialogOverlayLayer`/presenter 基础设施，不作为部件暴露。 |
+| `mask` | 5.13.0 | `mask` | 一一对应；`IsModal=false` 或 Window 宿主时不物化（Optional）。 |
+| `container` | 6.0.0 | `container` | 一一对应（`Border#Frame`：背景、圆角、`ClipToBounds`）。上游同一节点的 `boxShadow`/`padding` 在 AtomUI 分属其他节点，见 §5.1。 |
+| `wrapper` | 5.13.0 | `wrapper` | 角色对应：上游是动画/滚动包裹层，AtomUI 由 `PART_SurfaceMotionActor` 承担。几何差异见 §5.2。 |
+| `header` | 5.13.0 | `header` | 一一对应（`Border#HeaderFrame`：背景、内边距）。 |
+| `title` | 6.0.0 | `title` | 一一对应（`TextBlock#Title`）。 |
+| `body` | 5.13.0 | `body` | 一一对应（`Border#ContentFrame`：正文内边距与内容承载）。 |
+| `footer` | 5.13.0 | `footer` | 一一对应（`Border#FooterFrame`：背景、内边距、外边距）。节点恒存在，`IsFooterVisible=false` 时仅隐藏（Single）。 |
+| `close` | 6.4.0 | `close` | 一一对应（`PART_CloseButton`）。节点恒存在，`IsClosable=false` 时仅隐藏（Single）。 |
+
+Part 明细：
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `MessageBox` / `root` |
+| Selector | 不适用（root 无 `.semantic-root`） |
+| SelectorRoute | 不适用 |
+| Style Type | 不生成（`root` descriptor 的 `StyleType` 为 `null`） |
+| ContractType | owner 自身类型 |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot | 不适用（owner 本身） |
+| AtomUI 节点 | `Dialog` / `MessageBox` 实例（零尺寸状态持有控件，`DialogTheme.axaml` 未定义模板） |
+| 职责 | public 打开意图、内容、结果、按钮与事件入口 |
+| 相关 API | `IsOpen`、`OpenAsync`、`Content`、`Result`、`BeforeCloseAsync`、`DialogHostType` |
+| 相关 Token | `DialogToken`（背景、文字、间距、尺寸） |
+| Customization | Root |
+| Stability | stable |
+
+#### `mask`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `mask` |
+| Selector | `.semantic-mask` |
+| SelectorRoute | `>> .semantic-scope-mask /template/ .semantic-mask` |
+| Style Type | `AtomUI.Theme.Styling.DialogMaskStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogMaskTheme.axaml` 的 `Border#Frame`（静态 marker） |
+| 职责 | modal 遮罩：`ColorBgMask` 背景、`CornerRadius`、指针命中与 fade motion 的视觉承载体 |
+| 相关 API | `IsModal`、`IsMaskClosable` |
+| 相关 Token | `ColorBgMask`、`MotionDurationMid` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `wrapper`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `wrapper` |
+| Selector | `.semantic-wrapper` |
+| SelectorRoute | `>> .semantic-scope-presenter > .semantic-wrapper` |
+| Style Type | `AtomUI.Theme.Styling.DialogWrapperStyle` |
+| ContractType | `Avalonia.Controls.Control` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogPresenterTheme.axaml` 的 `MotionActor#PART_SurfaceMotionActor`（静态 marker） |
+| 职责 | Surface 动画/过渡包裹层；承载 opening/closing motion 的视觉宿主 |
+| 相关 API | `IsMotionEnabled` |
+| 相关 Token | `MotionDurationMid` |
+| Customization | Selector |
+| Stability | stable（几何语义见 §5.2） |
+
+#### `container`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `container` |
+| Selector | `.semantic-container` |
+| SelectorRoute | `>> .semantic-scope-frame-host > .semantic-container` |
+| Style Type | `AtomUI.Theme.Styling.DialogContainerStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#Frame`（静态 marker） |
+| 职责 | 对话主体框体：`ContentBg` 背景、`BorderRadiusLG` 圆角、子内容裁剪 |
+| 相关 API | `DialogHostType`（Overlay 圆角 / Window 方角） |
+| 相关 Token | `ContentBg`、`BorderRadiusLG` |
+| Customization | Selector |
+| Stability | stable（阴影归属见 §5.1） |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-header` |
+| Style Type | `AtomUI.Theme.Styling.DialogHeaderStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `Border#HeaderFrame`（静态 marker） |
+| 职责 | 标题区框体：`HeaderBg` 背景与 `HeaderPadding` 内边距 |
+| 相关 API | `Title`、`TitleIcon`、`IsClosable`、`IsMaximizable`、`IsDragMovable` |
+| 相关 Token | `HeaderBg`、`HeaderPadding`、`HeaderMarginBottom` |
+| Customization | Selector |
+| Stability | stable（与上游 header 的几何差异见 §5.3） |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-title` |
+| Style Type | `AtomUI.Theme.Styling.DialogTitleStyle` |
+| ContractType | `Avalonia.Controls.TextBlock` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `TextBlock#Title`（静态 marker） |
+| 职责 | 标题文字排版与前景色 |
+| 相关 API | `Title` |
+| 相关 Token | `HeaderFontSize`、`FontWeightStrong`、`HeaderColor` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-body` |
+| Style Type | `AtomUI.Theme.Styling.DialogBodyStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#ContentFrame`（静态 marker） |
+| 职责 | 正文区域：`ContentPadding` 内边距、内容裁剪与 loading 骨架宿主边界 |
+| 相关 API | `Content`、`ContentTemplate`、`IsLoading` |
+| 相关 Token | `ContentPadding`、`LoadingIndicatorMargin` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `footer` |
+| Selector | `.semantic-footer` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-footer` |
+| Style Type | `AtomUI.Theme.Styling.DialogFooterStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#FooterFrame`（静态 marker） |
+| 职责 | 底部操作区框体：`FooterBg` 背景、`FooterPadding` 内边距、`FooterMarginTop` 外边距；不承诺内部按钮布局 |
+| 相关 API | `IsFooterVisible`、`StandardButtons`、`CustomButtons` |
+| 相关 Token | `FooterBg`、`FooterPadding`、`FooterMarginTop` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `close`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `close` |
+| Selector | `.semantic-close` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-close` |
+| Style Type | `AtomUI.Theme.Styling.DialogCloseStyle` |
+| ContractType | `Avalonia.Controls.Button` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `DialogCaptionButton#PART_CloseButton`（静态 marker） |
+| 职责 | 标题栏关闭入口的按钮视觉（前景、尺寸、hover/pressed 反馈） |
+| 相关 API | `IsClosable` |
+| 相关 Token | `CloseBtnSize`、`IconSize`、`HeaderColor` |
+| Customization | Selector |
+| Stability | stable（与上游绝对定位 close 的差异见 §5.4） |
+
+#### MessageBox
+
+`MessageBox` 是 `Dialog` 的语义专化，复用同一 `DialogSurface`/`OverlayDialogHeader` 模板，因此公开与 `Dialog`
+完全相同的 8 个 Part（节点、`SelectorClass`、`SelectorRoute`、`ContractType`、`Cardinality` 一致），但 descriptor 归属
+`MessageBox` 自身类型，生成 `MessageBox<Part>Style` 类型（如 `MessageBoxContainerStyle`）。`MessageBox` 的
+`MessageBoxContent`（图标 + 内容组合）属于 `body` 的内容，不是独立 Part。
+
+### 1.1 路由精度与 `.semantic-scope-*` 锚点
+
+Dialog body 内嵌 `Skeleton`（加载态常驻），用户内容还常包含 `Card`、`Tooltip`、`Spin` 等语义 owner，它们同样发布
+`semantic-header`/`semantic-title`/`semantic-body`/`semantic-footer`/`semantic-container` 等同名 `SelectorClass`。
+宽泛 `>>` descendant 会把这些嵌套部件一并命中（系统文档 §3.3 明确禁止公共 Selector 使用宽泛 descendant），
+因此本契约的全部路由都用 Dialog 自有的 `.semantic-scope-*` 锚点收窄：
+
+| 锚点 | 节点 | 作用 |
+| --- | --- | --- |
+| `semantic-scope-presenter` | `OverlayDialogPresenterTheme` 的模板根 `Panel` | 定位 presenter 模板，隔离嵌套 owner 的 `wrapper`。 |
+| `semantic-scope-mask` | `OverlayDialogMask#PART_DialogMask` | 定位遮罩控件，隔离嵌套 owner 的 `mask`。 |
+| `semantic-scope-frame-host` | `ShadowsAwareContainer#PART_ShadowHost` | 定位框体宿主，隔离嵌套 owner 的 `container`。 |
+| `semantic-scope-content-layer` | `DockPanel#PART_SurfaceContentLayer` | 定位 Header/正文/Footer 的直接父，隔离正文内的嵌套 owner。 |
+| `semantic-scope-header` | `OverlayDialogHeader#PART_Header` | 定位标题栏控件，隔离嵌套 owner 的 `header`/`title`/`close`。 |
+
+`.semantic-scope-*` 只用于路由，不进入 Part 表；隔离由「锚点唯一 + `>`/`/template/` 精确步骤」共同保证，
+不依赖任何“最近 Semantic owner”停止规则。回归测试
+`Generated_Semantic_Styles_Hit_Exactly_One_Node_Per_Part` 断言每个 Part 恰好命中一个节点，锁定该精度。
 
 ## Abstract AXAML Structure
 
@@ -19068,6 +19273,10 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - MessageBox 继续作为 Dialog 派生类，不增加平行 host/session/button cache 生命周期。
 - mask 外点关闭入口只由 `IsMaskClosable` 在 Overlay presenter 的 mask 输入路径统一门控；不引入第二条 mask 关闭路径，也不在 Session veto 层复制该判断。
 - 新增 binding、事件、资源 parent、motion source 或内容引用时，必须在同一个 owner 中增加释放点和回归测试。
+- Overlay presenter 的逻辑父必须指向 `Dialog`（加入 layer 前设置、teardown 后清空），否则 owner 作用域 Semantic Style
+  与 Gallery 语义预览均不可达；`Dialog.GetCrossRoots()` 只在 presenter 已附加时上报存活根，释放后不得保留引用。
+- Semantic Part marker 必须保持静态声明，不得按 `IsModal`/`IsLoading`/`DialogHostType` 等状态动态增删；`Optional` 语义
+  由节点是否存在（模板/开关）表达，不由 marker 增删表达。
 
 Source: ./controls/notification/semantic-cn.md
 
@@ -19077,13 +19286,305 @@ Source: ./controls/notification/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Notification` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Notification 由两个 public owner 组成，因此公开两个独立 descriptor：
+
+| Owner | 职责 |
+| --- | --- |
+| `NotificationCard` | 单条通知卡片（上游 notice），承载 `root`、`wrapper`、`icon`、`section`、`title`、`description`、`actions`、`close`、`progress` 九个 Part。 |
+| `WindowNotificationManager` | 服务型通知宿主（上游 notification list），承载 `root`（= 上游 `list`）与 `listContent` 两个 Part。 |
+
+上游 `NotificationSemanticType` 的 `classNames` / `styles` 为
+`{ list?, listContent?, wrapper?, root?, title?, description?, actions?, icon?, section?, close?, progress? }` 十一个键
+（上游 6.6.3 稳定发布源码 `notification/interface.ts`，语义 demo
+`notification/demo/_semantic.tsx`）。上游 DOM 嵌套为
+`list > listContent > root > [ wrapper > (icon, section > (title, description)), actions, close, progress ]`；
+`root`、`icon`、`title`、`description`、`actions` 自 6.0.0 起公开，`wrapper`、`section`、`close`、`progress`、
+`list`、`listContent` 自 6.4.0 起公开。
+
+AtomUI 把十一个上游 Part 一一映射到两个 owner 的真实节点：
+
+```text
+WindowNotificationManager (root，对应上游 list)
+  └─ Border（消费 owner Padding）
+       └─ ReversibleStackPanel#PART_Items (listContent, .semantic-list-content)
+            └─ NotificationCard (root，对应上游 notice root)
+                 └─ LayoutAwareMotionActor
+                      └─ Border#Frame (root 表面投影：背景/边框/圆角/阴影；MotionActor 直接内容，Padding=0)
+                           └─ Panel#PART_Layout (等于 padding box：Frame 无内边距)
+                                ├─ Border#ContentBox (消费 owner Padding，即上/下 paddingMD、左/右 paddingLG)
+                                │    └─ StackPanel
+                                │         ├─ DockPanel#Wrapper (wrapper, .semantic-wrapper)
+                                │         │    ├─ IconPresenter#IconPresenter (icon, .semantic-icon)
+                                │         │    └─ StackPanel#Section (section, .semantic-section)
+                                │         │         ├─ SelectableTextBlock#HeaderTitle (title, .semantic-title)
+                                │         │         └─ ContentPresenter#Content (description, .semantic-description)
+                                │         └─ ContentPresenter#ActionsContainer (actions, .semantic-actions)
+                                ├─ IconButton#PART_CloseButton (close, .semantic-close，覆盖层)
+                                └─ NotificationProgressBar#ProgressBar (progress, .semantic-progress，运行时创建覆盖层)
+```
+
+上游 `root` 就是 notification notice 本身，因此映射到 `NotificationCard` owner；上游 `list` 是承载全部 notice 的
+定位容器，映射到 `WindowNotificationManager` owner。两个 owner 各自拥有隐式 `root`，不额外声明 `.semantic-root` marker。
+
+与上游 DOM 的结构差异（Part 名称、数量与样式语义不变）：
+
+- 上游 `list` 自身承担 placement（`topRight` 等）；AtomUI 的 `WindowNotificationManager` 铺满 TopLevel 并只负责安全区
+  外边距与列表内边距，具体对齐由 `ReversibleStackPanel#PART_Items`（`listContent`）实际承担。因此"放置"语义在
+  AtomUI 由 `root`（`Position` 属性与宿主层范围的作用域）与 `listContent`（实际排列容器）共同表达。
+- 上游 notice 的 `close` 是 `position: absolute` 覆盖层，`progress` 是 `position: absolute; bottom: 0` 覆盖层。
+  AtomUI 同样把两者表达为 `Panel#PART_Layout` 上的覆盖元素（`close` 右上、`progress` 贴底并左右内缩 `BorderRadiusLG`），
+  不参与 `wrapper` / `section` / `actions` 的流式排版。
+- 上游 `position: absolute` 的子元素相对**padding box** 定位，而非 border box 或内容盒。因此 AtomUI 把
+  `Padding` 从 `Border#Frame` 下移到 Frame 内部的 `Border#ContentBox`，让 `Panel#PART_Layout` 恰好等于
+  padding box：`close` 的右侧偏移量到边框内侧、`progress` 贴在边框底边（而不是被 20px 内边距抬高）。
+  `Frame` 自身保持 `Padding=0`，同时负责画 `BoxShadow`。
+- `Border#Frame` 必须是 `LayoutAwareMotionActor` 的直接内容（中间只允许 `ContentControl` 自带的
+  `PART_ContentPresenter`）。曾经的模板在两者之间夹了一层 `Panel#PART_Layout`，`BoxShadow` 被裁到右/下各只剩
+  1 个逻辑像素（实测设备像素 2，上游为 8），卡片右下角看起来「少了一块」。`Message` 的 `PART_Frame` 正是
+  MotionActor 的直接内容，所以它的硬阴影一直正常；本控件的回归测试
+  `Frame_Sits_Directly_In_The_Motion_Actor_So_BoxShadow_Is_Not_Clipped` 锁定该约束。
+- 上游 `wrapper` 用 flex `gap: marginSM` + `align-items: flex-start` 排列 icon 与 section；AtomUI `DockPanel` 无
+  `Spacing`，等价的图标间距由 `IconPresenter` 的 `NotificationIconMargin`（右外边距）表达，视觉结果一致。
+- 上游 `section` 用 flex column `gap: marginXS`；AtomUI 由 `StackPanel#Section.Spacing` 表达。
+
+两个 owner 的 descriptor `Since` 统一为 `6.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
+
+以下类型不持有独立 Semantic descriptor：
+
+- `Notification`（`INotification` 的实现）是服务调用的数据对象，不是 Control。
+- `INotification` / `INotificationManager` 是服务契约接口。
+- `NotificationPseudoClass`、`NotificationPosition`、`NotificationType` 是状态与枚举类型。
+- `NotificationCardToken`、`NotificationProgressBar`、`NotificationProgressBarVisibleConverter` 与各 Motion 类型是
+  Token scope、内部进度绘制与动效实现；Semantic Part 不产生 Token identity。
+
+### 1.1 `NotificationCard`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `root` |
+| Selector | NotificationCard 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `NotificationCard` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard owner（表面投影到 `Border#Frame`，动效由 `LayoutAwareMotionActor` 承载） |
+| 职责 | 通知项根元素：承载 `Title`、`Content`、`Icon`、`Actions`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled` 与进入/退出动效；根表面（背景、边框、圆角、阴影、内边距）投影到模板中的 `Border#Frame`。对应上游 notice root。 |
+| 相关 API | `Title`、`Content`、`Icon`、`Actions`、`ActionsTemplate`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled`、`Close()`、`NotificationClosed` |
+| 相关 Token | `NotificationBg`、`NotificationPadding`、SharedToken（`BoxShadows`、`BorderRadiusLG`） |
+| 稳定性 | stable since 6.0 |
+
+#### `wrapper`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `wrapper` |
+| Selector | `.semantic-wrapper` |
+| SelectorRoute | `/template/ .semantic-wrapper` |
+| Style Type | `NotificationCardWrapperStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `DockPanel#Wrapper` |
+| 职责 | 图标与内容区域的包裹元素：决定 icon 与 section 的排列方向、对齐与图标间距。对应上游 notice wrapper（flex 行，`align-items: flex-start`）。 |
+| 相关 API | `Icon`、`Title`、`Content`（决定子节点可见性） |
+| 相关 Token | `NotificationIconMargin` |
+| 稳定性 | stable since 6.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `NotificationCardIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `IconPresenter#IconPresenter` |
+| 职责 | 状态图标元素：尺寸、画刷与行高；`NotificationType` 决定默认图标与状态色（Information = `ColorPrimary`，Success = `ColorSuccess`，Warning = `ColorWarning`，Error = `ColorError`）。对应上游 notice icon。 |
+| 相关 API | `Icon`、`NotificationType` |
+| 相关 Token | `NotificationIconSize`、`NotificationIconMargin`、SharedToken（`ColorPrimary`、`ColorSuccess`、`ColorWarning`、`ColorError`） |
+| 稳定性 | stable since 6.0 |
+
+#### `section`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `section` |
+| Selector | `.semantic-section` |
+| SelectorRoute | `/template/ .semantic-section` |
+| Style Type | `NotificationCardSectionStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `StackPanel#Section` |
+| 职责 | 包含标题与描述的内容区域元素：决定两者的纵向间距与对齐。对应上游 notice section（flex column，`gap: marginXS`）。 |
+| 相关 API | `Title`、`Content` |
+| 相关 Token | `NotificationSectionSpacing` |
+| 稳定性 | stable since 6.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `NotificationCardTitleStyle` |
+| ContractType | `AtomUI.Desktop.Controls.SelectableTextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `atom:SelectableTextBlock#HeaderTitle`（AtomUI 类型，主题中带 `atom:` 前缀） |
+| 职责 | 标题元素：文本颜色、字号、行高与右侧留白（为关闭按钮预留）。对应上游 notice title。 |
+| 相关 API | `Title` |
+| 相关 Token | SharedToken（`FontSizeLG`、`FontHeightLG`、`ColorTextHeading`）、`NotificationTitlePadding` |
+| 稳定性 | stable since 6.0 |
+
+#### `description`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `description` |
+| Selector | `.semantic-description` |
+| SelectorRoute | `/template/ .semantic-description` |
+| Style Type | `NotificationCardDescriptionStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `ContentPresenter#Content` |
+| 职责 | 描述元素：正文颜色、字号、行高与换行。对应上游 notice description（在标题下方，不与关闭按钮同排，因此不预留右侧空间）。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | SharedToken（`FontSize`、`FontHeight`、`ColorText`） |
+| 稳定性 | stable since 6.0 |
+
+#### `actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `actions` |
+| Selector | `.semantic-actions` |
+| SelectorRoute | `/template/ .semantic-actions` |
+| Style Type | `NotificationCardActionsStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `ContentPresenter#ActionsContainer` |
+| 职责 | 操作组元素：位于 notice 右下角，承载调用方传入的操作内容；`Actions` 为空时节点隐藏。对应上游 notice actions。 |
+| 相关 API | `Actions`、`ActionsTemplate` |
+| 相关 Token | `NotificationActionsMargin` |
+| 稳定性 | stable since 6.0 |
+
+#### `close`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `close` |
+| Selector | `.semantic-close` |
+| SelectorRoute | `/template/ .semantic-close` |
+| Style Type | `NotificationCardCloseStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `IconButton#PART_CloseButton` |
+| 职责 | 关闭按钮覆盖元素：位置（右上角）、尺寸、圆角、默认/悬停/按下颜色与聚焦样式。对应上游 notice close（absolute top-right）。 |
+| 相关 API | `Close()`、`NotificationClosed` |
+| 相关 Token | `NotificationCloseButtonSize`、`NotificationCloseButtonPadding`、`NotificationCloseButtonMargin`、SharedToken（`BorderRadiusSM`、`IconSizeSM`、`ColorIcon`、`ColorIconHover`、`ColorBgTextHover`、`ColorBgTextActive`） |
+| 稳定性 | stable since 6.0 |
+
+#### `progress`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `progress` |
+| Selector | `.semantic-progress` |
+| SelectorRoute | `/template/ .semantic-progress` |
+| Style Type | `NotificationCardProgressStyle` |
+| ContractType | `Control` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `NotificationCard` 运行时创建的 `NotificationProgressBar#ProgressBar`（贴卡片底边，左右内缩 `BorderRadiusLG`） |
+| 职责 | 进度覆盖元素：展示自动关闭的剩余时间。对应上游 notice progress（absolute bottom）。 |
+| 相关 API | `IsShowProgress`、`Expiration` |
+| 相关 Token | `NotificationProgressHeight`、`NotificationProgressBg`、`NotificationProgressMargin` |
+| 稳定性 | stable since 6.0 |
+
+### 1.2 `WindowNotificationManager`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `WindowNotificationManager` |
+| Part | `root` |
+| Selector | WindowNotificationManager 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `WindowNotificationManager` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | WindowNotificationManager owner（宿主层/full-screen 覆盖层；无宿主构造时为内联可放置实例） |
+| 职责 | 通知列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`，管理宿主层安装、通知队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度与边缘内边距语义。 |
+| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`、`Show(INotification)`、`Dispose()` |
+| 相关 Token | `NotificationPadding`（列表内边距）、SharedToken（`EnableMotion`、`MarginLG`） |
+| 稳定性 | stable since 6.0 |
+
+#### `listContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `WindowNotificationManager` |
+| Part | `listContent` |
+| Selector | `.semantic-list-content` |
+| SelectorRoute | `/template/ .semantic-list-content` |
+| Style Type | `WindowNotificationManagerListContentStyle` |
+| ContractType | `ReversibleStackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | WindowNotificationManager 模板中的 `ReversibleStackPanel#PART_Items` |
+| 职责 | 通知列表内容元素：notice 的排列方向、顺序、对齐与项间距；对应上游 `listContent` 的 notice 排列/间距语义。 |
+| 相关 API | `Position`、`MaxItems`（决定内容区可见项数量） |
+| 相关 Token | SharedToken（`EnableMotion`、`UniformlyMargin`） |
+| 稳定性 | stable since 6.0 |
+
+隐式 `root` 不声明 `.semantic-root` marker。`NotificationCard` 的 `wrapper`、`icon`、`section`、`title`、
+`description`、`actions`、`close` marker 静态声明在 `NotificationCardTheme.axaml` 模板内；`progress` 由控件运行时
+创建并在创建路径注入 semantic class；`WindowNotificationManager` 的 `listContent` marker 静态声明在
+`WindowNotificationManagerTheme.axaml` 模板内。
 
 ## Abstract AXAML Structure
 
@@ -19100,13 +19601,16 @@ Notification
   -> NotificationCard (control theme, NotificationCardTheme.axaml)
      -> MotionActor#{x:Static atom:BaseMotionActor.MotionActorPart} (internal-observable)
         -> Border#Frame (template-stable)
-           -> FeedbackStackTransitionSnapshotHost#PART_StackTransitionSnapshotHost (template-stable)
-              -> Grid#PART_Layout (template-stable)
-                 -> IconPresenter#IconPresenter (internal-observable)
-                 -> DockPanel#HeaderContainer (template-stable)
-                    -> IconButton#PART_CloseButton (template-stable)
-                    -> SelectableTextBlock#HeaderTitle (template-stable)
-                 -> ContentPresenter#Content (internal-observable)
+           -> Panel#PART_Layout (template-stable)
+              -> Border#ContentBox (template-stable)
+                 -> StackPanel (template-stable)
+                    -> DockPanel#Wrapper (template-stable)
+                       -> IconPresenter#IconPresenter (internal-observable)
+                       -> StackPanel#Section (template-stable)
+                          -> SelectableTextBlock#HeaderTitle (template-stable)
+                          -> ContentPresenter#Content (internal-observable)
+                    -> ContentPresenter#ActionsContainer (internal-observable)
+              -> IconButton#PART_CloseButton (template-stable)
   -> NotificationProgressBar (control theme, NotificationProgressBarTheme.axaml)
   -> FeedbackStackPresenter (presenter control theme, FeedbackStackPresenterTheme.axaml)
      -> Border (template-stable)
@@ -19118,16 +19622,19 @@ Notification
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Notification` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `NotificationCard` | control theme | `NotificationCardTheme.axaml` | 用户代码 / 控件宿主 | `Content`, `ContentTemplate`, `Icon`, `Title` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (MotionActor) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Frame` | template node (Border) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_StackTransitionSnapshotHost` | template node (FeedbackStackTransitionSnapshotHost) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Layout` | template node (Grid) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `NotificationCard` | control theme | `NotificationCardTheme.axaml` | 用户代码 / 控件宿主 | `Actions`, `ActionsTemplate`, `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (LayoutAwareMotionActor) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Frame` | template node (Border) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Layout` | template node (Panel) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Content`, `ContentTemplate`, `Icon`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ContentBox` | template node (Border) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Content`, `ContentTemplate`, `Icon`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `StackPanel` | template node (StackPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Wrapper` | template node (DockPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `IconPresenter` | template node (IconPresenter) | `NotificationCardTheme.axaml` | NotificationCard | `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `HeaderContainer` | template node (DockPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_CloseButton` | template node (IconButton) | `NotificationCardTheme.axaml` | NotificationCard | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Section` | template node (StackPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HeaderTitle` | template node (SelectableTextBlock) | `NotificationCardTheme.axaml` | NotificationCard | `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Content` | template node (ContentPresenter) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ActionsContainer` | template node (ContentPresenter) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_CloseButton` | template node (IconButton) | `NotificationCardTheme.axaml` | NotificationCard | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `NotificationProgressBar` | control theme | `NotificationProgressBarTheme.axaml` | Notification | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `FeedbackStackPresenter` | presenter control theme | `FeedbackStackPresenterTheme.axaml` | Notification | `ItemsPanel` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `FeedbackStackPresenterTheme.axaml` | FeedbackStackPresenter | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
