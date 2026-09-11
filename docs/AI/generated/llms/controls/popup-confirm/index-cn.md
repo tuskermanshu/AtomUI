@@ -81,7 +81,7 @@ PopupConfirm 的公共契约由 public/protected 类型成员、Avalonia 属性�
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/PopupConfirm/Views/PopupConfirmShowCase.axaml:36`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/PopupConfirm/Views/PopupConfirmShowCase.axaml:84`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -100,7 +100,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 本地化文本
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/PopupConfirm/Views/PopupConfirmShowCase.axaml:56`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/PopupConfirm/Views/PopupConfirmShowCase.axaml:104`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -111,6 +111,63 @@ Gallery key：`ExamplesContent` / item `1`
     ConfirmContent="确定要删除这个任务吗？">
     <atom:Button ButtonType="Default" IsDanger="True" Content="删除" />
 </atom:PopupConfirm>
+```
+
+### 自定义语义结构的样式
+
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/PopupConfirm/Views/PopupConfirmShowCase.axaml:283`
+
+SourceKey：`popupconfirm-semantic-part`
+
+```axaml
+<StackPanel Orientation="Horizontal" Spacing="16">
+    <StackPanel.Styles>
+        <Style Selector="atom|PopupConfirm.semantic-styles-object-demo">
+            <atom:PopupConfirmPopupContainerStyle x:SetterTargetType="Border">
+                <Setter Property="Background" Value="#EEEEEE" />
+                <Setter Property="Padding" Value="16" />
+            </atom:PopupConfirmPopupContainerStyle>
+            <atom:PopupConfirmPopupTitleStyle x:SetterTargetType="TextBlock">
+                <Setter Property="Foreground" Value="#262626" />
+            </atom:PopupConfirmPopupTitleStyle>
+        </Style>
+        <Style Selector="atom|PopupConfirm.semantic-styles-function-demo">
+            <atom:PopupConfirmPopupRootStyle x:SetterTargetType="atom:FlyoutPresenter">
+                <Setter Property="Background" Value="#CC35477D" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Padding" Value="12" />
+                <Setter Property="CornerRadius" Value="4" />
+            </atom:PopupConfirmPopupRootStyle>
+            <atom:PopupConfirmPopupActionsStyle x:SetterTargetType="StackPanel">
+                <Setter Property="Spacing" Value="12" />
+            </atom:PopupConfirmPopupActionsStyle>
+        </Style>
+    </StackPanel.Styles>
+    <atom:PopupConfirm Classes="semantic-styles-object-demo"
+                       Trigger="Click"
+                       ShouldUseOverlayPopup="False"
+                       IsArrowVisible="False"
+                       Placement="Top"
+                       Title="删除任务"
+                       ConfirmContent="确定要删除这个任务吗？"
+                       OkText="确定"
+                       CancelText="取消">
+        <atom:Button Content="Object Style" />
+    </atom:PopupConfirm>
+
+    <atom:PopupConfirm Classes="semantic-styles-function-demo"
+                       Trigger="Click"
+                       ShouldUseOverlayPopup="False"
+                       IsArrowVisible="False"
+                       Placement="Top"
+                       Title="删除任务"
+                       ConfirmContent="确定要删除这个任务吗？"
+                       OkText="确定"
+                       CancelText="取消">
+        <atom:Button ButtonType="Primary"
+                     Content="Function Style" />
+    </atom:PopupConfirm>
+</StackPanel>
 ```
 
 ## 状态模型
@@ -179,6 +236,7 @@ PopupConfirm Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 主要源码文件：
 
 - `src/AtomUI.Desktop.Controls/PopupConfirm/PopupConfirm.cs`
+- `src/AtomUI.Desktop.Controls/PopupConfirm/PopupConfirm.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/PopupConfirm/PopupConfirmContainer.cs`
 - `src/AtomUI.Desktop.Controls/PopupConfirm/PopupConfirmFlyout.cs`
 - `src/AtomUI.Desktop.Controls/PopupConfirm/PopupConfirmPseudoClass.cs`
@@ -197,6 +255,7 @@ PopupConfirm Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 
 - 源设计文档：`docs/controls/desktop/feedback/popup-confirm/overview.md`
 - 实现文档：`docs/controls/desktop/feedback/popup-confirm/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/feedback/popup-confirm/semantic-part.md`
 - Token 文档：`docs/controls/desktop/feedback/popup-confirm/token.md`
 - 变更记录：`docs/controls/desktop/feedback/popup-confirm/changelog.md`
 - 语义结构：`./semantic-cn.md`

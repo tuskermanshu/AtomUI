@@ -26,6 +26,7 @@
 - [Notification Changelog](notification/changelog.md)
 - [PopupConfirm 桌面版架构设计](popup-confirm/overview.md)
 - [PopupConfirm 桌面版实现原理](popup-confirm/implementation.md)
+- [PopupConfirm Semantic Part 契约](popup-confirm/semantic-part.md)
 - [PopupConfirm Token 设计](popup-confirm/token.md)
 - [PopupConfirm Changelog](popup-confirm/changelog.md)
 - [ProgressBar 桌面版架构设计](progress-bar/overview.md)

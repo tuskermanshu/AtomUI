@@ -1,8 +1,11 @@
-# PopupConfirm 语义结构
+# PopupConfirm Semantic Part 契约
 
-> 生成产物：由源文档生成，不要手工编辑。修改内容请回到控件文档、源码 public surface、Token 类型或生成数据、Gallery ShowCase 或源码结构。
+本文档定义 PopupConfirm 控件公开的 Semantic Part、Selector、类型约束、数量语义和定制边界。控件整体设计见
+[PopupConfirm 桌面版架构设计](overview.md)，真实模板、marker 映射与状态流见
+[PopupConfirm 桌面版实现原理](implementation.md)，系统级规则见
+[AtomUI Semantic Part 系统设计](../../../../architecture/systems/theming/semantic-parts.md)。
 
-## Semantic Parts
+## 1. Semantic Parts
 
 PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承 `FlyoutHost`，弹层由
 `PopupConfirmFlyout.CreatePresenter()` 在运行时创建、跨视觉根；internal 的 `PopupConfirmContainer`
@@ -219,132 +222,102 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 相关 Token | PopupConfirmToken（`ButtonSpacing`、`ButtonContainerMargin`）、SharedToken |
 | 稳定性 | stable since 6.0 |
 
-## Abstract AXAML Structure
+## 2. 职责与存在条件
 
-来源：`src/AtomUI.Desktop.Controls/PopupConfirm/Themes/PopupConfirmTheme.axaml`
+- 弹层由 `PopupConfirmFlyout.CreatePresenter()` 在弹层打开时才创建，是跨视觉根的 Popup 子节点，
+  `TemplatedParent` 不挂在 `PopupConfirm` 模板链上。因此 8 个 `popup.*` 部件全部声明
+  `CrossVisualRoot=true` + `RuntimeCreated=true`，生成器豁免宿主模板 marker 校验，由控件行为测试兜底。
+- 四个弹层框体件的 marker 由共享 FlyoutHost 家族代码路径注入：`popup.root` 在 `Flyout.CreatePresenter()`
+  创建 `FlyoutPresenter` 时注入，`popup.container` / `popup.content` / `popup.arrow` 在
+  `FlyoutPresenter.OnApplyTemplate` 注入到共享 `ArrowDecoratedBoxTheme` 的模板节点上。任何一次弹层重开或
+  模板重应用都必须重新注入，不能依赖上一次应用残留。
+- 四个确认体件的 marker 静态声明在 `PopupConfirmContainerTheme.axaml` 的模板节点上，随容器模板实例化
+  一次性设置。
+- **存在条件**：
+  - 弹层关闭时 8 个 `popup.*` 部件均不实例化。
+  - 弹层打开时 8 者同时存在；`popup.arrow` 仅在 `IsArrowVisible=true` 时可见（节点仍在，仅可见性切换）；
+    `popup.description` 仅在 `ConfirmContent != null` 时可见（`:empty-content` 伪类驱动）；
+    `popup.actions` 内 `PART_CancelButton` 仅在 `IsShowCancelButton=true` 时可见。
+  - `root`（`PopupConfirm`）与弹层打开状态无关，恒存在。
+
+## 3. 数量语义
+
+`root` 与 8 个 `popup.*` 均为 `Single`：每个 PopupConfirm 宿主在弹层打开时各实例化唯一一个对应节点。
+打开状态、`IsArrowVisible`、`ConfirmStatus`、`ConfirmContent` 的有无和主题切换只改变可见性或有效视觉值，
+不增删 marker；弹层关闭销毁 presenter 及其模板子树，重开重建，marker 身份与数量保持不变。
+
+## 4. Selector 用法
+
+生成的 Semantic Style 类型命名为 `PopupConfirm<PartPathPascalCase>Style`，如 `PopupConfirmPopupRootStyle`、
+`PopupConfirmPopupIconStyle`、`PopupConfirmPopupActionsStyle`（命名空间 `AtomUI.Theme.Styling`，AXAML 命名空间
+`https://atomui.net`）。`root` 不生成 Style 类型，owner 级 Setter 写在外层普通 Style 上。
+
+**路由说明**：生成的 `PopupConfirmPopupXxxStyle` 选择器以 owner 为根、经 `>>` 后代组合器下钻（生成器把
+`SelectorRoute` 中的 `>>` 映射为 Avalonia `.Descendant()`）。弹层根是代码创建、视觉上挂在独立 Popup 根里的
+`FlyoutPresenter`，但它在**逻辑树**上仍是 `PopupConfirm` 的后代
+（`FlyoutPresenter → Popup → 锚点/Content → PopupConfirm`），因此 `>>` 后代路由能跨越视觉根命中弹层节点。
 
 ```xml
-<ContentPresenter Name="PART_ContentPresenter" />
+<Style Selector="atom|PopupConfirm.semantic-demo">
+    <atom:PopupConfirmPopupContainerStyle x:SetterTargetType="Border">
+        <Setter Property="Padding" Value="12" />
+    </atom:PopupConfirmPopupContainerStyle>
+</Style>
 ```
 
-## Composition Model
+`FlyoutPresenter`（`popup.root`）继承自 `ArrowDecoratedBox` / `ContentControl`：`Background`、
+`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding` 经模板绑定作用于 `popup.container` 的
+`Border`，`Foreground` 经属性继承作用于 `popup.content` 的文本；因此直接定制 `popup.root` 即可覆盖整层
+弹层的视觉。需要更细粒度命中内部节点时，改用 `PopupConfirmPopupContainerStyle` /
+`PopupConfirmPopupIconStyle` / `PopupConfirmPopupTitleStyle` / `PopupConfirmPopupDescriptionStyle` /
+`PopupConfirmPopupActionsStyle` / `PopupConfirmPopupArrowStyle`。
 
-该章节由控件 `Themes/` 文件夹中的真实主题文件生成，用于说明 public 控件与内部协作对象之间的运行时结构。内部节点只用于理解和维护，不应指导用户代码直接依赖。
+不得使用以下写法：
 
-### 控件角色图
+- `.semantic-root`、`PART_*`、Name selector、internal 类型（含 `PopupConfirmContainer`）或视觉祖先顺序
+  作为应用主题契约。
+- 把 `Border.semantic-popup-container` 等 `ContractType` 写入 Part 身份 selector。
+- 穿过 `ConfirmContent` / `ConfirmContentTemplate` 等用户内容模板继续匹配内部 Visual。
+- 把 `PART_OkButton` / `PART_CancelButton` 当作 PopupConfirm 的 Semantic Part；它们是 `popup.actions`
+  内部的 Button 控件，属于嵌套 owner，PopupConfirm 不穿透其 descriptor。
 
-```text
-PopupConfirm
-  -> PopupConfirmContainer (internal container control theme, PopupConfirmContainerTheme.axaml)
-     -> DockPanel#PART_MainLayout (template-stable)
-        -> StackPanel#PART_ButtonLayout (template-stable)
-           -> Button#PART_CancelButton (template-stable)
-           -> Button#PART_OkButton (template-stable)
-        -> DockPanel (template-stable)
-           -> IconPresenter#PART_IconPresenter (template-stable)
-           -> StackPanel (template-stable)
-              -> TextBlock#PART_Title (template-stable)
-              -> ContentPresenter#PART_Content (template-stable)
-  -> PopupConfirm (control theme, PopupConfirmTheme.axaml)
-     -> ContentPresenter#PART_ContentPresenter (template-stable)
-```
+## 5. 定制边界
 
-### 协作节点
+以下区域不属于 PopupConfirm Semantic Part：
 
-| 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
-| --- | --- | --- | --- | --- | --- | --- |
-| `PopupConfirm` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `PopupConfirmContainer` | internal container control theme | `PopupConfirmContainerTheme.axaml` | PopupConfirm | `CancelText`, `ClipToBounds`, `ConfirmContent`, `ConfirmContentTemplate`, `Icon`, `IsShowCancelButton` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_MainLayout` | template node (DockPanel) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `CancelText`, `ClipToBounds`, `ConfirmContent`, `ConfirmContentTemplate`, `Icon`, `IsShowCancelButton` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ButtonLayout` | template node (StackPanel) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `CancelText`, `IsShowCancelButton`, `OkButtonType`, `OkText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_CancelButton` | template node (Button) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `CancelText`, `IsShowCancelButton` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_OkButton` | template node (Button) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `OkButtonType`, `OkText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `DockPanel` | template node (DockPanel) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `ConfirmContent`, `ConfirmContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_IconPresenter` | template node (IconPresenter) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `StackPanel` | template node (StackPanel) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `ConfirmContent`, `ConfirmContentTemplate`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Title` | template node (TextBlock) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Content` | template node (ContentPresenter) | `PopupConfirmContainerTheme.axaml` | PopupConfirmContainer | `ConfirmContent`, `ConfirmContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PopupConfirm` | control theme | `PopupConfirmTheme.axaml` | 用户代码 / 控件宿主 | `ClipToBounds`, `Content`, `ContentTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `PART_ContentPresenter` | template node (ContentPresenter) | `PopupConfirmTheme.axaml` | PopupConfirm | `ClipToBounds`, `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+- **操作按钮内部**：`PART_OkButton` / `PART_CancelButton` 是 `Button` 控件实例，其 icon/content 等语义
+  属于 Button 自己的契约，由 Button 的 owner 隔离；PopupConfirm 只开放承载它们的 `popup.actions`。
+- **弹层 Popup 宿主与定位**：弹层 Popup 的定位、钉住打开、动画由共享 Popup 契约承担，`popup.root`
+  只覆盖弹层内容根 `FlyoutPresenter` 的视觉。
+- **锚点、触发与动效**：`Content`（触发器）、`Trigger`、`TriggerType`、`Placement`、`IsArrowVisible`、
+  motion 相关属性由行为 API 承担，不以 semantic key 发布。
+- **内部布局 wrapper**：`PART_MainLayout`、`PART_ButtonLayout` 的父 `DockPanel` 等布局节点不进入公开
+  Part；其中 `PART_ButtonLayout` 本身以 `popup.actions` 发布。
+- `PART_*` 名称、internal 类型（`PopupConfirmContainer`、`PopupConfirmFlyout`）与模板层级。
 
-## Template Parts
+默认主题不消费 `.semantic-*` selector；静态 marker 只提供应用样式命中点，不改变默认属性优先级或增加状态
+订阅。Semantic Style 服从 Avalonia 原生属性优先级。
 
-| 契约组 | 代表成员 | 维护含义 |
-| --- | --- | --- |
-| 内容与数据 | `CancelText`、`ConfirmContent`、`ConfirmContentTemplate`、`Icon`、`OkText`、`Title` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `ConfirmStatus`、`IsShowCancelButton` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 其他稳定入口 | `OkButtonType` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+## 6. 兼容性与验证
 
-## Pseudo Classes
+删除或重命名 Part、修改 selector class / route、收窄 `ContractType`（含把公共基类承诺收窄为具体实现
+类型）、改变 cardinality，或让弹层模板变体缺少 marker，均属于公共主题契约变更。
 
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | input/value。 |
-| 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | PopupConfirm Token + ControlTheme。 |
+与上游 Popconfirm 的对照差异（有意保持）：
 
-## State Flow
+- 上游 `content` 槽位映射为 `popup.description`；`popup.content` 保留为 FlyoutHost 家族的弹层框体内容面。
+- 上游未把按钮行发布为语义 key；AtomUI 以 `popup.actions` 发布操作区（对齐 Alert `actions` 先例）。
+- AtomUI 额外的隐式 `root` 是 `PopupConfirm` 触发宿主自身，属于 AtomUI 所有控件统一的 owner 惯例。
 
-PopupConfirm 的状态流按以下路径收敛：
+验证至少覆盖：
 
-```text
-Public API / inherited command / item source / user input
-  -> 控件实例状态
-  -> effective state / pseudo-class / template property
-  -> ControlTheme selector / presenter / renderer
-  -> Gallery 可观察行为
-```
-
-状态维护规则：
-
-- Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
-- input/value 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
-- 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
-- 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
-
-## Theme and Token Boundaries
-
-PopupConfirm 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的控件 Token 共同构成。
-
-| 主题文件 | 职责 |
-| --- | --- |
-| `PopupConfirmContainerTheme.axaml` | 定义弹层、窗口或 overlay 宿主视觉。 |
-| `PopupConfirmTheme.axaml` | 定义弹层、窗口或 overlay 宿主视觉。 |
-
-PopupConfirm 使用 `PopupConfirmToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 input/value 运行时状态。
-
-主题维护规则：
-
-- 不删除或重命名已经稳定的 ControlTheme key、template part、伪类和资源 key。
-- 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
-- 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
-- Browser 或平台特化主题必须保持同一 API 的语义一致。
-
-Token 边界：
-
-PopupConfirm Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆角、阴影、图标尺寸和弹层边界。Token 不承载运行时选择、展开、加载、错误、上传任务、过滤条件或业务状态。
-
-当前 Token scope：
-
-- `PopupConfirmToken`，scope id 为 `PopupConfirm`，源码位于 `src/AtomUI.Desktop.Controls/PopupConfirm/PopupConfirmToken.cs`。
-
-## Customization Boundaries
-
-维护 PopupConfirm 时必须保持以下不变量：
-
-- 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
-- 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
-- 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
-- Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
-- 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
-- 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
-- 不破坏已发布的 Semantic Part 名称、selector class / route、ContractType 与数量语义（见 [Semantic Part 契约](semantic-part.md)）。
-- 文档只描述当前稳定设计；历史变化记录在 `changelog.md`。
-
-维护不变量：
-
-维护 PopupConfirm 时不得破坏：
-
-- Public API、默认值、事件顺序和 Gallery 可观察行为。
-- Template part 名称、ControlTheme key、伪类和资源 key。
-- 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
-- Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
-- 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
-- 已发布的 Semantic Part 名称、selector class / route、ContractType 和数量语义（见 [Semantic Part 契约](semantic-part.md)）。
+- owner descriptor 只包含 §1 的 9 个 Part，字段值与本文一致（`tests/AtomUI.Desktop.Controls.Tests/PopupConfirm/PopupConfirmSemanticPartTests.cs`）。
+- `PopupConfirmContainerTheme.axaml` 静态声明 4 个确认体 marker；`PopupConfirmTheme.axaml` 不声明任何
+  弹层 marker；两者默认主题均不消费 `.semantic-*` selector。
+- 运行时解析：钉住打开后 8 个 `popup.*` 各落在正确的跨视觉根节点（弹层框体件在 `FlyoutPresenter` 子树，
+  确认体件在 `PopupConfirmContainer` 子树）。
+- 生成的 `PopupConfirmPopupXxxStyle` 可编译并实例化（`Style` 派生类型），且经 `>>` 后代路由命中代码创建的
+  跨视觉根弹层节点。
+- Gallery Semantic Parts Tab 延迟创建 Preview，弹层钉住常开，9 个 Part 均可解析高亮（跨视觉根弹层根由
+  `SemanticPartPreview.AdditionalRoots` 显式注册）。
+- descriptor、生成 Style 与 NativeAOT 路径使用编译期生成数据，不依赖运行时反射或 VisualTree 扫描。

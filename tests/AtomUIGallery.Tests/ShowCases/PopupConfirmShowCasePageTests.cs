@@ -1,8 +1,20 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using AtomUI.Controls;
+using AtomUI.Desktop.Controls;
+using AtomUI.Toolkits.GalleryBase.Controls;
+using AtomUIGallery.ShowCases.PopupConfirm;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
+using ReactiveUI;
 using Shouldly;
 using Xunit;
+using AtomFlyoutPresenter = AtomUI.Desktop.Controls.FlyoutPresenter;
+using AtomPopupConfirm = AtomUI.Desktop.Controls.PopupConfirm;
+using AtomUIWindow = AtomUI.Desktop.Controls.Window;
 
 namespace AtomUIGallery.Tests.ShowCases;
 
@@ -26,7 +38,7 @@ public class PopupConfirmShowCasePageTests
         source.ShouldNotContain("Tag=\"Examples\"");
         source.ShouldNotContain("Tag=\"Api\"");
         source.ShouldNotContain("Tag=\"DesignToken\"");
-        source.ShouldContain("<gallery:GalleryStickyTabsHost");
+        source.ShouldContain("<gallery:GalleryShowCaseHost");
         source.ShouldContain("StickyContentPadding=\"28,0,28,0\"");
         source.ShouldNotContain("<atom:TabStrip Name=\"ScenarioTabs\"");
         source.ShouldNotContain("<ContentControl Name=\"ScenarioContentHost\">");
@@ -36,18 +48,83 @@ public class PopupConfirmShowCasePageTests
         source.ShouldContain("InitialDeferredLoadItemCount=\"4\"");
         source.ShouldContain("DeferredLoadBatchSize=\"2\"");
         source.ShouldContain("ContentMargin=\"28,10,28,28\"");
-        CountShowCaseItemElements(source).ShouldBe(4);
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(4);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(4);
-        CountOccurrences(source, "DataTemplate x:DataType=\"viewModels:PopupConfirmViewModel\"").ShouldBe(4);
+        CountShowCaseItemElements(source).ShouldBe(5);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(5);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(5);
+        // 5 个示例 DataTemplate + 1 个 SemanticPartsContentTemplate DataTemplate。
+        CountOccurrences(source, "DataTemplate x:DataType=\"viewModels:PopupConfirmViewModel\"").ShouldBe(6);
         source.ShouldContain("PopupConfirmShowCaseLangResource BasicUsageTitle");
         source.ShouldContain("PopupConfirmShowCaseLangResource PlacementTitle");
+        // Placement 的 5x5 网格需要整行宽度，否则会被压缩进半宽列。
+        CountOccurrences(source, "IsOccupyEntireRow=\"True\"").ShouldBe(1);
         source.ShouldContain("PopupConfirmShowCaseLangResource CustomizeIconTitle");
         source.ShouldContain("Icon=\"{antdicons:AntDesignIconProvider Kind=QuestionCircleOutlined}\"");
         source.ShouldNotContain("<atom:TabControl");
         source.ShouldNotContain("<atom:TabItem");
         source.ShouldNotContain("<atom:DataGrid");
         source.ShouldNotContain(">Gallery<");
+    }
+
+    [Fact]
+    public void PopupConfirm_ShowCase_Declares_Antd_Aligned_Semantic_Preview()
+    {
+        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/PopupConfirm/Views/PopupConfirmShowCase.axaml");
+
+        source.ShouldContain("SemanticOwnerType=\"{x:Type atom:PopupConfirm}\"");
+        source.ShouldContain("Name=\"PopupConfirmSemanticOwner\"");
+        source.ShouldContain("IsPopupPinnedOpen=\"True\"");
+        source.ShouldContain("IsArrowVisible=\"True\"");
+        // antd Popconfirm 语义槽位对齐：root / container / icon / title / content / arrow；
+        // 上游 content（描述）在 AtomUI 映射为 popup.description，按钮区以 popup.actions 发布。
+        source.ShouldContain("Path=\"root\"");
+        source.ShouldContain("Path=\"popup.root\"");
+        source.ShouldContain("Path=\"popup.container\"");
+        source.ShouldContain("Path=\"popup.content\"");
+        source.ShouldContain("Path=\"popup.arrow\"");
+        source.ShouldContain("Path=\"popup.icon\"");
+        source.ShouldContain("Path=\"popup.title\"");
+        source.ShouldContain("Path=\"popup.description\"");
+        source.ShouldContain("Path=\"popup.actions\"");
+        source.ShouldContain("Loaded=\"HandleSemanticPreviewLoaded\"");
+        source.ShouldContain("Unloaded=\"HandleSemanticPreviewUnloaded\"");
+    }
+
+    [Fact]
+    public void PopupConfirm_ShowCase_StyleClass_Example_Is_Deferred_Scoped_And_Versioned()
+    {
+        var source       = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/PopupConfirm/Views/PopupConfirmShowCase.axaml");
+        var localization = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/PopupConfirm/Localization/en-US.xlf");
+
+        source.ShouldContain("SourceKey=\"popupconfirm-semantic-part\"");
+        source.ShouldContain("BadgeText=\"{x:Static gallery:GalleryVersionInfo.DisplayVersion}\"");
+        source.ShouldContain("PopupConfirmShowCaseLangResource StyleClassTitle");
+        source.ShouldContain("PopupConfirmShowCaseLangResource StyleClassDescription");
+        source.ShouldContain("Classes=\"semantic-styles-object-demo\"");
+        source.ShouldContain("Classes=\"semantic-styles-function-demo\"");
+        source.ShouldContain("Selector=\"atom|PopupConfirm.semantic-styles-object-demo\"");
+        source.ShouldContain("Selector=\"atom|PopupConfirm.semantic-styles-function-demo\"");
+        source.ShouldContain("<atom:PopupConfirmPopupContainerStyle x:SetterTargetType=\"Border\">");
+        source.ShouldContain("<atom:PopupConfirmPopupRootStyle x:SetterTargetType=\"atom:FlyoutPresenter\">");
+        source.ShouldContain("<atom:PopupConfirmPopupTitleStyle x:SetterTargetType=\"TextBlock\">");
+        source.ShouldContain("<atom:PopupConfirmPopupActionsStyle x:SetterTargetType=\"StackPanel\">");
+        source.ShouldContain("PopupConfirmShowCaseLangResource SemanticStyleObjectTrigger");
+        source.ShouldContain("PopupConfirmShowCaseLangResource SemanticStyleFunctionTrigger");
+        source.ShouldNotContain("Loaded=\"HandleSemanticStyleDemoLoaded\"");
+        source.ShouldNotContain("Unloaded=\"HandleSemanticStyleDemoUnloaded\"");
+        CountOccurrences(source, "IsArrowVisible=\"False\"").ShouldBe(2);
+        localization.ShouldContain("<source>The PopupConfirm host itself.</source>");
+        localization.ShouldContain("<source>Root surface of the confirmation popup.</source>");
+        localization.ShouldContain("<source>Inner container carrying the popup background, border and padding.</source>");
+        localization.ShouldContain("<source>Content surface of the popup frame that hosts the confirmation body.</source>");
+        localization.ShouldContain("<source>Arrow indicator pointing to the anchor.</source>");
+        localization.ShouldContain("<source>Confirmation status icon, colored by ConfirmStatus.</source>");
+        localization.ShouldContain("<source>Confirmation title.</source>");
+        localization.ShouldContain("<source>Confirmation description text.</source>");
+        localization.ShouldContain("<source>Confirm and cancel action row.</source>");
+        localization.ShouldContain("<source>Object text</source>");
+        localization.ShouldContain("<source>Object Style</source>");
+        localization.ShouldContain("<source>Function text</source>");
+        localization.ShouldContain("<source>Function Style</source>");
     }
 
     [Fact]
@@ -59,6 +136,40 @@ public class PopupConfirmShowCasePageTests
         var normalized = NormalizeMarkup(ExtractPopupConfirmExampleItems(source));
         CountShowCaseItemElements(normalized).ShouldBe(ReadSnapshotCount(approved));
         ComputeSha256(normalized).ShouldBe(ReadSnapshotHash(approved));
+    }
+
+    [Fact]
+    public void PopupConfirm_Semantic_Preview_Registers_The_CodeCreated_Popup_Root()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+
+        var page = new PopupConfirmShowCase
+        {
+            DataContext = new PopupConfirmViewModel(new TestScreen())
+        };
+
+        ShowInWindow(page, 1280, 900, () =>
+        {
+            var host = page.GetVisualDescendants().OfType<GalleryShowCaseHost>().Single();
+            host.SelectedTab = GalleryShowCaseTab.SemanticParts;
+            Dispatcher.UIThread.RunJobs();
+            page.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            var preview = page.GetVisualDescendants()
+                              .OfType<SemanticPartPreview>()
+                              .Single(candidate => candidate.Name == "PopupConfirmSemanticPreview");
+            var owner = preview.PreviewContent.ShouldBeOfType<AtomPopupConfirm>();
+            owner.Name.ShouldBe("PopupConfirmSemanticOwner");
+            owner.Flyout.ShouldNotBeNull().IsOpen.ShouldBeTrue();
+
+            Dispatcher.UIThread.RunJobs();
+
+            preview.AdditionalRoots.Count.ShouldBe(
+                1,
+                "the code-created cross-visual-root popup root must be registered so popup.frame and confirmation parts resolve");
+            preview.AdditionalRoots[0].ShouldBeOfType<AtomFlyoutPresenter>();
+        });
     }
 
     private static string ExtractPopupConfirmExampleItems(string source)
@@ -148,5 +259,48 @@ public class PopupConfirmShowCasePageTests
         }
 
         return Path.Combine(AppContext.BaseDirectory, relativePath);
+    }
+
+    private static void ShowInWindow(Control content, double width, double height, Action assertion)
+    {
+        var visualLayerManager = new VisualLayerManager
+        {
+            EnableAdornerLayer = true,
+            EnableOverlayLayer = true,
+            Child              = content
+        };
+        EnablePopupOverlayLayer(visualLayerManager);
+        var window = new AtomUIWindow
+        {
+            Content = visualLayerManager,
+            Width   = width,
+            Height  = height
+        };
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            assertion();
+        }
+        finally
+        {
+            window.Close();
+            Dispatcher.UIThread.RunJobs();
+        }
+    }
+
+    private static void EnablePopupOverlayLayer(VisualLayerManager visualLayerManager)
+    {
+        var property = typeof(VisualLayerManager).GetProperty(
+            "EnablePopupOverlayLayer",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+        property.ShouldNotBeNull();
+        property.SetValue(visualLayerManager, true);
+    }
+
+    private sealed class TestScreen : IScreen
+    {
+        public RoutingState Router { get; } = new();
     }
 }
