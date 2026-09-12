@@ -28,6 +28,9 @@ public abstract class AbstractBackTopFloatButton : AbstractFloatButton
     public static readonly StyledProperty<TimeSpan> MotionDurationProperty =
         MotionAwareControlProperty.MotionDurationProperty.AddOwner<AbstractBackTopFloatButton>();
 
+    public static readonly StyledProperty<bool> IsShowProgressProperty =
+        AvaloniaProperty.Register<AbstractBackTopFloatButton, bool>(nameof(IsShowProgress));
+
     public TimeSpan ToTopDuration
     {
         get => GetValue(ToTopDurationProperty);
@@ -52,6 +55,12 @@ public abstract class AbstractBackTopFloatButton : AbstractFloatButton
         set => SetValue(MotionDurationProperty, value);
     }
 
+    public bool IsShowProgress
+    {
+        get => GetValue(IsShowProgressProperty);
+        set => SetValue(IsShowProgressProperty, value);
+    }
+
     #endregion
 
     #region 内部属性定义
@@ -59,10 +68,19 @@ public abstract class AbstractBackTopFloatButton : AbstractFloatButton
     internal static readonly StyledProperty<bool> IsActiveProperty =
         AvaloniaProperty.Register<AbstractBackTopFloatButton, bool>(nameof(IsActive));
 
+    internal static readonly StyledProperty<double> ScrollProgressProperty =
+        AvaloniaProperty.Register<AbstractBackTopFloatButton, double>(nameof(ScrollProgress));
+
     internal bool IsActive
     {
         get => GetValue(IsActiveProperty);
         set => SetValue(IsActiveProperty, value);
+    }
+
+    internal double ScrollProgress
+    {
+        get => GetValue(ScrollProgressProperty);
+        set => SetValue(ScrollProgressProperty, value);
     }
 
     #endregion
@@ -150,7 +168,17 @@ public abstract class AbstractBackTopFloatButton : AbstractFloatButton
         if (sender is AvaScrollViewer scrollViewer)
         {
             IsActive = scrollViewer.Offset.Y >= VisibilityHeight;
+            UpdateScrollProgress(scrollViewer);
         }
+    }
+
+    private void UpdateScrollProgress(AvaScrollViewer scrollViewer)
+    {
+        var maxScroll = Math.Max(scrollViewer.Extent.Height - scrollViewer.Viewport.Height, 0d);
+        var progress  = maxScroll > 0d
+            ? Math.Clamp(scrollViewer.Offset.Y / maxScroll, 0d, 1d)
+            : 0d;
+        SetCurrentValue(ScrollProgressProperty, progress);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -159,6 +187,7 @@ public abstract class AbstractBackTopFloatButton : AbstractFloatButton
         if (Target != null)
         {
             IsActive = Target.Offset.Y >= VisibilityHeight;
+            UpdateScrollProgress(Target);
         }
     }
 

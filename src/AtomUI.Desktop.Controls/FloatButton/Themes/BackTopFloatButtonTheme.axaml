@@ -2,6 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:atom="https://atomui.net"
+    xmlns:atomc="https://atomui.net/common-controls"
     x:ClassModifier="internal">
     <ControlTheme x:Key="{x:Type atom:BackTopFloatButton}" TargetType="atom:BackTopFloatButton">
         <ControlTheme.BasedOn>
@@ -32,6 +33,9 @@
                                                       IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}" />
                                 </StackPanel>
                             </Border>
+                            <atomc:BackTopProgressRing Name="ProgressRing"
+                                                        Progress="{TemplateBinding ScrollProgress}"
+                                                        CornerRadius="{TemplateBinding CornerRadius}" />
                             <Canvas Name="BadgeLayout" />
                         </Panel>
                     </atom:MotionActor>
@@ -58,6 +62,9 @@
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center" />
                             </Border>
+                            <atomc:BackTopProgressRing Name="ProgressRing"
+                                                        Progress="{TemplateBinding ScrollProgress}"
+                                                        CornerRadius="{TemplateBinding CornerRadius}" />
                             <Canvas Name="BadgeLayout" />
                         </Panel>
                     </atom:MotionActor>
@@ -67,6 +74,18 @@
         
         <Setter Property="MotionDuration" Value="{atom:SharedTokenResource MotionDurationMid}" />
         <Setter Property="IsActive" Value="True" />
-        
+
+        <Style Selector="^ /template/ atomc|BackTopProgressRing#ProgressRing">
+            <!-- 默认隐藏：由 IsShowProgress=True 的下述选择器置 True（后序样式覆盖先序） -->
+            <Setter Property="IsVisible" Value="False" />
+            <Setter Property="StrokeThickness" Value="{atom:SharedTokenResource LineWidthBold}" />
+            <Setter Property="TrackBrush" Value="{atom:SharedTokenResource ColorBorderSecondary}" />
+            <Setter Property="IndicatorBrush" Value="{atom:SharedTokenResource ColorPrimary}" />
+        </Style>
+
+        <Style Selector="^[IsShowProgress=True] /template/ atomc|BackTopProgressRing#ProgressRing">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
     </ControlTheme>
 </ResourceDictionary>
