@@ -215,14 +215,14 @@ internal static class Program
             ["message"] = new(
                 "MessageShowCase",
                 MessageViewModel.ID,
-                "AtomUIGallery.ShowCases.Views.MessageShowCase",
-                "controlgallery/AtomUIGallery/ShowCases/Views/Feedback/MessageShowCase.axaml",
+                "AtomUIGallery.ShowCases.Message.MessageShowCase",
+                "controlgallery/AtomUIGallery/ShowCases/Feedback/Message/Views/MessageShowCase.axaml",
                 stats => stats.ShowCaseItemCount >= 4 && stats.ButtonCount >= 7),
             ["notification"] = new(
                 "NotificationShowCase",
                 NotificationViewModel.ID,
-                "AtomUIGallery.ShowCases.Views.NotificationShowCase",
-                "controlgallery/AtomUIGallery/ShowCases/Views/Feedback/NotificationShowCase.axaml",
+                "AtomUIGallery.ShowCases.Notification.NotificationShowCase",
+                "controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml",
                 stats => stats.ShowCaseItemCount >= 6 && stats.ButtonCount >= 14),
             ["alert"] = new(
                 "AlertShowCase",
