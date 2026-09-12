@@ -16,7 +16,7 @@ using Avalonia.VisualTree;
 namespace AtomUI.Desktop.Controls;
 
 [PseudoClasses(StdPseudoClass.Error, StdPseudoClass.Information, StdPseudoClass.Success, StdPseudoClass.Warning)]
-public class NotificationCard : ContentControl, IMotionAwareControl
+public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackStackItem
 {
     internal const double AnimationMaxOffsetY = 150d;
     internal const double AnimationMaxOffsetX = 500d;
@@ -150,8 +150,9 @@ public class NotificationCard : ContentControl, IMotionAwareControl
     #endregion
 
     private bool _isClosing;
+    private bool _isStackVisible = true;
     private MotionExecutionState _closeMotionState;
-    private readonly WindowNotificationManager _notificationManager;
+    private WindowNotificationManager? _notificationManager;
     private Grid? _layout;
     private IconButton? _closeButton;
     private NotificationProgressBar? _progressBar;
@@ -176,6 +177,31 @@ public class NotificationCard : ContentControl, IMotionAwareControl
         }
 
         IsClosing = true;
+    }
+
+    bool IFeedbackStackItem.IsStackVisible
+    {
+        get => _isStackVisible;
+        set => _isStackVisible = value;
+    }
+
+    bool IFeedbackStackItem.IsProgressVisible => IsShowProgress;
+
+    void IFeedbackStackItem.RequestClose()
+    {
+        Close();
+    }
+
+    void IFeedbackStackItem.UpdateRemaining(TimeSpan remaining)
+    {
+        Expiration = remaining;
+    }
+
+    internal void ReleaseOwner()
+    {
+        _notificationManager = null;
+        OnClick = null;
+        OnClose = null;
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -510,49 +536,16 @@ public class NotificationCard : ContentControl, IMotionAwareControl
         return null;
     }
 
-    internal bool NotifyCloseTick(TimeSpan cycleDuration)
-    {
-        InvalidateVisual();
-        if (Expiration is null)
-        {
-            return false;
-        }
-
-        Expiration -= cycleDuration;
-
-        if (Expiration.Value.TotalMilliseconds < 0)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     protected override void OnPointerEntered(PointerEventArgs e)
     {
         base.OnPointerEntered(e);
-        if (_notificationManager.IsPauseOnHover)
-        {
-            _notificationManager.StopExpiredTimer();
-        }
+        _notificationManager?.SetItemPaused(this, true);
     }
-    
-    protected override void OnPointerMoved(PointerEventArgs e)
-    {
-        base.OnPointerMoved(e);
-        if (_notificationManager.IsPauseOnHover)
-        {
-            _notificationManager.StopExpiredTimer();
-        }
-    }
-    
+
     protected override void OnPointerExited(PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        if (_notificationManager.IsPauseOnHover)
-        {
-            _notificationManager.StartExpiredTimer();
-        }
+        _notificationManager?.SetItemPaused(this, false);
     }
 
     private void SetupPositionPseudoClasses(NotificationPosition position)

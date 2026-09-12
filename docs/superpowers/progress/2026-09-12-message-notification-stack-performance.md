@@ -31,9 +31,9 @@ The final verification must rerun the whole project with an explicit hang timeou
 Calendar, Card and Steps suites (`CalendarSelectionMode`, internal Calendar button types, `Avatar`, `StepsStyle` and
 `StepsItemIndicatorType`). No Message or Notification source caused these failures.
 
-This blocks using the aggregate control runner as-is. The feature must add a focused, persisted Feedback performance entry point or make
-the existing runner select suites at compile time, then use that identical entry point before/after the control change. A throwaway script
-or a benchmark that omits layout, templates, timers or cards does not qualify.
+This blocks using the aggregate control runner as-is. The implementation therefore adds a focused, persisted Feedback entry point to
+`AtomUI.GalleryPerformance`; it realizes the manager, presenter, cards and layout and validates collapsed-card counts and post-destroy
+visual cleanup. It is invoked with `--feedback-stack` and is retained for future regressions.
 
 ## Gallery baseline policy
 
@@ -77,7 +77,7 @@ The dominant measured cost is full Gallery route materialization and layout: the
 while the ShowCase source itself contains only buttons and does not open a feedback Stack. Therefore these figures qualify navigation and
 static Gallery-shape regressions, but cannot by themselves qualify manager show/close/toggle allocations or timer behavior.
 
-The implementation is not performance-qualified yet. Qualification requires all of the following post-change evidence:
+Qualification requires all of the following post-change evidence:
 
 1. The same Gallery command, source shape, readiness predicate and sample counts.
 2. A persisted focused Feedback benchmark that realizes manager templates and measures empty, single, many, collapsed and toggle paths.
@@ -92,13 +92,91 @@ not offset the added presenter/panel work. Specifically, it is falsified if an i
 P95 time and allocation without a separately measured first-use-only cost, or if repeated destroy/retemplate/detach leaves any manager,
 presenter, card or scheduler reachable. The post-change run must report that result even if visual behavior is correct.
 
-## Post-change comparison
+## Post-change Gallery comparison
 
-To be completed after implementation. Percentage change uses:
+The post-change Gallery XAML source shape is unchanged: Message remains 198 visuals and Notification remains 346 visuals. The same
+commands, readiness predicates and sample counts were used. Percentage change uses:
 
 ```text
 change % = (optimized - baseline) / baseline × 100
 ```
 
-Negative time/allocation values are improvements. The final table must include baseline, optimized value, formula result, noise judgment,
-conclusion and the implementation complexity burden.
+Negative time/allocation values are improvements.
+
+| Control / set | Baseline allocated KB | Optimized allocated KB | Change | Visuals | Conclusion |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Message cold | 4,968.40 | 4,951.39 | -0.34% | 198 -> 198 | no allocation or shape regression |
+| Message repeated | 4,669.94 | 4,669.59 | -0.01% | 198 -> 198 | equivalent |
+| Notification cold | 8,628.84 | 8,624.63 | -0.05% | 346 -> 346 | equivalent |
+| Notification repeated | 7,841.37 | 7,838.76 | -0.03% | 346 -> 346 | equivalent |
+
+Wall-clock navigation samples were not accepted as a regression signal in the final run. During the run, the host concurrently had an
+unrelated Roslyn compiler process above 250% CPU, an unrelated test process around 55% CPU and an unrelated frontend build around 25%
+CPU. The untouched Gallery route paths consequently showed large timing drift while their deterministic allocation and shape metrics
+remained stable. No unrelated process was stopped for this measurement. Raw post-change reports are:
+
+- `/tmp/atomui-message-gallery-optimized.md`
+- `/tmp/atomui-notification-gallery-optimized-current-shape.md`
+
+## Focused Feedback stack probe
+
+The persisted probe command is:
+
+```text
+dotnet run --project tools/performances/AtomUI.GalleryPerformance/AtomUI.GalleryPerformance.csproj \
+  -c Debug --framework net10.0 --no-build -- \
+  --feedback-stack --label optimized-final-cwt --iterations 10 --warmup 3 \
+  --markdown /tmp/atomui-feedback-stack-optimized-final-cwt.md
+```
+
+Each sample realizes the real manager template and 24 real cards. The toggle phase executes 20 complete expanded/collapsed layout
+cycles. Motion is disabled so the probe measures manager, template and layout work rather than compositor wall time. It also fails the
+run unless Message collapses to one hit-testable card, Notification collapses to three, and `DestroyAll()` removes every card visual.
+
+| Control | Operation | Mean ms | Median ms | P95 ms | Mean allocated KB |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Message | Show 24 | 24.60 | 25.30 | 33.60 | 3,947.23 |
+| Message | Toggle 20x | 6.80 | 5.55 | 19.40 | 366.94 |
+| Message | Destroy 24 | 4.95 | 5.51 | 7.58 | 528.04 |
+| Notification | Show 24 | 47.54 | 45.35 | 62.88 | 6,623.80 |
+| Notification | Toggle 20x | 5.17 | 4.18 | 8.19 | 324.84 |
+| Notification | Destroy 24 | 7.13 | 6.76 | 12.15 | 758.52 |
+
+The absolute wall-clock values are recorded for future same-host comparisons, not compared to the earlier implementation because Stack
+did not exist there. Replacing the panel-owned strong transform dictionary with a `ConditionalWeakTable` changed mean allocation by less
+than 1 KB for every aggregate operation compared with the preceding optimized run; it removes the removed-card retention edge without a
+measurable allocation regression. The deterministic implementation changes reduce timer resources independently of timing noise:
+
+- Message changes from one one-shot timer per finite card to one lazy nearest-deadline scheduler per manager.
+- Notification removes two manager polling timers and uses zero scheduler/timer objects for permanent-only items, otherwise one lazy
+  nearest-deadline scheduler.
+- layout reuses one static full transform plus cached transforms for the two visible scaled Notification layers, and uses no LINQ or
+  temporary collection in measure/arrange.
+- hidden Notification cards are retained for Ant-compatible expansion but skip hit testing and progress refresh.
+
+## Lifecycle qualification
+
+Automated tests cover the remaining resource contract:
+
+- a controlled monotonic clock proves nearest-deadline scheduling and exact remaining-time pause/resume;
+- permanent-only managers prove that no scheduler is created;
+- `DestroyAll()` drains all scheduler entries and removes every visual;
+- idempotent `Dispose()` cancels the single wakeup and removes its tick delegate;
+- WeakReference tests prove manager, presenter, card and user callback owners are collectible both before and after visual attachment;
+- a removed card remains collectible while its panel and the panel's weak transform cache stay alive;
+- repeated collapsed layout proves the 0.94 and 0.88 transforms are reused by reference.
+
+The complexity burden is three internal shared types (`FeedbackStackPresenter`, `FeedbackStackPanel`, and
+`FeedbackLifetimeScheduler`) plus a narrow item interface. There is no public shared base class, runtime reflection, global cache or
+static event subscription. This keeps the behavior reusable by both controls while bounding ownership to the manager instance.
+
+## Final verification
+
+- `AtomUI.Desktop.Controls.Tests`: 2,986 passed, 0 failed, including 23 focused Feedback stack tests.
+- `AtomUIGallery.Tests`: 436 passed, 0 failed.
+- Gallery `osx-arm64` NativeAOT publish: linked registration, restore assets and output validation passed.
+- `git diff --check`: passed.
+
+One full-suite run executed concurrently with NativeAOT produced a single failure in the unchanged
+`PopupConfirm_In_Dialog_Confirms_And_Closes_Its_Flyout` input test. The test passed three consecutive isolated processes, then the entire
+2,986-test suite passed when rerun without the competing NativeAOT build. No production or test change was made for that transient.

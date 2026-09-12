@@ -81,7 +81,7 @@ public partial class NotificationShowCase : GalleryReactiveUserControl<Notificat
 
         manager = new WindowNotificationManager(topLevel)
         {
-            MaxItems = 3,
+            MaxItems = 0,
             Position = position
         };
         return manager;

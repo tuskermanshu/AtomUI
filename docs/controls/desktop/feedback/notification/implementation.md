@@ -25,10 +25,10 @@
 - `src/AtomUI.Desktop.Controls/Notifications/Themes/WindowNotificationManagerTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Notifications/Utils/NotificationProgressBarVisibleConverter.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/WindowNotificationManager.cs`
-- `src/AtomUI.Desktop.Controls/FeedbackStack/FeedbackStackPresenter.cs`
-- `src/AtomUI.Desktop.Controls/FeedbackStack/FeedbackStackPanel.cs`
-- `src/AtomUI.Desktop.Controls/FeedbackStack/FeedbackLifetimeScheduler.cs`
-- `src/AtomUI.Desktop.Controls/FeedbackStack/IFeedbackStackItem.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPresenter.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPanel.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackLifetimeScheduler.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/IFeedbackStackItem.cs`
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`
 
 职责边界：

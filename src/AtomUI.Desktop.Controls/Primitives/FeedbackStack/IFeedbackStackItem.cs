@@ -1,11 +1,12 @@
 namespace AtomUI.Desktop.Controls;
 
+/// <summary>Internal lifecycle contract shared by transient feedback surfaces.</summary>
 internal interface IFeedbackStackItem
 {
     bool IsClosing { get; }
     bool IsClosed { get; }
     bool IsProgressVisible { get; }
-    bool IsStackVisible { get; }
+    bool IsStackVisible { get; set; }
 
     void RequestClose();
     void UpdateRemaining(TimeSpan remaining);

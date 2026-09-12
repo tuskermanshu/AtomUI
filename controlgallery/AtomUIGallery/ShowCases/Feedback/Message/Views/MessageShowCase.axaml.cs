@@ -128,7 +128,8 @@ public partial class MessageShowCase : GalleryReactiveUserControl<MessageViewMod
 
         _messageManager = new WindowMessageManager(topLevel)
         {
-            MaxItems = 10
+            MaxItems = 0,
+            IsStackEnabled = true
         };
         return _messageManager;
     }

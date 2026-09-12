@@ -52,7 +52,7 @@ internal sealed class MessageCardToken : AbstractControlDesignToken
              EffectiveGlobalToken.FontSize * EffectiveGlobalToken.RelativeLineHeight) / 2,
             EffectiveGlobalToken.UniformlyPaddingXS);
         MessageIconMargin = new Thickness(0, 0, EffectiveGlobalToken.UniformlyMarginXS, 0);
-        MessageTopMargin  = new Thickness(EffectiveGlobalToken.UniformlyMargin, EffectiveGlobalToken.UniformlyMargin, EffectiveGlobalToken.UniformlyMargin, 0);
+        MessageTopMargin  = new Thickness(EffectiveGlobalToken.UniformlyMarginXS);
         MessageIconSize   = EffectiveGlobalToken.FontSizeSM * EffectiveGlobalToken.RelativeLineHeightSM;
     }
     

@@ -6,18 +6,89 @@
     <ControlTheme x:Key="{x:Type atom:WindowMessageManager}" TargetType="atom:WindowMessageManager">
         <Setter Property="Template">
             <ControlTemplate>
-                <ReversibleStackPanel Name="PART_Items" />
+                <Grid Name="PART_StackHost" ClipToBounds="False">
+                    <Border Name="PART_SecondBackplate"
+                            Width="{Binding SecondBackplateWidth, ElementName=PART_Items}"
+                            Height="16"
+                            Margin="{Binding SecondBackplateMargin, ElementName=PART_Items}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            IsVisible="{Binding IsSecondBackplateVisible, ElementName=PART_Items}"
+                            IsHitTestVisible="False"
+                            Background="{atom:MessageCardTokenResource ContentBg}"
+                            BoxShadow="{atom:SharedTokenResource BoxShadowsTertiary}"
+                            CornerRadius="{atom:SharedTokenResource BorderRadiusLG}">
+                        <Border.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Width" Duration="0:0:0.3" />
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.1" />
+                                <ThicknessTransition Property="Margin" Duration="0:0:0.1" />
+                            </Transitions>
+                        </Border.Transitions>
+                    </Border>
+                    <Border Name="PART_FirstBackplate"
+                            Width="{Binding FirstBackplateWidth, ElementName=PART_Items}"
+                            Height="16"
+                            Margin="{Binding FirstBackplateMargin, ElementName=PART_Items}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            IsVisible="{Binding IsFirstBackplateVisible, ElementName=PART_Items}"
+                            IsHitTestVisible="False"
+                            Background="{atom:MessageCardTokenResource ContentBg}"
+                            BoxShadow="{atom:SharedTokenResource BoxShadowsTertiary}"
+                            CornerRadius="{atom:SharedTokenResource BorderRadiusLG}">
+                        <Border.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Width" Duration="0:0:0.3" />
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.1" />
+                                <ThicknessTransition Property="Margin" Duration="0:0:0.1" />
+                            </Transitions>
+                        </Border.Transitions>
+                    </Border>
+                    <atom:FeedbackStackPresenter Name="PART_Items" />
+                </Grid>
             </ControlTemplate>
         </Setter>
 
         <Setter Property="IsMotionEnabled" Value="{atom:SharedTokenResource EnableMotion}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
 
-        <Style Selector="^:topcenter">
-            <Style Selector="^ /template/ ReversibleStackPanel#PART_Items">
-                <Setter Property="ReverseOrder" Value="True"/>
-                <Setter Property="HorizontalAlignment" Value="Center"/>
-                <Setter Property="VerticalAlignment" Value="Top"/>
-            </Style>
+        <Style Selector="^[Position=TopLeft] /template/ Grid#PART_StackHost">
+            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+        <Style Selector="^[Position=TopCenter] /template/ Grid#PART_StackHost">
+            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+        <Style Selector="^[Position=TopRight] /template/ Grid#PART_StackHost">
+            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+        <Style Selector="^[Position=BottomLeft] /template/ Grid#PART_StackHost">
+            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+        <Style Selector="^[Position=BottomCenter] /template/ Grid#PART_StackHost">
+            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+        <Style Selector="^[Position=BottomRight] /template/ Grid#PART_StackHost">
+            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+        <Style Selector="^[IsMotionEnabled=False] /template/ Border#PART_FirstBackplate">
+            <Setter Property="Transitions" Value="{x:Null}" />
+        </Style>
+        <Style Selector="^[IsMotionEnabled=False] /template/ Border#PART_SecondBackplate">
+            <Setter Property="Transitions" Value="{x:Null}" />
         </Style>
     </ControlTheme>
 </ResourceDictionary>

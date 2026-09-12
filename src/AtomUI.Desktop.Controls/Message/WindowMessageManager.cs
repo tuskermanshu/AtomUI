@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections.ObjectModel;
 using AtomUI.Controls;
 using Avalonia;
 using Avalonia.Controls;
@@ -7,47 +7,80 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
 
-[TemplatePart("PART_Items", typeof(Panel))]
+[TemplatePart("PART_Items", typeof(FeedbackStackPresenter))]
+[PseudoClasses(NotificationPseudoClass.TopLeft,
+    NotificationPseudoClass.TopRight,
+    NotificationPseudoClass.BottomLeft,
+    NotificationPseudoClass.BottomRight,
+    NotificationPseudoClass.TopCenter,
+    NotificationPseudoClass.BottomCenter)]
 public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAwareControl, IDisposable
 {
-    #region 公共属性定义
-
-    /// <summary>
-    /// Defines the <see cref="Position" /> property.
-    /// </summary>
     public static readonly StyledProperty<NotificationPosition> PositionProperty =
         AvaloniaProperty.Register<WindowMessageManager, NotificationPosition>(
-            nameof(Position), NotificationPosition.TopRight);
+            nameof(Position), NotificationPosition.TopCenter);
+
+    public static readonly StyledProperty<int> MaxItemsProperty =
+        AvaloniaProperty.Register<WindowMessageManager, int>(nameof(MaxItems));
+
+    public static readonly StyledProperty<bool> IsStackEnabledProperty =
+        AvaloniaProperty.Register<WindowMessageManager, bool>(nameof(IsStackEnabled));
+
+    public static readonly StyledProperty<int> StackThresholdProperty =
+        AvaloniaProperty.Register<WindowMessageManager, int>(nameof(StackThreshold), 3);
+
+    public static readonly StyledProperty<bool> IsPauseOnHoverProperty =
+        AvaloniaProperty.Register<WindowMessageManager, bool>(nameof(IsPauseOnHover), true);
 
     public static readonly StyledProperty<bool> IsMotionEnabledProperty =
         MotionAwareControlProperty.IsMotionEnabledProperty.AddOwner<WindowMessageManager>();
 
-    /// <summary>
-    /// Defines which corner of the screen notifications can be displayed in.
-    /// </summary>
-    /// <seealso cref="NotificationPosition" />
+    private readonly ObservableCollection<MessageCard> _cards = new();
+    private TopLevel? _topLevel;
+    private bool _isDisposed;
+    private Panel? _hostLayer;
+    private bool _hostLayerUsesNativeAdorner;
+    private IDisposable? _safeAreaMarginSubscription;
+    private FeedbackStackPresenter? _presenter;
+    private FeedbackLifetimeScheduler? _lifetimeScheduler;
+    private bool _isLifecyclePaused = true;
+    private bool _isStackPaused;
+    private const int MaxHostLayerRetryCount = 30;
+    private bool _hostLayerRetryScheduled;
+    private int _hostLayerRetryCount;
+
     public NotificationPosition Position
     {
         get => GetValue(PositionProperty);
         set => SetValue(PositionProperty, value);
     }
 
-    /// <summary>
-    /// Defines the <see cref="MaxItems" /> property.
-    /// </summary>
-    public static readonly StyledProperty<int> MaxItemsProperty =
-        AvaloniaProperty.Register<WindowMessageManager, int>(nameof(MaxItems), 5);
-
-    /// <summary>
-    /// Defines the maximum number of notifications visible at once.
-    /// </summary>
     public int MaxItems
     {
         get => GetValue(MaxItemsProperty);
         set => SetValue(MaxItemsProperty, value);
+    }
+
+    public bool IsStackEnabled
+    {
+        get => GetValue(IsStackEnabledProperty);
+        set => SetValue(IsStackEnabledProperty, value);
+    }
+
+    public int StackThreshold
+    {
+        get => GetValue(StackThresholdProperty);
+        set => SetValue(StackThresholdProperty, value);
+    }
+
+    public bool IsPauseOnHover
+    {
+        get => GetValue(IsPauseOnHoverProperty);
+        set => SetValue(IsPauseOnHoverProperty, value);
     }
 
     public bool IsMotionEnabled
@@ -56,27 +89,16 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
         set => SetValue(IsMotionEnabledProperty, value);
     }
 
-    #endregion
+    internal IReadOnlyList<MessageCard> Cards => _cards;
 
-    private IList? _items;
-    private TopLevel? _topLevel;
-    private bool _isDisposed;
-    private Panel? _hostLayer;
-    private bool _hostLayerUsesNativeAdorner;
-    private IDisposable? _safeAreaMarginSubscription;
-    private readonly Queue<PendingMessage> _pendingMessages = new();
-    private readonly Dictionary<MessageCard, IDisposable> _messageCloseTimers = new();
-    private const int MaxHostLayerRetryCount = 30;
-    private bool _hostLayerRetryScheduled;
-    private int _hostLayerRetryCount;
+    internal bool HasLifetimeScheduler => _lifetimeScheduler is not null;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="WindowNotificationManager" /> class.
-    /// </summary>
-    /// <param name="host">The TopLevel that will host the control.</param>
+    internal int LifetimeEntryCount => _lifetimeScheduler?.Count ?? 0;
+
+    internal bool IsLifetimePaused => _lifetimeScheduler?.IsAllPaused ?? _isLifecyclePaused;
+
     public WindowMessageManager(TopLevel? host)
     {
-
         if (host is not null)
         {
             _topLevel = host;
@@ -92,200 +114,222 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
-        base.OnApplyTemplate(e);
+        if (_presenter is not null)
+        {
+            _presenter.StackHoverChanged -= OnStackHoverChanged;
+            _presenter.ItemsSource = null;
+        }
 
-        var itemsControl = e.NameScope.Find<Panel>("PART_Items");
-        _items = itemsControl?.Children;
-        FlushPendingMessages();
+        base.OnApplyTemplate(e);
+        _presenter = e.NameScope.Find<FeedbackStackPresenter>("PART_Items");
+        if (_presenter is not null)
+        {
+            _presenter[!FeedbackStackPresenter.PositionProperty] = this[!PositionProperty];
+            _presenter[!FeedbackStackPresenter.IsStackEnabledProperty] = this[!IsStackEnabledProperty];
+            _presenter[!FeedbackStackPresenter.StackThresholdProperty] = this[!StackThresholdProperty];
+            _presenter.StackMode = FeedbackStackMode.Message;
+            _presenter.ItemsSource = _cards;
+            _presenter.StackHoverChanged += OnStackHoverChanged;
+        }
+        UpdatePseudoClasses(Position);
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _isLifecyclePaused = false;
+        UpdateSchedulerPauseState();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        _isLifecyclePaused = true;
+        UpdateSchedulerPauseState();
         base.OnDetachedFromVisualTree(e);
-        _items?.Clear();
     }
 
-    /// <summary>
-    /// Shows a Notification
-    /// </summary>
-    /// <param name="message">the content of the message</param>
-    /// <param name="classes">style classes to apply</param>
     public void Show(IMessage message, string[]? classes = null)
     {
         Dispatcher.VerifyAccess();
-
         if (_isDisposed)
         {
             return;
         }
 
-        if (_items is null)
+        var card = new MessageCard
         {
-            _pendingMessages.Enqueue(new PendingMessage(message, classes));
-            ApplyTemplate();
-            return;
-        }
-
-        ShowCore(message, classes);
-    }
-
-    private void ShowCore(IMessage message, string[]? classes)
-    {
-        var messageControl = new MessageCard
-        {
-            Icon        = message.Icon,
-            Message     = message.Content,
-            MessageType = message.Type
+            Icon = message.Icon,
+            Message = message.Content,
+            MessageType = message.Type,
+            OnClose = message.OnClose,
+            HoverChanged = OnCardHoverChanged
         };
-        messageControl[!MessageCard.IsMotionEnabledProperty] = this[!IsMotionEnabledProperty];
-        
-        // Add style classes if any
-        if (classes?.Length > 0)
+        card[!MessageCard.IsMotionEnabledProperty] = this[!IsMotionEnabledProperty];
+        if (classes is not null)
         {
-            foreach (var cls in classes)
+            for (var i = 0; i < classes.Length; i++)
             {
-                messageControl.Classes.Add(cls);
+                card.Classes.Add(classes[i]);
             }
         }
 
-        messageControl.OnClose = message.OnClose;
-        messageControl.MessageClosed += OnMessageClosed;
-
-        Dispatcher.Post(() =>
+        card.MessageClosed += OnMessageClosed;
+        _cards.Add(card);
+        if (message.Expiration > TimeSpan.Zero)
         {
-            if (_items is null || _isDisposed)
-            {
-                return;
-            }
+            var scheduler = _lifetimeScheduler ??= new FeedbackLifetimeScheduler();
+            scheduler.Register(card, message.Expiration);
+            UpdateSchedulerPauseState();
+        }
+        RemoveExcessMessages();
+    }
 
-            _items.Add(messageControl);
-            RemoveExcessMessages();
-        });
-
-        // Auto-close after expiration time
-        if (message.Expiration != TimeSpan.Zero)
+    public void DestroyAll()
+    {
+        Dispatcher.VerifyAccess();
+        for (var i = _cards.Count - 1; i >= 0; i--)
         {
-            _messageCloseTimers[messageControl] = DispatcherTimer.RunOnce(messageControl.Close, message.Expiration);
+            var card = _cards[i];
+            _lifetimeScheduler?.Remove(card);
+            card.Close();
         }
     }
 
-    private void FlushPendingMessages()
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
-        if (_items is null || _isDisposed)
+        base.OnPropertyChanged(change);
+        if (change.Property == PositionProperty)
         {
-            return;
+            UpdatePseudoClasses(change.GetNewValue<NotificationPosition>());
         }
+        else if (change.Property == IsPauseOnHoverProperty && !change.GetNewValue<bool>())
+        {
+            _isStackPaused = false;
+            UpdateSchedulerPauseState();
+            for (var i = 0; i < _cards.Count; i++)
+            {
+                _lifetimeScheduler?.SetPaused(_cards[i], false);
+            }
+        }
+        else if (change.Property == IsStackEnabledProperty && !change.GetNewValue<bool>())
+        {
+            _isStackPaused = false;
+            UpdateSchedulerPauseState();
+        }
+    }
 
-        while (_pendingMessages.Count > 0)
+    private void OnCardHoverChanged(IFeedbackStackItem item, bool isPointerOver)
+    {
+        if (IsPauseOnHover)
         {
-            var pendingMessage = _pendingMessages.Dequeue();
-            ShowCore(pendingMessage.Message, pendingMessage.Classes);
+            _lifetimeScheduler?.SetPaused(item, isPointerOver);
         }
+    }
+
+    private void OnStackHoverChanged(object? sender, FeedbackStackHoverChangedEventArgs e)
+    {
+        _isStackPaused = e.IsStackInteraction && e.IsPointerOver && IsPauseOnHover;
+        UpdateSchedulerPauseState();
+        _lifetimeScheduler?.Refresh();
+    }
+
+    private void UpdateSchedulerPauseState()
+    {
+        _lifetimeScheduler?.SetAllPaused(_isLifecyclePaused || _isStackPaused);
     }
 
     private void OnMessageClosed(object? sender, RoutedEventArgs e)
     {
-        if (sender is MessageCard card)
+        if (sender is not MessageCard card)
         {
-            if (_messageCloseTimers.Remove(card, out var closeTimer))
-            {
-                closeTimer.Dispose();
-            }
-            card.OnClose?.Invoke();
-            _items?.Remove(card);
+            return;
+        }
+
+        _lifetimeScheduler?.Remove(card);
+        card.MessageClosed -= OnMessageClosed;
+        card.HoverChanged = null;
+        _cards.Remove(card);
+        var callback = card.OnClose;
+        card.OnClose = null;
+        try
+        {
+            callback?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            System.Diagnostics.Debug.WriteLine($"Message close callback failed: {exception.Message}");
         }
     }
 
-    /// <summary>
-    /// Removes excess messages when the count exceeds MaxItems.
-    /// </summary>
     private void RemoveExcessMessages()
     {
-        var visibleCount = 0;
-        foreach (var item in _items!)
+        if (MaxItems <= 0)
         {
-            if (item is MessageCard { IsClosing: false })
+            return;
+        }
+
+        var activeCount = 0;
+        for (var i = 0; i < _cards.Count; i++)
+        {
+            if (!_cards[i].IsClosing)
             {
-                visibleCount++;
+                activeCount++;
             }
         }
 
-        var excessCount = visibleCount - MaxItems;
-
-        if (excessCount > 0)
+        var excessCount = activeCount - MaxItems;
+        for (var i = 0; i < _cards.Count && excessCount > 0; i++)
         {
-            foreach (var item in _items)
+            var card = _cards[i];
+            if (card.IsClosing)
             {
-                if (item is not MessageCard { IsClosing: false } messageCard)
-                {
-                    continue;
-                }
-
-                messageCard.Close();
-                excessCount--;
-                if (excessCount == 0)
-                {
-                    break;
-                }
+                continue;
             }
+            _lifetimeScheduler?.Remove(card);
+            card.Close();
+            excessCount--;
         }
     }
-    
+
     private void InstallFromTopLevel(TopLevel topLevel)
     {
         topLevel.TemplateApplied -= TopLevelOnTemplateApplied;
         topLevel.TemplateApplied += TopLevelOnTemplateApplied;
         TryInstallHostLayer(topLevel);
-
-        // 反馈宿主层覆盖整个 TopLevel（含 CSD 装饰阴影 / 非 CSD 自绘阴影那一圈）不会跟着
-        // VisualLayerManager.Margin 内缩。给 manager 自己加 Margin 把内容收到可见客户区，
-        // 否则 Top/Center 等对齐会贴到装饰外沿、卡片漏到窗外。
         _safeAreaMarginSubscription?.Dispose();
         _safeAreaMarginSubscription = TopLevelMarginBinder.BindHostMargin(topLevel, margin => Margin = margin);
     }
 
     private void TryInstallHostLayer(TopLevel topLevel)
     {
-        _hostLayer                  = WindowFeedbackLayer.GetLayer(topLevel);
+        _hostLayer = WindowFeedbackLayer.GetLayer(topLevel);
         _hostLayerUsesNativeAdorner = false;
-
         if (_hostLayer is null)
         {
-            _hostLayer                  = AdornerLayer.GetAdornerLayer(topLevel);
+            _hostLayer = AdornerLayer.GetAdornerLayer(topLevel);
             _hostLayerUsesNativeAdorner = _hostLayer is not null;
         }
-
         if (_hostLayer is null)
         {
             ScheduleHostLayerRetry(topLevel);
             return;
         }
 
-        _hostLayerRetryCount     = 0;
+        _hostLayerRetryCount = 0;
         _hostLayerRetryScheduled = false;
         if (!_hostLayer.Children.Contains(this))
         {
             _hostLayer.Children.Add(this);
         }
-        if (_hostLayerUsesNativeAdorner)
-        {
-            AdornerLayer.SetAdornedElement(this, _hostLayer);
-        }
-        else
-        {
-            AdornerLayer.SetAdornedElement(this, null);
-        }
+        AdornerLayer.SetAdornedElement(this, _hostLayerUsesNativeAdorner ? _hostLayer : null);
     }
 
     private void ScheduleHostLayerRetry(TopLevel topLevel)
     {
-        if (_hostLayerRetryScheduled ||
-            _isDisposed ||
-            _hostLayerRetryCount >= MaxHostLayerRetryCount)
+        if (_hostLayerRetryScheduled || _isDisposed || _hostLayerRetryCount >= MaxHostLayerRetryCount)
         {
             return;
         }
-
         _hostLayerRetryScheduled = true;
         if (_hostLayerRetryCount == 0)
         {
@@ -303,17 +347,40 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
         {
             return;
         }
-
         _hostLayerRetryScheduled = false;
-        if (_isDisposed ||
-            _hostLayer is not null ||
-            !ReferenceEquals(_topLevel, topLevel))
+        if (_isDisposed || _hostLayer is not null || !ReferenceEquals(_topLevel, topLevel))
         {
             return;
         }
-
         _hostLayerRetryCount++;
         TryInstallHostLayer(topLevel);
+    }
+
+    private void TopLevelOnTemplateApplied(object? sender, TemplateAppliedEventArgs e)
+    {
+        RemoveFromHostLayer();
+        _hostLayerRetryScheduled = false;
+        _hostLayerRetryCount = 0;
+        var topLevel = (TopLevel)sender!;
+        topLevel.TemplateApplied -= TopLevelOnTemplateApplied;
+        InstallFromTopLevel(topLevel);
+    }
+
+    private void RemoveFromHostLayer()
+    {
+        _safeAreaMarginSubscription?.Dispose();
+        _safeAreaMarginSubscription = null;
+        if (_hostLayer is null)
+        {
+            return;
+        }
+        _hostLayer.Children.Remove(this);
+        if (_hostLayerUsesNativeAdorner)
+        {
+            AdornerLayer.SetAdornedElement(this, null);
+        }
+        _hostLayer = null;
+        _hostLayerUsesNativeAdorner = false;
     }
 
     public void Dispose()
@@ -322,73 +389,43 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
         {
             return;
         }
+        _isDisposed = true;
 
-        try
+        if (_topLevel is not null)
         {
-            // 卸载事件订阅
-            if (_topLevel is not null)
-            {
-                _topLevel.TemplateApplied -= TopLevelOnTemplateApplied;
-            }
-            _items?.Clear();
-            _pendingMessages.Clear();
-            foreach (var closeTimer in _messageCloseTimers.Values)
-            {
-                closeTimer.Dispose();
-            }
-            _messageCloseTimers.Clear();
-            _hostLayerRetryScheduled = false;
-            _hostLayerRetryCount = 0;
-            _safeAreaMarginSubscription?.Dispose();
-            _safeAreaMarginSubscription = null;
-            // 从宿主层中移除
-            if (_hostLayer is not null)
-            {
-                _hostLayer.Children.Remove(this);
-                if (_hostLayerUsesNativeAdorner)
-                {
-                    AdornerLayer.SetAdornedElement(this, null);
-                }
-                _hostLayer                  = null;
-                _hostLayerUsesNativeAdorner = false;
-            }
-            _topLevel   = null;
-            _items      = null;
-            _isDisposed = true;
+            _topLevel.TemplateApplied -= TopLevelOnTemplateApplied;
         }
-        catch (Exception ex)
+        if (_presenter is not null)
         {
-            System.Diagnostics.Debug.WriteLine($"Error uninstalling from TopLevel: {ex.Message}");
+            _presenter.StackHoverChanged -= OnStackHoverChanged;
+            _presenter.ItemsSource = null;
+            _presenter = null;
         }
-    }
-
-    private void RemoveFromHostLayer()
-    {
-        _safeAreaMarginSubscription?.Dispose();
-        _safeAreaMarginSubscription = null;
-        if (_hostLayer is not null)
+        _lifetimeScheduler?.Dispose();
+        _lifetimeScheduler = null;
+        for (var i = 0; i < _cards.Count; i++)
         {
-            _hostLayer.Children.Remove(this);
-            if (_hostLayerUsesNativeAdorner)
-            {
-                AdornerLayer.SetAdornedElement(this, null);
-            }
-            _hostLayer                  = null;
-            _hostLayerUsesNativeAdorner = false;
+            var card = _cards[i];
+            card.MessageClosed -= OnMessageClosed;
+            card.HoverChanged = null;
+            card.OnClose = null;
         }
-    }
-
-    private void TopLevelOnTemplateApplied(object? sender, TemplateAppliedEventArgs _)
-    {
-        RemoveFromHostLayer();
+        _cards.Clear();
+        _isLifecyclePaused = true;
+        _isStackPaused = false;
         _hostLayerRetryScheduled = false;
-        _hostLayerRetryCount     = 0;
-        
-        // Reinstall notification manager on template reapplied.
-        var topLevel = (TopLevel)sender!;
-        topLevel.TemplateApplied -= TopLevelOnTemplateApplied;
-        InstallFromTopLevel(topLevel);
+        _hostLayerRetryCount = 0;
+        RemoveFromHostLayer();
+        _topLevel = null;
     }
 
-    private readonly record struct PendingMessage(IMessage Message, string[]? Classes);
+    private void UpdatePseudoClasses(NotificationPosition position)
+    {
+        PseudoClasses.Set(NotificationPseudoClass.TopLeft, position == NotificationPosition.TopLeft);
+        PseudoClasses.Set(NotificationPseudoClass.TopRight, position == NotificationPosition.TopRight);
+        PseudoClasses.Set(NotificationPseudoClass.BottomLeft, position == NotificationPosition.BottomLeft);
+        PseudoClasses.Set(NotificationPseudoClass.BottomRight, position == NotificationPosition.BottomRight);
+        PseudoClasses.Set(NotificationPseudoClass.TopCenter, position == NotificationPosition.TopCenter);
+        PseudoClasses.Set(NotificationPseudoClass.BottomCenter, position == NotificationPosition.BottomCenter);
+    }
 }

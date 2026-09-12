@@ -146,7 +146,7 @@ Notification 与同分类控件共享尺寸、状态、Token、Gallery 展示和
 
 ### 8.1 进度与当前时长模型
 
-`CurrentExpiration` 是 scheduler 剩余时间对 NotificationCard 的单向投影，只为可见进度提供状态。卡片不能通过修改该值反向重排 scheduler deadline；隐藏、关闭、禁用进度、重套模板或 detach 时必须停止进度刷新。
+`NotificationProgressBar.CurrentExpiration` 是 scheduler 剩余时间经 NotificationCard 对进度模板的单向投影，只为可见进度提供状态。模板不能通过修改该值反向重排 scheduler deadline；隐藏、关闭、禁用进度、重套模板或 detach 时必须停止进度刷新。
 
 ### 8.2 集合与数据同步模型
 

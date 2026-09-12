@@ -18,7 +18,7 @@ namespace AtomUI.Desktop.Controls;
     MessageCardPseudoClass.Success, 
     MessageCardPseudoClass.Warning, 
     MessageCardPseudoClass.Loading)]
-public class MessageCard : TemplatedControl, IMotionAwareControl
+public class MessageCard : TemplatedControl, IMotionAwareControl, IFeedbackStackItem
 {
     internal const double AnimationMaxOffsetY = 100d;
 
@@ -118,6 +118,8 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
     /// <summary>回调：消息卡片关闭时触发，由 WindowMessageManager 设置以避免 lambda 闭包。</summary>
     internal Action? OnClose { get; set; }
 
+    internal Action<IFeedbackStackItem, bool>? HoverChanged { get; set; }
+
     internal static readonly DirectProperty<MessageCard, TimeSpan> OpenCloseMotionDurationProperty =
         AvaloniaProperty.RegisterDirect<MessageCard, TimeSpan>(nameof(OpenCloseMotionDuration),
             o => o.OpenCloseMotionDuration,
@@ -134,6 +136,7 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
     #endregion
 
     private bool _isClosing;
+    private bool _isStackVisible = true;
     private MotionExecutionState _closeMotionState;
     private BaseMotionActor? _motionActor;
     
@@ -149,6 +152,35 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
         }
 
         IsClosing = true;
+    }
+
+    bool IFeedbackStackItem.IsStackVisible
+    {
+        get => _isStackVisible;
+        set => _isStackVisible = value;
+    }
+
+    bool IFeedbackStackItem.IsProgressVisible => false;
+
+    void IFeedbackStackItem.RequestClose()
+    {
+        Close();
+    }
+
+    void IFeedbackStackItem.UpdateRemaining(TimeSpan remaining)
+    {
+    }
+
+    protected override void OnPointerEntered(Avalonia.Input.PointerEventArgs e)
+    {
+        base.OnPointerEntered(e);
+        HoverChanged?.Invoke(this, true);
+    }
+
+    protected override void OnPointerExited(Avalonia.Input.PointerEventArgs e)
+    {
+        base.OnPointerExited(e);
+        HoverChanged?.Invoke(this, false);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

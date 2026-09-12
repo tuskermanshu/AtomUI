@@ -1,7 +1,7 @@
 # Feedback 堆叠基础设施
 
 本文定义 Message 与 Notification 共用的堆叠、生命周期计时和集合呈现契约。共享实现位于
-`AtomUI.Desktop.Controls`，控件管理器继续拥有各自的 public API、内容模型、位置和关闭事件。目录入口见
+`src/AtomUI.Desktop.Controls/Primitives/FeedbackStack`，控件管理器继续拥有各自的 public API、内容模型、位置和关闭事件。目录入口见
 [Control 基础设施](overview.md)，控件入口见 [Message](../../../controls/desktop/feedback/message/overview.md) 与
 [Notification](../../../controls/desktop/feedback/notification/overview.md)。
 
@@ -130,7 +130,7 @@ margin 动画触发布局风暴。展开/折叠布局过渡为 200ms。
 3. Notification 需要可见进度时，以受控刷新节奏只更新可见且活动的进度项；没有这类项时回到最近 deadline 模式。
 4. 进入暂停状态时一次性计算并保存 remaining，取消当前唤醒；继续时从 remaining 建立新 deadline。
 5. deadline 到达后为所有已到期项发起一次关闭，并立即移除调度登记。
-6. 项关闭、`DestroyAll()`、template detach 或 manager dispose 时移除登记；登记为空时停止 timer 并解除 tick。
+6. 项关闭或 `DestroyAll()` 时移除对应登记；manager detach 时暂停唤醒，manager dispose 时清空登记、停止 timer 并解除 tick。
 
 调度器不拥有用户 delegate。manager 在关闭完成后调用一次 `OnClose`，并在 `finally` 语义下清空 delegate、卡片 owner
 引用和事件订阅。回调异常不能阻止集合与调度资源清理。
@@ -152,7 +152,7 @@ template detach 和 dispose 时直接收敛到终态并取消未完成动画。�
 | --- | --- | --- |
 | manager 安装到 TopLevel | host layer、safe-area / TopLevel 订阅 | rehost、detach、dispose |
 | `OnApplyTemplate` | 当前 presenter、pointer 与状态协作 | 下次模板应用、detach、dispose |
-| Show 有限时长项 | scheduler entry、最近 deadline 唤醒 | close、destroy、detach、dispose |
+| Show 有限时长项 | scheduler entry、最近 deadline 唤醒 | close、destroy、dispose；detach 只暂停唤醒并保留 remaining，供 reattach 继续 |
 | card 关闭接入 | closed 事件、owner 引用、用户回调 | 关闭完成；异常路径也清理 |
 | Notification 可见进度 | 进度刷新登记 | 隐藏、关闭、禁用进度、重套模板、detach、dispose |
 | 堆叠状态动效 | transform / opacity animation | 完成、状态替换、禁用 motion、detach、dispose |
@@ -195,4 +195,5 @@ Notification 的 MaxItems 默认值。除此之外，内容对象、类型枚举
 | 平台 | Desktop 与 Browser 主题语义一致；链接注册或模板类型变化通过 NativeAOT 检查 |
 
 自动化测试使用可控时钟验证剩余时间和 deadline，不依赖真实 sleep。内存测试以 `WeakReference` 和强制 GC 验证 owner
-链释放；视觉测试同时检查 Bounds、transform、opacity、IsVisible 与 hit-test，不能只断言单个伪类或最终集合数量。
+链释放以及移出 panel 的 card 不会被 transform cache 保留；视觉测试同时检查 Bounds、transform、opacity、IsVisible 与
+hit-test，不能只断言单个伪类或最终集合数量。
