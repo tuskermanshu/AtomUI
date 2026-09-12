@@ -151,6 +151,12 @@
         <target state="translated">打开自定义视图对话框</target>
       </segment>
     </unit>
+    <unit id="P2ContentOpenMessageBox">
+      <segment>
+        <source>Open MessageBox</source>
+        <target state="translated">打开 MessageBox</target>
+      </segment>
+    </unit>
     <unit id="P2ContentOpenModal">
       <segment>
         <source>Open Modal</source>
@@ -263,6 +269,12 @@
       <segment>
         <source>Native Window:</source>
         <target state="translated">原生窗口：</target>
+      </segment>
+    </unit>
+    <unit id="P2TextOverlayHost">
+      <segment>
+        <source>Overlay</source>
+        <target state="translated">浮层</target>
       </segment>
     </unit>
     <unit id="P2TextSomeContents">
@@ -385,6 +397,90 @@
         <target state="translated">示例</target>
       </segment>
     </unit>
+    <unit id="SemanticBodyDescription">
+      <segment>
+        <source>Body element: content area padding and content host.</source>
+        <target state="translated">内容元素：正文区内边距与内容承载。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticCloseDescription">
+      <segment>
+        <source>Close element: the title bar close button.</source>
+        <target state="translated">关闭元素：标题栏关闭按钮。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticContainerDescription">
+      <segment>
+        <source>Container element: dialog body frame with background, corner radius and clipping.</source>
+        <target state="translated">容器元素：对话主体框体，承载背景、圆角与裁剪。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticFooterDescription">
+      <segment>
+        <source>Footer element: action area frame with background and padding.</source>
+        <target state="translated">底部元素：操作区框体，承载背景与内边距。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticHeaderDescription">
+      <segment>
+        <source>Header element: title bar frame with background and padding.</source>
+        <target state="translated">头部元素：标题栏框体，承载背景与内边距。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticMaskDescription">
+      <segment>
+        <source>Mask element: the modal mask background and pointer hit-testing.</source>
+        <target state="translated">遮罩层元素：模态遮罩背景与指针命中。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPreviewFooterLink">
+      <segment>
+        <source>More</source>
+        <target state="translated">更多</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPreviewTitleText">
+      <segment>
+        <source>Semantic Part preview</source>
+        <target state="translated">语义部件预览</target>
+      </segment>
+    </unit>
+    <unit id="SemanticRootDescription">
+      <segment>
+        <source>Root element: the Dialog owner itself, carrying the opening intent, content, result and events.</source>
+        <target state="translated">根元素：Dialog 自身，承载打开意图、内容、结果与事件。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStageHint">
+      <segment>
+        <source>A Dialog Overlay host floats above the page instead of rendering inline; it stays pinned here so each part can be inspected.</source>
+        <target state="translated">Dialog 的 Overlay 宿主浮在页面之上而非内联渲染；这里保持常开，便于逐个检视部件。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesDescription">
+      <segment>
+        <source>Style Dialog Semantic Parts through the generated Semantic Style classes.</source>
+        <target state="translated">通过生成的 Semantic Style 类定制 Dialog 的语义部件。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesTitle">
+      <segment>
+        <source>Custom Semantic Part styling</source>
+        <target state="translated">自定义语义结构的样式</target>
+      </segment>
+    </unit>
+    <unit id="SemanticTitleDescription">
+      <segment>
+        <source>Title element: title text typography and foreground color.</source>
+        <target state="translated">标题元素：标题文字的排版与前景色。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticWrapperDescription">
+      <segment>
+        <source>Wrapper element: the surface motion and transition container.</source>
+        <target state="translated">包裹层元素：对话表面的动效与过渡容器。</target>
+      </segment>
+    </unit>
     <unit id="StaticDialogApiDescription">
       <segment>
         <source>Creating a Dialog using the static method of Dialog.</source>
@@ -397,5 +493,5 @@
         <target state="translated">静态对话框 API</target>
       </segment>
     </unit>
-  </file>
+</file>
 </xliff>

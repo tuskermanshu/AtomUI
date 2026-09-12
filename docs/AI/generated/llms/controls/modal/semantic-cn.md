@@ -4,13 +4,218 @@
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Dialog` / `MessageBox` | public 打开意图、内容、结果和事件入口。 | `IsOpen`, `OpenAsync`, `Result`, `BeforeCloseAsync` | `DialogToken` | stable |
-| `host` | Overlay presenter / native Window | 承载模态、placement、尺寸和宿主生命周期。 | `DialogHostType`, `IsModal`, `PlacementTarget` | SharedToken motion | internal-observable |
-| `surface` | `DialogSurface` | 共享标题、正文、Footer、按钮和 focus scope。 | `Content`, `StandardButtons`, `IsLoading` | `ContentBg`, padding/footer tokens | internal-observable |
-| `content` | Content / `MessageBoxContent` | 呈现任意 Dialog 内容或 MessageBox 语义内容。 | `Content`, `ContentTemplate`, `Style`, `Icon` | typography/color tokens | stable |
-| `motion` | Overlay `MotionActor` + `PART_SurfaceContentLayer` | Overlay 等待外层、前景内容和 mask 的关闭边界；Window 使用原生 Opened/Closed 边界。 | `IsMotionEnabled` | `MotionDurationMid` | internal-observable |
+Dialog 家族公开 8 个 Semantic Part，`root` 由生成器隐式加入（不要求 `.semantic-root`）。语义 owner 是 public 的
+`Dialog` 控件本身；`MessageBox : Dialog` 复用同一 `DialogSurface` 视觉树，因此单独声明同一组 Part（生成器按 public
+Control 生成 descriptor，不继承基类 descriptor，先例：`SimplePagination` 对 `Pagination`）。
+
+`Dialog` **没有 `ControlTemplate`**（`DialogTheme.axaml` 只定义默认属性与 `IsModal` 状态），全部视觉节点位于运行时
+创建并附加到 `DialogOverlayLayer` 或原生 `DialogWindow` 的 `DialogSurface` / `OverlayDialogPresenter` /
+`OverlayDialogHeader` 模板中。因此全部 Part 声明 `RuntimeCreated=true`、`CrossVisualRoot=true`、
+`CrossNestedOwners=true`，路由以 `>>` 从 owner 直接定位 marker 节点（先例：Drawer 的运行时容器部件）。
+
+与上游 Modal 语义 DOM（`_semantic.tsx`，9 个槽位）的映射：
+
+| 上游槽位 | 上游 since | AtomUI 部件 | 说明 |
+| --- | --- | --- | --- |
+| `root` | 6.0.0 | `root`（隐式，owner 契约） | 上游 `.ant-modal-root` 是最外层容器；AtomUI 遵循系统契约 root=owner 控件，上游 root 对应内部 `DialogOverlayLayer`/presenter 基础设施，不作为部件暴露。 |
+| `mask` | 5.13.0 | `mask` | 一一对应；`IsModal=false` 或 Window 宿主时不物化（Optional）。 |
+| `container` | 6.0.0 | `container` | 一一对应（`Border#Frame`：背景、圆角、`ClipToBounds`）。上游同一节点的 `boxShadow`/`padding` 在 AtomUI 分属其他节点，见 §5.1。 |
+| `wrapper` | 5.13.0 | `wrapper` | 角色对应：上游是动画/滚动包裹层，AtomUI 由 `PART_SurfaceMotionActor` 承担。几何差异见 §5.2。 |
+| `header` | 5.13.0 | `header` | 一一对应（`Border#HeaderFrame`：背景、内边距）。 |
+| `title` | 6.0.0 | `title` | 一一对应（`TextBlock#Title`）。 |
+| `body` | 5.13.0 | `body` | 一一对应（`Border#ContentFrame`：正文内边距与内容承载）。 |
+| `footer` | 5.13.0 | `footer` | 一一对应（`Border#FooterFrame`：背景、内边距、外边距）。节点恒存在，`IsFooterVisible=false` 时仅隐藏（Single）。 |
+| `close` | 6.4.0 | `close` | 一一对应（`PART_CloseButton`）。节点恒存在，`IsClosable=false` 时仅隐藏（Single）。 |
+
+Part 明细：
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `MessageBox` / `root` |
+| Selector | 不适用（root 无 `.semantic-root`） |
+| SelectorRoute | 不适用 |
+| Style Type | 不生成（`root` descriptor 的 `StyleType` 为 `null`） |
+| ContractType | owner 自身类型 |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot | 不适用（owner 本身） |
+| AtomUI 节点 | `Dialog` / `MessageBox` 实例（零尺寸状态持有控件，`DialogTheme.axaml` 未定义模板） |
+| 职责 | public 打开意图、内容、结果、按钮与事件入口 |
+| 相关 API | `IsOpen`、`OpenAsync`、`Content`、`Result`、`BeforeCloseAsync`、`DialogHostType` |
+| 相关 Token | `DialogToken`（背景、文字、间距、尺寸） |
+| Customization | Root |
+| Stability | stable |
+
+#### `mask`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `mask` |
+| Selector | `.semantic-mask` |
+| SelectorRoute | `>> .semantic-scope-mask /template/ .semantic-mask` |
+| Style Type | `AtomUI.Theme.Styling.DialogMaskStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogMaskTheme.axaml` 的 `Border#Frame`（静态 marker） |
+| 职责 | modal 遮罩：`ColorBgMask` 背景、`CornerRadius`、指针命中与 fade motion 的视觉承载体 |
+| 相关 API | `IsModal`、`IsMaskClosable` |
+| 相关 Token | `ColorBgMask`、`MotionDurationMid` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `wrapper`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `wrapper` |
+| Selector | `.semantic-wrapper` |
+| SelectorRoute | `>> .semantic-scope-presenter > .semantic-wrapper` |
+| Style Type | `AtomUI.Theme.Styling.DialogWrapperStyle` |
+| ContractType | `Avalonia.Controls.Control` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogPresenterTheme.axaml` 的 `MotionActor#PART_SurfaceMotionActor`（静态 marker） |
+| 职责 | Surface 动画/过渡包裹层；承载 opening/closing motion 的视觉宿主 |
+| 相关 API | `IsMotionEnabled` |
+| 相关 Token | `MotionDurationMid` |
+| Customization | Selector |
+| Stability | stable（几何语义见 §5.2） |
+
+#### `container`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `container` |
+| Selector | `.semantic-container` |
+| SelectorRoute | `>> .semantic-scope-frame-host > .semantic-container` |
+| Style Type | `AtomUI.Theme.Styling.DialogContainerStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#Frame`（静态 marker） |
+| 职责 | 对话主体框体：`ContentBg` 背景、`BorderRadiusLG` 圆角、子内容裁剪 |
+| 相关 API | `DialogHostType`（Overlay 圆角 / Window 方角） |
+| 相关 Token | `ContentBg`、`BorderRadiusLG` |
+| Customization | Selector |
+| Stability | stable（阴影归属见 §5.1） |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-header` |
+| Style Type | `AtomUI.Theme.Styling.DialogHeaderStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `Border#HeaderFrame`（静态 marker） |
+| 职责 | 标题区框体：`HeaderBg` 背景与 `HeaderPadding` 内边距 |
+| 相关 API | `Title`、`TitleIcon`、`IsClosable`、`IsMaximizable`、`IsDragMovable` |
+| 相关 Token | `HeaderBg`、`HeaderPadding`、`HeaderMarginBottom` |
+| Customization | Selector |
+| Stability | stable（与上游 header 的几何差异见 §5.3） |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-title` |
+| Style Type | `AtomUI.Theme.Styling.DialogTitleStyle` |
+| ContractType | `Avalonia.Controls.TextBlock` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `TextBlock#Title`（静态 marker） |
+| 职责 | 标题文字排版与前景色 |
+| 相关 API | `Title` |
+| 相关 Token | `HeaderFontSize`、`FontWeightStrong`、`HeaderColor` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-body` |
+| Style Type | `AtomUI.Theme.Styling.DialogBodyStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#ContentFrame`（静态 marker） |
+| 职责 | 正文区域：`ContentPadding` 内边距、内容裁剪与 loading 骨架宿主边界 |
+| 相关 API | `Content`、`ContentTemplate`、`IsLoading` |
+| 相关 Token | `ContentPadding`、`LoadingIndicatorMargin` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `footer` |
+| Selector | `.semantic-footer` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-footer` |
+| Style Type | `AtomUI.Theme.Styling.DialogFooterStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#FooterFrame`（静态 marker） |
+| 职责 | 底部操作区框体：`FooterBg` 背景、`FooterPadding` 内边距、`FooterMarginTop` 外边距；不承诺内部按钮布局 |
+| 相关 API | `IsFooterVisible`、`StandardButtons`、`CustomButtons` |
+| 相关 Token | `FooterBg`、`FooterPadding`、`FooterMarginTop` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `close`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `close` |
+| Selector | `.semantic-close` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-close` |
+| Style Type | `AtomUI.Theme.Styling.DialogCloseStyle` |
+| ContractType | `Avalonia.Controls.Button` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `DialogCaptionButton#PART_CloseButton`（静态 marker） |
+| 职责 | 标题栏关闭入口的按钮视觉（前景、尺寸、hover/pressed 反馈） |
+| 相关 API | `IsClosable` |
+| 相关 Token | `CloseBtnSize`、`IconSize`、`HeaderColor` |
+| Customization | Selector |
+| Stability | stable（与上游绝对定位 close 的差异见 §5.4） |
+
+#### MessageBox
+
+`MessageBox` 是 `Dialog` 的语义专化，复用同一 `DialogSurface`/`OverlayDialogHeader` 模板，因此公开与 `Dialog`
+完全相同的 8 个 Part（节点、`SelectorClass`、`SelectorRoute`、`ContractType`、`Cardinality` 一致），但 descriptor 归属
+`MessageBox` 自身类型，生成 `MessageBox<Part>Style` 类型（如 `MessageBoxContainerStyle`）。`MessageBox` 的
+`MessageBoxContent`（图标 + 内容组合）属于 `body` 的内容，不是独立 Part。
+
+### 1.1 路由精度与 `.semantic-scope-*` 锚点
+
+Dialog body 内嵌 `Skeleton`（加载态常驻），用户内容还常包含 `Card`、`Tooltip`、`Spin` 等语义 owner，它们同样发布
+`semantic-header`/`semantic-title`/`semantic-body`/`semantic-footer`/`semantic-container` 等同名 `SelectorClass`。
+宽泛 `>>` descendant 会把这些嵌套部件一并命中（系统文档 §3.3 明确禁止公共 Selector 使用宽泛 descendant），
+因此本契约的全部路由都用 Dialog 自有的 `.semantic-scope-*` 锚点收窄：
+
+| 锚点 | 节点 | 作用 |
+| --- | --- | --- |
+| `semantic-scope-presenter` | `OverlayDialogPresenterTheme` 的模板根 `Panel` | 定位 presenter 模板，隔离嵌套 owner 的 `wrapper`。 |
+| `semantic-scope-mask` | `OverlayDialogMask#PART_DialogMask` | 定位遮罩控件，隔离嵌套 owner 的 `mask`。 |
+| `semantic-scope-frame-host` | `ShadowsAwareContainer#PART_ShadowHost` | 定位框体宿主，隔离嵌套 owner 的 `container`。 |
+| `semantic-scope-content-layer` | `DockPanel#PART_SurfaceContentLayer` | 定位 Header/正文/Footer 的直接父，隔离正文内的嵌套 owner。 |
+| `semantic-scope-header` | `OverlayDialogHeader#PART_Header` | 定位标题栏控件，隔离嵌套 owner 的 `header`/`title`/`close`。 |
+
+`.semantic-scope-*` 只用于路由，不进入 Part 表；隔离由「锚点唯一 + `>`/`/template/` 精确步骤」共同保证，
+不依赖任何“最近 Semantic owner”停止规则。回归测试
+`Generated_Semantic_Styles_Hit_Exactly_One_Node_Per_Part` 断言每个 Part 恰好命中一个节点，锁定该精度。
 
 ## Abstract AXAML Structure
 
@@ -108,3 +313,7 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - MessageBox 继续作为 Dialog 派生类，不增加平行 host/session/button cache 生命周期。
 - mask 外点关闭入口只由 `IsMaskClosable` 在 Overlay presenter 的 mask 输入路径统一门控；不引入第二条 mask 关闭路径，也不在 Session veto 层复制该判断。
 - 新增 binding、事件、资源 parent、motion source 或内容引用时，必须在同一个 owner 中增加释放点和回归测试。
+- Overlay presenter 的逻辑父必须指向 `Dialog`（加入 layer 前设置、teardown 后清空），否则 owner 作用域 Semantic Style
+  与 Gallery 语义预览均不可达；`Dialog.GetCrossRoots()` 只在 presenter 已附加时上报存活根，释放后不得保留引用。
+- Semantic Part marker 必须保持静态声明，不得按 `IsModal`/`IsLoading`/`DialogHostType` 等状态动态增删；`Optional` 语义
+  由节点是否存在（模板/开关）表达，不由 marker 增删表达。

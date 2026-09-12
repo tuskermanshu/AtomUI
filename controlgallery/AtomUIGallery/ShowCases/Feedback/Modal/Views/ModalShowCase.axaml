@@ -6,8 +6,8 @@
              xmlns:viewModels="clr-namespace:AtomUIGallery.ShowCases.Modal"
              x:DataType="viewModels:ModalViewModel">
     <Grid Background="{atom:SharedTokenResource ColorBgLayout}">
-        <gallery:GalleryStickyTabsHost StickyContentPadding="28,0,28,0">
-            <gallery:GalleryStickyTabsHost.Header>
+        <gallery:GalleryShowCaseHost StickyContentPadding="28,0,28,0">
+            <gallery:GalleryShowCaseHost.Header>
                 <gallery:GalleryShowCaseHeader
                     Title="Modal"
                     Category="{gallery:ModalShowCaseLangResource ComponentCategory}"
@@ -17,7 +17,149 @@
                     Namespace="AtomUI.Desktop.Controls"
                     Package="AtomUI.Desktop.Controls"
                     BaseClass="Dialog" />
-            </gallery:GalleryStickyTabsHost.Header>
+            </gallery:GalleryShowCaseHost.Header>
+
+            <gallery:GalleryShowCaseHost.SemanticPartsContentTemplate>
+                <DataTemplate x:DataType="viewModels:ModalViewModel">
+                    <StackPanel Orientation="Vertical" Spacing="24">
+                    <gallery:SemanticPartPreview Name="ModalSemanticPreview"
+                                                 Title="Modal"
+                                                 SemanticOwner="{Binding #ModalSemanticOwner}"
+                                                 SemanticOwnerType="{x:Type atom:Dialog}"
+                                                 PreviewStageMinHeight="434">
+                        <gallery:SemanticPartPreview.PreviewContent>
+                            <!-- 对齐上游 antd 语义演示的内联模态（getContainer={false} + 舞台内 mask）：
+                                 舞台承载一个 ScopeAwareOverlayLayerPanel，Dialog 经 OverlayScope 把 overlay 宿主
+                                 限定在该作用域，mask/居中随舞台；右侧部件卡因此仍可 hover。常开由 IsPinnedOpen 钉住。 -->
+                            <Border Name="ModalSemanticStage"
+                                    Width="420"
+                                    Height="320"
+                                    Margin="24"
+                                    Background="{atom:SharedTokenResource ColorFillAlter}"
+                                    BorderBrush="{atom:SharedTokenResource ColorBorderSecondary}"
+                                    BorderThickness="1"
+                                    CornerRadius="{atom:SharedTokenResource BorderRadiusLG}">
+                                <atom:ScopeAwareOverlayLayerPanel Name="ModalSemanticStageLayer">
+                                    <Panel>
+                                        <atom:TextBlock Margin="24,16,24,0"
+                                                        VerticalAlignment="Top"
+                                                        TextWrapping="Wrap"
+                                                        Foreground="{atom:SharedTokenResource ColorTextSecondary}"
+                                                        Text="{gallery:ModalShowCaseLangResource SemanticStageHint}" />
+                                        <atom:Dialog Name="ModalSemanticOwner"
+                                                     Title="{gallery:ModalShowCaseLangResource SemanticPreviewTitleText}"
+                                                     IsOpen="True"
+                                                     IsPinnedOpen="True"
+                                                     IsMotionEnabled="False"
+                                                     IsModal="True"
+                                                     DialogHostType="Overlay"
+                                                     OverlayScope="{Binding #ModalSemanticStageLayer}"
+                                                     PlacementTarget="{Binding #ModalSemanticStageLayer}"
+                                                     StandardButtons="Cancel,Ok"
+                                                     DefaultStandardButton="Ok"
+                                                     HostMinWidth="260"
+                                                     HostMaxWidth="360">
+                                            <StackPanel Orientation="Vertical" Spacing="5">
+                                                <atom:TextBlock Text="{gallery:ModalShowCaseLangResource P2TextSomeContents}" />
+                                                <atom:TextBlock Text="{gallery:ModalShowCaseLangResource P2TextSomeContents}" />
+                                            </StackPanel>
+                                        </atom:Dialog>
+                                    </Panel>
+                                </atom:ScopeAwareOverlayLayerPanel>
+                            </Border>
+                        </gallery:SemanticPartPreview.PreviewContent>
+                        <gallery:SemanticPartPreview.PartDescriptions>
+                            <gallery:SemanticPartDescription Path="root"
+                                Description="{gallery:ModalShowCaseLangResource SemanticRootDescription}" />
+                            <gallery:SemanticPartDescription Path="mask"
+                                Description="{gallery:ModalShowCaseLangResource SemanticMaskDescription}" />
+                            <gallery:SemanticPartDescription Path="container"
+                                Description="{gallery:ModalShowCaseLangResource SemanticContainerDescription}" />
+                            <gallery:SemanticPartDescription Path="wrapper"
+                                Description="{gallery:ModalShowCaseLangResource SemanticWrapperDescription}" />
+                            <gallery:SemanticPartDescription Path="header"
+                                Description="{gallery:ModalShowCaseLangResource SemanticHeaderDescription}" />
+                            <gallery:SemanticPartDescription Path="title"
+                                Description="{gallery:ModalShowCaseLangResource SemanticTitleDescription}" />
+                            <gallery:SemanticPartDescription Path="body"
+                                Description="{gallery:ModalShowCaseLangResource SemanticBodyDescription}" />
+                            <gallery:SemanticPartDescription Path="footer"
+                                Description="{gallery:ModalShowCaseLangResource SemanticFooterDescription}" />
+                            <gallery:SemanticPartDescription Path="close"
+                                Description="{gallery:ModalShowCaseLangResource SemanticCloseDescription}" />
+                        </gallery:SemanticPartPreview.PartDescriptions>
+                    </gallery:SemanticPartPreview>
+
+                    <!-- MessageBox 与 Dialog 公开同一组 Semantic Part，但拥有独立 descriptor 与
+                         MessageBox<Part>Style；这里以第二个预览并列展示（跨根同样经 GetCrossRoots 上报）。 -->
+                    <gallery:SemanticPartPreview Name="MessageBoxSemanticPreview"
+                                                 Title="MessageBox"
+                                                 SemanticOwner="{Binding #MessageBoxSemanticOwner}"
+                                                 SemanticOwnerType="{x:Type atom:MessageBox}"
+                                                 PreviewStageMinHeight="434">
+                        <gallery:SemanticPartPreview.PreviewContent>
+                            <Border Name="MessageBoxSemanticStage"
+                                    Width="420"
+                                    Height="320"
+                                    Margin="24"
+                                    Background="{atom:SharedTokenResource ColorFillAlter}"
+                                    BorderBrush="{atom:SharedTokenResource ColorBorderSecondary}"
+                                    BorderThickness="1"
+                                    CornerRadius="{atom:SharedTokenResource BorderRadiusLG}">
+                                <atom:ScopeAwareOverlayLayerPanel Name="MessageBoxSemanticStageLayer">
+                                    <Panel>
+                                        <atom:TextBlock Margin="24,16,24,0"
+                                                        VerticalAlignment="Top"
+                                                        TextWrapping="Wrap"
+                                                        Foreground="{atom:SharedTokenResource ColorTextSecondary}"
+                                                        Text="{gallery:ModalShowCaseLangResource SemanticStageHint}" />
+                                        <atom:MessageBox Name="MessageBoxSemanticOwner"
+                                                         Title="{gallery:ModalShowCaseLangResource P2TitleNormal}"
+                                                         Style="Confirm"
+                                                         IsOpen="True"
+                                                         IsPinnedOpen="True"
+                                                         IsMotionEnabled="False"
+                                                         IsModal="True"
+                                                         DialogHostType="Overlay"
+                                                         OverlayScope="{Binding #MessageBoxSemanticStageLayer}"
+                                                         PlacementTarget="{Binding #MessageBoxSemanticStageLayer}"
+                                                         StandardButtons="Cancel,Ok"
+                                                         DefaultStandardButton="Ok"
+                                                         HostMinWidth="260"
+                                                         HostMaxWidth="360">
+                                            <StackPanel Orientation="Vertical" Spacing="5">
+                                                <atom:TextBlock Text="{gallery:ModalShowCaseLangResource P2TextSomeContents}" />
+                                                <atom:TextBlock Text="{gallery:ModalShowCaseLangResource P2TextSomeContents}" />
+                                            </StackPanel>
+                                        </atom:MessageBox>
+                                    </Panel>
+                                </atom:ScopeAwareOverlayLayerPanel>
+                            </Border>
+                        </gallery:SemanticPartPreview.PreviewContent>
+                        <gallery:SemanticPartPreview.PartDescriptions>
+                            <gallery:SemanticPartDescription Path="root"
+                                Description="{gallery:ModalShowCaseLangResource SemanticRootDescription}" />
+                            <gallery:SemanticPartDescription Path="mask"
+                                Description="{gallery:ModalShowCaseLangResource SemanticMaskDescription}" />
+                            <gallery:SemanticPartDescription Path="container"
+                                Description="{gallery:ModalShowCaseLangResource SemanticContainerDescription}" />
+                            <gallery:SemanticPartDescription Path="wrapper"
+                                Description="{gallery:ModalShowCaseLangResource SemanticWrapperDescription}" />
+                            <gallery:SemanticPartDescription Path="header"
+                                Description="{gallery:ModalShowCaseLangResource SemanticHeaderDescription}" />
+                            <gallery:SemanticPartDescription Path="title"
+                                Description="{gallery:ModalShowCaseLangResource SemanticTitleDescription}" />
+                            <gallery:SemanticPartDescription Path="body"
+                                Description="{gallery:ModalShowCaseLangResource SemanticBodyDescription}" />
+                            <gallery:SemanticPartDescription Path="footer"
+                                Description="{gallery:ModalShowCaseLangResource SemanticFooterDescription}" />
+                            <gallery:SemanticPartDescription Path="close"
+                                Description="{gallery:ModalShowCaseLangResource SemanticCloseDescription}" />
+                        </gallery:SemanticPartPreview.PartDescriptions>
+                    </gallery:SemanticPartPreview>
+                    </StackPanel>
+                </DataTemplate>
+            </gallery:GalleryShowCaseHost.SemanticPartsContentTemplate>
 
 
             <gallery:ShowCasePanel Name="ExamplesContent"
@@ -125,10 +267,13 @@
             <DataTemplate x:DataType="viewModels:ModalViewModel">
 
         <StackPanel Orientation="Vertical" Spacing="20" Loaded="HandleDialogExampleLoaded">
-            <StackPanel Orientation="Horizontal" Spacing="5">
-                <TextBlock VerticalAlignment="Center" Text="{gallery:ModalShowCaseLangResource P2TextNativeWindow}" />
-                <atom:ToggleSwitch Name="StyleCaseHostTypeSwitch" />
-            </StackPanel>
+            <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="10">
+                <atom:Button Name="MessageBoxOverlayHostButton"
+                             ButtonType="Primary"
+                             Content="{gallery:ModalShowCaseLangResource P2TextOverlayHost}" />
+                <atom:Button Name="MessageBoxWindowHostButton"
+                             Content="{gallery:ModalShowCaseLangResource P2TextNativeWindow}" />
+            </WrapPanel>
             <atom:Separator Title="{gallery:ModalShowCaseLangResource P2TitleNormal}"/>
             <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="10">
                 <Panel>
@@ -411,7 +556,104 @@
         </gallery:ShowCaseItem.DeferredContentTemplate>
     </gallery:ShowCaseItem>
 
+                <gallery:ShowCaseItem Title="{gallery:ModalShowCaseLangResource SemanticStylesTitle}"
+                                      Description="{gallery:ModalShowCaseLangResource SemanticStylesDescription}"
+                                      Height="300" IsDeferredContentEnabled="True">
+                    <gallery:ShowCaseItem.DeferredContentTemplate>
+                        <DataTemplate x:DataType="viewModels:ModalViewModel">
+                            <Panel>
+                                <StackPanel Orientation="Vertical" Spacing="10" VerticalAlignment="Top">
+                                    <atom:TextBlock Text="{gallery:ModalShowCaseLangResource P2TextContentOfTheModal}" />
+                                    <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="10">
+                                        <atom:Button Name="SemanticStyleDialogOpenButton"
+                                                     ButtonType="Primary"
+                                                     Content="{gallery:ModalShowCaseLangResource P2ContentOpenModal}" />
+                                        <atom:Button Name="MessageBoxSemanticStyleOpenButton"
+                                                     Content="{gallery:ModalShowCaseLangResource P2ContentOpenMessageBox}" />
+                                    </WrapPanel>
+                                </StackPanel>
+                                <atom:Dialog Classes="semantic-styles-demo"
+                                             IsOpen="{Binding IsSemanticStyleDialogOpen}"
+                                             DialogHostType="Overlay"
+                                             IsMotionEnabled="False"
+                                             Title="{gallery:ModalShowCaseLangResource P2TitleBasicModal}">
+                                    <atom:Dialog.Styles>
+                                        <!-- 专用 Semantic Part Style 是唯一定制入口；x:SetterTargetType 必须写 Part
+                                             的 ContractType（title 是 Avalonia TextBlock、close 是 Avalonia Button，
+                                             不带 atom: 前缀）。 -->
+                                        <Style Selector="atom|Dialog.semantic-styles-demo">
+                                            <atom:DialogMaskStyle x:SetterTargetType="Border">
+                                                <Setter Property="Background" Value="#661677ff" />
+                                            </atom:DialogMaskStyle>
+                                            <atom:DialogContainerStyle x:SetterTargetType="Border">
+                                                <Setter Property="CornerRadius" Value="8" />
+                                            </atom:DialogContainerStyle>
+                                            <atom:DialogHeaderStyle x:SetterTargetType="Border">
+                                                <Setter Property="Background"
+                                                        Value="{atom:SharedTokenResource ColorFillAlter}" />
+                                            </atom:DialogHeaderStyle>
+                                            <atom:DialogTitleStyle x:SetterTargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#1677ff" />
+                                            </atom:DialogTitleStyle>
+                                            <atom:DialogBodyStyle x:SetterTargetType="Border">
+                                                <Setter Property="Padding" Value="32" />
+                                            </atom:DialogBodyStyle>
+                                            <atom:DialogFooterStyle x:SetterTargetType="Border">
+                                                <Setter Property="Background"
+                                                        Value="{atom:SharedTokenResource ColorFillAlter}" />
+                                            </atom:DialogFooterStyle>
+                                            <atom:DialogCloseStyle x:SetterTargetType="Button">
+                                                <Setter Property="Foreground" Value="#1677ff" />
+                                            </atom:DialogCloseStyle>
+                                        </Style>
+                                    </atom:Dialog.Styles>
+                                    <atom:TextBlock Text="{gallery:ModalShowCaseLangResource P2TextSomeContents}" />
+                                </atom:Dialog>
+                                <!-- MessageBox 与 Dialog 公开同一组 Semantic Part，但使用自己的 MessageBox<Part>Style 类型；
+                                     同样只以生成 Style 定制，不使用 code-behind 属性回退。 -->
+                                <atom:MessageBox Classes="messagebox-semantic-styles-demo"
+                                                 IsOpen="{Binding IsMessageBoxSemanticStyleOpen}"
+                                                 Title="{gallery:ModalShowCaseLangResource P2TitleNormal}"
+                                                 Style="Information"
+                                                 StandardButtons="Cancel,Ok"
+                                                 DefaultStandardButton="Ok"
+                                                 DialogHostType="Overlay"
+                                                 IsMotionEnabled="False">
+                                    <atom:MessageBox.Styles>
+                                        <Style Selector="atom|MessageBox.messagebox-semantic-styles-demo">
+                                            <atom:MessageBoxMaskStyle x:SetterTargetType="Border">
+                                                <Setter Property="Background" Value="#661677ff" />
+                                            </atom:MessageBoxMaskStyle>
+                                            <atom:MessageBoxContainerStyle x:SetterTargetType="Border">
+                                                <Setter Property="CornerRadius" Value="8" />
+                                            </atom:MessageBoxContainerStyle>
+                                            <atom:MessageBoxHeaderStyle x:SetterTargetType="Border">
+                                                <Setter Property="Background"
+                                                        Value="{atom:SharedTokenResource ColorFillAlter}" />
+                                            </atom:MessageBoxHeaderStyle>
+                                            <atom:MessageBoxTitleStyle x:SetterTargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#1677ff" />
+                                            </atom:MessageBoxTitleStyle>
+                                            <atom:MessageBoxBodyStyle x:SetterTargetType="Border">
+                                                <Setter Property="Padding" Value="32" />
+                                            </atom:MessageBoxBodyStyle>
+                                            <atom:MessageBoxFooterStyle x:SetterTargetType="Border">
+                                                <Setter Property="Background"
+                                                        Value="{atom:SharedTokenResource ColorFillAlter}" />
+                                            </atom:MessageBoxFooterStyle>
+                                            <atom:MessageBoxCloseStyle x:SetterTargetType="Button">
+                                                <Setter Property="Foreground" Value="#1677ff" />
+                                            </atom:MessageBoxCloseStyle>
+                                        </Style>
+                                    </atom:MessageBox.Styles>
+                                    <atom:TextBlock Text="{gallery:ModalShowCaseLangResource P2TextSomeContents}" />
+                                </atom:MessageBox>
+                            </Panel>
+                        </DataTemplate>
+                    </gallery:ShowCaseItem.DeferredContentTemplate>
+                </gallery:ShowCaseItem>
+
             </gallery:ShowCasePanel>
-        </gallery:GalleryStickyTabsHost>
+        </gallery:GalleryShowCaseHost>
     </Grid>
 </UserControl>

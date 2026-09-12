@@ -2,6 +2,27 @@
 
 本文档记录 Modal 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-11
+
+- Semantic Parts
+  - Publish the Modal family Semantic Part contract: `Dialog` and `MessageBox` each expose implicit `root` plus `mask`, `wrapper`, `container`, `header`, `title`, `body`, `footer` and `close`, mapped to the upstream Ant Design `Modal` semantic DOM (`components/modal/demo/_semantic.tsx`, 9 slots).
+  - Declare every non-root Part as `RuntimeCreated`/`CrossVisualRoot`/`CrossNestedOwners` (`Dialog` has no `ControlTemplate`; nodes live in the `DialogSurface`/`OverlayDialogPresenter`/`OverlayDialogHeader`/`OverlayDialogMask` templates) and mark them with static `Classes.semantic-*="True"`.
+  - Route every Part through Dialog-owned `.semantic-scope-*` anchors instead of a broad `>>`: the body permanently hosts a `Skeleton` and user content commonly contains `Card`/`Tooltip`/`Spin`, which publish same-named `semantic-header`/`semantic-title`/`semantic-body`/`semantic-footer`/`semantic-container` classes that a broad descendant would also hit.
+  - Cardinality: `mask` and `wrapper` are `Optional` (modeless and the Window host do not materialize them); `footer`/`close` stay `Single` because `IsFooterVisible`/`IsClosable` only toggle `IsVisible`.
+- API
+  - Add `Dialog.OverlayScope` (default `null`, Overlay host only): when set, the overlay host is injected into that element's scope so the mask, surface sizing and centering are bounded by the scope instead of the owning `TopLevel`, matching upstream Ant Design's inline/`setContainer` modal semantics. The default keeps the existing TopLevel host resolution unchanged.
+  - Add `Dialog.IsPinnedOpen` (default `false`, Overlay host only). While true, user-initiated close requests (header close button, mask outside-press, Escape, footer buttons) are ignored; external `IsOpen=false` still closes. This replaces the earlier plan of an example-side `BeforeCloseAsync` veto, which AXAML cannot express.
+- Behavior
+  - `OverlayDialogPresenter` sets the `Dialog` owner as its logical parent so owner-scoped generated Semantic Styles can reach the presenter subtree; the parent is only set while the owner is attached to a logical tree, and the visual parent remains `DialogOverlayLayer`.
+  - `Dialog` implements `ISemanticPartCrossRootProvider` and reports the live Overlay presenter as its cross root.
+- Docs
+  - Add `semantic-part.md`; replace the previous non-contract `root`/`host`/`surface`/`content`/`motion` overview summary with the real Part table; document the `.semantic-scope-*` route anchors, host boundaries and `IsPinnedOpen` semantics.
+- Gallery
+  - Add a MessageBox Semantic Part styling example parallel to the Dialog one (generated `MessageBox<Part>Style` classes, no code-behind fallback), and switch every Modal example trigger from `ToggleSwitch` to `Button` (MessageBox host selection is now two buttons; the semantic styling examples use an open button).
+- Validation
+  - Add `DialogSemanticPartTests`: descriptor contract, static marker lists, runtime markers, logical-parent invariant, cross-root reporting, exact single-node style hits, pin gating, modeless/hidden-node `Optional` semantics and MessageBox parity. Desktop Controls 3732/3732; LLMS generate/verify 79 controls / 161 files.
+  - Gallery Semantic Parts tab and NativeAOT publish are still pending.
+
 ## 2026-08-21
 
 - API

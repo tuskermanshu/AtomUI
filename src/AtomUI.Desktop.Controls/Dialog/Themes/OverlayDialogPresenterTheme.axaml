@@ -8,14 +8,17 @@
         <Setter Property="MotionDuration" Value="{atom:SharedTokenResource MotionDurationMid}" />
         <Setter Property="Template">
             <ControlTemplate TargetType="atom:OverlayDialogPresenter">
-                <Panel>
+                <Panel Classes.semantic-scope-presenter="True">
                     <atom:MotionActor Name="PART_MaskMotionActor"
                                       IsVisible="{TemplateBinding IsModal}"
                                       ClipToBounds="False">
                         <atom:OverlayDialogMask Name="PART_DialogMask"
+                                                Classes.semantic-scope-mask="True"
                                                 IsMotionEnabled="{TemplateBinding IsMotionEnabled}" />
                     </atom:MotionActor>
-                    <atom:MotionActor Name="PART_SurfaceMotionActor" ClipToBounds="False">
+                    <atom:MotionActor Name="PART_SurfaceMotionActor"
+                                      Classes.semantic-wrapper="True"
+                                      ClipToBounds="False">
                         <ContentPresenter Content="{TemplateBinding Content}"
                                           ContentTemplate="{TemplateBinding ContentTemplate}" />
                     </atom:MotionActor>

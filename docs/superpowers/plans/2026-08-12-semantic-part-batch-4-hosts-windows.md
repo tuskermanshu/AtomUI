@@ -125,8 +125,8 @@
 
 **风险类型：** Overlay 和 native Window 宿主、session state machine、多个 public 子控件、resize/motion。
 
-- [ ] **Gate A 设计审核：** 审计 Dialog/MessageBox owner、DialogSurface、button box/header/resizer、overlay presenter/mask 和 window presenter；确认 surface/title/icon/content/footer/actions/close/mask/resize regions 和 owner 覆盖 Overlay/Window，记录 session open-close, teardown, host sizing 和 nested dialogs。
-- [ ] 更新两份控件文档，写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
+- [x] **Gate A 设计审核：** 审计 Dialog/MessageBox owner、DialogSurface、button box/header/resizer、overlay presenter/mask 和 window presenter；确认 surface/title/icon/content/footer/actions/close/mask/resize regions 和 owner 覆盖 Overlay/Window，记录 session open-close, teardown, host sizing 和 nested dialogs。
+- [x] 更新两份控件文档，写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
 - [ ] **Gate B 实现与验证：** 新增 `tests/AtomUI.Desktop.Controls.Tests/Dialog/DialogSemanticPartTests.cs` 并扩展 MessageBox 测试，覆盖 Overlay/Window、modal/modeless、MessageBox 类型、button、resize/motion、嵌套 session、close failure 和 root release；验证 Gallery additional root 和 NativeAOT。
 - [ ] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
 - [ ] **强制停止：** 保持 Modal / Dialog 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
@@ -160,6 +160,65 @@
 - [x] **强制停止：** 保持 PopupConfirm 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
 
 ## 批次收尾
+
+> 2026-09-11 Modal / Dialog 任务 8 进展（Gate B 部分完成，未收尾）：Gate A 与控件文档已完成并经用户批准。
+> 已交付 `Dialog.SemanticParts.cs` / `MessageBox.SemanticParts.cs`（8 个部件，对齐上游 Modal 语义 DOM）、四个宿主主题的
+> 静态 marker、`Dialog` 的 `ISemanticPartCrossRootProvider`、`OverlayDialogPresenter` 的逻辑父与 cross-root 上报、
+> 新增 public `Dialog.IsPinnedOpen`（预览钉住），以及 `tests/AtomUI.Desktop.Controls.Tests/Dialog/DialogSemanticPartTests.cs`
+>（11 个用例）。Desktop Controls 3732/3732、LLMS verify 79/161 通过，`git diff --check` 干净。
+>
+> 两处相对 Gate A 文档的实现决策：(1) 全部路由改用 Dialog 自有的 `.semantic-scope-*` 锚点收窄，而非宽泛 `>>`——body 常驻
+> `Skeleton`、用户内容常含 `Card`/`Tooltip`/`Spin`，宽泛 descendant 会命中同名部件（已用“每部件恰好命中一个节点”的回归测试
+> 锁定）；(2) 新增 `Dialog.IsPinnedOpen` 产品 API：AXAML 无法表达 `BeforeCloseAsync` 否决，原“不新增产品 API”的承诺不成立，
+> 已按 Drawer 先例实现并经用户确认。
+>
+> 2026-09-11 Gallery 与 NativeAOT 补齐：`ModalShowCase` 已从 `GalleryStickyTabsHost` 切到 `GalleryShowCaseHost`，新增语义页签
+> （`SemanticPartPreview` + 9 个 `SemanticPartDescription`，顺序对齐上游）与 SemanticStyles 示例（专用生成 Style 类 + 显式
+> `x:SetterTargetType`）；本地化补齐 14 个资源键（枚举 + 4 个 xlf 各 80 unit + `CatalogMemberOrder.baseline` +
+> `GalleryCatalogCoverageTests` unit 总数 4632→4646），并按仓库既有约束把 `SemanticStylesTitle` 对齐到四语言唯一文案；
+> `ModalShowCasePageTests` 扩展为 3 个用例并更新 `ModalShowCaseExamples.snapshot`（count 10）。
+>
+> 验证：Gallery 619/619、Desktop Controls 3732/3732、Generator 532/532、LLMS 文档测试 23/23、LLMS verify 79/161、
+> NativeAOT `osx-arm64` publish 通过（NativeAOT output validation passed，`/tmp/atomui-gallery-aot-dialog`）、
+> `git diff --check` 干净。
+>
+> 2026-09-11 上游严格对齐复核（用户指出预览未严格对齐 antd）：修正三处偏差。(1) `SemanticPartDescription` 顺序改为上游
+> `_semantic.tsx` 原序 `root, mask, container, wrapper, header, title, body, footer, close`（原先 wrapper/container 颠倒）；
+> (2) 预览从 modeless 浮动浮层改为**舞台内模态**：新增可选公共属性 `Dialog.OverlayScope`（默认 `null` = 既有 TopLevel 宿主，
+> 行为与渲染完全不变），舞台内嵌 `ScopeAwareOverlayLayerPanel`，Dialog 同时设置 `OverlayScope` + `PlacementTarget` +
+> `IsModal=True` + `StandardButtons="Cancel,Ok"`，使 mask 覆盖舞台、模态居中于舞台、`footer` 有真实按钮呈现；
+> (3) `container` 的 boxShadow/padding 归属保持现状并已在文档记录（经用户确认不迁移，避免默认渲染变更）。
+>
+> `OverlayScope` 实现要点：`DialogOverlayLayer.GetOrCreate(anchor, overlayScope)` 优先解析作用域宿主并在无可用 scope layer 时
+> 回退默认宿主；`OverlayDialogPresenter` 仅在**显式** `OverlayScope` 时不解析 owning Window（作用域无 Window frame 契约，
+> 不参与 frame 内缩与 drawn chrome 抑制），未指定时保持既有 owner window/base chrome 抑制解析不变。
+>
+> 新增回归：`OverlayScope_Contains_The_Host_And_Mask_Within_The_Scope`（断言宿主落在舞台内、mask bounds = 舞台尺寸且小于窗口）、
+> `Without_OverlayScope_The_Host_Stays_In_The_TopLevel_Overlay_Layer`（默认行为不变）。验证：Desktop Controls 3734/3734、
+> Gallery 619/619、Generator 532/532、LLMS 文档测试 23/23、LLMS verify 79/161、NativeAOT `osx-arm64` publish 通过、`git diff --check` 干净。
+>
+> 2026-09-11 Gallery 交互补齐（用户要求，最终形态）：在「自定义语义结构的样式」之外**新增 MessageBox 语义样式示例**
+> （`MessageBoxSemanticStylesTitle`，用生成的 `MessageBox<Part>Style` 类定制，与 Dialog 示例平行），并把 Modal 页面所有示例
+> 触发方式从 ToggleSwitch 改为 Button——MessageBox 宿主切换改为 Overlay/Window 两个按钮，两个语义样式示例改为打开按钮。
+> 代码后置移除 `StyleCaseHostTypeSwitch` 的 ToggleButton 处理器与全局开关订阅。本地化净增 3 键（4 个 xlf 各 83 unit，
+> unit 总数 4646→4649），基线由枚举重建；页面测试改为 `Modal_ShowCase_MessageBox_Semantic_Styling_Uses_Generated_MessageBox_Styles`
+> 并把「页面不含 ToggleSwitch」写入布局断言。
+>
+> 用户复核确认 MessageBox 已具备 Semantic Part 改造（独立 descriptor + `MessageBox<Part>Style`）；本次补齐其缺失的**回归覆盖**
+> ——`Generated_Semantic_Styles_Hit_Exactly_One_Part_On_MessageBox` 断言 MessageBox 的 8 个生成 Style 各精确命中一个节点。
+> Gallery 620/620、AtomUIGallery 构建通过。
+>
+> 2026-09-11 语义页签并列 MessageBox 预览（用户要求「在这个下面再新增一个 MessageBox 的 Preview 示例」）：语义页签的
+> `DataTemplate` 改为纵向 `StackPanel`，并列两个 `SemanticPartPreview`——`ModalSemanticPreview`（Dialog）与
+> `MessageBoxSemanticPreview`（MessageBox，`SemanticOwnerType={x:Type atom:MessageBox}`），两者都使用舞台内模态模式
+> （`OverlayScope` + `PlacementTarget` + `IsModal=True` + `IsPinnedOpen=True` + `StandardButtons`）。`GalleryShowCaseHost`
+> 本身支持多预览（≥2 时改用内容尺寸布局，不高限钳制）。页面测试改为按预览切片断言，避免两个预览的 Part 路径混淆。
+> 验证：Gallery 620/620、Desktop Controls 3735/3735、Generator 532/532、LLMS 23/23、LLMS verify 79/161、
+> AtomUIGallery 构建成功、NativeAOT publish 通过、`git diff --check` 干净。
+>
+> 说明：Desktop 全量首轮出现过一次 `DialogLifecycleTests.Closed_Overlay_Session_Releases_Surface_When_A_Custom_Button_Is_Retained`
+> 失败；该用例是既有 `WeakReference` + `GC.Collect` 回收断言、未被本次改动修改，单独连跑 6 次与全量复跑均通过，判定为间歇性
+> GC 时序抖动，不是本次改动引入的回归。
 
 > 2026-09-11 范围复核：ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、PopupConfirm、Notification 八个家族的单项任务框已置为已完成（均已按用户授权提交；PopupConfirm 真机视觉验收见 `docs/superpowers/specs/2026-09-11-popupconfirm-semantic-visual-acceptance.md`）。Message、Modal / Dialog 两个家族未开始，本批次仍未收尾。
 >

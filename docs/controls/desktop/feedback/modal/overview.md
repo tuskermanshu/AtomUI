@@ -1,6 +1,6 @@
 # Modal 桌面版架构设计
 
-本文档定义 `Dialog` 和 `MessageBox` 的当前公共设计。内部状态机与宿主实现见 [Modal 桌面版实现原理](implementation.md)，关闭动效的视觉层与生命周期边界见 [Modal Dialog 关闭动效设计](dialog-close-motion-design.md)，宿主尺寸与交互缩放见 [Modal 宿主尺寸与 Resize 设计](host-sizing-design.md)，内容区弹层叠放见 [Modal 内容弹层叠放设计](popup-layering-design.md)，视觉变量见 [Modal Token 设计](token.md)，历史变化见 [Modal Changelog](changelog.md)。
+本文档定义 `Dialog` 和 `MessageBox` 的当前公共设计。内部状态机与宿主实现见 [Modal 桌面版实现原理](implementation.md)，公共 Semantic Part 契约见 [Modal / Dialog Semantic Part 契约](semantic-part.md)，关闭动效的视觉层与生命周期边界见 [Modal Dialog 关闭动效设计](dialog-close-motion-design.md)，宿主尺寸与交互缩放见 [Modal 宿主尺寸与 Resize 设计](host-sizing-design.md)，内容区弹层叠放见 [Modal 内容弹层叠放设计](popup-layering-design.md)，视觉变量见 [Modal Token 设计](token.md)，历史变化见 [Modal Changelog](changelog.md)。
 
 ## 1. 控件定位
 
@@ -35,10 +35,10 @@ Modal 不承担通知队列、轻量 Tooltip、Popup 菜单或业务级导航服
 | --- | --- | --- |
 | 内容 | `Title`, `TitleIcon`, `Content`, `ContentTemplate`, `DataContext` | 定义标题和任意内容对象或模板。 |
 | 打开状态 | `IsOpen`, `OpenAsync(...)` | `IsOpen` 是默认 TwoWay 的声明式意图；`OpenAsync` 表示一次完整 Session。 |
-| 展示方式 | `DialogHostType`, `IsModal`, `PlacementTarget`, startup anchor/offset | 选择 Overlay/Window、交互模态和初始位置。直接实例化与静态 API 的水平、垂直 startup anchor 默认均为 `Center`；显式 `Custom` 时由对应 offset 决定位置。 |
+| 展示方式 | `DialogHostType`, `IsModal`, `PlacementTarget`, `OverlayScope`, startup anchor/offset | 选择 Overlay/Window、交互模态、初始位置与 overlay 宿主作用域。直接实例化与静态 API 的水平、垂直 startup anchor 默认均为 `Center`；显式 `Custom` 时由对应 offset 决定位置。`OverlayScope` 默认 `null` 表示宿主解析到 owning TopLevel；指定后 mask 与正文尺寸限定在该作用域内（对齐上游内联模态语义），仅 Overlay 宿主有效。 |
 | 尺寸与窗口能力 | `HostWidth/Height/Min/Max`, `IsResizable`, `IsClosable`, `IsMaskClosable`, `IsDragMovable`, `IsMaximizable`, `IsMinimizable`, `IsTopmost` | 同一组 Surface 正文尺寸请求映射到 Overlay 或原生 Window。`NaN` 表示初始自然尺寸；有效最小尺寸还必须满足 Dialog 的结构性下限。`IsClosable` 控制标题栏关闭入口，`IsMaskClosable` 控制 Overlay modal mask 外点关闭入口，两者正交且默认都为 `true`。 |
 | 操作 | `StandardButtons`, `CustomButtons`, `DefaultStandardButton`, `EscapeStandardButton`, `ButtonsConfigure` | 生成标准按钮、加入自定义按钮并配置当前有效按钮序列。 |
-| 状态与策略 | `IsLoading`, `IsConfirmLoading`, `IsFooterVisible`, `IsMotionEnabled`, `BeforeCloseAsync` | 控制加载、确认按钮 loading、Footer、motion 和关闭前校验。 |
+| 状态与策略 | `IsLoading`, `IsConfirmLoading`, `IsFooterVisible`, `IsMotionEnabled`, `IsPinnedOpen`, `BeforeCloseAsync` | 控制加载、确认按钮 loading、Footer、motion、预览钉住和关闭前校验。 |
 | 结果 | `Result`, `Accept()`, `Reject()`, `Done(...)` | 所有关闭来源归一为结果与 `DialogCloseReason`。 |
 
 静态入口只有异步形式：
@@ -90,6 +90,8 @@ Dialog 公开 `Opened`、`Closing`、`Accepted`、`Rejected`、`Finished`、`Clo
 | `PART_SurfaceContentLayer` | `DialogSurface` 内部模板节点 | 包围 Header、ContentFrame 和 FooterFrame；Overlay 关闭时承载前景 opacity 动画，不是 public Semantic Part。 |
 
 当前没有 Modal 专属 pseudo class。
+
+上表是**模板部件**（`PART_*`）清单，与公共 Semantic Part 是两套契约。`Dialog` 没有 `ControlTemplate`，全部视觉节点位于运行时创建的 `DialogSurface`/`OverlayDialogPresenter`/`OverlayDialogHeader` 模板中，因此公开的 `container`/`header`/`title`/`body`/`footer`/`close`/`mask`/`wrapper` 全部声明 `RuntimeCreated`，并与上表的 `PART_*` 名称并存、职责不同。完整契约见 [Modal / Dialog Semantic Part 契约](semantic-part.md)。
 
 ## 4. 行为与状态模型
 
@@ -185,21 +187,33 @@ owner resize、frame shadow、drawn frame thickness、Window state 和 `ClientSi
 ## 9. 文档导航、LLMS 导出与验证策略
 
 - [实现原理](implementation.md)
+- [Semantic Part 契约](semantic-part.md)
 - [关闭动效设计](dialog-close-motion-design.md)
 - [宿主尺寸与 Resize 设计](host-sizing-design.md)
 - [内容弹层叠放设计](popup-layering-design.md)
 - [Token 设计](token.md)
 - [控件级 Changelog](changelog.md)
 
-LLMS 语义区域：
+公共 Semantic Part：
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Dialog` / `MessageBox` | public 打开意图、内容、结果和事件入口。 | `IsOpen`, `OpenAsync`, `Result`, `BeforeCloseAsync` | `DialogToken` | stable |
-| `host` | Overlay presenter / native Window | 承载模态、placement、尺寸和宿主生命周期。 | `DialogHostType`, `IsModal`, `PlacementTarget` | SharedToken motion | internal-observable |
-| `surface` | `DialogSurface` | 共享标题、正文、Footer、按钮和 focus scope。 | `Content`, `StandardButtons`, `IsLoading` | `ContentBg`, padding/footer tokens | internal-observable |
-| `content` | Content / `MessageBoxContent` | 呈现任意 Dialog 内容或 MessageBox 语义内容。 | `Content`, `ContentTemplate`, `Style`, `Icon` | typography/color tokens | stable |
-| `motion` | Overlay `MotionActor` + `PART_SurfaceContentLayer` | Overlay 等待外层、前景内容和 mask 的关闭边界；Window 使用原生 Opened/Closed 边界。 | `IsMotionEnabled` | `MotionDurationMid` | internal-observable |
+`Dialog` 与 `MessageBox` 公开同一组 8 个 Semantic Part，对齐上游 Ant Design `Modal` 的公开 Semantic DOM。每个 Part 的
+`SelectorClass`/`SelectorRoute`/`Style Type`/`ContractType`/`Cardinality`、存在条件、尺寸与几何基线、定制边界和
+兼容性定义见 [Modal / Dialog Semantic Part 契约](semantic-part.md)。
+
+| Part | AtomUI 节点 | 职责 | Cardinality |
+| --- | --- | --- | --- |
+| `root` | `Dialog` / `MessageBox` | public 打开意图、内容、结果和事件入口。 | Single |
+| `mask` | `OverlayDialogMaskTheme` 的 `Border#Frame` | modal 遮罩（`ColorBgMask`）。 | Optional |
+| `wrapper` | `OverlayDialogPresenterTheme` 的 `PART_SurfaceMotionActor` | Surface 动画/过渡包裹层。 | Optional |
+| `container` | `DialogSurfaceTheme` 的 `Border#Frame` | 对话主体框体（背景、圆角、裁剪）。 | Single |
+| `header` | `OverlayDialogHeaderTheme` 的 `Border#HeaderFrame` | 标题区框体（背景、内边距）。 | Single |
+| `title` | `OverlayDialogHeaderTheme` 的 `TextBlock#Title` | 标题文字排版。 | Single |
+| `body` | `DialogSurfaceTheme` 的 `Border#ContentFrame` | 正文区（内边距、内容承载）。 | Single |
+| `footer` | `DialogSurfaceTheme` 的 `Border#FooterFrame` | 底部操作区框体。 | Optional |
+| `close` | `OverlayDialogHeaderTheme` 的 `PART_CloseButton` | 关闭按钮视觉。 | Optional |
+
+宿主边界：`mask`/`wrapper` 仅 Overlay 宿主物化；Window 宿主内 marker 完整存在，但 owner 作用域 Semantic Style 不跨
+`TopLevel` 级联（先例：ImagePreviewer 的 native dialog）。
 
 LLMS 导出来源：
 

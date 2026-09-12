@@ -126,6 +126,11 @@
         <source>Open CustomView Dialog</source>
       </segment>
     </unit>
+    <unit id="P2ContentOpenMessageBox">
+      <segment>
+        <source>Open MessageBox</source>
+      </segment>
+    </unit>
     <unit id="P2ContentOpenModal">
       <segment>
         <source>Open Modal</source>
@@ -219,6 +224,11 @@
     <unit id="P2TextNativeWindow">
       <segment>
         <source>Native Window:</source>
+      </segment>
+    </unit>
+    <unit id="P2TextOverlayHost">
+      <segment>
+        <source>Overlay</source>
       </segment>
     </unit>
     <unit id="P2TextSomeContents">
@@ -321,6 +331,76 @@
         <source>Examples</source>
       </segment>
     </unit>
+    <unit id="SemanticBodyDescription">
+      <segment>
+        <source>Body element: content area padding and content host.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticCloseDescription">
+      <segment>
+        <source>Close element: the title bar close button.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticContainerDescription">
+      <segment>
+        <source>Container element: dialog body frame with background, corner radius and clipping.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticFooterDescription">
+      <segment>
+        <source>Footer element: action area frame with background and padding.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticHeaderDescription">
+      <segment>
+        <source>Header element: title bar frame with background and padding.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticMaskDescription">
+      <segment>
+        <source>Mask element: the modal mask background and pointer hit-testing.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticPreviewFooterLink">
+      <segment>
+        <source>More</source>
+      </segment>
+    </unit>
+    <unit id="SemanticPreviewTitleText">
+      <segment>
+        <source>Semantic Part preview</source>
+      </segment>
+    </unit>
+    <unit id="SemanticRootDescription">
+      <segment>
+        <source>Root element: the Dialog owner itself, carrying the opening intent, content, result and events.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticStageHint">
+      <segment>
+        <source>A Dialog Overlay host floats above the page instead of rendering inline; it stays pinned here so each part can be inspected.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesDescription">
+      <segment>
+        <source>Style Dialog Semantic Parts through the generated Semantic Style classes.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesTitle">
+      <segment>
+        <source>Custom Semantic Part styling</source>
+      </segment>
+    </unit>
+    <unit id="SemanticTitleDescription">
+      <segment>
+        <source>Title element: title text typography and foreground color.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticWrapperDescription">
+      <segment>
+        <source>Wrapper element: the surface motion and transition container.</source>
+      </segment>
+    </unit>
     <unit id="StaticDialogApiDescription">
       <segment>
         <source>Creating a Dialog using the static method of Dialog.</source>
@@ -331,5 +411,5 @@
         <source>Static Dialog API</source>
       </segment>
     </unit>
-  </file>
+</file>
 </xliff>

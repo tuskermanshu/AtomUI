@@ -14,14 +14,18 @@
             <ControlTemplate TargetType="atom:DialogSurface">
                 <Panel>
                     <atom:ShadowsAwareContainer Name="PART_ShadowHost"
+                                                Classes.semantic-scope-frame-host="True"
                                                 IsOverlayMode="True">
                         <Border Name="Frame"
+                                Classes.semantic-container="True"
                                 Background="{atom:DialogTokenResource ContentBg}"
                                 CornerRadius="{TemplateBinding CornerRadius}"
                                 ClipToBounds="True">
                             <DockPanel Name="PART_SurfaceContentLayer"
+                                       Classes.semantic-scope-content-layer="True"
                                        LastChildFill="True">
                                 <atom:OverlayDialogHeader Name="PART_Header"
+                                                          Classes.semantic-scope-header="True"
                                                           DockPanel.Dock="Top"
                                                           IsVisible="{TemplateBinding IsHeaderVisible}"
                                                           Title="{TemplateBinding Title}"
@@ -31,6 +35,7 @@
                                                           IsDialogMaximized="{TemplateBinding IsDialogMaximized}"
                                                           IsMotionEnabled="{TemplateBinding IsMotionEnabled}" />
                                 <Border Name="FooterFrame"
+                                        Classes.semantic-footer="True"
                                         DockPanel.Dock="Bottom"
                                         IsVisible="{TemplateBinding IsEffectiveFooterVisible}">
                                     <atom:DialogButtonBox Name="PART_ButtonBox"
@@ -39,7 +44,9 @@
                                                           DefaultStandardButton="{TemplateBinding DefaultStandardButton}"
                                                           EscapeStandardButton="{TemplateBinding EscapeStandardButton}" />
                                 </Border>
-                                <Border Name="ContentFrame" ClipToBounds="True">
+                                <Border Name="ContentFrame"
+                                        Classes.semantic-body="True"
+                                        ClipToBounds="True">
                                     <atom:Skeleton IsLoading="{TemplateBinding IsLoading}"
                                                    IsActive="True"
                                                    ParagraphRows="4"

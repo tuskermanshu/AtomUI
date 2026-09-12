@@ -70,5 +70,21 @@ public enum ModalShowCaseLangResourceKind
     P2TextName,
     P2TextAge,
     P2RunThisModalWillBeDestroyedAfter,
-    P2RunSecond
+    P2RunSecond,
+    SemanticRootDescription,
+    SemanticMaskDescription,
+    SemanticWrapperDescription,
+    SemanticContainerDescription,
+    SemanticHeaderDescription,
+    SemanticTitleDescription,
+    SemanticBodyDescription,
+    SemanticFooterDescription,
+    SemanticCloseDescription,
+    SemanticStageHint,
+    SemanticPreviewTitleText,
+    SemanticPreviewFooterLink,
+    SemanticStylesTitle,
+    SemanticStylesDescription,
+    P2ContentOpenMessageBox,
+    P2TextOverlayHost
 }
