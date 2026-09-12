@@ -1,6 +1,6 @@
 # Message 桌面版架构设计
 
-本文档定义 `Message` 桌面版的最新设计定位、公共契约、状态模型、视觉主题关系和兼容边界。通用控件研发约束见 [控件研发标准](../../../../engineering/development/control-development-guidelines.md)，内部实现原理见 [Message 桌面版实现原理](implementation.md)，Message Token 的专项设计见 [Message Token 设计](token.md)，设计和契约变化记录见 [Message Changelog](changelog.md)。
+本文档定义 `Message` 桌面版的最新设计定位、公共契约、状态模型、视觉主题关系和兼容边界。通用控件研发约束见 [控件研发标准](../../../../engineering/development/control-development-guidelines.md)，Message 与 Notification 的共享堆叠算法见 [Feedback 堆叠基础设施](../../../../architecture/systems/control-infrastructure/feedback-stack.md)，内部实现原理见 [Message 桌面版实现原理](implementation.md)，Message Token 的专项设计见 [Message Token 设计](token.md)，设计和契约变化记录见 [Message Changelog](changelog.md)。
 
 ## 1. 控件定位
 
@@ -27,8 +27,8 @@ Message 的设计语言围绕控件职责、可观察状态和主题契约组织
 | 维度 | 含义 | Message 中的表达 |
 | --- | --- | --- |
 | 产品语义 | 控件在界面中承担的稳定职责。 | Message 是 AtomUI 桌面控件体系中的全局消息控件，用于展示轻量级、自动关闭的操作反馈。 |
-| 内容承载 | 用户数据、展示内容、集合项或操作入口如何进入控件。 | `Icon`、`MaxItems`。 |
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | collection/filter、motion、visual option。 |
+| 内容承载 | 用户数据、展示内容、集合项或操作入口如何进入控件。 | `Message` 内容对象、`Icon`、`MessageType`。 |
+| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | 自动关闭、hover 暂停、Stack 展开/折叠和关闭 motion。 |
 | 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | Message Token + ControlTheme。 |
 
 ## 3. API 与契约模型
@@ -39,16 +39,17 @@ Message 的公共契约由 public/protected 类型成员、Avalonia 属性、事
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `Icon`、`MaxItems` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `IsClosed`、`IsClosing`、`IsMotionEnabled` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `Position` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
-| 其他稳定入口 | `Message`、`MessageType` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+| 内容与数据 | `Show(IMessage, string[]?)`、`MaxItems` | 创建消息并约束活动项上限；`MaxItems <= 0` 表示不限制。 |
+| Stack | `IsStackEnabled`、`StackThreshold`、`IsPauseOnHover` | 控制阈值折叠、整体 hover 展开和生命周期暂停。 |
+| 交互与状态 | `DestroyAll()`、`IsClosed`、`IsClosing`、`IsMotionEnabled` | 清空活动消息，并表达卡片关闭与动效状态。 |
+| 视觉与布局 | `Position` | 默认为 `TopCenter`，决定宿主边和横向对齐。 |
+| 内容对象 | `Message`、`MessageType`、`IMessage.Expiration` | 表达正文、类型、图标、自动关闭时长与一次性关闭回调。 |
 
 稳定事件包括 `MessageClosed`。事件触发顺序属于兼容契约，不能因内部状态重排而改变。
 
 主要公开类型与枚举：
 
-- 类型：`Message`、`MessageCard`、`WindowMessageManager`。
+- 类型：`Message`、`MessageCard`、`WindowMessageManager`、`IMessageManager`。
 - 枚举：`MessageType`。
 
 稳定 template part：
@@ -58,7 +59,7 @@ Message 的公共契约由 public/protected 类型成员、Avalonia 属性、事
 | `PART_Frame` | `?` | 承载根视觉、边框、背景或尺寸基线。 |
 | `PART_HeaderContainer` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
 | `PART_IconContent` | `?` | 展示图标、状态图标或操作图标。 |
-| `PART_Items` | `Panel` | 承载集合项、布局面板或虚拟化内容。 |
+| `PART_Items` | `ItemsControl` | 承载 manager 的稳定卡片集合和共享 Stack panel。 |
 | `PART_Message` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
 
 控件专属或内部伪类包括 `Error=:error`、`Information=:information`、`Loading=:loading`、`MessageCardPseudoClass.Error`、`MessageCardPseudoClass.Information`、`MessageCardPseudoClass.Loading`、`MessageCardPseudoClass.Success`、`MessageCardPseudoClass.Warning`、`Success=:success`、`Warning=:warning`。这些伪类属于主题 selector 可观察契约，不能在未同步主题和 Gallery 的情况下重命名或删除。
@@ -91,7 +92,7 @@ Message 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的
 | `MessageCardTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 | `WindowMessageManagerTheme.axaml` | 定义弹层、窗口或 overlay 宿主视觉。 |
 
-Message 使用 `MessageToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 collection/filter、motion、visual option 运行时状态。
+Message 使用 internal `MessageCardToken` 作为控件 Token scope。Token 只表达卡片背景、padding、图标与外部间距等组件视觉语义，不承载 Stack、剩余时长或关闭状态。
 
 主题维护规则：
 
@@ -108,8 +109,9 @@ Message 与同分类控件共享尺寸、状态、Token、Gallery 展示和验�
 
 - `Message`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `MessageCard`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `MessageToken`：控件 Token scope，负责从全局 token 派生控件语义变量。
+- `MessageCardToken`：internal 控件 Token scope，负责从全局 token 派生卡片视觉变量。
 - `WindowMessageManager`：数据、状态或行为协作类型，维护集合同步和事件路径。
+- 共享 `FeedbackStackPresenter` / `FeedbackStackPanel` / `FeedbackLifetimeScheduler`：维护堆叠布局与生命周期调度，不拥有 Message public 内容语义。
 
 集成关系：
 
@@ -117,11 +119,11 @@ Message 与同分类控件共享尺寸、状态、Token、Gallery 展示和验�
 - 涉及 ItemsSource、Popup、Flyout、Window、Form 或 CompactSpace 的路径必须保持生命周期释放和数据状态同步。
 - 源码目录中的共享基类和内部协作类型形成维护边界，不能只修改桌面包装类而忽略共享状态 owner。
 
-## 7. 兼容性不变量
+## 7. 兼容性与维护不变量
 
 维护 Message 时必须保持以下不变量：
 
-- 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
+- Stack API、默认值与共享基础设施文档构成当前契约；后续不得仅修改 Message 一侧而造成两个管理器同名 API 语义分叉。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
@@ -133,15 +135,19 @@ Message 与同分类控件共享尺寸、状态、Token、Gallery 展示和验�
 
 ### 8.1 集合与数据同步模型
 
-Message 的集合状态必须能处理 source replace、reset、clear 和 container recycle。业务数据对象不应反向持有视觉对象，虚拟化或懒创建路径必须在容器回收时清理旧状态。
+Manager 持有稳定集合，模板只通过 `ItemsSource` 消费；重套模板不能清空或重新创建卡片。`MaxItems` 为正数时淘汰最旧活动项，`DestroyAll()` 为全部活动项发起一次正常关闭。业务内容对象不能反向持有 manager 或 presenter。
 
 ### 8.2 动效模型
 
-Message 的动效只表达状态变化反馈，不应改变 public API 语义。初始加载、禁用态和卸载路径应能抑制或取消动效，避免保留旧控件实例。
+Message 的进入/退出 motion 与 Stack 展开/折叠过渡相互独立。折叠时只有最新真实卡片可见，两层深度由静态 AXAML 背板表达；hover 展开全部。初始投影、禁用 motion、重套模板和卸载路径必须同步收敛或取消动效。
 
 ### 8.3 视觉选项模型
 
 Message 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
+
+### 8.4 生命周期计时模型
+
+默认自动关闭时长为 3 秒，零时长永久展示。一个 manager 只使用一个惰性共享调度器，并按最近 deadline 唤醒；普通状态只暂停悬停卡片，Stack 状态 hover 暂停全部活动卡片。继续计时必须使用剩余时长，不能重置完整时长。
 
 ## 9. 文档导航、LLMS 导出与验证策略
 
@@ -150,6 +156,7 @@ Message 的视觉选项通过 public API 归一为 theme variables、伪类或�
 - [Message 桌面版实现原理](implementation.md)
 - [Message Token 设计](token.md)
 - [Message Changelog](changelog.md)
+- [Feedback 堆叠基础设施](../../../../architecture/systems/control-infrastructure/feedback-stack.md)
 
 LLMS 语义区域：
 

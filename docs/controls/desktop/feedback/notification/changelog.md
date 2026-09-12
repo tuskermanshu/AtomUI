@@ -2,6 +2,16 @@
 
 本文档记录 Notification 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-12
+
+- Design
+  - Adopt the shared Feedback stack infrastructure with the Notification stack enabled by default, threshold `3`, whole-stack hover expansion and three visible collapsed cards.
+  - Define scale `1` / `0.94` / `0.88`, 8 DIP collapsed offsets, position-aware expansion and unlimited `MaxItems` as the Notification contract.
+  - Add the shared `IsStackEnabled`, `StackThreshold` and `DestroyAll()` manager contract.
+- Performance / lifecycle
+  - Replace fixed expiration and cleanup polling with one lazy nearest-deadline scheduler that refreshes progress only for visible active cards.
+  - Require stable ItemsSource-backed cards and deterministic cleanup for retemplate, detach, rehost, destroy, callback failure and dispose.
+
 ## 2026-08-24
 
 - Motion
