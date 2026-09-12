@@ -378,12 +378,12 @@
     </unit>
     <unit id="SemanticStageHint">
       <segment>
-        <source>A Dialog Overlay host floats above the page instead of rendering inline; it stays pinned here so each part can be inspected.</source>
+        <source>The overlay host is scoped to this stage, so the mask and the dialog stay inside it while each part is inspected.</source>
       </segment>
     </unit>
     <unit id="SemanticStylesDescription">
       <segment>
-        <source>Style Dialog Semantic Parts through the generated Semantic Style classes.</source>
+        <source>Style Dialog and MessageBox Semantic Parts through the generated Semantic Style classes.</source>
       </segment>
     </unit>
     <unit id="SemanticStylesTitle">

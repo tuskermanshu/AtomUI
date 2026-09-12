@@ -107,7 +107,7 @@ Dialog 公开 `Opened`、`Closing`、`Accepted`、`Rejected`、`Finished`、`Clo
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:177`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:183`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -165,7 +165,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 异步关闭
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:236`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:242`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -196,7 +196,7 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 加载状态
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:364`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:370`
 
 Gallery key：`ExamplesContent` / item `3`
 
@@ -231,7 +231,7 @@ Gallery key：`ExamplesContent` / item `3`
 
 ### 自定义页脚按钮
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:400`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:406`
 
 Gallery key：`ExamplesContent` / item `4`
 

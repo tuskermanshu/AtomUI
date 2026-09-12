@@ -453,14 +453,14 @@
     </unit>
     <unit id="SemanticStageHint">
       <segment>
-        <source>A Dialog Overlay host floats above the page instead of rendering inline; it stays pinned here so each part can be inspected.</source>
-        <target state="translated">O host Overlay do Dialog flutua sobre a página em vez de renderizar inline; ele fica fixo aqui para inspecionar cada parte.</target>
+        <source>The overlay host is scoped to this stage, so the mask and the dialog stay inside it while each part is inspected.</source>
+        <target state="translated">O host Overlay é limitado a este palco, então a máscara e o diálogo permanecem dentro dele enquanto cada parte é inspecionada.</target>
       </segment>
     </unit>
     <unit id="SemanticStylesDescription">
       <segment>
-        <source>Style Dialog Semantic Parts through the generated Semantic Style classes.</source>
-        <target state="translated">Estilize as Semantic Parts do Dialog com as classes Semantic Style geradas.</target>
+        <source>Style Dialog and MessageBox Semantic Parts through the generated Semantic Style classes.</source>
+        <target state="translated">Estilize as Semantic Parts do Dialog e do MessageBox com as classes Semantic Style geradas.</target>
       </segment>
     </unit>
     <unit id="SemanticStylesTitle">

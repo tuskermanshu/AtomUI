@@ -111,11 +111,16 @@
 
 **风险类型：** 服务创建的 Window 宿主、运行时 card、queue 和 motion。
 
-- [ ] **Gate A 设计审核：** 审计 `Message` service/session、WindowMessageManager 和 public `MessageCard` owner；确认 icon/content/action/status surface 区域，明确 manager host layer、多个 message stack、timeout/manual close、motion 和 Window detach。
-- [ ] 更新两份控件文档，写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
-- [ ] **Gate B 实现与验证：** 创建 `tests/AtomUI.Desktop.Controls.Tests/Message/MessageSemanticPartTests.cs`，覆盖全部类型、custom content/icon、多项 queue、timeout/manual close、host attach/detach 和 card 保留检查；Gallery 只在选择 Tab 后创建显式示例 root，并执行 NativeAOT 验证。
-- [ ] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
-- [ ] **强制停止：** 保持 Message 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
+- [x] **Gate A 设计审核：** 审计 `Message` service/session、WindowMessageManager 和 public `MessageCard` owner；确认 icon/content/action/status surface 区域，明确 manager host layer、多个 message stack、timeout/manual close、motion 和 Window detach。
+- [x] 更新两份控件文档，写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
+- [x] **Gate B 实现与验证：** 创建 `tests/AtomUI.Desktop.Controls.Tests/Message/MessageSemanticPartTests.cs`，覆盖全部类型、custom content/icon、多项 queue、timeout/manual close、host attach/detach 和 card 保留检查；Gallery 只在选择 Tab 后创建显式示例 root，并执行 NativeAOT 验证。
+- [x] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
+- [x] **强制停止：** 保持 Message 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
+
+> 2026-09-12 状态复核：任务 7 的勾选长期滞后于实际进度——Message 家族已由 `be91097d0`（增加 Message 语义部件、
+> 对齐上游示例并统一 Semantic Part 示例标题）与 `ebe687f89`（修复 Message 语义示例对齐并移除高亮白环）交付并经用户
+> 授权提交；`docs/controls/desktop/feedback/message/semantic-part.md`、`MessageSemanticPartTests` 与 Gallery 示例均在
+> 仓库中，且包含在历次全量测试通过范围内。本条目据此补记为完成。
 
 ### 任务 8：Modal / Dialog
 
@@ -127,9 +132,19 @@
 
 - [x] **Gate A 设计审核：** 审计 Dialog/MessageBox owner、DialogSurface、button box/header/resizer、overlay presenter/mask 和 window presenter；确认 surface/title/icon/content/footer/actions/close/mask/resize regions 和 owner 覆盖 Overlay/Window，记录 session open-close, teardown, host sizing 和 nested dialogs。
 - [x] 更新两份控件文档，写明准确的 Descriptor、cross-root/runtime 标志、owner/session 生命周期、真实节点、兼容性和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
-- [ ] **Gate B 实现与验证：** 新增 `tests/AtomUI.Desktop.Controls.Tests/Dialog/DialogSemanticPartTests.cs` 并扩展 MessageBox 测试，覆盖 Overlay/Window、modal/modeless、MessageBox 类型、button、resize/motion、嵌套 session、close failure 和 root release；验证 Gallery additional root 和 NativeAOT。
-- [ ] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
-- [ ] **强制停止：** 保持 Modal / Dialog 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
+- [x] **Gate B 实现与验证：** 新增 `tests/AtomUI.Desktop.Controls.Tests/Dialog/DialogSemanticPartTests.cs` 并扩展 MessageBox 测试，覆盖 Overlay/Window、modal/modeless、MessageBox 类型、button、resize/motion、嵌套 session、close failure 和 root release；验证 Gallery additional root 和 NativeAOT。
+- [x] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
+- [x] **强制停止：** 保持 Modal / Dialog 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
+
+> 2026-09-12 任务 8 收尾：实现与验证由 `7271b0a95`（用户 amend 并入 Core using 清理）与 `327346ea1`（示例文案修正）
+> 交付。`DialogSemanticPartTests` 14 用例覆盖 descriptor/marker/逻辑父/cross-root/精确单节点命中（Dialog 与
+> MessageBox 各自）/`OverlayScope`/钉住门控/Optional 语义；Gallery 新增 `ModalSemanticPartHighlightTests`
+> 运行期高亮回归（两个预览 × 9 部件逐张悬停恰好一个 Adorner；`root` 依赖舞台 owner 显式铺满——Dialog 主题默认零尺寸，
+> resolver 对零尺寸目标不建 Adorner）。真机视觉验收见
+> `docs/superpowers/specs/2026-09-12-dialog-semantic-visual-acceptance.md`（用户回传截图判定 1–4 项通过，
+> 悬停高亮由自动化覆盖）。Desktop Controls 3735/3735、Gallery 620→621/621、Generator 532/532、LLMS 23/23、
+> NativeAOT `osx-arm64` 通过；`git diff --check` 干净。既有间歇性 GC/时序抖动（`Closed_Overlay_Session_Releases_Surface…`、
+> `PopupConfirm_In_Dialog_Confirms…`）经基线提交 `f86c5b772` 双跑复现确认为**先于本批存在**，非本次引入。
 
 ### 任务 9：Notification
 
@@ -235,7 +250,19 @@
 > 加粗边框（2px `#FFCCC7`）、完整 `#FFCCC7` 硬阴影均已呈现，用户答复「解决了」。视觉验收判定通过，
 > 证据为用户回传截图（按约定不入库）。
 
-- [ ] 确认 10 个控件家族分别拥有用户授权的独立提交。
-- [ ] 运行完整 Desktop Controls、Generator、GalleryBase 和 Gallery 测试，并执行 Popup/Overlay 生命周期筛选。
-- [ ] 运行 LLMS verify、Gallery NativeAOT publish、适用的平台冒烟检查和 `git diff --check`。
-- [ ] 更新总计划清单，不创建批次提交。
+> 2026-09-12 批次收尾（本批 10 个家族全部完成）：Modal / Dialog 是最后一个家族（`7271b0a95` + `327346ea1`，含
+> `ModalSemanticPartHighlightTests` 运行期高亮回归与舞台 owner 铺满修复）；任务 7 Message 补记完成（`be91097d0` +
+> `ebe687f89`）。10 个家族的交付提交：ImagePreviewer `f32e2b258`/`08aa3e6ef`、InfoFlyout `e9401ee8b`、ToolTip
+> `5fe34ab8a`、Tour `b6ee2e315`、Drawer `e415b81f9`、DropdownButton `6abaf6100`、Message `be91097d0`/`ebe687f89`、
+> PopupConfirm `d8857e738`、Notification `f86c5b772`、Modal/Dialog `7271b0a95`/`327346ea1`，均经用户授权提交。
+> 收尾验证：Desktop Controls 3735/3735、Generator 532/532、GalleryBase 181/181、Gallery 621/621、Popup/Overlay
+> 生命周期筛选（Dialog|MessageBox）通过、LLMS verify 79/161、NativeAOT `osx-arm64` 通过、`git diff --check` 干净。
+> 已知非阻塞事项：两条先于本批存在的间歇性测试抖动（`DialogLifecycleTests.Closed_Overlay_Session_Releases_Surface…`
+> 与 `DialogPopupControlFamilyTests.PopupConfirm_In_Dialog_Confirms…`），已在基线提交 `f86c5b772` 双跑中复现确认；
+> Modal/Dialog 真机悬停高亮未单独截图，由自动化回归覆盖（见
+> `docs/superpowers/specs/2026-09-12-dialog-semantic-visual-acceptance.md`）。
+
+- [x] 确认 10 个控件家族分别拥有用户授权的独立提交。
+- [x] 运行完整 Desktop Controls、Generator、GalleryBase 和 Gallery 测试，并执行 Popup/Overlay 生命周期筛选。
+- [x] 运行 LLMS verify、Gallery NativeAOT publish、适用的平台冒烟检查和 `git diff --check`。
+- [x] 更新总计划清单，不创建批次提交。

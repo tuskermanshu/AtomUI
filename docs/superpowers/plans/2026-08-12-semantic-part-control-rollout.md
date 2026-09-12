@@ -60,7 +60,7 @@
 - [x] 第一批：基础控件，共 16 个家族。
 - [x] 第二批：集合与容器，共 16 个家族。（2026-08-27 复核：全部家族均已按用户授权提交）
 - [x] 第三批：输入与选择，共 15 个家族。（2026-09-10 复核：15 个家族全部按用户授权提交；视觉验收 NumericUpDown、Form、Transfer、AutoComplete、Cascader 已关闭，ColorPicker、Select、DatePicker 待视觉验收，Mentions、TimePicker、TreeSelect 尚无验收文档；本批次收尾测试尚未执行。）
-- [ ] 第四批：Popup 与独立宿主，共 10 个家族。（2026-09-11 范围复核：DropdownButton 正式映射上游 Dropdown 并纳入本批；ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、PopupConfirm 已按用户授权提交；Message、Modal / Dialog、Notification 未开始。）
+- [x] 第四批：Popup 与独立宿主，共 10 个家族。（2026-09-12 收尾：10 个家族全部按用户授权提交——ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、Message、PopupConfirm、Notification、Modal/Dialog；收尾验证 Desktop Controls 3735/3735、Generator 532/532、GalleryBase 181/181、Gallery 621/621、LLMS verify、NativeAOT `osx-arm64` 通过；真机视觉验收已关闭的家族见各自 `docs/superpowers/specs/` 验收记录，Modal/Dialog 悬停高亮由自动化回归覆盖。已知非阻塞：两条先于本批的间歇性测试抖动。）
 - [ ] 第五批：高密度控件，共 2 个家族。（未开始：NavMenu、DataGrid。）
 
 合计待改造：59 个控件家族。

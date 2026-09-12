@@ -46,7 +46,11 @@
                                                         TextWrapping="Wrap"
                                                         Foreground="{atom:SharedTokenResource ColorTextSecondary}"
                                                         Text="{gallery:ModalShowCaseLangResource SemanticStageHint}" />
+                                        <!-- owner 显式铺满舞台（420x320）：Dialog 主题默认零尺寸，而 resolver
+                                             对零尺寸目标不建 Adorner，不铺满则 root 部件无法高亮（先例：Drawer 舞台 Grid 拉伸）。 -->
                                         <atom:Dialog Name="ModalSemanticOwner"
+                                                     Width="420"
+                                                     Height="320"
                                                      Title="{gallery:ModalShowCaseLangResource SemanticPreviewTitleText}"
                                                      IsOpen="True"
                                                      IsPinnedOpen="True"
@@ -114,6 +118,8 @@
                                                         Foreground="{atom:SharedTokenResource ColorTextSecondary}"
                                                         Text="{gallery:ModalShowCaseLangResource SemanticStageHint}" />
                                         <atom:MessageBox Name="MessageBoxSemanticOwner"
+                                                         Width="420"
+                                                         Height="320"
                                                          Title="{gallery:ModalShowCaseLangResource P2TitleNormal}"
                                                          Style="Confirm"
                                                          IsOpen="True"

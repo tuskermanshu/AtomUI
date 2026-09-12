@@ -453,14 +453,14 @@
     </unit>
     <unit id="SemanticStageHint">
       <segment>
-        <source>A Dialog Overlay host floats above the page instead of rendering inline; it stays pinned here so each part can be inspected.</source>
-        <target state="translated">Dialog 的 Overlay 宿主浮在页面之上而非内联渲染；这里保持常开，便于逐个检视部件。</target>
+        <source>The overlay host is scoped to this stage, so the mask and the dialog stay inside it while each part is inspected.</source>
+        <target state="translated">Overlay 宿主被限定在这个舞台内，遮罩与对话框都停留在舞台中，便于逐个检视部件。</target>
       </segment>
     </unit>
     <unit id="SemanticStylesDescription">
       <segment>
-        <source>Style Dialog Semantic Parts through the generated Semantic Style classes.</source>
-        <target state="translated">通过生成的 Semantic Style 类定制 Dialog 的语义部件。</target>
+        <source>Style Dialog and MessageBox Semantic Parts through the generated Semantic Style classes.</source>
+        <target state="translated">通过生成的 Semantic Style 类定制 Dialog 与 MessageBox 的语义部件。</target>
       </segment>
     </unit>
     <unit id="SemanticStylesTitle">

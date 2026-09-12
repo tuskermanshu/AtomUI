@@ -18,7 +18,9 @@
 - Docs
   - Add `semantic-part.md`; replace the previous non-contract `root`/`host`/`surface`/`content`/`motion` overview summary with the real Part table; document the `.semantic-scope-*` route anchors, host boundaries and `IsPinnedOpen` semantics.
 - Gallery
-  - Add a MessageBox Semantic Part styling example parallel to the Dialog one (generated `MessageBox<Part>Style` classes, no code-behind fallback), and switch every Modal example trigger from `ToggleSwitch` to `Button` (MessageBox host selection is now two buttons; the semantic styling examples use an open button).
+  - Add a MessageBox Semantic Part styling demo inside the "Custom Semantic Part styling" example (generated `MessageBox<Part>Style` classes with an explicit owner selector, triggered by an `Open MessageBox` button next to the Dialog one), and switch every Modal example trigger from `ToggleSwitch` to `Button` (MessageBox host selection is now two buttons).
+  - Stack a second `SemanticPartPreview` for MessageBox under the Dialog preview in the Semantic Parts tab; both previews use the stage-scoped inline modal pattern (`OverlayScope`), and the stage owners are explicitly sized to the stage so the `root` part can highlight (the Dialog theme defaults to a zero-size owner and the resolver skips zero-size targets).
+  - Add `ModalSemanticPartHighlightTests`: hovering each of the 9 part cards in both previews yields exactly one highlight adorner, a mask press does not close the pinned previews, and switching back to Examples clears all highlights.
 - Validation
   - Add `DialogSemanticPartTests`: descriptor contract, static marker lists, runtime markers, logical-parent invariant, cross-root reporting, exact single-node style hits, pin gating, modeless/hidden-node `Optional` semantics and MessageBox parity. Desktop Controls 3732/3732; LLMS generate/verify 79 controls / 161 files.
   - Gallery Semantic Parts tab and NativeAOT publish are still pending.
