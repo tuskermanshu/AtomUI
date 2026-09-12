@@ -77,7 +77,7 @@ FloatButton
 | 内容与数据 | `CloseIcon`、`Description`、`DescriptionTemplate`、`Icon` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `BadgeCount`、`BadgeOverflowCount`、`IsTriggerMode` | 维护选择、展开、过滤、分页、分组或集合状态。 |
 | 命令与动作 | `Command`、`CommandParameter`、`Href` | 通过 Avalonia `Button` 命令语义触发业务动作；host 只做投影转发，不自行执行命令。 |
-| 交互与状态 | `IsBadgeEnabled`、`IsDotBadge`、`IsMotionEnabled`、`IsOpen` | 表达用户可观察状态、可用性、清除、加载或反馈语义；`FloatButtonGroup.IsOpen` 与 `FloatButtonGroupHost.IsOpen` 默认双向绑定。 |
+| 交互与状态 | `IsBadgeEnabled`、`IsDotBadge`、`IsMotionEnabled`、`IsOpen`、`IsShowProgress` | 表达用户可观察状态、可用性、清除、加载或反馈语义；`FloatButtonGroup.IsOpen` 与 `FloatButtonGroupHost.IsOpen` 默认双向绑定；`IsShowProgress` 是 BackTop 进度环显示开关。 |
 | 视觉与布局 | `BadgeColor`、`BadgeOffset`、`BoxShadow`、`FloatOffsetX`、`FloatOffsetY`、`MenuPlacement`、`Orientation`、`Placement`、`SeparatorBrush`、`Shape` 等 12 项 | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 动效与异步 | `MenuMotionDuration`、`MotionDuration`、`ToTopDuration` | 约束动效开关、异步加载、播放速度、超时和任务边界。 |
 | 其他稳定入口 | `ButtonType`、`Target`、`Tooltip`、`Trigger` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
@@ -104,6 +104,7 @@ Public API / inherited command / item source / user input
 - Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
 - `Command.CanExecute=false` 必须通过 Avalonia Button 语义反映为不可执行状态；BackTop 场景下不可执行命令也应阻止回到顶部动作。
 - open/close、motion、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
+- `IsShowProgress` 开启时，滚动进度由 `Target` 滚动几何派生为 0~1 的 internal 状态；进度值是派生状态，不通过 public API 暴露，也不参与命令或显隐阈值语义。
 - `IsOpen` 是默认 `TwoWay` 的受控状态；交互路径应使用 current value 语义更新，不得用样式优先级写入破坏用户绑定。
 - Host 创建的 overlay 按钮只能接收 host 公共属性投影；命令执行、`CanExecute`、事件顺序和禁用状态仍由真实 `FloatButton` 作为交互 owner。
 - Group host 搬移子按钮到 overlay group 时必须保留原有绑定语义，使未设置本地 `DataContext` 的子项继承 host 数据上下文。
@@ -126,6 +127,8 @@ FloatButton 的视觉模型由控件模板、ControlTheme、SharedToken 和必�
 | `FloatButtonTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
 
 FloatButton 使用 `FloatButtonToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 open/close、motion、visual option 运行时状态。
+
+BackTop 进度环不使用控件专属 Token：`BackTopFloatButtonTheme.axaml` 中的进度环节点直接引用全局 SharedToken（`LineWidthBold`、`ColorBorderSecondary`、`ColorPrimary`），显隐由 `IsShowProgress` 驱动的主题 selector 控制。
 
 主题维护规则：
 
@@ -165,6 +168,7 @@ FloatButton Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 - Avalonia Button 命令语义：`CanExecute`、禁用状态、点击事件和命令执行顺序不得被 host 手动调用路径绕开。
 - Host overlay 投影的 acquire/release 必须成对；不能留下命令绑定、数据上下文绑定或 child 逻辑父级保留。
 - Group 子按钮的命令绑定必须能继承 host `DataContext`，同时保留子项本地 `DataContext` 的优先级。
+- `BackTopProgressRing` 显隐契约：进度环默认隐藏，仅 `IsShowProgress=True` 的主题 selector 置可见；进度环线宽与颜色来自全局 SharedToken，不得引入控件实例色值或运行时状态色。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。

@@ -2,6 +2,15 @@
 
 本文档记录 FloatButton 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-12
+
+- API
+  - Add `IsShowProgress` (`bool`, default `false`) to `BackTopFloatButton` and `BackTopFloatButtonHost`, aligned with antd 6.6.0 `FloatButton.BackTop` `showProgress`.
+- Theme
+  - Add the internal `BackTopProgressRing` template node to `BackTopFloatButtonTheme.axaml`; visibility defaults to hidden and is enabled by the `IsShowProgress=True` selector. Stroke width and colors consume global tokens (`LineWidthBold`, `ColorBorderSecondary`, `ColorPrimary`); no control token is introduced.
+- Implementation
+  - Derive the internal scroll progress from the `Target` ScrollViewer in `ScrollChanged` and `OnLoaded`; Avalonia `ScrollChanged` covers extent/viewport changes, so no dedicated resize listener is required.
+
 ## 2026-07-09
 
 - Docs
