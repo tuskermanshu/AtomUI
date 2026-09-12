@@ -7,6 +7,18 @@
         <target state="translated">BackTop makes isso easy para go voltar para o superior de o página.</target>
       </segment>
     </unit>
+    <unit id="BackTopProgressDescription">
+      <segment>
+        <source>Show the current scroll progress around the BackTop button edge.</source>
+        <target state="translated">Mostra o progresso atual da rolagem na borda do botão BackTop.</target>
+      </segment>
+    </unit>
+    <unit id="BackTopProgressTitle">
+      <segment>
+        <source>BackTop with progress</source>
+        <target state="translated">BackTop com progresso</target>
+      </segment>
+    </unit>
     <unit id="BackTopTitle">
       <segment>
         <source>BackTop</source>

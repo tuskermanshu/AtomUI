@@ -7,6 +7,18 @@
         <target state="translated">BackTop 可以方便地回到頁面頂部。</target>
       </segment>
     </unit>
+    <unit id="BackTopProgressDescription">
+      <segment>
+        <source>Show the current scroll progress around the BackTop button edge.</source>
+        <target state="translated">在 BackTop 按鈕邊緣顯示當前滾動進度。</target>
+      </segment>
+    </unit>
+    <unit id="BackTopProgressTitle">
+      <segment>
+        <source>BackTop with progress</source>
+        <target state="translated">回到頂部（進度環）</target>
+      </segment>
+    </unit>
     <unit id="BackTopTitle">
       <segment>
         <source>BackTop</source>

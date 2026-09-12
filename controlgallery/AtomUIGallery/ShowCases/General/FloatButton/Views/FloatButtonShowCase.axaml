@@ -426,6 +426,41 @@
             </DataTemplate>
         </gallery:ShowCaseItem.DeferredContentTemplate>
     </gallery:ShowCaseItem>
+
+    <gallery:ShowCaseItem
+        Title="{gallery:FloatButtonShowCaseLangResource BackTopProgressTitle}"
+        Description="{gallery:FloatButtonShowCaseLangResource BackTopProgressDescription}"
+        IsDeferredContentEnabled="True">
+        <gallery:ShowCaseItem.DeferredContentTemplate>
+            <DataTemplate x:DataType="vm:FloatButtonViewModel">
+        <atom:ScrollViewer Height="300">
+            <Border Background="White">
+                <Panel Height="1000">
+                    <StackPanel>
+                        <TextBlock Text="{gallery:FloatButtonShowCaseLangResource P2TextScrollToBottom}" />
+                        <TextBlock Text="{gallery:FloatButtonShowCaseLangResource P2TextScrollToBottom}" />
+                        <TextBlock Text="{gallery:FloatButtonShowCaseLangResource P2TextScrollToBottom}" />
+                        <TextBlock Text="{gallery:FloatButtonShowCaseLangResource P2TextScrollToBottom}" />
+                        <TextBlock Text="{gallery:FloatButtonShowCaseLangResource P2TextScrollToBottom}" />
+                        <TextBlock Text="{gallery:FloatButtonShowCaseLangResource P2TextScrollToBottom}" />
+                        <TextBlock Text="{gallery:FloatButtonShowCaseLangResource P2TextScrollToBottom}" />
+                        <TextBlock Text="{gallery:FloatButtonShowCaseLangResource P2TextScrollToBottom}" />
+                    </StackPanel>
+                    <atom:BackTopFloatButtonHost ButtonType="Default"
+                                                 IsShowProgress="True"
+                                                 VisibilityHeight="0" />
+                    <atom:BackTopFloatButtonHost ButtonType="Default"
+                                                 Shape="Square"
+                                                 IsShowProgress="True"
+                                                 VisibilityHeight="0"
+                                                 FloatOffsetX="72" />
+                </Panel>
+            </Border>
+        </atom:ScrollViewer>
+
+            </DataTemplate>
+        </gallery:ShowCaseItem.DeferredContentTemplate>
+    </gallery:ShowCaseItem>
             </gallery:ShowCasePanel>
         </gallery:GalleryStickyTabsHost>
     </Grid>

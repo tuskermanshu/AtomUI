@@ -42,14 +42,15 @@ public class FloatButtonShowCasePageTests
         source.ShouldNotContain("LineHeight=\"22\"");
         source.ShouldContain("Description=\"{gallery:FloatButtonShowCaseLangResource PageDescription}\"");
         source.ShouldContain("<gallery:ShowCaseItem");
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(12);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(12);
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:FloatButtonViewModel\"").ShouldBe(12);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(13);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(13);
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:FloatButtonViewModel\"").ShouldBe(13);
         source.ShouldContain("FloatButtonShowCaseLangResource BasicTitle");
         source.ShouldContain("FloatButtonShowCaseLangResource CommandTitle");
         source.ShouldContain("FloatButtonShowCaseLangResource ControlledModeTitle");
         source.ShouldContain("FloatButtonShowCaseLangResource PlacementTitle");
         source.ShouldContain("FloatButtonShowCaseLangResource BackTopTitle");
+        source.ShouldContain("FloatButtonShowCaseLangResource BackTopProgressTitle");
         source.ShouldContain("IsOccupyEntireRow=\"True\"");
         source.ShouldNotContain("<atom:TabControl");
         source.ShouldNotContain("<atom:TabItem");

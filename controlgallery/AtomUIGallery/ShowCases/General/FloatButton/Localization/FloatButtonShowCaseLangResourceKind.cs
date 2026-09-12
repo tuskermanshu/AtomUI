@@ -29,6 +29,8 @@ public enum FloatButtonShowCaseLangResourceKind
     BadgeDescription,
     BackTopTitle,
     BackTopDescription,
+    BackTopProgressTitle,
+    BackTopProgressDescription,
     P2TooltipSinceN5N25N0,
     P2TooltipDocuments,
     P2DescriptionHelpInfo,
