@@ -167,19 +167,14 @@ Gallery key：`ExamplesContent` / item `12`
                 <TextBlock Text="滚动到底部" />
                 <TextBlock Text="滚动到底部" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Margin="0,16,16,0">
-                <atom:BackTopFloatButtonHost ButtonType="Default"
-                                             IsShowProgress="True"
-                                             VisibilityHeight="0" />
-                <atom:BackTopFloatButtonHost ButtonType="Default"
-                                             Shape="Square"
-                                             IsShowProgress="True"
-                                             VisibilityHeight="0" />
-            </StackPanel>
+            <atom:BackTopFloatButtonHost ButtonType="Default"
+                                         IsShowProgress="True"
+                                         VisibilityHeight="0" />
+            <atom:BackTopFloatButtonHost ButtonType="Default"
+                                         Shape="Square"
+                                         IsShowProgress="True"
+                                         VisibilityHeight="0"
+                                         FloatOffsetX="72" />
         </Panel>
     </Border>
 </atom:ScrollViewer>

@@ -68,6 +68,28 @@ internal class BackTopProgressRing : Control
 
     private IPen? _trackPen;
 
+    /// <summary>
+    /// 计算环的几何：外/中心线/内边界矩形与对应圆角半径。
+    /// 外边界半径必须等于按钮自身的圆角半径，使环的外缘与按钮轮廓完全重合；
+    /// 中心线半径为外边界半径减去半线宽，内边界半径为外边界半径减去线宽。
+    /// </summary>
+    internal static BackTopProgressRingMetrics CalculateRingMetrics(
+        Size size, double cornerRadius, double thickness)
+    {
+        var outerRect      = new Rect(size);
+        var centerlineRect = outerRect.Deflate(thickness / 2);
+        var innerRect      = outerRect.Deflate(thickness);
+        var halfThickness  = thickness / 2;
+
+        var outerLimit    = Math.Min(outerRect.Width, outerRect.Height) / 2;
+        var outerRadius   = Math.Clamp(cornerRadius, 0d, outerLimit);
+        var centerlineRadius = Math.Max(0d, outerRadius - halfThickness);
+        var innerRadius      = Math.Max(0d, outerRadius - thickness);
+
+        return new BackTopProgressRingMetrics(outerRect, centerlineRect, innerRect,
+            outerRadius, centerlineRadius, innerRadius);
+    }
+
     public override void Render(DrawingContext context)
     {
         var bounds    = new Rect(Bounds.Size);
@@ -77,15 +99,14 @@ internal class BackTopProgressRing : Control
             return;
         }
 
-        // 描边带完全落在控件边界内，等价 antd border-box 内的边框环
-        var ringRect = bounds.Deflate(thickness / 2);
-        var radius   = EffectiveRadius(ringRect);
+        var metrics = CalculateRingMetrics(bounds.Size, CornerRadius.TopLeft, thickness);
 
         PenUtils.TryModifyOrCreate(ref _trackPen, TrackBrush, thickness);
         if (_trackPen is not null)
         {
-            // CornerRadius=尺寸一半（Circle 由 AbstractFloatButton.OnSizeChanged 设置）时即为圆
-            context.DrawRectangle(null, _trackPen, ringRect, radius, radius);
+            // 轨道描边以中心线为基准；外缘与按钮轮廓重合，两种形状共用同一路径
+            context.DrawRectangle(null, _trackPen, metrics.CenterlineRect,
+                metrics.CenterlineRadius, metrics.CenterlineRadius);
         }
 
         var sweepAngle = 360d * Math.Clamp(Progress, 0d, 1d);
@@ -95,14 +116,11 @@ internal class BackTopProgressRing : Control
         }
 
         // 进度扇形填充裁剪到「外圆角矩形−内圆角矩形」环带，Circle/Square 统一路径。
-        // 环带以 ringRect 为中心线、厚度为线宽，与轨道描边带重合：
-        // 外边界 = ringRect.Inflate(半线宽)，内边界 = ringRect.Deflate(半线宽)。
-        // 指示器必须是扇形填充而非 ringRect 的内切圆弧描边：Square 形状下圆角方向的
+        // 指示器必须是扇形填充而非环矩形的内切圆弧描边：Square 形状下圆角方向的
         // 内切圆弧半径小于外边界，会落入内孔几何被裁掉，进度环退化为四段侧边短线
-        var halfThickness = thickness / 2;
-        var bandGeometry  = new CombinedGeometry(GeometryCombineMode.Exclude,
-            BuildRoundedRectGeometry(ringRect.Inflate(halfThickness), radius + halfThickness),
-            BuildRoundedRectGeometry(ringRect.Deflate(halfThickness), Math.Max(0d, radius - halfThickness)));
+        var bandGeometry = new CombinedGeometry(GeometryCombineMode.Exclude,
+            BuildRoundedRectGeometry(metrics.OuterRect, metrics.OuterRadius),
+            BuildRoundedRectGeometry(metrics.InnerRect, metrics.InnerRadius));
 
         if (sweepAngle >= 360d)
         {
@@ -111,12 +129,12 @@ internal class BackTopProgressRing : Control
             return;
         }
 
-        // 以 ringRect.Center 为顶点的扇形，半径取半对角线以覆盖环带最外点，
+        // 以环中心为顶点的扇形，半径取半对角线以覆盖环带最外点，
         // 从 -90°（12 点方向）顺时针扫 sweepAngle。
         // 角度→点换算与 CommonShapeBuilder.GetRingPoint 同约定：x = cx + r·cos(deg)，y = cy + r·sin(deg)
-        var center = ringRect.Center;
-        var sectorRadius = Math.Sqrt(ringRect.Width * ringRect.Width / 4
-                                     + ringRect.Height * ringRect.Height / 4);
+        var center = metrics.CenterlineRect.Center;
+        var sectorRadius = Math.Sqrt(metrics.CenterlineRect.Width * metrics.CenterlineRect.Width / 4
+                                     + metrics.CenterlineRect.Height * metrics.CenterlineRect.Height / 4);
 
         var startPoint = new Point(
             center.X + sectorRadius * Math.Cos(MathUtils.Deg2Rad(-90d)),
@@ -139,11 +157,6 @@ internal class BackTopProgressRing : Control
         {
             context.DrawGeometry(IndicatorBrush, null, sectorGeometry);
         }
-    }
-
-    private double EffectiveRadius(Rect rect)
-    {
-        return Math.Clamp(CornerRadius.TopLeft, 0d, Math.Min(rect.Width, rect.Height) / 2);
     }
 
     private static StreamGeometry BuildRoundedRectGeometry(Rect rect, double radius)
@@ -183,3 +196,15 @@ internal class BackTopProgressRing : Control
         return geometry;
     }
 }
+
+/// <summary>
+/// 进度环的几何参数。外边界为按钮轮廓（半径等于按钮圆角半径），
+/// 中心线与内边界由线宽向内偏移得到。
+/// </summary>
+internal readonly record struct BackTopProgressRingMetrics(
+    Rect OuterRect,
+    Rect CenterlineRect,
+    Rect InnerRect,
+    double OuterRadius,
+    double CenterlineRadius,
+    double InnerRadius);

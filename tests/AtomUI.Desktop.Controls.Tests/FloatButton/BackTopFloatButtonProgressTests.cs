@@ -1,6 +1,7 @@
 using AtomUI.Controls;
 using AtomUI.Controls.Commons;
 using AtomUI.Controls.Primitives;
+using AtomUI.Utils;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -292,5 +293,84 @@ public class BackTopFloatButtonProgressTests
         {
             window.Close();
         }
+    }
+
+    [Theory]
+    [InlineData(40d, 8d)]   // Square：CornerRadius = BorderRadiusLG
+    [InlineData(40d, 20d)]  // Circle：CornerRadius = Height / 2
+    public void BackTop_Ring_OuterEdge_Should_Match_Button_CornerRadius(double size, double cornerRadius)
+    {
+        // 环的外缘必须与按钮轮廓完全重合（半径 = 按钮圆角半径），
+        // 否则圆角处会露出背景与环之间的缝隙。
+        var metrics = BackTopProgressRing.CalculateRingMetrics(new Size(size, size), cornerRadius, 2d);
+
+        metrics.OuterRadius.ShouldBe(cornerRadius, 0.0001d);
+        metrics.CenterlineRadius.ShouldBe(cornerRadius - 1d, 0.0001d);
+        metrics.InnerRadius.ShouldBe(cornerRadius - 2d, 0.0001d);
+        metrics.OuterRect.ShouldBe(new Rect(new Size(size, size)));
+    }
+
+    [Theory]
+    [InlineData(40d, 8d)]   // Square
+    [InlineData(40d, 20d)]  // Circle
+    public void BackTop_Ring_Band_Should_Cover_Button_Outline(double size, double cornerRadius)
+    {
+        // 沿按钮轮廓的四个圆角采样：这些点必须落在环带内（在外边界内、不在内孔里）。
+        // 这是圆角缝隙的直接几何判据——缝隙正是「按钮轮廓上未被环带覆盖」的区域。
+        // 使用自建圆角矩形包含判据而非 geometry.FillContains：后者在 headless 环境
+        // 下对 StreamGeometry 的命中测试不可靠（几何中心点都会被判为外部）。
+        const double thickness = 2d;
+        var metrics = BackTopProgressRing.CalculateRingMetrics(new Size(size, size), cornerRadius, thickness);
+
+        // 稍向内采样 0.05px，避免恰好落在边界上的浮点歧义。
+        // 每个圆角只采样其「向外」的 90° 象限：这些点才真正落在按钮轮廓上。
+        var sampleRadius = cornerRadius - 0.05d;
+        var cornerSamples = new[]
+        {
+            (Center: new Point(cornerRadius, cornerRadius), StartAngle: 180d),                  // 左上
+            (Center: new Point(size - cornerRadius, cornerRadius), StartAngle: 270d),           // 右上
+            (Center: new Point(size - cornerRadius, size - cornerRadius), StartAngle: 0d),      // 右下
+            (Center: new Point(cornerRadius, size - cornerRadius), StartAngle: 90d)             // 左下
+        };
+
+        foreach (var (cornerCenter, startAngle) in cornerSamples)
+        {
+            for (var offset = 0d; offset <= 90d; offset += 10d)
+            {
+                var rad   = MathUtils.Deg2Rad(startAngle + offset);
+                var point = new Point(
+                    cornerCenter.X + sampleRadius * Math.Cos(rad),
+                    cornerCenter.Y + sampleRadius * Math.Sin(rad));
+
+                InsideRoundedRect(metrics.OuterRect, metrics.OuterRadius, point)
+                    .ShouldBeTrue($"outline point {point} must be covered by ring outer boundary");
+                InsideRoundedRect(metrics.InnerRect, metrics.InnerRadius, point)
+                    .ShouldBeFalse($"outline point {point} must not fall inside ring inner hole");
+            }
+        }
+    }
+
+    private static bool InsideRoundedRect(Rect rect, double radius, Point point)
+    {
+        const double epsilon = 1e-9;
+        if (point.X < rect.Left - epsilon || point.X > rect.Right + epsilon ||
+            point.Y < rect.Top - epsilon || point.Y > rect.Bottom + epsilon)
+        {
+            return false;
+        }
+
+        radius = Math.Clamp(radius, 0d, Math.Min(rect.Width, rect.Height) / 2);
+        var centerX = Math.Clamp(point.X, rect.Left + radius, rect.Right - radius);
+        var centerY = Math.Clamp(point.Y, rect.Top + radius, rect.Bottom - radius);
+        var inCornerX = point.X < rect.Left + radius || point.X > rect.Right - radius;
+        var inCornerY = point.Y < rect.Top + radius || point.Y > rect.Bottom - radius;
+        if (inCornerX && inCornerY)
+        {
+            var dx = point.X - centerX;
+            var dy = point.Y - centerY;
+            return dx * dx + dy * dy <= radius * radius + epsilon;
+        }
+
+        return true;
     }
 }
