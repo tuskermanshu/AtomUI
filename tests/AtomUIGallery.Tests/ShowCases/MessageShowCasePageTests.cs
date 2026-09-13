@@ -1,8 +1,23 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using AtomUI.Desktop.Controls;
+using AtomUI.Toolkits.GalleryBase.Controls;
+using AtomUIGallery.ShowCases.Message;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Shouldly;
 using Xunit;
+using AvaloniaWindow = Avalonia.Controls.Window;
+using AvaloniaTextBlock = Avalonia.Controls.TextBlock;
+using DesktopButton = AtomUI.Desktop.Controls.Button;
+using DesktopNumericUpDown = AtomUI.Desktop.Controls.NumericUpDown;
+using DesktopRibbonBadge = AtomUI.Desktop.Controls.RibbonBadge;
+using DesktopToggleSwitch = AtomUI.Desktop.Controls.ToggleSwitch;
 
 namespace AtomUIGallery.Tests.ShowCases;
 
@@ -36,14 +51,16 @@ public class MessageShowCasePageTests
         source.ShouldContain("InitialDeferredLoadItemCount=\"4\"");
         source.ShouldContain("DeferredLoadBatchSize=\"2\"");
         source.ShouldContain("ContentMargin=\"28,10,28,28\"");
-        CountShowCaseItemElements(source).ShouldBe(4);
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(4);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(4);
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:MessageViewModel\"").ShouldBe(4);
+        CountShowCaseItemElements(source).ShouldBe(5);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(5);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(5);
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:MessageViewModel\"").ShouldBe(5);
         source.ShouldContain("MessageShowCaseLangResource BasicTitle");
         source.ShouldContain("MessageShowCaseLangResource OtherTypesTitle");
         source.ShouldContain("MessageShowCaseLangResource LoadingIndicatorTitle");
         source.ShouldContain("MessageShowCaseLangResource CallbackTitle");
+        source.ShouldContain("MessageShowCaseLangResource StackTitle");
+        source.ShouldContain("SourceKey=\"message-stack\"");
         source.ShouldNotContain("<atom:TabControl");
         source.ShouldNotContain("<atom:TabItem");
         source.ShouldNotContain("<atom:DataGrid");
@@ -59,6 +76,184 @@ public class MessageShowCasePageTests
         var normalized = NormalizeMarkup(ExtractMessageExampleItems(source));
         CountShowCaseItemElements(normalized).ShouldBe(ReadSnapshotCount(approved));
         ComputeSha256(normalized).ShouldBe(ReadSnapshotHash(approved));
+    }
+
+    [Fact]
+    public void Message_Stack_ShowCase_Isolates_Configuration_Lifetime_And_Destroy_Scope()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+        var page = new MessageShowCase();
+
+        ShowInWindow(page, window =>
+        {
+            var items = page.GetVisualDescendants().OfType<ShowCaseItem>().ToArray();
+            var stackItem = items.Single(item => item.SourceKey == "message-stack");
+            stackItem.MaterializeDeferredContent();
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+
+            var enabledSwitch = stackItem.GetVisualDescendants()
+                                         .OfType<DesktopToggleSwitch>()
+                                         .Single(control => control.Name == "StackEnabledSwitch");
+            var thresholdInput = stackItem.GetVisualDescendants()
+                                          .OfType<DesktopNumericUpDown>()
+                                          .Single(control => control.Name == "StackThresholdInput");
+            var openButton = stackItem.GetVisualDescendants()
+                                      .OfType<DesktopButton>()
+                                      .Single(control => control.Name == "OpenStackMessageButton");
+            var destroyButton = stackItem.GetVisualDescendants()
+                                         .OfType<DesktopButton>()
+                                         .Single(control => control.Name == "DestroyStackMessagesButton");
+
+            enabledSwitch.IsChecked.ShouldBe(true);
+            thresholdInput.Value.ShouldBe(3m);
+            thresholdInput.Minimum.ShouldBe(1m);
+            thresholdInput.Maximum.ShouldBe(10m);
+            thresholdInput.IsEnabled.ShouldBeTrue();
+
+            RaiseClick(destroyButton);
+            window.GetVisualDescendants().OfType<WindowMessageManager>().ShouldBeEmpty();
+
+            RaiseClick(openButton);
+            RaiseClick(openButton);
+            window.UpdateLayout();
+
+            var stackManager = window.GetVisualDescendants().OfType<WindowMessageManager>().Single();
+            stackManager.IsStackEnabled.ShouldBeTrue();
+            stackManager.StackThreshold.ShouldBe(3);
+            stackManager.GetVisualDescendants()
+                        .OfType<MessageCard>()
+                        .Select(card => card.Message)
+                        .ShouldBe([
+                            "Message 1: This is a stacked message.",
+                            "Message 2: This is a slightly longer stacked message."
+                        ]);
+
+            thresholdInput.Value = 5m;
+            stackManager.StackThreshold.ShouldBe(5);
+
+            enabledSwitch.IsChecked = false;
+            stackManager.IsStackEnabled.ShouldBeFalse();
+            thresholdInput.IsEnabled.ShouldBeFalse();
+
+            enabledSwitch.IsChecked = true;
+            stackManager.IsStackEnabled.ShouldBeTrue();
+            thresholdInput.IsEnabled.ShouldBeTrue();
+
+            var basicItem = items[0];
+            var normalButton = basicItem.GetVisualDescendants().OfType<DesktopButton>().Single();
+            RaiseClick(normalButton);
+            window.UpdateLayout();
+
+            var managers = window.GetVisualDescendants().OfType<WindowMessageManager>().ToArray();
+            managers.Length.ShouldBe(2);
+            var defaultManager = managers.Single(manager => !ReferenceEquals(manager, stackManager));
+            defaultManager.IsStackEnabled.ShouldBeFalse();
+            defaultManager.GetVisualDescendants().OfType<MessageCard>().Count().ShouldBe(1);
+
+            stackManager.IsMotionEnabled = false;
+            RaiseClick(destroyButton);
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+
+            stackManager.GetVisualDescendants().OfType<MessageCard>().ShouldBeEmpty();
+            defaultManager.GetVisualDescendants().OfType<MessageCard>().Count().ShouldBe(1);
+
+            RaiseClick(openButton);
+            window.UpdateLayout();
+            stackManager.GetVisualDescendants()
+                        .OfType<MessageCard>()
+                        .Single()
+                        .Message.ShouldBe("Message 3: This is a stacked message.");
+
+            window.Content = null;
+            Dispatcher.UIThread.RunJobs();
+            foreach (var manager in managers)
+            {
+                manager.GetVisualParent().ShouldBeNull();
+            }
+        });
+    }
+
+    [Fact]
+    public void Message_Stack_ShowCase_Localization_Is_Complete()
+    {
+        foreach (var language in new[] { "en-US", "zh-CN", "zh-TW", "pt-BR" })
+        {
+            var localization = XliffTestDocument.Read(
+                $"controlgallery/AtomUIGallery/ShowCases/Feedback/Message/Localization/{language}.xlf");
+
+            foreach (var key in new[]
+                     {
+                         "StackTitle",
+                         "StackDescription",
+                         "StackEnabledLabel",
+                         "StackThresholdLabel",
+                         "P2ContentOpenMessageBox",
+                         "P2ContentDestroyAll",
+                         "P2MessageStackedFormat",
+                         "P2MessageLongStackedFormat"
+                     })
+            {
+                localization.ContainsKey(key).ShouldBeTrue($"Missing {key} in {language}.");
+            }
+        }
+    }
+
+    [Fact]
+    public void Message_Stack_ShowCase_Configuration_Row_Uses_One_Vertical_Center_Line()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+        var page = new MessageShowCase();
+
+        ShowInWindow(page, window =>
+        {
+            var stackItem = page.GetVisualDescendants()
+                                .OfType<ShowCaseItem>()
+                                .Single(item => item.SourceKey == "message-stack");
+            stackItem.MaterializeDeferredContent();
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+
+            var enabledLabel = stackItem.GetVisualDescendants()
+                                        .OfType<AvaloniaTextBlock>()
+                                        .Single(control => control.Text == "Enabled:");
+            var thresholdLabel = stackItem.GetVisualDescendants()
+                                          .OfType<AvaloniaTextBlock>()
+                                          .Single(control => control.Text == "Threshold:");
+            var enabledSwitch = stackItem.GetVisualDescendants()
+                                         .OfType<DesktopToggleSwitch>()
+                                         .Single(control => control.Name == "StackEnabledSwitch");
+            var thresholdInput = stackItem.GetVisualDescendants()
+                                          .OfType<DesktopNumericUpDown>()
+                                          .Single(control => control.Name == "StackThresholdInput");
+
+            var expectedCenterY = GetCenterY(thresholdInput, stackItem);
+            GetCenterY(enabledLabel, stackItem).ShouldBe(expectedCenterY, 0.5);
+            GetCenterY(enabledSwitch, stackItem).ShouldBe(expectedCenterY, 0.5);
+            GetCenterY(thresholdLabel, stackItem).ShouldBe(expectedCenterY, 0.5);
+        });
+    }
+
+    [Fact]
+    public void Message_Stack_ShowCase_Displays_The_V619_Version_Badge()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+        var page = new MessageShowCase();
+
+        ShowInWindow(page, window =>
+        {
+            var stackItem = page.GetVisualDescendants()
+                                .OfType<ShowCaseItem>()
+                                .Single(item => item.SourceKey == "message-stack");
+            window.UpdateLayout();
+
+            stackItem.BadgeText.ShouldBe("v6.1.9");
+            stackItem.GetVisualDescendants()
+                     .OfType<DesktopRibbonBadge>()
+                     .Single()
+                     .Text.ShouldBe("v6.1.9");
+        });
     }
 
     private static string ExtractMessageExampleItems(string source)
@@ -123,6 +318,49 @@ public class MessageShowCasePageTests
 
             count++;
             startIndex = matchIndex + value.Length;
+        }
+    }
+
+    private static double GetCenterY(Control control, Visual relativeTo)
+    {
+        var center = control.TranslatePoint(
+            new Point(control.Bounds.Width / 2, control.Bounds.Height / 2),
+            relativeTo);
+        center.ShouldNotBeNull();
+        return center.Value.Y;
+    }
+
+    private static void RaiseClick(DesktopButton button)
+    {
+        button.RaiseEvent(new RoutedEventArgs(DesktopButton.ClickEvent, button));
+        Dispatcher.UIThread.RunJobs();
+    }
+
+    private static void ShowInWindow(Control content, Action<AvaloniaWindow> assertion)
+    {
+        var visualLayerManager = new VisualLayerManager
+        {
+            EnableAdornerLayer = true,
+            Child              = content
+        };
+        var window = new AvaloniaWindow
+        {
+            Width   = 1000,
+            Height  = 900,
+            Content = visualLayerManager
+        };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        try
+        {
+            assertion(window);
+        }
+        finally
+        {
+            window.Close();
+            Dispatcher.UIThread.RunJobs();
         }
     }
 

@@ -17,6 +17,10 @@ public enum NotificationShowCaseLangResourceKind
     CustomizedIconDescription,
     ProgressTitle,
     ProgressDescription,
+    StackTitle,
+    StackDescription,
+    StackEnabledLabel,
+    StackThresholdLabel,
     ComponentCategory,
     ComponentStatusStable,
     PageSubtitle,
@@ -37,6 +41,7 @@ public enum NotificationShowCaseLangResourceKind
     P2ContentBottomright,
     P2ContentPauseOnHover,
     P2ContentDonTPauseOnHover,
+    P2ContentDestroyAll,
     P2NotificationTitle,
     P2NotificationTopTitle,
     P2NotificationBottomTitle,
@@ -46,5 +51,8 @@ public enum NotificationShowCaseLangResourceKind
     P2NotificationBottomRightTitle,
     P2NotificationHello,
     P2NotificationContent,
-    P2NotificationNeverCloseContent
+    P2NotificationNeverCloseContent,
+    P2NotificationStackedTitleFormat,
+    P2NotificationStackedFormat,
+    P2NotificationLongStackedFormat
 }

@@ -1,9 +1,9 @@
 using AtomUI.Desktop.Controls;
-using AtomUI.Data;
 using AtomUIGallery.Localization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using AtomUINumericUpDown = AtomUI.Desktop.Controls.NumericUpDown;
 
 namespace AtomUIGallery.ShowCases.Message;
 
@@ -11,7 +11,11 @@ public partial class MessageShowCase : GalleryReactiveUserControl<MessageViewMod
 {
     public const string LanguageId = nameof(MessageShowCase);
 
-    private WindowMessageManager? _messageManager;
+    private WindowMessageManager? _defaultMessageManager;
+    private WindowMessageManager? _stackMessageManager;
+    private bool _isStackEnabled = true;
+    private int _stackThreshold = 3;
+    private int _stackMessageIndex;
 
     public MessageShowCase()
     {
@@ -21,14 +25,10 @@ public partial class MessageShowCase : GalleryReactiveUserControl<MessageViewMod
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        _messageManager?.Dispose();
-        _messageManager = null;
-    }
-
-    protected override void OnDataContextChanged(EventArgs e)
-    {
-        base.OnDataContextChanged(e);
-
+        _defaultMessageManager?.Dispose();
+        _defaultMessageManager = null;
+        _stackMessageManager?.Dispose();
+        _stackMessageManager = null;
     }
 
     private void ShowSimpleMessage(object? sender, RoutedEventArgs e)
@@ -103,9 +103,62 @@ public partial class MessageShowCase : GalleryReactiveUserControl<MessageViewMod
         ));
     }
 
+    private void HandleStackEnabledChanged(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not AtomUIToggleSwitch toggleSwitch)
+        {
+            return;
+        }
+
+        _isStackEnabled = toggleSwitch.IsChecked == true;
+        if (_stackMessageManager is not null)
+        {
+            _stackMessageManager.IsStackEnabled = _isStackEnabled;
+        }
+    }
+
+    private void HandleStackThresholdChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+    {
+        if (sender is not AtomUINumericUpDown { Value: { } value })
+        {
+            return;
+        }
+
+        _stackThreshold = (int)value;
+        if (_stackMessageManager is not null)
+        {
+            _stackMessageManager.StackThreshold = _stackThreshold;
+        }
+    }
+
+    private void ShowStackMessage(object? sender, RoutedEventArgs e)
+    {
+        var index = ++_stackMessageIndex;
+        var isLongMessage = index % 2 == 0;
+        var content = isLongMessage
+            ? Format(
+                MessageShowCaseLangResourceKind.P2MessageLongStackedFormat,
+                "Message {0}: This is a slightly longer stacked message.",
+                index)
+            : Format(
+                MessageShowCaseLangResourceKind.P2MessageStackedFormat,
+                "Message {0}: This is a stacked message.",
+                index);
+
+        GetStackMessageManager()?.Show(new AtomUIMessage(
+            content,
+            type: MessageType.Information,
+            expiration: TimeSpan.Zero));
+    }
+
+    private void DestroyStackMessages(object? sender, RoutedEventArgs e)
+    {
+        _stackMessageManager?.DestroyAll();
+    }
+
     private void ShowMessage(AtomUIMessage message)
     {
-        GetMessageManager()?.Show(message);
+        GetDefaultMessageManager()?.Show(message);
     }
 
     private static string Lang(MessageShowCaseLangResourceKind resourceKind, string fallback)
@@ -113,11 +166,19 @@ public partial class MessageShowCase : GalleryReactiveUserControl<MessageViewMod
         return GalleryLocalization.Get(resourceKind, fallback);
     }
 
-    private WindowMessageManager? GetMessageManager()
+    private static string Format(
+        MessageShowCaseLangResourceKind resourceKind,
+        string fallback,
+        params object?[] args)
     {
-        if (_messageManager is not null)
+        return GalleryLocalization.Format(resourceKind, fallback, args);
+    }
+
+    private WindowMessageManager? GetDefaultMessageManager()
+    {
+        if (_defaultMessageManager is not null)
         {
-            return _messageManager;
+            return _defaultMessageManager;
         }
 
         var topLevel = TopLevel.GetTopLevel(this);
@@ -126,11 +187,32 @@ public partial class MessageShowCase : GalleryReactiveUserControl<MessageViewMod
             return null;
         }
 
-        _messageManager = new WindowMessageManager(topLevel)
+        _defaultMessageManager = new WindowMessageManager(topLevel)
         {
-            MaxItems = 0,
-            IsStackEnabled = true
+            MaxItems = 0
         };
-        return _messageManager;
+        return _defaultMessageManager;
+    }
+
+    private WindowMessageManager? GetStackMessageManager()
+    {
+        if (_stackMessageManager is not null)
+        {
+            return _stackMessageManager;
+        }
+
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is null)
+        {
+            return null;
+        }
+
+        _stackMessageManager = new WindowMessageManager(topLevel)
+        {
+            MaxItems       = 0,
+            IsStackEnabled = _isStackEnabled,
+            StackThreshold = _stackThreshold
+        };
+        return _stackMessageManager;
     }
 }

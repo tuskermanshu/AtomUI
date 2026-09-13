@@ -3,24 +3,24 @@ using AtomUI.Icons.AntDesign;
 using AtomUI.MotionScene;
 using AtomUI.Reflection;
 using Avalonia;
-using Avalonia.Animation.Easings;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Threading;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
 
 [PseudoClasses(StdPseudoClass.Error, StdPseudoClass.Information, StdPseudoClass.Success, StdPseudoClass.Warning)]
-public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackStackItem
+public class NotificationCard : ContentControl,
+                                IMotionAwareControl,
+                                IFeedbackStackItem,
+                                IFeedbackStackTransitionSnapshotItem
 {
-    internal const double AnimationMaxOffsetY = 150d;
-    internal const double AnimationMaxOffsetX = 500d;
-
     #region 公共属性定义
     
     public static readonly DirectProperty<NotificationCard, bool> IsClosingProperty =
@@ -151,15 +151,18 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
 
     private bool _isClosing;
     private bool _isStackVisible = true;
-    private MotionExecutionState _closeMotionState;
+    private readonly FeedbackCardMotionCoordinator _motionCoordinator;
     private WindowNotificationManager? _notificationManager;
     private Grid? _layout;
     private IconButton? _closeButton;
     private NotificationProgressBar? _progressBar;
     private PathIcon? _templateNotificationIcon;
     private bool _isApplyingTemplateNotificationIcon;
-    private TimeSpan? _progressBarTotalExpiration;
+    private TimeSpan _progressBarTotalExpiration;
     private BaseMotionActor? _motionActor;
+    private FeedbackStackTransitionSnapshotHost? _stackTransitionSnapshotHost;
+    private Matrix _stackCollapseSnapshotTarget;
+    private bool _isStackCollapseSnapshotArmed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NotificationCard" /> class.
@@ -167,6 +170,7 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
     public NotificationCard(WindowNotificationManager manager)
     {
         _notificationManager = manager;
+        _motionCoordinator = new FeedbackCardMotionCoordinator(CompleteCloseMotion);
     }
     
     public void Close()
@@ -197,8 +201,38 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
         Expiration = remaining;
     }
 
+    bool IFeedbackStackTransitionSnapshotItem.TryBeginStackCollapseSnapshot()
+    {
+        ReleaseStackTransitionSnapshot();
+        return _stackTransitionSnapshotHost?.TryBeginSnapshot() == true;
+    }
+
+    void IFeedbackStackTransitionSnapshotItem.ArmStackCollapseSnapshot(ITransform targetTransform)
+    {
+        if (_stackTransitionSnapshotHost?.IsSnapshotActive != true)
+        {
+            return;
+        }
+
+        if (!HasStackTransformTransition())
+        {
+            ReleaseStackTransitionSnapshot();
+            return;
+        }
+
+        _stackCollapseSnapshotTarget = targetTransform.Value;
+        _isStackCollapseSnapshotArmed = true;
+    }
+
+    void IFeedbackStackTransitionSnapshotItem.ReleaseStackTransitionSnapshot()
+    {
+        ReleaseStackTransitionSnapshot();
+    }
+
     internal void ReleaseOwner()
     {
+        ReleaseStackTransitionSnapshot();
+        _motionCoordinator.Dispose();
         _notificationManager = null;
         OnClick = null;
         OnClose = null;
@@ -210,6 +244,7 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
         SetupPositionPseudoClasses(Position);
         SetupNotificationTypePseudoClasses();
         SetupDefaultNotificationIcon();
+        ApplyMotionActor();
         if (_closeButton != null)
         {
             _closeButton.Click += HandleCloseButtonClose;
@@ -218,6 +253,8 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        ReleaseStackTransitionSnapshot();
+        _motionCoordinator.DetachActor(IsClosing, IsClosed);
         base.OnDetachedFromVisualTree(e);
         if (_closeButton != null)
         {
@@ -229,6 +266,7 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
+        ReleaseStackTransitionSnapshot();
         base.OnApplyTemplate(e);
 
         if (_closeButton is not null)
@@ -239,141 +277,32 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
         _layout      = e.NameScope.Find<Grid>("PART_Layout");
         _closeButton = e.NameScope.Find<IconButton>("PART_CloseButton");
         _motionActor = e.NameScope.Find<BaseMotionActor>(BaseMotionActor.MotionActorPart);
+        _stackTransitionSnapshotHost = e.NameScope.Find<FeedbackStackTransitionSnapshotHost>(
+            FeedbackStackTransitionSnapshotHost.SnapshotHostPart);
 
         if (_closeButton is not null)
         {
             _closeButton.Click += HandleCloseButtonClose;
         }
 
-        if (_motionActor is not null && IsMotionEnabled && !IsClosing)
-        {
-            _motionActor.Opacity = 0;
-        }
-
-        if (IsClosing)
-        {
-            ScheduleHideMotion(DispatcherPriority.Loaded);
-        }
-        else
-        {
-            Dispatcher.InvokeAsync(ApplyShowMotionAsync, DispatcherPriority.Loaded);
-        }
+        ApplyMotionActor();
         ConfigureProgressBar();
     }
 
-    private async Task ApplyShowMotionAsync()
+    private void ApplyMotionActor()
     {
-        if (IsClosing)
-        {
-            return;
-        }
-
-        if (_motionActor is null)
-        {
-            return;
-        }
-
-        if (IsMotionEnabled)
-        {
-            AbstractMotion? motion;
-            if (Position == NotificationPosition.TopLeft || Position == NotificationPosition.BottomLeft)
-            {
-                motion = new NotificationMoveLeftInMotion(AnimationMaxOffsetX,
-                    _openCloseMotionDuration, new CubicEaseOut());
-            }
-            else if (Position == NotificationPosition.TopRight || Position == NotificationPosition.BottomRight)
-            {
-                motion = new NotificationMoveRightInMotion(AnimationMaxOffsetX, _openCloseMotionDuration, new CubicEaseOut());
-            }
-            else if (Position == NotificationPosition.TopCenter)
-            {
-                motion = new NotificationMoveUpInMotion(AnimationMaxOffsetY, _openCloseMotionDuration,
-                    new CubicEaseOut());
-            }
-            else
-            {
-                motion = new NotificationMoveDownInMotion(AnimationMaxOffsetY, _openCloseMotionDuration,
-                    new CubicEaseOut());
-            }
-            await motion.RunAsync(_motionActor);
-            _motionActor.Opacity = 1;
-        }
-    }
-
-    private async Task ApplyHideMotionAsync()
-    {
-        if (_closeMotionState != MotionExecutionState.Pending)
-        {
-            return;
-        }
-
-        _closeMotionState = MotionExecutionState.Playing;
-        if (_motionActor is null || !IsMotionEnabled)
-        {
-            CompleteCloseMotion();
-            return;
-        }
-
-        AbstractMotion? motion;
-        if (Position == NotificationPosition.TopLeft || Position == NotificationPosition.BottomLeft)
-        {
-            motion = new NotificationMoveLeftOutMotion(AnimationMaxOffsetX, _openCloseMotionDuration,
-                new CubicEaseIn());
-        }
-        else if (Position == NotificationPosition.TopRight || Position == NotificationPosition.BottomRight)
-        {
-            motion = new NotificationMoveRightOutMotion(AnimationMaxOffsetX, _openCloseMotionDuration,
-                new CubicEaseIn());
-        }
-        else if (Position == NotificationPosition.TopCenter)
-        {
-            motion = new NotificationMoveUpOutMotion(AnimationMaxOffsetY, _openCloseMotionDuration,
-                new CubicEaseIn());
-        }
-        else
-        {
-            motion = new NotificationMoveDownOutMotion(AnimationMaxOffsetY, _openCloseMotionDuration,
-                new CubicEaseIn());
-        }
-
-        await motion.RunAsync(_motionActor);
-        CompleteCloseMotion();
-    }
-
-    private void ScheduleHideMotion(DispatcherPriority? priority = null)
-    {
-        if (!IsClosing || IsClosed || _closeMotionState != MotionExecutionState.Idle)
-        {
-            return;
-        }
-
-        _closeMotionState = MotionExecutionState.Pending;
-        if (priority is { } dispatcherPriority)
-        {
-            Dispatcher.InvokeAsync(ApplyHideMotionAsync, dispatcherPriority);
-        }
-        else
-        {
-            Dispatcher.InvokeAsync(ApplyHideMotionAsync);
-        }
+        _motionCoordinator.ApplyActor(
+            _motionActor,
+            IsClosing,
+            IsClosed,
+            IsMotionEnabled,
+            Position,
+            OpenCloseMotionDuration);
     }
 
     private void CompleteCloseMotion()
     {
-        if (_closeMotionState != MotionExecutionState.Playing)
-        {
-            return;
-        }
-
-        _closeMotionState = MotionExecutionState.Completing;
-        try
-        {
-            IsClosed = true;
-        }
-        finally
-        {
-            _closeMotionState = MotionExecutionState.Idle;
-        }
+        IsClosed = true;
     }
 
     private void HandleCloseButtonClose(object? sender, EventArgs args)
@@ -394,8 +323,14 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
             }
         }
         
-        if (change.Property == IsClosedProperty)
+        if (change.Property == RenderTransformProperty)
         {
+            TryCompleteStackTransitionSnapshot(change.GetNewValue<ITransform?>());
+        }
+        else if (change.Property == IsClosedProperty)
+        {
+            ReleaseStackTransitionSnapshot();
+            UpdateMotionConfiguration();
             if (!IsClosing && !IsClosed)
             {
                 return;
@@ -405,13 +340,17 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
         }
         else if (change.Property == PositionProperty)
         {
+            ReleaseStackTransitionSnapshot();
             SetupPositionPseudoClasses(change.GetNewValue<NotificationPosition>());
+            UpdateMotionConfiguration();
         } 
         else if (change.Property == IsClosingProperty)
         {
             if (IsClosing)
             {
-                ScheduleHideMotion();
+                ReleaseStackTransitionSnapshot();
+                InvalidateFeedbackStackMeasure();
+                _motionCoordinator.StartClose(IsClosed, IsMotionEnabled, Position, OpenCloseMotionDuration);
             }
         } 
         else if (change.Property == IconProperty)
@@ -426,6 +365,85 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
                  change.Property == ExpirationProperty)
         {
             ConfigureProgressBar();
+        }
+        else if (change.Property == IsMotionEnabledProperty ||
+                 change.Property == OpenCloseMotionDurationProperty)
+        {
+            if (!IsMotionEnabled)
+            {
+                ReleaseStackTransitionSnapshot();
+            }
+            UpdateMotionConfiguration();
+        }
+    }
+
+    private bool HasStackTransformTransition()
+    {
+        if (!IsMotionEnabled || Transitions is null)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < Transitions.Count; i++)
+        {
+            var transition = Transitions[i];
+            if (transition.Property == RenderTransformProperty &&
+                transition is TransformOperationsTransition { Duration: var duration } &&
+                duration > TimeSpan.Zero)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void TryCompleteStackTransitionSnapshot(ITransform? currentTransform)
+    {
+        if (!_isStackCollapseSnapshotArmed ||
+            currentTransform is null ||
+            !MatricesAreClose(currentTransform.Value, _stackCollapseSnapshotTarget))
+        {
+            return;
+        }
+
+        ReleaseStackTransitionSnapshot();
+    }
+
+    private void ReleaseStackTransitionSnapshot()
+    {
+        _isStackCollapseSnapshotArmed = false;
+        _stackCollapseSnapshotTarget = default;
+        _stackTransitionSnapshotHost?.ReleaseSnapshot();
+    }
+
+    private static bool MatricesAreClose(Matrix first, Matrix second)
+    {
+        const double tolerance = 0.0001;
+        return Math.Abs(first.M11 - second.M11) < tolerance &&
+               Math.Abs(first.M12 - second.M12) < tolerance &&
+               Math.Abs(first.M21 - second.M21) < tolerance &&
+               Math.Abs(first.M22 - second.M22) < tolerance &&
+               Math.Abs(first.M31 - second.M31) < tolerance &&
+               Math.Abs(first.M32 - second.M32) < tolerance;
+    }
+
+    private void UpdateMotionConfiguration()
+    {
+        _motionCoordinator.UpdateConfiguration(
+            IsClosing,
+            IsClosed,
+            IsMotionEnabled,
+            Position,
+            OpenCloseMotionDuration);
+    }
+
+    private void InvalidateFeedbackStackMeasure()
+    {
+        InvalidateMeasure();
+        if (this.GetVisualParent() is Control parent)
+        {
+            parent.InvalidateMeasure();
         }
     }
 
@@ -453,8 +471,7 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
             _layout.Children.Add(_progressBar);
         }
 
-        var totalExpiration = _progressBarTotalExpiration ?? Expiration.Value;
-        _progressBar.SetCurrentValue(NotificationProgressBar.ExpirationProperty, totalExpiration);
+        _progressBar.SetCurrentValue(NotificationProgressBar.ExpirationProperty, _progressBarTotalExpiration);
         _progressBar.SetCurrentValue(NotificationProgressBar.CurrentExpirationProperty, Expiration.Value);
     }
 
@@ -468,7 +485,7 @@ public class NotificationCard : ContentControl, IMotionAwareControl, IFeedbackSt
         _layout?.Children.Remove(_progressBar);
         _progressBar.SetTemplatedParent(null);
         _progressBar                = null;
-        _progressBarTotalExpiration = null;
+        _progressBarTotalExpiration = default;
     }
 
     private void SetupNotificationTypePseudoClasses()

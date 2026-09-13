@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Shouldly;
 using Xunit;
 
@@ -149,6 +150,61 @@ public class FeedbackLifetimeSchedulerTests
         wakeup.DisposeCount.ShouldBe(1);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Last_Wakeup_Releases_Expired_And_Already_Closing_Items(bool alreadyClosing)
+    {
+        var clock = new ManualFeedbackClock();
+        var wakeup = new ManualFeedbackWakeup();
+        using var scheduler = new FeedbackLifetimeScheduler(clock, wakeup);
+        var reference = RegisterUnownedItem(scheduler, alreadyClosing);
+
+        clock.Advance(TimeSpan.FromSeconds(1));
+        wakeup.Fire();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        scheduler.Count.ShouldBe(0);
+        wakeup.IsScheduled.ShouldBeFalse();
+        reference.IsAlive.ShouldBeFalse();
+        GC.KeepAlive(scheduler);
+    }
+
+    [Fact]
+    public void Next_Wakeup_Uses_The_Time_After_Close_Callbacks()
+    {
+        var clock = new ManualFeedbackClock();
+        var wakeup = new ManualFeedbackWakeup();
+        using var scheduler = new FeedbackLifetimeScheduler(clock, wakeup);
+        var early = new TestFeedbackItem { OnClose = () => clock.Advance(TimeSpan.FromSeconds(1)) };
+        var late = new TestFeedbackItem();
+        scheduler.Register(early, TimeSpan.FromSeconds(2));
+        scheduler.Register(late, TimeSpan.FromSeconds(5));
+
+        clock.Advance(TimeSpan.FromSeconds(2));
+        wakeup.Fire();
+
+        early.CloseCount.ShouldBe(1);
+        wakeup.Due.ShouldBe(TimeSpan.FromSeconds(2));
+        clock.Advance(wakeup.Due);
+        wakeup.Fire();
+        late.CloseCount.ShouldBe(1);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference RegisterUnownedItem(FeedbackLifetimeScheduler scheduler, bool alreadyClosing)
+    {
+        var item = new TestFeedbackItem();
+        scheduler.Register(item, TimeSpan.FromSeconds(1));
+        if (alreadyClosing)
+        {
+            item.RequestClose();
+        }
+        return new WeakReference(item);
+    }
+
     private sealed class TestFeedbackItem : IFeedbackStackItem
     {
         public bool IsClosing { get; private set; }
@@ -158,11 +214,13 @@ public class FeedbackLifetimeSchedulerTests
         public int CloseCount { get; private set; }
         public int RemainingUpdates { get; private set; }
         public TimeSpan LastRemaining { get; private set; }
+        public Action? OnClose { get; init; }
 
         public void RequestClose()
         {
             CloseCount++;
             IsClosing = true;
+            OnClose?.Invoke();
         }
 
         public void UpdateRemaining(TimeSpan remaining)

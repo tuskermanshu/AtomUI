@@ -8,12 +8,13 @@
     <ControlTheme x:Key="{x:Type atom:NotificationCard}" TargetType="atom:NotificationCard">
         <Setter Property="Template">
             <ControlTemplate>
-                <atom:LayoutAwareMotionActor Name="{x:Static atom:BaseMotionActor.MotionActorPart}"
-                                             ClipToBounds="False">
+                <atom:MotionActor Name="{x:Static atom:BaseMotionActor.MotionActorPart}"
+                                  ClipToBounds="False">
                     <Border Name="Frame">
-                        <Grid Name="PART_Layout"
-                              ColumnDefinitions="Auto, *"
-                              RowDefinitions="Auto, *, Auto">
+                        <atom:FeedbackStackTransitionSnapshotHost Name="PART_StackTransitionSnapshotHost">
+                            <Grid Name="PART_Layout"
+                                  ColumnDefinitions="Auto, *"
+                                  RowDefinitions="Auto, *, Auto">
                             <atom:IconPresenter
                                 Name="IconPresenter"
                                 Grid.Row="0"
@@ -41,9 +42,10 @@
                                 Grid.Column="1"
                                 Content="{TemplateBinding Content, Converter={StaticResource StringToSelectableTextBlockConverter}}"
                                 ContentTemplate="{TemplateBinding ContentTemplate}" />
-                        </Grid>
+                            </Grid>
+                        </atom:FeedbackStackTransitionSnapshotHost>
                     </Border>
-                </atom:LayoutAwareMotionActor>
+                </atom:MotionActor>
             </ControlTemplate>
         </Setter>
 
@@ -54,8 +56,15 @@
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Transitions">
             <Transitions>
-                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" />
-                <DoubleTransition Property="Opacity" Duration="0:0:0.1" />
+                <TransformOperationsTransition Property="RenderTransform"
+                                               Duration="{atom:SharedTokenResourceValue Kind=MotionDurationMid}"
+                                               Easing="0.645,0.045,0.355,1" />
+                <DoubleTransition Property="Opacity"
+                                  Duration="{atom:SharedTokenResourceValue Kind=MotionDurationMid}"
+                                  Easing="0.645,0.045,0.355,1" />
+                <DoubleTransition Property="{x:Static atom:FeedbackStackPanel.StackClipProgressProperty}"
+                                  Duration="{atom:SharedTokenResourceValue Kind=MotionDurationMid}"
+                                  Easing="0.645,0.045,0.355,1" />
             </Transitions>
         </Setter>
 

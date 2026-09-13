@@ -71,8 +71,12 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="Transitions">
             <Transitions>
-                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" />
-                <DoubleTransition Property="Opacity" Duration="0:0:0.1" />
+                <TransformOperationsTransition Property="RenderTransform"
+                                               Duration="{atom:SharedTokenResourceValue Kind=MotionDurationMid}"
+                                               Easing="0.645,0.045,0.355,1" />
+                <DoubleTransition Property="Opacity"
+                                  Duration="{atom:SharedTokenResourceValue Kind=MotionDurationMid}"
+                                  Easing="0.645,0.045,0.355,1" />
             </Transitions>
         </Setter>
 

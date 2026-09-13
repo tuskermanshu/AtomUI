@@ -49,7 +49,7 @@ Notification 的公共契约由 public/protected 类型成员、Avalonia 属性�
 
 主要公开类型与枚举：
 
-- 类型：`Notification`、`NotificationCard`、`NotificationProgressBar`、`WindowNotificationManager`、`INotificationManager` 及 Notification 进入/退出 motion 类型。
+- 类型：`Notification`、`NotificationCard`、`NotificationProgressBar`、`WindowNotificationManager`、`INotificationManager`。
 - 枚举：`NotificationPosition`、`NotificationType`。
 
 `NotificationType.Default` 表达普通通知语义，默认不显示类型图标，也不投射 success/info/warning/error 状态伪类。`Information`、`Success`、`Warning` 和 `Error` 表达带类型通知语义，在未设置自定义 `Icon` 时使用对应状态图标，并参与状态颜色 selector。
@@ -110,19 +110,12 @@ Notification 与同分类控件共享尺寸、状态、Token、Gallery 展示和
 
 - `Notification`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `NotificationCard`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveDownInMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveDownOutMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveLeftInMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveLeftOutMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveRightInMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveRightOutMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveUpInMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveUpOutMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `NotificationProgressBar`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `NotificationProgressBarVisibleConverter`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `NotificationCardToken`：internal 控件 Token scope，负责从全局 token 派生卡片视觉变量。
 - `WindowNotificationManager`：数据、状态或行为协作类型，维护集合同步和事件路径。
 - 共享 `FeedbackStackPresenter` / `FeedbackStackPanel` / `FeedbackLifetimeScheduler`：维护堆叠布局与生命周期调度，不拥有 Notification public 内容语义。
+- 共享 `FeedbackCardMotion` / `FeedbackCardMotionCoordinator`：维护位置感知的进入/退出曲线、单 actor 执行和取消释放，不进入 public API。
 
 集成关系：
 
@@ -130,7 +123,7 @@ Notification 与同分类控件共享尺寸、状态、Token、Gallery 展示和
 - 涉及 ItemsSource、Popup、Flyout、Window、Form 或 CompactSpace 的路径必须保持生命周期释放和数据状态同步。
 - 源码目录中的共享基类和内部协作类型形成维护边界，不能只修改桌面包装类而忽略共享状态 owner。
 
-## 7. 兼容性与维护不变量
+## 7. 兼容性不变量
 
 维护 Notification 时必须保持以下不变量：
 
@@ -154,7 +147,13 @@ Manager 持有稳定集合，模板只通过 `ItemsSource` 消费；重套模板
 
 ### 8.3 动效模型
 
-Notification 的进入/退出 motion 与 Stack 展开/折叠过渡相互独立。超过阈值时显示最新三张真实卡片，scale 为 `1`、`0.94`、`0.88`；hover 展开全部。初始投影、禁用 motion、重套模板和卸载路径必须同步收敛或取消动效。
+Notification 的内容 actor 与外层队列 transform 职责独立但同时运行。卡片按 Position 从宿主边方向的 `64 DIP` 偏移
+连续淡入，退出沿同一方向离场，scale 在进入/退出期间始终为 `1`；已有通知同步平滑让位。两类过渡均使用
+SharedToken `MotionDurationMid` 和 `cubic-bezier(0.645, 0.045, 0.355, 1)`。超过阈值时最多显示最新三张真实卡片，
+实际可见数为 `Min(3, StackThreshold)`，Stack scale 为 `1`、`0.94`、`0.88`。每张卡片以真实测量高度参与 8 DIP
+折叠边缘定位；hover 展开全部。关闭项保留最后一次投影独立离场，其余项从关闭开始同步重排。初始投影、禁用 motion、
+重套模板和卸载路径必须直接收敛或取消旧 actor，不允许延迟 completion 改写当前状态。进入先提交无 transition 的透明偏移
+准备态，跨过所属 TopLevel 的一个真实动画帧后再进入可见终态，保证首张卡片与后续卡片具有同样连续的淡入位移。
 
 ### 8.4 视觉选项模型
 
@@ -162,7 +161,16 @@ Notification 的视觉选项通过 public API 归一为 theme variables、伪类
 
 ### 8.5 生命周期计时模型
 
-默认自动关闭时长为 4.5 秒，零时长永久展示。一个 manager 只使用一个惰性共享调度器；没有可见进度时按最近 deadline 唤醒，有进度时只刷新可见活动项。普通状态只暂停悬停卡片，Stack 状态 hover 暂停全部活动卡片，继续时使用剩余时长。
+`IsStackEnabled` 默认为 `false`，`StackThreshold` 默认为 `3`；应用必须显式开启 Stack。默认自动关闭时长为 4.5 秒，零时长永久展示。一个 manager 只使用一个惰性共享调度器；没有可见进度时按最近 deadline
+唤醒，有进度时只刷新可见活动项。Stack 开启时，列表 hover 暂停全部活动卡片，即使数量没有超过阈值；Stack 关闭时
+只暂停实际悬停卡片。继续时使用剩余时长。
+
+### 8.6 Gallery Stack 示例
+
+Gallery 的 Stack 示例使用独立 manager，不与基础、类型、placement、进度和自定义关闭示例共享配置或 `DestroyAll()`
+范围。示例显式以 Enabled 开启、Threshold 为 `3` 启动，每次打开交替创建短内容和长内容的零时长通知，便于持续
+观察不同卡片高度下的折叠、hover 展开、运行时开关和阈值变化。配置标签、ToggleSwitch 与 NumericUpDown 使用同一垂直
+中心线，示例卡片以 `v6.1.9` RibbonBadge 标记能力引入版本。
 
 ## 9. 文档导航、LLMS 导出与验证策略
 

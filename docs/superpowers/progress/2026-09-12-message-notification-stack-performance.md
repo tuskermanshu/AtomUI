@@ -94,7 +94,7 @@ presenter, card or scheduler reachable. The post-change run must report that res
 
 ## Post-change Gallery comparison
 
-The post-change Gallery XAML source shape is unchanged: Message remains 198 visuals and Notification remains 346 visuals. The same
+The initially materialized Gallery visual shape is unchanged: Message remains 198 visuals and Notification remains 346 visuals. The same
 commands, readiness predicates and sample counts were used. Percentage change uses:
 
 ```text
@@ -166,17 +166,117 @@ Automated tests cover the remaining resource contract:
 - a removed card remains collectible while its panel and the panel's weak transform cache stay alive;
 - repeated collapsed layout proves the 0.94 and 0.88 transforms are reused by reference.
 
-The complexity burden is three internal shared types (`FeedbackStackPresenter`, `FeedbackStackPanel`, and
-`FeedbackLifetimeScheduler`) plus a narrow item interface. There is no public shared base class, runtime reflection, global cache or
-static event subscription. This keeps the behavior reusable by both controls while bounding ownership to the manager instance.
+The complexity burden is five internal shared types (`FeedbackStackPresenter`, `FeedbackStackPanel`, `FeedbackLifetimeScheduler`,
+`FeedbackCardMotion`, and `FeedbackCardMotionCoordinator`) plus a narrow item interface. There is no public shared base class, runtime
+reflection, global cache or static event subscription. This keeps the behavior reusable by both controls while bounding ownership to the
+manager instance or card instance.
+
+## Ant motion alignment follow-up
+
+The shared Ant-aligned motion adds `FeedbackCardMotion` and `FeedbackCardMotionCoordinator` without adding public surface. Entry and exit
+now use the same 64 DIP translate/fade path, 200ms shared duration and Ant ease-in-out spline; queue reflow uses stable edge anchors while
+motion is enabled. The panel retains the allocation-sensitive fast path when motion is disabled and caches two non-identity transform
+target slots per card, which covers repeated collapse/expand without recreating transforms.
+
+The final runs use the same persisted command, 24 real cards, 20 complete collapse/expand cycles, 10 measured samples and 3 warmups as
+`optimized-final-cwt`:
+
+```text
+dotnet run --project tools/performances/AtomUI.GalleryPerformance/AtomUI.GalleryPerformance.csproj \
+  -c Debug --framework net10.0 --no-build -- \
+  --feedback-stack --label motion-aligned-verified --iterations 10 --warmup 3 \
+  --markdown /tmp/atomui-feedback-stack-motion-aligned-verified.md
+```
+
+Two consecutive final-code runs produced substantial wall-clock spread while allocations stayed stable. This repeats the host contention
+observed in the Gallery comparison, so wall time is retained as diagnostic evidence rather than accepted as an improvement or regression
+signal:
+
+| Control | Operation | Previous mean ms | Final run A mean ms | Final run B mean ms |
+| --- | --- | ---: | ---: | ---: |
+| Message | Show 24 | 24.60 | 15.53 | 27.98 |
+| Message | Toggle 20x | 6.80 | 3.98 | 6.14 |
+| Message | Destroy 24 | 4.95 | 2.28 | 4.33 |
+| Notification | Show 24 | 47.54 | 30.85 | 54.10 |
+| Notification | Toggle 20x | 5.17 | 3.61 | 5.61 |
+| Notification | Destroy 24 | 7.13 | 3.57 | 7.01 |
+
+The stable allocation comparison uses the later verified run:
+
+| Control | Operation | Previous allocated KB | Verified allocated KB | Change |
+| --- | --- | ---: | ---: | ---: |
+| Message | Show 24 | 3,947.23 | 3,962.01 | +0.4% |
+| Message | Toggle 20x | 366.94 | 371.04 | +1.1% |
+| Message | Destroy 24 | 528.04 | 510.99 | -3.2% |
+| Notification | Show 24 | 6,623.80 | 6,626.66 | +0.0% |
+| Notification | Toggle 20x | 324.84 | 334.90 | +3.1% |
+| Notification | Destroy 24 | 758.52 | 734.18 | -3.2% |
+
+Show allocations remain within 0.4%, both destroy paths improve by about 3.2%, and the 20-cycle toggle aggregates increase by 4.10 KB
+for Message and 10.06 KB for Notification (about 0.21 KB and 0.50 KB per complete cycle). The Notification residual comes from applying
+the two visible non-identity collapsed scale targets; it is recorded rather than hidden because removing those targets would remove the
+Notification depth behavior. No per-frame Dispatcher callback, layout object recreation, timer or unbounded cache was added. Raw reports:
+
+- `/tmp/atomui-feedback-stack-motion-aligned-final-reuse.md`
+- `/tmp/atomui-feedback-stack-motion-aligned-verified.md`
+
+The lifecycle suite additionally cancels an entry in flight, clears the actor's transition state synchronously on dispose, then proves the
+coordinator and actor graph collectible with WeakReference after Dispatcher cancellation propagation. Closed detach converges to hidden,
+and retemplate/disable-motion tests prove stale completion cannot close twice or leave a previous actor active.
+
+## Message Stack showcase follow-up
+
+The Ant-aligned Message Stack showcase is appended as a fifth deferred item while `InitialDeferredLoadItemCount` remains `4`. It therefore
+does not increase cold page materialization. Its default and Stack managers are both lazy, and pressing Destroy all before the first Open
+does not create either manager. Stack messages explicitly use zero expiration, so they create no lifetime scheduler entry, timer, async
+loop or cancellation token. The page disposes both manager instances and clears their references when detached.
+
+| Structural metric | Before follow-up | After follow-up | Formula / change | Conclusion |
+| --- | ---: | ---: | --- | --- |
+| Initially materialized showcase items | 4 | 4 | `(4 - 4) / 4 = 0%` | no cold-page materialization regression |
+| Manager instances before first action | 0 | 0 | not applicable for zero baseline | no eager manager allocation |
+| Lifetime scheduler entries per permanent Stack message | 0 | 0 | not applicable for zero baseline | permanent demo remains timer-free |
+| New manual subscriptions, per-item timers, async loops or cancellation sources | 0 | 0 | not applicable for zero baseline | no new retained-resource edge |
+
+This follow-up is a behavior and documentation correction, so no timing percentage is claimed without a new controlled before/after
+timing sample. The bounded structural metrics above, the full Gallery test and the manager lifetime tests are the acceptance evidence for
+the added example.
+
+## Notification Ant-alignment follow-up
+
+The Notification follow-up adds variable-height edge projection, mirrored transform origins, animated half-card clipping for the two
+visible back layers, immediate sibling reflow when a card starts closing, and a dedicated permanent-item Stack showcase. Notification
+continues to use the same shared presenter, panel, lifetime scheduler, card motion and motion coordinator as Message; the template now
+uses the render-only `MotionActor`, so queue reflow does not start a second layout-aware animation loop.
+
+The first animated-clip implementation wrote an Avalonia attached property for every card even when motion was disabled. The focused
+probe exposed this as 702.27 KB for 20 Notification toggle cycles. Dedicated regressions now keep the motion-disabled path off that
+property pipeline, reuse one weakly-owned clip geometry per card, avoid touching invisible deep layers, and prevent Notification from
+publishing Message-only static-backplate state. The release-candidate probe measures 427.99 KB for the same work, a 39.1% reduction from
+the rejected implementation. Compared with the preceding motion-aligned probe, the final Ant-compatible clipping adds 93.09 KB across
+20 full cycles (4.65 KB per cycle); this bounded absolute cost is the Avalonia geometry invalidation required to preserve the visible
+half-card edge, rather than a timer, collection or per-frame layout allocation. Show allocation remains effectively flat (6,626.66 KB
+to 6,632.21 KB, +0.08%).
+
+```text
+dotnet run --project tools/performances/AtomUI.GalleryPerformance/AtomUI.GalleryPerformance.csproj \
+  -c Debug --framework net10.0 --no-restore -- \
+  --feedback-stack --label notification-stack-release-candidate-backplate-pruned --iterations 10 --warmup 3 \
+  --markdown /tmp/atomui-feedback-stack-notification-stack-release-candidate-backplate-pruned.md
+```
+
+The property-driven clip transition is active only when motion is enabled and changes render geometry without invalidating Measure.
+Its static class handlers capture no manager, presenter, card or panel. Clip and transform targets remain in the panel's
+`ConditionalWeakTable`, so removing a card also removes the only cache key and makes the complete projection cache collectible.
 
 ## Final verification
 
-- `AtomUI.Desktop.Controls.Tests`: 2,986 passed, 0 failed, including 23 focused Feedback stack tests.
-- `AtomUIGallery.Tests`: 436 passed, 0 failed.
+- `AtomUI.Desktop.Controls.Tests`: 3,035 passed, 0 failed. This includes the 83 focused Feedback/motion tests for variable-height
+  projection, mirrored clipping/origins, coordinator cancellation, external close, WeakReference collection, stable-anchor, transform
+  reuse and the motion-disabled clip fast path.
+- `AtomUIGallery.Tests`: 444 passed, 0 failed, including Message and Notification Stack runtime isolation, vertical center-line,
+  localization, source snapshot and rendered `v6.1.9` RibbonBadge regressions.
+- `AtomUIGallery.Desktop`: Debug `net10.0` build passes with 0 warnings and 0 errors.
 - Gallery `osx-arm64` NativeAOT publish: linked registration, restore assets and output validation passed.
+- LLMS generator: verified 79 controls and 161 generated files after regenerating Message and Notification outputs.
 - `git diff --check`: passed.
-
-One full-suite run executed concurrently with NativeAOT produced a single failure in the unchanged
-`PopupConfirm_In_Dialog_Confirms_And_Closes_Its_Flyout` input test. The test passed three consecutive isolated processes, then the entire
-2,986-test suite passed when rerun without the competing NativeAOT build. No production or test change was made for that transient.

@@ -40,7 +40,7 @@ Message 的公共契约由 public/protected 类型成员、Avalonia 属性、事
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
 | 内容与数据 | `Show(IMessage, string[]?)`、`MaxItems` | 创建消息并约束活动项上限；`MaxItems <= 0` 表示不限制。 |
-| Stack | `IsStackEnabled`、`StackThreshold`、`IsPauseOnHover` | 控制阈值折叠、整体 hover 展开和生命周期暂停。 |
+| Stack | `IsStackEnabled`、`StackThreshold`、`IsPauseOnHover` | 默认关闭；控制阈值折叠、整体 hover 展开和实际 hover 期间的生命周期暂停，不改变消息时长。 |
 | 交互与状态 | `DestroyAll()`、`IsClosed`、`IsClosing`、`IsMotionEnabled` | 清空活动消息，并表达卡片关闭与动效状态。 |
 | 视觉与布局 | `Position` | 默认为 `TopCenter`，决定宿主边和横向对齐。 |
 | 内容对象 | `Message`、`MessageType`、`IMessage.Expiration` | 表达正文、类型、图标、自动关闭时长与一次性关闭回调。 |
@@ -119,7 +119,7 @@ Message 与同分类控件共享尺寸、状态、Token、Gallery 展示和验�
 - 涉及 ItemsSource、Popup、Flyout、Window、Form 或 CompactSpace 的路径必须保持生命周期释放和数据状态同步。
 - 源码目录中的共享基类和内部协作类型形成维护边界，不能只修改桌面包装类而忽略共享状态 owner。
 
-## 7. 兼容性与维护不变量
+## 7. 兼容性不变量
 
 维护 Message 时必须保持以下不变量：
 
@@ -139,7 +139,10 @@ Manager 持有稳定集合，模板只通过 `ItemsSource` 消费；重套模板
 
 ### 8.2 动效模型
 
-Message 的进入/退出 motion 与 Stack 展开/折叠过渡相互独立。折叠时只有最新真实卡片可见，两层深度由静态 AXAML 背板表达；hover 展开全部。初始投影、禁用 motion、重套模板和卸载路径必须同步收敛或取消动效。
+Message 的内容 actor 与外层队列 transform 职责独立但同时运行：TopCenter 默认从宿主上方 `64 DIP` 处以完整时长连续
+淡入并移动到终点，scale 始终为 `1`；已有消息同步平滑让位。两类过渡均使用 SharedToken `MotionDurationMid` 和
+`cubic-bezier(0.645, 0.045, 0.355, 1)`。折叠时只有最新真实卡片可见，两层深度由静态 AXAML 背板表达；hover 展开
+全部。初始投影、禁用 motion、重套模板和卸载路径必须直接收敛或取消旧 actor，不允许延迟 completion 改写当前状态。
 
 ### 8.3 视觉选项模型
 
@@ -147,7 +150,23 @@ Message 的视觉选项通过 public API 归一为 theme variables、伪类或�
 
 ### 8.4 生命周期计时模型
 
-默认自动关闭时长为 3 秒，零时长永久展示。一个 manager 只使用一个惰性共享调度器，并按最近 deadline 唤醒；普通状态只暂停悬停卡片，Stack 状态 hover 暂停全部活动卡片。继续计时必须使用剩余时长，不能重置完整时长。
+`IsStackEnabled` 默认为 `false`，默认自动关闭时长为 3 秒，零时长永久展示。Stack 与展示时长是两个正交契约：开启
+Stack 或超过阈值只改变视觉投影，有限时长消息仍按原 deadline 自动关闭；零时长消息不登记 deadline。一个 manager
+只使用一个惰性共享调度器，并按最近 deadline 唤醒；普通状态只暂停实际悬停卡片，Stack 状态只在指针进入整体堆叠时
+暂停全部活动卡片。继续计时必须使用剩余时长，不能重置完整时长。
+
+| Stack | 展示时长 | 未 hover 时的布局与生命周期 |
+| --- | --- | --- |
+| 关闭 | 有限时长 | 全部展开，并按各自 deadline 自动关闭。 |
+| 开启 | 有限时长 | 超过阈值时折叠，但仍按各自 deadline 自动关闭。 |
+| 开启 | 零时长 | 超过阈值时折叠，并保持展示直到显式关闭。 |
+
+### 8.5 Gallery Stack 示例模型
+
+Gallery 的 Stack 示例使用独立 manager，不与基础、类型、loading 和回调示例共享配置或 `DestroyAll()` 范围。示例本地
+状态以 Enabled 开启、Threshold 为 `3` 启动，并为每次打开显式创建零时长消息，以便持续观察折叠、hover 展开、运行时
+开关和阈值变化。配置标签、ToggleSwitch 与 NumericUpDown 使用同一垂直中心线，示例卡片以 `v6.1.9` RibbonBadge 标记
+能力引入版本。这些值和标记只属于示例场景；控件的 `IsStackEnabled=false` 和默认 3 秒时长不受示例状态影响。
 
 ## 9. 文档导航、LLMS 导出与验证策略
 

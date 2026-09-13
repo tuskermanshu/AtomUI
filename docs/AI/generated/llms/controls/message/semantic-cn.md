@@ -30,6 +30,9 @@ Message
            -> DockPanel#PART_HeaderContainer (template-stable)
               -> IconPresenter#PART_IconContent (template-stable)
               -> SelectableTextBlock#PART_Message (template-stable)
+  -> FeedbackStackPresenter (presenter control theme, FeedbackStackPresenterTheme.axaml)
+     -> Border (template-stable)
+        -> ItemsPresenter#PART_ItemsPresenter (template-stable)
 ```
 
 ### 协作节点
@@ -43,19 +46,22 @@ Message
 | `PART_HeaderContainer` | template node (DockPanel) | `MessageCardTheme.axaml` | MessageCard | `Icon`, `Message` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_IconContent` | template node (IconPresenter) | `MessageCardTheme.axaml` | MessageCard | `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Message` | template node (SelectableTextBlock) | `MessageCardTheme.axaml` | MessageCard | `Message` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `FeedbackStackPresenter` | presenter control theme | `FeedbackStackPresenterTheme.axaml` | Message | `ItemsPanel` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ItemsPresenter` | template node (ItemsPresenter) | `FeedbackStackPresenterTheme.axaml` | FeedbackStackPresenter | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `Icon`、`MaxItems` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `IsClosed`、`IsClosing`、`IsMotionEnabled` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `Position` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
-| 其他稳定入口 | `Message`、`MessageType` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+| 内容与数据 | `Show(IMessage, string[]?)`、`MaxItems` | 创建消息并约束活动项上限；`MaxItems <= 0` 表示不限制。 |
+| Stack | `IsStackEnabled`、`StackThreshold`、`IsPauseOnHover` | 默认关闭；控制阈值折叠、整体 hover 展开和实际 hover 期间的生命周期暂停，不改变消息时长。 |
+| 交互与状态 | `DestroyAll()`、`IsClosed`、`IsClosing`、`IsMotionEnabled` | 清空活动消息，并表达卡片关闭与动效状态。 |
+| 视觉与布局 | `Position` | 默认为 `TopCenter`，决定宿主边和横向对齐。 |
+| 内容对象 | `Message`、`MessageType`、`IMessage.Expiration` | 表达正文、类型、图标、自动关闭时长与一次性关闭回调。 |
 
 ## Pseudo Classes
 
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | collection/filter、motion、visual option。 |
+| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | 自动关闭、hover 暂停、Stack 展开/折叠和关闭 motion。 |
 | 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | Message Token + ControlTheme。 |
 
 ## State Flow
@@ -86,7 +92,7 @@ Message 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的
 | `MessageCardTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 | `WindowMessageManagerTheme.axaml` | 定义弹层、窗口或 overlay 宿主视觉。 |
 
-Message 使用 `MessageToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 collection/filter、motion、visual option 运行时状态。
+Message 使用 internal `MessageCardToken` 作为控件 Token scope。Token 只表达卡片背景、padding、图标与外部间距等组件视觉语义，不承载 Stack、剩余时长或关闭状态。
 
 主题维护规则：
 
@@ -101,13 +107,13 @@ Message Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 
 当前 Token scope：
 
-- `MessageToken`，scope id 为 `Message`，源码位于 `src/AtomUI.Desktop.Controls/Message/MessageToken.cs`。
+- internal `MessageCardToken`，scope id 为 `MessageCard`，源码位于 `src/AtomUI.Desktop.Controls/Message/MessageCardToken.cs`。
 
 ## Customization Boundaries
 
 维护 Message 时必须保持以下不变量：
 
-- 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
+- Stack API、默认值与共享基础设施文档构成当前契约；后续不得仅修改 Message 一侧而造成两个管理器同名 API 语义分叉。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
@@ -125,3 +131,7 @@ Message Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 - `IsClosing` / `IsClosed` public 状态不得与 internal `MotionExecutionState` 合并；重复调度不得创建并行退出动效。
+- `MaxItems <= 0` 必须保持无限语义；Stack 不能通过提前关闭旧项模拟折叠。
+- Stack 不能隐式把有限时长改为永久展示，也不能在未 hover 时暂停 scheduler；Gallery 的永久 Stack 示例必须通过
+  `Expiration=TimeSpan.Zero` 显式表达。
+- template detach、rehost、DestroyAll、用户回调异常与 dispose 均必须释放 scheduler entry、presenter、host 订阅、card owner 与 delegate。

@@ -28,7 +28,7 @@ public class WindowNotificationManager : TemplatedControl, INotificationManager,
         AvaloniaProperty.Register<WindowNotificationManager, int>(nameof(MaxItems));
 
     public static readonly StyledProperty<bool> IsStackEnabledProperty =
-        AvaloniaProperty.Register<WindowNotificationManager, bool>(nameof(IsStackEnabled), true);
+        AvaloniaProperty.Register<WindowNotificationManager, bool>(nameof(IsStackEnabled));
 
     public static readonly StyledProperty<int> StackThresholdProperty =
         AvaloniaProperty.Register<WindowNotificationManager, int>(nameof(StackThreshold), 3);
@@ -125,6 +125,7 @@ public class WindowNotificationManager : TemplatedControl, INotificationManager,
             _presenter[!FeedbackStackPresenter.PositionProperty] = this[!PositionProperty];
             _presenter[!FeedbackStackPresenter.IsStackEnabledProperty] = this[!IsStackEnabledProperty];
             _presenter[!FeedbackStackPresenter.StackThresholdProperty] = this[!StackThresholdProperty];
+            _presenter[!FeedbackStackPresenter.IsMotionEnabledProperty] = this[!IsMotionEnabledProperty];
             _presenter.StackMode = FeedbackStackMode.Notification;
             _presenter.ItemsSource = _cards;
             _presenter.StackHoverChanged += OnStackHoverChanged;
@@ -191,9 +192,11 @@ public class WindowNotificationManager : TemplatedControl, INotificationManager,
     public void DestroyAll()
     {
         Dispatcher.VerifyAccess();
-        for (var i = _cards.Count - 1; i >= 0; i--)
+        // Close callbacks can synchronously change the queue or dispose its owner.
+        var cards = _cards.ToArray();
+        for (var i = cards.Length - 1; i >= 0 && !_isDisposed; i--)
         {
-            var card = _cards[i];
+            var card = cards[i];
             _lifetimeScheduler?.Remove(card);
             card.Close();
         }
@@ -290,16 +293,25 @@ public class WindowNotificationManager : TemplatedControl, INotificationManager,
         }
 
         var excessCount = activeCount - MaxItems;
-        for (var i = 0; i < _cards.Count && excessCount > 0; i++)
+        if (excessCount <= 0)
         {
-            var card = _cards[i];
-            if (card.IsClosing)
+            return;
+        }
+
+        // Select the oldest active batch before synchronous close callbacks mutate the queue.
+        var cards = new NotificationCard[excessCount];
+        var count = 0;
+        for (var i = 0; i < _cards.Count && count < excessCount; i++)
+        {
+            if (!_cards[i].IsClosing)
             {
-                continue;
+                cards[count++] = _cards[i];
             }
-            _lifetimeScheduler?.Remove(card);
-            card.Close();
-            excessCount--;
+        }
+        for (var i = 0; i < count && !_isDisposed; i++)
+        {
+            _lifetimeScheduler?.Remove(cards[i]);
+            cards[i].Close();
         }
     }
 

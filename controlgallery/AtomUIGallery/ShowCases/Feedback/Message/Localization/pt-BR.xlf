@@ -73,6 +73,12 @@
         <target state="translated">Exibir a carregando indicator</target>
       </segment>
     </unit>
+    <unit id="P2ContentDestroyAll">
+      <segment>
+        <source>Destroy all</source>
+        <target state="translated">Destruir todas</target>
+      </segment>
+    </unit>
     <unit id="P2ContentDisplayNormalMessage">
       <segment>
         <source>Display normal message</source>
@@ -89,6 +95,12 @@
       <segment>
         <source>Info</source>
         <target state="translated">Informação</target>
+      </segment>
+    </unit>
+    <unit id="P2ContentOpenMessageBox">
+      <segment>
+        <source>Open the message box</source>
+        <target state="translated">Abrir a caixa de mensagens</target>
       </segment>
     </unit>
     <unit id="P2ContentSuccess">
@@ -133,6 +145,18 @@
         <target state="translated">Carregando finished</target>
       </segment>
     </unit>
+    <unit id="P2MessageLongStackedFormat">
+      <segment>
+        <source>Message {0}: This is a slightly longer stacked message.</source>
+        <target state="translated">Mensagem {0}: Esta é uma mensagem empilhada um pouco mais longa.</target>
+      </segment>
+    </unit>
+    <unit id="P2MessageStackedFormat">
+      <segment>
+        <source>Message {0}: This is a stacked message.</source>
+        <target state="translated">Mensagem {0}: Esta é uma mensagem empilhada.</target>
+      </segment>
+    </unit>
     <unit id="P2MessageSuccess">
       <segment>
         <source>This is a success message.</source>
@@ -161,6 +185,30 @@
       <segment>
         <source>Examples</source>
         <target state="translated">Exemplos</target>
+      </segment>
+    </unit>
+    <unit id="StackDescription">
+      <segment>
+        <source>Stack configuration, disabled by default. Messages will be stacked when the amount is over threshold. Only the latest message is shown in the collapsed stack.</source>
+        <target state="translated">A configuração de empilhamento fica desativada por padrão. As mensagens serão empilhadas quando a quantidade ultrapassar o limite. Apenas a mensagem mais recente aparece na pilha recolhida.</target>
+      </segment>
+    </unit>
+    <unit id="StackEnabledLabel">
+      <segment>
+        <source>Enabled:</source>
+        <target state="translated">Ativado:</target>
+      </segment>
+    </unit>
+    <unit id="StackThresholdLabel">
+      <segment>
+        <source>Threshold:</source>
+        <target state="translated">Limite:</target>
+      </segment>
+    </unit>
+    <unit id="StackTitle">
+      <segment>
+        <source>Stack</source>
+        <target state="translated">Empilhamento</target>
       </segment>
     </unit>
   </file>

@@ -160,53 +160,59 @@ internal sealed class FeedbackLifetimeScheduler : IDisposable
             return;
         }
 
-        var now = _clock.Now;
-        _removeItems.Clear();
-        _expiredItems.Clear();
-
-        foreach (var pair in _entries)
+        try
         {
-            var item = pair.Key;
-            var entry = pair.Value;
-            if (item.IsClosing || item.IsClosed)
+            var now = _clock.Now;
+
+            foreach (var pair in _entries)
             {
-                _removeItems.Add(item);
-                continue;
-            }
-            if (_isAllPaused || entry.IsItemPaused)
-            {
-                continue;
+                var item = pair.Key;
+                var entry = pair.Value;
+                if (item.IsClosing || item.IsClosed)
+                {
+                    _removeItems.Add(item);
+                    continue;
+                }
+                if (_isAllPaused || entry.IsItemPaused)
+                {
+                    continue;
+                }
+
+                var remaining = entry.Deadline - now;
+                if (remaining <= TimeSpan.Zero)
+                {
+                    entry.Remaining = TimeSpan.Zero;
+                    _expiredItems.Add(item);
+                    continue;
+                }
+
+                entry.Remaining = remaining;
+                if (item.IsProgressVisible && item.IsStackVisible)
+                {
+                    item.UpdateRemaining(remaining);
+                }
             }
 
-            var remaining = entry.Deadline - now;
-            if (remaining <= TimeSpan.Zero)
+            for (var i = 0; i < _removeItems.Count; i++)
             {
-                entry.Remaining = TimeSpan.Zero;
-                _expiredItems.Add(item);
-                continue;
+                _entries.Remove(_removeItems[i]);
             }
-
-            entry.Remaining = remaining;
-            if (item.IsProgressVisible && item.IsStackVisible)
+            for (var i = 0; i < _expiredItems.Count; i++)
             {
-                item.UpdateRemaining(remaining);
+                _entries.Remove(_expiredItems[i]);
+            }
+            for (var i = 0; i < _expiredItems.Count; i++)
+            {
+                _expiredItems[i].RequestClose();
             }
         }
-
-        for (var i = 0; i < _removeItems.Count; i++)
+        finally
         {
-            _entries.Remove(_removeItems[i]);
+            // A drained queue may never wake again; release this batch immediately.
+            _removeItems.Clear();
+            _expiredItems.Clear();
+            ScheduleNext(_clock.Now);
         }
-        for (var i = 0; i < _expiredItems.Count; i++)
-        {
-            _entries.Remove(_expiredItems[i]);
-        }
-        for (var i = 0; i < _expiredItems.Count; i++)
-        {
-            _expiredItems[i].RequestClose();
-        }
-
-        ScheduleNext(now);
     }
 
     private void ScheduleNext(TimeSpan now)

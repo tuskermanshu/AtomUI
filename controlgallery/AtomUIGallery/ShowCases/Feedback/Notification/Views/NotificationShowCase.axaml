@@ -81,6 +81,61 @@
                     </gallery:ShowCaseItem.DeferredContentTemplate>
                 </gallery:ShowCaseItem>
 
+                <gallery:ShowCaseItem
+                    Title="{gallery:NotificationShowCaseLangResource StackTitle}"
+                    Description="{gallery:NotificationShowCaseLangResource StackDescription}"
+                    BadgeText="v6.1.9"
+                    SourceKey="notification-stack"
+                    IsDeferredContentEnabled="True">
+                    <gallery:ShowCaseItem.DeferredContentTemplate>
+                        <DataTemplate x:DataType="viewModels:NotificationViewModel">
+                            <StackPanel Spacing="24">
+                                <StackPanel Orientation="Horizontal"
+                                            VerticalAlignment="Center"
+                                            Spacing="32">
+                                    <StackPanel Orientation="Horizontal"
+                                                VerticalAlignment="Center"
+                                                Spacing="12">
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{gallery:NotificationShowCaseLangResource StackEnabledLabel}" />
+                                        <atom:ToggleSwitch Name="NotificationStackEnabledSwitch"
+                                                           VerticalAlignment="Center"
+                                                           IsChecked="True"
+                                                           IsCheckedChanged="HandleStackEnabledChanged" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal"
+                                                VerticalAlignment="Center"
+                                                Spacing="12">
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{gallery:NotificationShowCaseLangResource StackThresholdLabel}" />
+                                        <atom:NumericUpDown Name="NotificationStackThresholdInput"
+                                                            Width="100"
+                                                            VerticalAlignment="Center"
+                                                            Minimum="1"
+                                                            Maximum="10"
+                                                            Increment="1"
+                                                            FormatString="0"
+                                                            Value="3"
+                                                            IsEnabled="{Binding #NotificationStackEnabledSwitch.IsChecked}"
+                                                            ValueChanged="HandleStackThresholdChanged" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <atom:Separator />
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <atom:Button Name="OpenStackNotificationButton"
+                                                 ButtonType="Primary"
+                                                 Click="ShowStackNotification"
+                                                 Content="{gallery:NotificationShowCaseLangResource P2ContentOpenTheNotificationBox}" />
+                                    <atom:Button Name="DestroyStackNotificationsButton"
+                                                 ButtonType="Default"
+                                                 Click="DestroyStackNotifications"
+                                                 Content="{gallery:NotificationShowCaseLangResource P2ContentDestroyAll}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </gallery:ShowCaseItem.DeferredContentTemplate>
+                </gallery:ShowCaseItem>
+
                 <gallery:ShowCaseItem Title="{gallery:NotificationShowCaseLangResource CustomizedIconTitle}"
                                   Description="{gallery:NotificationShowCaseLangResource CustomizedIconDescription}" IsDeferredContentEnabled="True">
                     <gallery:ShowCaseItem.DeferredContentTemplate>

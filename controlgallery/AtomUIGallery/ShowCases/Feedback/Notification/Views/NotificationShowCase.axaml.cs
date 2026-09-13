@@ -1,12 +1,12 @@
 using AtomUI.Controls;
 using AtomUI.Controls.Commons;
-using AtomUI.Data;
 using AtomUI.Desktop.Controls;
 using AtomUI.Icons.AntDesign;
 using AtomUIGallery.Localization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using AtomUINumericUpDown = AtomUI.Desktop.Controls.NumericUpDown;
 
 namespace AtomUIGallery.ShowCases.Notification;
 
@@ -21,7 +21,11 @@ public partial class NotificationShowCase : GalleryReactiveUserControl<Notificat
     private WindowNotificationManager? _bottomLeftManager;
     private WindowNotificationManager? _bottomManager;
     private WindowNotificationManager? _bottomRightManager;
+    private WindowNotificationManager? _stackManager;
     private bool _isPauseOnHover = true;
+    private bool _isStackEnabled = true;
+    private int _stackThreshold = 3;
+    private int _stackNotificationIndex;
 
     public NotificationShowCase()
     {
@@ -48,12 +52,7 @@ public partial class NotificationShowCase : GalleryReactiveUserControl<Notificat
         DisposeManager(ref _bottomLeftManager);
         DisposeManager(ref _bottomManager);
         DisposeManager(ref _bottomRightManager);
-    }
-
-    protected override void OnDataContextChanged(EventArgs e)
-    {
-        base.OnDataContextChanged(e);
-
+        DisposeManager(ref _stackManager);
     }
 
     private WindowNotificationManager? GetBasicManager()
@@ -220,8 +219,95 @@ public partial class NotificationShowCase : GalleryReactiveUserControl<Notificat
         ));
     }
 
+    private void HandleStackEnabledChanged(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not AtomUIToggleSwitch toggleSwitch)
+        {
+            return;
+        }
+
+        _isStackEnabled = toggleSwitch.IsChecked == true;
+        if (_stackManager is not null)
+        {
+            _stackManager.IsStackEnabled = _isStackEnabled;
+        }
+    }
+
+    private void HandleStackThresholdChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+    {
+        if (sender is not AtomUINumericUpDown { Value: { } value })
+        {
+            return;
+        }
+
+        _stackThreshold = (int)value;
+        if (_stackManager is not null)
+        {
+            _stackManager.StackThreshold = _stackThreshold;
+        }
+    }
+
+    private void ShowStackNotification(object? sender, RoutedEventArgs e)
+    {
+        var index = ++_stackNotificationIndex;
+        var title = Format(
+            NotificationShowCaseLangResourceKind.P2NotificationStackedTitleFormat,
+            "Notification {0}",
+            index);
+        var content = index % 2 == 0
+            ? Format(
+                NotificationShowCaseLangResourceKind.P2NotificationLongStackedFormat,
+                "Notification {0}: This is a deliberately longer stacked notification used to verify variable-height cards.",
+                index)
+            : Format(
+                NotificationShowCaseLangResourceKind.P2NotificationStackedFormat,
+                "Notification {0}: This is a stacked notification.",
+                index);
+
+        GetStackManager()?.Show(new AtomUINotification(
+            title: title,
+            content: content,
+            expiration: TimeSpan.Zero));
+    }
+
+    private void DestroyStackNotifications(object? sender, RoutedEventArgs e)
+    {
+        _stackManager?.DestroyAll();
+    }
+
+    private WindowNotificationManager? GetStackManager()
+    {
+        if (_stackManager is not null)
+        {
+            return _stackManager;
+        }
+
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is null)
+        {
+            return null;
+        }
+
+        _stackManager = new WindowNotificationManager(topLevel)
+        {
+            MaxItems = 0,
+            Position = NotificationPosition.TopRight,
+            IsStackEnabled = _isStackEnabled,
+            StackThreshold = _stackThreshold
+        };
+        return _stackManager;
+    }
+
     private static string Lang(NotificationShowCaseLangResourceKind resourceKind, string fallback)
     {
         return GalleryLocalization.Get(resourceKind, fallback);
+    }
+
+    private static string Format(
+        NotificationShowCaseLangResourceKind resourceKind,
+        string fallback,
+        params object?[] args)
+    {
+        return GalleryLocalization.Format(resourceKind, fallback, args);
     }
 }

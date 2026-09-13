@@ -25,15 +25,19 @@
 ```text
 Notification
   -> NotificationCard (control theme, NotificationCardTheme.axaml)
-     -> LayoutAwareMotionActor#{x:Static atom:BaseMotionActor.MotionActorPart} (internal-observable)
+     -> MotionActor#{x:Static atom:BaseMotionActor.MotionActorPart} (internal-observable)
         -> Border#Frame (template-stable)
-           -> Grid#PART_Layout (template-stable)
-              -> IconPresenter#IconPresenter (internal-observable)
-              -> DockPanel#HeaderContainer (template-stable)
-                 -> IconButton#PART_CloseButton (template-stable)
-                 -> SelectableTextBlock#HeaderTitle (template-stable)
-              -> ContentPresenter#Content (internal-observable)
+           -> FeedbackStackTransitionSnapshotHost#PART_StackTransitionSnapshotHost (template-stable)
+              -> Grid#PART_Layout (template-stable)
+                 -> IconPresenter#IconPresenter (internal-observable)
+                 -> DockPanel#HeaderContainer (template-stable)
+                    -> IconButton#PART_CloseButton (template-stable)
+                    -> SelectableTextBlock#HeaderTitle (template-stable)
+                 -> ContentPresenter#Content (internal-observable)
   -> NotificationProgressBar (control theme, NotificationProgressBarTheme.axaml)
+  -> FeedbackStackPresenter (presenter control theme, FeedbackStackPresenterTheme.axaml)
+     -> Border (template-stable)
+        -> ItemsPresenter#PART_ItemsPresenter (template-stable)
 ```
 
 ### 协作节点
@@ -42,8 +46,9 @@ Notification
 | --- | --- | --- | --- | --- | --- | --- |
 | `Notification` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `NotificationCard` | control theme | `NotificationCardTheme.axaml` | 用户代码 / 控件宿主 | `Content`, `ContentTemplate`, `Icon`, `Title` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (LayoutAwareMotionActor) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (MotionActor) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `Frame` | template node (Border) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_StackTransitionSnapshotHost` | template node (FeedbackStackTransitionSnapshotHost) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Layout` | template node (Grid) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `IconPresenter` | template node (IconPresenter) | `NotificationCardTheme.axaml` | NotificationCard | `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `HeaderContainer` | template node (DockPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -51,20 +56,22 @@ Notification
 | `HeaderTitle` | template node (SelectableTextBlock) | `NotificationCardTheme.axaml` | NotificationCard | `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Content` | template node (ContentPresenter) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `NotificationProgressBar` | control theme | `NotificationProgressBarTheme.axaml` | Notification | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `FeedbackStackPresenter` | presenter control theme | `FeedbackStackPresenterTheme.axaml` | Notification | `ItemsPanel` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ItemsPresenter` | template node (ItemsPresenter) | `FeedbackStackPresenterTheme.axaml` | FeedbackStackPresenter | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `Icon`、`MaxItems`、`Title` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 选择与集合 | `CurrentExpiration` | 维护选择、展开、过滤、分页、分组或集合状态。 |
-| 交互与状态 | `IsClosed`、`IsClosing`、`IsMotionEnabled`、`IsPauseOnHover`、`IsShowProgress` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `Position`、`ProgressIndicatorBrush`、`ProgressIndicatorThickness` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
-| 其他稳定入口 | `CardExpiredPollingInterval`、`CleanupPollingInterval`、`Expiration`、`NotificationType` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+| 内容与数据 | `Show(INotification, string[]?)`、`MaxItems` | 创建通知并约束活动项上限；`MaxItems <= 0` 表示不限制。 |
+| Stack | `IsStackEnabled`、`StackThreshold`、`IsPauseOnHover` | 控制阈值折叠、整体 hover 展开和生命周期暂停。 |
+| 交互与状态 | `DestroyAll()`、`IsClosed`、`IsClosing`、`IsMotionEnabled`、`IsShowProgress` | 清空活动通知，并表达卡片关闭、进度和动效状态。 |
+| 视觉与布局 | `Position`、`ProgressIndicatorBrush`、`ProgressIndicatorThickness` | 默认 `TopRight`；控制宿主位置和进度视觉。 |
+| 内容对象 | `Expiration`、`NotificationType`、`Title`、`Content`、`Icon` | 表达正文、类型、自动关闭时长与一次性关闭回调。 |
 
 ## Pseudo Classes
 
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | selection/checked/active、loading/async、collection/filter、motion、visual option。 |
+| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | 自动关闭、进度、hover 暂停、Stack 展开/折叠和关闭 motion。 |
 | 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | Notification Token + ControlTheme。 |
 
 ## State Flow
@@ -96,7 +103,7 @@ Notification 的视觉模型由控件模板、ControlTheme、SharedToken 和必�
 | `NotificationProgressBarTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 | `WindowNotificationManagerTheme.axaml` | 定义弹层、窗口或 overlay 宿主视觉。 |
 
-Notification 使用 `NotificationToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 selection/checked/active、loading/async、collection/filter、motion、visual option 运行时状态。
+Notification 使用 internal `NotificationCardToken` 作为控件 Token scope。Token 只表达卡片背景、尺寸、padding、图标、进度和外部间距等视觉语义，不承载 Stack、剩余时长或关闭状态。
 
 主题维护规则：
 
@@ -111,13 +118,13 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 
 当前 Token scope：
 
-- `NotificationToken`，scope id 为 `Notification`，源码位于 `src/AtomUI.Desktop.Controls/Notifications/NotificationToken.cs`。
+- internal `NotificationCardToken`，scope id 为 `NotificationCard`，源码位于 `src/AtomUI.Desktop.Controls/Notifications/NotificationCardToken.cs`。
 
 ## Customization Boundaries
 
 维护 Notification 时必须保持以下不变量：
 
-- 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
+- Stack API、默认值与共享基础设施文档构成当前契约；后续不得仅修改 Notification 一侧而造成两个管理器同名 API 语义分叉。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
@@ -135,3 +142,5 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 - `IsClosing` / `IsClosed` public 状态不得与 internal `MotionExecutionState` 合并；重复调度不得创建并行退出动效。
+- `MaxItems <= 0` 必须保持无限语义；Stack 不能通过提前关闭旧项模拟折叠。
+- template detach、rehost、DestroyAll、用户回调异常与 dispose 均必须释放 scheduler entry、presenter、host 订阅、card owner 与 delegate。

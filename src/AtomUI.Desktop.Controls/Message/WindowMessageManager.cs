@@ -127,6 +127,7 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
             _presenter[!FeedbackStackPresenter.PositionProperty] = this[!PositionProperty];
             _presenter[!FeedbackStackPresenter.IsStackEnabledProperty] = this[!IsStackEnabledProperty];
             _presenter[!FeedbackStackPresenter.StackThresholdProperty] = this[!StackThresholdProperty];
+            _presenter[!FeedbackStackPresenter.IsMotionEnabledProperty] = this[!IsMotionEnabledProperty];
             _presenter.StackMode = FeedbackStackMode.Message;
             _presenter.ItemsSource = _cards;
             _presenter.StackHoverChanged += OnStackHoverChanged;
@@ -164,6 +165,7 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
             OnClose = message.OnClose,
             HoverChanged = OnCardHoverChanged
         };
+        card[!MessageCard.PositionProperty] = this[!PositionProperty];
         card[!MessageCard.IsMotionEnabledProperty] = this[!IsMotionEnabledProperty];
         if (classes is not null)
         {
@@ -187,9 +189,11 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
     public void DestroyAll()
     {
         Dispatcher.VerifyAccess();
-        for (var i = _cards.Count - 1; i >= 0; i--)
+        // Close callbacks can synchronously change the queue or dispose its owner.
+        var cards = _cards.ToArray();
+        for (var i = cards.Length - 1; i >= 0 && !_isDisposed; i--)
         {
-            var card = _cards[i];
+            var card = cards[i];
             _lifetimeScheduler?.Remove(card);
             card.Close();
         }
@@ -247,10 +251,9 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
 
         _lifetimeScheduler?.Remove(card);
         card.MessageClosed -= OnMessageClosed;
-        card.HoverChanged = null;
         _cards.Remove(card);
         var callback = card.OnClose;
-        card.OnClose = null;
+        card.ReleaseOwner();
         try
         {
             callback?.Invoke();
@@ -278,16 +281,25 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
         }
 
         var excessCount = activeCount - MaxItems;
-        for (var i = 0; i < _cards.Count && excessCount > 0; i++)
+        if (excessCount <= 0)
         {
-            var card = _cards[i];
-            if (card.IsClosing)
+            return;
+        }
+
+        // Select the oldest active batch before synchronous close callbacks mutate the queue.
+        var cards = new MessageCard[excessCount];
+        var count = 0;
+        for (var i = 0; i < _cards.Count && count < excessCount; i++)
+        {
+            if (!_cards[i].IsClosing)
             {
-                continue;
+                cards[count++] = _cards[i];
             }
-            _lifetimeScheduler?.Remove(card);
-            card.Close();
-            excessCount--;
+        }
+        for (var i = 0; i < count && !_isDisposed; i++)
+        {
+            _lifetimeScheduler?.Remove(cards[i]);
+            cards[i].Close();
         }
     }
 
@@ -407,8 +419,7 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
         {
             var card = _cards[i];
             card.MessageClosed -= OnMessageClosed;
-            card.HoverChanged = null;
-            card.OnClose = null;
+            card.ReleaseOwner();
         }
         _cards.Clear();
         _isLifecyclePaused = true;

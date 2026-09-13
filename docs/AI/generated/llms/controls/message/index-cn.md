@@ -29,8 +29,8 @@ Message 的设计语言围绕控件职责、可观察状态和主题契约组织
 | 维度 | 含义 | Message 中的表达 |
 | --- | --- | --- |
 | 产品语义 | 控件在界面中承担的稳定职责。 | Message 是 AtomUI 桌面控件体系中的全局消息控件，用于展示轻量级、自动关闭的操作反馈。 |
-| 内容承载 | 用户数据、展示内容、集合项或操作入口如何进入控件。 | `Icon`、`MaxItems`。 |
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | collection/filter、motion、visual option。 |
+| 内容承载 | 用户数据、展示内容、集合项或操作入口如何进入控件。 | `Message` 内容对象、`Icon`、`MessageType`。 |
+| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | 自动关闭、hover 暂停、Stack 展开/折叠和关闭 motion。 |
 | 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | Message Token + ControlTheme。 |
 
 ## 公共 API
@@ -41,16 +41,17 @@ Message 的公共契约由 public/protected 类型成员、Avalonia 属性、事
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `Icon`、`MaxItems` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `IsClosed`、`IsClosing`、`IsMotionEnabled` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `Position` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
-| 其他稳定入口 | `Message`、`MessageType` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+| 内容与数据 | `Show(IMessage, string[]?)`、`MaxItems` | 创建消息并约束活动项上限；`MaxItems <= 0` 表示不限制。 |
+| Stack | `IsStackEnabled`、`StackThreshold`、`IsPauseOnHover` | 默认关闭；控制阈值折叠、整体 hover 展开和实际 hover 期间的生命周期暂停，不改变消息时长。 |
+| 交互与状态 | `DestroyAll()`、`IsClosed`、`IsClosing`、`IsMotionEnabled` | 清空活动消息，并表达卡片关闭与动效状态。 |
+| 视觉与布局 | `Position` | 默认为 `TopCenter`，决定宿主边和横向对齐。 |
+| 内容对象 | `Message`、`MessageType`、`IMessage.Expiration` | 表达正文、类型、图标、自动关闭时长与一次性关闭回调。 |
 
 稳定事件包括 `MessageClosed`。事件触发顺序属于兼容契约，不能因内部状态重排而改变。
 
 主要公开类型与枚举：
 
-- 类型：`Message`、`MessageCard`、`WindowMessageManager`。
+- 类型：`Message`、`MessageCard`、`WindowMessageManager`、`IMessageManager`。
 - 枚举：`MessageType`。
 
 稳定 template part：
@@ -60,7 +61,7 @@ Message 的公共契约由 public/protected 类型成员、Avalonia 属性、事
 | `PART_Frame` | `?` | 承载根视觉、边框、背景或尺寸基线。 |
 | `PART_HeaderContainer` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
 | `PART_IconContent` | `?` | 展示图标、状态图标或操作图标。 |
-| `PART_Items` | `Panel` | 承载集合项、布局面板或虚拟化内容。 |
+| `PART_Items` | `ItemsControl` | 承载 manager 的稳定卡片集合和共享 Stack panel。 |
 | `PART_Message` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
 
 控件专属或内部伪类包括 `Error=:error`、`Information=:information`、`Loading=:loading`、`MessageCardPseudoClass.Error`、`MessageCardPseudoClass.Information`、`MessageCardPseudoClass.Loading`、`MessageCardPseudoClass.Success`、`MessageCardPseudoClass.Warning`、`Success=:success`、`Warning=:warning`。这些伪类属于主题 selector 可观察契约，不能在未同步主题和 Gallery 的情况下重命名或删除。
@@ -149,7 +150,7 @@ Message 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的
 | `MessageCardTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 | `WindowMessageManagerTheme.axaml` | 定义弹层、窗口或 overlay 宿主视觉。 |
 
-Message 使用 `MessageToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 collection/filter、motion、visual option 运行时状态。
+Message 使用 internal `MessageCardToken` 作为控件 Token scope。Token 只表达卡片背景、padding、图标与外部间距等组件视觉语义，不承载 Stack、剩余时长或关闭状态。
 
 主题维护规则：
 
@@ -164,7 +165,7 @@ Message Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 
 当前 Token scope：
 
-- `MessageToken`，scope id 为 `Message`，源码位于 `src/AtomUI.Desktop.Controls/Message/MessageToken.cs`。
+- internal `MessageCardToken`，scope id 为 `MessageCard`，源码位于 `src/AtomUI.Desktop.Controls/Message/MessageCardToken.cs`。
 
 ## AOT 与裁剪注意事项
 
@@ -178,9 +179,14 @@ Message Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 
 性能边界：
 
-- 控件应优先复用 Avalonia 原生虚拟化、模板绑定和资源系统。
-- 避免为每次状态变化创建不必要的视觉对象、订阅或动画对象。
-- 大集合控件必须保证 container recycle 后不会泄漏旧 item 状态。
+- manager、ItemsControl 与 card collection 在 Stack 切换和重套模板之间保持稳定。
+- `MeasureOverride` / `ArrangeOverride` 不允许 LINQ、临时数组、闭包或逐帧 transform 创建。
+- 稳态布局必须复用缓存 transform；目标变化最多创建一个 transform 并交给 transition 插值，不增加逐帧 managed 回调。
+- 没有有限时长活动项时 scheduler 不保持活动 timer；没有 Notification 进度需求时只安排最近 deadline。
+- Gallery Stack 示例的零时长消息不创建 scheduler entry、异步循环、取消令牌或逐项 timer；两个示例 manager 都只在
+  第一次实际操作时创建，并在页面 detach 时释放。
+- 折叠背板由 AXAML 静态创建，不随 show 次数增加视觉对象。
+- 性能修改必须使用同一 Message 场景比较基线与优化后的 mean、median、P95，并证明主要指标无可测量回退。
 
 ## 源码索引
 
@@ -191,11 +197,17 @@ Message Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 - `src/AtomUI.Desktop.Controls/Message/Message.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageCard.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageCardPseudoClass.cs`
-- `src/AtomUI.Desktop.Controls/Message/MessageToken.cs`
+- `src/AtomUI.Desktop.Controls/Message/MessageCardToken.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageType.cs`
 - `src/AtomUI.Desktop.Controls/Message/Themes/MessageCardTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Message/Themes/WindowMessageManagerTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Message/WindowMessageManager.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPresenter.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPanel.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackLifetimeScheduler.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotion.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotionCoordinator.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/IFeedbackStackItem.cs`
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`
 
 职责边界：
