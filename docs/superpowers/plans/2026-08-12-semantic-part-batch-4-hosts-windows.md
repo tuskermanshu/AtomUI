@@ -142,7 +142,20 @@
 > 运行期高亮回归（两个预览 × 9 部件逐张悬停恰好一个 Adorner；`root` 依赖舞台 owner 显式铺满——Dialog 主题默认零尺寸，
 > resolver 对零尺寸目标不建 Adorner）。真机视觉验收见
 > `docs/superpowers/specs/2026-09-12-dialog-semantic-visual-acceptance.md`（用户回传截图判定 1–4 项通过，
-> 悬停高亮由自动化覆盖）。Desktop Controls 3735/3735、Gallery 620→621/621、Generator 532/532、LLMS 23/23、
+> 悬停高亮由自动化覆盖）。随后补齐第三个**原生 Window 宿主预览**：`GetCrossRoots()` 在该宿主上报 `DialogWindow`
+> （`WindowDialogPresenter` 于显示/Opened/teardown 触发 `CrossRootsChanged`），高亮落在原生窗口自己的
+> AdornerLayer；运行期诊断证实 `WindowDialogPresenter` 无条件隐藏 Surface 标题栏（原生 caption 独占），
+> `header`/`title`/`close` 在该宿主不物化，据此把三者修正为 `Optional`（连同 `mask`/`wrapper` 共五个），
+> `footer` 保持 `Single`。窗口预览最终形态：**不默认打开**；触发按钮经用户截图指正后位于 Examples 页签
+> 「自定义语义结构的样式」卡片按钮行（Open Modal / Open MessageBox 之后的第三、四个按钮）——「打开窗口 Dialog」
+> 用于语义预览部件高亮（两页签内容常驻，切页不关闭），
+> 「打开样式化窗口」打开 owner 实例级 Semantic Style 定制的窗口 Dialog（`container`/`body`/`footer`，该宿主只物化
+> 这三个部件）。**样式级联实证修正**：`Window_Host_Owner_Scoped_Semantic_Styles_Cascade_Via_Logical_Parent`
+> 证明 owner 实例级 Semantic Style 经逻辑父链（`DialogWindow` 挂 owner 逻辑树下）在 Window 宿主同样命中，推翻了
+> 早前「只在 Overlay 宿主保证命中」的文档结论。样式化 Dialog 必须位于 `PreviewContent` 之外——语义预览按 owner
+> 类型多实例解析，同一 Preview 内容内的第二个 Dialog 实例会被一并高亮（高亮回归实证：root 悬停出现两个 Adorner）。
+> 窗口宿主显式 `HostWidth=360/HostHeight=220`（自然测量过小）。Desktop Controls 3737/3737、Gallery 621/621、
+> Generator 532/532、LLMS 23/23、
 > NativeAOT `osx-arm64` 通过；`git diff --check` 干净。既有间歇性 GC/时序抖动（`Closed_Overlay_Session_Releases_Surface…`、
 > `PopupConfirm_In_Dialog_Confirms…`）经基线提交 `f86c5b772` 双跑复现确认为**先于本批存在**，非本次引入。
 
@@ -255,7 +268,7 @@
 > `ebe687f89`）。10 个家族的交付提交：ImagePreviewer `f32e2b258`/`08aa3e6ef`、InfoFlyout `e9401ee8b`、ToolTip
 > `5fe34ab8a`、Tour `b6ee2e315`、Drawer `e415b81f9`、DropdownButton `6abaf6100`、Message `be91097d0`/`ebe687f89`、
 > PopupConfirm `d8857e738`、Notification `f86c5b772`、Modal/Dialog `7271b0a95`/`327346ea1`，均经用户授权提交。
-> 收尾验证：Desktop Controls 3735/3735、Generator 532/532、GalleryBase 181/181、Gallery 621/621、Popup/Overlay
+> 收尾验证：Desktop Controls 3736/3736、Generator 532/532、GalleryBase 181/181、Gallery 621/621、Popup/Overlay
 > 生命周期筛选（Dialog|MessageBox）通过、LLMS verify 79/161、NativeAOT `osx-arm64` 通过、`git diff --check` 干净。
 > 已知非阻塞事项：两条先于本批存在的间歇性测试抖动（`DialogLifecycleTests.Closed_Overlay_Session_Releases_Surface…`
 > 与 `DialogPopupControlFamilyTests.PopupConfirm_In_Dialog_Confirms…`），已在基线提交 `f86c5b772` 双跑中复现确认；

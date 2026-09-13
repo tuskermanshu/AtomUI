@@ -156,6 +156,22 @@ public class ModalViewModel : ReactiveObject, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _isMessageBoxSemanticStyleOpen, value);
     }
 
+    private bool _isWindowDialogSemanticOpen;
+
+    public bool IsWindowDialogSemanticOpen
+    {
+        get => _isWindowDialogSemanticOpen;
+        set => this.RaiseAndSetIfChanged(ref _isWindowDialogSemanticOpen, value);
+    }
+
+    private bool _isWindowDialogStyledOpen;
+
+    public bool IsWindowDialogStyledOpen
+    {
+        get => _isWindowDialogStyledOpen;
+        set => this.RaiseAndSetIfChanged(ref _isWindowDialogStyledOpen, value);
+    }
+
     public ModalViewModel(IScreen screen)
     {
         HostScreen = screen;

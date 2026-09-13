@@ -26,7 +26,8 @@
 
 - `tests/AtomUIGallery.Tests/ShowCases/ModalSemanticPartHighlightTests.cs`：进入语义页签后，Dialog 与 MessageBox
   两个预览各自 9 张部件卡逐张悬停，断言恰好一个 `SemanticPartAdorner`（含 `root`——舞台 owner 显式 420×320 铺满，
-  因 Dialog 主题默认零尺寸而 resolver 对零尺寸目标不建 Adorner）；遮罩按压不关闭钉住的预览；切回 Examples 清理全部高亮。
+  因 Dialog 主题默认零尺寸而 resolver 对零尺寸目标不建 Adorner）；第三个原生 Window 宿主预览中，`root` 高亮舞台 owner、`container`/`body`/`footer` 经跨根在原生窗口内高亮、
+  五个不物化部件（`mask`/`wrapper`/`header`/`title`/`close`）无高亮；遮罩按压不关闭钉住的预览；切回 Examples 清理全部高亮。
 - `tests/AtomUI.Desktop.Controls.Tests/Dialog/DialogSemanticPartTests.cs`：descriptor/marker/逻辑父/cross-root/
   精确单节点命中（Dialog 与 MessageBox 各自）/钉住门控/Optional 语义，共 14 用例。
 
@@ -34,3 +35,15 @@
 
 1–4 项真机验收通过（证据：用户回传截图）；第 5 项悬停高亮由自动化回归覆盖，真机悬停截图未回传、不宣称通过。
 Visual acceptance 状态：**通过（含一项由自动化覆盖的待补真机悬停证据）**。
+
+## 4. 2026-09-13 增补：窗口宿主样式修复与文案检查点（待真机验收）
+
+修复（详见 changelog 2026-09-13）：DialogWindow 按 PopupRoot 范式覆写 IStyleHost.StylingParent；
+container 背景迁出模板局部值；样式化窗口 Dialog 补 StandardButtons。复现工程真机截图已回传确认
+（淡粉背景 + 品红加粗正文 + 绿色胶囊 Cancel/OK）。Gallery 本体待验收：
+
+1. Examples 页签「自定义语义结构的样式」卡：引导句应为"分别打开语义样式定制后的 Dialog、MessageBox
+   与窗口宿主 Dialog："；按钮为"打开样式化 Dialog / 打开样式化 MessageBox / 打开样式化窗口 Dialog"。
+2. 点击"打开样式化窗口 Dialog"：独立 Basic Modal 窗口内三处样式（淡粉背景 / 品红加粗正文 /
+   绿色胶囊 Cancel/OK）必须全部出现。
+3. Semantic Parts 页签：常开预览对话框标题应为"基础模态框"（Basic Modal，对齐上游语义 demo）。

@@ -18981,11 +18981,11 @@ Control 生成 descriptor，不继承基类 descriptor，先例：`SimplePaginat
 | `mask` | 5.13.0 | `mask` | 一一对应；`IsModal=false` 或 Window 宿主时不物化（Optional）。 |
 | `container` | 6.0.0 | `container` | 一一对应（`Border#Frame`：背景、圆角、`ClipToBounds`）。上游同一节点的 `boxShadow`/`padding` 在 AtomUI 分属其他节点，见 §5.1。 |
 | `wrapper` | 5.13.0 | `wrapper` | 角色对应：上游是动画/滚动包裹层，AtomUI 由 `PART_SurfaceMotionActor` 承担。几何差异见 §5.2。 |
-| `header` | 5.13.0 | `header` | 一一对应（`Border#HeaderFrame`：背景、内边距）。 |
-| `title` | 6.0.0 | `title` | 一一对应（`TextBlock#Title`）。 |
+| `header` | 5.13.0 | `header` | 一一对应（`Border#HeaderFrame`：背景、内边距）。Overlay 恒存在；Window 宿主不物化（Optional，见 §2）。 |
+| `title` | 6.0.0 | `title` | 一一对应（`TextBlock#Title`）。Overlay 恒存在；随 header 在 Window 宿主不物化（Optional）。 |
 | `body` | 5.13.0 | `body` | 一一对应（`Border#ContentFrame`：正文内边距与内容承载）。 |
 | `footer` | 5.13.0 | `footer` | 一一对应（`Border#FooterFrame`：背景、内边距、外边距）。节点恒存在，`IsFooterVisible=false` 时仅隐藏（Single）。 |
-| `close` | 6.4.0 | `close` | 一一对应（`PART_CloseButton`）。节点恒存在，`IsClosable=false` 时仅隐藏（Single）。 |
+| `close` | 6.4.0 | `close` | 一一对应（`PART_CloseButton`）。Overlay 恒存在，`IsClosable=false` 仅隐藏；随 header 在 Window 宿主不物化（Optional）。 |
 
 Part 明细：
 
@@ -19070,7 +19070,7 @@ Part 明细：
 | SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-header` |
 | Style Type | `AtomUI.Theme.Styling.DialogHeaderStyle` |
 | ContractType | `Avalonia.Controls.Border` |
-| Cardinality | Single |
+| Cardinality | Optional |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `Border#HeaderFrame`（静态 marker） |
 | 职责 | 标题区框体：`HeaderBg` 背景与 `HeaderPadding` 内边距 |
@@ -19088,7 +19088,7 @@ Part 明细：
 | SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-title` |
 | Style Type | `AtomUI.Theme.Styling.DialogTitleStyle` |
 | ContractType | `Avalonia.Controls.TextBlock` |
-| Cardinality | Single |
+| Cardinality | Optional |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `TextBlock#Title`（静态 marker） |
 | 职责 | 标题文字排版与前景色 |
@@ -19142,7 +19142,7 @@ Part 明细：
 | SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-close` |
 | Style Type | `AtomUI.Theme.Styling.DialogCloseStyle` |
 | ContractType | `Avalonia.Controls.Button` |
-| Cardinality | Single |
+| Cardinality | Optional |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `DialogCaptionButton#PART_CloseButton`（静态 marker） |
 | 职责 | 标题栏关闭入口的按钮视觉（前景、尺寸、hover/pressed 反馈） |

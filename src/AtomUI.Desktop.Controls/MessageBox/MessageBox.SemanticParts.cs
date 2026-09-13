@@ -38,6 +38,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     CrossNestedOwners = true,
     RuntimeCreated = true,
+    Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Border),
     Since = "6.2")]
 [SemanticPart("title",
@@ -46,6 +47,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     CrossNestedOwners = true,
     RuntimeCreated = true,
+    Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Avalonia.Controls.TextBlock),
     Since = "6.2")]
 [SemanticPart("body",
@@ -70,6 +72,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     CrossNestedOwners = true,
     RuntimeCreated = true,
+    Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Avalonia.Controls.Button),
     Since = "6.2")]
 public partial class MessageBox

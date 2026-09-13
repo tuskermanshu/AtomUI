@@ -30,11 +30,11 @@ Control 生成 descriptor，不继承基类 descriptor，先例：`SimplePaginat
 | `mask` | 5.13.0 | `mask` | 一一对应；`IsModal=false` 或 Window 宿主时不物化（Optional）。 |
 | `container` | 6.0.0 | `container` | 一一对应（`Border#Frame`：背景、圆角、`ClipToBounds`）。上游同一节点的 `boxShadow`/`padding` 在 AtomUI 分属其他节点，见 §5.1。 |
 | `wrapper` | 5.13.0 | `wrapper` | 角色对应：上游是动画/滚动包裹层，AtomUI 由 `PART_SurfaceMotionActor` 承担。几何差异见 §5.2。 |
-| `header` | 5.13.0 | `header` | 一一对应（`Border#HeaderFrame`：背景、内边距）。 |
-| `title` | 6.0.0 | `title` | 一一对应（`TextBlock#Title`）。 |
+| `header` | 5.13.0 | `header` | 一一对应（`Border#HeaderFrame`：背景、内边距）。Overlay 恒存在；Window 宿主不物化（Optional，见 §2）。 |
+| `title` | 6.0.0 | `title` | 一一对应（`TextBlock#Title`）。Overlay 恒存在；随 header 在 Window 宿主不物化（Optional）。 |
 | `body` | 5.13.0 | `body` | 一一对应（`Border#ContentFrame`：正文内边距与内容承载）。 |
 | `footer` | 5.13.0 | `footer` | 一一对应（`Border#FooterFrame`：背景、内边距、外边距）。节点恒存在，`IsFooterVisible=false` 时仅隐藏（Single）。 |
-| `close` | 6.4.0 | `close` | 一一对应（`PART_CloseButton`）。节点恒存在，`IsClosable=false` 时仅隐藏（Single）。 |
+| `close` | 6.4.0 | `close` | 一一对应（`PART_CloseButton`）。Overlay 恒存在，`IsClosable=false` 仅隐藏；随 header 在 Window 宿主不物化（Optional）。 |
 
 Part 明细：
 
@@ -119,7 +119,7 @@ Part 明细：
 | SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-header` |
 | Style Type | `AtomUI.Theme.Styling.DialogHeaderStyle` |
 | ContractType | `Avalonia.Controls.Border` |
-| Cardinality | Single |
+| Cardinality | Optional |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `Border#HeaderFrame`（静态 marker） |
 | 职责 | 标题区框体：`HeaderBg` 背景与 `HeaderPadding` 内边距 |
@@ -137,7 +137,7 @@ Part 明细：
 | SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-title` |
 | Style Type | `AtomUI.Theme.Styling.DialogTitleStyle` |
 | ContractType | `Avalonia.Controls.TextBlock` |
-| Cardinality | Single |
+| Cardinality | Optional |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `TextBlock#Title`（静态 marker） |
 | 职责 | 标题文字排版与前景色 |
@@ -191,7 +191,7 @@ Part 明细：
 | SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-close` |
 | Style Type | `AtomUI.Theme.Styling.DialogCloseStyle` |
 | ContractType | `Avalonia.Controls.Button` |
-| Cardinality | Single |
+| Cardinality | Optional |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `DialogCaptionButton#PART_CloseButton`（静态 marker） |
 | 职责 | 标题栏关闭入口的按钮视觉（前景、尺寸、hover/pressed 反馈） |
@@ -238,16 +238,19 @@ Dialog body 内嵌 `Skeleton`（加载态常驻），用户内容还常包含 `C
   owner 未附加时 owner 作用域样式本就无法激活，此时保持 layer 所有权以避免改变 presenter 的 `Parent` 语义。
   因此 Overlay 可达性的前提是 owner 已进入可视/逻辑树（声明式 `IsOpen` 与静态 API 两条路径都满足）。
 - **Window 宿主**：`DialogSurface` 是 `DialogWindow.Content`，`DialogWindow` 的逻辑父已指向 `Dialog`
-  （`WindowDialogPresenter` 的 `SetParent(_dialog)`），因此 marker 完整存在；但 `DialogWindow` 是独立 `TopLevel`，
-  Avalonia 样式级联不跨 TopLevel，因此 **owner 作用域生成 Semantic Style 只在 Overlay 宿主保证命中**，Window 宿主内
-  的对话视觉经 host 契约（owner 属性、`DialogResourceBridge` 资源中继与 App 级主题）定制（先例：
-  ImagePreviewer 的 native dialog）。
-- `mask` 在 `IsModal=false`（modeless）与 Window 宿主下都不物化：未测量/未渲染的遮罩节点不会挂到可视树，
-  原生窗口也没有 mask，因此声明 `Optional`。`wrapper` 只在 Window 宿主缺失（原生窗口没有 Surface motion actor），
-  同样声明 `Optional`。
-- `footer`、`close`、`header`、`title` 的 marker 节点在两种宿主中都恒存在；`IsFooterVisible=false`、`IsClosable=false`
-  只隐藏节点（`IsVisible`），不增删 marker，因此保持 `Single`。Cardinality 描述节点存在性，不描述可见性。
-- `title` 随 `header` 恒存在（`IsHeaderVisible` 由 Surface 依据标题/图标/关闭能力解析）；`header` 为 `Single`。
+  （`WindowDialogPresenter` 的 `SetParent(_dialog)`），因此 `container`/`body`/`footer` 的 marker 在该宿主完整存在
+  （`mask`/`wrapper`/`header`/`title`/`close` 不物化，见上文 Optional 说明）。**owner 实例级 Semantic Style 经该逻辑
+  父链在 Window 宿主同样命中**（控件级回归 `Window_Host_Owner_Scoped_Semantic_Styles_Cascade_Via_Logical_Parent`
+  实证：owner `Styles` 中的生成 Part Style 命中独立 TopLevel 内的 `container`；Gallery 的样式化窗口 Dialog 演示即该
+  模式）。跨根高亮另经 `GetCrossRoots()` 上报的 `HostWindow` 解析（Adorner 落在宿主窗口自己的 AdornerLayer）；
+  静态资源仍由 `DialogResourceBridge` 中继（先例：ImagePreviewer 的 native dialog）。
+- Window 宿主不物化的部件共五个：`mask`（原生窗口没有遮罩）、`wrapper`（没有 Surface motion actor），以及
+  `header`/`title`/`close`——`WindowDialogPresenter` 无条件 `IsHeaderVisible=false`（原生窗口 caption 独占标题栏），
+  隐藏的标题栏模板不应用，三个 marker 节点不存在。按系统设计 §8.2（模板变体无法提供 Part 必须声明 Optional），
+  五者均为 `Optional`。
+- Overlay 宿主中上述部件全部物化：`IsFooterVisible=false`、`IsClosable=false` 只隐藏节点（`IsVisible`），不增删 marker。
+  Cardinality 描述节点存在性，不描述可见性。
+- `title` 随 `header` 存在；`footer` 在两种宿主都恒存在（`Single`）。
 - `Dialog.IsPinnedOpen=true` 时，用户发起的 presenter 关闭请求（标题栏关闭按钮、Overlay 遮罩外点、Escape、
   Footer 按钮）不再进入关闭管道；外部代码直接设置 `IsOpen=false` 仍正常关闭。该开关只是预览用行为门控，
   **不是 Part**，不改变任何 marker、Cardinality 或默认视觉；Window 宿主由原生窗口关闭流程负责，不受其控制。
@@ -261,11 +264,11 @@ Dialog body 内嵌 `Skeleton`（加载态常驻），用户内容还常包含 `C
 | `mask` | Optional | Overlay + `IsModal=true` 时 1 个；Window 或 modeless 为 0。 |
 | `wrapper` | Optional | Overlay 时 1 个；Window 为 0。 |
 | `container` | Single | 每次展示唯一 Surface 框体。 |
-| `header` | Single | 每次展示唯一标题区框体。 |
-| `title` | Single | 每次展示唯一标题文本。 |
+| `header` | Optional | Overlay 时 1 个；Window 宿主标题栏隐藏、模板不应用，为 0。 |
+| `title` | Optional | 随 header：Overlay 时 1 个；Window 宿主为 0。 |
 | `body` | Single | 每次展示唯一正文区。 |
 | `footer` | Single | 节点恒存在；`IsFooterVisible=false` 只隐藏。 |
-| `close` | Single | 节点恒存在；`IsClosable=false` 只隐藏。 |
+| `close` | Optional | 随 header：Overlay 恒存在（`IsClosable=false` 只隐藏）；Window 宿主为 0。 |
 
 同一 `Dialog` 实例的多个会话（关闭后重开）不保留 marker 状态；嵌套 Dialog 各自持有独立 presenter 与 Surface，
 部件互不串扰。`IsLoading` 只在 `body` 内切换 `Skeleton` 与 `Content`，不增删 Part marker。
@@ -302,12 +305,34 @@ Dialog body 内嵌 `Skeleton`（加载态常驻），用户内容还常包含 `C
 - `x:SetterTargetType` 必须是部件 `ContractType`；AtomUI 类型带 `atom:` 前缀，Avalonia 类型不带。
 - 禁止把 `ContractType.semantic-*`、`:is(ContractType).semantic-*`、`PART_*`、Name selector 或 internal 类型写进
   Part 身份 selector。
-- Window 宿主内 owner 作用域样式不生效（§2）；需要跨宿主一致的定制时必须使用 Application/App 级 Style。
+- Window 宿主内 owner 实例级 Semantic Style 同样命中（§2），但机制不是"自动"的——Avalonia `TopLevel` 把
+  样式宿主父级固定为 Application（`IStyleHost.StylingParent => _globalStyles`），且窗口模板应用时
+  `ContentPresenter` 会改写 surface 的继承父，模板之后才挂载的内容/按钮永远走不到 owner 样式链。
+  `DialogWindow` 因此按 `PopupRoot` 的既有范式覆写 `IStyleHost.StylingParent` 交还给逻辑父（owner Dialog）；
+  owner 未生根（脱离页面树直接构造 presenter）时退回 Application 保证 ControlTheme 可达
+  （回归：`Window_Host_Owner_Instance_Styles_Restyle_Container_Content_And_Footer_Buttons`）。
+- `container` 的 `Background`/`CornerRadius` 在 `DialogSurfaceTheme` 中必须以 ControlTheme 嵌套样式声明，
+  禁止写成模板局部值——局部值优先级压过任何 Style setter，`DialogContainerStyle` 将永远无法覆盖
+  （2026-09-13 真机缺陷：container 始终白色即此因）；`CornerRadius` 经 `TemplatedParent` 绑定保持对
+  Surface 运行时变更（Overlay 最大化归零）的跟随。
+- **部件内部元素的定制（按钮/正文文字）**：在外层 owner Style 内声明一级嵌套样式即可命中部件内部元素——
+  `^ atom|Button` 命中 Footer 按钮、`^ atom|TextBlock` 命中正文文字。三条机制约束（控件级回归
+  `Nested_Styles_Inside_Part_Styles_Reach_Footer_Buttons_And_Body_Text` 与上文 Window 宿主回归锁定）：
+  1. `DialogButton` 的 `StyleKeyOverride` 是 AtomUI `Button`，Avalonia 类型选择器按 StyleKey 精确匹配——
+     必须写 `atom|Button`，写 `atom|DialogButton` 永远不命中；标题栏 caption 按钮的 StyleKey 不同，不会被误伤。
+  2. 嵌套样式必须直接挂外层 owner Style；挂在生成 Part Style（如 `DialogFooterStyle`）内部的二级嵌套不激活。
+  3. 要演示 footer 按钮样式，Dialog 必须显式声明 `StandardButtons`（默认 `NoButton`，footer 无按钮，
+     按钮级样式无目标可命中）。
 
 Gallery 语义预览：对齐上游 `getContainer={false}` 的内联模态——舞台内嵌一个 `ScopeAwareOverlayLayerPanel`，Dialog 同时设置
 `OverlayScope`（把 overlay 宿主限定到该作用域，mask 与居中随舞台而非铺满窗口）与 `PlacementTarget`（解析目标），并以
 `IsOpen=True` + `IsPinnedOpen=True` 常开钉住；`StandardButtons` 提供真实按钮序列以呈现 `footer`。右侧部件卡因此仍可 hover，
-`mask` 也能在舞台内高亮。Window 宿主因独立 `TopLevel` 无法内联预览，只列出部件描述。
+`mask` 也能在舞台内高亮。第三个预览演示**原生 Window 宿主**（先例：ImagePreviewer 的 native dialog）：对话以独立
+系统窗口打开（modeless——模态会阻断 Gallery 输入），**由按钮按需触发、不默认打开**；跨根经 `Dialog.GetCrossRoots()`
+上报 `HostWindow`，部件高亮落在该窗口自己的 AdornerLayer；`mask`/`wrapper`/`header`/`title`/`close` 在该宿主不物化，
+对应卡片无高亮目标。第二个按钮打开**样式化窗口 Dialog**（owner 实例级 Semantic Style 定制 `container`/`body`/`footer`
+——该宿主只物化这三个部件）；该 Dialog 必须位于 `PreviewContent` 之外，因为语义预览按 owner 类型多实例解析，
+同一 Preview 内容内的第二个 Dialog 实例会被一并高亮。
 
 `OverlayScope` 是可选公共属性（默认 `null`）：指定后 overlay 宿主注入该元素所在作用域，mask、Surface 尺寸与居中都以作用域
 为边界；作用域内没有可用 scope layer 时回退到默认 TopLevel 宿主；Window 宿主忽略该属性。作用域宿主没有 Window frame
@@ -403,7 +428,8 @@ internal-observable）。本次改造将其替换为上述 8 个公共 Part；`h
   `Optional` 语义；`footer`/`close` 的存在性开关。
 - owner 逻辑父不变量：`OverlayDialogPresenter` 的逻辑父指向 `Dialog`，teardown 后置空；`GetCrossRoots()` 上报与
   释放；嵌套/堆叠会话的多实例隔离。
-- Window 宿主：marker 完整存在，且回归测试固定“owner 作用域样式不跨 TopLevel 级联”的边界（先例：
+- Window 宿主：`container`/`body`/`footer` marker 存在，`mask`/`wrapper`/`header`/`title`/`close` 不物化（Optional）；
+  回归测试固定“owner 实例级样式经逻辑父链命中 Window 宿主”与“跨根高亮落在原生窗口内”的边界（先例：
   ImagePreviewer 的 native dialog）。
 - 布局协调：`body`/`footer`/`header` 的 `Padding` Setter 与 owner `HostMin/Max`、structural minimum、裁剪的最终结果
   （系统文档 §7.1）。
@@ -417,4 +443,4 @@ internal-observable）。本次改造将其替换为上述 8 个公共 Part；`h
 - 上游 `wrapper` 全屏，AtomUI `wrapper` 与 Surface 同界（§5.2）。
 - 上游 `close` 绝对定位，AtomUI `close` 在标题栏按钮组内（§5.4）。
 - 上游 `container` 独占 `boxShadow`，AtomUI 阴影当前在 `PART_ShadowHost`（§5.1，待 Gate A 决策）。
-- Window 宿主为原生窗口，无 `mask`/`wrapper`，且 owner 作用域样式不跨 TopLevel（§2）。
+- Window 宿主为原生窗口，无 `mask`/`wrapper`/`header`/`title`/`close`；owner 实例级样式经逻辑父链命中（§2）。

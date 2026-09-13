@@ -151,12 +151,6 @@
         <target state="translated">打开自定义视图对话框</target>
       </segment>
     </unit>
-    <unit id="P2ContentOpenMessageBox">
-      <segment>
-        <source>Open MessageBox</source>
-        <target state="translated">打开 MessageBox</target>
-      </segment>
-    </unit>
     <unit id="P2ContentOpenModal">
       <segment>
         <source>Open Modal</source>
@@ -439,12 +433,6 @@
         <target state="translated">更多</target>
       </segment>
     </unit>
-    <unit id="SemanticPreviewTitleText">
-      <segment>
-        <source>Semantic Part preview</source>
-        <target state="translated">语义部件预览</target>
-      </segment>
-    </unit>
     <unit id="SemanticRootDescription">
       <segment>
         <source>Root element: the Dialog owner itself, carrying the opening intent, content, result and events.</source>
@@ -463,6 +451,30 @@
         <target state="translated">通过生成的 Semantic Style 类定制 Dialog 与 MessageBox 的语义部件。</target>
       </segment>
     </unit>
+    <unit id="SemanticStylesHint">
+      <segment>
+        <source>Open the semantically styled Dialog, MessageBox and window-hosted Dialog:</source>
+        <target state="translated">分别打开语义样式定制后的 Dialog、MessageBox 与窗口宿主 Dialog：</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledDialog">
+      <segment>
+        <source>Open styled Dialog</source>
+        <target state="translated">打开样式化 Dialog</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledMessageBox">
+      <segment>
+        <source>Open styled MessageBox</source>
+        <target state="translated">打开样式化 MessageBox</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledWindowDialog">
+      <segment>
+        <source>Open styled window Dialog</source>
+        <target state="translated">打开样式化窗口 Dialog</target>
+      </segment>
+    </unit>
     <unit id="SemanticStylesTitle">
       <segment>
         <source>Custom Semantic Part styling</source>
@@ -473,6 +485,12 @@
       <segment>
         <source>Title element: title text typography and foreground color.</source>
         <target state="translated">标题元素：标题文字的排版与前景色。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticWindowStageHint">
+      <segment>
+        <source>Open the native Window host with the stage button: parts highlight inside that window; the styled window opens from the styling example.</source>
+        <target state="translated">用舞台内按钮打开原生 Window 宿主：部件高亮发生在该窗口内；样式化窗口由样式示例的按钮打开。</target>
       </segment>
     </unit>
     <unit id="SemanticWrapperDescription">

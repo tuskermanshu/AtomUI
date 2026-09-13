@@ -126,11 +126,6 @@
         <source>Open CustomView Dialog</source>
       </segment>
     </unit>
-    <unit id="P2ContentOpenMessageBox">
-      <segment>
-        <source>Open MessageBox</source>
-      </segment>
-    </unit>
     <unit id="P2ContentOpenModal">
       <segment>
         <source>Open Modal</source>
@@ -366,11 +361,6 @@
         <source>More</source>
       </segment>
     </unit>
-    <unit id="SemanticPreviewTitleText">
-      <segment>
-        <source>Semantic Part preview</source>
-      </segment>
-    </unit>
     <unit id="SemanticRootDescription">
       <segment>
         <source>Root element: the Dialog owner itself, carrying the opening intent, content, result and events.</source>
@@ -386,6 +376,26 @@
         <source>Style Dialog and MessageBox Semantic Parts through the generated Semantic Style classes.</source>
       </segment>
     </unit>
+    <unit id="SemanticStylesHint">
+      <segment>
+        <source>Open the semantically styled Dialog, MessageBox and window-hosted Dialog:</source>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledDialog">
+      <segment>
+        <source>Open styled Dialog</source>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledMessageBox">
+      <segment>
+        <source>Open styled MessageBox</source>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledWindowDialog">
+      <segment>
+        <source>Open styled window Dialog</source>
+      </segment>
+    </unit>
     <unit id="SemanticStylesTitle">
       <segment>
         <source>Custom Semantic Part styling</source>
@@ -394,6 +404,11 @@
     <unit id="SemanticTitleDescription">
       <segment>
         <source>Title element: title text typography and foreground color.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticWindowStageHint">
+      <segment>
+        <source>Open the native Window host with the stage button: parts highlight inside that window; the styled window opens from the styling example.</source>
       </segment>
     </unit>
     <unit id="SemanticWrapperDescription">

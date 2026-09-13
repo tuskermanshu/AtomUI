@@ -397,9 +397,18 @@ public partial class Dialog : TemplatedControl,
 
     public IReadOnlyList<Visual> GetCrossRoots()
     {
-        if (_session?.Presenter is Visual root && root.GetVisualParent() is not null)
+        var presenter = _session?.Presenter;
+        if (presenter is Visual overlayRoot && overlayRoot.GetVisualParent() is not null)
         {
-            return [root];
+            return [overlayRoot];
+        }
+
+        // Window 宿主：跨根是原生 DialogWindow（独立 TopLevel）。语义预览据此在该窗口内解析并高亮部件
+        // （Adorner 落在宿主窗口自己的 AdornerLayer，先例：ImagePreviewer 的 native dialog）。
+        // 该上报只服务跨根解析；owner 作用域的样式级联仍不跨 TopLevel（见 semantic-part.md）。
+        if (presenter is WindowDialogPresenter { HostWindow.IsVisible: true } windowPresenter)
+        {
+            return [windowPresenter.HostWindow];
         }
 
         return Array.Empty<Visual>();

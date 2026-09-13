@@ -75,6 +75,12 @@ public partial class ModalShowCase : GalleryReactiveUserControl<ModalViewModel>
             case "MessageBoxSemanticStyleOpenButton":
                 HandleMessageBoxSemanticStyleOpenButtonClick(button, e);
                 break;
+            case "WindowDialogSemanticOpenButton":
+                HandleWindowDialogSemanticOpenButtonClick(button, e);
+                break;
+            case "WindowDialogStyledOpenButton":
+                HandleWindowDialogStyledOpenButtonClick(button, e);
+                break;
             case "MessageBoxOverlayHostButton":
                 HandleMessageBoxOverlayHostButtonClick(button, e);
                 break;
@@ -228,6 +234,22 @@ public partial class ModalShowCase : GalleryReactiveUserControl<ModalViewModel>
         if (DataContext is ModalViewModel viewModel)
         {
             viewModel.IsMessageBoxSemanticStyleOpen = true;
+        }
+    }
+
+    private void HandleWindowDialogSemanticOpenButtonClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ModalViewModel viewModel)
+        {
+            viewModel.IsWindowDialogSemanticOpen = true;
+        }
+    }
+
+    private void HandleWindowDialogStyledOpenButtonClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ModalViewModel viewModel)
+        {
+            viewModel.IsWindowDialogStyledOpen = true;
         }
     }
 

@@ -151,12 +151,6 @@
         <target state="translated">Abrir CustomView Diálogo</target>
       </segment>
     </unit>
-    <unit id="P2ContentOpenMessageBox">
-      <segment>
-        <source>Open MessageBox</source>
-        <target state="translated">Abrir MessageBox</target>
-      </segment>
-    </unit>
     <unit id="P2ContentOpenModal">
       <segment>
         <source>Open Modal</source>
@@ -439,12 +433,6 @@
         <target state="translated">Mais</target>
       </segment>
     </unit>
-    <unit id="SemanticPreviewTitleText">
-      <segment>
-        <source>Semantic Part preview</source>
-        <target state="translated">Pré-visualização de Semantic Part</target>
-      </segment>
-    </unit>
     <unit id="SemanticRootDescription">
       <segment>
         <source>Root element: the Dialog owner itself, carrying the opening intent, content, result and events.</source>
@@ -463,6 +451,30 @@
         <target state="translated">Estilize as Semantic Parts do Dialog e do MessageBox com as classes Semantic Style geradas.</target>
       </segment>
     </unit>
+    <unit id="SemanticStylesHint">
+      <segment>
+        <source>Open the semantically styled Dialog, MessageBox and window-hosted Dialog:</source>
+        <target state="translated">Abra o Dialog, o MessageBox e o Dialog em janela com estilos semânticos:</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledDialog">
+      <segment>
+        <source>Open styled Dialog</source>
+        <target state="translated">Abrir Dialog estilizado</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledMessageBox">
+      <segment>
+        <source>Open styled MessageBox</source>
+        <target state="translated">Abrir MessageBox estilizado</target>
+      </segment>
+    </unit>
+    <unit id="SemanticStylesOpenStyledWindowDialog">
+      <segment>
+        <source>Open styled window Dialog</source>
+        <target state="translated">Abrir Dialog em janela estilizado</target>
+      </segment>
+    </unit>
     <unit id="SemanticStylesTitle">
       <segment>
         <source>Custom Semantic Part styling</source>
@@ -473,6 +485,12 @@
       <segment>
         <source>Title element: title text typography and foreground color.</source>
         <target state="translated">Elemento de título: tipografia e cor do texto do título.</target>
+      </segment>
+    </unit>
+    <unit id="SemanticWindowStageHint">
+      <segment>
+        <source>Open the native Window host with the stage button: parts highlight inside that window; the styled window opens from the styling example.</source>
+        <target state="translated">Abra o host Window nativo com o botão do palco: as partes são destacadas dentro dessa janela; a janela estilizada abre pelo exemplo de estilos.</target>
       </segment>
     </unit>
     <unit id="SemanticWrapperDescription">

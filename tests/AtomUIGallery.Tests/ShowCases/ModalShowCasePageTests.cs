@@ -77,8 +77,53 @@ public class ModalShowCasePageTests
         AssertPinnedOverlayPreview(messageBoxPreview, "atom:MessageBox", "MessageBoxSemanticStage",
             "MessageBoxSemanticStageLayer", "MessageBoxSemanticOwner");
 
-        // 两个预览的 PartDescriptions 顺序都严格对齐 antd Modal _semantic.tsx。
-        foreach (var preview in new[] { dialogPreview, messageBoxPreview })
+        // 第三个预览演示原生 Window 宿主（先例：ImagePreviewer 的 native dialog）：跨根经 GetCrossRoots
+        // 上报 HostWindow，高亮落在该窗口内。modeless 是必须的——模态窗口会阻断 Gallery 输入。
+        // 不默认打开：两个按钮按需触发（第二个打开改了样式的窗口 Dialog——owner 实例级 Semantic Style
+        // 经逻辑父链在 Window 宿主同样命中，有控件级回归实证）。
+        var windowPreview = ExtractSemanticPreview(source, "WindowDialogSemanticPreview");
+        windowPreview.ShouldContain("SemanticOwnerType=\"{x:Type atom:Dialog}\"");
+        windowPreview.ShouldContain("SemanticOwner=\"{Binding #WindowDialogSemanticOwner}\"");
+        windowPreview.ShouldContain("DialogHostType=\"Window\"");
+        windowPreview.ShouldContain("IsModal=\"False\"");
+        windowPreview.ShouldContain("IsMotionEnabled=\"False\"");
+        windowPreview.ShouldNotContain("IsOpen=\"True\"");
+        windowPreview.ShouldContain("IsOpen=\"{Binding IsWindowDialogSemanticOpen}\"");
+        // 「打开窗口 Dialog」在舞台内触发（语义预览高亮入口）；样式化窗口的触发在样式卡片。
+        windowPreview.ShouldContain("Name=\"WindowDialogSemanticOpenButton\"");
+        windowPreview.ShouldNotContain("WindowDialogStyledOpenButton");
+        // 显式宿主尺寸：窗口宿主自然测量过小，按 demo 基线固定（样式化窗口 Dialog 在预览内容之外，单独断言）。
+        windowPreview.ShouldContain("HostWidth=\"360\"");
+        windowPreview.ShouldContain("HostHeight=\"220\"");
+        windowPreview.ShouldContain("ModalShowCaseLangResource SemanticWindowStageHint");
+
+        // 样式化窗口 Dialog 必须位于 PreviewContent 之外：语义预览按 owner 类型多实例解析，
+        // 同一 Preview 内容内的第二个 Dialog 实例会被一并高亮（回归教训）。
+        var styledWindow = ExtractStyledWindowDialog(source);
+        styledWindow.ShouldContain("Classes=\"window-semantic-styles-demo\"");
+        styledWindow.ShouldContain("IsOpen=\"{Binding IsWindowDialogStyledOpen}\"");
+        styledWindow.ShouldContain("DialogHostType=\"Window\"");
+        styledWindow.ShouldContain("IsModal=\"False\"");
+        styledWindow.ShouldContain("HostWidth=\"360\"");
+        styledWindow.ShouldContain("HostHeight=\"220\"");
+        // footer 按钮必须显式声明：StandardButtons 默认 NoButton，漏配会让按钮级语义样式无目标
+        // 可命中（2026-09-13 真机缺陷回归）。
+        styledWindow.ShouldContain("StandardButtons=\"Cancel,Ok\"");
+        // 只定制该宿主真实物化的部件（container/body/footer；mask/header/title/close 不存在）。
+        styledWindow.ShouldContain("atom:DialogContainerStyle");
+        styledWindow.ShouldContain("atom:DialogBodyStyle");
+        styledWindow.ShouldContain("atom:DialogFooterStyle");
+        styledWindow.ShouldNotContain("atom:DialogMaskStyle");
+        styledWindow.ShouldNotContain("atom:DialogHeaderStyle");
+        styledWindow.ShouldNotContain("atom:DialogTitleStyle");
+        styledWindow.ShouldNotContain("atom:DialogCloseStyle");
+        // 按钮与正文文字的定制入口：外层 owner Style 的一级嵌套样式（DialogButton 的 StyleKey 是 atom:Button）。
+        styledWindow.ShouldContain("Selector=\"^ atom|TextBlock\"");
+        styledWindow.ShouldContain("Selector=\"^ atom|Button\"");
+        styledWindow.ShouldNotContain("Selector=\"^ atom|DialogButton\"");
+        windowPreview.ShouldNotContain("window-semantic-styles-demo");
+
+        foreach (var preview in new[] { dialogPreview, messageBoxPreview, windowPreview })
         {
             var paths = Regex.Matches(preview, "SemanticPartDescription Path=\"([^\"]+)\"")
                              .Select(static m => m.Groups[1].Value).ToArray();
@@ -118,7 +163,10 @@ public class ModalShowCasePageTests
         // 同一个条目同时提供 Dialog 与 MessageBox 两个触发按钮。
         item.ShouldContain("Name=\"SemanticStyleDialogOpenButton\"");
         item.ShouldContain("Name=\"MessageBoxSemanticStyleOpenButton\"");
-        CountOccurrences(item, "<atom:Button").ShouldBe(2);
+        // 样式化窗口 Dialog 的触发按钮在样式卡片（窗口 Dialog 的触发在语义预览舞台）。
+        item.ShouldContain("Name=\"WindowDialogStyledOpenButton\"");
+        item.ShouldNotContain("WindowDialogSemanticOpenButton");
+        CountOccurrences(item, "<atom:Button").ShouldBe(3);
         item.ShouldNotContain("ToggleSwitch");
 
         // Dialog 部分用 Dialog<Part>Style。
@@ -189,6 +237,19 @@ public class ModalShowCasePageTests
         preview.ShouldContain("IsModal=\"True\"");
         preview.ShouldContain("DialogHostType=\"Overlay\"");
         preview.ShouldContain("StandardButtons=\"Cancel,Ok\"");
+    }
+
+    private static string ExtractStyledWindowDialog(string source)
+    {
+        const string startMarker = "<atom:Dialog Classes=\"window-semantic-styles-demo\"";
+        const string endMarker   = "</atom:Dialog>";
+
+        var start = source.IndexOf(startMarker, StringComparison.Ordinal);
+        start.ShouldBeGreaterThanOrEqualTo(0, "missing styled window dialog");
+        var end = source.IndexOf(endMarker, start, StringComparison.Ordinal);
+        end.ShouldBeGreaterThan(start);
+
+        return source[start..(end + endMarker.Length)];
     }
 
     private static string ExtractSemanticPreview(string source, string previewName)

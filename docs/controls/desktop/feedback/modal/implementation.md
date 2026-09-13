@@ -40,6 +40,9 @@
 - `DialogOverlayLayer` 解析当前 owner 的视觉宿主，并管理同一 owner scope 内的 presenter 顺序、可用尺寸和栈顶键盘路由。
 - `OverlayDialogPresenter` 是 Dialog layer 的直接子节点；mask 与 Surface 不拆成独立 popup。
 - `WindowDialogPresenter` 拥有一个 `DialogWindow`，并将同一个 `DialogSurface` 作为原生 Window 内容。
+  `DialogWindow` 逻辑父是 owner `Dialog`（presenter 构造时 `SetParent`），并按 `PopupRoot` 既有范式覆写
+  `IStyleHost.StylingParent => Parent`，使 owner 实例级 Semantic Style 能级联进独立窗口宿主；owner 未生根
+  （脱离页面树直接构造 presenter）时退回 `Application`，保证 ControlTheme 仍可达。
 - `MessageBox` 不拥有隐藏 Dialog；它覆盖 Surface 内容和按钮配置 hook。
 
 ## 4. 状态与数据流
@@ -126,8 +129,10 @@ Overlay 可达性依赖两条实现不变量：`OverlayDialogPresenter` 必须�
 `Dialog` 的逻辑子节点（`((ISetLogicalParent)presenter).SetParent(_dialog)`，先例：`DrawerContainer`），否则 owner
 作用域生成的 Semantic Style 无法沿逻辑祖先链命中 presenter 子树；`Dialog` 必须实现
 `ISemanticPartCrossRootProvider` 并在 presenter 附加/释放时上报 `GetCrossRoots()`，供 Gallery 语义预览收集跨根。
-Window 宿主中 `DialogWindow` 已是 `Dialog` 的逻辑子节点，但独立 `TopLevel` 阻断样式级联，因此 owner 作用域
-Semantic Style 只在 Overlay 宿主保证命中。完整契约见 [Modal / Dialog Semantic Part 契约](semantic-part.md)。
+Window 宿主同样上报：跨根是原生 `DialogWindow`（`GetCrossRoots()` 在 `HostWindow.IsVisible` 时返回该窗口，
+`WindowDialogPresenter` 在窗口显示、Opened 与 teardown 时触发 `CrossRootsChanged`），语义预览据此在该窗口内解析并
+高亮部件（Adorner 落在宿主窗口自己的 AdornerLayer）；该上报只服务跨根解析，owner 作用域的样式级联仍不跨 TopLevel。
+完整契约见 [Modal / Dialog Semantic Part 契约](semantic-part.md)。
 
 ## 6. 生命周期与模板接入
 

@@ -18,8 +18,6 @@
                                                 IsOverlayMode="True">
                         <Border Name="Frame"
                                 Classes.semantic-container="True"
-                                Background="{atom:DialogTokenResource ContentBg}"
-                                CornerRadius="{TemplateBinding CornerRadius}"
                                 ClipToBounds="True">
                             <DockPanel Name="PART_SurfaceContentLayer"
                                        Classes.semantic-scope-content-layer="True"
@@ -63,6 +61,15 @@
                 </Panel>
             </ControlTemplate>
         </Setter>
+
+        <!-- container 的背景/圆角必须走 ControlTheme 样式而不是模板局部值：局部值优先级压过
+             任何 Style setter，DialogContainerStyle（owner 实例级语义样式）将永远无法覆盖。
+             CornerRadius 经 TemplatedParent 绑定保持对 Surface 运行时变更（如最大化归零）的跟随。 -->
+        <Style Selector="^ /template/ Border#Frame">
+            <Setter Property="Background" Value="{atom:DialogTokenResource ContentBg}" />
+            <Setter Property="CornerRadius"
+                    Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+        </Style>
 
         <Style Selector="^ /template/ atom|OverlayDialogHeader#PART_Header">
             <Setter Property="TitleFontSize" Value="{atom:DialogTokenResource HeaderFontSize}" />
