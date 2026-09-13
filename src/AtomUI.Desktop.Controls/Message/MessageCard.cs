@@ -2,13 +2,11 @@
 using AtomUI.Icons.AntDesign;
 using AtomUI.MotionScene;
 using Avalonia;
-using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Interactivity;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
@@ -18,10 +16,8 @@ namespace AtomUI.Desktop.Controls;
     MessageCardPseudoClass.Success, 
     MessageCardPseudoClass.Warning, 
     MessageCardPseudoClass.Loading)]
-public class MessageCard : TemplatedControl, IMotionAwareControl
+public class MessageCard : TemplatedControl, IMotionAwareControl, IFeedbackStackItem
 {
-    internal const double AnimationMaxOffsetY = 100d;
-
     #region 公共属性定义
 
     /// <summary>
@@ -118,10 +114,26 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
     /// <summary>回调：消息卡片关闭时触发，由 WindowMessageManager 设置以避免 lambda 闭包。</summary>
     internal Action? OnClose { get; set; }
 
+    internal Action<IFeedbackStackItem, bool>? HoverChanged { get; set; }
+
+    internal static readonly DirectProperty<MessageCard, NotificationPosition> PositionProperty =
+        AvaloniaProperty.RegisterDirect<MessageCard, NotificationPosition>(
+            nameof(Position),
+            card => card.Position,
+            (card, value) => card.Position = value);
+
     internal static readonly DirectProperty<MessageCard, TimeSpan> OpenCloseMotionDurationProperty =
         AvaloniaProperty.RegisterDirect<MessageCard, TimeSpan>(nameof(OpenCloseMotionDuration),
             o => o.OpenCloseMotionDuration,
             (o, v) => o.OpenCloseMotionDuration = v);
+
+    private NotificationPosition _position = NotificationPosition.TopCenter;
+
+    internal NotificationPosition Position
+    {
+        get => _position;
+        set => SetAndRaise(PositionProperty, ref _position, value);
+    }
 
     private TimeSpan _openCloseMotionDuration;
 
@@ -134,11 +146,13 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
     #endregion
 
     private bool _isClosing;
-    private MotionExecutionState _closeMotionState;
+    private bool _isStackVisible = true;
+    private readonly FeedbackCardMotionCoordinator _motionCoordinator;
     private BaseMotionActor? _motionActor;
     
     public MessageCard()
     {
+        _motionCoordinator = new FeedbackCardMotionCoordinator(CompleteCloseMotion);
     }
     
     public void Close()
@@ -149,6 +163,42 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
         }
 
         IsClosing = true;
+    }
+
+    bool IFeedbackStackItem.IsStackVisible
+    {
+        get => _isStackVisible;
+        set => _isStackVisible = value;
+    }
+
+    bool IFeedbackStackItem.IsProgressVisible => false;
+
+    void IFeedbackStackItem.RequestClose()
+    {
+        Close();
+    }
+
+    void IFeedbackStackItem.UpdateRemaining(TimeSpan remaining)
+    {
+    }
+
+    internal void ReleaseOwner()
+    {
+        _motionCoordinator.Dispose();
+        HoverChanged = null;
+        OnClose = null;
+    }
+
+    protected override void OnPointerEntered(Avalonia.Input.PointerEventArgs e)
+    {
+        base.OnPointerEntered(e);
+        HoverChanged?.Invoke(this, true);
+    }
+
+    protected override void OnPointerExited(Avalonia.Input.PointerEventArgs e)
+    {
+        base.OnPointerExited(e);
+        HoverChanged?.Invoke(this, false);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -174,6 +224,12 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
 
         if (change.Property == IsClosedProperty)
         {
+            _motionCoordinator.UpdateConfiguration(
+                IsClosing,
+                IsClosed,
+                IsMotionEnabled,
+                Position,
+                OpenCloseMotionDuration);
             if (!IsClosing && !IsClosed)
             {
                 return;
@@ -185,8 +241,29 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
         {
             if (IsClosing)
             {
-                ScheduleHideMotion();
+                InvalidateFeedbackStackMeasure();
+                _motionCoordinator.StartClose(IsClosed, IsMotionEnabled, Position, OpenCloseMotionDuration);
             }
+        }
+        else if (change.Property == IsMotionEnabledProperty ||
+                 change.Property == PositionProperty ||
+                 change.Property == OpenCloseMotionDurationProperty)
+        {
+            _motionCoordinator.UpdateConfiguration(
+                IsClosing,
+                IsClosed,
+                IsMotionEnabled,
+                Position,
+                OpenCloseMotionDuration);
+        }
+    }
+
+    private void InvalidateFeedbackStackMeasure()
+    {
+        InvalidateMeasure();
+        if (this.GetVisualParent() is Control parent)
+        {
+            parent.InvalidateMeasure();
         }
     }
 
@@ -194,94 +271,37 @@ public class MessageCard : TemplatedControl, IMotionAwareControl
     {
         base.OnApplyTemplate(e);
         _motionActor = e.NameScope.Find<BaseMotionActor>(BaseMotionActor.MotionActorPart);
-        if (_motionActor is not null && IsMotionEnabled && !IsClosing)
-        {
-            _motionActor.Opacity = 0;
-        }
-        if (IsClosing)
-        {
-            ScheduleHideMotion(DispatcherPriority.Loaded);
-        }
-        else
-        {
-            Dispatcher.InvokeAsync(ApplyShowMotionAsync, DispatcherPriority.Loaded);
-        }
+        ApplyMotionActor();
         UpdatePseudoClasses();
         SetupDefaultMessageIcon();
     }
 
-    private async Task ApplyShowMotionAsync()
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        if (IsClosing)
-        {
-            return;
-        }
-
-        if (_motionActor is not null)
-        {
-            if (IsMotionEnabled)
-            {
-                var motion = new MoveUpInMotion(AnimationMaxOffsetY, _openCloseMotionDuration, new CubicEaseOut());
-                await motion.RunAsync(_motionActor);
-                _motionActor.Opacity = 1;
-            }
-        }
+        base.OnAttachedToVisualTree(e);
+        ApplyMotionActor();
     }
 
-    private async Task ApplyHideMotionAsync()
+    private void ApplyMotionActor()
     {
-        if (_closeMotionState != MotionExecutionState.Pending)
-        {
-            return;
-        }
-
-        _closeMotionState = MotionExecutionState.Playing;
-        if (_motionActor is null || !IsMotionEnabled)
-        {
-            CompleteCloseMotion();
-            return;
-        }
-
-        var motion =
-            new MoveUpOutMotion(AnimationMaxOffsetY, _openCloseMotionDuration, new CubicEaseIn());
-        await motion.RunAsync(_motionActor);
-        CompleteCloseMotion();
+        _motionCoordinator.ApplyActor(
+            _motionActor,
+            IsClosing,
+            IsClosed,
+            IsMotionEnabled,
+            Position,
+            OpenCloseMotionDuration);
     }
 
-    private void ScheduleHideMotion(DispatcherPriority? priority = null)
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        if (!IsClosing || IsClosed || _closeMotionState != MotionExecutionState.Idle)
-        {
-            return;
-        }
-
-        _closeMotionState = MotionExecutionState.Pending;
-        if (priority is { } dispatcherPriority)
-        {
-            Dispatcher.InvokeAsync(ApplyHideMotionAsync, dispatcherPriority);
-        }
-        else
-        {
-            Dispatcher.InvokeAsync(ApplyHideMotionAsync);
-        }
+        _motionCoordinator.DetachActor(IsClosing, IsClosed);
+        base.OnDetachedFromVisualTree(e);
     }
 
     private void CompleteCloseMotion()
     {
-        if (_closeMotionState != MotionExecutionState.Playing)
-        {
-            return;
-        }
-
-        _closeMotionState = MotionExecutionState.Completing;
-        try
-        {
-            IsClosed = true;
-        }
-        finally
-        {
-            _closeMotionState = MotionExecutionState.Idle;
-        }
+        IsClosed = true;
     }
 
     private void UpdatePseudoClasses()

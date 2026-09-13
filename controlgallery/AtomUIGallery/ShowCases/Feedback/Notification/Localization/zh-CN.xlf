@@ -79,6 +79,12 @@
         <target state="translated">悬停时不暂停</target>
       </segment>
     </unit>
+    <unit id="P2ContentDestroyAll">
+      <segment>
+        <source>Destroy all</source>
+        <target state="translated">销毁全部</target>
+      </segment>
+    </unit>
     <unit id="P2ContentError">
       <segment>
         <source>Error</source>
@@ -175,6 +181,24 @@
         <target state="translated">我不会自动关闭。这是一段特意写得很长的描述，包含很多字符和词语。</target>
       </segment>
     </unit>
+    <unit id="P2NotificationLongStackedFormat">
+      <segment>
+        <source>Notification {0}: This is a deliberately longer stacked notification used to verify variable-height cards.</source>
+        <target state="translated">通知 {0}：这是一条特意加长的堆叠通知，用于验证不同高度的通知卡片。</target>
+      </segment>
+    </unit>
+    <unit id="P2NotificationStackedFormat">
+      <segment>
+        <source>Notification {0}: This is a stacked notification.</source>
+        <target state="translated">通知 {0}：这是一条堆叠通知。</target>
+      </segment>
+    </unit>
+    <unit id="P2NotificationStackedTitleFormat">
+      <segment>
+        <source>Notification {0}</source>
+        <target state="translated">通知 {0}</target>
+      </segment>
+    </unit>
     <unit id="P2NotificationTitle">
       <segment>
         <source>Notification Title</source>
@@ -239,6 +263,30 @@
       <segment>
         <source>Examples</source>
         <target state="translated">示例</target>
+      </segment>
+    </unit>
+    <unit id="StackDescription">
+      <segment>
+        <source>Stack is disabled by default. This example enables it; notifications stack when their amount is over threshold, and hover expands all notifications.</source>
+        <target state="translated">默认关闭堆叠。本示例将其开启；通知数量超过阈值后会折叠显示，悬停堆叠区域可展开全部通知。</target>
+      </segment>
+    </unit>
+    <unit id="StackEnabledLabel">
+      <segment>
+        <source>Enabled:</source>
+        <target state="translated">开启：</target>
+      </segment>
+    </unit>
+    <unit id="StackThresholdLabel">
+      <segment>
+        <source>Threshold:</source>
+        <target state="translated">阈值：</target>
+      </segment>
+    </unit>
+    <unit id="StackTitle">
+      <segment>
+        <source>Stack</source>
+        <target state="translated">堆叠</target>
       </segment>
     </unit>
     <unit id="WithIconDescription">

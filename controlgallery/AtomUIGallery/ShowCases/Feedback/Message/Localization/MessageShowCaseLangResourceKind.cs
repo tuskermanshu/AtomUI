@@ -13,6 +13,10 @@ public enum MessageShowCaseLangResourceKind
     LoadingIndicatorDescription,
     CallbackTitle,
     CallbackDescription,
+    StackTitle,
+    StackDescription,
+    StackEnabledLabel,
+    StackThresholdLabel,
     ComponentCategory,
     ComponentStatusStable,
     PageSubtitle,
@@ -25,11 +29,15 @@ public enum MessageShowCaseLangResourceKind
     P2ContentWarning,
     P2ContentError,
     P2ContentDisplayALoadingIndicator,
+    P2ContentOpenMessageBox,
+    P2ContentDestroyAll,
     P2MessageHelloAtomUIAvalonia,
     P2MessageInformation,
     P2MessageSuccess,
     P2MessageWarning,
     P2MessageError,
     P2MessageActionInProgress,
-    P2MessageLoadingFinished
+    P2MessageLoadingFinished,
+    P2MessageStackedFormat,
+    P2MessageLongStackedFormat
 }

@@ -61,6 +61,11 @@
         <source>Display a loading indicator</source>
       </segment>
     </unit>
+    <unit id="P2ContentDestroyAll">
+      <segment>
+        <source>Destroy all</source>
+      </segment>
+    </unit>
     <unit id="P2ContentDisplayNormalMessage">
       <segment>
         <source>Display normal message</source>
@@ -74,6 +79,11 @@
     <unit id="P2ContentInfo">
       <segment>
         <source>Info</source>
+      </segment>
+    </unit>
+    <unit id="P2ContentOpenMessageBox">
+      <segment>
+        <source>Open the message box</source>
       </segment>
     </unit>
     <unit id="P2ContentSuccess">
@@ -111,6 +121,16 @@
         <source>Loading finished</source>
       </segment>
     </unit>
+    <unit id="P2MessageLongStackedFormat">
+      <segment>
+        <source>Message {0}: This is a slightly longer stacked message.</source>
+      </segment>
+    </unit>
+    <unit id="P2MessageStackedFormat">
+      <segment>
+        <source>Message {0}: This is a stacked message.</source>
+      </segment>
+    </unit>
     <unit id="P2MessageSuccess">
       <segment>
         <source>This is a success message.</source>
@@ -134,6 +154,26 @@
     <unit id="ScenarioExamples">
       <segment>
         <source>Examples</source>
+      </segment>
+    </unit>
+    <unit id="StackDescription">
+      <segment>
+        <source>Stack configuration, disabled by default. Messages will be stacked when the amount is over threshold. Only the latest message is shown in the collapsed stack.</source>
+      </segment>
+    </unit>
+    <unit id="StackEnabledLabel">
+      <segment>
+        <source>Enabled:</source>
+      </segment>
+    </unit>
+    <unit id="StackThresholdLabel">
+      <segment>
+        <source>Threshold:</source>
+      </segment>
+    </unit>
+    <unit id="StackTitle">
+      <segment>
+        <source>Stack</source>
       </segment>
     </unit>
   </file>

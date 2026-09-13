@@ -73,6 +73,12 @@
         <target state="translated">显示加载指示器</target>
       </segment>
     </unit>
+    <unit id="P2ContentDestroyAll">
+      <segment>
+        <source>Destroy all</source>
+        <target state="translated">销毁全部</target>
+      </segment>
+    </unit>
     <unit id="P2ContentDisplayNormalMessage">
       <segment>
         <source>Display normal message</source>
@@ -89,6 +95,12 @@
       <segment>
         <source>Info</source>
         <target state="translated">信息</target>
+      </segment>
+    </unit>
+    <unit id="P2ContentOpenMessageBox">
+      <segment>
+        <source>Open the message box</source>
+        <target state="translated">打开消息框</target>
       </segment>
     </unit>
     <unit id="P2ContentSuccess">
@@ -133,6 +145,18 @@
         <target state="translated">加载完成</target>
       </segment>
     </unit>
+    <unit id="P2MessageLongStackedFormat">
+      <segment>
+        <source>Message {0}: This is a slightly longer stacked message.</source>
+        <target state="translated">消息 {0}：这是一条稍长的堆叠消息。</target>
+      </segment>
+    </unit>
+    <unit id="P2MessageStackedFormat">
+      <segment>
+        <source>Message {0}: This is a stacked message.</source>
+        <target state="translated">消息 {0}：这是一条堆叠消息。</target>
+      </segment>
+    </unit>
     <unit id="P2MessageSuccess">
       <segment>
         <source>This is a success message.</source>
@@ -161,6 +185,30 @@
       <segment>
         <source>Examples</source>
         <target state="translated">示例</target>
+      </segment>
+    </unit>
+    <unit id="StackDescription">
+      <segment>
+        <source>Stack configuration, disabled by default. Messages will be stacked when the amount is over threshold. Only the latest message is shown in the collapsed stack.</source>
+        <target state="translated">堆叠配置默认关闭。当消息数量超过阈值时将折叠显示；折叠状态下只展示最新一条消息。</target>
+      </segment>
+    </unit>
+    <unit id="StackEnabledLabel">
+      <segment>
+        <source>Enabled:</source>
+        <target state="translated">启用：</target>
+      </segment>
+    </unit>
+    <unit id="StackThresholdLabel">
+      <segment>
+        <source>Threshold:</source>
+        <target state="translated">阈值：</target>
+      </segment>
+    </unit>
+    <unit id="StackTitle">
+      <segment>
+        <source>Stack</source>
+        <target state="translated">堆叠</target>
       </segment>
     </unit>
   </file>

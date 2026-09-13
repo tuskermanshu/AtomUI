@@ -79,6 +79,12 @@
         <target state="translated">Don't pause em sobreposição</target>
       </segment>
     </unit>
+    <unit id="P2ContentDestroyAll">
+      <segment>
+        <source>Destroy all</source>
+        <target state="translated">Destruir todas</target>
+      </segment>
+    </unit>
     <unit id="P2ContentError">
       <segment>
         <source>Error</source>
@@ -175,6 +181,24 @@
         <target state="translated">I irá never fechar automatically. Este é a purposely very very longo descrição que has many many characters e words.</target>
       </segment>
     </unit>
+    <unit id="P2NotificationLongStackedFormat">
+      <segment>
+        <source>Notification {0}: This is a deliberately longer stacked notification used to verify variable-height cards.</source>
+        <target state="translated">Notificação {0}: Esta é uma notificação empilhada propositalmente mais longa para verificar cartões de alturas variáveis.</target>
+      </segment>
+    </unit>
+    <unit id="P2NotificationStackedFormat">
+      <segment>
+        <source>Notification {0}: This is a stacked notification.</source>
+        <target state="translated">Notificação {0}: Esta é uma notificação empilhada.</target>
+      </segment>
+    </unit>
+    <unit id="P2NotificationStackedTitleFormat">
+      <segment>
+        <source>Notification {0}</source>
+        <target state="translated">Notificação {0}</target>
+      </segment>
+    </unit>
     <unit id="P2NotificationTitle">
       <segment>
         <source>Notification Title</source>
@@ -239,6 +263,30 @@
       <segment>
         <source>Examples</source>
         <target state="translated">Exemplos</target>
+      </segment>
+    </unit>
+    <unit id="StackDescription">
+      <segment>
+        <source>Stack is disabled by default. This example enables it; notifications stack when their amount is over threshold, and hover expands all notifications.</source>
+        <target state="translated">A pilha fica desativada por padrão. Este exemplo a ativa; as notificações são empilhadas quando excedem o limite, e passar o ponteiro sobre a pilha expande todas.</target>
+      </segment>
+    </unit>
+    <unit id="StackEnabledLabel">
+      <segment>
+        <source>Enabled:</source>
+        <target state="translated">Ativado:</target>
+      </segment>
+    </unit>
+    <unit id="StackThresholdLabel">
+      <segment>
+        <source>Threshold:</source>
+        <target state="translated">Limite:</target>
+      </segment>
+    </unit>
+    <unit id="StackTitle">
+      <segment>
+        <source>Stack</source>
+        <target state="translated">Pilha</target>
       </segment>
     </unit>
     <unit id="WithIconDescription">

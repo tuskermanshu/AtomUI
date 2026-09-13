@@ -8,7 +8,7 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 
 当前 Token scope：
 
-- `NotificationToken`，scope id 为 `Notification`，源码位于 `src/AtomUI.Desktop.Controls/Notifications/NotificationToken.cs`。
+- internal `NotificationCardToken`，scope id 为 `NotificationCard`，源码位于 `src/AtomUI.Desktop.Controls/Notifications/NotificationCardToken.cs`。
 
 ## 2. Token 分类
 
@@ -33,6 +33,10 @@ Notification 的控件专项模型通过 Theme 消费 Token：
 - Token 类型、生成数据和 token.md 应显式维护，不依赖运行时反射扫描。
 
 `NotificationProgressBg` 使用主色边框 hover 色到主色的线性渐变。`NotificationCloseButtonSize` 控制关闭按钮的固定命中尺寸；hover 和 pressed 背景由 SharedToken 的文本背景状态色在主题 selector 中表达，不引入额外控件 Token。
+
+Stack 的展开 gap 16 与折叠 offset 8 来自 SharedToken 的统一 margin 尺度；三层 scale 是共享布局行为，不属于
+`NotificationCardToken`。Notification 的 24 DIP 宿主边距继续由 `NotificationTopMargin` / `NotificationBottomMargin`
+表达。Stack 状态、层索引、可见项数和剩余时长均是运行时状态，不能写入 Token。
 
 ## 4. 控件家族影响
 

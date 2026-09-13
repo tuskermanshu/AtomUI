@@ -1,10 +1,14 @@
 using AtomUI.Controls;
+using AtomUI.Controls.Primitives;
 using AtomUI.Desktop.Controls.DesignTokens;
 using AtomUI.Icons.AntDesign;
 using AtomUI.Theme.Resources;
 using Avalonia;
+using Avalonia.Data;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Media;
+using Avalonia.Media.Transformation;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Shouldly;
@@ -26,6 +30,146 @@ public class NotificationCardThemeTests
         var notification = new Notification("Notification Title", "Notification body");
 
         notification.Expiration.ShouldBe(TimeSpan.FromSeconds(4.5));
+    }
+
+    [Fact]
+    public void Notification_Card_Uses_Render_Only_Motion_Actor()
+    {
+        using var manager = new WindowNotificationManager();
+        var card = new NotificationCard(manager)
+        {
+            Title = "Notification Title",
+            Content = "Notification body"
+        };
+
+        ShowInWindow(card, () =>
+        {
+            card.GetVisualDescendants()
+                .OfType<MotionActor>()
+                .Single()
+                .ShouldNotBeNull();
+            card.GetVisualDescendants()
+                .OfType<LayoutAwareMotionActor>()
+                .ShouldBeEmpty();
+        });
+    }
+
+    [Fact]
+    public void Notification_Template_Wraps_Only_The_Content_Layout_In_A_Stack_Transition_Snapshot_Host()
+    {
+        using var manager = new WindowNotificationManager();
+        var card = new NotificationCard(manager)
+        {
+            Title = "Notification Title",
+            Content = "Notification body",
+            IsMotionEnabled = false
+        };
+
+        ShowInWindow(card, () =>
+        {
+            var actor = card.GetVisualDescendants().OfType<MotionActor>().Single();
+            var frame = actor.GetVisualDescendants().OfType<Border>().Single(item => item.Name == "Frame");
+            var host = frame.GetVisualDescendants()
+                            .OfType<FeedbackStackTransitionSnapshotHost>()
+                            .Single();
+            var layout = card.GetVisualDescendants()
+                             .OfType<Avalonia.Controls.Grid>()
+                             .Single(item => item.Name == "PART_Layout");
+
+            host.Child.ShouldBeSameAs(layout);
+            frame.Child.ShouldBeSameAs(host);
+        });
+    }
+
+    [Fact]
+    public void Stack_Transition_Snapshot_Host_Restores_Content_State_And_Releases_Its_Bitmap()
+    {
+        var content = new Border
+        {
+            Width = 120,
+            Height = 60,
+            Opacity = 0.75,
+            IsHitTestVisible = true,
+            Background = Brushes.Red
+        };
+        var host = new FeedbackStackTransitionSnapshotHost
+        {
+            Child = content
+        };
+
+        ShowInWindow(host, () =>
+        {
+            host.TryBeginSnapshot().ShouldBeTrue();
+            host.IsSnapshotActive.ShouldBeTrue();
+            host.SnapshotBitmap.ShouldNotBeNull();
+            content.Opacity.ShouldBe(0);
+            content.IsHitTestVisible.ShouldBeFalse();
+
+            host.ReleaseSnapshot();
+
+            host.IsSnapshotActive.ShouldBeFalse();
+            host.SnapshotBitmap.ShouldBeNull();
+            content.Opacity.ShouldBe(0.75);
+            content.IsHitTestVisible.ShouldBeTrue();
+        });
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void Stack_Transition_Snapshot_Uses_Arranged_Size_For_Stretched_Content(double scaling)
+    {
+        var content = new Avalonia.Controls.Grid
+        {
+            Children = { new Avalonia.Controls.TextBlock { Text = "Short notification" } }
+        };
+        var host = new FeedbackStackTransitionSnapshotHost { Child = content };
+
+        ShowInWindow(host, window =>
+        {
+            window.SetRenderScaling(scaling);
+            window.UpdateLayout();
+            content.Bounds.Width.ShouldBeGreaterThan(content.DesiredSize.Width);
+            host.TryBeginSnapshot().ShouldBeTrue();
+
+            host.SnapshotBitmap!.PixelSize.ShouldBe(PixelSize.FromSize(content.Bounds.Size, scaling),
+                "A snapshot of stretched content must cover its arranged bounds without magnifying its intrinsic desired size.");
+            host.ReleaseSnapshot();
+        });
+    }
+
+    [Fact]
+    public void Notification_Card_Releases_The_Content_Snapshot_When_Animated_Transform_Reaches_Its_Target()
+    {
+        using var manager = new WindowNotificationManager();
+        var card = new NotificationCard(manager)
+        {
+            Title = "Notification Title",
+            Content = "Notification body",
+            IsMotionEnabled = true
+        };
+
+        ShowInWindow(card, () =>
+        {
+            var host = card.GetVisualDescendants()
+                           .OfType<FeedbackStackTransitionSnapshotHost>()
+                           .Single();
+            var snapshotItem = (IFeedbackStackTransitionSnapshotItem)card;
+            var target = BuildTransform(0.94, 8);
+            var intermediate = BuildTransform(0.97, 4);
+
+            snapshotItem.TryBeginStackCollapseSnapshot().ShouldBeTrue();
+            card.SetCurrentValue(Visual.RenderTransformProperty, target);
+            snapshotItem.ArmStackCollapseSnapshot(target);
+            host.IsSnapshotActive.ShouldBeTrue();
+
+            card.SetValue(Visual.RenderTransformProperty, intermediate, BindingPriority.Animation);
+            host.IsSnapshotActive.ShouldBeTrue();
+
+            card.SetValue(Visual.RenderTransformProperty, target, BindingPriority.Animation);
+            host.IsSnapshotActive.ShouldBeFalse();
+            host.SnapshotBitmap.ShouldBeNull();
+        });
     }
 
     [Fact]
@@ -266,6 +410,14 @@ public class NotificationCardThemeTests
         application!.TryGetResource(key, application.ActualThemeVariant, out var value).ShouldBeTrue();
         value.ShouldBeAssignableTo<T>();
         return (T)value!;
+    }
+
+    private static ITransform BuildTransform(double scale, double translateY)
+    {
+        var builder = new TransformOperations.Builder(2);
+        builder.AppendScale(scale, scale);
+        builder.AppendTranslate(0, translateY);
+        return builder.Build();
     }
 
     private static IconPresenter GetSemanticIconPresenter(NotificationCard card)

@@ -73,6 +73,55 @@
                         </DataTemplate>
                     </gallery:ShowCaseItem.DeferredContentTemplate>
                 </gallery:ShowCaseItem>
+
+                <gallery:ShowCaseItem
+                    Title="{gallery:MessageShowCaseLangResource StackTitle}"
+                    Description="{gallery:MessageShowCaseLangResource StackDescription}"
+                    BadgeText="v6.1.9"
+                    SourceKey="message-stack"
+                    IsDeferredContentEnabled="True">
+                    <gallery:ShowCaseItem.DeferredContentTemplate>
+                        <DataTemplate x:DataType="vm:MessageViewModel">
+                            <StackPanel Spacing="24">
+                                <StackPanel Orientation="Horizontal" Spacing="32">
+                                    <StackPanel Orientation="Horizontal"
+                                                VerticalAlignment="Center"
+                                                Spacing="12">
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{gallery:MessageShowCaseLangResource StackEnabledLabel}" />
+                                        <atom:ToggleSwitch Name="StackEnabledSwitch"
+                                                           IsChecked="True"
+                                                           IsCheckedChanged="HandleStackEnabledChanged" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{gallery:MessageShowCaseLangResource StackThresholdLabel}" />
+                                        <atom:NumericUpDown Name="StackThresholdInput"
+                                                            Width="100"
+                                                            Minimum="1"
+                                                            Maximum="10"
+                                                            Increment="1"
+                                                            FormatString="0"
+                                                            Value="3"
+                                                            IsEnabled="{Binding #StackEnabledSwitch.IsChecked}"
+                                                            ValueChanged="HandleStackThresholdChanged" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <atom:Separator />
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <atom:Button Name="OpenStackMessageButton"
+                                                 ButtonType="Primary"
+                                                 Click="ShowStackMessage"
+                                                 Content="{gallery:MessageShowCaseLangResource P2ContentOpenMessageBox}" />
+                                    <atom:Button Name="DestroyStackMessagesButton"
+                                                 ButtonType="Default"
+                                                 Click="DestroyStackMessages"
+                                                 Content="{gallery:MessageShowCaseLangResource P2ContentDestroyAll}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </gallery:ShowCaseItem.DeferredContentTemplate>
+                </gallery:ShowCaseItem>
             </gallery:ShowCasePanel>
         </gallery:GalleryStickyTabsHost>
     </Grid>

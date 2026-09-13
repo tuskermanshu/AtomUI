@@ -1,6 +1,6 @@
 # Message 桌面版实现原理
 
-本文档描述 Message 桌面版的内部实现范围、源码职责、状态流、生命周期、资源边界和维护规则。公共设计与 API 契约见 [Message 桌面版架构设计](overview.md)，变化记录见 [Message Changelog](changelog.md)。涉及控件 Token 的实现应同时阅读 [Message Token 设计](token.md)。
+本文档描述 Message 桌面版的内部实现范围、源码职责、状态流、生命周期、资源边界和维护规则。公共设计与 API 契约见 [Message 桌面版架构设计](overview.md)，共用堆叠与计时算法见 [Feedback 堆叠基础设施](../../../../architecture/systems/control-infrastructure/feedback-stack.md)，变化记录见 [Message Changelog](changelog.md)。涉及控件 Token 的实现应同时阅读 [Message Token 设计](token.md)。
 
 ## 1. 实现定位
 
@@ -15,11 +15,17 @@
 - `src/AtomUI.Desktop.Controls/Message/Message.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageCard.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageCardPseudoClass.cs`
-- `src/AtomUI.Desktop.Controls/Message/MessageToken.cs`
+- `src/AtomUI.Desktop.Controls/Message/MessageCardToken.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageType.cs`
 - `src/AtomUI.Desktop.Controls/Message/Themes/MessageCardTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Message/Themes/WindowMessageManagerTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Message/WindowMessageManager.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPresenter.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPanel.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackLifetimeScheduler.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotion.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotionCoordinator.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/IFeedbackStackItem.cs`
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`
 
 职责边界：
@@ -33,8 +39,13 @@
 
 - `Message`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `MessageCard`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `MessageToken`：控件 Token scope，负责从全局 token 派生控件语义变量。
-- `WindowMessageManager`：数据、状态或行为协作类型，维护集合同步和事件路径。
+- `MessageCardToken`：internal 控件 Token scope，负责从全局 token 派生控件语义变量。
+- `WindowMessageManager`：拥有稳定卡片集合、public Stack 配置、TopLevel host、生命周期调度与用户回调清理。
+- `FeedbackStackPresenter`：消费稳定 ItemsSource，管理整体 hover 和 Message 静态背板状态。
+- `FeedbackStackPanel`：按共享几何契约测量和排列，不拥有内容或生命周期。
+- `FeedbackLifetimeScheduler`：按单调 deadline 调度有限时长项；空闲时没有活动 timer。
+- `FeedbackCardMotion`：把 Message 的 Position 归一为 64 DIP translate/fade 和统一 Ant easing，不改变 card scale。
+- `FeedbackCardMotionCoordinator`：协调当前 actor 的进入/退出状态、取消和完成提交，并在 retemplate、detach、dispose 时同步解除 transition 引用。
 
 核心协作规则：
 
@@ -57,15 +68,16 @@ Public API / ItemsSource / Command / Event
 
 源码中的状态入口按以下语义维护：
 
-- 内容与数据：`Icon`、`MaxItems`。
+- 内容与数据：`Show`、`MaxItems`、`Message`、`MessageType`、`Icon`。
+- Stack 与生命周期：`IsStackEnabled`、`StackThreshold`、`IsPauseOnHover`、`IMessage.Expiration`、`DestroyAll()`；Stack
+  只参与视觉投影和实际 hover 暂停，不能改写或替代展示时长。
 - 交互与状态：`IsClosed`、`IsClosing`、`IsMotionEnabled`。
 - 视觉与布局：`Position`。
-- 其他稳定入口：`Message`、`MessageType`。
 
-`IsClosing` 和 `IsClosed` 是 MessageCard 的 public 业务状态。关闭动效执行由 MessageCard 实例单独持有
-`MotionExecutionState`，按 `Idle -> Pending -> Playing -> Completing -> Idle` 推进；Core 的共享 enum 只统一阶段语义，
-不拥有 Dispatcher 任务、MotionActor 或 public 属性。属性变化与模板重套用都进入同一个 Pending 调度入口，不能并行启动
-两次退出动效；Completing 只负责提交一次 `IsClosed=true`。
+`IsClosing` 和 `IsClosed` 是 MessageCard 的 public 业务状态。卡片拥有一个共享 `FeedbackCardMotionCoordinator`；协调器分别
+以 `MotionExecutionState` 约束进入和退出阶段，按 `Idle -> Pending -> Playing -> Completing -> Idle` 推进。关闭/禁用状态与
+模板重套用都进入同一控制器；旧 actor 的执行会被取消且 completion 失效，当前 actor 立即接管目标状态。播放中的 Position /
+Duration 变化不重启同一 actor，新值从下一次 motion 生效；Completing 只负责提交一次 `IsClosed=true`。
 
 维护要求：
 
@@ -80,6 +92,8 @@ Public API / ItemsSource / Command / Event
 
 - 构造阶段只注册必要状态，不依赖 template part。
 - 模板应用时获取 part、建立事件订阅和绑定，并先释放旧 part 订阅。
+- manager 的卡片 collection 在模板之外创建并保持稳定；新 `PART_Items` 只重新绑定该 collection，旧 presenter 立即解绑。
+- Gallery 页面分别惰性创建普通示例 manager 与 Stack 示例 manager；页面 detach 时两者都必须 `Dispose()` 并清空引用。
 - 控件卸载、弹层关闭、窗口关闭、集合替换或 container recycle 时释放事件订阅和资源宿主。
 - DynamicResource、TokenResourceBinder 或 C# binding 必须有明确 owner 和释放点。
 - Browser 和 Desktop 宿主下的主题加载顺序不得影响 public API 语义。
@@ -89,7 +103,7 @@ Public API / ItemsSource / Command / Event
 - `PART_Frame`：承载根视觉、边框、背景或尺寸基线。
 - `PART_HeaderContainer`：稳定模板协作入口，重命名前必须同步主题和实现。
 - `PART_IconContent`：展示图标、状态图标或操作图标。
-- `PART_Items`：承载集合项、布局面板或虚拟化内容。
+- `PART_Items`：`ItemsControl` 级稳定入口，承载共享 presenter 和 panel；不能再由 manager 直接修改 `Panel.Children`。
 - `PART_Message`：稳定模板协作入口，重命名前必须同步主题和实现。
 
 ## 6. 交互与事件处理
@@ -113,6 +127,30 @@ Message 的交互事件应从输入源收敛到控件级语义事件：
 - ItemsSource、selection、checked、expanded、filter、paging 或 upload task 的集合同步。
 - 动效启停、初始加载阶段 transition 抑制和卸载取消。
 - MessageCard 的关闭请求、模板状态回放和最终 `IsClosed` 提交必须经过同一个关闭动效执行状态流。
+- MessageCard 的内容 actor 使用共享 Feedback motion；按 Position 从对应边缘平移 64 DIP 并插值 opacity，退出反向执行，
+  scale 全程为 `1`。actor 进入/退出与外层队列位置 transform 不得写入同一属性。
+- 入场和退出通过同一 motion 执行入口交接 actor；复用同一个 actor 时，取消请求之后必须等待旧 motion 的异步清理完成，
+  才能写入新目标。新模板的不同 actor 可以立即启动。等待期间仍响应当前执行的取消，重套模板、detach 或 dispose
+  不得留下继续启动旧执行的回调。
+- FeedbackStackPanel 把展开位置表达为相对稳定顶部/底部锚点的 transform，使新增、移除和 Stack 切换只更新目标
+  transform；不得先改写屏幕位置再通过 Dispatcher 执行补偿动画。motion-disabled 时直接排列可见终态，并保持隐藏项
+  的有效展开 Bounds，以避免无意义的 transform 属性写入和 layout-invalid 重试。
+- `Show` 在 UI thread 同步创建并登记卡片，加入稳定 collection 后更新 MaxItems 和 Stack 投影；不使用延迟队列重新取得旧模板的 children。
+- Stack 判定使用活动项数量严格大于有效阈值；Message 折叠只保留最新真实卡片可见，并由 AXAML 中两个静态背板表达深度。
+- 背板在展开期间仍跟随最新活动卡片的尺寸，通过 opacity 与 RenderTransform 的快速过渡表达显隐；收拢时不能从零
+  重新增长宽度。两层背板由零尺寸 Panel 叠放，不参与队列 extent 或命中；顶部、底部锚定及宽度变化过渡遵循共享几何契约。
+- 生命周期调度只保存 deadline / remaining 与 card 协作引用。有限时长项无论 Stack 是否开启都登记 deadline；零时长项
+  不创建登记。只有 lifecycle detach 或实际 hover 才能暂停，折叠状态自身不能暂停。继续和 deadline 到期由一个
+  manager 级 scheduler 完成，不为每项创建 timer。
+- scheduler 在本次唤醒结束时清空扫描临时列表，关闭回调完成后读取最新单调时刻再安排下一次唤醒；空闲 manager 不得
+  因复用列表保留已关闭卡片，也不得把回调耗时再次计入后续 deadline。
+- `MaxItems` 淘汰先固定本批最旧活动项，再按创建顺序请求关闭；同步关闭或回调修改集合不得改变已选批次。
+- `DestroyAll()` 固定调用时的卡片批次并倒序请求关闭；回调中新建的卡片不属于外层批次，manager dispose 后停止请求。
+  正在关闭项不会重复关闭，清理仍由 card 的 `MessageClosed` 单一路径提交。
+- Gallery Stack 示例每次只同步创建一个零时长 Information 消息，并复用一个递增序号；Enabled 与 Threshold 直接更新
+  Stack 示例 manager 的现有投影，`DestroyAll()` 只清空该 manager 且不重置序号。普通示例 manager 保持运行时默认
+  `IsStackEnabled=false`，因此 Stack 示例配置不能泄漏到其他示例。配置行按 NumericUpDown 的行高垂直居中各子组，
+  `BadgeText="v6.1.9"` 交由 ShowCaseItem 的既有 RibbonBadge 模板呈现，不创建专用角标视觉。
 
 实现文档不逐行解释私有方法。若某个私有算法成为稳定维护入口，应在本节补充算法不变量，而不是把代码复述为说明书。
 
@@ -128,9 +166,14 @@ Message 的交互事件应从输入源收敛到控件级语义事件：
 
 性能边界：
 
-- 控件应优先复用 Avalonia 原生虚拟化、模板绑定和资源系统。
-- 避免为每次状态变化创建不必要的视觉对象、订阅或动画对象。
-- 大集合控件必须保证 container recycle 后不会泄漏旧 item 状态。
+- manager、ItemsControl 与 card collection 在 Stack 切换和重套模板之间保持稳定。
+- `MeasureOverride` / `ArrangeOverride` 不允许 LINQ、临时数组、闭包或逐帧 transform 创建。
+- 稳态布局必须复用缓存 transform；目标变化最多创建一个 transform 并交给 transition 插值，不增加逐帧 managed 回调。
+- 没有有限时长活动项时 scheduler 不保持活动 timer；没有 Notification 进度需求时只安排最近 deadline。
+- Gallery Stack 示例的零时长消息不创建 scheduler entry、异步循环、取消令牌或逐项 timer；两个示例 manager 都只在
+  第一次实际操作时创建，并在页面 detach 时释放。
+- 折叠背板由 AXAML 静态创建，不随 show 次数增加视觉对象。
+- 性能修改必须使用同一 Message 场景比较基线与优化后的 mean、median、P95，并证明主要指标无可测量回退。
 
 ## 9. 维护不变量
 
@@ -142,6 +185,10 @@ Message 的交互事件应从输入源收敛到控件级语义事件：
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 - `IsClosing` / `IsClosed` public 状态不得与 internal `MotionExecutionState` 合并；重复调度不得创建并行退出动效。
+- `MaxItems <= 0` 必须保持无限语义；Stack 不能通过提前关闭旧项模拟折叠。
+- Stack 不能隐式把有限时长改为永久展示，也不能在未 hover 时暂停 scheduler；Gallery 的永久 Stack 示例必须通过
+  `Expiration=TimeSpan.Zero` 显式表达。
+- template detach、rehost、DestroyAll、用户回调异常与 dispose 均必须释放 scheduler entry、presenter、host 订阅、card owner 与 delegate。
 
 ## 10. 测试与验证
 
@@ -149,6 +196,19 @@ Message 的交互事件应从输入源收敛到控件级语义事件：
 
 - `CloseMotionExecutionTests` 验证关闭属性变化与模板重套用同时请求退出动效时只启动一次 motion，并只提交一次
   `IsClosed=true`。
+- Feedback motion 测试验证 64 DIP 方向、scale 恒等、完整时长 opacity 插值、Ant ease-in-out 参数以及取消后旧 actor
+  不提交 completion。
+- `FeedbackCardMotionCoordinatorTests` 使用真实 actor 与可控时钟验证六种 Position 的入场中关闭，旧入场清理后退出目标
+  保持到完整时长结束，且关闭只完成一次。
+- `FeedbackStackPanelTests` 覆盖阈值边界、最新项顺序、Message 背板、hover gap、运行时配置和 Top/Bottom 几何。
+- `MessageStackAnimationTests` 用可控动画时钟验证背板在卡片收拢期间淡入、hover 反转连续、内容宽度变化、motion / Stack
+  开关，以及空队列和展开队列不被透明背板扩高。
+- `FeedbackLifetimeSchedulerTests` 以可控时钟覆盖最近 deadline、剩余时长、普通/Stack 暂停、空闲停表及关闭回调耗时后的重调度；
+  `WeakReference` 用例验证 scheduler 保持存活时，最后一批已到期或已在关闭的项也能回收。
+- manager 测试覆盖 Stack 开启但未 hover 的有限时长消息保持计时登记且未暂停，以及零时长 Stack 消息不创建 scheduler。
+- `FeedbackManagerStackTests` 覆盖无动画批量淘汰的最旧优先顺序，以及关闭回调中的 Dispose、嵌套 DestroyAll 和新增消息；
+  `WeakReference` 用例验证 manager dispose 后的 manager、presenter、card 与回调 owner 对象图释放。
+- Gallery 行为测试覆盖普通与 Stack 示例 manager 隔离、Stack 控件初值、运行时切换、交替文案、局部 DestroyAll 和 detach 释放。
 - 纯文档改动运行 `git diff --check` 并检查相对链接。
 - 控件 API 或行为变更运行对应 `tests/AtomUI.Desktop.Controls.Tests` 或专用包测试。
 - DataGrid 相关变更运行 `tests/AtomUI.Desktop.Controls.DataGrid.Tests`。

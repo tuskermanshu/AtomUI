@@ -29,8 +29,8 @@ Notification 的设计语言围绕控件职责、可观察状态和主题契约�
 | 维度 | 含义 | Notification 中的表达 |
 | --- | --- | --- |
 | 产品语义 | 控件在界面中承担的稳定职责。 | Notification 是 AtomUI 桌面控件体系中的通知控件，用于在窗口角落展示可关闭的较重反馈和进度信息。 |
-| 内容承载 | 用户数据、展示内容、集合项或操作入口如何进入控件。 | `Icon`、`MaxItems`、`Title`。 |
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | selection/checked/active、loading/async、collection/filter、motion、visual option。 |
+| 内容承载 | 用户数据、展示内容、集合项或操作入口如何进入控件。 | `Notification` 内容对象、`Title`、`Content`、`Icon`、`NotificationType`。 |
+| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | 自动关闭、进度、hover 暂停、Stack 展开/折叠和关闭 motion。 |
 | 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | Notification Token + ControlTheme。 |
 
 ## 公共 API
@@ -41,17 +41,17 @@ Notification 的公共契约由 public/protected 类型成员、Avalonia 属性�
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `Icon`、`MaxItems`、`Title` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 选择与集合 | `CurrentExpiration` | 维护选择、展开、过滤、分页、分组或集合状态。 |
-| 交互与状态 | `IsClosed`、`IsClosing`、`IsMotionEnabled`、`IsPauseOnHover`、`IsShowProgress` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `Position`、`ProgressIndicatorBrush`、`ProgressIndicatorThickness` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
-| 其他稳定入口 | `CardExpiredPollingInterval`、`CleanupPollingInterval`、`Expiration`、`NotificationType` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+| 内容与数据 | `Show(INotification, string[]?)`、`MaxItems` | 创建通知并约束活动项上限；`MaxItems <= 0` 表示不限制。 |
+| Stack | `IsStackEnabled`、`StackThreshold`、`IsPauseOnHover` | 控制阈值折叠、整体 hover 展开和生命周期暂停。 |
+| 交互与状态 | `DestroyAll()`、`IsClosed`、`IsClosing`、`IsMotionEnabled`、`IsShowProgress` | 清空活动通知，并表达卡片关闭、进度和动效状态。 |
+| 视觉与布局 | `Position`、`ProgressIndicatorBrush`、`ProgressIndicatorThickness` | 默认 `TopRight`；控制宿主位置和进度视觉。 |
+| 内容对象 | `Expiration`、`NotificationType`、`Title`、`Content`、`Icon` | 表达正文、类型、自动关闭时长与一次性关闭回调。 |
 
 稳定事件包括 `NotificationClosed`。事件触发顺序属于兼容契约，不能因内部状态重排而改变。
 
 主要公开类型与枚举：
 
-- 类型：`Notification`、`NotificationCard`、`NotificationMoveDownInMotion`、`NotificationMoveDownOutMotion`、`NotificationMoveLeftInMotion`、`NotificationMoveLeftOutMotion`、`NotificationMoveRightInMotion`、`NotificationMoveRightOutMotion`、`NotificationMoveUpInMotion`、`NotificationMoveUpOutMotion`、`NotificationProgressBar`、`NotificationProgressBarVisibleConverter`、`WindowNotificationManager`。
+- 类型：`Notification`、`NotificationCard`、`NotificationProgressBar`、`WindowNotificationManager`、`INotificationManager`。
 - 枚举：`NotificationPosition`、`NotificationType`。
 
 `NotificationType.Default` 表达普通通知语义，默认不显示类型图标，也不投射 success/info/warning/error 状态伪类。`Information`、`Success`、`Warning` 和 `Error` 表达带类型通知语义，在未设置自定义 `Icon` 时使用对应状态图标，并参与状态颜色 selector。
@@ -61,7 +61,7 @@ Notification 的公共契约由 public/protected 类型成员、Avalonia 属性�
 | Template Part | 类型 | 职责 |
 | --- | --- | --- |
 | `PART_CloseButton` | `?` | 承载用户触发入口、导航或关闭动作。 |
-| `PART_Items` | `Panel` | 承载集合项、布局面板或虚拟化内容。 |
+| `PART_Items` | `ItemsControl` | 承载 manager 的稳定卡片集合和共享 Stack panel。 |
 | `PART_Layout` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
 
 控件专属或内部伪类包括 `BottomCenter=:bottomcenter`、`BottomLeft=:bottomleft`、`BottomRight=:bottomright`、`NotificationPseudoClass.BottomCenter`、`NotificationPseudoClass.BottomLeft`、`NotificationPseudoClass.BottomRight`、`NotificationPseudoClass.TopCenter`、`NotificationPseudoClass.TopLeft`、`NotificationPseudoClass.TopRight`、`TopCenter=:topcenter`、`TopLeft=:topleft`、`TopRight=:topright`。这些伪类属于主题 selector 可观察契约，不能在未同步主题和 Gallery 的情况下重命名或删除。
@@ -166,7 +166,7 @@ Notification 的视觉模型由控件模板、ControlTheme、SharedToken 和必�
 | `NotificationProgressBarTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 | `WindowNotificationManagerTheme.axaml` | 定义弹层、窗口或 overlay 宿主视觉。 |
 
-Notification 使用 `NotificationToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 selection/checked/active、loading/async、collection/filter、motion、visual option 运行时状态。
+Notification 使用 internal `NotificationCardToken` 作为控件 Token scope。Token 只表达卡片背景、尺寸、padding、图标、进度和外部间距等视觉语义，不承载 Stack、剩余时长或关闭状态。
 
 主题维护规则：
 
@@ -181,7 +181,7 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 
 当前 Token scope：
 
-- `NotificationToken`，scope id 为 `Notification`，源码位于 `src/AtomUI.Desktop.Controls/Notifications/NotificationToken.cs`。
+- internal `NotificationCardToken`，scope id 为 `NotificationCard`，源码位于 `src/AtomUI.Desktop.Controls/Notifications/NotificationCardToken.cs`。
 
 ## AOT 与裁剪注意事项
 
@@ -195,9 +195,20 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 
 性能边界：
 
-- 控件应优先复用 Avalonia 原生虚拟化、模板绑定和资源系统。
-- 避免为每次状态变化创建不必要的视觉对象、订阅或动画对象。
-- 大集合控件必须保证 container recycle 后不会泄漏旧 item 状态。
+- manager、ItemsControl 与 card collection 在 Stack 切换和重套模板之间保持稳定。
+- `MeasureOverride` / `ArrangeOverride` 不允许 LINQ、临时数组、闭包或逐帧 transform 创建。
+- 稳态布局必须复用缓存 transform；目标变化最多创建一个 transform 并交给 transition 插值，不增加逐帧 managed 回调。
+- Notification 进出场必须使用 render-only actor，不能因 translate/fade 在每帧触发 panel Measure；布局只在集合、测量
+  尺寸、位置、Stack 配置或 hover 投影实际变化时失效。
+- 默认 Stack 关闭时，普通 Notification 不进入折叠裁剪投影；入场只增加一个一次性帧屏障，四个方向的偏移 transform 静态复用。
+- 一个 manager 最多一个惰性 scheduler timer；隐藏旧项在折叠稳态不进行进度刷新、绘制或 hit test，其折叠过渡只复用
+  已有 transform 和 clip geometry，不新增 timer、逐帧 managed 回调或强引用缓存。
+- 内容快照是 bounded one-shot 资源：一次折叠最多三个，不在普通 Notification、首次折叠稳态或反向展开路径创建；完成
+  检测复用卡片已有的 transform 属性通知，不增加 timer、全局事件或独立动画时钟。
+- 禁止用永久 `BitmapCache` 代替显式快照；renderer cache 不能保证正文像素在父级 transform / clip 重合成期间保持冻结，
+  也不能提供确定的资源释放边界。
+- scale、offset 与 opacity 通过 compositor 友好的 transform 更新，不动画 width、height 或 margin。
+- 性能修改必须使用同一 Notification 场景比较基线与优化后的 mean、median、P95，并证明主要指标无可测量回退。
 
 ## 源码索引
 
@@ -207,17 +218,22 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 - `src/AtomUI.Desktop.Controls/Notifications/INotificationManager.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/Notification.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationCard.cs`
-- `src/AtomUI.Desktop.Controls/Notifications/NotificationMotions.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationPosition.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationProgressBar.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationPseudoClass.cs`
-- `src/AtomUI.Desktop.Controls/Notifications/NotificationToken.cs`
+- `src/AtomUI.Desktop.Controls/Notifications/NotificationCardToken.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationType.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/Themes/NotificationCardTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Notifications/Themes/NotificationProgressBarTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Notifications/Themes/WindowNotificationManagerTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Notifications/Utils/NotificationProgressBarVisibleConverter.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/WindowNotificationManager.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPresenter.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPanel.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackLifetimeScheduler.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotion.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotionCoordinator.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/IFeedbackStackItem.cs`
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`
 
 职责边界：

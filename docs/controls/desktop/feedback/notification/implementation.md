@@ -1,6 +1,6 @@
 # Notification 桌面版实现原理
 
-本文档描述 Notification 桌面版的内部实现范围、源码职责、状态流、生命周期、资源边界和维护规则。公共设计与 API 契约见 [Notification 桌面版架构设计](overview.md)，变化记录见 [Notification Changelog](changelog.md)。涉及控件 Token 的实现应同时阅读 [Notification Token 设计](token.md)。
+本文档描述 Notification 桌面版的内部实现范围、源码职责、状态流、生命周期、资源边界和维护规则。公共设计与 API 契约见 [Notification 桌面版架构设计](overview.md)，共用堆叠与计时算法见 [Feedback 堆叠基础设施](../../../../architecture/systems/control-infrastructure/feedback-stack.md)，变化记录见 [Notification Changelog](changelog.md)。涉及控件 Token 的实现应同时阅读 [Notification Token 设计](token.md)。
 
 ## 1. 实现定位
 
@@ -14,17 +14,22 @@
 - `src/AtomUI.Desktop.Controls/Notifications/INotificationManager.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/Notification.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationCard.cs`
-- `src/AtomUI.Desktop.Controls/Notifications/NotificationMotions.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationPosition.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationProgressBar.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationPseudoClass.cs`
-- `src/AtomUI.Desktop.Controls/Notifications/NotificationToken.cs`
+- `src/AtomUI.Desktop.Controls/Notifications/NotificationCardToken.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/NotificationType.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/Themes/NotificationCardTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Notifications/Themes/NotificationProgressBarTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Notifications/Themes/WindowNotificationManagerTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Notifications/Utils/NotificationProgressBarVisibleConverter.cs`
 - `src/AtomUI.Desktop.Controls/Notifications/WindowNotificationManager.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPresenter.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackStackPanel.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackLifetimeScheduler.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotion.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotionCoordinator.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/IFeedbackStackItem.cs`
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`
 
 职责边界：
@@ -38,18 +43,16 @@
 
 - `Notification`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `NotificationCard`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveDownInMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveDownOutMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveLeftInMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveLeftOutMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveRightInMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveRightOutMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveUpInMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationMoveUpOutMotion`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `NotificationProgressBar`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `NotificationProgressBarVisibleConverter`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
-- `NotificationToken`：控件 Token scope，负责从全局 token 派生控件语义变量。
-- `WindowNotificationManager`：数据、状态或行为协作类型，维护集合同步和事件路径。
+- `NotificationCardToken`：internal 控件 Token scope，负责从全局 token 派生控件语义变量。
+- `WindowNotificationManager`：拥有稳定卡片集合、public Stack 配置、TopLevel host、生命周期调度与用户回调清理。
+- `FeedbackStackPresenter`：消费稳定 ItemsSource，独立保存列表 hover，并在数量、开关或阈值变化时派生展开与暂停状态。
+- `FeedbackStackPanel`：按共享几何契约测量每张卡片，生成 Notification 的变高折叠、关闭投影与 Top/Bottom 镜像投影，并标识展开到折叠的单次过渡边界。
+- `FeedbackStackTransitionSnapshotHost`：模板内部正文宿主，只在平铺到折叠期间持有最多一个显式内容位图；外层卡片仍负责背景、阴影和全部 Stack 投影。
+- `FeedbackLifetimeScheduler`：按单调 deadline 调度有限时长项，并只为可见进度项安排刷新。
+- `FeedbackCardMotion`：把 Position 归一为 64 DIP translate/fade 和统一 Ant easing，不改变 card scale。
+- `FeedbackCardMotionCoordinator`：协调当前 actor 的进入/退出状态、取消和完成提交，并在 retemplate、detach、dispose 时同步解除 transition 引用。
 
 核心协作规则：
 
@@ -72,18 +75,17 @@ Public API / ItemsSource / Command / Event
 
 源码中的状态入口按以下语义维护：
 
-- 内容与数据：`Icon`、`MaxItems`、`Title`。
-- 选择与集合：`CurrentExpiration`。
-- 交互与状态：`IsClosed`、`IsClosing`、`IsMotionEnabled`、`IsPauseOnHover`、`IsShowProgress`。
+- 内容与数据：`Show`、`MaxItems`、`Title`、`Content`、`Icon`、`NotificationType`。
+- Stack 与生命周期：`IsStackEnabled`、`StackThreshold`、`IsPauseOnHover`、`DestroyAll()`、`Expiration`、`CurrentExpiration`。
+- 交互与状态：`IsClosed`、`IsClosing`、`IsMotionEnabled`、`IsShowProgress`。
 - 视觉与布局：`Position`、`ProgressIndicatorBrush`、`ProgressIndicatorThickness`。
-- 其他稳定入口：`CardExpiredPollingInterval`、`CleanupPollingInterval`、`Expiration`、`NotificationType`。
 
 `NotificationType.Default` 是普通通知入口，不生成类型图标；带类型通知由 `NotificationType` 映射到 success/info/warning/error 伪类和默认状态图标。自定义 `Icon` 始终优先于类型图标。
 
-`IsClosing` 和 `IsClosed` 是 NotificationCard 的 public 业务状态。关闭动效执行由 NotificationCard 实例单独持有
-`MotionExecutionState`，按 `Idle -> Pending -> Playing -> Completing -> Idle` 推进；Core 的共享 enum 只统一阶段语义，
-不拥有 Dispatcher 任务、MotionActor、Position 或 public 属性。属性变化与模板重套用都进入同一个 Pending 调度入口，
-不能并行启动两次退出动效；Completing 只负责提交一次 `IsClosed=true`。
+`IsClosing` 和 `IsClosed` 是 NotificationCard 的 public 业务状态。卡片拥有一个共享 `FeedbackCardMotionCoordinator`；协调器
+分别以 `MotionExecutionState` 约束进入和退出阶段，按 `Idle -> Pending -> Playing -> Completing -> Idle` 推进。关闭/禁用状态
+与模板重套用都进入同一控制器；旧 actor 的执行会被取消且 completion 失效，当前 actor 立即接管目标状态。播放中的 Position /
+Duration 变化不重启同一 actor，新值从下一次 motion 生效；Completing 只负责提交一次 `IsClosed=true`。
 
 维护要求：
 
@@ -98,6 +100,7 @@ Public API / ItemsSource / Command / Event
 
 - 构造阶段只注册必要状态，不依赖 template part。
 - 模板应用时获取 part、建立事件订阅和绑定，并先释放旧 part 订阅。
+- manager 的卡片 collection 在模板之外创建并保持稳定；新 `PART_Items` 只重新绑定该 collection，旧 presenter 立即解绑。
 - 控件卸载、弹层关闭、窗口关闭、集合替换或 container recycle 时释放事件订阅和资源宿主。
 - DynamicResource、TokenResourceBinder 或 C# binding 必须有明确 owner 和释放点。
 - Browser 和 Desktop 宿主下的主题加载顺序不得影响 public API 语义。
@@ -105,7 +108,7 @@ Public API / ItemsSource / Command / Event
 稳定 template part 接入点：
 
 - `PART_CloseButton`：承载用户触发入口、导航或关闭动作。
-- `PART_Items`：承载集合项、布局面板或虚拟化内容。
+- `PART_Items`：`ItemsControl` 级稳定入口，承载共享 presenter 和 panel；不能再由 manager 直接修改 `Panel.Children`。
 - `PART_Layout`：稳定模板协作入口，重命名前必须同步主题和实现。
 
 ## 6. 交互与事件处理
@@ -129,6 +132,44 @@ Notification 的交互事件应从输入源收敛到控件级语义事件：
 - ItemsSource、selection、checked、expanded、filter、paging 或 upload task 的集合同步。
 - 动效启停、初始加载阶段 transition 抑制和卸载取消。
 - NotificationCard 的关闭请求、模板状态回放和最终 `IsClosed` 提交必须经过同一个关闭动效执行状态流。
+- NotificationCard 的内容 actor 使用普通 render-only `MotionActor` 和共享 Feedback motion；Position 只决定
+  `64 DIP` 位移轴和符号，opacity 与 translate 使用完整时长插值且 scale 恒为 `1`。actor 进入/退出与外层队列位置 /
+  Stack scale transform 不得写入同一属性，也不得在动画帧中使卡片 Measure 失效。
+- `FeedbackCardMotionCoordinator` 在 actor 应用时先关闭 transition 并写入透明偏移准备态，再通过所属 `TopLevel` 的一次性
+  `RequestAnimationFrame` 跨过真实渲染边界，之后才运行 active transition。等待使用当前进入 cancellation source；关闭、
+  retemplate、detach 或 dispose 会取消等待并释放 registration，帧回调只捕获局部 completion，不持有 card 或 coordinator。
+- 入场和退出通过同一 motion 执行入口交接 actor；复用同一个 actor 时，取消请求之后必须等待旧 motion 的异步清理完成，
+  才能写入新目标。新模板的不同 actor 可以立即启动。等待期间仍响应当前执行的取消，重套模板、detach 或 dispose
+  不得留下继续启动旧执行的回调。
+- FeedbackStackPanel 把展开位置表达为相对稳定宿主边锚点的 transform，使新增、移除和 Stack 切换只更新目标
+  transform；不得先改写屏幕位置再通过 Dispatcher 执行补偿动画。motion-disabled 时直接排列可见终态，并保持隐藏项
+  的有效展开 Bounds，以避免无意义的 transform 属性写入和 layout-invalid 重试。
+- `Show` 在 UI thread 同步创建并登记卡片，加入稳定 collection 后更新 MaxItems 和 Stack 投影；不使用 cleanup queue 或轮询寻找关闭项。
+- Stack 判定只统计非 closing、非 closed 的活动项，并使用数量严格大于有效阈值。折叠位置从最新项开始，按
+  `nextInset = previousFarEdge + 8 - currentHeight` 使用每张卡片的真实高度计算；最多绘制并命中最新
+  `Min(3, StackThreshold)` 张，前三层 scale 为 `1`、`0.94`、`0.88`。其余旧项的折叠目标 opacity 为 `0`，但仍必须在
+  同一布局提交中取得最深层 scale `0.88`、placement-aware 半裁剪和对应 inset；不得让完整正文或阴影在收拢途中先穿过
+  前层再淡出。transform、clip progress 与 opacity 使用同一 `MotionDurationMid` 和 easing，折叠稳态才跳过旧项绘制与命中。
+- `IsClosing=true` 时卡片立即退出活动投影，但保留最后一次 inset、scale、clip、层级和宿主边锚点直到退出 actor 完成；
+  其余活动项在同一布局周期重排。投影缓存只由 panel 弱引用持有，卡片移除或 panel 释放后不得形成保留链。
+- panel 只在已经完成过一次展开布局后检测到 `expanded -> collapsed` 时请求正文快照；首次直接以折叠态出现、Stack 关闭、
+  motion disabled 以及 `collapsed -> expanded` 都不捕获。捕获范围只限折叠稳态仍可见且外层投影发生变化的卡片，最多三张。
+- `NotificationCard` 在 panel 写入折叠目标前冻结 `PART_Layout`；写入目标后才登记目标矩阵，避免同步属性通知把快照误判为
+  已完成。后续 `RenderTransform` 动画值到达该矩阵时恢复真实布局并释放位图。重新展开、关闭、重套模板、detach、
+  `IsMotionEnabled=false` 和 owner release 都走同一个幂等清理入口。
+- 快照 host 保留正文原始 opacity 与 hit-test 状态。结束时先恢复原状态，再 `Dispose()` 当前 `RenderTargetBitmap` 并清空引用；
+  捕获失败直接使用真实正文继续过渡，不能留下半激活状态。绘制时源矩形取位图物理 `PixelSize`、目标矩形取 host 逻辑
+  Bounds；不能用受 DPI 影响的逻辑位图尺寸作为源像素坐标。
+- presenter 的 pointer-over 是独立事实，不记录“进入时是否折叠”。当前数量或 Stack 配置变化时重新派生展开状态；Stack
+  开启且列表 hover 时，manager 暂停全部活动 deadline，离开后从剩余时长恢复。
+- presenter 只保存最后一次真实 pointer 事件的屏幕坐标；resize 或 placement 布局移动改变 bounds 时重新换算并验证命中，
+  已移出则同步收拢 Stack 和恢复生命周期。重复 Enter / Exit 必须收敛 panel 状态，不能因缓存布尔值相同而直接返回。
+- 生命周期调度不递减 public `Expiration`，只把剩余时间单向投影到可见进度；没有进度刷新需求时按最近 deadline 单次唤醒。
+- scheduler 在本次唤醒结束时清空扫描临时列表，关闭回调完成后读取最新单调时刻再安排下一次唤醒；空闲 manager 不得
+  因复用列表保留已关闭卡片，也不得把回调耗时再次计入后续 deadline。
+- `MaxItems` 淘汰先固定本批最旧活动项，再按创建顺序请求关闭；同步关闭或回调修改集合不得改变已选批次。
+- `DestroyAll()` 固定调用时的卡片批次并倒序请求关闭；回调中新建的卡片不属于外层批次，manager dispose 后停止请求。
+  集合移除、用户回调与资源释放仍由 `NotificationClosed` 单一路径提交。
 
 实现文档不逐行解释私有方法。若某个私有算法成为稳定维护入口，应在本节补充算法不变量，而不是把代码复述为说明书。
 
@@ -144,9 +185,20 @@ Notification 的交互事件应从输入源收敛到控件级语义事件：
 
 性能边界：
 
-- 控件应优先复用 Avalonia 原生虚拟化、模板绑定和资源系统。
-- 避免为每次状态变化创建不必要的视觉对象、订阅或动画对象。
-- 大集合控件必须保证 container recycle 后不会泄漏旧 item 状态。
+- manager、ItemsControl 与 card collection 在 Stack 切换和重套模板之间保持稳定。
+- `MeasureOverride` / `ArrangeOverride` 不允许 LINQ、临时数组、闭包或逐帧 transform 创建。
+- 稳态布局必须复用缓存 transform；目标变化最多创建一个 transform 并交给 transition 插值，不增加逐帧 managed 回调。
+- Notification 进出场必须使用 render-only actor，不能因 translate/fade 在每帧触发 panel Measure；布局只在集合、测量
+  尺寸、位置、Stack 配置或 hover 投影实际变化时失效。
+- 默认 Stack 关闭时，普通 Notification 不进入折叠裁剪投影；入场只增加一个一次性帧屏障，四个方向的偏移 transform 静态复用。
+- 一个 manager 最多一个惰性 scheduler timer；隐藏旧项在折叠稳态不进行进度刷新、绘制或 hit test，其折叠过渡只复用
+  已有 transform 和 clip geometry，不新增 timer、逐帧 managed 回调或强引用缓存。
+- 内容快照是 bounded one-shot 资源：一次折叠最多三个，不在普通 Notification、首次折叠稳态或反向展开路径创建；完成
+  检测复用卡片已有的 transform 属性通知，不增加 timer、全局事件或独立动画时钟。
+- 禁止用永久 `BitmapCache` 代替显式快照；renderer cache 不能保证正文像素在父级 transform / clip 重合成期间保持冻结，
+  也不能提供确定的资源释放边界。
+- scale、offset 与 opacity 通过 compositor 友好的 transform 更新，不动画 width、height 或 margin。
+- 性能修改必须使用同一 Notification 场景比较基线与优化后的 mean、median、P95，并证明主要指标无可测量回退。
 
 ## 9. 维护不变量
 
@@ -158,6 +210,8 @@ Notification 的交互事件应从输入源收敛到控件级语义事件：
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 - `IsClosing` / `IsClosed` public 状态不得与 internal `MotionExecutionState` 合并；重复调度不得创建并行退出动效。
+- `MaxItems <= 0` 必须保持无限语义；Stack 不能通过提前关闭旧项模拟折叠。
+- template detach、rehost、DestroyAll、用户回调异常与 dispose 均必须释放 scheduler entry、presenter、host 订阅、card owner 与 delegate。
 
 ## 10. 测试与验证
 
@@ -165,6 +219,22 @@ Notification 的交互事件应从输入源收敛到控件级语义事件：
 
 - `CloseMotionExecutionTests` 验证关闭属性变化与模板重套用同时请求退出动效时只启动一次 motion，并只提交一次
   `IsClosed=true`。
+- Feedback motion 测试验证六种 Position 的 64 DIP 方向、scale 恒等、完整时长 opacity 插值、Ant ease-in-out 参数以及
+  取消后旧 actor 不提交 completion。
+- `FeedbackCardMotionCoordinatorTests` 使用真实 actor 与可控时钟验证六种 Position 的入场中关闭，旧入场清理后退出目标
+  保持到完整时长结束，且关闭只完成一次。
+- `FeedbackStackPanelTests` 覆盖阈值 `1/2/3/5`、变高卡片、关闭中的同步重排与退出快照、可见层、scale/offset、clip、
+  hover 跨阈值、运行时配置和六种 Position 几何；阈值外旧项必须同步投影到最深 scale、半裁剪和 card opacity 目标。
+- `NotificationCardThemeTests` 验证内层使用 render-only motion actor；manager 生命周期测试使用 `WeakReference` 验证
+  dispose 后 card 与 actor 均可回收；模板测试同时验证快照 host 只包裹 `PART_Layout`，不包裹外层 Frame。
+- 折叠快照测试覆盖：首次折叠不捕获、展开到折叠最多捕获三张、目标 transform 完成释放、折叠中重新展开、关闭、
+  retemplate、detach 与 motion disabled 的同步释放，以及释放后真实正文 opacity / hit-test 状态恢复。
+- manager 输入测试必须在通用 `VisualLayerManager` 与 Gallery 使用的 AtomUI Window 两条宿主路径覆盖：resize 后重新进入、
+  离开，以及 resize 将右/下对齐 Stack 移出静止鼠标位置时的自动收拢。
+- `FeedbackLifetimeSchedulerTests` 以可控时钟覆盖最近 deadline、进度刷新、剩余时长、普通/Stack 暂停、空闲停表及关闭回调耗时后的重调度；
+  `WeakReference` 用例验证 scheduler 保持存活时，最后一批已到期或已在关闭的项也能回收。
+- `FeedbackManagerStackTests` 覆盖无动画批量淘汰的最旧优先顺序，以及关闭回调中的 Dispose、嵌套 DestroyAll 和新增消息；
+  `WeakReference` 用例验证 manager dispose 后的 manager、presenter、card、actor 与回调 owner 对象图释放。
 - 纯文档改动运行 `git diff --check` 并检查相对链接。
 - 控件 API 或行为变更运行对应 `tests/AtomUI.Desktop.Controls.Tests` 或专用包测试。
 - DataGrid 相关变更运行 `tests/AtomUI.Desktop.Controls.DataGrid.Tests`。

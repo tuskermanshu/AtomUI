@@ -66,6 +66,11 @@
         <source>Don't pause on hover</source>
       </segment>
     </unit>
+    <unit id="P2ContentDestroyAll">
+      <segment>
+        <source>Destroy all</source>
+      </segment>
+    </unit>
     <unit id="P2ContentError">
       <segment>
         <source>Error</source>
@@ -146,6 +151,21 @@
         <source>I will never close automatically. This is a purposely very very long description that has many many characters and words.</source>
       </segment>
     </unit>
+    <unit id="P2NotificationLongStackedFormat">
+      <segment>
+        <source>Notification {0}: This is a deliberately longer stacked notification used to verify variable-height cards.</source>
+      </segment>
+    </unit>
+    <unit id="P2NotificationStackedFormat">
+      <segment>
+        <source>Notification {0}: This is a stacked notification.</source>
+      </segment>
+    </unit>
+    <unit id="P2NotificationStackedTitleFormat">
+      <segment>
+        <source>Notification {0}</source>
+      </segment>
+    </unit>
     <unit id="P2NotificationTitle">
       <segment>
         <source>Notification Title</source>
@@ -199,6 +219,26 @@
     <unit id="ScenarioExamples">
       <segment>
         <source>Examples</source>
+      </segment>
+    </unit>
+    <unit id="StackDescription">
+      <segment>
+        <source>Stack is disabled by default. This example enables it; notifications stack when their amount is over threshold, and hover expands all notifications.</source>
+      </segment>
+    </unit>
+    <unit id="StackEnabledLabel">
+      <segment>
+        <source>Enabled:</source>
+      </segment>
+    </unit>
+    <unit id="StackThresholdLabel">
+      <segment>
+        <source>Threshold:</source>
+      </segment>
+    </unit>
+    <unit id="StackTitle">
+      <segment>
+        <source>Stack</source>
       </segment>
     </unit>
     <unit id="WithIconDescription">

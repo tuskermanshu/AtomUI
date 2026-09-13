@@ -6,5 +6,6 @@
 - [过滤](filtering.md)：谓词、过滤值、Selector、有效状态和候选视图边界。
 - [响应式](responsive.md)：媒体断点、partial map、求值和 fallback。
 - [内容展开与收起动效](content-expansion.md)：NavMenu、Collapse 和 Expander 的共用设计契约，覆盖尺寸、裁剪、方向、请求所有权与验证边界；实现证据见各控件文档。
+- [Feedback 堆叠基础设施](feedback-stack.md)：Message 与 Notification 共用的堆叠布局、hover 展开、生命周期计时、性能和资源释放契约。
 - [使用指南](../../../guides/control-infrastructure/overview.md)
 - [AtomUI.Controls.Shared 模块](../../../modules/controls-shared/overview.md)

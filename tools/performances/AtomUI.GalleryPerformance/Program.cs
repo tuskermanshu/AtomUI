@@ -215,14 +215,14 @@ internal static class Program
             ["message"] = new(
                 "MessageShowCase",
                 MessageViewModel.ID,
-                "AtomUIGallery.ShowCases.Views.MessageShowCase",
-                "controlgallery/AtomUIGallery/ShowCases/Views/Feedback/MessageShowCase.axaml",
+                "AtomUIGallery.ShowCases.Message.MessageShowCase",
+                "controlgallery/AtomUIGallery/ShowCases/Feedback/Message/Views/MessageShowCase.axaml",
                 stats => stats.ShowCaseItemCount >= 4 && stats.ButtonCount >= 7),
             ["notification"] = new(
                 "NotificationShowCase",
                 NotificationViewModel.ID,
-                "AtomUIGallery.ShowCases.Views.NotificationShowCase",
-                "controlgallery/AtomUIGallery/ShowCases/Views/Feedback/NotificationShowCase.axaml",
+                "AtomUIGallery.ShowCases.Notification.NotificationShowCase",
+                "controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml",
                 stats => stats.ShowCaseItemCount >= 6 && stats.ButtonCount >= 14),
             ["alert"] = new(
                 "AlertShowCase",
@@ -494,6 +494,28 @@ internal static class Program
     public static int Main(string[] args)
     {
         var options = PerfOptions.Parse(args);
+        if (options.FeedbackStack)
+        {
+            try
+            {
+                SetupAvalonia(out var feedbackLifetime);
+                feedbackLifetime.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                var feedbackOutput = FeedbackStackPerformanceProbe.Run(
+                    options.Iterations,
+                    options.Warmup,
+                    options.Label);
+                Console.WriteLine(feedbackOutput);
+                WriteMarkdownOutput(feedbackOutput, options);
+                feedbackLifetime.Shutdown();
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                return 1;
+            }
+        }
+
         if (!ShowCases.TryGetValue(options.ShowCase, out var showCase))
         {
             Console.Error.WriteLine($"Unknown showcase '{options.ShowCase}'. Available: {string.Join(", ", ShowCases.Keys)}.");
@@ -1743,7 +1765,8 @@ internal sealed record PerfOptions(
     bool TraceNavigation,
     int? SpaceRemoveItem,
     bool ResizeTrace,
-    bool ResizeForceMaterialized)
+    bool ResizeForceMaterialized,
+    bool FeedbackStack)
 {
     public static PerfOptions Parse(string[] args)
     {
@@ -1763,6 +1786,7 @@ internal sealed record PerfOptions(
         var spaceRemoveItem = default(int?);
         var resizeTrace = false;
         var resizeForceMaterialized = false;
+        var feedbackStack = false;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -1831,6 +1855,9 @@ internal sealed record PerfOptions(
                 case "--resize-force-materialized":
                     resizeForceMaterialized = true;
                     break;
+                case "--feedback-stack":
+                    feedbackStack = true;
+                    break;
                 case "--space-remove-item" when i + 1 < args.Length &&
                                                 int.TryParse(args[i + 1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedItem):
                     showCase        = "space";
@@ -1856,7 +1883,8 @@ internal sealed record PerfOptions(
             traceNavigation,
             spaceRemoveItem,
             resizeTrace,
-            resizeForceMaterialized);
+            resizeForceMaterialized,
+            feedbackStack);
     }
 }
 
