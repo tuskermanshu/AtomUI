@@ -111,6 +111,26 @@ x:Name="ShowCollapsiblePanelThird">
 </atom:Splitter>
 </Border>
 </gallery:ShowCaseItem>
+<gallery:ShowCaseItem Title="{gallery:SplitterShowCaseLangResource DoubleClickResetTitle}"
+Description="{gallery:SplitterShowCaseLangResource DoubleClickResetDescription}"
+SourceKey="splitter-double-click-reset"
+IsOccupyEntireRow="True">
+<Border Classes="splitter-surface">
+<atom:Splitter Orientation="Vertical"
+Height="220"
+DraggerDoubleClicked="HandleDraggerDoubleClicked">
+<Border Classes="splitter-panel" atom:Splitter.DefaultSize="30%">
+<TextBlock Classes="splitter-label" Text="{gallery:SplitterShowCaseLangResource P2TextPanel1}" />
+</Border>
+<Border Classes="splitter-panel alt" atom:Splitter.DefaultSize="40%">
+<TextBlock Classes="splitter-label" Text="{gallery:SplitterShowCaseLangResource P2TextPanel2}" />
+</Border>
+<Border Classes="splitter-panel" atom:Splitter.DefaultSize="30%">
+<TextBlock Classes="splitter-label" Text="{gallery:SplitterShowCaseLangResource P2TextPanel3}" />
+</Border>
+</atom:Splitter>
+</Border>
+</gallery:ShowCaseItem>
 <gallery:ShowCaseItem Title="{gallery:SplitterShowCaseLangResource LazyTitle}"
 Description="{gallery:SplitterShowCaseLangResource LazyDescription}"
 IsOccupyEntireRow="True">
