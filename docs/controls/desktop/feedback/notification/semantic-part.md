@@ -26,47 +26,39 @@ AtomUI 把十一个上游 Part 一一映射到两个 owner 的真实节点：
 
 ```text
 WindowNotificationManager (root，对应上游 list)
-  └─ Border（消费 owner Padding）
-       └─ ReversibleStackPanel#PART_Items (listContent, .semantic-list-content)
+  └─ FeedbackStackPresenter#PART_Items (listContent，公共契约 ItemsControl，Margin 消费 manager.Padding)
+       └─ ItemsPresenter / FeedbackStackPanel
             └─ NotificationCard (root，对应上游 notice root)
-                 └─ LayoutAwareMotionActor
-                      └─ Border#Frame (root 表面投影：背景/边框/圆角/阴影；MotionActor 直接内容，Padding=0)
-                           └─ Panel#PART_Layout (等于 padding box：Frame 无内边距)
-                                ├─ Border#ContentBox (消费 owner Padding，即上/下 paddingMD、左/右 paddingLG)
-                                │    └─ StackPanel
-                                │         ├─ DockPanel#Wrapper (wrapper, .semantic-wrapper)
-                                │         │    ├─ IconPresenter#IconPresenter (icon, .semantic-icon)
-                                │         │    └─ StackPanel#Section (section, .semantic-section)
-                                │         │         ├─ SelectableTextBlock#HeaderTitle (title, .semantic-title)
-                                │         │         └─ ContentPresenter#Content (description, .semantic-description)
-                                │         └─ ContentPresenter#ActionsContainer (actions, .semantic-actions)
-                                ├─ IconButton#PART_CloseButton (close, .semantic-close，覆盖层)
-                                └─ NotificationProgressBar#ProgressBar (progress, .semantic-progress，运行时创建覆盖层)
+                 └─ MotionActor
+                      └─ Border#Frame (表面投影，Padding=0)
+                           └─ FeedbackStackTransitionSnapshotHost#PART_StackTransitionSnapshotHost
+                                └─ Grid#PART_Layout
+                                     ├─ Border#ContentBox (消费 card.Padding)
+                                     │    └─ StackPanel
+                                     │         ├─ DockPanel#Wrapper (wrapper)
+                                     │         │    ├─ IconPresenter#IconPresenter (icon)
+                                     │         │    └─ StackPanel#Section (section)
+                                     │         │         ├─ SelectableTextBlock#HeaderTitle (title)
+                                     │         │         └─ ContentPresenter#Content (description)
+                                     │         └─ ContentPresenter#ActionsContainer (actions)
+                                     ├─ IconButton#PART_CloseButton (close，右上角覆盖)
+                                     └─ NotificationProgressBar#ProgressBar (progress，运行时创建、跨列贴底)
 ```
 
 上游 `root` 就是 notification notice 本身，因此映射到 `NotificationCard` owner；上游 `list` 是承载全部 notice 的
 定位容器，映射到 `WindowNotificationManager` owner。两个 owner 各自拥有隐式 `root`，不额外声明 `.semantic-root` marker。
 
-与上游 DOM 的结构差异（Part 名称、数量与样式语义不变）：
+结构与布局边界：
 
-- 上游 `list` 自身承担 placement（`topRight` 等）；AtomUI 的 `WindowNotificationManager` 铺满 TopLevel 并只负责安全区
-  外边距与列表内边距，具体对齐由 `ReversibleStackPanel#PART_Items`（`listContent`）实际承担。因此"放置"语义在
-  AtomUI 由 `root`（`Position` 属性与宿主层范围的作用域）与 `listContent`（实际排列容器）共同表达。
-- 上游 notice 的 `close` 是 `position: absolute` 覆盖层，`progress` 是 `position: absolute; bottom: 0` 覆盖层。
-  AtomUI 同样把两者表达为 `Panel#PART_Layout` 上的覆盖元素（`close` 右上、`progress` 贴底并左右内缩 `BorderRadiusLG`），
-  不参与 `wrapper` / `section` / `actions` 的流式排版。
-- 上游 `position: absolute` 的子元素相对**padding box** 定位，而非 border box 或内容盒。因此 AtomUI 把
-  `Padding` 从 `Border#Frame` 下移到 Frame 内部的 `Border#ContentBox`，让 `Panel#PART_Layout` 恰好等于
-  padding box：`close` 的右侧偏移量到边框内侧、`progress` 贴在边框底边（而不是被 20px 内边距抬高）。
-  `Frame` 自身保持 `Padding=0`，同时负责画 `BoxShadow`。
-- `Border#Frame` 必须是 `LayoutAwareMotionActor` 的直接内容（中间只允许 `ContentControl` 自带的
-  `PART_ContentPresenter`）。曾经的模板在两者之间夹了一层 `Panel#PART_Layout`，`BoxShadow` 被裁到右/下各只剩
-  1 个逻辑像素（实测设备像素 2，上游为 8），卡片右下角看起来「少了一块」。`Message` 的 `PART_Frame` 正是
-  MotionActor 的直接内容，所以它的硬阴影一直正常；本控件的回归测试
-  `Frame_Sits_Directly_In_The_Motion_Actor_So_BoxShadow_Is_Not_Clipped` 锁定该约束。
-- 上游 `wrapper` 用 flex `gap: marginSM` + `align-items: flex-start` 排列 icon 与 section；AtomUI `DockPanel` 无
-  `Spacing`，等价的图标间距由 `IconPresenter` 的 `NotificationIconMargin`（右外边距）表达，视觉结果一致。
-- 上游 `section` 用 flex column `gap: marginXS`；AtomUI 由 `StackPanel#Section.Spacing` 表达。
+- manager 铺满宿主反馈层，安全区外边距由 `TopLevelMarginBinder` 提供；列表内边距由 owner `Padding` 提供，
+  投影到 presenter 的 `Margin`。`Position` 决定六种对齐，内联使用时定位作用于调用方分配的布局范围。
+- `listContent` 公共类型为 `ItemsControl`。实际 presenter 和 panel 管理可变高度卡片的堆叠、展开与项间距。
+- `Frame` 是 `MotionActor` 的直接内容，绘制背景、边框、阴影。card `Padding` 由内部 `ContentBox` 消费；
+  `Frame` 自身零内边距，使关闭按钮偏移从边框内侧计算，进度条能够贴底。
+- `close` 与内容在 Grid 第一行重叠，右上对齐；`progress` 运行时加入第二行并跨两列，以有限的卡片内容宽度测量。
+  两者均不嵌入 `wrapper` / `section` / `actions` 的正文流。快照 host 只拥有折叠过渡期间的内容快照，不公开 Part。
+- `wrapper` 使用 DockPanel，icon 的右外边距取 `NotificationIconMargin`，并与标题首行顶部对齐。
+  `section` 使用 StackPanel，其 `Spacing` 取 `NotificationSectionSpacing`。
 
 两个 owner 的 descriptor `Since` 统一为 `6.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
 
@@ -94,7 +86,7 @@ WindowNotificationManager (root，对应上游 list)
 | Customization | `Root` |
 | CrossVisualRoot | `false` |
 | RuntimeCreated | `false` |
-| AtomUI 节点 | NotificationCard owner（表面投影到 `Border#Frame`，动效由 `LayoutAwareMotionActor` 承载） |
+| AtomUI 节点 | NotificationCard owner（表面投影到 `Border#Frame`，动效由 `MotionActor` 承载） |
 | 职责 | 通知项根元素：承载 `Title`、`Content`、`Icon`、`Actions`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled` 与进入/退出动效；根表面（背景、边框、圆角、阴影、内边距）投影到模板中的 `Border#Frame`。对应上游 notice root。 |
 | 相关 API | `Title`、`Content`、`Icon`、`Actions`、`ActionsTemplate`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled`、`Close()`、`NotificationClosed` |
 | 相关 Token | `NotificationBg`、`NotificationPadding`、SharedToken（`BoxShadows`、`BorderRadiusLG`） |
@@ -278,8 +270,8 @@ WindowNotificationManager (root，对应上游 list)
 | RuntimeCreated | `false` |
 | AtomUI 节点 | WindowNotificationManager owner（宿主层/full-screen 覆盖层；无宿主构造时为内联可放置实例） |
 | 职责 | 通知列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`，管理宿主层安装、通知队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度与边缘内边距语义。 |
-| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`、`Show(INotification)`、`Dispose()` |
-| 相关 Token | `NotificationPadding`（列表内边距）、SharedToken（`EnableMotion`、`MarginLG`） |
+| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`、`Padding`、`IsStackEnabled`、`StackThreshold`、`Show(INotification)`、`DestroyAll()`、`Dispose()` |
+| 相关 Token | `NotificationTopMargin`、`NotificationBottomMargin`、SharedToken（`EnableMotion`） |
 | 稳定性 | stable since 6.0 |
 
 #### `listContent`
@@ -291,14 +283,14 @@ WindowNotificationManager (root，对应上游 list)
 | Selector | `.semantic-list-content` |
 | SelectorRoute | `/template/ .semantic-list-content` |
 | Style Type | `WindowNotificationManagerListContentStyle` |
-| ContractType | `ReversibleStackPanel` |
+| ContractType | `ItemsControl` |
 | Cardinality | `Single` |
 | Customization | `Selector` |
 | CrossVisualRoot | `false` |
 | RuntimeCreated | `false` |
-| AtomUI 节点 | WindowNotificationManager 模板中的 `ReversibleStackPanel#PART_Items` |
+| AtomUI 节点 | WindowNotificationManager 模板中的 `FeedbackStackPresenter#PART_Items` |
 | 职责 | 通知列表内容元素：notice 的排列方向、顺序、对齐与项间距；对应上游 `listContent` 的 notice 排列/间距语义。 |
-| 相关 API | `Position`、`MaxItems`（决定内容区可见项数量） |
+| 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
 | 相关 Token | SharedToken（`EnableMotion`、`UniformlyMargin`） |
 | 稳定性 | stable since 6.0 |
 
@@ -321,15 +313,15 @@ WindowNotificationManager (root，对应上游 list)
 - 根视觉表面：背景（`NotificationBg`）、圆角（`BorderRadiusLG`）、阴影（`BoxShadows`）投影到 `Border#Frame`；
   内边距（`NotificationPadding`）投影到 `Frame` 内部的 `Border#ContentBox`（原因见 §1 的 padding box 说明）。
   卡片**不承担**通知间距：`root` 的几何等于可见卡片本身（四边零外边距），
-  通知间距由 `listContent` 的 `Spacing` 表达（见 §5）。
+  通知间距由内部 `FeedbackStackPresenter` / `FeedbackStackPanel` 管理（见 §5）。
 - 作为 `wrapper` / `icon` / `section` / `title` / `description` / `actions` / `close` / `progress`
   owner-scoped Selector 的作用域边界。
 
 适合通过 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`BoxShadow`、`Padding` 等 owner 侧 Setter
 定制整卡视觉——背景/圆角/阴影/边框经模板内 `Border#Frame` 的 `TemplateBinding` 投影到卡片外框，`Padding` 经
 `Border#ContentBox` 投影到内容内边距，是上游 `root` styles
-（背景色、圆角、阴影、内边距、边框）的 AtomUI 等价表达。`root` 不表示模板中的 `LayoutAwareMotionActor`、
-`Border#Frame` 或 `Panel#PART_Layout` 节点本身。
+（背景色、圆角、阴影、内边距、边框）的 AtomUI 等价表达。`root` 不表示模板中的 `MotionActor`、
+`Border#Frame` 或 `Grid#PART_Layout` 节点本身。
 
 ### 2.2 wrapper / icon / section / title / description / actions
 
@@ -355,7 +347,7 @@ WindowNotificationManager (root，对应上游 list)
 
 两个 Part 是覆盖层，cardinality 均为 `Single`：
 
-- `close` 承载 `IconButton#PART_CloseButton`，放在 `Panel#PART_Layout` 上并以右上角对齐，因此不占用 `wrapper` /
+- `close` 承载 `IconButton#PART_CloseButton`，放在 `Grid#PART_Layout` 上并以右上角对齐，因此不占用 `wrapper` /
   `actions` 的排版空间，对齐上游 absolute top-right。适合定制位置（`Margin`）、尺寸、圆角与交互色。
 - `progress` 由 `ConfigureProgressBar` 运行时创建 `NotificationProgressBar#ProgressBar` 并注入
   `semantic-progress` class，只在 `IsShowProgress` 为真且 `Expiration` 非空时存在；节点贴卡片底边、左右内缩
@@ -366,13 +358,14 @@ WindowNotificationManager (root，对应上游 list)
 
 两个 Part 在 `WindowNotificationManager` 内各对应一个稳定节点，cardinality 均为 `Single`：
 
-- `root` 承载 manager owner 本身：安装到 TopLevel 宿主层（`WindowFeedbackLayer` 优先，回退 `AdornerLayer`）时它是
-  full-screen 覆盖层，负责安全区外边距、列表内边距（`NotificationPadding`）、通知队列（`_pendingNotifications`）、
-  过期计时器（`_cardExpiredTimer`）、`MaxItems` 清理与 `Dispose` 卸载。
-- `listContent` 承载 `ReversibleStackPanel#PART_Items`：所有 `NotificationCard` 的逻辑父级，决定 notice 的排列方向、
-  `ReverseOrder`、对齐与 `Spacing`。
+- `root` 承载 manager owner：管理 `Position`、列表 `Padding`、稳定卡片集合、`MaxItems`、Stack 配置与生命周期。
+  宿主构造安装到 `WindowFeedbackLayer`（回退 `AdornerLayer`）；无参构造或传入 `null` 时由调用方放进视觉树。
+- `listContent` 承载 `FeedbackStackPresenter#PART_Items`，公共 `ContractType` 为 `ItemsControl`。它通过
+  `ItemsSource` 消费稳定卡片集合；内部 panel 按 `Position`、卡片高度和 Stack 状态计算排列、层级与间距。
 
-适合通过 `root` 定制 manager 的内边距与宿主层相关视觉，通过 `listContent` 定制 notice 排列间距与对齐。
+通过 owner `Padding` 定制列表边缘间隔，通过生成的 `WindowNotificationManagerListContentStyle` 定制
+`ItemsControl` 的宽度、最小宽度、对齐等公共属性。`Spacing`、`ReverseOrder` 不是该 Part 的公共属性。
+内部反馈栈维护展开间距和折叠层级，不提供新的应用 API。
 
 ## 3. Selector 用法
 
@@ -397,8 +390,8 @@ WindowNotificationManager (root，对应上游 list)
     </Style>
 
     <Style Selector="atom|WindowNotificationManager">
-        <atom:WindowNotificationManagerListContentStyle x:SetterTargetType="atom:ReversibleStackPanel">
-            <Setter Property="Spacing" Value="12" />
+        <atom:WindowNotificationManagerListContentStyle x:SetterTargetType="ItemsControl">
+            <Setter Property="MinWidth" Value="320" />
         </atom:WindowNotificationManagerListContentStyle>
     </Style>
 </Application.Styles>
@@ -432,16 +425,18 @@ WindowNotificationManager (root，对应上游 list)
 | 场景 | NotificationCard 各 Part | WindowNotificationManager root / listContent | 说明 |
 | --- | --- | --- | --- |
 | 单条通知 | 各 1 | 各 1 | 每条可见通知一个 NotificationCard。 |
-| N 条可见通知 | 各 N | 各 1 | manager 只有一个模板实例与一个 `PART_Items`。 |
+| N 张已实例化卡片 | 各 N | 各 1 | manager 只有一个模板实例与一个 `PART_Items`；动态 progress 仍按其存在条件计数。 |
 | `Icon` 为 null 且默认类型 | `icon` marker 保留，节点 `IsVisible=false` | — | 高亮与命中只针对有效可见实例。 |
+| Stack 折叠 / 展开 | 已实例化卡片的 marker 数量保持 | 各 1 | 隐藏层仍属于卡片集合；可见性影响高亮与命中，不销毁 marker。 |
 | 自定义 `Icon` | `icon` marker 保留 | — | 自定义图标不新增节点。 |
 | `Actions` 为空 | `actions` marker 保留，节点 `IsVisible=false` | — | 提供操作后节点显示，不新增节点。 |
 | `IsShowProgress=false` 或 `Expiration` 为空 | `progress` 节点与 marker 都不存在 | — | `Optional` 语义由运行时创建路径表达。 |
 | 显示进度 | `progress` 恰 1 | — | 节点贴底覆盖，不改变其它 Part 数量。 |
-| 超时自动关闭 | 关闭后随卡片移除 | 各 1 | `NotificationClosed` 后 manager 从 `PART_Items` 移除卡片。 |
+| 超时自动关闭 | 关闭后随卡片移除 | 各 1 | `NotificationClosed` 后 manager 从稳定卡片集合移除卡片。 |
 | 手动 `Close()` | 同上 | 各 1 | 与超时走同一关闭动效状态流。 |
-| 超过 `MaxItems` | 只保留 `MaxItems` 条可见 | 各 1 | 超出部分被 `Close()`，marker 随卡片移除。 |
-| 宿主 detach / `Dispose` | 全部移除 | root 随 manager 卸载 | `OnDetachedFromVisualTree` 清空 `PART_Items`；`Dispose` 卸载事件、计时器与宿主层。 |
+| 超过正数 `MaxItems` | 最旧活动项关闭后移除 | 各 1 | 关闭中的卡片不计入活动项；`MaxItems <= 0` 不限制。 |
+| 持续宿主 detach | 卡片关闭后移除 | root 随 manager 卸载 | detach 级联完成后仍未重新入树时关闭卡片；同轮重新入树保留队列。 |
+| `Dispose` | 全部移除 | root 随 manager 卸载 | 解绑 presenter、释放 scheduler、card owner、回调和宿主层。 |
 
 ## 5. 尺寸基线
 
@@ -473,21 +468,22 @@ Notification 没有 `SizeType` 分档，视觉基线由 `NotificationCardToken` 
   的 `IconPresenter` 在 `DockPanel` 中默认 `Stretch` 且带显式 `Height`，会被垂直居中而低一截，因此主题显式设置
   `VerticalAlignment="Top"`。
 
-`WindowNotificationManager` 没有独立尺寸 Token：其 `root` 铺满 TopLevel 并由 `TopLevelMarginBinder` 投影安全区外边距，
-并通过 `NotificationPadding` 提供列表内边距，`listContent` 的对齐与顺序来自 `Position` 伪类、项间距来自 `Spacing`。
+`WindowNotificationManager.Padding` 的默认值由 owner 的 `Position` 选择器提供：顶部位置使用
+`NotificationTopMargin`，底部位置使用 `NotificationBottomMargin`。前者为左/上/右 `UniformlyMarginLG`、下 0；
+后者为左/下/右 `UniformlyMarginLG`、上 0。应用显式设置 Padding 可以覆盖默认值；切换位置仍保留显式值。
+`NotificationPadding` 只表达卡片内容内边距，不承担 manager 的边缘定位。
 
 ### 5.1 list / listContent / root 的几何归属
 
-上游把三个层级的职责分得很清楚，AtomUI 严格对齐：
-
-| 上游 | AtomUI 节点 | 承担 |
+| 区域 | AtomUI 节点 | 承担 |
 | --- | --- | --- |
-| `.ant-notification` / `.ant-notification-list`（`--notification-margin-edge`、padding） | `WindowNotificationManager`（`root`）+ 模板内 `Border` 消费 `Padding` | 列表容器内边距与定位 |
-| `.ant-notification-list-content`（`gap: notificationMarginBottom`） | `ReversibleStackPanel#PART_Items`（`listContent`） | 通知项排列与间距 |
-| `.ant-notification-notice`（绝对定位，自身零外边距） | `NotificationCard`（`root`） | 单条通知，几何等于可见卡片 |
+| list | `WindowNotificationManager`（`root`） | `Position` 与 `Padding`，Padding 投影到 presenter.Margin |
+| listContent | `FeedbackStackPresenter#PART_Items`（公共契约 `ItemsControl`） | 实际队列范围；内部 panel 管理排列、堆叠与项间距 |
+| notice | `NotificationCard`（`root`） | 单条通知表面，卡片自身零外边距 |
 
-据此，`root`（卡片）的高亮框与可见卡片完全重合（四边间距为 0），`listContent` 高亮框相对 `root` 四边各内缩一个
-内边距，形成两个大小不同、间距对称的矩形——与上游悬停 `list` / `listContent` 的表现一致。
+TopRight 的上边与右边间隔分别取 manager `Padding.Top` / `Padding.Right`；BottomLeft 对应下边和左边。
+列表紧贴可见队列，空白区域不应扩大 hover 命中范围。卡片 root 的 Bounds 与表面 Border 一致；列表按定位边
+锚定，不要求相对整个 manager 的四边间隔相等。
 
 ### 5.2 单预览合并两个 owner
 
@@ -521,16 +517,15 @@ Application 之一。Gallery 的 `Custom Semantic Part styling` 示例把生成�
 
 以下区域明确不属于 Notification Semantic Part：
 
-- 关闭动效执行状态（`MotionExecutionState` 与 `LayoutAwareMotionActor`）、`Close()` 调度与 `IsClosed` 提交路径是
+- 关闭动效执行状态（`MotionExecutionState` 与 `MotionActor`）、`Close()` 调度与 `IsClosed` 提交路径是
   行为状态，不是 Part。
-- `Border#Frame`、`Panel#PART_Layout`、`Border#ContentBox`、`StackPanel` 是模板结构节点：`root` 的表面投影到 `Frame`，
-内边距投影到 `ContentBox`，但节点名称、
-  数量与层级不属于 `root` 契约。
-- `_pendingNotifications` 队列、`_cardExpiredTimer` / `_cleanupTimer` 计时器、`MaxHostLayerRetryCount` 重试与宿主层
+- `Border#Frame`、`Grid#PART_Layout`、`Border#ContentBox`、`StackPanel` 是模板结构节点：`root` 的表面投影到 `Frame`，
+  内边距投影到 `ContentBox`，但节点名称、数量与层级不属于 `root` 契约。
+- 稳定卡片集合、`FeedbackLifetimeScheduler`、`MaxHostLayerRetryCount` 重试与宿主层
   安装/卸载是 manager 的行为实现，不是 Part。
 - `NotificationCard` 的默认图标选择（`SetupDefaultNotificationIcon`）与 `NotificationType` 伪类是行为状态；
   `icon` Part 只表达图标元素的视觉。
-- `NotificationPropertyBar` 的绘制算法（剩余时间比例、`Render` 矩形）是实现细节；`progress` Part 只表达该覆盖
+- `NotificationProgressBar` 的绘制算法（剩余时间比例、`Render` 矩形）是实现细节；`progress` Part 只表达该覆盖
   元素的视觉区域。
 - `Notification`、`INotification`、`INotificationManager` 数据/契约类型。
 
@@ -551,33 +546,20 @@ Semantic Style 服从 Avalonia 原生属性优先级。Notification 没有用户
 - 两个 owner 的主题资产各自携带批准 marker：`NotificationCardTheme.axaml` 为 `semantic-wrapper:DockPanel`、
   `semantic-icon:IconPresenter`、`semantic-section:StackPanel`、`semantic-title:SelectableTextBlock`、
   `semantic-description:ContentPresenter`、`semantic-actions:ContentPresenter`、`semantic-close:IconButton`；
-  `WindowNotificationManagerTheme.axaml` 为 `semantic-list-content:ReversibleStackPanel`；
+  `WindowNotificationManagerTheme.axaml` 为 `semantic-list-content:FeedbackStackPresenter`；
   `progress` 不进静态模板 marker，由运行时路径注入。
 - 全部 `NotificationType`、自定义 `Icon`、`Actions` 有无、进度开关、多项 queue、关闭与 detach 后 marker 数量符合
   第 4 节表。
 - owner-scoped Semantic Style（九个生成 Style 类型）与 `x:SetterTargetType` 可以编译并命中对应最低 public 类型。
-- 宿主 attach/detach、`Dispose` 后不保留旧卡片、计时器或宿主层引用。
+- 首次 attach 前 `Show` 保留卡片；持续 detach 关闭卡片，同轮重新入树保留队列；`Dispose` 释放卡片、scheduler 与宿主层引用。
+- 六种 `Position` 下，默认与非默认 `Padding` 均按当前定位边投影；运行时修改内边距不能扩大队列 hover 命中区。
+- `listContent` 的生成 Style 以 `ItemsControl` 为目标命中宽度、对齐等公共属性，不能依赖内部 panel 的项间距属性。
 - 默认主题不消费 `.semantic-*`，未声明用户 Semantic Style 时不增加 selector activator。
 - Generator 静态输出和 NativeAOT 路径不依赖反射或运行时扫描。
 
-### 7.1 与改造前的差异（行为与渲染变化）
+### 7.1 堆叠与动态部件验证
 
-本次改造把 notice 模板结构对齐到上游 DOM，属于已授权的渲染结果与公共主题契约变更：
-
-- `close` 从原来的流内 `DockPanel` 子节点改为右上角覆盖层；`title` 改为通过 `NotificationTitlePadding` 为关闭按钮
-  预留右侧空间（描述按上游规则不预留），而不是依赖 `DockPanel` 的 `LastChildFill`。
-- 卡片 `Padding` 由 `(左右, 上, 左右, 0)` 改为四边对称，对齐上游 `padding: paddingMD paddingLG`；该内边距不再由
-  `Border#Frame` 承担，而是投影到 Frame 内部的 `Border#ContentBox`（见下一项）。
-- `Border#Frame` 从 `Panel#PART_Layout` 的子节点提升为 `LayoutAwareMotionActor` 的直接内容，`Padding` 下移到
-  新增的 `Border#ContentBox`。原因是 `position:absolute` 的覆盖层以 padding box 为基准，且 `Frame` 的
-  `BoxShadow` 曾被中间 `Panel` 裁到右/下各 1 个逻辑像素（实测设备像素 2，上游为 8）。结构变化见 §1 的模板示意。
-- 新增 `section`（`StackPanel`）承载标题与描述，标题与描述间距改由其 `Spacing` 表达；原 `NotificationContentMargin`
-  与 `HeaderMargin` 两个 Token 由 `NotificationSectionSpacing` 取代。
-- 新增 `actions` 区域与 `NotificationCard.Actions` / `ActionsTemplate`、`INotification.Actions` /
-  `ActionsTemplate`、`Notification.Actions` 公共契约。
-- `progress` 从 `Grid` 的行内元素改为 `Panel` 上的底部覆盖层，左右内缩 `BorderRadiusLG`。
-- manager 新增 `Padding`（`MarginLG`）承担列表内边距；卡片侧移除 `NotificationTopMargin` / `NotificationBottomMargin` /
-  `NotificationMarginBottom` 三个边缘外边距 Token。
-- `NotificationCard` 新增公开无参构造（与 `MessageCard` 对齐），使卡片可声明式实例化；manager 构造路径行为不变。
-- `WindowNotificationManager` 补齐 `OnDetachedFromVisualTree` 清空 `PART_Items`，与 `WindowMessageManager` 的内存
-  泄漏修复保持一致。
+- standalone `NotificationCard` 与 manager 创建的卡片均初始化 motion coordinator，模板应用和属性修改不依赖 host。
+- 正文、关闭按钮和 runtime progress 使用同一模板 owner；进度条跨列、贴底且可获得有限测量宽度。
+- render-only `MotionActor` 负责进出场，外层卡片负责队列投影；折叠快照的完成、取消和卸载均释放位图与旧节点引用。
+- 六种 `Position`、运行时切换、非默认 `Padding` 与 Stack 配置不改变 Part 身份；可见数量由活动卡片和堆叠状态决定。

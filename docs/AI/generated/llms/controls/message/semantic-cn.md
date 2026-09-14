@@ -21,28 +21,28 @@ AtomUI 把六个上游 Part 一一映射到两个 owner 的真实节点：
 
 ```text
 WindowMessageManager (root，对应上游 list)
-  └─ ReversibleStackPanel#PART_Items (listContent, .semantic-list-content)
-       └─ MessageCard (root，对应上游 notice root)
-            └─ MotionActor
-                 └─ Border#PART_Frame (root 表面投影：背景/圆角/阴影/内边距)
-                      └─ DockPanel#PART_HeaderContainer (wrapper, .semantic-wrapper)
-                           ├─ IconPresenter#PART_IconContent (icon, .semantic-icon)
-                           └─ SelectableTextBlock#PART_Message (title, .semantic-title)
+  └─ Grid#PART_StackHost (按 Position 锚定，Margin 消费 manager.Padding)
+       ├─ Panel (零尺寸、不可命中的两层静态背板)
+       └─ FeedbackStackPresenter#PART_Items (listContent，公共契约 ItemsControl)
+            └─ ItemsPresenter / FeedbackStackPanel
+                 └─ MessageCard (root，对应上游 notice root)
+                      └─ MotionActor
+                           └─ Border#PART_Frame (root 表面投影)
+                                └─ DockPanel#PART_HeaderContainer (wrapper)
+                                     ├─ IconPresenter#PART_IconContent (icon)
+                                     └─ SelectableTextBlock#PART_Message (title)
 ```
 
 上游 `root` 就是 message notice 本身，因此映射到 `MessageCard` owner；上游 `list` 是承载全部 notice 的定位容器，
 映射到 `WindowMessageManager` owner。两个 owner 各自拥有隐式 `root`，不额外声明 `.semantic-root` marker。
 
-与上游 DOM 的两处结构差异（Part 名称、数量与样式语义不变）：
+结构与布局边界：
 
-- 上游 `list` 自身承担 placement（`top` / `left` / `right`）；AtomUI 的 `WindowMessageManager` 铺满 TopLevel 并只
-  负责安全区外边距，具体对齐由 `ReversibleStackPanel#PART_Items`（`listContent`）实际承担。因此"放置"语义在
-  AtomUI 由 `root`（`Position` 属性与宿主层范围的作用域）与 `listContent`（实际排列容器）共同表达。以无宿主构造
-  内联使用时没有宿主层，`root` 退化为普通可放置控件，placement 语义不适用。当前控件未在
-  `Position` 变化时更新伪类，主题中的 `:topcenter` 对齐选择器不可达（见第 7 节残余风险）。实测宿主构造
-  （`WindowFeedbackLayer`）下卡片顶部贴顶、水平居中：窗口 1280×900 时卡片 `x=347`、`y=0`、宽 586，即
-  居中值 `(1280-586)/2=347`，与上游默认的视口顶部居中浮层一致；可见上边距来自 `list`（manager）的内边距，
-  而不是卡片自身外边距（见 §5.2）。
+- manager 的 `Position` 决定六种边缘对齐，`Padding` 决定队列与 manager 边缘的间隔。
+  宿主模式中 manager 铺满反馈层并通过 `TopLevelMarginBinder` 接收安全区外边距；内联模式中同样的定位作用于
+  调用方分配的布局范围。模板中的 `PART_StackHost` 按位置锚定并紧贴队列，`listContent` 填满该 host。
+- `listContent` 的公共类型为 `ItemsControl`；实际 presenter 和其内部 panel 管理堆叠、顺序与项间距。
+  这两个内部类型及其专属属性不是应用的样式契约。
 - 上游 `wrapper` 用 flex `gap: marginXS` + `align-items: center` 排列 icon 与 title；AtomUI `DockPanel` 无 `Spacing`，
   等价的图标间距由 `IconPresenter` 的 `MessageIconMargin`（右外边距 `UniformlyMarginXS`）表达，视觉结果一致。
 
@@ -155,8 +155,8 @@ WindowMessageManager (root，对应上游 list)
 | RuntimeCreated | `false` |
 | AtomUI 节点 | WindowMessageManager owner（宿主层/full-screen 覆盖层；无宿主构造时为内联可放置实例） |
 | 职责 | 消息列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`，管理宿主层安装、消息队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度语义。 |
-| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`Show(IMessage)`、`Dispose()` |
-| 相关 Token | SharedToken（`EnableMotion`） |
+| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`Padding`、`IsStackEnabled`、`StackThreshold`、`IsPauseOnHover`、`Show(IMessage)`、`DestroyAll()`、`Dispose()` |
+| 相关 Token | `MessageTopMargin`、SharedToken（`EnableMotion`） |
 | 稳定性 | stable since 6.0 |
 
 #### `listContent`
@@ -168,14 +168,14 @@ WindowMessageManager (root，对应上游 list)
 | Selector | `.semantic-list-content` |
 | SelectorRoute | `/template/ .semantic-list-content` |
 | Style Type | `WindowMessageManagerListContentStyle` |
-| ContractType | `ReversibleStackPanel` |
+| ContractType | `ItemsControl` |
 | Cardinality | `Single` |
 | Customization | `Selector` |
 | CrossVisualRoot | `false` |
 | RuntimeCreated | `false` |
-| AtomUI 节点 | WindowMessageManager 模板中的 `ReversibleStackPanel#PART_Items` |
+| AtomUI 节点 | WindowMessageManager 模板中的 `FeedbackStackPresenter#PART_Items` |
 | 职责 | 消息列表内容元素：notice 的排列方向、顺序与对齐；对应上游 `listContent` 的 notice 排列/间距语义。 |
-| 相关 API | `Position`、`MaxItems`（决定内容区可见项数量） |
+| 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
 | 相关 Token | SharedToken（`EnableMotion`） |
 | 稳定性 | stable since 6.0 |
 
@@ -272,6 +272,10 @@ Message 使用 internal `MessageCardToken` 作为控件 Token scope。Token 只�
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
+
+列表的公开样式入口是 `WindowMessageManager.Padding` 与生成的 `WindowMessageManagerListContentStyle`。
+前者控制队列边缘间隔；后者以 `ItemsControl` 为公共目标，支持宽度、最小宽度与对齐等属性。
+项间距和卡片顺序由内部反馈栈管理，不能以 `Spacing` / `ReverseOrder` 作为 listContent 的公开 Setter。
 
 Token 边界：
 

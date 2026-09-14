@@ -57,7 +57,7 @@ public class MessageShowCasePageTests
         CountShowCaseItemElements(source).ShouldBe(6);
         CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(6);
         CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(6);
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:MessageViewModel\"").ShouldBe(6);
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:MessageViewModel\"").ShouldBe(7);
         source.ShouldContain("MessageShowCaseLangResource BasicTitle");
         source.ShouldContain("MessageShowCaseLangResource OtherTypesTitle");
         source.ShouldContain("MessageShowCaseLangResource LoadingIndicatorTitle");

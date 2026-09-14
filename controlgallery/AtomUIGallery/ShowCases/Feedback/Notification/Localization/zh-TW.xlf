@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xliff version="2.1" srcLang="en-US" trgLang="zh-TW" xmlns="urn:oasis:names:tc:xliff:document:2.0">
   <file id="AtomUIGallery.Localization.NotificationShowCaseLangResourceKind">
-    
     <unit id="ActionsDescription">
       <segment>
         <source>Add action buttons to the bottom-right of the notification through the Actions API.</source>

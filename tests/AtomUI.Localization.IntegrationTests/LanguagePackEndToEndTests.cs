@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text.Json;
 using System.Xml.Linq;
 using Shouldly;
 using Xunit;
@@ -9,6 +11,95 @@ namespace AtomUI.Localization.IntegrationTests;
 public sealed partial class LanguagePackEndToEndTests
 {
     private static readonly TimeSpan s_stageTimeout = TimeSpan.FromSeconds(120);
+    // Isolated consumers compile the full control graph without shared checkout outputs.
+    private static readonly TimeSpan s_buildStageTimeout = TimeSpan.FromMinutes(5);
+
+    [Fact]
+    public async Task Repository_Build_Path_Overrides_Isolate_Outputs_And_Tool_Assets()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var temporaryRoot = Path.Combine(Path.GetTempPath(), "AtomUI.Localization.IntegrationTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temporaryRoot);
+        try
+        {
+            string[] properties = ["OutputPathWithoutFramework", "OutputPath", "BaseIntermediateOutputPath",
+                "IntermediateOutputPathWithoutFramework", "IntermediateOutputPath", "MSBuildProjectExtensionsPath",
+                "PackageOutputPath", "AtomUIBuildTasksAssembly", "AtomUILinkedPublishGeneratorAssembly", "AtomUIToolsetCacheRoot"];
+            var result = await RunProcess("Evaluate isolated paths", repositoryRoot, temporaryRoot,
+                "dotnet", "msbuild", Path.Combine(repositoryRoot, "tests/fixtures/LanguagePackEndToEnd/Module/Module.csproj"),
+                "-p:Configuration=Release", "-p:TargetFramework=net10.0",
+                "-getProperty:" + string.Join(',', properties), "-getItem:AtomUIGeneratorToolAsset");
+            using var output = JsonDocument.Parse(result.StandardOutput);
+            var artifactsRoot = Path.Combine(temporaryRoot, "artifacts") + Path.DirectorySeparatorChar;
+            foreach (var property in properties)
+            {
+                Path.GetFullPath(output.RootElement.GetProperty("Properties").GetProperty(property).GetString()!)
+                    .ShouldStartWith(artifactsRoot, customMessage: property);
+            }
+            var tools = output.RootElement.GetProperty("Items").GetProperty("AtomUIGeneratorToolAsset").EnumerateArray().ToArray();
+            tools.ShouldNotBeEmpty();
+            foreach (var tool in tools)
+            {
+                Path.GetFullPath(tool.GetProperty("Identity").GetString()!).ShouldStartWith(artifactsRoot);
+            }
+        }
+        finally
+        {
+            Directory.Delete(temporaryRoot, recursive: true);
+        }
+    }
+
+    [Fact(Timeout = 360_000)]
+    public async Task Fixture_Module_Pack_Does_Not_Modify_Repository_Dependency_Outputs()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var temporaryRoot = Path.Combine(Path.GetTempPath(), "AtomUI.Localization.IntegrationTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temporaryRoot);
+        var before = CaptureSharedDependencyOutputs(repositoryRoot);
+        try
+        {
+            await RunProcess(
+                "Pack module without changing shared dependencies", repositoryRoot, temporaryRoot,
+                "dotnet", "msbuild",
+                Path.Combine(repositoryRoot, "tests/fixtures/LanguagePackEndToEnd/Module/Module.csproj"),
+                "-restore", "-t:Pack", "-m:1", "-nr:false", "-p:Configuration=Debug",
+                $"-p:PackageVersion=1.0.0-local.{Guid.NewGuid():N}",
+                $"-p:PackageOutputPath={Path.Combine(temporaryRoot, "feed")}",
+                $"-p:RestorePackagesPath={GlobalPackagesPath()}", "-p:NoPackageAnalysis=true");
+
+            AssertRepositoryCoreAssemblyVersion(repositoryRoot, temporaryRoot);
+            var after = CaptureSharedDependencyOutputs(repositoryRoot);
+            var changed = before.Keys.Union(after.Keys).Where(path =>
+                !before.TryGetValue(path, out var original) ||
+                !after.TryGetValue(path, out var current) || original != current).ToArray();
+            changed.ShouldBeEmpty("Fixture builds must preserve every shared dependency output byte.");
+        }
+        finally
+        {
+            Directory.Delete(temporaryRoot, recursive: true);
+        }
+    }
+
+    private static SortedDictionary<string, string> CaptureSharedDependencyOutputs(string repositoryRoot)
+    {
+        var outputs = new SortedDictionary<string, string>(StringComparer.Ordinal);
+        var directory = Path.Combine(repositoryRoot, ".artifacts", "bin");
+        if (!Directory.Exists(directory))
+        {
+            return outputs;
+        }
+
+        string[] assemblies = ["AtomUI.Core", "AtomUI.Localization", "AtomUI.Generator", "AtomUI.Build.Tasks"];
+        string[] suffixes = [".dll", ".pdb", ".deps.json", ".runtimeconfig.json"];
+        foreach (var path in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
+        {
+            if (assemblies.Any(assembly => suffixes.Any(suffix => Path.GetFileName(path) == assembly + suffix)))
+            {
+                outputs.Add(Path.GetRelativePath(directory, path), Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))));
+            }
+        }
+        return outputs;
+    }
 
     [Fact]
     public void Language_Pack_Fixtures_Cover_Verified_And_Deferred_Authoring()
@@ -97,7 +188,7 @@ public sealed partial class LanguagePackEndToEndTests
                 $"-p:PackageOutputPath={feed}",
                 $"-p:RestorePackagesPath={globalPackages}",
                 "-p:NoPackageAnalysis=true");
-            AssertRepositoryCoreAssemblyVersion(repositoryRoot);
+            AssertRepositoryCoreAssemblyVersion(repositoryRoot, temporaryRoot);
             var verifiedPackResult = await RunProcess(
                 "Pack language pack",
                 repositoryRoot,
@@ -180,8 +271,8 @@ public sealed partial class LanguagePackEndToEndTests
                 $"-p:RestorePackagesPath={packages}",
                 $"-p:RestoreAdditionalProjectFallbackFolders={globalPackages}");
             var assetsFile = Path.Combine(
-                repositoryRoot,
-                ".artifacts",
+                temporaryRoot,
+                "artifacts",
                 "Consumer",
                 "obj",
                 "project.assets.json");
@@ -276,6 +367,7 @@ public sealed partial class LanguagePackEndToEndTests
                 "dotnet",
                 "msbuild",
                 Path.Combine(fixtureRoot, "Module", "Module.csproj"),
+                "-restore",
                 "-t:Pack",
                 "-m:1",
                 "-nr:false",
@@ -283,7 +375,7 @@ public sealed partial class LanguagePackEndToEndTests
                 $"-p:PackageVersion={packageVersion}",
                 $"-p:PackageOutputPath={feed}",
                 "-p:NoPackageAnalysis=true");
-            AssertRepositoryCoreAssemblyVersion(repositoryRoot);
+            AssertRepositoryCoreAssemblyVersion(repositoryRoot, temporaryRoot);
 
             var templateProject = Path.Combine(templateProjectDirectory, "TemplateExport.csproj");
             var globalPackages = Path.Combine(
@@ -361,14 +453,14 @@ public sealed partial class LanguagePackEndToEndTests
         }
     }
 
-    private static void AssertRepositoryCoreAssemblyVersion(string repositoryRoot)
+    private static void AssertRepositoryCoreAssemblyVersion(string repositoryRoot, string temporaryRoot)
     {
         var versionDocument = XDocument.Load(Path.Combine(repositoryRoot, "build", "Versions.props"));
         var atomUIVersion = versionDocument.Descendants("AtomUIVersion").Single().Value;
         var expectedVersion = new Version($"{atomUIVersion}.0");
         var coreAssemblyPath = Path.Combine(
-            repositoryRoot,
-            ".artifacts",
+            temporaryRoot,
+            "artifacts",
             "bin",
             "Debug",
             "net10.0",
@@ -601,6 +693,37 @@ public sealed partial class LanguagePackEndToEndTests
                path.Contains("AtomUI.Generator", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static string CreateIsolatedBuildProps(string repositoryRoot, string temporaryRoot)
+    {
+        var propsPath = Path.Combine(temporaryRoot, "IsolatedDirectory.Build.props");
+        if (File.Exists(propsPath))
+        {
+            return propsPath;
+        }
+
+        var artifactsRoot = Path.Combine(temporaryRoot, "artifacts");
+        var repositoryPrefix = Path.TrimEndingDirectorySeparator(repositoryRoot) + Path.DirectorySeparatorChar;
+        var repositoryCondition = $"$([System.String]::Copy('$(MSBuildProjectFullPath)').StartsWith('{repositoryPrefix}'))";
+        new XDocument(new XElement("Project",
+            new XElement("Import",
+                new XAttribute("Project", Path.Combine(repositoryRoot, "Directory.Build.props")),
+                new XAttribute("Condition", repositoryCondition)),
+            new XElement("PropertyGroup", new XAttribute("Condition", repositoryCondition),
+                new XElement("PackageOutputPath", Path.Combine(artifactsRoot, "Nuget", "$(Configuration)")),
+                new XElement("OutputPathWithoutFramework", Path.Combine(artifactsRoot, "bin", "$(Configuration)")),
+                new XElement("OutputPath", "$(OutputPathWithoutFramework)"),
+                new XElement("BaseIntermediateOutputPath", Path.Combine(artifactsRoot, "$(MSBuildProjectName)", "obj") + Path.DirectorySeparatorChar),
+                new XElement("IntermediateOutputPathWithoutFramework", "$(BaseIntermediateOutputPath)"),
+                new XElement("IntermediateOutputPath", "$(BaseIntermediateOutputPath)$(Configuration)/"),
+                // Repository.props computed these properties before the test path overrides.
+                // Its tool asset Items are evaluated afterwards and use the new output root.
+                new XElement("AtomUIBuildTasksAssembly", "$(OutputPathWithoutFramework)/net10.0/AtomUI.Build.Tasks.dll"),
+                new XElement("AtomUILinkedPublishGeneratorAssembly", "$(OutputPathWithoutFramework)/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"),
+                new XElement("AtomUIToolsetCacheRoot", Path.Combine(artifactsRoot, "tools")))))
+            .Save(propsPath);
+        return propsPath;
+    }
+
     private static async Task<ProcessResult> RunProcess(
         string stage,
         string workingDirectory,
@@ -625,6 +748,12 @@ public sealed partial class LanguagePackEndToEndTests
         string executable,
         params string[] arguments)
     {
+        if (executable == "dotnet")
+        {
+            // The global override follows ProjectReferences; external consumer projects
+            // keep their defaults while repository projects use isolated output paths.
+            arguments = [.. arguments, $"-p:DirectoryBuildPropsPath={CreateIsolatedBuildProps(workingDirectory, temporaryRoot)}"];
+        }
         var startInfo = new ProcessStartInfo(executable)
         {
             WorkingDirectory = workingDirectory,
@@ -652,7 +781,9 @@ public sealed partial class LanguagePackEndToEndTests
         var standardError = process.StandardError.ReadToEndAsync();
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(
             TestContext.Current.CancellationToken);
-        timeout.CancelAfter(s_stageTimeout);
+        timeout.CancelAfter(executable == "dotnet" && arguments.FirstOrDefault() == "build"
+            ? s_buildStageTimeout
+            : s_stageTimeout);
         try
         {
             await process.WaitForExitAsync(timeout.Token);

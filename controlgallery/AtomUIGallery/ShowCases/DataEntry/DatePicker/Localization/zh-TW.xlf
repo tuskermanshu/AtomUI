@@ -379,54 +379,6 @@
         <target state="translated">示例</target>
       </segment>
     </unit>
-    <unit id="StatusDescription">
-      <segment>
-        <source>Add status to DatePicker with status, which could be error or warning.</source>
-        <target state="translated">通過 status 為 DatePicker 添加狀態，可設置為錯誤或警告。</target>
-      </segment>
-    </unit>
-    <unit id="StatusTitle">
-      <segment>
-        <source>Status</source>
-        <target state="translated">狀態</target>
-      </segment>
-    </unit>
-    <unit id="SwitchableDescription">
-      <segment>
-        <source>Switch between TimePicker and DatePicker modes from a single selector.</source>
-        <target state="translated">透過一個選擇器在 TimePicker 和 DatePicker 各類型之間切換，常用於日期篩選場景。</target>
-      </segment>
-    </unit>
-    <unit id="SwitchableTitle">
-      <segment>
-        <source>Switchable picker</source>
-        <target state="translated">切換不同的選擇器</target>
-      </segment>
-    </unit>
-    <unit id="ThreeSizesDescription">
-      <segment>
-        <source>The input box comes in three sizes: small, middle and large. The middle size will be used if size is omitted.</source>
-        <target state="translated">輸入框提供小號、中號和大號三種尺寸。省略 size 時使用中號。</target>
-      </segment>
-    </unit>
-    <unit id="ThreeSizesTitle">
-      <segment>
-        <source>Three Sizes</source>
-        <target state="translated">三種尺寸</target>
-      </segment>
-    </unit>
-    <unit id="VariantsDescription">
-      <segment>
-        <source>Bordered-less style component.</source>
-        <target state="translated">無邊框風格組件。</target>
-      </segment>
-    </unit>
-    <unit id="VariantsTitle">
-      <segment>
-        <source>Variants</source>
-        <target state="translated">變體</target>
-      </segment>
-    </unit>
     <unit id="SemanticClearDescription">
       <segment>
         <source>Clear button in the suffix area, rendered in clear mode.</source>
@@ -505,6 +457,18 @@
         <target state="translated">輸入區後綴區域,承載清除按鈕、表單回饋與使用者後綴內容。</target>
       </segment>
     </unit>
+    <unit id="StatusDescription">
+      <segment>
+        <source>Add status to DatePicker with status, which could be error or warning.</source>
+        <target state="translated">通過 status 為 DatePicker 添加狀態，可設置為錯誤或警告。</target>
+      </segment>
+    </unit>
+    <unit id="StatusTitle">
+      <segment>
+        <source>Status</source>
+        <target state="translated">狀態</target>
+      </segment>
+    </unit>
     <unit id="StyleClassDescription">
       <segment>
         <source>Apply owner-scoped styles with the public Semantic Parts of the picker to customize the prefix, both inputs, the date cells and the popup layer.</source>
@@ -515,6 +479,42 @@
       <segment>
         <source>Custom Semantic Part styling</source>
         <target state="translated">自訂語義結構的樣式</target>
+      </segment>
+    </unit>
+    <unit id="SwitchableDescription">
+      <segment>
+        <source>Switch between TimePicker and DatePicker modes from a single selector.</source>
+        <target state="translated">透過一個選擇器在 TimePicker 和 DatePicker 各類型之間切換，常用於日期篩選場景。</target>
+      </segment>
+    </unit>
+    <unit id="SwitchableTitle">
+      <segment>
+        <source>Switchable picker</source>
+        <target state="translated">切換不同的選擇器</target>
+      </segment>
+    </unit>
+    <unit id="ThreeSizesDescription">
+      <segment>
+        <source>The input box comes in three sizes: small, middle and large. The middle size will be used if size is omitted.</source>
+        <target state="translated">輸入框提供小號、中號和大號三種尺寸。省略 size 時使用中號。</target>
+      </segment>
+    </unit>
+    <unit id="ThreeSizesTitle">
+      <segment>
+        <source>Three Sizes</source>
+        <target state="translated">三種尺寸</target>
+      </segment>
+    </unit>
+    <unit id="VariantsDescription">
+      <segment>
+        <source>Bordered-less style component.</source>
+        <target state="translated">無邊框風格組件。</target>
+      </segment>
+    </unit>
+    <unit id="VariantsTitle">
+      <segment>
+        <source>Variants</source>
+        <target state="translated">變體</target>
       </segment>
     </unit>
   </file>

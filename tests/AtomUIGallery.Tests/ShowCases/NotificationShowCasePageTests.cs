@@ -186,6 +186,44 @@ public class NotificationShowCasePageTests
     }
 
     [Fact]
+    public void Notification_Actions_ShowCase_Button_Displays_Card_With_Action_Buttons()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+        var page = new NotificationShowCase
+        {
+            DataContext = new NotificationViewModel(new TestScreen())
+        };
+
+        ShowInWindow(page, window =>
+        {
+            var actionsTitle = Lang(NotificationShowCaseLangResourceKind.ActionsTitle, "Notification with actions");
+            var actionsItem = page.GetVisualDescendants()
+                                  .OfType<ShowCaseItem>()
+                                  .Single(item => Equals(item.Title, actionsTitle));
+            actionsItem.MaterializeDeferredContent();
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+
+            var openButton = actionsItem.GetVisualDescendants().OfType<DesktopButton>().Single();
+            RaiseClick(openButton);
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+
+            var manager = window.GetVisualDescendants().OfType<WindowNotificationManager>().Single();
+            var cards = manager.GetVisualDescendants().OfType<NotificationCard>().ToArray();
+            cards.Length.ShouldBe(1, "the Actions example must show a notification when its button is clicked");
+            var card = cards[0];
+            card.Actions.ShouldNotBeNull();
+            var actionButtons = card.GetVisualDescendants().OfType<DesktopButton>().ToArray();
+            actionButtons.Select(button => button.Content).ShouldBe([
+                Lang(NotificationShowCaseLangResourceKind.P2ContentDestroyAll, "Destroy All"),
+                Lang(NotificationShowCaseLangResourceKind.P2ContentConfirm, "Confirm")
+            ]);
+            actionButtons.ShouldAllBe(button => button.IsEffectivelyVisible);
+        });
+    }
+
+    [Fact]
     public void Notification_ShowCase_Semantic_Parts_Follow_The_Two_Owner_Pattern()
     {
         var source     = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/Notification/Views/NotificationShowCase.axaml");
@@ -422,7 +460,7 @@ public class NotificationShowCasePageTests
                 frame.BorderThickness.ShouldBe(new Thickness(2));
                 frame.CornerRadius.ShouldBe(new CornerRadius(16));
                 frame.BoxShadow.ShouldBe(BoxShadows.Parse("4 4 0 #D9F7BE"));
-                BrushColor(FindSemanticControl<TextBlock>(card, "semantic-title").Foreground)
+                BrushColor(FindSemanticControl<AvaloniaTextBlock>(card, "semantic-title").Foreground)
                     .ShouldBe(Color.Parse("#237804"));
                 BrushColor(FindSemanticControl<ContentPresenter>(card, "semantic-description").Foreground)
                     .ShouldBe(Color.Parse("#3F6600"));
@@ -438,7 +476,7 @@ public class NotificationShowCasePageTests
                 BrushColor(errorFrame.Background).ShouldBe(Color.Parse("#FFF2F0"));
                 BrushColor(errorFrame.BorderBrush).ShouldBe(Color.Parse("#FFCCC7"));
                 errorFrame.BoxShadow.ShouldBe(BoxShadows.Parse("4 4 0 #FFCCC7"));
-                BrushColor(FindSemanticControl<TextBlock>(errorCard, "semantic-title").Foreground)
+                BrushColor(FindSemanticControl<AvaloniaTextBlock>(errorCard, "semantic-title").Foreground)
                     .ShouldBe(Color.Parse("#CF1322"));
                 BrushColor(FindSemanticControl<ContentPresenter>(errorCard, "semantic-description").Foreground)
                     .ShouldBe(Color.Parse("#5C0011"));
@@ -619,8 +657,6 @@ public class NotificationShowCasePageTests
         throw new InvalidOperationException($"Unbalanced braces for '{methodName}'.");
     }
 
-    private static void ShowInWindow(Control content, double width, double height, Action assertion)
-
     private static void ShowInWindow(Control content, Action<AvaloniaWindow> assertion)
     {
         var visualLayerManager = new VisualLayerManager
@@ -648,6 +684,8 @@ public class NotificationShowCasePageTests
             Dispatcher.UIThread.RunJobs();
         }
     }
+
+    private static void ShowInWindow(Control content, double width, double height, Action assertion)
     {
         var visualLayerManager = new VisualLayerManager
         {

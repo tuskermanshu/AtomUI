@@ -48,6 +48,7 @@ public partial class WindowNotificationManager : TemplatedControl, INotification
     private FeedbackStackPresenter? _presenter;
     private FeedbackLifetimeScheduler? _lifetimeScheduler;
     private bool _isLifecyclePaused = true;
+    private bool _hasBeenAttached;
     private bool _isStackPaused;
     private const int MaxHostLayerRetryCount = 30;
     private bool _hostLayerRetryScheduled;
@@ -87,6 +88,16 @@ public partial class WindowNotificationManager : TemplatedControl, INotification
     {
         get => GetValue(IsMotionEnabledProperty);
         set => SetValue(IsMotionEnabledProperty, value);
+    }
+
+    // Position selectors update the theme default, leaving public Padding at normal style priority.
+    internal static readonly StyledProperty<Thickness> ThemePaddingProperty =
+        AvaloniaProperty.Register<WindowNotificationManager, Thickness>(nameof(ThemePadding));
+
+    internal Thickness ThemePadding
+    {
+        get => GetValue(ThemePaddingProperty);
+        set => SetValue(ThemePaddingProperty, value);
     }
 
     internal IReadOnlyList<NotificationCard> Cards => _cards;
@@ -137,6 +148,7 @@ public partial class WindowNotificationManager : TemplatedControl, INotification
     {
         base.OnAttachedToVisualTree(e);
         _isLifecyclePaused = false;
+        _hasBeenAttached = true;
         UpdateSchedulerPauseState();
     }
 
@@ -145,6 +157,36 @@ public partial class WindowNotificationManager : TemplatedControl, INotification
         _isLifecyclePaused = true;
         UpdateSchedulerPauseState();
         base.OnDetachedFromVisualTree(e);
+        ScheduleReleaseCardsOnHostDetach();
+    }
+
+    // 宿主层释放契约：manager 运行途中离开视觉树即释放其上的全部卡片（对齐上游 notification-list 卸载行为）。
+    // 必须推迟到 detach 级联完成之后：在 detach 过程中同步关闭卡片会让 presenter 重建容器树，
+    // 触发 Avalonia 视觉树内部集合越界。从未 attach 过的 manager 不适用——release/6.0 允许 attach 前 Show。
+    private void ScheduleReleaseCardsOnHostDetach()
+    {
+        if (!_hasBeenAttached || _isDisposed)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            // 执行时已重新入树（反馈层迁移等瞬时 detach）则不释放。
+            if (_isDisposed || !_isLifecyclePaused)
+            {
+                return;
+            }
+
+            // 关闭回调可能同步修改 _cards，先拷贝快照。
+            var cards = _cards.ToArray();
+            for (var i = 0; i < cards.Length; i++)
+            {
+                var card = cards[i];
+                _lifetimeScheduler?.Remove(card);
+                card.Close();
+            }
+        });
     }
 
     public void Show(INotification notification, string[]? classes = null)

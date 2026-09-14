@@ -16,7 +16,8 @@
 | `body.row` | `DataGridRow` / `DataGridRowGroupHeader` 根（运行时创建，虚拟化回收） | 数据行：悬浮效果、选中状态、展开状态等交互行样式；分组头行同样属于表体行。 | `DataGridBodyRowStyle` | 代码注入（运行时创建） | stable |
 | `body.cell` | `DataGridCell` 根（运行时创建，slot 回收） | 数据单元格：相对定位、内边距、文字换行等数据单元格基础样式。 | `DataGridBodyCellStyle` | 代码注入（运行时创建） | stable |
 | `footer` | `Footer`（ContentPresenter） | 表格底部：背景色、文字颜色等 footer 样式。 | `DataGridFooterStyle` | 静态模板 marker | stable |
-| `pagination.root` / `pagination.item` | 模板内两处 `Pagination` 实例 | 委托给 Pagination 自身的语义部件，DataGrid 不重复声明。 | 见 Pagination 文档 | 委托 | stable |
+| `pagination.root` | 模板内两处 `Pagination` 实例（顶部/底部槽位） | 分页宿主：表格分页区域的布局与间距样式。 | `DataGridPaginationRootStyle` | 静态模板 marker | stable |
+| `pagination.item` | 分页器生成的页码项（`ContentControl`） | 分页项：页码项尺寸、激活态与间距样式。 | `DataGridPaginationItemStyle` | 运行时 marker | stable |
 
 ## Abstract AXAML Structure
 

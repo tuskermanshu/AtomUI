@@ -895,18 +895,6 @@
         <target state="translated">Elemento de conteúdo com área de cabeçalho, área de linhas e layout da barra de rolagem.</target>
       </segment>
     </unit>
-    <unit id="SemanticPaginationItemDescription">
-      <segment>
-        <source>Pagination item element with page item sizing, active state and spacing styles.</source>
-        <target state="translated">Elemento de item de paginação: dimensionamento, estado ativo e espaçamento dos itens de página.</target>
-      </segment>
-    </unit>
-    <unit id="SemanticPaginationRootDescription">
-      <segment>
-        <source>Pagination host element with table pagination layout and spacing styles.</source>
-        <target state="translated">Elemento host de paginação: layout e espaçamento da paginação da tabela.</target>
-      </segment>
-    </unit>
     <unit id="SemanticFooterDescription">
       <segment>
         <source>Footer element with table footer text color styles.</source>
@@ -923,6 +911,18 @@
       <segment>
         <source>Header wrapper element with table header layout and container styles.</source>
         <target state="translated">Elemento contêiner do cabeçalho com layout e estilos de contêiner do cabeçalho da tabela.</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPaginationItemDescription">
+      <segment>
+        <source>Pagination item element with page item sizing, active state and spacing styles.</source>
+        <target state="translated">Elemento de item de paginação: dimensionamento, estado ativo e espaçamento dos itens de página.</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPaginationRootDescription">
+      <segment>
+        <source>Pagination host element with table pagination layout and spacing styles.</source>
+        <target state="translated">Elemento host de paginação: layout e espaçamento da paginação da tabela.</target>
       </segment>
     </unit>
     <unit id="SemanticPartStyleDescription">

@@ -57,7 +57,7 @@ public class MessageSemanticPartTests
         managerDescriptor.ShouldNotBeNull();
         managerDescriptor.Parts.Select(static part => part.Name).ShouldBe(ApprovedManagerPartNames);
         AssertRoot(managerDescriptor, typeof(AtomUIMessageManager));
-        AssertPart(managerDescriptor, "listContent", "semantic-list-content", typeof(ReversibleStackPanel));
+        AssertPart(managerDescriptor, "listContent", "semantic-list-content", typeof(ItemsControl));
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class MessageSemanticPartTests
         cardDocument.Descendants().Any(static element => HasMarker(element, "semantic-root")).ShouldBeFalse();
 
         var managerDocument = XDocument.Load(GetRepoFile(MessageManagerThemePath), LoadOptions.SetLineInfo);
-        CollectMarkers(managerDocument).ShouldBe(["semantic-list-content:ReversibleStackPanel"]);
+        CollectMarkers(managerDocument).ShouldBe(["semantic-list-content:FeedbackStackPresenter"]);
         managerDocument.Descendants().Any(static element => HasMarker(element, "semantic-root")).ShouldBeFalse();
     }
 
@@ -119,7 +119,7 @@ public class MessageSemanticPartTests
         var window = ShowInWindow(manager);
         try
         {
-            var listContent = FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content");
+            var listContent = FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content");
             listContent.Name.ShouldBe("PART_Items");
         }
         finally
@@ -140,12 +140,12 @@ public class MessageSemanticPartTests
             // 未被反馈层收养：父链仍是窗口内容，而不是 AdornerLayer 之类的宿主层。
             manager.GetVisualAncestors().ShouldNotContain(static ancestor => ancestor is AdornerLayer);
 
-            var listContent = FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content");
+            var listContent = FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content");
             listContent.Name.ShouldBe("PART_Items");
 
             manager.Show(new AtomUI.Desktop.Controls.Message("Inline", expiration: TimeSpan.Zero));
             Dispatcher.UIThread.RunJobs();
-            listContent.Children.Count.ShouldBe(1);
+            listContent.Items.Count.ShouldBe(1);
             manager.GetVisualDescendants().OfType<AtomUIMessageCard>().Count().ShouldBe(1);
         }
         finally
@@ -238,7 +238,7 @@ public class MessageSemanticPartTests
         var window = ShowInWindow(manager);
         try
         {
-            FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content").Tag
+            FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content").Tag
                 .ShouldBe("listContent");
         }
         finally
@@ -328,19 +328,21 @@ public class MessageSemanticPartTests
         frame.Bounds.Width.ShouldBe(card.Bounds.Width);
         frame.Bounds.Height.ShouldBe(card.Bounds.Height);
 
-        // 2) list 与 listContent：四边内缩一致且非零。
-        var listContent = FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content");
+        // 2) list 与 listContent：release/6.0 堆叠架构下 list（StackHost）按方位锚定并紧贴可见队列
+        //    （hover 命中区与队列范围一致），不再四边对称拉伸；语义保留为：左右对称内缩、
+        //    朝向边（TopCenter 即上边）内缩非零，卡片间距由 listContent 的 ExpandedGap 承担。
+        var listContent = FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content");
         var listOrigin    = manager.TranslatePoint(new Point(0, 0), host)!.Value;
         var contentOrigin = listContent.TranslatePoint(new Point(0, 0), host)!.Value;
         var left   = contentOrigin.X - listOrigin.X;
         var top    = contentOrigin.Y - listOrigin.Y;
         var right  = (listOrigin.X + manager.Bounds.Width) - (contentOrigin.X + listContent.Bounds.Width);
         var bottom = (listOrigin.Y + manager.Bounds.Height) - (contentOrigin.Y + listContent.Bounds.Height);
-        left.ShouldBeGreaterThan(0);
-        left.ShouldBe(top);
         left.ShouldBe(right);
-        left.ShouldBe(bottom);
-        listContent.Spacing.ShouldBeGreaterThan(0);
+        left.ShouldBeGreaterThan(0);
+        top.ShouldBeGreaterThan(0);
+        bottom.ShouldBeGreaterThan(0);
+        listContent.ExpandedGap.ShouldBeGreaterThan(0);
         window.Close();
     }
 
@@ -375,12 +377,12 @@ public class MessageSemanticPartTests
                 FindSemanticControl<AvaloniaSelectableTextBlock>(card, "semantic-title").ShouldNotBeNull();
             }
 
-            var listContent = FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content");
-            listContent.Children.Count.ShouldBe(2);
+            var listContent = FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content");
+            listContent.Items.Count.ShouldBe(2);
 
             cards[0].Close();
             Dispatcher.UIThread.RunJobs();
-            listContent.Children.Count.ShouldBe(1);
+            listContent.Items.Count.ShouldBe(1);
         }
         finally
         {

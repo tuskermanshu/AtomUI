@@ -2,6 +2,16 @@
 
 本文档记录 Message 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-14
+
+- Theme / Semantic Part
+  - Preserve WindowMessageManager `Padding` customization with the shared feedback stack while keeping the default placement and queue hover bounds.
+  - Align `listContent` with the public `ItemsControl` contract and update examples to use supported size and alignment setters; item spacing remains owned by the internal feedback stack.
+- Lifecycle
+  - Close cards after a persistent host detach while preserving cards shown before the first attachment and queues moved back into the visual tree during the same dispatch cycle.
+- Token
+  - Retain `MessageTopMargin` as the manager padding default and keep cards free of list-edge margins.
+
 ## 2026-09-13
 
 - Lifecycle / correctness

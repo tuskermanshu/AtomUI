@@ -17,7 +17,7 @@ Token 按控件语义分类维护：
 | 分类 | 语义 | 代表 Token |
 | --- | --- | --- |
 | 尺寸与密度 | 控件高度、宽度、图标尺寸、内容最小尺寸。 | `NotificationIconSize`、`NotificationCloseButtonSize`、`NotificationProgressHeight`、`NotificationWidth` |
-| 间距与布局 | padding、margin、gap、offset、popup content padding。 | `NotificationPadding`、`NotificationIconMargin`、`NotificationSectionSpacing`、`NotificationTitlePadding`、`NotificationActionsMargin`、`NotificationCloseButtonPadding`、`NotificationCloseButtonMargin`、`NotificationProgressMargin` |
+| 间距与布局 | padding、margin、gap、offset、popup content padding。 | `NotificationPadding`、`NotificationIconMargin`、`NotificationSectionSpacing`、`NotificationTitlePadding`、`NotificationActionsMargin`、`NotificationCloseButtonPadding`、`NotificationCloseButtonMargin`、`NotificationProgressMargin`、`NotificationTopMargin`、`NotificationBottomMargin` |
 | 颜色与状态视觉 | 文本、背景、边框、hover、selected、active、disabled 视觉。 | `NotificationBg`、`NotificationProgressBg`、`NotificationProgressTrackBg` |
 | 结构与装饰 | 圆角、阴影、指示器、弹层和装饰线相关变量。 | 按源码 Token 语义维护 |
 
@@ -35,14 +35,12 @@ Notification 的控件专项模型通过 Theme 消费 Token：
 `NotificationProgressBg` 使用主色边框 hover 色到主色的线性渐变。`NotificationCloseButtonSize` 控制关闭按钮的固定命中尺寸；
 hover 和 pressed 背景由 SharedToken 的文本背景状态色在主题 selector 中表达，不引入额外控件 Token。
 
-对齐上游 notice 结构后，间距 Token 按上游职责重新划分，并**严格取全局 Token 的同名值**（不再对本控件的间距做
-统一 `× 2/3` 缩放——那是本控件自创的压缩，会让卡片比上游矮一截）：
+卡片间距 Token 直接取全局 Token 的对应值：
 
 - `NotificationPadding`：卡片内边距，上下左右对称，垂直 `paddingMD`、水平 `paddingLG`
   （上游 `padding: paddingMD paddingLG`）。
 - `NotificationIconMargin`：`wrapper` 内 icon 与 section 的间距，右 `marginSM`（上游 `gap: marginSM`）。
-- `NotificationSectionSpacing`：`section` 内标题与描述的间距 `marginXS`（上游 `gap: marginXS`），取代原
-  `NotificationContentMargin` 与 `HeaderMargin`。
+- `NotificationSectionSpacing`：`section` 内标题与描述的间距 `marginXS`（上游 `gap: marginXS`）。
 - `NotificationTitlePadding`：标题的右侧留白 `paddingLG`，为覆盖层 `close` 预留空间（上游 `.notice-closable` 的
   `padding-inline-end`）。描述不与关闭按钮同排，按上游 `.notice-title + .notice-description` 不预留。
 - `NotificationActionsMargin`：`actions` 区域的上边距 `marginSM`（上游 `margin-top: marginSM`）。
@@ -54,13 +52,14 @@ hover 和 pressed 背景由 SharedToken 的文本背景状态色在主题 select
 `&, &::-webkit-progress-bar { background-color: rgba(0, 0, 0, 0.04) }`；`NotificationProgressBg` 是叠加在其上的
 彩色进度值。两者缺一都会让进度视觉不完整。
 
-卡片自身不再承担通知间距，`NotificationMarginBottom`、`NotificationTopMargin`、`NotificationBottomMargin` 三个边缘
-外边距 Token 已删除；列表内边距由 manager 的 `Padding`（SharedToken `MarginLG`）承担，项间距由 `listContent` 的
-`Spacing`（SharedToken `UniformlyMargin`）承担。
+卡片自身不承担列表边缘间隔。`WindowNotificationManager.Padding` 的默认值按 Position 从
+`NotificationTopMargin` / `NotificationBottomMargin` 选择：顶部为 `(marginLG, marginLG, marginLG, 0)`，
+底部为 `(marginLG, 0, marginLG, marginLG)`。模板把 Padding 绑定到 presenter.Margin，应用的显式 Padding
+可覆盖默认值。`NotificationPadding` 只控制卡片 `ContentBox` 内边距。
 
-Stack 的展开 gap 16 与折叠 offset 8 来自 SharedToken 的统一 margin 尺度；三层 scale 是共享布局行为，不属于
-`NotificationCardToken`。Notification 的 24 DIP 宿主边距继续由 `NotificationTopMargin` / `NotificationBottomMargin`
-表达。Stack 状态、层索引、可见项数和剩余时长均是运行时状态，不能写入 Token。
+Stack 的展开 gap 16 与折叠 offset 8 来自 SharedToken 的统一 margin 尺度，由内部 presenter/panel 管理，
+不作为 `ItemsControl` 类型的 `listContent` 的公开 Setter。三层 scale 是共享布局行为，不属于
+`NotificationCardToken`。Stack 状态、层索引、可见项数和剩余时长均是运行时状态，不能写入 Token。
 
 ## 4. 控件家族影响
 

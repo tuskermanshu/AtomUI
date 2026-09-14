@@ -24,28 +24,28 @@ AtomUI 把六个上游 Part 一一映射到两个 owner 的真实节点：
 
 ```text
 WindowMessageManager (root，对应上游 list)
-  └─ ReversibleStackPanel#PART_Items (listContent, .semantic-list-content)
-       └─ MessageCard (root，对应上游 notice root)
-            └─ MotionActor
-                 └─ Border#PART_Frame (root 表面投影：背景/圆角/阴影/内边距)
-                      └─ DockPanel#PART_HeaderContainer (wrapper, .semantic-wrapper)
-                           ├─ IconPresenter#PART_IconContent (icon, .semantic-icon)
-                           └─ SelectableTextBlock#PART_Message (title, .semantic-title)
+  └─ Grid#PART_StackHost (按 Position 锚定，Margin 消费 manager.Padding)
+       ├─ Panel (零尺寸、不可命中的两层静态背板)
+       └─ FeedbackStackPresenter#PART_Items (listContent，公共契约 ItemsControl)
+            └─ ItemsPresenter / FeedbackStackPanel
+                 └─ MessageCard (root，对应上游 notice root)
+                      └─ MotionActor
+                           └─ Border#PART_Frame (root 表面投影)
+                                └─ DockPanel#PART_HeaderContainer (wrapper)
+                                     ├─ IconPresenter#PART_IconContent (icon)
+                                     └─ SelectableTextBlock#PART_Message (title)
 ```
 
 上游 `root` 就是 message notice 本身，因此映射到 `MessageCard` owner；上游 `list` 是承载全部 notice 的定位容器，
 映射到 `WindowMessageManager` owner。两个 owner 各自拥有隐式 `root`，不额外声明 `.semantic-root` marker。
 
-与上游 DOM 的两处结构差异（Part 名称、数量与样式语义不变）：
+结构与布局边界：
 
-- 上游 `list` 自身承担 placement（`top` / `left` / `right`）；AtomUI 的 `WindowMessageManager` 铺满 TopLevel 并只
-  负责安全区外边距，具体对齐由 `ReversibleStackPanel#PART_Items`（`listContent`）实际承担。因此"放置"语义在
-  AtomUI 由 `root`（`Position` 属性与宿主层范围的作用域）与 `listContent`（实际排列容器）共同表达。以无宿主构造
-  内联使用时没有宿主层，`root` 退化为普通可放置控件，placement 语义不适用。当前控件未在
-  `Position` 变化时更新伪类，主题中的 `:topcenter` 对齐选择器不可达（见第 7 节残余风险）。实测宿主构造
-  （`WindowFeedbackLayer`）下卡片顶部贴顶、水平居中：窗口 1280×900 时卡片 `x=347`、`y=0`、宽 586，即
-  居中值 `(1280-586)/2=347`，与上游默认的视口顶部居中浮层一致；可见上边距来自 `list`（manager）的内边距，
-  而不是卡片自身外边距（见 §5.2）。
+- manager 的 `Position` 决定六种边缘对齐，`Padding` 决定队列与 manager 边缘的间隔。
+  宿主模式中 manager 铺满反馈层并通过 `TopLevelMarginBinder` 接收安全区外边距；内联模式中同样的定位作用于
+  调用方分配的布局范围。模板中的 `PART_StackHost` 按位置锚定并紧贴队列，`listContent` 填满该 host。
+- `listContent` 的公共类型为 `ItemsControl`；实际 presenter 和其内部 panel 管理堆叠、顺序与项间距。
+  这两个内部类型及其专属属性不是应用的样式契约。
 - 上游 `wrapper` 用 flex `gap: marginXS` + `align-items: center` 排列 icon 与 title；AtomUI `DockPanel` 无 `Spacing`，
   等价的图标间距由 `IconPresenter` 的 `MessageIconMargin`（右外边距 `UniformlyMarginXS`）表达，视觉结果一致。
 
@@ -158,8 +158,8 @@ WindowMessageManager (root，对应上游 list)
 | RuntimeCreated | `false` |
 | AtomUI 节点 | WindowMessageManager owner（宿主层/full-screen 覆盖层；无宿主构造时为内联可放置实例） |
 | 职责 | 消息列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`，管理宿主层安装、消息队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度语义。 |
-| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`Show(IMessage)`、`Dispose()` |
-| 相关 Token | SharedToken（`EnableMotion`） |
+| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`Padding`、`IsStackEnabled`、`StackThreshold`、`IsPauseOnHover`、`Show(IMessage)`、`DestroyAll()`、`Dispose()` |
+| 相关 Token | `MessageTopMargin`、SharedToken（`EnableMotion`） |
 | 稳定性 | stable since 6.0 |
 
 #### `listContent`
@@ -171,14 +171,14 @@ WindowMessageManager (root，对应上游 list)
 | Selector | `.semantic-list-content` |
 | SelectorRoute | `/template/ .semantic-list-content` |
 | Style Type | `WindowMessageManagerListContentStyle` |
-| ContractType | `ReversibleStackPanel` |
+| ContractType | `ItemsControl` |
 | Cardinality | `Single` |
 | Customization | `Selector` |
 | CrossVisualRoot | `false` |
 | RuntimeCreated | `false` |
-| AtomUI 节点 | WindowMessageManager 模板中的 `ReversibleStackPanel#PART_Items` |
+| AtomUI 节点 | WindowMessageManager 模板中的 `FeedbackStackPresenter#PART_Items` |
 | 职责 | 消息列表内容元素：notice 的排列方向、顺序与对齐；对应上游 `listContent` 的 notice 排列/间距语义。 |
-| 相关 API | `Position`、`MaxItems`（决定内容区可见项数量） |
+| 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
 | 相关 Token | SharedToken（`EnableMotion`） |
 | 稳定性 | stable since 6.0 |
 
@@ -200,7 +200,7 @@ API，`IsClosing` / `IsClosed` 关闭状态，以及 `IsMotionEnabled` 与进出
   `MessageClosed`。
 - 根视觉表面：背景（`ContentBg`）、内边距（`ContentPadding`）、圆角（`BorderRadiusLG`）、阴影（`BoxShadows`），
   投影到模板中的 `Border#PART_Frame`。卡片**不承担**消息间距：`root` 的几何等于可见卡片本身（四边零外边距），
-  消息间距由 `listContent` 的 `Spacing` 表达（见 §5.2）。
+  消息间距由内部 `FeedbackStackPresenter` / `FeedbackStackPanel` 管理（见 §5.1）。
 - 作为 `wrapper` / `icon` / `title` owner-scoped Selector 的作用域边界。
 
 适合通过 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`BoxShadow`、`Padding` 等 owner 侧 Setter
@@ -228,15 +228,13 @@ Semantic Style 覆盖 `IsVisible` 会绕过数据状态机，属于不推荐用�
 
 两个 Part 在 `WindowMessageManager` 内各对应一个稳定节点，cardinality 均为 `Single`：
 
-- `root` 承载 manager owner 本身：安装到 TopLevel 宿主层（`WindowFeedbackLayer` 优先，回退
-  `AdornerLayer`）时它是 full-screen 覆盖层，负责安全区外边距、消息队列（`_pendingMessages`）、超时计时器
-  （`_messageCloseTimers`）、`MaxItems` 清理与 `Dispose` 卸载。`WindowMessageManager` 另提供无参构造，不安装到
-  任何层，作为普通可放置控件放进调用方自己的视觉树（上游把 list 改为内联容器的等价物），此时 `root` 即该内联实例。
-- `listContent` 承载 `ReversibleStackPanel#PART_Items`：所有 `MessageCard` 的逻辑父级，决定 notice 的排列方向、
-  `ReverseOrder` 与对齐。主题按 `Position` 伪类声明对齐分支（当前仅有 `^:topcenter`）；该伪类在控件侧尚未触发，
-  位置对齐暂未生效（见第 7 节）。
+- `root` 承载 manager owner：管理 `Position`、列表 `Padding`、稳定卡片集合、`MaxItems`、Stack 配置与生命周期。
+  宿主构造安装到 `WindowFeedbackLayer`（回退 `AdornerLayer`）；无参构造或传入 `null` 时由调用方放进视觉树。
+- `listContent` 承载 `FeedbackStackPresenter#PART_Items`，公共 `ContractType` 为 `ItemsControl`。它消费 manager
+  的稳定集合，内部 panel 决定卡片位置、层级和展开间距。折叠时最新卡片可见，两层静态背板表达深度。
 
-适合通过 `root` 定制 manager 的安全区外边距与宿主层相关视觉，通过 `listContent` 定制 notice 排列间距与对齐。
+通过 owner `Padding` 定制列表边缘间隔，通过生成的 `WindowMessageManagerListContentStyle` 定制 `ItemsControl`
+的宽度、最小宽度或对齐等公共属性。`Spacing`、`ReverseOrder` 不是该 Part 的公共属性；项间距由内部反馈栈管理。
 
 ## 3. Selector 用法
 
@@ -254,11 +252,12 @@ Semantic Style 覆盖 `IsVisible` 会绕过数据状态机，属于不推荐用�
         </atom:MessageCardIconStyle>
         <atom:MessageCardTitleStyle x:SetterTargetType="SelectableTextBlock">
             <Setter Property="FontWeight" Value="SemiBold" />
-        </atom:MessageCardTitleStyle>    </Style>
+        </atom:MessageCardTitleStyle>
+    </Style>
 
     <Style Selector="atom|WindowMessageManager">
-        <atom:WindowMessageManagerListContentStyle x:SetterTargetType="atom:ReversibleStackPanel">
-            <Setter Property="Spacing" Value="12" />
+        <atom:WindowMessageManagerListContentStyle x:SetterTargetType="ItemsControl">
+            <Setter Property="MinWidth" Value="320" />
         </atom:WindowMessageManagerListContentStyle>
     </Style>
 </Application.Styles>
@@ -290,14 +289,16 @@ Semantic Style 覆盖 `IsVisible` 会绕过数据状态机，属于不推荐用�
 | 场景 | MessageCard root / wrapper / icon / title | WindowMessageManager root / listContent | 说明 |
 | --- | --- | --- | --- |
 | 单条消息 | 各 1 | 各 1 | 每条可见消息一个 MessageCard。 |
-| N 条可见消息 | 各 N | 各 1 | manager 只有一个模板实例与一个 `PART_Items`。 |
+| N 张已实例化卡片 | 各 N | 各 1 | manager 只有一个模板实例与一个 `PART_Items`。 |
 | `Icon` 为 null | `icon` marker 保留，节点 `IsVisible=false` | — | 高亮与命中只针对有效可见实例。 |
+| Stack 折叠 / 展开 | 已实例化卡片的 marker 数量保持 | 各 1 | 隐藏层仍属于卡片集合；可见性影响高亮与命中，不销毁 marker。 |
 | 自定义 `Icon` | `icon` marker 保留 | — | 自定义图标不新增节点。 |
 | Loading 类型 | 各 1 | 各 1 | `LoadingOutlined` 旋转由图标动画承载，不增删 marker。 |
-| 超时自动关闭 | 关闭后随卡片移除 | 各 1 | `MessageClosed` 后 manager 从 `PART_Items` 移除卡片。 |
+| 超时自动关闭 | 关闭后随卡片移除 | 各 1 | `MessageClosed` 后 manager 从稳定卡片集合移除卡片。 |
 | 手动 `Close()` | 同上 | 各 1 | 与超时走同一关闭动效状态流。 |
-| 超过 `MaxItems` | 只保留 `MaxItems` 条可见 | 各 1 | 超出部分被 `Close()`，marker 随卡片移除。 |
-| 宿主 detach / `Dispose` | 全部移除 | root 随 manager 卸载 | `OnDetachedFromVisualTree` 清空 `PART_Items`；`Dispose` 卸载事件、计时器与宿主层。 |
+| 超过正数 `MaxItems` | 最旧活动项关闭后移除 | 各 1 | 关闭中的卡片不计入活动项；`MaxItems <= 0` 不限制。 |
+| 持续宿主 detach | 卡片关闭后移除 | root 随 manager 卸载 | detach 级联完成后仍未重新入树时关闭卡片；同轮重新入树保留队列。 |
+| `Dispose` | 全部移除 | root 随 manager 卸载 | 解绑 presenter、释放 scheduler、card owner、回调和宿主层。 |
 
 ## 5. 尺寸基线
 
@@ -314,29 +315,24 @@ Message 没有 `SizeType` 分档，视觉基线由 `MessageCardToken` 与全局 
 - 状态色 Information/Loading = `ColorPrimary`，Success = `ColorSuccess`，Warning = `ColorWarning`，
   Error = `ColorError`。
 
-`WindowMessageManager` 没有独立尺寸 Token：其 `root` 铺满 TopLevel 并由 `TopLevelMarginBinder` 投影安全区外边距，
-`listContent` 的对齐与顺序来自 `Position` 伪类。
+`WindowMessageManager.Padding` 默认消费 `MessageTopMargin`（四边 `UniformlyMarginXS`）。模板把该值绑定到
+`Grid#PART_StackHost.Margin`，应用显式设置 owner `Padding` 后可改变列表边缘间隔。`Position` 的六种对齐分支
+作用于 StackHost，内部反馈栈按顶部或底部锚点排列卡片。
 
-Semantic Style 覆盖 `wrapper` / `listContent` 的 `Padding` / `Margin` / 对齐时，应验证 notice 仍正确对齐、
-`root` 的圆角/阴影仍完整可见；覆盖 `icon` 尺寸时应验证文本基线与垂直居中没有被破坏。注意 `listContent` 当前没有
-生效的 `Position` 对齐基线（见第 7 节残余风险），覆盖对齐前应先确认该缺口是否已修复。
+覆盖 `listContent` 的尺寸与对齐、卡片表面或 icon 尺寸时，应验证可见卡片、阴影和实际 hover 范围。
+不通过修改内部 `FeedbackStackPanel` 的布局属性定制公开 Part。
 
 ## 5.1 list / listContent / root 的几何归属
 
-上游把三个层级的职责分得很清楚，AtomUI 严格对齐：
-
-| 上游 | AtomUI 节点 | 承担 |
+| 区域 | AtomUI 节点 | 承担 |
 | --- | --- | --- |
-| `.ant-message-list`（`padding: marginLG`） | `WindowMessageManager`（`root`）+ 模板内 `Border` 消费 `Padding` | 列表容器内边距与定位 |
-| `.ant-message-list-content`（`gap: margin`） | `ReversibleStackPanel#PART_Items`（`listContent`） | 消息项排列与间距 |
-| `.ant-message-notice`（无外边距） | `MessageCard`（`root`） | 单条消息，几何等于可见卡片 |
+| list | `WindowMessageManager`（`root`） | `Position` 与 `Padding`；由 StackHost 的 Margin 投影边缘间隔 |
+| listContent | `FeedbackStackPresenter#PART_Items`（公共契约 `ItemsControl`） | 可见队列范围；内部 panel 管理排列、堆叠和项间距 |
+| notice | `MessageCard`（`root`） | 单条消息表面，卡片自身零外边距 |
 
-据此，`root`（卡片）的高亮框与可见卡片完全重合（四边间距为 0），`listContent` 高亮框相对 `list(root)` 四边各
-内缩一个内边距，形成两个大小不同、间距对称的矩形——与上游悬停 `list` / `listContent` 的表现一致。
-
-历史上 AtomUI 把间距塞进卡片外边距（`MessageCardToken.MessageTopMargin = (m, m, m, 0)`），导致 `root` 高亮框
-左/上/右各多出一个间距、下边为 0。该 token 已删除：间距改由 `listContent` 的 `Spacing` 承担，卡片自身不再有
-外边距。注意这与 `MessageCard` 的 `BoxShadow` 无关——阴影不参与布局，不产生 Bounds。
+列表布局按定位边锚定。TopCenter 的上边间隔取 `Padding.Top`，水平居中于扣除左右 Padding 的范围；底部位置
+对应 `Padding.Bottom`。队列紧贴内容，不要求相对整个 manager 四边间隔相等。透明背板不参与队列 extent 或命中。
+卡片 root 的 Bounds 与表面 Border 一致；阴影不参与布局度量。
 
 ## 5.2 单预览合并两个 owner
 
@@ -370,7 +366,7 @@ TopLevel 内三种作用域同时尝试命中卡片）：
   不是 Part。
 - `Border#PART_Frame`、`MotionActor` 是模板结构节点：`root` 的表面投影到 `PART_Frame`，但 `PART_Frame` 的名称、
   数量与层级不属于 `root` 契约。
-- `_pendingMessages` 队列、`_messageCloseTimers` 计时器、`MaxHostLayerRetryCount` 重试与宿主层安装/卸载是
+- 稳定卡片集合、`FeedbackLifetimeScheduler`、`MaxHostLayerRetryCount` 重试与宿主层安装/卸载是
   manager 的行为实现，不是 Part。
 - `MessageCard` 的默认图标选择（`SetupDefaultMessageIcon`）与 `MessageType` 伪类是行为状态；`icon` Part 只表达
   图标元素的视觉。
@@ -391,17 +387,18 @@ marker，均属于公共主题契约变更。
   descriptor。
 - 两个 owner 的主题资产各自携带批准 marker：`MessageCardTheme.axaml` 为 `semantic-wrapper:DockPanel`、
   `semantic-icon:IconPresenter`、`semantic-title:SelectableTextBlock`；`WindowMessageManagerTheme.axaml` 为
-  `semantic-list-content:ReversibleStackPanel`。
+  `semantic-list-content:FeedbackStackPresenter`。
 - 五种 `MessageType`、自定义 `Icon`、多项 queue、超时与手动关闭后 marker 数量符合第 4 节表。
 - owner-scoped Semantic Style（四个生成 Style 类型）与 `x:SetterTargetType` 可以编译并命中对应最低 public
   类型。
-- 宿主 attach/detach、`Dispose` 后不保留旧卡片、计时器或宿主层引用。
+- 首次 attach 前 `Show` 保留卡片；持续 detach 关闭卡片，同轮重新入树保留队列；`Dispose` 释放卡片、scheduler 与宿主层引用。
+- 六种 `Position` 下，默认与非默认 `Padding` 均按当前定位边投影；运行时修改内边距不能扩大队列 hover 命中区。
+- `listContent` 的生成 Style 以 `ItemsControl` 为目标命中宽度、对齐等公共属性，不能依赖内部 panel 的项间距属性。
 - 默认主题不消费 `.semantic-*`，未声明用户 Semantic Style 时不增加 selector activator。
 - Generator 静态输出和 NativeAOT 路径不依赖反射或运行时扫描。
 
-### 7.1 残余风险（不属于本次 Semantic Part 范围，需单独授权）
+### 7.1 堆叠集成验证
 
-`WindowMessageManager` 未在 `Position` 变化时更新伪类（`UpdatePseudoClasses` 缺失，`WindowNotificationManager`
-有对应实现），因此 `WindowMessageManagerTheme.axaml` 中的 `^:topcenter` 选择器不可达，`Position` 的
-`TopCenter` / `BottomCenter` 等对齐分支目前不会生效。该缺口是既有行为问题，不是本次 Semantic Part 引入，修复会改变
-渲染结果，需要单独的行为变更授权与视觉验收。`listContent` Part 本身（`PART_Items` 排列容器）不受该缺口影响。
+`Position` 在模板应用和属性变化时同步伪类及 presenter 状态。验证顶部/底部的左、中、右六种定位，覆盖运行时
+切换、非默认 `Padding`、堆叠开关和阈值变化。列表的公开样式目标始终是 `ItemsControl`；内部 presenter、panel
+和背板变更不能改变 `semantic-list-content` 的 owner 作用域或 marker 数量。

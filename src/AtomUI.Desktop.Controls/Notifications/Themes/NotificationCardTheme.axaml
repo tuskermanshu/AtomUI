@@ -21,8 +21,8 @@
                        `PART_Layout` 是 close / progress 的定位父级，只有 `Frame` 无内边距时它才与卡片
                        边框内侧重合，close / progress 才能贴在边框右上角与边框底边；否则会被内边距顶开。
                 -->
-                <atom:LayoutAwareMotionActor Name="{x:Static atom:BaseMotionActor.MotionActorPart}"
-                                             ClipToBounds="False">
+                <atom:MotionActor Name="{x:Static atom:BaseMotionActor.MotionActorPart}"
+                                  ClipToBounds="False">
                     <Border Name="Frame"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
@@ -30,54 +30,61 @@
                             CornerRadius="{TemplateBinding CornerRadius}"
                             BoxShadow="{TemplateBinding BoxShadow}">
                         <atom:FeedbackStackTransitionSnapshotHost Name="PART_StackTransitionSnapshotHost">
-                        <Panel Name="PART_Layout">
-                            <Border Name="ContentBox"
-                                    Padding="{TemplateBinding Padding}">
-                                <StackPanel>
-                                    <DockPanel Name="Wrapper"
-                                               Classes.semantic-wrapper="True"
-                                               LastChildFill="True">
-                                        <atom:IconPresenter
-                                            Name="IconPresenter"
-                                            Classes.semantic-icon="True"
-                                            DockPanel.Dock="Left"
-                                            IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                            Icon="{TemplateBinding Icon}" />
-                                        <StackPanel Name="Section"
-                                                    Classes.semantic-section="True">
-                                            <atom:SelectableTextBlock
-                                                Name="HeaderTitle"
-                                                Classes.semantic-title="True"
-                                                Text="{TemplateBinding Title}" />
-                                            <ContentPresenter
-                                                Name="Content"
-                                                Classes.semantic-description="True"
-                                                TextWrapping="Wrap"
-                                                Content="{TemplateBinding Content, Converter={StaticResource StringToSelectableTextBlockConverter}}"
-                                                ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                        </StackPanel>
-                                    </DockPanel>
-                                    <ContentPresenter
-                                        Name="ActionsContainer"
-                                        Classes.semantic-actions="True"
-                                        HorizontalAlignment="Right"
-                                        IsVisible="{TemplateBinding Actions, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                        Content="{TemplateBinding Actions}"
-                                        ContentTemplate="{TemplateBinding ActionsTemplate}" />
-                                </StackPanel>
-                            </Border>
+                            <Grid Name="PART_Layout"
+                                  ColumnDefinitions="Auto, *"
+                                  RowDefinitions="Auto, *, Auto">
+                                <Border Name="ContentBox"
+                                        Padding="{TemplateBinding Padding}"
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2">
+                                    <StackPanel>
+                                        <DockPanel Name="Wrapper"
+                                                   Classes.semantic-wrapper="True"
+                                                   LastChildFill="True">
+                                            <atom:IconPresenter
+                                                Name="IconPresenter"
+                                                Classes.semantic-icon="True"
+                                                DockPanel.Dock="Left"
+                                                IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                                Icon="{TemplateBinding Icon}" />
+                                            <StackPanel Name="Section"
+                                                        Classes.semantic-section="True">
+                                                <atom:SelectableTextBlock
+                                                    Name="HeaderTitle"
+                                                    Classes.semantic-title="True"
+                                                    Text="{TemplateBinding Title}" />
+                                                <ContentPresenter
+                                                    Name="Content"
+                                                    Classes.semantic-description="True"
+                                                    TextWrapping="Wrap"
+                                                    Content="{TemplateBinding Content, Converter={StaticResource StringToSelectableTextBlockConverter}}"
+                                                    ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                            </StackPanel>
+                                        </DockPanel>
+                                        <ContentPresenter
+                                            Name="ActionsContainer"
+                                            Classes.semantic-actions="True"
+                                            HorizontalAlignment="Right"
+                                            IsVisible="{TemplateBinding Actions, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            Content="{TemplateBinding Actions}"
+                                            ContentTemplate="{TemplateBinding ActionsTemplate}" />
+                                    </StackPanel>
+                                </Border>
 
-                            <!-- close 是覆盖层：不参与流式排版，贴卡片右上角对齐。 -->
-                            <atom:IconButton
-                                Name="PART_CloseButton"
-                                Classes.semantic-close="True"
-                                Icon="{antdicons:AntDesignIconProvider Kind=CloseOutlined}"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Top" />
-                        </Panel>
+                                <!-- close 是覆盖层：不参与流式排版，贴卡片右上角对齐。 -->
+                                <atom:IconButton
+                                    Name="PART_CloseButton"
+                                    Classes.semantic-close="True"
+                                    Icon="{antdicons:AntDesignIconProvider Kind=CloseOutlined}"
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top" />
+                            </Grid>
                         </atom:FeedbackStackTransitionSnapshotHost>
                     </Border>
-                </atom:LayoutAwareMotionActor>
+                </atom:MotionActor>
             </ControlTemplate>
         </Setter>
 
@@ -102,11 +109,6 @@
 
         <Style Selector="^[IsMotionEnabled=False]">
             <Setter Property="Transitions" Value="{x:Null}" />
-        </Style>
-
-        <Style Selector="^ /template/ atom|NotificationProgressBar#ProgressBar">
-            <Setter Property="Margin"
-                    Value="{atom:NotificationCardTokenResource NotificationProgressMargin}" />
         </Style>
 
         <Setter Property="Width" Value="{atom:NotificationCardTokenResource NotificationWidth}" />

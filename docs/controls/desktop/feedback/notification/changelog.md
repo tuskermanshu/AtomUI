@@ -2,6 +2,18 @@
 
 本文档记录 Notification 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-14
+
+- Theme / Semantic Part
+  - Preserve WindowNotificationManager `Padding` customization with the shared feedback stack while keeping the default placement and queue hover bounds.
+  - Align `listContent` with the public `ItemsControl` contract and update examples to use supported size and alignment setters; item spacing remains owned by the internal feedback stack.
+- Lifecycle
+  - Close cards after a persistent host detach while preserving cards shown before the first attachment and queues moved back into the visual tree during the same dispatch cycle.
+- Correctness
+  - Initialize standalone notification motion state and align the card template, progress layout and render-only actor with feedback stack execution.
+- Token
+  - Retain `NotificationTopMargin` and `NotificationBottomMargin` as placement-dependent manager padding defaults.
+
 ## 2026-09-13
 
 - Lifecycle / correctness

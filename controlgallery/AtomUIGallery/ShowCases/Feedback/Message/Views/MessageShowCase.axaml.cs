@@ -194,7 +194,7 @@ public partial class MessageShowCase : GalleryReactiveUserControl<MessageViewMod
     {
         // 与上游一致：demo 走 messageApi.open 的默认 duration = 3 秒，到期自动消失。
         // 注意保持有限时长：常驻消息在连点时会无限堆积。
-        GetMessageManager()?.Show(
+        GetDefaultMessageManager()?.Show(
             new AtomUIMessage(
                 type: type,
                 content: Lang(resourceKind, fallback),

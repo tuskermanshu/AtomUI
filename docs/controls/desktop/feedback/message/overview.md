@@ -105,6 +105,10 @@ Message 使用 internal `MessageCardToken` 作为控件 Token scope。Token 只�
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
 
+列表的公开样式入口是 `WindowMessageManager.Padding` 与生成的 `WindowMessageManagerListContentStyle`。
+前者控制队列边缘间隔；后者以 `ItemsControl` 为公共目标，支持宽度、最小宽度与对齐等属性。
+项间距和卡片顺序由内部反馈栈管理，不能以 `Spacing` / `ReverseOrder` 作为 listContent 的公开 Setter。
+
 ## 6. 控件家族或集成关系
 
 Message 与同分类控件共享尺寸、状态、Token、Gallery 展示和验证规则。组合或派生控件应显式说明哪些 API 被继承、覆盖或不支持。
@@ -190,7 +194,7 @@ Semantic Parts 摘要（完整契约见 [Message Semantic Part 契约](semantic-
 | `MessageCard` | `icon` | `MessageCardIconStyle` | `IconPresenter` | `IconPresenter#PART_IconContent` | 状态图标尺寸与画刷；对应上游 notice icon。 | stable since 6.0 |
 | `MessageCard` | `title` | `MessageCardTitleStyle` | `Avalonia.Controls.SelectableTextBlock` | `SelectableTextBlock#PART_Message` | 消息文本颜色、字号、行高；对应上游 notice title。 | stable since 6.0 |
 | `WindowMessageManager` | `root` | 不适用（root） | `WindowMessageManager` | owner 本身（宿主层覆盖层；无宿主时为内联实例） | 消息列表根：定位、层级、队列、超时与宿主生命周期；对应上游 list。 | stable since 6.0 |
-| `WindowMessageManager` | `listContent` | `WindowMessageManagerListContentStyle` | `ReversibleStackPanel` | `ReversibleStackPanel#PART_Items` | notice 排列方向、顺序与对齐；对应上游 listContent。 | stable since 6.0 |
+| `WindowMessageManager` | `listContent` | `WindowMessageManagerListContentStyle` | `ItemsControl` | `FeedbackStackPresenter#PART_Items` | 列表内容区域；通过 ItemsControl 公共属性定制尺寸与对齐。 | stable since 6.0 |
 
 定制与兼容性摘要：
 
@@ -209,7 +213,7 @@ LLMS 导出来源：
 | LLMS 内容 | 来源 | 说明 |
 | --- | --- | --- |
 | 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/message/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/message/semantic-cn.md` |
+| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/message/semantic-cn.md` |
 | API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
 | Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
 | 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |

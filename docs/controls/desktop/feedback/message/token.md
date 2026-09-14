@@ -32,6 +32,9 @@ Message 的控件专项模型通过 Theme 消费 Token：
 - Token 默认值从 SharedToken 派生，不直接读取控件实例状态。
 - Token 类型、生成数据和 token.md 应显式维护，不依赖运行时反射扫描。
 
+`MessageTopMargin` 为四边 `UniformlyMarginXS`，作为 `WindowMessageManager.Padding` 的默认值；模板将 Padding
+投影到 StackHost 的 Margin。应用可覆盖 owner Padding，卡片外框自身保持零外边距。
+
 Stack 的展开 gap 16、折叠 offset 8、背板高度 16 与左右缩进分别来自 SharedToken 的统一 margin 尺度；
 Notification 与 Message 共用这些几何语义，因此不在 `MessageCardToken` 中复制一组 Stack Token。背板背景复用
 `ContentBg`，阴影复用 SharedToken tertiary shadow。Stack 状态和活动项数量属于运行时状态，不能写入 Token。
@@ -41,7 +44,8 @@ Notification 与 Message 共用这些几何语义，因此不在 `MessageCardTok
 调整 Message Token 时必须评估以下范围：
 
 - `Message`
-- `MessageManager`
+- `MessageCard`
+- `WindowMessageManager`
 - 对应 Gallery ShowCase 的示例和源码片段。
 - Light/Dark 主题、Browser/Desktop 主题和 Compact/Form/Popup 集成场景。
 

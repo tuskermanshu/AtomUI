@@ -89,6 +89,17 @@ internal sealed class NotificationCardToken : AbstractControlDesignToken
     /// </summary>
     public double NotificationWidth { get; set; }
 
+
+    /// <summary>
+    /// 提醒框上边缘外边距
+    /// </summary>
+    public Thickness NotificationTopMargin { get; set; }
+
+    /// <summary>
+    /// 提醒框下边缘外边距
+    /// </summary>
+    public Thickness NotificationBottomMargin { get; set; }
+
     public override void CalculateTokenValues(bool isDarkMode)
     {
         base.CalculateTokenValues(isDarkMode);
@@ -138,6 +149,9 @@ internal sealed class NotificationCardToken : AbstractControlDesignToken
         NotificationWidth = 384;
         // 图标与右侧内容之间的横向间距。
         NotificationIconMargin         = new Thickness(0, 0, marginSM, 0);
+        NotificationTopMargin = new Thickness(EffectiveGlobalToken.UniformlyMarginLG, EffectiveGlobalToken.UniformlyMarginLG, EffectiveGlobalToken.UniformlyMarginLG, 0);
+        NotificationBottomMargin =
+            new Thickness(EffectiveGlobalToken.UniformlyMarginLG, 0, EffectiveGlobalToken.UniformlyMarginLG, EffectiveGlobalToken.UniformlyMarginLG);
         NotificationCloseButtonPadding = EffectiveGlobalToken.PaddingXXS;
     }
     

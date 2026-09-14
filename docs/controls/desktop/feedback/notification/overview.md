@@ -102,6 +102,10 @@ Notification 使用 internal `NotificationCardToken` 作为控件 Token scope。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
 
+列表的公开样式入口是 `WindowNotificationManager.Padding` 与生成的 `WindowNotificationManagerListContentStyle`。
+前者控制队列边缘间隔；后者以 `ItemsControl` 为公共目标，支持宽度、最小宽度与对齐等属性。
+项间距和卡片顺序由内部反馈栈管理，不能以 `Spacing` / `ReverseOrder` 作为 listContent 的公开 Setter。
+
 ## 6. 控件家族或集成关系
 
 Notification 与同分类控件共享尺寸、状态、Token、Gallery 展示和验证规则。组合或派生控件应显式说明哪些 API 被继承、覆盖或不支持。
@@ -191,11 +195,11 @@ Semantic Part 语义区域：
 | `icon` | `IconPresenter#IconPresenter` | 状态图标元素：尺寸、画刷与行高。 | `Icon`、`NotificationType` | `NotificationIconSize`、状态色 SharedToken | stable |
 | `section` | `StackPanel#Section` | 标题与描述的内容区域，决定两者纵向间距。 | `Title`、`Content` | `NotificationSectionSpacing` | stable |
 | `title` | `atom:SelectableTextBlock#HeaderTitle` | 标题元素：颜色、字号、行高与右侧留白。 | `Title` | `FontSizeLG`、`FontHeightLG`、`NotificationTitlePadding` | stable |
-| `description` | `ContentPresenter#Content` | 描述元素：颜色、字号、行高、换行与右侧留白。 | `Content`、`ContentTemplate` | `FontSize`、`FontHeight`、`NotificationTitlePadding` | stable |
+| `description` | `ContentPresenter#Content` | 描述元素：颜色、字号、行高与换行。 | `Content`、`ContentTemplate` | `FontSize`、`FontHeight` | stable |
 | `actions` | `ContentPresenter#ActionsContainer` | 操作组元素：notice 右下角的操作入口。 | `Actions`、`ActionsTemplate` | `NotificationActionsMargin` | stable |
 | `close` | `IconButton#PART_CloseButton` | 关闭按钮覆盖层：位置、尺寸、圆角与交互色。 | `Close()`、`NotificationClosed` | `NotificationCloseButtonSize`、`NotificationCloseButtonMargin` | stable |
 | `progress` | `NotificationProgressBar#ProgressBar`（运行时创建） | 进度覆盖元素：展示自动关闭剩余时间。 | `IsShowProgress`、`Expiration` | `NotificationProgressHeight`、`NotificationProgressBg` | stable |
-| `listContent` | `ReversibleStackPanel#PART_Items` | 通知列表排列容器：方向、顺序、对齐与项间距。 | `Position`、`MaxItems` | `UniformlyMargin` | stable |
+| `listContent` | `FeedbackStackPresenter#PART_Items` | 列表内容区域；公共契约为 ItemsControl，支持尺寸与对齐定制。 | `Position`、`MaxItems` | `UniformlyMargin` | stable |
 
 完整 Part 表、Selector 用法与定制边界见 [Notification Semantic Part 契约](semantic-part.md)。
 
@@ -204,7 +208,7 @@ LLMS 导出来源：
 | LLMS 内容 | 来源 | 说明 |
 | --- | --- | --- |
 | 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/notification/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/notification/semantic-cn.md` |
+| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/notification/semantic-cn.md` |
 | API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
 | Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
 | 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |

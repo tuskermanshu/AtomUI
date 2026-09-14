@@ -84,6 +84,11 @@ Public API / ItemsSource / Command / Event
 - 交互与状态：`IsClosed`、`IsClosing`、`IsMotionEnabled`、`IsShowProgress`。
 - 视觉与布局：`Position`、`ProgressIndicatorBrush`、`ProgressIndicatorThickness`。
 
+manager 主题把方位对应的 Token 写入内部 `ThemePadding`，再用编译绑定为公开 `Padding` 提供普通样式层的默认值。
+方位条件选择器不能直接设置公开 `Padding`，否则 `StyleTrigger` 优先级会覆盖应用的普通类型样式。
+模板中的 presenter 通过 `TemplateBinding` 将最终 `Padding` 投影为 `Margin`，因此类型样式、条件样式和局部值
+都能按正常优先级覆盖默认边距，Token 或方位变化也能继续更新未覆盖的默认值。
+
 `NotificationType.Default` 是普通通知入口，不生成类型图标；带类型通知由 `NotificationType` 映射到 success/info/warning/error 伪类和默认状态图标。自定义 `Icon` 始终优先于类型图标。
 
 `IsClosing` 和 `IsClosed` 是 NotificationCard 的 public 业务状态。卡片拥有一个共享 `FeedbackCardMotionCoordinator`；协调器
@@ -105,6 +110,10 @@ Duration 变化不重启同一 actor，新值从下一次 motion 生效；Comple
 - 构造阶段只注册必要状态，不依赖 template part。
 - 模板应用时获取 part、建立事件订阅和绑定，并先释放旧 part 订阅。
 - manager 的卡片 collection 在模板之外创建并保持稳定；新 `PART_Items` 只重新绑定该 collection，旧 presenter 立即解绑。
+- manager 首次 attach 前允许 `Show`，卡片进入稳定集合，有限时长登记保持暂停。detach 时先暂停 scheduler，
+  并在视觉树级联完成后确认是否仍离树：持续离树关闭当时卡片，同轮重新入树的 host 迁移保留队列。
+- `Dispose` 解绑 presenter 的集合与 hover 事件、释放 scheduler 和每张 card 的 owner/回调，再移除宿主层及安全区订阅。
+  模板重套用仅更换 presenter，不重新创建卡片。
 - 控件卸载、弹层关闭、窗口关闭、集合替换或 container recycle 时释放事件订阅和资源宿主。
 - DynamicResource、TokenResourceBinder 或 C# binding 必须有明确 owner 和释放点。
 - Browser 和 Desktop 宿主下的主题加载顺序不得影响 public API 语义。
@@ -120,7 +129,7 @@ Duration 变化不重启同一 actor，新值从下一次 motion 生效；Comple
 通知模板结构直接对齐上游 antd notice DOM，marker 的归属如下：
 
 - `Border#Frame` 通过 `TemplateBinding` 消费 owner 的 `Background` / `BorderBrush` / `BorderThickness` / `CornerRadius` /
-  `BoxShadow` / `Padding`，是隐式 `root` 表面的投影节点。
+  `BoxShadow`，是隐式 `root` 表面的投影节点；owner `Padding` 由内部 `Border#ContentBox` 消费。
 - `DockPanel#Wrapper`、`IconPresenter#IconPresenter`、`StackPanel#Section`、`atom:SelectableTextBlock#HeaderTitle`、
   `ContentPresenter#Content`、`ContentPresenter#ActionsContainer`、`IconButton#PART_CloseButton` 在
   `NotificationCardTheme.axaml` 内用 `Classes.semantic-*="True"` 静态声明，由生成器静态校验 cardinality 与
@@ -128,7 +137,13 @@ Duration 变化不重启同一 actor，新值从下一次 motion 生效；Comple
 - `progress` 是 RuntimeCreated Part：`ConfigureProgressBar` 创建 `NotificationProgressBar` 时注入
   `NotificationCardSemanticParts.ProgressClass`，`ClearProgressBar` 在移除节点时一并释放 marker；生成器不通过源码文本
   搜索证明调用，契约由控件行为测试覆盖。
-- `ReversibleStackPanel#PART_Items` 在 `WindowNotificationManagerTheme.axaml` 内静态声明 `semantic-list-content`。
+- `FeedbackStackPresenter#PART_Items` 在 `WindowNotificationManagerTheme.axaml` 内静态声明 `semantic-list-content`，
+  公共 `ContractType` 为 `ItemsControl`，内部 panel 维护卡片间距与堆叠投影。
+- presenter 的 `Margin` 绑定 manager `Padding`，owner 的 Position selector 选择 `NotificationTopMargin` / `NotificationBottomMargin` 默认 token。
+  显式 Padding 覆盖默认值；六种方位的队列保持紧贴内容的 hover 范围。
+- `Grid#PART_Layout` 位于折叠快照 host 内，close 与内容在第一行重叠，runtime progress 置于第二行并跨两列，
+  避免 Auto 列以无限宽度测量进度条。`MotionActor` 只执行 render transform，不把进出场平移带入布局计算。
+- standalone 与 manager 构造路径都初始化同一 motion coordinator，首次模板应用及属性变化不要求 manager 存在。
 
 marker 只增加模板节点已有 `Classes` 集合中的稳定字符串，不引入 VisualTree 搜索、运行时 AXAML 解析或反射扫描。
 

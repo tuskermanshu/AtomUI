@@ -316,46 +316,6 @@
         <source>Examples</source>
       </segment>
     </unit>
-    <unit id="StatusDescription">
-      <segment>
-        <source>Add status to DatePicker with status, which could be error or warning.</source>
-      </segment>
-    </unit>
-    <unit id="StatusTitle">
-      <segment>
-        <source>Status</source>
-      </segment>
-    </unit>
-    <unit id="SwitchableDescription">
-      <segment>
-        <source>Switch between TimePicker and DatePicker modes from a single selector.</source>
-      </segment>
-    </unit>
-    <unit id="SwitchableTitle">
-      <segment>
-        <source>Switchable picker</source>
-      </segment>
-    </unit>
-    <unit id="ThreeSizesDescription">
-      <segment>
-        <source>The input box comes in three sizes: small, middle and large. The middle size will be used if size is omitted.</source>
-      </segment>
-    </unit>
-    <unit id="ThreeSizesTitle">
-      <segment>
-        <source>Three Sizes</source>
-      </segment>
-    </unit>
-    <unit id="VariantsDescription">
-      <segment>
-        <source>Bordered-less style component.</source>
-      </segment>
-    </unit>
-    <unit id="VariantsTitle">
-      <segment>
-        <source>Variants</source>
-      </segment>
-    </unit>
     <unit id="SemanticClearDescription">
       <segment>
         <source>Clear button in the suffix area, rendered in clear mode.</source>
@@ -421,6 +381,16 @@
         <source>Suffix area hosting the clear button, the form feedback and the user suffix content.</source>
       </segment>
     </unit>
+    <unit id="StatusDescription">
+      <segment>
+        <source>Add status to DatePicker with status, which could be error or warning.</source>
+      </segment>
+    </unit>
+    <unit id="StatusTitle">
+      <segment>
+        <source>Status</source>
+      </segment>
+    </unit>
     <unit id="StyleClassDescription">
       <segment>
         <source>Apply owner-scoped styles with the public Semantic Parts of the picker to customize the prefix, both inputs, the date cells and the popup layer.</source>
@@ -429,6 +399,36 @@
     <unit id="StyleClassTitle">
       <segment>
         <source>Custom Semantic Part styling</source>
+      </segment>
+    </unit>
+    <unit id="SwitchableDescription">
+      <segment>
+        <source>Switch between TimePicker and DatePicker modes from a single selector.</source>
+      </segment>
+    </unit>
+    <unit id="SwitchableTitle">
+      <segment>
+        <source>Switchable picker</source>
+      </segment>
+    </unit>
+    <unit id="ThreeSizesDescription">
+      <segment>
+        <source>The input box comes in three sizes: small, middle and large. The middle size will be used if size is omitted.</source>
+      </segment>
+    </unit>
+    <unit id="ThreeSizesTitle">
+      <segment>
+        <source>Three Sizes</source>
+      </segment>
+    </unit>
+    <unit id="VariantsDescription">
+      <segment>
+        <source>Bordered-less style component.</source>
+      </segment>
+    </unit>
+    <unit id="VariantsTitle">
+      <segment>
+        <source>Variants</source>
       </segment>
     </unit>
   </file>

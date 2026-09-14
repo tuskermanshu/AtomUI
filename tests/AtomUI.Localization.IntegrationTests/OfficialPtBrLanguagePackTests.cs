@@ -227,6 +227,21 @@ public sealed partial class LanguagePackEndToEndTests
         string toolingPackageVersion)
     {
         var globalPackages = GlobalPackagesPath();
+        // Generator's Pack target builds this sidecar through an MSBuild task, so it
+        // is outside the ordinary ProjectReference restore graph of a fresh fixture.
+        await RunProcess(
+            "Restore AtomUI.Generator.LinkedPublish",
+            repositoryRoot,
+            temporaryRoot,
+            "dotnet",
+            "restore",
+            Path.Combine(repositoryRoot, "src/AtomUI.Generator.LinkedPublish/AtomUI.Generator.LinkedPublish.csproj"),
+            "--disable-build-servers",
+            "-m:1",
+            "-nr:false",
+            "-p:Configuration=Release",
+            $"-p:Version={toolingPackageVersion}",
+            $"-p:RestorePackagesPath={globalPackages}");
         await RunProcess(
             "Pack AtomUI.Generator",
             repositoryRoot,
@@ -480,6 +495,7 @@ public sealed partial class LanguagePackEndToEndTests
     {
         return new XElement(
             "ProjectReference",
+            new XAttribute("GlobalPropertiesToRemove", "OutputPath"),
             new XAttribute("Include", Path.Combine(repositoryRoot, relativePath)));
     }
 

@@ -379,54 +379,6 @@
         <target state="translated">Exemplos</target>
       </segment>
     </unit>
-    <unit id="StatusDescription">
-      <segment>
-        <source>Add status to DatePicker with status, which could be error or warning.</source>
-        <target state="translated">Adicionar status para DatePicker com status, which could ser erro ou aviso.</target>
-      </segment>
-    </unit>
-    <unit id="StatusTitle">
-      <segment>
-        <source>Status</source>
-        <target state="translated">Status</target>
-      </segment>
-    </unit>
-    <unit id="SwitchableDescription">
-      <segment>
-        <source>Switch between TimePicker and DatePicker modes from a single selector.</source>
-        <target state="translated">Alternância between TimePicker e DatePicker modes de a single selector.</target>
-      </segment>
-    </unit>
-    <unit id="SwitchableTitle">
-      <segment>
-        <source>Switchable picker</source>
-        <target state="translated">Switchable picker</target>
-      </segment>
-    </unit>
-    <unit id="ThreeSizesDescription">
-      <segment>
-        <source>The input box comes in three sizes: small, middle and large. The middle size will be used if size is omitted.</source>
-        <target state="translated">O entrada caixa comes em três tamanhos: pequeno, centro e grande. O centro tamanho irá ser usado se tamanho é omitted.</target>
-      </segment>
-    </unit>
-    <unit id="ThreeSizesTitle">
-      <segment>
-        <source>Three Sizes</source>
-        <target state="translated">Três Tamanhos</target>
-      </segment>
-    </unit>
-    <unit id="VariantsDescription">
-      <segment>
-        <source>Bordered-less style component.</source>
-        <target state="translated">Bordered-menos estilo component.</target>
-      </segment>
-    </unit>
-    <unit id="VariantsTitle">
-      <segment>
-        <source>Variants</source>
-        <target state="translated">Variantes</target>
-      </segment>
-    </unit>
     <unit id="SemanticClearDescription">
       <segment>
         <source>Clear button in the suffix area, rendered in clear mode.</source>
@@ -505,6 +457,18 @@
         <target state="translated">Área de sufixo da entrada, hospedando o botão de limpar, o feedback do formulário e o conteúdo de sufixo do usuário.</target>
       </segment>
     </unit>
+    <unit id="StatusDescription">
+      <segment>
+        <source>Add status to DatePicker with status, which could be error or warning.</source>
+        <target state="translated">Adicionar status para DatePicker com status, which could ser erro ou aviso.</target>
+      </segment>
+    </unit>
+    <unit id="StatusTitle">
+      <segment>
+        <source>Status</source>
+        <target state="translated">Status</target>
+      </segment>
+    </unit>
     <unit id="StyleClassDescription">
       <segment>
         <source>Apply owner-scoped styles with the public Semantic Parts of the picker to customize the prefix, both inputs, the date cells and the popup layer.</source>
@@ -515,6 +479,42 @@
       <segment>
         <source>Custom Semantic Part styling</source>
         <target state="translated">Estilo personalizado de Semantic Part</target>
+      </segment>
+    </unit>
+    <unit id="SwitchableDescription">
+      <segment>
+        <source>Switch between TimePicker and DatePicker modes from a single selector.</source>
+        <target state="translated">Alternância between TimePicker e DatePicker modes de a single selector.</target>
+      </segment>
+    </unit>
+    <unit id="SwitchableTitle">
+      <segment>
+        <source>Switchable picker</source>
+        <target state="translated">Switchable picker</target>
+      </segment>
+    </unit>
+    <unit id="ThreeSizesDescription">
+      <segment>
+        <source>The input box comes in three sizes: small, middle and large. The middle size will be used if size is omitted.</source>
+        <target state="translated">O entrada caixa comes em três tamanhos: pequeno, centro e grande. O centro tamanho irá ser usado se tamanho é omitted.</target>
+      </segment>
+    </unit>
+    <unit id="ThreeSizesTitle">
+      <segment>
+        <source>Three Sizes</source>
+        <target state="translated">Três Tamanhos</target>
+      </segment>
+    </unit>
+    <unit id="VariantsDescription">
+      <segment>
+        <source>Bordered-less style component.</source>
+        <target state="translated">Bordered-menos estilo component.</target>
+      </segment>
+    </unit>
+    <unit id="VariantsTitle">
+      <segment>
+        <source>Variants</source>
+        <target state="translated">Variantes</target>
       </segment>
     </unit>
   </file>

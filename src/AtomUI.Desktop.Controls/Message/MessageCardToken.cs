@@ -32,6 +32,7 @@ internal sealed class MessageCardToken : AbstractControlDesignToken
     /// 提醒框图标外边距
     /// </summary>
     public Thickness MessageIconMargin { get; set; }
+    public Thickness MessageTopMargin { get; set; }
 
     public MessageCardToken()
 

@@ -61,7 +61,7 @@ public class NotificationSemanticPartTests
         managerDescriptor.ShouldNotBeNull();
         managerDescriptor.Parts.Select(static part => part.Name).ShouldBe(ApprovedManagerPartNames);
         AssertRoot(managerDescriptor, typeof(WindowNotificationManager));
-        AssertPart(managerDescriptor, "listContent", "semantic-list-content", typeof(ReversibleStackPanel));
+        AssertPart(managerDescriptor, "listContent", "semantic-list-content", typeof(ItemsControl));
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class NotificationSemanticPartTests
         cardDocument.Descendants().Any(static element => HasMarker(element, "semantic-root")).ShouldBeFalse();
 
         var managerDocument = XDocument.Load(GetRepoFile(ManagerThemePath), LoadOptions.SetLineInfo);
-        CollectMarkers(managerDocument).ShouldBe(["semantic-list-content:ReversibleStackPanel"]);
+        CollectMarkers(managerDocument).ShouldBe(["semantic-list-content:FeedbackStackPresenter"]);
         managerDocument.Descendants().Any(static element => HasMarker(element, "semantic-root")).ShouldBeFalse();
     }
 
@@ -272,7 +272,7 @@ public class NotificationSemanticPartTests
         var window = ShowInWindow(manager);
         try
         {
-            var listContent = FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content");
+            var listContent = FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content");
             listContent.Name.ShouldBe("PART_Items");
         }
         finally
@@ -342,7 +342,7 @@ public class NotificationSemanticPartTests
         var window = ShowInWindow(manager);
         try
         {
-            FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content").Tag
+            FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content").Tag
                 .ShouldBe("listContent");
         }
         finally
@@ -387,13 +387,13 @@ public class NotificationSemanticPartTests
             frame.Bounds.Height.ShouldBe(card.Bounds.Height);
 
             // list 的内边距承担边缘偏移：TopRight 放置时上边与右边各内缩一个 Padding。
-            var listContent  = FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content");
+            var listContent  = FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content");
             var listOrigin   = manager.TranslatePoint(new Point(0, 0), host)!.Value;
             var contentOrigin = listContent.TranslatePoint(new Point(0, 0), host)!.Value;
             (contentOrigin.Y - listOrigin.Y).ShouldBe(manager.Padding.Top, 0.5);
             ((listOrigin.X + manager.Bounds.Width) - (contentOrigin.X + listContent.Bounds.Width))
                 .ShouldBe(manager.Padding.Right, 0.5);
-            listContent.Spacing.ShouldBeGreaterThan(0);
+            listContent.ExpandedGap.ShouldBeGreaterThan(0);
         }
         finally
         {
@@ -427,12 +427,12 @@ public class NotificationSemanticPartTests
                 FindSemanticControl<IconButton>(card, "semantic-close").ShouldNotBeNull();
             }
 
-            var listContent = FindSemanticControl<ReversibleStackPanel>(manager, "semantic-list-content");
-            listContent.Children.Count.ShouldBe(2);
+            var listContent = FindSemanticControl<FeedbackStackPresenter>(manager, "semantic-list-content");
+            listContent.Items.Count.ShouldBe(2);
 
             cards[0].Close();
             Dispatcher.UIThread.RunJobs();
-            listContent.Children.Count.ShouldBe(1);
+            listContent.Items.Count.ShouldBe(1);
         }
         finally
         {

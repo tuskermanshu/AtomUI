@@ -308,11 +308,6 @@ public partial class NotificationShowCase : GalleryReactiveUserControl<Notificat
     {
         var manager = GetBasicManager();
         if (manager is null)
->>>>>>> f86c5b772 (feat(Semantic): 增加 Notification 语义部件、引入 Actions API 并对齐上游示例)
-        {
-            return;
-        }
-
         {
             return;
         }

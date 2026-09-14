@@ -18,6 +18,13 @@ class RealPolicyContracts(unittest.TestCase):
     def test_all_current_production_roots_and_test_projects_have_selection_owners(self):
         self.assertEqual([], self.planner.audit()["errors"])
 
+    def test_full_regression_script_selects_verification_tooling_without_policy_gaps(self):
+        changed = "scripts/run-full-regression.sh"
+        plan = self.planner.plan([changed])
+        self.assertEqual([], plan["gaps"])
+        self.assertTrue(plan["tooling"])
+        self.assertNotIn(changed, plan["ignored"])
+
     def test_source_reading_consumers_are_selected_across_project_boundaries(self):
         cases = [
             ("controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml", "GalleryExampleReaderTests"),

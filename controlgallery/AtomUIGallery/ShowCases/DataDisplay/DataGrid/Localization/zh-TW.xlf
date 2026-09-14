@@ -895,18 +895,6 @@
         <target state="translated">內容元素：表頭區、列區與捲軸的佈局樣式。</target>
       </segment>
     </unit>
-    <unit id="SemanticPaginationItemDescription">
-      <segment>
-        <source>Pagination item element with page item sizing, active state and spacing styles.</source>
-        <target state="translated">分頁項元素：分頁項尺寸、啟用態與間距樣式。</target>
-      </segment>
-    </unit>
-    <unit id="SemanticPaginationRootDescription">
-      <segment>
-        <source>Pagination host element with table pagination layout and spacing styles.</source>
-        <target state="translated">分頁宿主元素：表格分頁佈局與間距樣式。</target>
-      </segment>
-    </unit>
     <unit id="SemanticFooterDescription">
       <segment>
         <source>Footer element with table footer text color styles.</source>
@@ -923,6 +911,18 @@
       <segment>
         <source>Header wrapper element with table header layout and container styles.</source>
         <target state="translated">表頭容器元素：表頭的佈局與容器樣式。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPaginationItemDescription">
+      <segment>
+        <source>Pagination item element with page item sizing, active state and spacing styles.</source>
+        <target state="translated">分頁項元素：分頁項尺寸、啟用態與間距樣式。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPaginationRootDescription">
+      <segment>
+        <source>Pagination host element with table pagination layout and spacing styles.</source>
+        <target state="translated">分頁宿主元素：表格分頁佈局與間距樣式。</target>
       </segment>
     </unit>
     <unit id="SemanticPartStyleDescription">

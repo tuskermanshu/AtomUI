@@ -14,7 +14,6 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
@@ -202,7 +201,7 @@ public partial class NotificationCard : ContentControl,
     private bool _isStackVisible = true;
     private readonly FeedbackCardMotionCoordinator _motionCoordinator;
     private WindowNotificationManager? _notificationManager;
-    private Panel? _layout;
+    private Grid? _layout;
     private IconButton? _closeButton;
     private NotificationProgressBar? _progressBar;
     private PathIcon? _templateNotificationIcon;
@@ -229,6 +228,7 @@ public partial class NotificationCard : ContentControl,
     /// </summary>
     public NotificationCard()
     {
+        _motionCoordinator = new FeedbackCardMotionCoordinator(CompleteCloseMotion);
     }
     
     public void Close()
@@ -332,7 +332,7 @@ public partial class NotificationCard : ContentControl,
             _closeButton.Click -= HandleCloseButtonClose;
         }
         ClearProgressBar();
-        _layout      = e.NameScope.Find<Panel>("PART_Layout");
+        _layout      = e.NameScope.Find<Grid>("PART_Layout");
         _closeButton = e.NameScope.Find<IconButton>("PART_CloseButton");
         _motionActor = e.NameScope.Find<BaseMotionActor>(BaseMotionActor.MotionActorPart);
         _stackTransitionSnapshotHost = e.NameScope.Find<FeedbackStackTransitionSnapshotHost>(
@@ -525,6 +525,10 @@ public partial class NotificationCard : ContentControl,
             // progress 是覆盖在卡片底部的运行时 Part：显式注入 semantic class，随进度条一同创建与释放。
             _progressBar.Classes.Add(NotificationCardSemanticParts.ProgressClass);
             _progressBar.SetTemplatedParent(this);
+            // 列 0 是 Auto，未跨列时会以无限宽测量并令 Measure 返回非法尺寸；跨双列对齐卡片内容行。
+            Grid.SetRow(_progressBar, 1);
+            Grid.SetColumn(_progressBar, 0);
+            Grid.SetColumnSpan(_progressBar, 2);
             _layout.Children.Add(_progressBar);
         }
 
