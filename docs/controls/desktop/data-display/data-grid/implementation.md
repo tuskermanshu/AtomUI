@@ -431,6 +431,13 @@ Maximum 触发 Avalonia RangeBase 校验异常。
 cell sort/filter 状态和事件订阅。`DataGridDisplayData` 继续复用循环 displayed list 与 row/group pool；不能引入第二个
 ItemsRepeater、VirtualizingStackPanel 或 scroll owner。
 
+行头模板由 `DataGridRow` 持有，优先使用行级 `HeaderContentTemplate`，其次使用表格级 `RowHeaderContentTemplate`。
+行数据变化时通过 `IRecyclingDataTemplate.Build` 由模板决定能否复用旧视觉；普通 `IDataTemplate` 为当前数据重新创建内容。
+模板缓存不代表内容仍挂接在 `Header` 上。回收时解除挂接并清空内容的 DataContext，复用时为当前数据重新应用模板并挂接内容，
+非回收卸载时同时释放模板缓存。同模板的重复应用保留调用方显式设置的 `Header`；有效模板变更后由新模板接管生成内容。
+替换或清空模板必须释放旧内容的数据引用，包括行头隐藏时；新内容的创建仍等待行头可见。行头模板更新独立于 RowDetails 的
+可见性和加载/卸载事件，不能复用详情的状态标志。
+
 RowsPresenter.Children 只包含 visible 加一个 editing row 和一个 drag row 上限的 controls。Measure、Arrange、prepare 和 recycle
 不 fetch、不等待、不分配 range buffer。嵌套滚动在内部边界前由 DataGrid 消费，到边界后交给外层 ScrollViewer。
 

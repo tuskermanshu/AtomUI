@@ -2337,10 +2337,7 @@ public partial class DataGrid
         {
             foreach (DataGridRow row in GetAllRows())
             {
-                if (GetRowDetailsVisibility(row.Index))
-                {
-                    row.ApplyHeaderContentTemplate();
-                }
+                row.ApplyHeaderContentTemplate();
             }
         }
         InvalidateMeasure();
