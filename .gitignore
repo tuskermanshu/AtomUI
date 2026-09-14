@@ -195,6 +195,8 @@ api/diff
 
 # Project generation intermediate results storage
 .artifacts/
+__pycache__/
+*.pyc
 output/
 outputs/
 cmake-build-*/

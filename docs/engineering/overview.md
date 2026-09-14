@@ -33,6 +33,7 @@
 
 ## Workflows
 
+- [按改动影响选择验证](workflows/affected-verification.md)
 - [Gallery NativeAOT Release Workflow](workflows/gallery-aot-release-workflow.md)
 
 ## Case Studies

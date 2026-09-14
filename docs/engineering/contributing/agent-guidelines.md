@@ -107,14 +107,16 @@ Gallery 改动时注意：
 
 ## 测试与验证
 
-选择验证命令时按风险扩大范围：
+日常验证必须先使用 [按改动影响选择验证](../workflows/affected-verification.md) 的统一入口：
 
-- 纯共享数据结构：先跑对应 shared tests。
-- Desktop 控件行为：跑对应 `AtomUI.Desktop.Controls.Tests`。
-- DataGrid：跑 `AtomUI.Desktop.Controls.DataGrid.Tests`。
-- Gallery 页面或 ViewModel：跑 `AtomUIGallery.Tests`。
-- AOT、trim、发布配置、source generator 运行时注册：跑真实 NativeAOT publish。
-- 每次收尾都运行 `git diff --check`。
+- `python3 scripts/verification/test.py plan`：检查改动、功能域、消费路径与专项义务。
+- 开发过程中使用 `run --scope iterate`；收尾使用 `run`，已提交分支通过 `--base <目标分支>` 纳入比较。
+- `--include-test <测试源文件模式>` 只追加检查；不得用手选子集代替 change 计划后声称完成交付验证。
+- 不因修改一个控件而默认运行整个 Desktop 测试项目。需要扩大范围时由共享规则或明确影响证据说明原因。
+- 规则 gap、零测试、skip、陈旧产物或 pending 专项义务都不能报告为完整通过；按报告处理缺口和真实发布验证。
+- 无新增改动且输入、配置、产物匹配的成功 receipt 可以复用；不得为了收尾重复已通过的同一份验证。
+- 直接 `dotnet test --filter ...` 保留用于复现和诊断；全量入口使用 `run --scope full`，不要依赖 solution 项目清单。
+- 每次收尾仍运行 `git diff --check`，保留原始 UX、AOT、资源生命周期验证要求。
 
 测试运行产生的本地临时结果必须由仓库构建入口自动清理。不得在 `tests/**/TestResults`、`.artifacts/TestResults`
 或工作树副本中长期保留 VSTest 结果、hang dump、crash dump、coverage 临时文件等占用存储的测试产物；需要诊断 dump

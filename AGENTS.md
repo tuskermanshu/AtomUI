@@ -116,7 +116,16 @@ Detailed AI collaboration rules live in [docs/engineering/contributing/agent-gui
 
 ## Common Commands
 
-Use the command that matches the touched area, and prefer targeted tests while iterating.
+Use [affected verification](docs/engineering/workflows/affected-verification.md) as the default. Inspect the plan, use direct scope while iterating, and verify consumers once before completion. Full regression is explicit; the solution does not enumerate every test project.
+
+```bash
+python3 scripts/verification/test.py plan
+python3 scripts/verification/test.py run --scope iterate
+python3 scripts/verification/test.py run
+python3 scripts/verification/test.py audit
+```
+
+For committed branch changes pass `--base <target-branch>`. Direct project commands below are for diagnosis or an explicitly justified module-wide check:
 
 ```bash
 dotnet test tests/AtomUI.Controls.Shared.Tests/AtomUI.Controls.Shared.Tests.csproj --framework net10.0 --no-restore
