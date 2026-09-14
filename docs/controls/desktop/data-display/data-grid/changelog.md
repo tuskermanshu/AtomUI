@@ -2,6 +2,17 @@
 
 本文档记录 DataGrid 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-14
+
+- Implementation
+  - Reattach cached row-header content to the current item when a row is reused, clear item references during recycle, and release the template cache on permanent detach. Fixes [#475](https://github.com/AtomUI/AtomUI/issues/475).
+  - Keep row-header template replacement and removal independent of RowDetails visibility and loading/unloading events.
+  - Honor each header template's recycling behavior, preserve explicit Header values when reapplying the same template, and release invalidated content while row headers are hidden.
+- Validation
+  - Cover row numbers through scrolling beyond the first viewport and back with ordinary and frozen columns, header data rebinding and cleanup, and runtime template replacement/removal.
+- Docs
+  - Document row-header template ownership and the separation between reusable visuals and item-scoped attachment.
+
 ## 2026-09-06
 
 - Design

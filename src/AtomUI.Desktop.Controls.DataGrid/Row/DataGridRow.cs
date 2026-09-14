@@ -403,6 +403,11 @@ public partial class DataGridRow : TemplatedControl
                     }
                 }
             }
+
+            if (owner != null)
+            {
+                ApplyHeaderContentTemplate();
+            }
         }
         else if (change.Property == IsSelectedProperty)
         {
