@@ -17,11 +17,20 @@ internal sealed class SemanticPartAdorner : Control
 
     private readonly bool _isPrimary;
     private readonly double _layoutOutset;
+    private readonly Visual? _clipHost;
 
-    private SemanticPartAdorner(bool isPrimary)
+    /// <summary>
+    /// 语义预览的高亮画布（PART_PreviewStage）。声明后描边与画布求交：
+    /// 溢出画布的部件只高亮画布内的部分，完全在画布之外的部件整体隐藏，
+    /// 高亮框绝不越出画布边界。
+    /// </summary>
+    internal Visual? ClipHost => _clipHost;
+
+    private SemanticPartAdorner(bool isPrimary, Visual? clipHost)
     {
         _isPrimary       = isPrimary;
         _layoutOutset    = isPrimary ? PrimaryLayoutOutset : SecondaryLayoutOutset;
+        _clipHost        = clipHost;
         Focusable        = false;
         IsHitTestVisible = false;
         Margin           = new Thickness(-_layoutOutset);
@@ -32,10 +41,10 @@ internal sealed class SemanticPartAdorner : Control
         AdornerLayer.SetIsClipEnabled(this, false);
     }
 
-    internal static SemanticPartAdorner Create(Visual target, bool isPrimary)
+    internal static SemanticPartAdorner Create(Visual target, bool isPrimary, Visual? clipHost = null)
     {
         ArgumentNullException.ThrowIfNull(target);
-        var adorner = new SemanticPartAdorner(isPrimary);
+        var adorner = new SemanticPartAdorner(isPrimary, clipHost);
         AdornerLayer.SetAdornedElement(adorner, target);
         return adorner;
     }
@@ -75,10 +84,45 @@ internal sealed class SemanticPartAdorner : Control
             var positionInLayer = new Point(
                 Bounds.Position.X + transform.M31,
                 Bounds.Position.Y + transform.M32);
+
+            // 预览画布钳制优先：跨视觉根的目标（popup/独立窗口宿主）无法换算画布坐标，
+            // 退回仅按层钳制的旧行为。
+            if (_clipHost is { } host &&
+                host.TranslatePoint(default, layer) is { } hostTopLeft)
+            {
+                var hostRect = new Rect(hostTopLeft.X, hostTopLeft.Y, host.Bounds.Width, host.Bounds.Height);
+                var clampedByHost = ClampMarkerRectToClipHost(markerRect, hostRect, positionInLayer, pen.Thickness);
+                if (clampedByHost is null)
+                {
+                    // 目标完全在画布之外：整体隐藏，不跨画布边界绘制。
+                    return;
+                }
+                markerRect = clampedByHost.Value;
+            }
+
             markerRect = ClampMarkerRect(markerRect, layer.Bounds, positionInLayer, pen.Thickness);
         }
 
         context.DrawRectangle(null, pen, markerRect);
+    }
+
+    /// <summary>
+    /// 把描边矩形钳制到预览画布在 adorner 本地坐标空间的范围内，仅内收半个笔宽。
+    /// 与画布无交集（目标完全在画布外）时返回 null，调用方应整体隐藏该标记。
+    /// </summary>
+    internal static Rect? ClampMarkerRectToClipHost(
+        Rect markerRect,
+        Rect clipHostRectInLayer,
+        Point adornerPositionInLayer,
+        double penThickness)
+    {
+        var hostLocal = new Rect(
+            clipHostRectInLayer.X - adornerPositionInLayer.X,
+            clipHostRectInLayer.Y - adornerPositionInLayer.Y,
+            clipHostRectInLayer.Width,
+            clipHostRectInLayer.Height);
+        var clamped = markerRect.Intersect(hostLocal.Deflate(penThickness / 2));
+        return clamped.Width >= 1 && clamped.Height >= 1 ? clamped : null;
     }
 
     /// <summary>

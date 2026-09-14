@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data.Converters;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -477,11 +478,17 @@ public class SemanticPartPreview : TemplatedControl, IDisposable
             return;
         }
 
+        // 高亮框钳制在预览画布内：溢出画布的部件只高亮画布内部分，
+        // 画布外的描边会误导为页面其他区域也是语义部件。
+        var stage = this.GetTemplateDescendants()
+                        .OfType<Border>()
+                        .FirstOrDefault(static border => border.Name == "PART_PreviewStage");
         _activeHighlightSession = SemanticPartHighlightSession.Start(
             CollectOwnerInstances(anchor, item.OwnerType),
             item.Descriptor,
             registry,
-            AdditionalRoots);
+            AdditionalRoots,
+            stage);
     }
 
     private IReadOnlyList<Control> CollectOwnerInstances(Control anchor, Type ownerType)

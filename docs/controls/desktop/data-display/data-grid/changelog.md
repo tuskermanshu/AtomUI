@@ -12,6 +12,24 @@
   - Cover row numbers through scrolling beyond the first viewport and back with ordinary and frozen columns, header data rebinding and cleanup, and runtime template replacement/removal.
 - Docs
   - Document row-header template ownership and the separation between reusable visuals and item-scoped attachment.
+- Design
+  - 补充 `pagination.root` / `pagination.item` 语义部件：`pagination.root` 指向模板内顶部/底部两处 `Pagination` 槽位（`Multiple`），`pagination.item` 经 `>> .semantic-pagination-root >> .semantic-item` 跨根路由命中页码项，与上游 Table 的 pagination 语义区域对齐；生成器产出 `DataGridPaginationRootStyle` / `DataGridPaginationItemStyle`。
+
+## 2026-09-13
+
+- Design
+  - 对齐 Ant Design 6.6.3 Table Semantic DOM：`DataGrid` 作为语义 owner 声明 `section`、`header.wrapper`、`header.cell`、`title`、`body.wrapper`、`body.row`、`body.cell`、`footer`、`content` 九个部件（`root` 由生成器隐式合成；`header.row` 无独立节点不声明）。
+  - `body.row` 同时覆盖数据行与分组头行；`header.cell`/`body.cell`/`body.row` 的 marker 由目标控件构造时注入并在类被 `Classes.Replace` 清空后重挂，列拖拽 ghost 显式排除。
+- API
+  - 新增生成的专用部件 Style 类（`DataGridSectionStyle`、`DataGridTitleStyle`、`DataGridContentStyle`、`DataGridHeaderWrapperStyle`、`DataGridHeaderCellStyle`、`DataGridBodyWrapperStyle`、`DataGridBodyRowStyle`、`DataGridBodyCellStyle`、`DataGridFooterStyle`）与 `DataGridSemanticParts` 常量（Since 6.0）。
+- Token
+  - `CellPaddingMD` 从 12×12 修正为横向 8、纵向 12（AntD `cellPaddingInlineMD=paddingXS`、`cellPaddingBlockMD=paddingSM`）。
+  - `HeaderSplitColor` 从 `ColorSplit` 修正为 `ColorBorderSecondary`（AntD `headerSplitColor`）。
+  - `FilterDropdownBg` 从 `ColorBgElevated` 修正为 `ColorBgContainer`（AntD `filterDropdownBg`）。
+  - 左右冻结列分界阴影从外扩 `±10px 0 8px 0` 修正为 `inset ±10px 0 8px -8px`（AntD `fixed.ts getShadowStyle`）。
+- Gallery and validation
+  - DataGrid Gallery 页迁移到 `GalleryShowCaseHost` 并新增 Semantic Parts 预览页签与 "Custom Semantic Part styling" 专用部件样式示例（延迟加载）。
+  - 新增 `DataGridSemanticPartTests`（描述符、静态 marker、运行时 marker、回收保持、专用 Style 命中）、`DataGridTokenAlignmentTests`（四处视觉对齐锁定）与 Gallery 语义高亮页面测试。
 
 ## 2026-09-06
 

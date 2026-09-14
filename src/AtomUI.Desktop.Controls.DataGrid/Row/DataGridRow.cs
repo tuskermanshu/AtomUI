@@ -13,6 +13,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using AtomUI.Generated.AtomUIDesktopControlsDataGrid;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -146,6 +147,7 @@ public partial class DataGridRow : TemplatedControl
     
     public DataGridRow()
     {
+        Classes.Add(DataGridSemanticParts.BodyRowClass);
         MinHeight                 =  DefaultMinHeight;
         Index                     =  -1;
         IsValid                   =  true;

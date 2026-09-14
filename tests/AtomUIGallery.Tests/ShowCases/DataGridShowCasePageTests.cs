@@ -26,7 +26,7 @@ public class DataGridShowCasePageTests
         source.ShouldNotContain("Tag=\"Examples\"");
         source.ShouldNotContain("Tag=\"Api\"");
         source.ShouldNotContain("Tag=\"DesignToken\"");
-        source.ShouldContain("<gallery:GalleryStickyTabsHost");
+        source.ShouldContain("<gallery:GalleryShowCaseHost");
         source.ShouldContain("StickyContentPadding=\"28,0,28,0\"");
         source.ShouldNotContain("<atom:TabStrip Name=\"ScenarioTabs\"");
         source.ShouldNotContain("<ContentControl Name=\"ScenarioContentHost\">");
@@ -42,9 +42,9 @@ public class DataGridShowCasePageTests
         CountOccurrences(source, "Classes=\"info-value\"").ShouldBe(0);
         source.ShouldNotContain("LineHeight=\"22\"");
         source.ShouldContain("Description=\"{gallery:DataGridShowCaseLangResource PageDescription}\"");
-        CountShowCaseItemElements(source).ShouldBe(23);
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(23);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(23);
+        CountShowCaseItemElements(source).ShouldBe(24);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(24);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(24);
         CountOccurrences(source, "DataTemplate x:DataType=\"vm:DataGridViewModel\"").ShouldBe(23);
         source.ShouldContain("DataGridShowCaseLangResource BasicTitle");
         source.ShouldContain("DataGridShowCaseLangResource SelectionTitle");

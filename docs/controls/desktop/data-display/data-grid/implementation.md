@@ -335,6 +335,39 @@ Source replacement 遵循预验证事务：候选 schema、当前 Query、列与
 - SortIndicator、FilterIndicator、row/cell/group header 继续使用既有 theme、part 与 pseudo-class。
 - FrameContentClip、FrameCornerRadius 和 FrameBorderThickness 的 ownership 不因异步数据架构改变。
 
+### 6.5 语义部件（Semantic Part）接入
+
+语义部件对齐 Ant Design 6.6.3 Table Semantic DOM，owner 为 `DataGrid`（public、非泛型，满足契约校验器）。声明位于 `DataGrid.SemanticParts.cs`，生成器为每个部件产出专用 Style 类（`DataGrid<PartPath>Style`，如 `header.wrapper` → `DataGridHeaderWrapperStyle`）与 marker 常量。
+
+Owner 事实表：
+
+| 部件 | 声明者 | 目标控件可见性 | SelectorRoute | 基数 | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- |
+| `root` | 生成器隐式合成 | `DataGrid` 控件自身 | 无（Customization=Root） | Single | 否 |
+| `section` | `DataGrid` | 模板静态节点 | `/template/ .semantic-section` | Single | 否 |
+| `title` | `DataGrid` | 模板静态节点 | `/template/ .semantic-title` | Single | 否 |
+| `content` | `DataGrid` | 模板静态节点（主 Grid） | `/template/ .semantic-content` | Single | 否 |
+| `header.wrapper` | `DataGrid` | 模板静态节点 | `/template/ .semantic-header-wrapper` | Single | 否 |
+| `header.cell` | `DataGrid` | `DataGridColumnHeader`（internal） | `>> .semantic-header-cell` | Multiple | 是 |
+| `body.wrapper` | `DataGrid` | 模板静态节点 | `/template/ .semantic-body-wrapper` | Single | 否 |
+| `body.row` | `DataGrid` | `DataGridRow` / `DataGridRowGroupHeader`（public） | `>> .semantic-body-row` | Multiple | 是 |
+| `body.cell` | `DataGrid` | `DataGridCell`（public） | `>> .semantic-body-row >> .semantic-body-cell`（CrossNestedOwners） | Multiple | 是 |
+| `footer` | `DataGrid` | 模板静态节点 | `/template/ .semantic-footer` | Single | 否 |
+
+Marker 预算与注入方式：
+
+- 静态模板 marker 共 8 个（section/title/content/header.wrapper/body.wrapper/footer/pagination.root×2），在 `DataGridTheme.axaml` 模板节点上以 `Classes.semantic-*="True"` 一次性声明；内置主题默认视觉不消费 `.semantic-*` selector，继续使用 `^ /template/ Type#Name` 形态。
+- 运行时 marker 共 4 类：`DataGridColumnHeader`、`DataGridRow`、`DataGridRowGroupHeader` 与 `DataGridCell` 在模板根应用时用生成常量注入（构造或 ApplyTemplate 一次 `Classes.Add`，回收复用不重复注入）；`pagination.item` 复用 `Pagination` 模板既有的 `semantic-item` class，经 `>> .semantic-pagination-root >> .semantic-item` 跨根路由命中。
+- 分组头行（`DataGridRowGroupHeader`）同样注入 `semantic-body-row`：分组头在视觉上属于表体行，用户对 `body.row` 的定制应自然覆盖。
+- `header.row` 不声明：AtomUI 模板中表头 presenter 直接承载列头，不存在独立表头行节点，不为对齐上游而虚构结构。
+- `pagination.root` 指向模板内两处 `Pagination` 槽位（顶部/底部，`Multiple`）；`pagination.item` 经 `>> .semantic-pagination-root >> .semantic-item` 跨视觉根命中分页器内部页码项，与上游 Table 的 pagination 区域对齐。
+
+虚拟化 ownership 与性能边界：
+
+- `body.row` / `body.cell` 目标节点由 DisplayData slot 回收与 Range 管线在运行时创建/回收；marker 只在控件模板应用时注入一次，回收复用不产生额外 Classes 写入或 VisualTree 扫描。
+- 语义系统构造时不读 registry；descriptor 查询只发生在专用 Style 解析阶段。
+- 冻结列、分组模式、行详情与拖动指示器不改变上述 selector 命中拓扑。
+
 ## 7. 交互与事件处理
 
 - Header pointer、keyboard、tooltip 与 `SetSort` 都调用同一 `DataGridSortPolicy`；resize 边界命中优先于排序手势。

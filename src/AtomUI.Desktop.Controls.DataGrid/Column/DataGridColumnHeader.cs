@@ -9,6 +9,7 @@ using System.Diagnostics;
 using AtomUI.Animations;
 using AtomUI.Controls;
 using AtomUI.Desktop.Controls.Utils;
+using AtomUI.Generated.AtomUIDesktopControlsDataGrid;
 using AtomUI.Utils;
 using Avalonia;
 using Avalonia.Automation;
@@ -315,6 +316,11 @@ internal partial class DataGridColumnHeader : ContentControl
         PointerMovedEvent.AddClassHandler<DataGridColumnHeader>((x, e) => x.HandlePointerMoved(e));
         IsTabStopProperty.OverrideDefaultValue<DataGridColumnHeader>(false);
         AutomationProperties.IsOffscreenBehaviorProperty.OverrideDefaultValue<DataGridColumnHeader>(IsOffscreenBehavior.FromClip);
+    }
+
+    public DataGridColumnHeader()
+    {
+        Classes.Add(DataGridSemanticParts.HeaderCellClass);
     }
 
     // protected override AutomationPeer OnCreateAutomationPeer()
@@ -841,6 +847,8 @@ internal partial class DataGridColumnHeader : ContentControl
             IsVisible = false
         };
         dragIndicator.PseudoClasses.Add(StdPseudoClass.DragIndicator);
+        // 拖拽 ghost 只是列头预览，不属于表头单元格语义部件。
+        dragIndicator.Classes.Remove(DataGridSemanticParts.HeaderCellClass);
         
         // pass the caret's data template to the user for modification
         DataGridColumnReorderingEventArgs columnReorderingEventArgs = new DataGridColumnReorderingEventArgs(OwningColumn)

@@ -588,4 +588,86 @@ public class SemanticPartHighlightSessionTests
 
         clamped.ShouldBe(markerRect);
     }
+
+    [Fact]
+    public void Clip_Host_Clamps_Marker_Rect_To_The_Preview_Stage()
+    {
+        // 语义预览表格横向溢出画布：目标右段越出画布（adorner 左缘在画布左缘外 2px，
+        // 画布宽 690）。描边必须与画布求交，只保留画布内的部分，右边缘贴画布右缘
+        // 内收半个笔宽，不再画到部件面板或画布之外。
+        var markerRect = SemanticPartAdorner.GetMarkerRect(new Size(760, 300), 2, 1);
+
+        var clamped = SemanticPartAdorner.ClampMarkerRectToClipHost(
+            markerRect,
+            clipHostRectInLayer: new Rect(40, 60, 690, 400),
+            adornerPositionInLayer: new Point(38, 100),
+            penThickness: 2);
+
+        clamped.ShouldNotBeNull();
+        clamped.ShouldBe(new Rect(3, 1, 688, 298));
+    }
+
+    [Fact]
+    public void Clip_Host_Hides_Markers_Entirely_Outside_The_Stage()
+    {
+        // 目标完全落在画布之外（如溢出画布的填充列）：画布内没有任何可见部分，
+        // 高亮框必须整体隐藏而不是跨过画布边界绘制。
+        var markerRect = SemanticPartAdorner.GetMarkerRect(new Size(60, 300), 2, 1);
+
+        var clamped = SemanticPartAdorner.ClampMarkerRectToClipHost(
+            markerRect,
+            clipHostRectInLayer: new Rect(40, 60, 690, 400),
+            adornerPositionInLayer: new Point(760, 100),
+            penThickness: 2);
+
+        clamped.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Clip_Host_Keeps_Interior_Markers_Untouched()
+    {
+        // 画布内目标（如 title 部件）不受画布钳制影响。
+        var markerRect = SemanticPartAdorner.GetMarkerRect(new Size(246, 42), 2, 1);
+
+        var clamped = SemanticPartAdorner.ClampMarkerRectToClipHost(
+            markerRect,
+            clipHostRectInLayer: new Rect(40, 60, 690, 400),
+            adornerPositionInLayer: new Point(120, 150),
+            penThickness: 2);
+
+        clamped.ShouldNotBeNull();
+        clamped.ShouldBe(markerRect);
+    }
+
+    [Fact]
+    public void Start_Passes_The_Clip_Host_To_The_Adorners()
+    {
+        var registry = Application.Current.ShouldNotBeNull()
+                                  .GetThemeManager().ShouldNotBeNull()
+                                  .SemanticParts;
+        registry.TryGetControl(typeof(AtomUIButton), out var descriptor).ShouldBeTrue();
+        var part = descriptor.Parts.Single(static candidate => candidate.Path == "content");
+        var button = new AtomUIButton
+        {
+            Content = "Semantic Button"
+        };
+        var stage = new Border();
+
+        using var context = ShowInAdornerHost(button);
+        using (var session = SemanticPartHighlightSession.Start(
+            button, part, registry, additionalRoots: null, clipHost: stage))
+        {
+            Dispatcher.UIThread.RunJobs();
+            var adorner = context.Layer.Children.OfType<SemanticPartAdorner>().Single();
+            adorner.ClipHost.ShouldBeSameAs(stage);
+        }
+
+        // 未声明画布的会话（popup/独立窗口宿主）保持旧行为：只钳制到层。
+        using (var plainSession = SemanticPartHighlightSession.Start(button, part, registry))
+        {
+            Dispatcher.UIThread.RunJobs();
+            var plainAdorner = context.Layer.Children.OfType<SemanticPartAdorner>().Single();
+            plainAdorner.ClipHost.ShouldBeNull();
+        }
+    }
 }

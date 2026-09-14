@@ -4,9 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
-using Avalonia.Media;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 
 namespace AtomUI.Toolkits.GalleryBase.Controls;
 
@@ -20,6 +18,7 @@ internal sealed class SemanticPartHighlightSession : IDisposable
     private SemanticPartDescriptor? _part;
     private SemanticPartRegistry? _registry;
     private Visual[] _additionalRoots;
+    private Visual? _clipHost;
     private bool _refreshQueued;
     private bool _isDisposed;
 
@@ -27,12 +26,14 @@ internal sealed class SemanticPartHighlightSession : IDisposable
         IReadOnlyList<Control> owners,
         SemanticPartDescriptor part,
         SemanticPartRegistry registry,
-        IEnumerable<Visual>? additionalRoots)
+        IEnumerable<Visual>? additionalRoots,
+        Visual? clipHost)
     {
         _owners          = owners.ToArray();
         _part            = part;
         _registry        = registry;
         _additionalRoots = additionalRoots?.ToArray() ?? [];
+        _clipHost        = clipHost;
     }
 
     public int TotalMatchCount { get; private set; }
@@ -45,7 +46,8 @@ internal sealed class SemanticPartHighlightSession : IDisposable
         IReadOnlyList<Control> owners,
         SemanticPartDescriptor part,
         SemanticPartRegistry registry,
-        IEnumerable<Visual>? additionalRoots = null)
+        IEnumerable<Visual>? additionalRoots = null,
+        Visual? clipHost = null)
     {
         ArgumentNullException.ThrowIfNull(owners);
         ArgumentNullException.ThrowIfNull(part);
@@ -55,7 +57,7 @@ internal sealed class SemanticPartHighlightSession : IDisposable
             throw new ArgumentException("At least one Semantic owner is required.", nameof(owners));
         }
 
-        var session = new SemanticPartHighlightSession(owners, part, registry, additionalRoots);
+        var session = new SemanticPartHighlightSession(owners, part, registry, additionalRoots, clipHost);
         session.SubscribeToOwnerPopups();
         session.Refresh();
         return session;
@@ -65,10 +67,11 @@ internal sealed class SemanticPartHighlightSession : IDisposable
         Control owner,
         SemanticPartDescriptor part,
         SemanticPartRegistry registry,
-        IEnumerable<Visual>? additionalRoots = null)
+        IEnumerable<Visual>? additionalRoots = null,
+        Visual? clipHost = null)
     {
         ArgumentNullException.ThrowIfNull(owner);
-        return Start([owner], part, registry, additionalRoots);
+        return Start([owner], part, registry, additionalRoots, clipHost);
     }
 
     public void Dispose()
@@ -88,6 +91,7 @@ internal sealed class SemanticPartHighlightSession : IDisposable
         }
         _crossRootProviders.Clear();
         _additionalRoots = [];
+        _clipHost = null;
         _owners = [];
         _part = null;
         _registry = null;
@@ -240,7 +244,7 @@ internal sealed class SemanticPartHighlightSession : IDisposable
                 continue;
             }
 
-            var adorner = SemanticPartAdorner.Create(target, index == 0);
+            var adorner = SemanticPartAdorner.Create(target, index == 0, _clipHost);
             layer.Children.Add(adorner);
             target.DetachedFromVisualTree += HandleTargetDetached;
             _adorners.Add(new AdornerEntry(target, layer, adorner));
