@@ -37,6 +37,18 @@
         <target state="translated">組合佈局</target>
       </segment>
     </unit>
+    <unit id="DoubleClickResetDescription">
+      <segment>
+        <source>Double-click a dragger to reset all panels to their default sizes.</source>
+        <target state="translated">雙擊分隔條，將所有面板還原為預設尺寸。</target>
+      </segment>
+    </unit>
+    <unit id="DoubleClickResetTitle">
+      <segment>
+        <source>Double-clicked reset</source>
+        <target state="translated">雙擊重設</target>
+      </segment>
+    </unit>
     <unit id="HorizontalDescription">
       <segment>
         <source>Top-bottom splitter with collapsible icons.</source>
@@ -149,6 +161,24 @@
       <segment>
         <source>Not Resizable</source>
         <target state="translated">Not Resizable</target>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel1">
+      <segment>
+        <source>Panel 1</source>
+        <target state="translated">面板 1</target>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel2">
+      <segment>
+        <source>Panel 2</source>
+        <target state="translated">面板 2</target>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel3">
+      <segment>
+        <source>Panel 3</source>
+        <target state="translated">面板 3</target>
       </segment>
     </unit>
     <unit id="P2TextResizable">

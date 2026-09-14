@@ -31,6 +31,16 @@
         <source>Composite</source>
       </segment>
     </unit>
+    <unit id="DoubleClickResetDescription">
+      <segment>
+        <source>Double-click a dragger to reset all panels to their default sizes.</source>
+      </segment>
+    </unit>
+    <unit id="DoubleClickResetTitle">
+      <segment>
+        <source>Double-clicked reset</source>
+      </segment>
+    </unit>
     <unit id="HorizontalDescription">
       <segment>
         <source>Top-bottom splitter with collapsible icons.</source>
@@ -124,6 +134,21 @@
     <unit id="P2TextNotResizable">
       <segment>
         <source>Not Resizable</source>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel1">
+      <segment>
+        <source>Panel 1</source>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel2">
+      <segment>
+        <source>Panel 2</source>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel3">
+      <segment>
+        <source>Panel 3</source>
       </segment>
     </unit>
     <unit id="P2TextResizable">

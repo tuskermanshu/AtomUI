@@ -123,6 +123,7 @@ internal class SplitterPanel : Panel
                 handle.DragStarted               -= HandleDragStarted;
                 handle.DragDelta                 -= HandleDragDelta;
                 handle.DragCompleted             -= HandleDragCompleted;
+                handle.DraggerDoubleClicked       -= HandleDraggerDoubleClicked;
                 handle.CollapsePreviousRequested -= HandleCollapsePreviousRequested;
                 handle.CollapseNextRequested     -= HandleCollapseNextRequested;
                 Children.Remove(handle);
@@ -228,6 +229,7 @@ internal class SplitterPanel : Panel
         handle.DragStarted               += HandleDragStarted;
         handle.DragDelta                 += HandleDragDelta;
         handle.DragCompleted             += HandleDragCompleted;
+        handle.DraggerDoubleClicked       += HandleDraggerDoubleClicked;
         handle.CollapsePreviousRequested += HandleCollapsePreviousRequested;
         handle.CollapseNextRequested     += HandleCollapseNextRequested;
 
@@ -374,6 +376,14 @@ internal class SplitterPanel : Panel
         if (sender is SplitterHandle handle)
         {
             ExpandLeftAtHandle(handle);
+        }
+    }
+
+    private void HandleDraggerDoubleClicked(object? sender, EventArgs e)
+    {
+        if (sender is SplitterHandle handle)
+        {
+            OwnerSplitter?.RaiseDraggerDoubleClicked(handle.HandleIndex);
         }
     }
 

@@ -113,6 +113,7 @@ public class Splitter : TemplatedControl
     public event EventHandler<SplitterResizeEventArgs>? ResizeStarted;
     public event EventHandler<SplitterResizeEventArgs>? ResizeDelta;
     public event EventHandler<SplitterResizeEventArgs>? ResizeCompleted;
+    public event EventHandler<SplitterDraggerDoubleClickedEventArgs>? DraggerDoubleClicked;
 
     #endregion
     
@@ -261,5 +262,10 @@ public class Splitter : TemplatedControl
     internal void RaiseResizeCompleted(int handleIndex, IReadOnlyList<double> sizes)
     {
         ResizeCompleted?.Invoke(this, new SplitterResizeEventArgs(handleIndex, sizes));
+    }
+
+    internal void RaiseDraggerDoubleClicked(int handleIndex)
+    {
+        DraggerDoubleClicked?.Invoke(this, new SplitterDraggerDoubleClickedEventArgs(handleIndex));
     }
 }

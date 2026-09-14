@@ -45,6 +45,11 @@ public class SplitterShowCasePageTests
         source.ShouldContain("SplitterShowCaseLangResource MultiPanelsTitle");
         source.ShouldContain("SplitterShowCaseLangResource LazyTitle");
         source.ShouldContain("SplitterShowCaseLangResource LineStyleTitle");
+        source.ShouldContain("SplitterShowCaseLangResource DoubleClickResetTitle");
+        source.ShouldContain("SourceKey=\"splitter-double-click-reset\"");
+        source.ShouldContain("DraggerDoubleClicked=\"HandleDraggerDoubleClicked\"");
+        CountOccurrences(source, "atom:Splitter.DefaultSize=\"30%\"").ShouldBeGreaterThanOrEqualTo(2);
+        CountOccurrences(source, "atom:Splitter.DefaultSize=\"40%\"").ShouldBeGreaterThanOrEqualTo(1);
         source.ShouldNotContain("<atom:TabControl");
         source.ShouldNotContain("<atom:DataGrid");
         source.ShouldNotContain(">Gallery<");

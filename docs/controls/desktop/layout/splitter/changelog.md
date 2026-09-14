@@ -2,6 +2,19 @@
 
 本文档记录 Splitter 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-14
+
+- API
+  - Add `DraggerDoubleClicked` and `SplitterDraggerDoubleClickedEventArgs`, exposing the zero-based handle index without applying an automatic reset policy.
+- Runtime
+  - Detect platform double-clicks from pointer click count, suppress the second drag start, dispatch after the matching left-button release, and cancel pending notification on pointer capture loss.
+  - Keep dragger double-click available when resizing is disabled and isolate nested Splitter notifications to their direct owner.
+  - Pair double-click subscriptions with drag bar template replacement and generated handle rebuild cleanup.
+- Gallery
+  - Add the stable `splitter-double-click-reset` ShowCase item, restoring three panels to their 30% / 40% / 30% default sizes.
+- Docs
+  - Document double-click event timing, ownership, reset responsibility, lifecycle and validation boundaries.
+
 ## 2026-07-02
 
 - Runtime

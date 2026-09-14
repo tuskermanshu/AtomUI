@@ -37,6 +37,18 @@
         <target state="translated">Composite</target>
       </segment>
     </unit>
+    <unit id="DoubleClickResetDescription">
+      <segment>
+        <source>Double-click a dragger to reset all panels to their default sizes.</source>
+        <target state="translated">Clique duas vezes no divisor para restaurar todos os painéis aos tamanhos padrão.</target>
+      </segment>
+    </unit>
+    <unit id="DoubleClickResetTitle">
+      <segment>
+        <source>Double-clicked reset</source>
+        <target state="translated">Redefinir com clique duplo</target>
+      </segment>
+    </unit>
     <unit id="HorizontalDescription">
       <segment>
         <source>Top-bottom splitter with collapsible icons.</source>
@@ -149,6 +161,24 @@
       <segment>
         <source>Not Resizable</source>
         <target state="translated">Não Resizable</target>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel1">
+      <segment>
+        <source>Panel 1</source>
+        <target state="translated">Painel 1</target>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel2">
+      <segment>
+        <source>Panel 2</source>
+        <target state="translated">Painel 2</target>
+      </segment>
+    </unit>
+    <unit id="P2TextPanel3">
+      <segment>
+        <source>Panel 3</source>
+        <target state="translated">Painel 3</target>
       </segment>
     </unit>
     <unit id="P2TextResizable">

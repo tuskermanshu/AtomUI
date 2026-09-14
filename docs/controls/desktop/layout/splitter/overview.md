@@ -32,7 +32,7 @@ Splitter 的设计语言是“低干扰的可调整边界”。分割线应明�
 | --- | --- | --- |
 | 产品语义 | 将一个区域拆成若干可调整子区域。 | `Children` 承载面板，`Orientation` 决定分割方向。 |
 | 内容承载 | 面板内容由用户直接提供。 | 子控件通过 `Splitter.Size`、`Splitter.MinSize` 等附加属性参与布局。 |
-| 状态反馈 | 拖拽、可折叠、禁用拖拽和延迟反馈需要可见状态。 | `ResizeStarted` / `ResizeDelta` / `ResizeCompleted` 事件、handle hover/dragging 视觉和折叠按钮。 |
+| 状态反馈 | 拖拽、双击、可折叠、禁用拖拽和延迟反馈需要稳定的交互边界。 | resize 事件、`DraggerDoubleClicked`、handle hover/dragging 视觉和折叠按钮。 |
 | 主题语义 | 外层容器与分割把手分开定制。 | `SplitterTheme` 承载根框架，`SplitterHandleTheme` 和 `SplitterDragBarTheme` 承载分割线和拖拽命中区。 |
 
 ## 3. API 与契约模型
@@ -46,7 +46,7 @@ Splitter 的公共契约由根控件 API、面板附加属性、折叠模型、�
 | 折叠入口 | `CollapsePreviousIcon`、`CollapseNextIcon`、`Splitter.Collapsible`、`Splitter.IsCollapsed` | 定义面板是否可折叠、折叠状态以及折叠图标。 |
 | 面板尺寸 | `Splitter.Size`、`Splitter.DefaultSize`、`Splitter.MinSize`、`Splitter.MaxSize` | 定义子面板初始尺寸、默认尺寸和尺寸约束。 |
 | 面板交互 | `Splitter.IsResizable` | 控制相邻边界是否允许拖拽调整。 |
-| 事件 | `ResizeStarted`、`ResizeDelta`、`ResizeCompleted` | 把 internal drag 流转换为控件级 resize 事件。 |
+| 事件 | `ResizeStarted`、`ResizeDelta`、`ResizeCompleted`、`DraggerDoubleClicked` | 把 internal drag 和分隔条双击转换为控件级事件。 |
 | 主题入口 | `HandleSize`、控件 Token、根模板外观入口 | 区分命中区域、可见分割线和根框架外观。 |
 
 样式能力边界：
@@ -96,6 +96,9 @@ Public API / attached panel properties / pointer drag / collapse button
 - `IsLazy=False` 时拖拽过程中实时调整面板尺寸；`IsLazy=True` 时拖拽过程中移动 drag bar，完成后提交尺寸。
 - `Splitter.Size` 是用户可双向绑定的实际尺寸入口；`DefaultSize` 是未提供实际尺寸时的初始化入口。
 - `MinSize`、`MaxSize`、`IsResizable` 和折叠状态共同决定某个 handle 是否可拖拽。
+- 分隔条第二次左键按下不会再次启动 drag；第二次左键释放后，`DraggerDoubleClicked` 以零基 `HandleIndex` 通知所属 `Splitter`。
+- `DraggerDoubleClicked` 不自动修改面板尺寸或折叠状态。应用可在处理器中把需要恢复的面板 `Size` 写回 `DefaultSize`，绑定场景应恢复绑定的数据源。
+- `IsResizable=False` 只禁用拖拽，分隔条双击通知仍然可用；嵌套 Splitter 的通知不会传播到外层 Splitter。
 - 折叠按钮只在相邻面板支持折叠或存在可恢复折叠面板时显示。
 - resize 事件以 handle index 和当前尺寸快照暴露，不让用户直接依赖 internal handle 实例。
 
@@ -136,6 +139,7 @@ Splitter 的运行时组合关系如下：
 | `SplitterDragBar` | internal | 继承 Thumb，提供 pointer drag 源和方向 cursor。 |
 | `SplitterPanelCollapsible` | public data model | 描述面板可折叠方向、显示策略和折叠尺寸。 |
 | `SplitterResizeEventArgs` | public event args | 暴露 resize 事件中的 handle index 和尺寸快照。 |
+| `SplitterDraggerDoubleClickedEventArgs` | public event args | 暴露双击的零基 handle index，不携带 internal handle。 |
 | `SplitterToken` | internal design token | 从 SharedToken 派生组件级视觉变量。 |
 
 集成关系：
@@ -150,6 +154,7 @@ Splitter 的运行时组合关系如下：
 维护 Splitter 时必须保持以下不变量：
 
 - 不改变 `Orientation`、`IsLazy`、`HandleSize`、附加尺寸属性、折叠属性和 resize 事件的默认语义。
+- 不改变 `DraggerDoubleClicked` 在第二次左键释放后触发、抑制第二次 drag start、只通知直接所属 Splitter 且不自动 reset 的语义。
 - 不把 `HandleSize` 重新定义为可见分割线厚度。
 - 不让 internal `SplitterPanel`、`SplitterHandle`、`SplitterDragBar` 成为用户必须引用的样式 API。
 - 不删除或重命名 `PART_SplitterPanel`，也不随意重命名 internal handle template part。
@@ -165,7 +170,7 @@ Splitter 的运行时组合关系如下：
 Splitter 的面板尺寸由用户面板上的附加属性描述：
 
 - `Size` 是可绑定的当前尺寸。
-- `DefaultSize` 只用于缺省初始化和布局恢复。
+- `DefaultSize` 用于缺省初始化，也可以作为应用处理 `DraggerDoubleClicked` 时显式恢复 `Size` 的目标值。
 - `MinSize` / `MaxSize` 限制拖拽和折叠恢复后的尺寸。
 - `IsResizable=False` 会让关联 handle 不接受拖拽，但不移除视觉分割线。
 - `IsCollapsed` 是可绑定折叠状态，必须和尺寸快照保持一致。
@@ -225,8 +230,8 @@ LLMS 导出来源：
 | 改动类型 | 验证要求 |
 | --- | --- |
 | 文档改动 | 运行 `git diff --check`，检查相对链接存在。 |
-| Public API | 覆盖属性默认值、事件触发、附加属性和继承语义。 |
+| Public API | 覆盖属性默认值、resize 与双击事件触发、handle index、附加属性和继承语义。 |
 | 状态模型 | 覆盖 drag、lazy、collapsed、disabled、hover、dragging 和折叠按钮显示。 |
 | AXAML/Theme | 检查 `PART_SplitterPanel`、internal handle part、伪类、资源 key 和 Light/Dark 主题。 |
 | Token | 检查 TokenKind、AXAML token resource、Token 类型、生成数据和 token.md和文档同步。 |
-| Gallery | 走查对应 ShowCase 示例和源码片段入口。 |
+| Gallery | 走查对应 ShowCase 示例和源码片段入口，包括 `splitter-double-click-reset`。 |

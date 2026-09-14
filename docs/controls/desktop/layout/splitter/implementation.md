@@ -28,6 +28,7 @@ Splitter
 - `src/AtomUI.Desktop.Controls/Splitter/SplitterDragBar.cs`
 - `src/AtomUI.Desktop.Controls/Splitter/SplitterPanelCollapsible.cs`
 - `src/AtomUI.Desktop.Controls/Splitter/SplitterResizeEventArgs.cs`
+- `src/AtomUI.Desktop.Controls/Splitter/SplitterDraggerDoubleClickedEventArgs.cs`
 - `src/AtomUI.Desktop.Controls/Splitter/SplitterToken.cs`
 - `src/AtomUI.Desktop.Controls/Splitter/Themes/SplitterTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Splitter/Themes/SplitterHandleTheme.axaml`
@@ -42,10 +43,10 @@ Gallery 与文档结构：
 
 职责边界：
 
-- `Splitter.cs` 保留 public API、附加属性、Children 同步、template part 获取和 resize 事件抛出。
+- `Splitter.cs` 保留 public API、附加属性、Children 同步、template part 获取、resize 和 dragger 双击事件抛出。
 - `SplitterPanel.cs` 保留布局、拖拽、折叠、尺寸约束和 handle 状态刷新。
 - `SplitterHandle.cs` 保留单个 handle 的按钮、hover、dragging、collapse request 和 drag event 转发。
-- `SplitterDragBar.cs` 保留 Thumb 输入事件和禁用拖拽拦截。
+- `SplitterDragBar.cs` 保留 Thumb 输入事件、双击识别、第二次 drag start 抑制和禁用拖拽拦截。
 - Theme 文件负责静态视觉结构、template binding、selector 和 TokenResource 映射。
 - Token 文件只提供组件视觉变量，不保存实例状态。
 
@@ -60,6 +61,7 @@ Gallery 与文档结构：
 - 在 `OnApplyTemplate` 中获取 `PART_SplitterPanel`。
 - 把 `Children` 同步到 `SplitterPanel.Children`。
 - 通过 `RaiseResizeStarted`、`RaiseResizeDelta`、`RaiseResizeCompleted` 把 internal drag 状态转换为 public resize 事件。
+- 通过 `RaiseDraggerDoubleClicked` 把 internal dragger 双击转换为 public `DraggerDoubleClicked`，只暴露 handle index。
 - 注册 `SplitterToken` scope。
 
 维护规则：
@@ -93,6 +95,7 @@ Gallery 与文档结构：
 - 接收 `Orientation`、`IsDragEnabled`、line brush、line thickness 等视觉状态。
 - 获取 `PART_DragBar` 和折叠按钮。
 - 转发 `SplitterDragBar` 的 drag event。
+- 转发 `SplitterDragBar` 的双击通知，并沿模板重套用生命周期成对订阅和解除。
 - 根据可折叠状态、hover side 和 icon display mode 更新折叠按钮。
 - 使用 `:pointerover` 和 `:dragging` 驱动主题 selector。
 
@@ -108,6 +111,8 @@ Gallery 与文档结构：
 
 - 提供 pointer drag 入口。
 - 通过 `IsDragEnabled` 禁用拖拽输入。
+- 使用平台提供的 pointer `ClickCount` 识别第二次左键按下，在释放阶段发出双击通知。
+- 第二次按下不进入 Thumb drag 流；捕获丢失会取消待释放的双击通知。
 - 使用 `Orientation` 设置 resize cursor。
 - 使用 line brush、line thickness 和 line corner radius 展示 grip。
 - 使用 `:dragging` 表达拖拽状态。
@@ -138,6 +143,18 @@ Pointer drag on SplitterDragBar
   -> SplitterPanel.HandleDragStarted / HandleDragDelta / HandleDragCompleted
   -> Apply panel sizes
   -> Splitter.ResizeStarted / ResizeDelta / ResizeCompleted
+```
+
+双击状态流：
+
+```text
+Second left PointerPressed on SplitterDragBar
+  -> suppress second Thumb DragStarted
+  -> matching left PointerReleased
+  -> SplitterHandle.DraggerDoubleClicked
+  -> SplitterPanel forwards HandleIndex
+  -> Splitter.DraggerDoubleClicked
+  -> application-owned reset policy
 ```
 
 折叠状态流：
@@ -179,13 +196,13 @@ Splitter public style API / SplitterToken
 `SplitterPanel` 生命周期：
 
 - 构造阶段订阅自身 `Children.CollectionChanged`。
-- `RefreshPanelsAndHandles` 移除旧 handle、解除事件订阅、重建面板列表、创建新 handle、建立 handle 事件。
+- `RefreshPanelsAndHandles` 移除旧 handle、解除 drag、double-click 和 collapse 事件订阅、重建面板列表、创建新 handle、建立 handle 事件。
 - `SyncTrackedPanels` 跟踪用户面板属性变化，并在面板离开时解绑。
 - 布局变化和属性变化触发 measure/arrange 或 handle state update。
 
 `SplitterHandle` 生命周期：
 
-- `OnApplyTemplate` 先解除旧 `SplitterDragBar` 和按钮事件，再获取新 part 并重新订阅。
+- `OnApplyTemplate` 先解除旧 `SplitterDragBar` 的 drag/double-click 事件和按钮事件，再获取新 part 并重新订阅。
 - `SetDragging` 同步 handle 和 drag bar 的 `:dragging` 状态。
 - `UpdateCollapseButtons` 在 hover、orientation、collapse state 变化后刷新按钮。
 
@@ -204,9 +221,17 @@ Splitter public style API / SplitterToken
 交互规则：
 
 - Pointer drag 只从 `SplitterDragBar` 进入。
-- `SplitterHandle` 只转发 drag event 和 collapse request。
+- `SplitterHandle` 只转发 drag event、dragger double-click 和 collapse request。
 - `SplitterPanel` 是唯一可修改面板尺寸和折叠状态的内部 owner。
 - `Splitter` 只负责对外抛 resize 事件。
+
+dragger 双击事件语义：
+
+- 双击时间和距离由 Avalonia 平台输入系统计算为 `ClickCount`，控件不维护固定毫秒计时器。
+- 第一次按下和释放保留原有 drag started/completed 语义；第二次按下不再启动 drag。
+- `DraggerDoubleClicked` 在第二次左键释放后触发，捕获丢失时取消。
+- 双击通知直接沿所属 drag bar、handle、panel 和 Splitter 传递，不使用冒泡 routed event，避免嵌套 Splitter 通知外层。
+- 双击通知独立于 `IsDragEnabled`；控件不自动恢复 `Size`、`DefaultSize` 或 `IsCollapsed`。
 
 resize 事件语义：
 
@@ -240,6 +265,7 @@ resize 事件语义：
 - 不通过运行时反射扫描 public API、Token 或 Gallery 示例数据。
 - 不把可静态声明的模板结构迁移到 C# 动态创建。
 - handle、drag bar、button 的事件订阅必须在模板重套用或 handle 移除时解绑。
+- drag bar 仅持有一个待释放双击状态；该状态在 release 和 pointer capture lost 时清除，不使用 timer 或全局输入监听。
 - `_trackedPanels` 中的面板属性订阅必须在面板离开时解绑。
 
 性能边界：
@@ -263,6 +289,7 @@ AOT 边界：
 - `HandleSize` 作为 hit area 的语义。
 - `SplitterPanel` 作为尺寸与折叠状态 owner 的语义。
 - internal handle template part 的绑定关系和事件释放路径。
+- `DraggerDoubleClicked` 的释放时机、零基 handle index、第二次 drag start 抑制、禁用拖拽可用性和嵌套隔离。
 - Light/Dark、Browser/Desktop 和不同方向下的主题一致性。
 - API 契约摘要、Token 语义、ShowCase 示例和控件文档的一致性。
 
@@ -280,6 +307,7 @@ AOT 边界：
 
 - 纯文档改动运行 `git diff --check` 并检查相对链接。
 - 控件 API 或行为变更运行 `tests/AtomUI.Desktop.Controls.Tests`。
+- 双击行为测试覆盖释放时机、handle index、重复 drag start、禁用拖拽、捕获丢失、handle 重建解绑和嵌套隔离。
 - Gallery 示例或源码片段变更运行 `tests/AtomUIGallery.Tests` 中 Splitter 相关测试。
 - 主题变更检查 `SplitterTheme.axaml`、`SplitterHandleTheme.axaml`、`SplitterDragBarTheme.axaml` 中 TemplateBinding、TokenResource 和 selector 是否一致。
 - AOT、生成器或动态数据路径变更按 Gallery NativeAOT 发布流程验证。
