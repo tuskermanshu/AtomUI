@@ -34,6 +34,9 @@ public class MenuItemGroup : ItemsControl
 
     private const string ItemTitleGroupClass = "semantic-item-title-group";
 
+    // 分组所在层级由 owner 在 prepare 时下发；分组内的菜单项继承该层级。
+    internal MenuSemanticLevel SemanticLevel { get; set; }
+
     public MenuItemGroup()
     {
         // itemTitle 语义部件锚定到分组标题元素；分组容器本身承担跨视觉根路由的
@@ -51,6 +54,7 @@ public class MenuItemGroup : ItemsControl
 
         var menuItem = new MenuItem();
         menuItem.Classes.Add(DropdownButtonSemanticParts.ItemClass);
+        ApplyChildSemanticLevel(menuItem);
         return menuItem;
     }
 
@@ -72,6 +76,7 @@ public class MenuItemGroup : ItemsControl
         if (container is MenuItem menuItem)
         {
             menuItem.Classes.Add(DropdownButtonSemanticParts.ItemClass);
+            ApplyChildSemanticLevel(menuItem);
 
             if (item != null && item is not Visual)
             {
@@ -120,5 +125,17 @@ public class MenuItemGroup : ItemsControl
         base.OnApplyTemplate(e);
         e.NameScope.Find<ContentPresenter>("GroupTitlePresenter")?
          .Classes.Add(DropdownButtonSemanticParts.ItemTitleClass);
+    }
+
+    // 分组内的菜单项继承分组层级：顶层分组内的项算一级，子菜单内分组里的项算子菜单项。
+    private void ApplyChildSemanticLevel(MenuItem menuItem)
+    {
+        if (SemanticLevel == MenuSemanticLevel.None)
+        {
+            return;
+        }
+
+        menuItem.SemanticLevel = SemanticLevel;
+        MenuSemanticLevelScope.ApplyItemLevel(menuItem, SemanticLevel);
     }
 }

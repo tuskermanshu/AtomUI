@@ -50,6 +50,8 @@
                         </Panel>
 
                         <atom:IconPresenter Name="ItemIconPresenter"
+                                            Classes.semantic-item-icon="True"
+                                            Classes.semantic-sub-menu-item-icon="True"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             Icon="{TemplateBinding Icon}"
@@ -57,6 +59,8 @@
                                             IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"
                                             Grid.Column="1" />
                         <ContentPresenter Name="ItemTextPresenter"
+                                          Classes.semantic-item-content="True"
+                                          Classes.semantic-sub-menu-item-content="True"
                                           HorizontalAlignment="Stretch"
                                           VerticalAlignment="Center"
                                           RecognizesAccessKey="True"
@@ -87,6 +91,7 @@
                             IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
                             ShouldUseOverlayLayer="{TemplateBinding ShouldUseOverlayPopup}">
                     <Border Name="PopupFrame"
+                            Classes.semantic-popup-root="True"
                             MaxHeight="{TemplateBinding MaxPopupHeight}"
                             Padding="{TemplateBinding PopupPadding}">
                         <atom:MenuPopupScrollHost IsScrollEnabled="{TemplateBinding IsScrollEnabled}"

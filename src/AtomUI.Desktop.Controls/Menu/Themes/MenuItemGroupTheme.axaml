@@ -8,13 +8,17 @@
             <ControlTemplate TargetType="atom:MenuItemGroup">
                 <StackPanel>
                     <ContentPresenter Name="GroupTitlePresenter"
+                                      Classes.semantic-item-title="True"
+                                      Classes.semantic-sub-menu-item-title="True"
                                       HorizontalAlignment="Stretch"
                                       VerticalAlignment="Center"
                                       Foreground="{atom:SharedTokenResource ColorTextDescription}"
                                       Padding="16,8"
                                       Content="{TemplateBinding Header}"
                                       ContentTemplate="{TemplateBinding HeaderTemplate}" />
-                    <ItemsPresenter Name="PART_ItemsPresenter" />
+                    <ItemsPresenter Name="PART_ItemsPresenter"
+                                    Classes.semantic-list="True"
+                                    Classes.semantic-sub-menu-list="True" />
                 </StackPanel>
             </ControlTemplate>
         </Setter>

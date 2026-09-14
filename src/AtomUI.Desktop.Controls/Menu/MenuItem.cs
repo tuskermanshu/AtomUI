@@ -64,6 +64,7 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
     public EntityKey? ItemKey { get; set; }
 
     private Popup? _popup;
+    private bool _isSyncingSubMenuPopupState;
     private bool _isUsingDetachedTitleBarPopupPlacement;
     private IDisposable? _detachedTitleBarPopupPlacementTracker;
 
@@ -223,6 +224,10 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         PseudoClasses.Set(MenuItemPseudoClass.TopLevel, IsTopLevel);
     }
 
+    // 由 owner 在容器 prepare 时下发。None 表示该 MenuItem 不属于 plain Menu 语义作用域（MenuFlyout /
+    // ContextMenu / DropdownButton 弹层创建并复用同一容器类型），此时保持既有 .semantic-item marker。
+    internal MenuSemanticLevel SemanticLevel { get; set; }
+
     protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
     {
         if (item is MenuSeparatorData)
@@ -257,7 +262,13 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         base.PrepareContainerForItemOverride(container, item, index);
         if (container is MenuItem menuItem)
         {
+            var childLevel = ResolveChildSemanticLevel();
             menuItem.Classes.Add(DropdownButtonSemanticParts.ItemClass);
+            if (childLevel != MenuSemanticLevel.None)
+            {
+                menuItem.SemanticLevel = childLevel;
+                MenuSemanticLevelScope.ApplyItemLevel(menuItem, childLevel);
+            }
 
             if (item != null && item is not Visual)
             {
@@ -305,9 +316,15 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         {
             menuSeparator.Orientation = Orientation.Horizontal;
         }
-        else if (container is MenuItemGroup)
+        else if (container is MenuItemGroup menuItemGroup)
         {
             // 分组标题与子项的样式由 MenuItemGroup 自身的模板与容器逻辑处理。
+            var childLevel = ResolveChildSemanticLevel();
+            if (childLevel != MenuSemanticLevel.None)
+            {
+                menuItemGroup.SemanticLevel = childLevel;
+                MenuSemanticLevelScope.ApplyGroupLevel(menuItemGroup, childLevel);
+            }
         }
         else if (container is not MenuSeparator)
         {
@@ -318,6 +335,15 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
 
     protected virtual void PrepareMenuItem(MenuItem menuItem, object? item, int index)
     {
+    }
+
+    // 自身层级决定子容器层级：plain Menu 顶层项的子项属于子菜单层，子菜单项的子项仍在子菜单层。
+    // None 表示不在 plain Menu 语义作用域内，子容器保持复用方既有的 marker 行为。
+    private MenuSemanticLevel ResolveChildSemanticLevel()
+    {
+        return SemanticLevel == MenuSemanticLevel.None
+            ? MenuSemanticLevel.None
+            : MenuSemanticLevel.SubMenu;
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -332,10 +358,7 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         }
 
         base.OnApplyTemplate(e);
-        e.NameScope.Find<IconPresenter>("ItemIconPresenter")?
-         .Classes.Add(DropdownButtonSemanticParts.ItemIconClass);
-        e.NameScope.Find<ContentPresenter>("ItemTextPresenter")?
-         .Classes.Add(DropdownButtonSemanticParts.ItemContentClass);
+        // icon / content 的层级 marker 由模板静态声明（同 NavMenu），不在这里按 Name 动态注入。
         _popup = e.NameScope.Find<Popup>("PART_Popup");
         if (_popup != null)
         {
@@ -365,7 +388,24 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
             return;
         }
 
-        _popup.IsOpen = IsSubMenuOpen;
+        // 业务打开状态与弹层呈现之间是双向传播：这里写 Popup.IsOpen 会同步派发 Opened / Closed，
+        // 事件处理器又会把 IsSubMenuOpen 写回并回到本方法。弹层无法呈现时（放置目标跑出 TopLevel
+        // 可视矩形，例如菜单在长页面折叠线以下）该写回不会收敛，会形成无界同步递归直到栈溢出。
+        // 正在驱动弹层时不再回写驱动：弹层已经处于目标状态，重入同步没有语义。
+        if (_isSyncingSubMenuPopupState)
+        {
+            return;
+        }
+
+        _isSyncingSubMenuPopupState = true;
+        try
+        {
+            _popup.IsOpen = IsSubMenuOpen;
+        }
+        finally
+        {
+            _isSyncingSubMenuPopupState = false;
+        }
     }
 
     private void DeferSubMenuPopupOpen(Popup popup)

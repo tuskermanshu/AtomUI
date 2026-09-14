@@ -21,7 +21,10 @@ Popup 接入边界：`Menu` / MenuFlyout 负责业务状态和内容准备，men
 - `src/AtomUI.Desktop.Controls/Menu/Converters/ToggleItemsLayoutVisibleConverter.cs`
 - `src/AtomUI.Desktop.Controls/Menu/DefaultMenuInteractionHandler.cs`
 - `src/AtomUI.Desktop.Controls/Menu/Menu.cs`
+- `src/AtomUI.Desktop.Controls/Menu/Menu.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItem.cs`
+- `src/AtomUI.Desktop.Controls/Menu/MenuItemGroup.cs`
+- `src/AtomUI.Desktop.Controls/Menu/MenuSemanticLevel.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemData.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemPseudoClass.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuPopupScrollHost.cs`
@@ -31,6 +34,7 @@ Popup 接入边界：`Menu` / MenuFlyout 负责业务状态和内容准备，men
 - `src/AtomUI.Desktop.Controls/Menu/Themes/ContextMenuTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/MenuItemTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/MenuItemTheme.cs`
+- `src/AtomUI.Desktop.Controls/Menu/Themes/MenuItemGroupTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/MenuSeparatorTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/MenuTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/TopLevelMenuItemTheme.axaml`
@@ -198,6 +202,19 @@ Menu 的交互事件应从输入源收敛到控件级语义事件：
 - ItemsSource、selection、checked、expanded、filter、paging 或 upload task 的集合同步。
 - 动效启停、初始加载阶段 transition 抑制和卸载取消。
 
+菜单项图标容器必须保持以下不变量：
+
+- `IconPresenter` 自身不测量图标，尺寸由主题 Setter 提供。菜单栏一级项与弹层菜单项都必须声明 `Width` / `Height`
+  （取 `MenuTokenResource ItemIconSize`）与 `Margin`（取 `MenuTokenResource ItemMargin`）；只声明 `Margin` 会让图标
+  量到 `0x0`：图标不可见但间距仍在，菜单项文字出现幽灵右移。
+- 图标为空时靠 `IsVisible` 折叠整个 `IconPresenter`，不得用固定占位宽度对齐无图标项。
+- 菜单栏顶层项按自身内容排布，图标列不参与跨项 `SharedSizeGroup`；否则无图标项会让出图标列宽。
+- 弹层内「直接子项」与「分组内子项」的图标列由不同共享尺寸作用域决定：`MenuItem` 模板的图标列带
+  `SharedSizeGroup="IconPresenter"`，作用域锚在 popup 的 `PART_ItemsPresenter`；`MenuItemGroup` 模板自带
+  `ItemsPresenter`，其子项位于该作用域之外，图标列不会被同层有图标的兄弟撑开。因此弹层内同一层菜单项若在
+  有/无图标之间混用，分组行的图标列会量到 `0`、文字左移，与直接子项文字左边缘不齐。示例与演示内容应保持
+  同一层菜单项的图标使用一致；该行为是既有布局契约，不在本次语义改造范围内。
+
 子菜单延迟算法必须保持以下不变量：
 
 - 每类 intent 最多只有一个当前目标；同一目标不能同时处于 pending open 和 pending close。
@@ -242,7 +259,11 @@ Menu 的交互事件应从输入源收敛到控件级语义事件：
 - `IsScrollEnabled` 默认值、继承传播、本地覆盖和 `MenuFlyout` 到 presenter 中继语义。
 - 滚动禁用时不创建 `ScrollViewer`，滚动开启时 `DisplayPageSize` 继续限制弹层最大高度。
 - 选择状态、Popup 状态与 hover intent 的职责分离。
+- `MenuItem.SyncSubMenuPopupOpenState` 的非重入性：`Popup.IsOpen` 的打开 / 关闭结果会回写 `IsSubMenuOpen`，写入
+  又触发同一同步方法。弹层无法保持打开时（放置目标跑出 `TopLevel` 可视矩形）该回写链曾无限递归直至栈溢出，因此同步
+  必须由 `_isSyncingSubMenuPopupState` 守卫；移除守卫会让可视区外的子菜单展开直接崩溃。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
+- plain Menu 的语义层级只在其自身子树内下发；共享容器在 ContextMenu / MenuFlyout / DropdownButton 弹层中的 marker 行为不变。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 
 ## 10. 测试与验证
@@ -260,9 +281,27 @@ Menu 的交互事件应从输入源收敛到控件级语义事件：
 - pointer 进入带子菜单项后在打开延迟内离开，延迟完成后子菜单仍未打开。
 - pointer 离开已打开父项后，在关闭延迟内进入父项或其 Popup，子菜单保持打开。
 - pointer 从一个带子菜单项快速移动到兄弟项，只允许当前目标打开，旧目标 callback 不提交状态。
+
+子菜单弹层开关状态同步至少覆盖以下回归场景：
+
+- 放置目标位于可视区外时展开子菜单不触发状态同步递归（不得出现 `StackOverflowException`）。
+- 放置目标位于可视区内时，`IsSubMenuOpen` 与 `Popup.IsOpen` 的打开 / 收起行为保持不变。
 - pointer 从带子菜单项移动到叶子项，已打开兄弟子菜单按关闭延迟关闭，叶子项不产生打开 intent。
 - menu close、Popup/Flyout 关闭、窗口失活和 visual detach 后执行历史 callback，不得重新打开或修改菜单项。
 - 外部 delay runner 无法物理取消任务时，dispose 后执行 callback 仍不得提交状态。
 - keyboard、access key 和 pointer press 的即时打开、选择首项、关闭与事件顺序保持不变。
 - `Menu`、`ContextMenu`、默认 `MenuFlyoutPresenter` 和 detached title-bar menu 路径分别覆盖。
 - `IsScrollEnabled` 默认值、继承传播、本地覆盖、`MenuFlyout` presenter 中继、`ScrollViewer` 有无和最大高度算法分别覆盖。
+
+Semantic Part 至少覆盖以下回归场景（见 [Menu Semantic Part 契约](semantic-part.md)）：
+
+- `Menu` descriptor 的 Part 名称逐字等于上游 12 个键路径，顺序、Selector、route、ContractType、cardinality 与契约一致；
+  `MenuItem`、`MenuItemGroup`、`MenuSeparator`、`MenuPopupScrollHost` 不持有 descriptor。
+- 层级 marker 互斥：菜单栏项与一级分组内的项只带 `.semantic-item`，子菜单容器只带 `.semantic-sub-menu-item`；一级分组带
+  `.semantic-scope-group`，子菜单内分组带 `.semantic-sub-menu-group`；容器回收 / 复用 / re-template 后不残留另一层级。
+- 复用方边界：未经 `Menu` 下发层级的 `MenuItemGroup` / `MenuItem`（ContextMenu、MenuFlyout、DropdownButton 弹层）保持既有
+  `.semantic-item` marker，不因 plain Menu 层级隔离而丢失或改变。
+- 模板 marker 存在性：`MenuItemTheme` 与 `TopLevelMenuItemTheme` 的 icon / content 双层级 marker、两个模板的
+  `Border#PopupFrame` popup.root marker、`MenuItemGroupTheme` 的标题 / 列表双层级 marker 均在模板中静态声明。
+- 声明式钉住时序：`IsPopupPinnedOpen="True"` 在容器生成前写入时，容器 prepare 阶段补齐请求，普通关闭请求不得收起弹层。
+- 用户入口：`atom|Menu` owner-scoped 生成 Semantic Style 可编译并命中；默认主题不消费 `.semantic-*`。
