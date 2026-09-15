@@ -3,6 +3,24 @@
 本文档记录 Masonry 控件级设计、API、主题契约、Token 和实现结构的变化。
 它不替代仓库根目录 CHANGELOG.md，也不作为正式版本发布说明。
 
+## 2026-09-15
+
+- Behavior
+  - feat(Masonry): 对齐 Ant Design item 动效（入场淡入/位置滑动/离场淡出）与 RTL 镜像。
+  - New items fade in (`MotionDurationSlow`, 300ms default); existing items glide to new positions with `RenderTransform` translate (no fade); removed items fade out in place through a transient ghost layer (`MotionDurationFast`, 100ms default), keeping the `.semantic-item` marker during the leave window, aligned with antd 6.6.3 Masonry motion semantics.
+  - Easing is `CubicEaseOut`, equivalent to antd `motionEaseOut`; global `EnableMotion=false` degrades all motions to instantaneous.
+  - RTL arranges visual rects mirrored (`x' = width - right`), matching antd `-rtl` semantics, without changing logical order.
+- Theme
+  - Feed `MotionDuration` / `LeaveMotionDuration` from `MotionDurationSlow` / `MotionDurationFast` tokens via ControlTheme setters; add the `PART_MotionGhostLayer` hosting canvas to the default template.
+- Implementation
+  - Drive motions from `MasonryPanel` layout state (old/new arrange rects) with Animation-priority preset/release via the `SetValue` disposable handle; register an `ITransform` keyframe animator (`MasonryItemTransformAnimator`).
+  - Override `Panel.ChildrenChanged` to collect removed children and release ghosts before visual-children synchronization on re-add.
+- Docs
+  - Extend semantic-part state table with the ghost window, add the motion chapter to implementation.md, and regenerate LLMS sources.
+  - Rework the Gallery semantic style demo copy from the antd React terms (`classNames` / `styles` / semantic DOM / absolute positioning / flex layout) to Avalonia/AtomUI concepts (owner-scoped styles, `MasonryItemStyle`, style matched by class or property state), aligned with the wording used by the Spin showcase and guarded by page tests.
+- Verification
+  - Add Masonry motion tests covering duration tokens, appear, glide, release, restart, leave ghost lifecycle, zero-duration degradation and RTL mirroring.
+
 ## 2026-08-26
 
 - API

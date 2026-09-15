@@ -93,26 +93,26 @@
     </unit>
     <unit id="SemanticFunctionStylesTitle">
       <segment>
-        <source>classNames and styles Function</source>
-        <target state="translated">classNames e styles Function</target>
+        <source>Style matched by property state</source>
+        <target state="translated">Estilo correspondido por estado de propriedade</target>
       </segment>
     </unit>
     <unit id="SemanticItemDescription">
       <segment>
-        <source>Item element, sets absolute positioning, width calculation, transition animation and masonry item styles.</source>
-        <target state="translated">Elemento de item, define posicionamento absoluto, cálculo de largura, animação de transição e estilos de item masonry.</target>
+        <source>Item container measured, column-assigned and arranged by the masonry layout, carrying the Masonry.Column and Masonry.Span metadata.</source>
+        <target state="translated">Contêiner de item medido, atribuído a colunas e organizado pelo layout masonry, carregando os metadados Masonry.Column e Masonry.Span.</target>
       </segment>
     </unit>
     <unit id="SemanticObjectStylesTitle">
       <segment>
-        <source>classNames and styles Object</source>
-        <target state="translated">classNames e styles Object</target>
+        <source>Style matched by class</source>
+        <target state="translated">Estilo correspondido por classe</target>
       </segment>
     </unit>
     <unit id="SemanticPartStyleDescription">
       <segment>
-        <source>You can customize the semantic dom style of Masonry by passing objects/functions through `classNames` and `styles`.</source>
-        <target state="translated">Você pode personalizar o estilo semantic dom do Masonry passando objetos/funções por meio de `classNames` e `styles`.</target>
+        <source>Use owner-scoped styles and the MasonryItemStyle semantic part style to customize Masonry's published Semantic Parts.</source>
+        <target state="translated">Use estilos com escopo de owner e o estilo de parte semântica MasonryItemStyle para personalizar as Semantic Parts publicadas do Masonry.</target>
       </segment>
     </unit>
     <unit id="SemanticPartStyleTitle">
@@ -123,8 +123,8 @@
     </unit>
     <unit id="SemanticRootDescription">
       <segment>
-        <source>Root element, sets relative positioning, flex layout and masonry container styles.</source>
-        <target state="translated">Elemento raiz, define posicionamento relativo, layout flex e estilos do contêiner masonry.</target>
+        <source>Root element, provides the root chrome, column and gutter layout inputs, and the ItemsControl entry.</source>
+        <target state="translated">Elemento raiz, fornece o chrome raiz, as entradas de layout de colunas e espaçamento, e a entrada do ItemsControl.</target>
       </segment>
     </unit>
   </file>

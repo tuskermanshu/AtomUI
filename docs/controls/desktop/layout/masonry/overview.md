@@ -115,7 +115,7 @@ public event EventHandler<MasonryLayoutChangedEventArgs>? LayoutChanged;
 
 ## 4. 行为与状态模型
 
-Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互状态。它必须完整保留子元素自身的命中测试、焦点、键盘导航、拖拽、上下文菜单和动画行为。
+Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互状态。它必须完整保留子元素自身的命中测试、焦点、键盘导航、拖拽、上下文菜单和动画行为。Masonry 自身为 item 提供布局动效：新 item 入场淡入、既有 item 位置变化时滑动、移除的 item 在原位置淡出（时长来自 `motionDurationSlow` / `motionDurationFast` token，全局禁用动效时退化为瞬时；机制见 [Masonry 桌面版实现原理](implementation.md)），item 自身的交互动画不受影响，动效结束后 item 的样式基值自动接管。
 
 有效状态由响应式属性、兼容属性、可用宽度和子项 attached property 共同决定。状态归一发生在 C# 布局层，AXAML 不承担列数、间距或子项位置计算。
 
@@ -133,18 +133,20 @@ Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互�
 
 ## 5. 视觉与主题模型
 
-Masonry 的默认主题装配 root chrome `PixelAlignedBorder`、`ItemsPresenter` 与 internal `MasonryPanel`，并把 Masonry 的布局属性与 root chrome 属性分别传递给对应层。Theme 不绘制子项外观，不通过 selector 计算列数和位置。Semantic Part marker 不写入主题静态节点；`.semantic-item` 由 Masonry 在 item container 准备阶段补齐。
+Masonry 的默认主题装配 root chrome `PixelAlignedBorder`、`ItemsPresenter`、离场 ghost 层与 internal `MasonryPanel`，并把 Masonry 的布局属性与 root chrome 属性分别传递给对应层。Theme 不绘制子项外观，不通过 selector 计算列数和位置。Semantic Part marker 不写入主题静态节点；`.semantic-item` 由 Masonry 在 item container 准备阶段补齐。
 
 默认视觉树：
 
 ```text
 Masonry (ItemsControl, default ItemsPanel = MasonryPanel)
 └─ PixelAlignedBorder#PART_RootBorder
-   └─ ItemsPresenter
-      └─ MasonryPanel (internal)
-         ├─ <子元素>
-         ├─ ContentPresenter → <子元素>
-         └─ ...
+   └─ Grid
+      ├─ ItemsPresenter
+      │  └─ MasonryPanel (internal)
+      │     ├─ <子元素>
+      │     ├─ ContentPresenter → <子元素>
+      │     └─ ...
+      └─ Canvas#PART_MotionGhostLayer (离场淡出托管，不参与命中测试)
 ```
 
 视觉树要求：
@@ -156,7 +158,7 @@ Masonry (ItemsControl, default ItemsPanel = MasonryPanel)
 - 不通过不可见控件缓存测量结果。
 - 不为子项主动插入额外视觉包装层。
 
-Masonry 当前不定义专属 Token，不需要创建 `token.md`。Masonry 的间距和列宽属于实例布局状态，不应迁移为控件 Token。root chrome 仅复用 `ItemsControl` 已有的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 与 `Padding`，不引入独立 token 边界。
+Masonry 当前不定义专属 Token，不需要创建 `token.md`。Masonry 的间距和列宽属于实例布局状态，不应迁移为控件 Token。root chrome 仅复用 `ItemsControl` 已有的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 与 `Padding`，不引入独立 token 边界。item 动效时长复用全局 motion token（`MotionDurationSlow` / `MotionDurationFast`），由 ControlTheme Setter 馈入 internal 属性，同样不属于 Masonry 专属 Token。
 
 ## 6. 控件家族或集成关系
 

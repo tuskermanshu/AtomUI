@@ -1183,7 +1183,10 @@ item 自身控件或 `ItemTemplate` 内部控件，而不是扩大 Masonry item 
 
 ```xml
 <PixelAlignedBorder Name="PART_RootBorder">
-    <ItemsPresenter Name="PART_ItemsPresenter" />
+    <Grid>
+        <ItemsPresenter Name="PART_ItemsPresenter" />
+        <Canvas Name="PART_MotionGhostLayer" />
+    </Grid>
 </PixelAlignedBorder>
 ```
 
@@ -1197,7 +1200,9 @@ item 自身控件或 `ItemTemplate` 内部控件，而不是扩大 Masonry item 
 Masonry
   -> Masonry (control theme, MasonryTheme.axaml)
      -> PixelAlignedBorder#PART_RootBorder (template-stable)
-        -> ItemsPresenter#PART_ItemsPresenter (template-stable)
+        -> Grid (template-stable)
+           -> ItemsPresenter#PART_ItemsPresenter (template-stable)
+           -> Canvas#PART_MotionGhostLayer (template-stable)
 ```
 
 ### 协作节点
@@ -1208,6 +1213,7 @@ Masonry
 | `Masonry` | control theme | `MasonryTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `ClipToBounds`, `CornerRadius`, `ItemsPanel` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `PART_RootBorder` | template node (PixelAlignedBorder) | `MasonryTheme.axaml` | Masonry | `Background`, `BorderBrush`, `BorderThickness`, `ClipToBounds`, `CornerRadius`, `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `MasonryTheme.axaml` | Masonry | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_MotionGhostLayer` | template node (Canvas) | `MasonryTheme.axaml` | Masonry | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
@@ -1219,7 +1225,7 @@ Masonry
 
 ## State Flow
 
-Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互状态。它必须完整保留子元素自身的命中测试、焦点、键盘导航、拖拽、上下文菜单和动画行为。
+Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互状态。它必须完整保留子元素自身的命中测试、焦点、键盘导航、拖拽、上下文菜单和动画行为。Masonry 自身为 item 提供布局动效：新 item 入场淡入、既有 item 位置变化时滑动、移除的 item 在原位置淡出（时长来自 `motionDurationSlow` / `motionDurationFast` token，全局禁用动效时退化为瞬时；机制见 [Masonry 桌面版实现原理](implementation.md)），item 自身的交互动画不受影响，动效结束后 item 的样式基值自动接管。
 
 有效状态由响应式属性、兼容属性、可用宽度和子项 attached property 共同决定。状态归一发生在 C# 布局层，AXAML 不承担列数、间距或子项位置计算。
 
@@ -1237,18 +1243,20 @@ Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互�
 
 ## Theme and Token Boundaries
 
-Masonry 的默认主题装配 root chrome `PixelAlignedBorder`、`ItemsPresenter` 与 internal `MasonryPanel`，并把 Masonry 的布局属性与 root chrome 属性分别传递给对应层。Theme 不绘制子项外观，不通过 selector 计算列数和位置。Semantic Part marker 不写入主题静态节点；`.semantic-item` 由 Masonry 在 item container 准备阶段补齐。
+Masonry 的默认主题装配 root chrome `PixelAlignedBorder`、`ItemsPresenter`、离场 ghost 层与 internal `MasonryPanel`，并把 Masonry 的布局属性与 root chrome 属性分别传递给对应层。Theme 不绘制子项外观，不通过 selector 计算列数和位置。Semantic Part marker 不写入主题静态节点；`.semantic-item` 由 Masonry 在 item container 准备阶段补齐。
 
 默认视觉树：
 
 ```text
 Masonry (ItemsControl, default ItemsPanel = MasonryPanel)
 └─ PixelAlignedBorder#PART_RootBorder
-   └─ ItemsPresenter
-      └─ MasonryPanel (internal)
-         ├─ <子元素>
-         ├─ ContentPresenter → <子元素>
-         └─ ...
+   └─ Grid
+      ├─ ItemsPresenter
+      │  └─ MasonryPanel (internal)
+      │     ├─ <子元素>
+      │     ├─ ContentPresenter → <子元素>
+      │     └─ ...
+      └─ Canvas#PART_MotionGhostLayer (离场淡出托管，不参与命中测试)
 ```
 
 视觉树要求：
@@ -1260,7 +1268,7 @@ Masonry (ItemsControl, default ItemsPanel = MasonryPanel)
 - 不通过不可见控件缓存测量结果。
 - 不为子项主动插入额外视觉包装层。
 
-Masonry 当前不定义专属 Token，不需要创建 `token.md`。Masonry 的间距和列宽属于实例布局状态，不应迁移为控件 Token。root chrome 仅复用 `ItemsControl` 已有的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 与 `Padding`，不引入独立 token 边界。
+Masonry 当前不定义专属 Token，不需要创建 `token.md`。Masonry 的间距和列宽属于实例布局状态，不应迁移为控件 Token。root chrome 仅复用 `ItemsControl` 已有的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 与 `Padding`，不引入独立 token 边界。item 动效时长复用全局 motion token（`MotionDurationSlow` / `MotionDurationFast`），由 ControlTheme Setter 馈入 internal 属性，同样不属于 Masonry 专属 Token。
 
 Token 边界：
 
@@ -1308,6 +1316,10 @@ Token 边界：
 - `StableColumns` 不等待异步内容加载完成；调用方通过尺寸约束控制首次分配依据。
 - `Reflow` 每次布局计算都从当前高度状态执行 shortest-column 分配，不读取稳定列快照。
 - 替换 `ItemsPanel` 等价于替换布局引擎，Masonry-specific 布局语义不再由默认面板保证。
+- item 动效时长只来自 ControlTheme token Setter（`MotionDurationSlow` / `MotionDurationFast`）；动画优先级持有必须能释放回用户样式基值，释放 `SetValue` 预置必须 Dispose 返回句柄。
+- 新项只入场淡入不滑动；既有项位置变化只滑动不淡入；入场淡入激活中的项不做位置过渡；移除项由 ghost 层在原位置淡出且保留 marker。
+- ghost host 由控件创建，不参与命中测试；容器重加入必须在 `base.ChildrenChanged` 之前释放 ghost；`Masonry` detached 时清空全部 ghost。
+- RTL 镜像只作用于排列的视觉矩形与 ghost 托管位置，不改变逻辑顺序与布局算法。
 
 Source: ./controls/space/semantic-cn.md
 

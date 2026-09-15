@@ -135,9 +135,17 @@ public class MasonryShowCasePageTests
         item.ShouldNotContain("> .semantic-item");
         localization.ShouldContain("<source>Custom Semantic Part styling</source>");
         localization.ShouldContain(
-            "<source>You can customize the semantic dom style of Masonry by passing objects/functions through `classNames` and `styles`.</source>");
-        localization.ShouldContain("<source>classNames and styles Object</source>");
-        localization.ShouldContain("<source>classNames and styles Function</source>");
+            "<source>Use owner-scoped styles and the MasonryItemStyle semantic part style to customize Masonry's published Semantic Parts.</source>");
+        localization.ShouldContain("<source>Style matched by class</source>");
+        localization.ShouldContain("<source>Style matched by property state</source>");
+        localization.ShouldContain(
+            "<source>Root element, provides the root chrome, column and gutter layout inputs, and the ItemsControl entry.</source>");
+        localization.ShouldContain(
+            "<source>Item container measured, column-assigned and arranged by the masonry layout, carrying the Masonry.Column and Masonry.Span metadata.</source>");
+        localization.ShouldNotContain("classNames", Case.Insensitive);
+        localization.ShouldNotContain("semantic dom", Case.Insensitive);
+        localization.ShouldNotContain("absolute positioning", Case.Insensitive);
+        localization.ShouldNotContain("flex layout", Case.Insensitive);
     }
 
     [Fact]

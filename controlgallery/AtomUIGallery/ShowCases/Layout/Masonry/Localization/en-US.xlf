@@ -78,22 +78,22 @@
     </unit>
     <unit id="SemanticFunctionStylesTitle">
       <segment>
-        <source>classNames and styles Function</source>
+        <source>Style matched by property state</source>
       </segment>
     </unit>
     <unit id="SemanticItemDescription">
       <segment>
-        <source>Item element, sets absolute positioning, width calculation, transition animation and masonry item styles.</source>
+        <source>Item container measured, column-assigned and arranged by the masonry layout, carrying the Masonry.Column and Masonry.Span metadata.</source>
       </segment>
     </unit>
     <unit id="SemanticObjectStylesTitle">
       <segment>
-        <source>classNames and styles Object</source>
+        <source>Style matched by class</source>
       </segment>
     </unit>
     <unit id="SemanticPartStyleDescription">
       <segment>
-        <source>You can customize the semantic dom style of Masonry by passing objects/functions through `classNames` and `styles`.</source>
+        <source>Use owner-scoped styles and the MasonryItemStyle semantic part style to customize Masonry's published Semantic Parts.</source>
       </segment>
     </unit>
     <unit id="SemanticPartStyleTitle">
@@ -103,7 +103,7 @@
     </unit>
     <unit id="SemanticRootDescription">
       <segment>
-        <source>Root element, sets relative positioning, flex layout and masonry container styles.</source>
+        <source>Root element, provides the root chrome, column and gutter layout inputs, and the ItemsControl entry.</source>
       </segment>
     </unit>
   </file>

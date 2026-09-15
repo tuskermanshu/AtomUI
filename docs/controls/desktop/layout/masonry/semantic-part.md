@@ -108,7 +108,10 @@ container 数量。
 - 在直接子元素和 `ItemsSource` 两种模式下保持同一个 Part 身份。
 
 直接子元素模式下，`item` marker 加在用户放入的直接 `Control` 上；`ItemsSource` 模式下，marker 加在 generated
-`ContentPresenter` 上。Masonry 不向 item 外层插入额外 Border、Panel 或 presenter。
+`ContentPresenter` 上。Masonry 不向 item 外层插入额外 Border、Panel 或 presenter。唯一的例外是离场动效：item 从集合移除后，
+容器会被临时移入模板中的 `PART_MotionGhostLayer`，由控件创建的瞬态 ghost host `Border` 承载并在原位置淡出；淡出期间
+item 保留 `.semantic-item` marker（对齐 antd CSSMotion leave 期间节点仍在 DOM），淡出结束或容器重加入集合后立即归还，
+该 ghost host 是瞬态承载节点，不属于 Masonry 的语义部件，不得作为定制目标。
 
 `item` 适合定制 `Margin`、`Opacity`、`RenderTransform`、对齐、尺寸约束和可见性。布局型 Setter 会参与 Masonry 的下一次测量
 与列分配：例如改变 `Height`、`MinHeight`、`Margin` 或 `IsVisible` 可能改变 shortest-column 结果，这是预期的 Avalonia 布局
@@ -174,6 +177,7 @@ container 数量。
 | `Masonry.Span=Full` | 1 | 不变 | 整行项只改变布局矩形，不改变 Part 身份。 |
 | `Masonry.Column` 改变 | 1 | 不变 | 显式列只改变列分配，不增删 marker。 |
 | item `IsVisible=false` | 1 | 不变 | container 仍有 marker，但不参与布局；Preview 高亮会按可见性过滤目标。 |
+| item 移除（离场淡出期） | 1 | 数量随已释放容器变化 | 被移除容器进入 ghost 层原位淡出（`LeaveMotionDuration`，默认 100ms），淡出期间保留 marker；淡出完成或重加入即释放。禁用动效（时长为 0）时立即可见移除。 |
 | 替换 `ItemsPanel` | 1 | 不变 | item identity 仍由 Masonry 准备；shortest-column 布局由替换后的面板决定。 |
 
 Masonry 当前不引入虚拟化或容器回收语义；未来如引入虚拟化，`item` 数量应改为“已实例化容器数量”，并同步更新本文档、实现与测试。
@@ -196,6 +200,7 @@ Semantic `item` style 不参与列数与间距解析。需要改变列数或间�
 
 - internal `MasonryPanel`、列高度数组、布局缓存和算法中间状态。
 - `ItemsPresenter#PART_ItemsPresenter` 与替换 `ItemsPanel` 的具体实现节点。
+- 离场动效的 `PART_MotionGhostLayer` 与瞬态 ghost host `Border`（由控件创建，仅承载淡出，不属于语义部件）。
 - `ItemTemplate` 生成的子树和用户直接放入 item 内部的子控件。
 - Card、Image、Skeleton、Button 等嵌套控件的 Semantic Part。
 - Gallery ShowCase 的图片加载 skeleton、动态删除按钮、说明文本和示例外层容器。
@@ -212,6 +217,7 @@ marker，均属于公共主题契约变更。
 - 直接子元素和 `ItemsSource` 两种模式均产生一一对应的 `.semantic-item` marker，且不引入额外包装层。
 - `MasonryItemStyle` 通过 owner-scoped route 命中真实 item container，且不穿透嵌套控件模板。
 - `Masonry.Column`、`Masonry.Span`、`IsVisible`、集合增删、替换 `ItemsPanel` 和响应式断点变化不破坏 marker 生命周期。
+- item 动效：入场淡入与位置滑动以 Animation 优先级临时驱动 `Opacity` / `RenderTransform`，完成后释放并回落用户样式基值；离场淡出期间容器由 ghost 层托管并保留 marker，释放后回归基值。对 item 应用 `MasonryItemStyle` 的 `Opacity` / `RenderTransform` Setter 时，动效结束后必须呈现 Setter 值。
 - 默认布局、响应式、动态 item、Gallery Semantic Preview 和 LLMS 生成保持一致。
 - Gallery Semantic Preview 不要求 Masonry 关闭 `ClipToBounds`，也不改变 root border、item 容器或布局祖先的 `Clip`。高亮由
   GalleryBase 的统一 `SemanticPartAdorner` 处理：其 ancestor clipping 关闭，外扩 marker 在自身 Bounds 内绘制，因此 Masonry

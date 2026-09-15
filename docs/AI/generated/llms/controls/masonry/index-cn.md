@@ -242,7 +242,7 @@ Gallery key：`ExamplesContent` / item `2`
 
 ## 状态模型
 
-Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互状态。它必须完整保留子元素自身的命中测试、焦点、键盘导航、拖拽、上下文菜单和动画行为。
+Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互状态。它必须完整保留子元素自身的命中测试、焦点、键盘导航、拖拽、上下文菜单和动画行为。Masonry 自身为 item 提供布局动效：新 item 入场淡入、既有 item 位置变化时滑动、移除的 item 在原位置淡出（时长来自 `motionDurationSlow` / `motionDurationFast` token，全局禁用动效时退化为瞬时；机制见 [Masonry 桌面版实现原理](implementation.md)），item 自身的交互动画不受影响，动效结束后 item 的样式基值自动接管。
 
 有效状态由响应式属性、兼容属性、可用宽度和子项 attached property 共同决定。状态归一发生在 C# 布局层，AXAML 不承担列数、间距或子项位置计算。
 
@@ -260,18 +260,20 @@ Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互�
 
 ## 主题与 Design Token
 
-Masonry 的默认主题装配 root chrome `PixelAlignedBorder`、`ItemsPresenter` 与 internal `MasonryPanel`，并把 Masonry 的布局属性与 root chrome 属性分别传递给对应层。Theme 不绘制子项外观，不通过 selector 计算列数和位置。Semantic Part marker 不写入主题静态节点；`.semantic-item` 由 Masonry 在 item container 准备阶段补齐。
+Masonry 的默认主题装配 root chrome `PixelAlignedBorder`、`ItemsPresenter`、离场 ghost 层与 internal `MasonryPanel`，并把 Masonry 的布局属性与 root chrome 属性分别传递给对应层。Theme 不绘制子项外观，不通过 selector 计算列数和位置。Semantic Part marker 不写入主题静态节点；`.semantic-item` 由 Masonry 在 item container 准备阶段补齐。
 
 默认视觉树：
 
 ```text
 Masonry (ItemsControl, default ItemsPanel = MasonryPanel)
 └─ PixelAlignedBorder#PART_RootBorder
-   └─ ItemsPresenter
-      └─ MasonryPanel (internal)
-         ├─ <子元素>
-         ├─ ContentPresenter → <子元素>
-         └─ ...
+   └─ Grid
+      ├─ ItemsPresenter
+      │  └─ MasonryPanel (internal)
+      │     ├─ <子元素>
+      │     ├─ ContentPresenter → <子元素>
+      │     └─ ...
+      └─ Canvas#PART_MotionGhostLayer (离场淡出托管，不参与命中测试)
 ```
 
 视觉树要求：
@@ -283,7 +285,7 @@ Masonry (ItemsControl, default ItemsPanel = MasonryPanel)
 - 不通过不可见控件缓存测量结果。
 - 不为子项主动插入额外视觉包装层。
 
-Masonry 当前不定义专属 Token，不需要创建 `token.md`。Masonry 的间距和列宽属于实例布局状态，不应迁移为控件 Token。root chrome 仅复用 `ItemsControl` 已有的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 与 `Padding`，不引入独立 token 边界。
+Masonry 当前不定义专属 Token，不需要创建 `token.md`。Masonry 的间距和列宽属于实例布局状态，不应迁移为控件 Token。root chrome 仅复用 `ItemsControl` 已有的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 与 `Padding`，不引入独立 token 边界。item 动效时长复用全局 motion token（`MotionDurationSlow` / `MotionDurationFast`），由 ControlTheme Setter 馈入 internal 属性，同样不属于 Masonry 专属 Token。
 
 Token 来源：
 
@@ -306,10 +308,11 @@ Masonry 不使用反射读取 item template 内部元素，不创建不可见测
 - `src/AtomUI.Desktop.Controls/Masonry/Masonry.cs`：公开控件类型、布局属性、attached property、`LayoutChanged` 事件入口和 item container prepare marker。
 - `src/AtomUI.Desktop.Controls/Masonry/MasonryLayoutStrategy.cs`：公开布局策略枚举，定义稳定列与经典重排语义。
 - `src/AtomUI.Desktop.Controls/Masonry/Masonry.SemanticParts.cs`：`item` Semantic Part descriptor；`root` 由生成器隐式补齐。
-- `src/AtomUI.Desktop.Controls/Masonry/MasonryPanel.cs`：internal 布局引擎，执行测量、排列、响应式断点监听和布局结果比较。
+- `src/AtomUI.Desktop.Controls/Masonry/MasonryPanel.cs`：internal 布局引擎，执行测量、排列、item 动效（入场/滑动）、响应式断点监听和布局结果比较。
+- `src/AtomUI.Desktop.Controls/Masonry/MasonryItemTransformAnimator.cs`：`ITransform?` 关键帧插值器，支撑 RenderTransform 滑动动画。
 - `src/AtomUI.Desktop.Controls/Masonry/MasonryItemSpan.cs`：子项 span 枚举。
 - `src/AtomUI.Desktop.Controls/Masonry/MasonryLayoutChangedEventArgs.cs`：布局结果事件参数。
-- `src/AtomUI.Desktop.Controls/Masonry/Themes/MasonryTheme.axaml`：默认 ControlTheme，装配 root chrome `PixelAlignedBorder`、`ItemsPresenter` 和 `MasonryPanel`。
+- `src/AtomUI.Desktop.Controls/Masonry/Themes/MasonryTheme.axaml`：默认 ControlTheme，装配 root chrome `PixelAlignedBorder`、`ItemsPresenter`、离场 ghost 层和 `MasonryPanel`，并提供动效时长 token Setter。
 
 ## 相关文档
 

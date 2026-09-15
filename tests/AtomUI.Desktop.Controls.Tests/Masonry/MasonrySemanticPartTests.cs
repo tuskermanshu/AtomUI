@@ -124,6 +124,9 @@ public class MasonrySemanticPartTests
                 item => new TextBlock { Text = item })
         };
         masonry.Classes.Add("semantic-owner");
+        // 入场动效以 Animation 优先级驱动 Opacity，会覆盖样式值；本测试聚焦生成的专用 Style
+        // 是否命中容器，故将动效时长归零禁用动效（等价全局 EnableMotion=false 的降级行为）。
+        masonry.SetValue(AtomUIMasonry.MotionDurationProperty, TimeSpan.Zero);
         var ownerStyle = new Style(selector => selector.OfType<AtomUIMasonry>().Class("semantic-owner"));
         ownerStyle.Children.Add(new MasonryItemStyle
         {
