@@ -70,7 +70,7 @@
 
 - [x] 第一批：基础控件，共 16 个家族。
 - [x] 第二批：集合与容器，共 16 个家族。（2026-08-27 复核：全部家族均已按用户授权提交）
-- [x] 第二批追加：`Expander`（2026-09-15 用户指令新增，原排除判定撤销；单面板折叠容器，映射上游 `Collapse` 面板 Semantic DOM，共 5 部件，见第二批任务 16）。（2026-09-15：已完成并经用户授权提交 `f1a61683e`，含 Semantic Part 改造与圆角裁剪修复。）
+- [x] 第二批追加：`Expander`（2026-09-15 用户指令新增，原排除判定撤销；单面板折叠容器，映射上游 `Collapse` 面板 Semantic DOM，共 5 部件，见第二批任务 16）。（2026-09-15：已完成并经用户授权提交 `be7b8dc71`，含 Semantic Part 改造与圆角裁剪修复。）
 - [x] 第三批：输入与选择，共 15 个家族。（2026-09-10 复核：15 个家族全部按用户授权提交；视觉验收 NumericUpDown、Form、Transfer、AutoComplete、Cascader 已关闭，ColorPicker、Select、DatePicker 待视觉验收，Mentions、TimePicker、TreeSelect 尚无验收文档；本批次收尾测试尚未执行。）
 - [x] 第四批：Popup 与独立宿主，共 10 个家族。（2026-09-12 收尾：10 个家族全部按用户授权提交——ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、Message、PopupConfirm、Notification、Modal/Dialog；收尾验证 Desktop Controls 3737/3737、Generator 532/532、GalleryBase 181/181、Gallery 621/621、LLMS verify、NativeAOT `osx-arm64` 通过；真机视觉验收已关闭的家族见各自 `docs/superpowers/specs/` 验收记录，Modal/Dialog 悬停高亮由自动化回归覆盖。已知非阻塞：两条先于本批的间歇性测试抖动。）
 - [ ] 第四批追加：`SplitButton`（2026-09-15 用户指令新增，原排除判定撤销；弹层侧映射上游 `Dropdown` 5 部件，触发侧补充发布 `primary` / `secondary`，共 7 部件，见第四批任务 11）。
@@ -152,7 +152,7 @@
 
 **状态（2026-08-27）：** Calendar、Collapse、ListView / ListBox、Segmented、Tag、Timeline、TreeView、Slider、Masonry、Space、Splitter、Breadcrumb、Pagination、Steps、TabControl 家族（含 TabStrip、CardTabStrip）已全部完成经用户授权的提交。
 
-**追加（2026-09-15）：** `Expander` 已纳入本批次（原排除判定撤销），完成 Gate A / Gate B / 真机视觉验收并经用户授权提交 `f1a61683e`，本批次家族数由 16 增至 17。
+**追加（2026-09-15）：** `Expander` 已纳入本批次（原排除判定撤销），完成 Gate A / Gate B / 真机视觉验收并经用户授权提交 `be7b8dc71`，本批次家族数由 16 增至 17。
 
 - [x] 只有第一批形成稳定审核节奏后才能开始，除非用户明确调整优先级。
 - [x] 每个适用家族都必须提供容器和运行时创建 marker 的生命周期证据。
