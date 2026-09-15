@@ -1,8 +1,8 @@
 ﻿using System.Collections;
+using System.Collections.Specialized;
 using System.Reactive.Disposables;
 using AtomUI.Animations;
 using AtomUI.Controls;
-using AtomUI.Data;
 using AtomUI.Utils;
 using Avalonia;
 using Avalonia.Controls;
@@ -20,7 +20,7 @@ using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
 
-public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
+public class BaseTabControl : SelectingItemsControl, IMotionAwareControl, ITabOverflowOwner
 {
     private static readonly FuncTemplate<Panel?> DefaultPanel =
         new(() => new StackPanel());
@@ -38,6 +38,9 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
     
     public static readonly StyledProperty<IDataTemplate?> ContentTemplateProperty =
         ContentControl.ContentTemplateProperty.AddOwner<BaseTabControl>();
+
+    public static readonly StyledProperty<IDataTemplate?> OverflowPopupTemplateProperty =
+        AvaloniaProperty.Register<BaseTabControl, IDataTemplate?>(nameof(OverflowPopupTemplate));
     
     public static readonly DirectProperty<BaseTabControl, object?> SelectedContentProperty =
         AvaloniaProperty.RegisterDirect<BaseTabControl, object?>(nameof(SelectedContent), o => o.SelectedContent);
@@ -154,6 +157,16 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
     {
         get => GetValue(ContentTemplateProperty);
         set => SetValue(ContentTemplateProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the template used to present tabs that are not fully visible in the tab viewport.
+    /// The template data item is a <see cref="TabOverflowPopupContext"/>.
+    /// </summary>
+    public IDataTemplate? OverflowPopupTemplate
+    {
+        get => GetValue(OverflowPopupTemplateProperty);
+        set => SetValue(OverflowPopupTemplateProperty, value);
     }
     
     public object? SelectedContent
@@ -312,9 +325,8 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
     private Pen? _tabStripBorderPen;
     private IBrush? _tabStripBorderPenBrush;
     private double _tabStripBorderPenThickness;
-    private BaseTabScrollViewer? _tabReorderScrollViewer;
-    private BaseTabScrollViewer? _popupPinnedOpenScrollViewer;
-    private IDisposable? _popupPinnedOpenRelay;
+    private TabScrollViewer? _tabReorderScrollViewer;
+    private EventHandler? _overflowSelectionChanged;
     private DispatcherTimer? _tabReorderAutoScrollTimer;
     private TabItem? _pendingTabActivationContainer;
     private IPointer? _pendingTabActivationPointer;
@@ -366,65 +378,52 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
             return false;
         }
 
-        var index = GetTabIndex(tabItem);
-        if (!CanRemoveItemAt(index))
+        if (!TabReorderHelper.TryResolveItemsList(this, out var list) ||
+            !TabReorderHelper.CanMoveItems(list))
         {
             return false;
         }
 
+        var index = TabReorderHelper.FindContainerIndex(this, list, tabItem);
+        if (!TabReorderHelper.IsValidIndex(index, list.Count))
+        {
+            return false;
+        }
+
+        var item = list[index];
         var closingArgs = new TabClosingEventArgs(ClosingEvent, tabItem);
         RaiseEvent(closingArgs);
 
-        if (closingArgs.Cancel)
+        if (closingArgs.Cancel || !tabItem.IsClosable ||
+            !TabReorderHelper.TryGetCurrentItemIndex(this, list, tabItem, item, out index))
         { 
             return false;
         }
 
-        SelectedIndex = GetNextSelectionIndex(index);
-        RemoveItemAt(index);
+        var nextSelectionIndex = GetNextSelectionIndex(index);
+        var nextSelectedItem = TabReorderHelper.IsValidIndex(nextSelectionIndex, list.Count)
+            ? list[nextSelectionIndex]
+            : null;
+        SelectedIndex = nextSelectionIndex;
+        if (!tabItem.IsClosable ||
+            !TabReorderHelper.TryGetCurrentItemIndex(this, list, tabItem, item, out index))
+        {
+            return false;
+        }
+        var itemAfterCallback = SelectedItem;
+        // A collection change during SelectionChanged can recommit the original numeric index.
+        var selectionDrifted = SelectedIndex == nextSelectionIndex &&
+                               !TabReorderHelper.IsSameItem(itemAfterCallback, nextSelectedItem);
+        list.RemoveAt(index);
+        if (selectionDrifted)
+        {
+            TabReorderHelper.RestoreSelectionAfterClose(this, list, nextSelectedItem, itemAfterCallback);
+        }
         
         var closedArgs = new TabClosedEventArgs(ClosedEvent, tabItem);
         RaiseEvent(closedArgs);
         
         return true;
-    }
-
-    private int GetTabIndex(TabItem tabItem)
-    {
-        var containerIndex = IndexFromContainer(tabItem);
-        return containerIndex >= FirstItemIndex ? containerIndex : Items.IndexOf(tabItem);
-    }
-
-    private bool CanRemoveItemAt(int index)
-    {
-        if (ItemsSource is IList list)
-        {
-            return TabReorderHelper.CanMoveItems(list) && IsValidIndex(index, list.Count);
-        }
-
-        if (ItemsSource is null)
-        {
-            return IsValidIndex(index, Items.Count);
-        }
-
-        return false;
-    }
-
-    private void RemoveItemAt(int index)
-    {
-        if (ItemsSource is IList list)
-        {
-            list.RemoveAt(index);
-        }
-        else
-        {
-            Items.RemoveAt(index);
-        }
-    }
-
-    private static bool IsValidIndex(int index, int count)
-    {
-        return index >= FirstItemIndex && index < count;
     }
 
     private int GetNextSelectionIndex(int closingIndex)
@@ -448,13 +447,13 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
     {
         ClearPendingTabActivation();
         CancelTabReorder();
-        ReleasePopupPinnedOpenScrollViewer();
+        DetachTabScrollViewer();
         base.OnApplyTemplate(e);
         
         ItemsPresenterPart = e.NameScope.Find<ItemsPresenter>("PART_ItemsPresenter");
         ItemsPresenterPart?.ApplyTemplate();
         _tabReorderScrollViewer = TabReorderHelper.FindTabScrollViewer(e.NameScope);
-        ReplacePopupPinnedOpenScrollViewer(_tabReorderScrollViewer);
+        _tabReorderScrollViewer?.AttachOverflowOwner(this);
 
         UpdateTabStripPlacement();
 
@@ -481,56 +480,24 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        ResumePopupPinnedOpenRelay();
+        _tabReorderScrollViewer?.AttachOverflowOwner(this);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        SuspendPopupPinnedOpenRelay();
+        _tabReorderScrollViewer?.DetachOverflowOwner(this);
         ClearPendingTabActivation();
         CancelTabReorder();
-        _tabReorderScrollViewer = null;
         base.OnDetachedFromVisualTree(e);
     }
 
-    private void ReplacePopupPinnedOpenScrollViewer(BaseTabScrollViewer? scrollViewer)
+    private void DetachTabScrollViewer()
     {
-        _popupPinnedOpenScrollViewer = scrollViewer;
-        ResumePopupPinnedOpenRelay();
-    }
-
-    private void ResumePopupPinnedOpenRelay()
-    {
-        if (_popupPinnedOpenRelay is not null || _popupPinnedOpenScrollViewer is not { } scrollViewer)
+        if (_tabReorderScrollViewer is { } scrollViewer)
         {
-            return;
+            scrollViewer.DetachOverflowOwner(this);
         }
-
-        _popupPinnedOpenRelay = BindUtils.RelayBind(
-            this,
-            IsPopupPinnedOpenProperty,
-            scrollViewer,
-            BaseTabScrollViewer.IsPopupPinnedOpenProperty);
-    }
-
-    private void SuspendPopupPinnedOpenRelay()
-    {
-        if (_popupPinnedOpenScrollViewer is { } scrollViewer)
-        {
-            scrollViewer.CloseForLifecycle();
-        }
-
-        _popupPinnedOpenRelay?.Dispose();
-        _popupPinnedOpenRelay = null;
-        _popupPinnedOpenScrollViewer?.SetCurrentValue(
-            BaseTabScrollViewer.IsPopupPinnedOpenProperty,
-            false);
-    }
-
-    private void ReleasePopupPinnedOpenScrollViewer()
-    {
-        SuspendPopupPinnedOpenRelay();
-        _popupPinnedOpenScrollViewer = null;
+        _tabReorderScrollViewer = null;
     }
     
     protected override bool ShouldTriggerSelection(Visual selectable, PointerEventArgs eventArgs)
@@ -793,9 +760,22 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
         if (element is TabItem tabItem)
         {
             tabItem.IsIconSlotReserved = false;
+            ReleaseTabItemOwnerBindings(tabItem);
         }
         UpdateIconSlotReservation();
         UpdateSelectedContent();
+    }
+
+    // The indexer bindings created in PrepareContainerForItemOverride subscribe to this
+    // owner's PropertyChanged, and Avalonia never disposes them on its own: without this
+    // release every removed item stays alive for the owner's lifetime. Avalonia skips
+    // ClearContainerForItemOverride for items that are their own container, so TabItem
+    // also routes its direct logical detach into this method.
+    internal virtual void ReleaseTabItemOwnerBindings(TabItem tabItem)
+    {
+        BindingOperations.GetBindingExpressionBase(tabItem, TabItem.SizeTypeProperty)?.Dispose();
+        BindingOperations.GetBindingExpressionBase(tabItem, TabItem.IsMotionEnabledProperty)?.Dispose();
+        BindingOperations.GetBindingExpressionBase(tabItem, TabItem.ContentTemplateProperty)?.Dispose();
     }
     
     private void UpdateSelectedContent(Control? container = null)
@@ -845,6 +825,10 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+        if (change.Property == SelectedIndexProperty)
+        {
+            _overflowSelectionChanged?.Invoke(this, EventArgs.Empty);
+        }
         if (change.Property == TabStripPlacementProperty)
         {
             UpdateTabStripPlacement();
@@ -883,8 +867,7 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
             {
                 for (int i = 0; i < ItemCount; i++)
                 {
-                    var item = Items[i];
-                    if (item is TabItem tabItem)
+                    if ((ContainerFromIndex(i) ?? Items[i]) is TabItem tabItem)
                     {
                         ConfigureTabItem(tabItem);
                     }
@@ -1385,17 +1368,22 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
 
         var shouldHandle = _isTabReorderDragging;
         var reorderCommitted = false;
-        if (_isTabReorderDragging)
+        try
         {
-            BeginTabReorderIndicatorRefreshDeferral();
-            reorderCommitted = CommitTabReorder();
-            if (!reorderCommitted)
+            if (_isTabReorderDragging)
             {
-                RestoreSelectionAfterCanceledReorder();
+                BeginTabReorderIndicatorRefreshDeferral();
+                reorderCommitted = CommitTabReorder();
+                if (!reorderCommitted)
+                {
+                    RestoreSelectionAfterCanceledReorder();
+                }
             }
         }
-
-        ClearTabReorder(releasePointer: true, deferIndicatorRefresh: reorderCommitted);
+        finally
+        {
+            ClearTabReorder(releasePointer: true, deferIndicatorRefresh: reorderCommitted);
+        }
         return shouldHandle;
     }
 
@@ -1419,18 +1407,21 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
             return false;
         }
 
-        var reorderingArgs = new TabReorderingEventArgs(TabReorderingEvent, _tabReorderItem, oldIndex, newIndex);
-        RaiseEvent(reorderingArgs);
-        if (reorderingArgs.Cancel)
+        var draggedContainer = _tabReorderContainer;
+        var item = _tabReorderItem;
+        var selectedItem = _tabReorderSelectedItem;
+        var reorderingArgs = new TabReorderingEventArgs(TabReorderingEvent, item, oldIndex, newIndex);
+        if (!TabReorderHelper.RaiseReorderingEvent(this, list, reorderingArgs) ||
+            !ReferenceEquals(_tabReorderContainer, draggedContainer))
         {
             return false;
         }
 
         TabReorderHelper.MoveItem(list, oldIndex, newIndex);
-        RestoreSelectionAfterReorder(list, _tabReorderSelectedItem);
+        RestoreSelectionAfterReorder(list, selectedItem);
         UpdateSelectedContent();
 
-        var reorderedArgs = new TabReorderedEventArgs(TabReorderedEvent, _tabReorderItem, oldIndex, newIndex);
+        var reorderedArgs = new TabReorderedEventArgs(TabReorderedEvent, item, oldIndex, newIndex);
         RaiseEvent(reorderedArgs);
         return true;
     }
@@ -1598,6 +1589,66 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl
         {
             this.EnableTransitions();
         }
+    }
+
+    int ITabOverflowOwner.OverflowItemCount => ItemCount;
+
+    int ITabOverflowOwner.OverflowSelectedIndex => SelectedIndex;
+
+    INotifyCollectionChanged ITabOverflowOwner.OverflowItems => ItemsView;
+
+    event EventHandler? ITabOverflowOwner.OverflowSelectionChanged
+    {
+        add => _overflowSelectionChanged += value;
+        remove => _overflowSelectionChanged -= value;
+    }
+
+    Control? ITabOverflowOwner.GetOverflowContainer(int index) => ContainerFromIndex(index);
+
+    object? ITabOverflowOwner.GetOverflowLogicalItem(int index) =>
+        index >= 0 && index < ItemsView.Count ? ItemsView[index] : null;
+
+    TabOverflowItem ITabOverflowOwner.CreateOverflowItem(int index, object? logicalItem, Control container)
+    {
+        if (container is not TabItem tabItem)
+        {
+            throw new ArgumentException("TabControl overflow containers must be TabItem instances.", nameof(container));
+        }
+
+        return new TabOverflowItem(
+            logicalItem,
+            tabItem.Header,
+            tabItem.HeaderTemplate,
+            tabItem.IsEffectivelyEnabled,
+            index == SelectedIndex,
+            tabItem.IsClosable);
+    }
+
+    bool ITabOverflowOwner.TryActivateOverflowItem(int index, object? logicalItem, Control container)
+    {
+        if (!IsCurrentOverflowEntry(index, logicalItem, container) || !container.IsEffectivelyEnabled)
+        {
+            return false;
+        }
+
+        container.BringIntoView();
+        SelectedIndex = index;
+        return true;
+    }
+
+    bool ITabOverflowOwner.TryCloseOverflowItem(int index, object? logicalItem, Control container)
+    {
+        return IsCurrentOverflowEntry(index, logicalItem, container) &&
+               container is TabItem tabItem &&
+               CloseTab(tabItem);
+    }
+
+    private bool IsCurrentOverflowEntry(int index, object? logicalItem, Control container)
+    {
+        return index >= 0 &&
+               index < ItemsView.Count &&
+               ReferenceEquals(ContainerFromIndex(index), container) &&
+               Equals(ItemsView[index], logicalItem);
     }
 }
 

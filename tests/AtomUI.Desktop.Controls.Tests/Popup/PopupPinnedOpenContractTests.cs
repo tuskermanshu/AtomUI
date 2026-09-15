@@ -39,7 +39,7 @@ public class PopupPinnedOpenContractTests
                      DesktopType("AtomUI.Desktop.Controls.TransferSelectDropdown"),
                      DesktopType("AtomUI.Desktop.Controls.BaseTabControl"),
                      DesktopType("AtomUI.Desktop.Controls.BaseTabStrip"),
-                     DesktopType("AtomUI.Desktop.Controls.BaseTabScrollViewer"),
+                     DesktopType("AtomUI.Desktop.Controls.TabScrollViewer"),
                      DesktopType("AtomUI.Desktop.Controls.DropdownButton"),
                      DesktopType("AtomUI.Desktop.Controls.SplitButton"),
                      DesktopType("AtomUI.Desktop.Controls.AvatarGroup"),

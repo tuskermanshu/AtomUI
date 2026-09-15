@@ -36,7 +36,7 @@ public class TabControl : BaseTabControl
 
     private Border? _selectedIndicator;
     private ItemsPresenter? _itemsPresenter;
-    private TabControlScrollViewer? _scrollViewer;
+    private TabScrollViewer? _scrollViewer;
     private IDisposable? _selectedItemBoundsSubscription;
 
     public TabControl()
@@ -165,10 +165,9 @@ public class TabControl : BaseTabControl
             _scrollViewer.PropertyChanged -= HandleScrollViewerPropertyChanged;
         }
 
-        _scrollViewer = e.NameScope.Find<TabControlScrollViewer>("PART_TabsContainer");
+        _scrollViewer = e.NameScope.Find<TabScrollViewer>("PART_TabsContainer");
         if (_scrollViewer != null)
         {
-            _scrollViewer.TabControl      = this;
             _scrollViewer.PropertyChanged += HandleScrollViewerPropertyChanged;
         }
 

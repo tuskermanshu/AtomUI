@@ -255,6 +255,56 @@
     </gallery:ShowCaseItem>
 
     <gallery:ShowCaseItem
+        SourceKey="tab-strip-overflow-popup-search"
+        Title="{gallery:TabStripShowCaseLangResource TabStripOverflowPopupSearchTitle}"
+        Description="{gallery:TabStripShowCaseLangResource TabStripOverflowPopupSearchDescription}"
+        IsDeferredContentEnabled="True">
+        <gallery:ShowCaseItem.DeferredContentTemplate>
+            <DataTemplate x:DataType="vm:TabStripViewModel">
+                <StackPanel Orientation="Vertical" Spacing="20">
+                    <atom:TabStrip MaxWidth="720"
+                                   HorizontalAlignment="Stretch"
+                                   ItemsSource="{Binding OverflowTabItems}"
+                                   SelectedIndex="1">
+                        <atom:TabStrip.OverflowPopupTemplate>
+                            <DataTemplate x:DataType="atom:TabOverflowPopupContext">
+                                <gallery:SearchableTabOverflowPopup
+                                    Context="{Binding}"
+                                    SearchPlaceholder="{gallery:TabStripShowCaseLangResource P2PlaceholderSearchTabs}"
+                                    EmptyText="{gallery:TabStripShowCaseLangResource P2TextNoMatchingTabs}" />
+                            </DataTemplate>
+                        </atom:TabStrip.OverflowPopupTemplate>
+                        <atom:TabStrip.ItemTemplate>
+                            <DataTemplate x:DataType="atom:TabItemData">
+                                <atom:TextBlock Text="{Binding Header}" />
+                            </DataTemplate>
+                        </atom:TabStrip.ItemTemplate>
+                    </atom:TabStrip>
+
+                    <atom:CardTabStrip MaxWidth="720"
+                                       HorizontalAlignment="Stretch"
+                                       ItemsSource="{Binding OverflowTabItems}"
+                                       SelectedIndex="1">
+                        <atom:CardTabStrip.OverflowPopupTemplate>
+                            <DataTemplate x:DataType="atom:TabOverflowPopupContext">
+                                <gallery:SearchableTabOverflowPopup
+                                    Context="{Binding}"
+                                    SearchPlaceholder="{gallery:TabStripShowCaseLangResource P2PlaceholderSearchTabs}"
+                                    EmptyText="{gallery:TabStripShowCaseLangResource P2TextNoMatchingTabs}" />
+                            </DataTemplate>
+                        </atom:CardTabStrip.OverflowPopupTemplate>
+                        <atom:CardTabStrip.ItemTemplate>
+                            <DataTemplate x:DataType="atom:TabItemData">
+                                <atom:TextBlock Text="{Binding Header}" />
+                            </DataTemplate>
+                        </atom:CardTabStrip.ItemTemplate>
+                    </atom:CardTabStrip>
+                </StackPanel>
+            </DataTemplate>
+        </gallery:ShowCaseItem.DeferredContentTemplate>
+    </gallery:ShowCaseItem>
+
+    <gallery:ShowCaseItem
         Title="{gallery:TabStripShowCaseLangResource TabStripCardTypeTitle}"
         Description="{gallery:TabStripShowCaseLangResource TabStripCardTypeDescription}"
         IsDeferredContentEnabled="True">
@@ -347,7 +397,6 @@
     <gallery:ShowCaseItem
         Title="{gallery:TabStripShowCaseLangResource TabStripCardShapePositionTitle}"
         Description="{gallery:TabStripShowCaseLangResource TabStripCardShapePositionDescription}"
-        Margin="0, 0, 10, 0"
         IsDeferredContentEnabled="True">
         <gallery:ShowCaseItem.DeferredContentTemplate>
             <DataTemplate x:DataType="vm:TabStripViewModel">
@@ -421,7 +470,6 @@
     <gallery:ShowCaseItem
         Title="{gallery:TabStripShowCaseLangResource TabStripAddCloseTitle}"
         Description="{gallery:TabStripShowCaseLangResource TabStripAddCloseDescription}"
-        Margin="0, 0, 30, 0"
         IsDeferredContentEnabled="True">
         <gallery:ShowCaseItem.DeferredContentTemplate>
             <DataTemplate x:DataType="vm:TabStripViewModel">

@@ -103,7 +103,7 @@ public class TabReorderTests
 
         ShowInWindow(tabControl, window =>
         {
-            var scrollViewer = GetVisualDescendant<BaseTabScrollViewer>(tabControl);
+            var scrollViewer = GetVisualDescendant<TabScrollViewer>(tabControl);
             RunJobsUntil(() => scrollViewer.Extent.Width > scrollViewer.Viewport.Width);
             scrollViewer.Offset.X.ShouldBe(0);
 
@@ -134,7 +134,7 @@ public class TabReorderTests
 
         ShowInWindow(tabControl, window =>
         {
-            var scrollViewer = GetVisualDescendant<BaseTabScrollViewer>(tabControl);
+            var scrollViewer = GetVisualDescendant<TabScrollViewer>(tabControl);
             RunJobsUntil(() => scrollViewer.Extent.Width > scrollViewer.Viewport.Width);
 
             var dragged = GetContainer<AtomTabItem>(tabControl, 0);
@@ -626,7 +626,7 @@ public class TabReorderTests
 
         ShowInWindow(tabControl, _ =>
         {
-            GetVisualDescendant<BaseTabScrollViewer>(tabControl).ShouldNotBeNull();
+            GetVisualDescendant<TabScrollViewer>(tabControl).ShouldNotBeNull();
         });
     }
 
@@ -777,7 +777,7 @@ public class TabReorderTests
 
         ShowInWindow(tabStrip, window =>
         {
-            var scrollViewer = GetVisualDescendant<BaseTabScrollViewer>(tabStrip);
+            var scrollViewer = GetVisualDescendant<TabScrollViewer>(tabStrip);
             RunJobsUntil(() => scrollViewer.Extent.Height > scrollViewer.Viewport.Height);
 
             var dragged = GetContainer<AtomTabStripItem>(tabStrip, 0);
@@ -813,7 +813,7 @@ public class TabReorderTests
 
         ShowInWindow(tabStrip, _ =>
         {
-            GetVisualDescendant<BaseTabScrollViewer>(tabStrip).ShouldNotBeNull();
+            GetVisualDescendant<TabScrollViewer>(tabStrip).ShouldNotBeNull();
         });
     }
 

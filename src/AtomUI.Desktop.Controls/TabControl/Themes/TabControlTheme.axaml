@@ -23,11 +23,13 @@
                                     <ContentPresenter Name="HeaderEndExtraContent"
                                                       Content="{TemplateBinding HeaderEndExtraContent}"
                                                       ContentTemplate="{TemplateBinding HeaderEndExtraContentTemplate}" />
-                                    <atom:TabControlScrollViewer
+                                    <atom:TabScrollViewer
                                         Name="PART_TabsContainer"
                                         IsScrollChainingEnabled="False"
                                         TabStripPlacement="{TemplateBinding TabStripPlacement}"
-                                        IsMotionEnabled="{TemplateBinding IsMotionEnabled}">
+                                        IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
+                                        IsPopupPinnedOpen="{TemplateBinding IsPopupPinnedOpen}"
+                                        OverflowPopupTemplate="{TemplateBinding OverflowPopupTemplate}">
                                         <Panel>
                                             <ItemsPresenter
                                                 Name="PART_ItemsPresenter"
@@ -36,7 +38,7 @@
                                                 Name="PART_SelectedItemIndicator"
                                                 RenderTransform="{TemplateBinding SelectedIndicatorRenderTransform}"/>
                                         </Panel>
-                                    </atom:TabControlScrollViewer>
+                                    </atom:TabScrollViewer>
                                 </DockPanel>
                             </Border>
                         </Panel>
@@ -110,7 +112,7 @@
             <!-- tabs 是否居中 -->
             <Style Selector="^[TabAlignmentCenter=True]">
                 <Style Selector="^ /template/ Panel#PART_AlignWrapper > Border">
-                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
                 </Style>
             </Style>
 
@@ -178,7 +180,7 @@
             <!-- tabs 是否居中 -->
             <Style Selector="^[TabAlignmentCenter=True]">
                 <Style Selector="^ /template/ Panel#PART_AlignWrapper > Border">
-                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
                 </Style>
             </Style>
 

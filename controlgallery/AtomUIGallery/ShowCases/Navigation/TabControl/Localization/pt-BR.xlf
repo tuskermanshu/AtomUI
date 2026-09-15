@@ -547,5 +547,29 @@
         <target state="translated">Slide</target>
       </segment>
     </unit>
+    <unit id="TabControlOverflowPopupSearchTitle">
+      <segment>
+        <source>Custom Popup Search</source>
+        <target state="translated">Pesquisa personalizada no popup</target>
+      </segment>
+    </unit>
+    <unit id="TabControlOverflowPopupSearchDescription">
+      <segment>
+        <source>Customize the overflow popup with search and keyboard navigation.</source>
+        <target state="translated">Personalize o popup de excedentes com pesquisa e navegação pelo teclado.</target>
+      </segment>
+    </unit>
+    <unit id="P2PlaceholderSearchTabs">
+      <segment>
+        <source>Search tabs...</source>
+        <target state="translated">Pesquisar abas...</target>
+      </segment>
+    </unit>
+    <unit id="P2TextNoMatchingTabs">
+      <segment>
+        <source>No matching tabs</source>
+        <target state="translated">Nenhuma aba correspondente</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

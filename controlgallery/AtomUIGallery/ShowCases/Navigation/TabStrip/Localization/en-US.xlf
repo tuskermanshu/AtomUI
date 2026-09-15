@@ -341,5 +341,25 @@
         <source>Slide</source>
       </segment>
     </unit>
+    <unit id="TabStripOverflowPopupSearchTitle">
+      <segment>
+        <source>Custom Popup Search</source>
+      </segment>
+    </unit>
+    <unit id="TabStripOverflowPopupSearchDescription">
+      <segment>
+        <source>Customize the overflow popup with search and keyboard navigation.</source>
+      </segment>
+    </unit>
+    <unit id="P2PlaceholderSearchTabs">
+      <segment>
+        <source>Search tabs...</source>
+      </segment>
+    </unit>
+    <unit id="P2TextNoMatchingTabs">
+      <segment>
+        <source>No matching tabs</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

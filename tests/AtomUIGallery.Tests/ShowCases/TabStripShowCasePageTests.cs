@@ -42,10 +42,10 @@ public class TabStripShowCasePageTests
         CountOccurrences(source, "Classes=\"info-value\"").ShouldBe(0);
         source.ShouldNotContain("LineHeight=\"22\"");
         source.ShouldContain("Description=\"{gallery:TabStripShowCaseLangResource PageDescription}\"");
-        CountShowCaseItemElements(source).ShouldBe(14);
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(14);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(14);
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:TabStripViewModel\"").ShouldBe(14);
+        CountShowCaseItemElements(source).ShouldBe(15);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(15);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(15);
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:TabStripViewModel\"").ShouldBe(15);
         CountOccurrences(source, "BadgeText=\"v6.0.8\"").ShouldBe(2);
         source.ShouldContain("TabStripShowCaseLangResource TabStripBasicTitle");
         source.ShouldContain("TabStripShowCaseLangResource TabStripItemsSourceTitle");

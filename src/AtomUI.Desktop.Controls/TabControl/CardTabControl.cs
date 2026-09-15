@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 
@@ -75,7 +76,6 @@ public class CardTabControl : BaseTabControl
 
     private IconButton? _addTabButton;
     private ItemsPresenter? _itemsPresenter;
-    private TabControlScrollViewer? _scrollViewer;
     
     protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
     {
@@ -83,6 +83,14 @@ public class CardTabControl : BaseTabControl
         {
             Shape = TabSharp.Card
         };
+    }
+
+    internal override void ReleaseTabItemOwnerBindings(TabItem tabItem)
+    {
+        base.ReleaseTabItemOwnerBindings(tabItem);
+        // Card-only indexer bindings created in PrepareContainerForItemOverride.
+        BindingOperations.GetBindingExpressionBase(tabItem, CornerRadiusProperty)?.Dispose();
+        BindingOperations.GetBindingExpressionBase(tabItem, BorderThicknessProperty)?.Dispose();
     }
 
     protected override void PrepareContainerForItemOverride(Control container, object? item, int index)
@@ -98,17 +106,17 @@ public class CardTabControl : BaseTabControl
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
+        if (_addTabButton is not null)
+        {
+            _addTabButton.Click -= HandleAddButtonClicked;
+        }
+
         base.OnApplyTemplate(e);
         _addTabButton   = e.NameScope.Find<IconButton>("PART_AddTabButton");
         _itemsPresenter = e.NameScope.Find<ItemsPresenter>("PART_ItemsPresenter");
         if (_addTabButton is not null)
         {
             _addTabButton.Click += HandleAddButtonClicked;
-        }
-        _scrollViewer      = e.NameScope.Find<TabControlScrollViewer>("PART_CardTabStripScrollViewer");
-        if (_scrollViewer != null)
-        {
-            _scrollViewer.TabControl = this;
         }
     }
 

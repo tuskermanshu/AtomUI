@@ -2,6 +2,58 @@
 
 本文档记录 TabStrip 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-15
+
+- Behavior
+  - Revalidate the original source and logical tab after closing and selection callbacks; cancel a reorder commit when its callback mutates the source collection.
+  - Apply owner close-button defaults to generated containers while preserving item overrides.
+  - Abort overflow opening when snapshot notifications or template construction invalidate the session, and release abandoned content before it enters the popup tree.
+- Theme
+  - Measure card tabs and the add button along the placement axis, tolerate narrow arrangement, and center vertical Line tabs along the correct axis.
+  - Respect RTL horizontal wheel direction and boundary scroll chaining while preserving vertical-wheel fallback.
+- Verification
+  - Replace the failed-open performance probe with a real overlay host and layout validation; supersede the earlier interaction percentages with a fresh matched-baseline report.
+
+## 2026-09-14
+
+- API
+  - Add `OverflowPopupTemplate` to `BaseTabStrip`, inherited by `TabStrip` and `CardTabStrip`, using the shared public sealed `TabOverflowPopupContext` and immutable `TabOverflowItem` contract.
+- Behavior
+  - Align the Gallery custom overflow search with Ant Design Tabs: 200 px popup, clearable prefixed search, case-insensitive contains matching, 300 px scroll viewport, empty state, selected/disabled states, click activation and keyboard navigation.
+  - Treat partially clipped headers as overflow and keep owner-controlled selection, close, light-dismiss and placement semantics.
+  - Keep focus on the more-button when pointer-opening overflow; do not auto-focus the selected item, first item, popup root or search input.
+  - Preserve and fully contain the overflow activator when the owner is narrowed by responsive masonry layout or a smaller final arrange.
+  - Render custom-search item headers through the button content pipeline and keep the Popup shadow mask rounded to the final surface, including nested content presenters.
+  - Hide the default and searchable overflow list scrollbars without disabling wheel, trackpad or programmatic scrolling, and keep item surfaces at equal left/right inset.
+  - Replace the tab-track gradient masks with Ant Design's directional outer overflow shadows for Top, Bottom, Left and Right placement, using transparent paint carriers aligned with the scrolling viewport boundary.
+- Architecture
+  - Replace the duplicated TabControl/TabStrip viewers and menu items with one internal sealed `TabScrollViewer`, one static Popup shell and one shared default menu implementation.
+  - Lazily create and cache popup content, clear session snapshots on ordinary close, and release popup child, cached root, context, subscriptions and owner references on template replacement or detach.
+  - Track the final Popup surface through nested content presenters with explicit presenter-chain and corner-radius binding teardown so replaced surfaces remain collectible.
+  - Position the static outer-shadow casters outside the scroll viewport and clip their output with an input-transparent Canvas; compiled bindings keep the inward caster faces aligned after resize or placement changes.
+  - Correct the current Avalonia Skia shadow-offset transform inside the shared Tab edge renderer so overflow shadows retain their visible strength on Retina and scaled surfaces. Preserve logical shadow tokens and input-transparent clipping.
+  - Add production Gallery page regressions for 1×/2× and dynamic display/ancestor scale coverage; assert visible contrast as well as bounds.
+  - Add isolated Skia compositor-frame regressions covering all four owners and placements, Light/Dark, scroll boundaries, resize and non-overflowing state.
+- Performance
+  - Reuse the attached popup content root and clear per-open snapshots on close. Interaction performance is measured with a realized overlay host; see the corrected 2026-09-15 verification record.
+  - Eliminate per-instance edge gradient brushes and gradient-stop allocations; scrolling now only updates indicator visibility.
+- Token
+  - Consume the TabControl family `BoxShadowTabsOverflowLeft`, `BoxShadowTabsOverflowRight`, `BoxShadowTabsOverflowTop` and `BoxShadowTabsOverflowBottom` Tokens, with `MenuEdgeThickness` derived from `ControlHeight`.
+- Gallery
+  - Add one shared searchable popup implementation and examples for `TabControl`, `CardTabControl`, `TabStrip` and `CardTabStrip`, including localized placeholder and empty-state text.
+  - Make the overflow examples responsive with `MaxWidth` plus stretch alignment so fixed sample width cannot push the activator outside a narrow Gallery column.
+
+## 2026-09-12
+
+- Docs
+  - Define the shared `TabControl` / `TabStrip` overflow popup architecture around one internal `TabScrollViewer`, a static template Popup shell, immutable per-open projections and owner-validated actions.
+  - Define `OverflowPopupTemplate`, `TabOverflowPopupContext` and `TabOverflowItem` as the customization contract inherited by `TabStrip` and `CardTabStrip`.
+  - Define lazy first-open content creation, cached visual reuse, close-time data clearing, full re-template/detach teardown and weak-owner retention invariants.
+  - Add blocking performance, repeated open/close, DynamicResource, stale-context, Gallery navigation and NativeAOT verification gates.
+
+- Token
+  - Confirm that TabStrip continues to use SharedToken and TabControl family resources without a dedicated Token document.
+
 ## 2026-08-28
 
 - Behavior
