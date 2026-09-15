@@ -23,4 +23,5 @@
 - [Separator Changelog](separator/changelog.md)
 - [SplitButton 桌面版架构设计](split-button/overview.md)
 - [SplitButton 桌面版实现原理](split-button/implementation.md)
+- [SplitButton Semantic Part 契约](split-button/semantic-part.md)
 - [SplitButton Changelog](split-button/changelog.md)

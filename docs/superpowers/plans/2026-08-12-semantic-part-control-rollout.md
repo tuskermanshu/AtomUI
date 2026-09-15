@@ -48,9 +48,13 @@
 ### 不适用
 
 - [x] `Avatar`、`Carousel`、`Expander`、`GroupBox`、`Rate`、`Watermark`。
-- [x] `Icon`、`SplitButton`、`FlexPanel`、`Grid / Row / Col`、`TabStrip`。
+- [x] `Icon`、`FlexPanel`、`Grid / Row / Col`、`TabStrip`。
 - [x] `ButtonSpinner`、`ComboBox`、`BorderBeam`、`Splash`。
 - [x] `Menu`、`WindowTitleBar`、`Window`。
+
+> 范围变更（2026-09-15）：`SplitButton` 的原排除判定经用户指令撤销——AtomUI 需要让 `SplitButton` 支持 Semantic
+> Part。它以自身 public owner 直接拥有下拉命令弹层（`Flyout`），按 `DropdownButton` 先例独立通过准入 Gate，
+> 移入第四批计划执行（见下方批次清单与[第四批任务清单](2026-08-12-semantic-part-batch-4-hosts-windows.md)任务 11）。
 
 逐项公开 API 证据、产品职责映射和重新评估条件以全量改造设计的“排除映射”为准。不得因 AtomUI 模板内部存在
 可定制节点而绕过准入 Gate。
@@ -61,9 +65,10 @@
 - [x] 第二批：集合与容器，共 16 个家族。（2026-08-27 复核：全部家族均已按用户授权提交）
 - [x] 第三批：输入与选择，共 15 个家族。（2026-09-10 复核：15 个家族全部按用户授权提交；视觉验收 NumericUpDown、Form、Transfer、AutoComplete、Cascader 已关闭，ColorPicker、Select、DatePicker 待视觉验收，Mentions、TimePicker、TreeSelect 尚无验收文档；本批次收尾测试尚未执行。）
 - [x] 第四批：Popup 与独立宿主，共 10 个家族。（2026-09-12 收尾：10 个家族全部按用户授权提交——ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、Message、PopupConfirm、Notification、Modal/Dialog；收尾验证 Desktop Controls 3737/3737、Generator 532/532、GalleryBase 181/181、Gallery 621/621、LLMS verify、NativeAOT `osx-arm64` 通过；真机视觉验收已关闭的家族见各自 `docs/superpowers/specs/` 验收记录，Modal/Dialog 悬停高亮由自动化回归覆盖。已知非阻塞：两条先于本批的间歇性测试抖动。）
+- [ ] 第四批追加：`SplitButton`（2026-09-15 用户指令新增，原排除判定撤销；弹层侧映射上游 `Dropdown` 5 部件，触发侧补充发布 `primary` / `secondary`，共 7 部件，见第四批任务 11）。
 - [ ] 第五批：高密度控件，共 2 个家族。（未开始：NavMenu、DataGrid。）
 
-合计待改造：59 个控件家族。
+合计待改造：60 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`）。
 
 ## 3. 单控件强制执行循环
 
@@ -206,9 +211,9 @@ pwsh -NoLogo -NoProfile -File controlgallery/AtomUIGallery.Desktop/scripts/Publi
 
 ## 6. 全量改造收尾
 
-- [ ] 确认 59 个家族都通过各自经用户授权的提交达到 `Committed` 状态。
+- [ ] 确认 60 个家族都通过各自经用户授权的提交达到 `Committed` 状态。
 - [ ] 重新扫描 public 控件和全部叶子主题，检查未声明的 `.semantic-*`、缺少的已批准 marker，以及 Descriptor 与文档不一致。
-- [ ] 确认 18 个排除控件仍然没有通过最新稳定发布源码公开 API 准入 Gate。
+- [ ] 确认 17 个排除控件仍然没有通过最新稳定发布源码公开 API 准入 Gate。
 - [ ] 运行全部通用测试、DataGrid 测试、LLMS verify、NativeAOT publish 和 `git diff --check`。
 - [ ] 审核每个 Gallery 页面，确认保持 Examples-first 行为，并且选择 Tab 前不会实例化 Semantic Preview。
 - [ ] 输出最终兼容性与性能摘要；除非用户明确要求，否则不得额外创建 squash 或批次提交。

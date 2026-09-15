@@ -102,6 +102,19 @@ public class MenuFlyoutPresenter : MenuBase,
     internal static readonly StyledProperty<double> ItemHeightProperty =
         AvaloniaProperty.Register<MenuFlyoutPresenter, double>(nameof(ItemHeight));
 
+    // 钉住语义由宿主 Flyout 下发到 Presenter，只用于区分「可恢复的生命周期关闭」与
+    // 「用户主动收起」：前者必须保留声明式子菜单状态，重开后由 MenuItem 的延迟同步恢复。
+    // 注意不要下发给 MenuItem 容器——pinned 的子菜单弹层会被关闭拦截，模板重绑后以
+    // 空壳形式滞留在 overlay 层（只剩圆角白底与阴影的空白弹层）。
+    internal static readonly StyledProperty<bool> IsPopupPinnedOpenProperty =
+        Popup.IsPopupPinnedOpenProperty.AddOwner<MenuFlyoutPresenter>();
+
+    internal bool IsPopupPinnedOpen
+    {
+        get => GetValue(IsPopupPinnedOpenProperty);
+        set => SetValue(IsPopupPinnedOpenProperty, value);
+    }
+
     internal static readonly StyledProperty<double> MaxPopupHeightProperty =
         AvaloniaProperty.Register<MenuFlyoutPresenter, double>(nameof(MaxPopupHeight));
 
@@ -241,6 +254,7 @@ public class MenuFlyoutPresenter : MenuBase,
             menuItem[!MenuItem.SizeTypeProperty]              = this[!SizeTypeProperty];
             menuItem[!MenuItem.DisplayPageSizeProperty]       = this[!DisplayPageSizeProperty];
             menuItem[!MenuItem.ShouldUseOverlayPopupProperty] = this[!ShouldUseOverlayPopupProperty];
+            menuItem[!MenuItem.IsPopupPinnedOpenProperty]      = this[!IsPopupPinnedOpenProperty];
 
             PrepareMenuItem(menuItem, item, index);
         }
@@ -296,6 +310,14 @@ public class MenuFlyoutPresenter : MenuBase,
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+        // 钉住弹层的关闭来自放置目标生命周期失效（页签切走 / 滚出视口），属于可恢复的临时
+        // 关闭而非用户收起菜单：此时保留声明式子菜单状态，菜单树重新附着后由 MenuItem 的
+        // 延迟同步恢复子菜单呈现。清理只针对普通关闭，避免把声明式展开状态一并抹掉。
+        if (IsPopupPinnedOpen)
+        {
+            return;
+        }
+
         foreach (var i in LogicalChildren)
         {
             if (i is MenuItem menuItem)

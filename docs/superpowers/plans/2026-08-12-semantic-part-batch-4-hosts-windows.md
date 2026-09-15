@@ -2,7 +2,7 @@
 
 > **供智能体执行者使用：** 使用 `superpowers:executing-plans` 在当前会话中执行，不得使用 subagent。每个控件修改源码前都必须明确 Visual root ownership 并获得批准。
 
-**目标：** 为 10 个具有 Ant Design 6.6.0 稳定发布源码公开 Semantic DOM 对应 API 的 Popup、Overlay 和服务宿主控件家族建立 Semantic Part 契约，并覆盖完整生命周期与多 root 隔离。
+**目标：** 为 10 个具有 Ant Design 6.6.0 稳定发布源码公开 Semantic DOM 对应 API 的 Popup、Overlay 和服务宿主控件家族建立 Semantic Part 契约，并覆盖完整生命周期与多 root 隔离。2026-09-15 用户指令新增任务 11 `SplitButton`（原排除判定撤销），随本计划执行。
 
 **架构：** 每个生产 owner 通过现有 host/session 生命周期公开 selector Part。Gallery 可以提供由示例显式拥有的 additional root，但生产控件不得引入 Preview API、全局 root registry 或运行时搜索。服务型控件使用真实 owner 边界。
 
@@ -186,6 +186,20 @@
 - [x] **Gate B 实现与验证：** 创建 `tests/AtomUI.Desktop.Controls.Tests/PopupConfirm/PopupConfirmSemanticPartTests.cs`，覆盖 status/icon/content/cancel visibility、confirm loading、open-close-reopen、presenter binding disposal 和 nested Button owner 隔离；NativeAOT。
 - [x] 运行 Generator Semantic 测试、目标宿主/控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`；当契约依赖原生/窗口行为时执行平台冒烟检查。
 - [x] **强制停止：** 保持 PopupConfirm 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
+
+### 任务 11：SplitButton（2026-09-15 用户指令新增，原排除判定撤销）
+
+**控件文档：** `docs/controls/desktop/general/split-button/overview.md`、`docs/controls/desktop/general/split-button/implementation.md`、`docs/controls/desktop/general/split-button/semantic-part.md`（Gate A 新增）
+
+**证据范围：** `src/AtomUI.Desktop.Controls/SplitButton/**/*.cs`、`src/AtomUI.Desktop.Controls/Buttons/Themes/SplitButtonTheme.axaml`、共享 MenuFlyout / MenuItem / MenuItemGroup marker 注入路径（注入点无条件、owner 隔离靠生成 Style 的逻辑祖先链，同 DropdownButton）；测试 `tests/AtomUI.Desktop.Controls.Tests/Buttons`（新增 `SplitButtonSemanticPartTests`）；Gallery `controlgallery/AtomUIGallery/ShowCases/General/SplitButton`。
+
+**风险类型：** MenuFlyout 跨视觉根（弹层锚定模板内 `PART_SecondaryButton`）、运行时 MenuItem 容器、共享菜单节点 owner 隔离、primary 形态接缝分隔线视觉对齐。
+
+- [ ] **Gate A 设计审核：** 将 AtomUI `SplitButton` 作为直接拥有下拉命令弹层的 public owner 映射到上游 `Dropdown` 的弹层 Semantic DOM（`root` / `itemTitle` / `item` / `itemContent` / `itemIcon`），不映射 deprecated `Dropdown.Button` 的 split-trigger 组合；上游弹层 `root` 映射为 `popup.root`；触发侧补充发布 `primary` / `secondary`（`PART_PrimaryButton` / `PART_SecondaryButton`，静态 marker）——上游消费者自持触发按钮、AtomUI 触发按钮为模板内部件，属显式能力补充；复核 primary 形态接缝分隔线与 antd `button/style/compact.ts` 的差距（分隔线颜色 `colorPrimaryHover` / `colorErrorHover`、次按钮 hover 时隐藏）。
+- [ ] 完成 `overview.md`、`implementation.md` 与新增 `semantic-part.md`，记录 `primary` / `secondary` / `popup.root` / `itemTitle` / `item` / `itemContent` / `itemIcon` 的 route、cardinality、跨根与嵌套 owner 边界及触发侧补充发布的理由；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
+- [ ] **Gate B 实现与验证：** `SplitButtonSemanticPartTests` 覆盖 descriptor（7 部件形态）、触发侧静态 marker（`primary` / `secondary`）与模板变体覆盖、pinned-open 弹层物化（含声明式子菜单）、owner-scoped 生成 Style 命中、light-dismiss 禁用、分隔线颜色与 hover 隐藏回归；Gallery 页面新增 Semantic Parts Tab（`IsPopupPinnedOpen` 钉住 + 弹层根显式注册 `AdditionalRoots`）与 SemanticStyles 示例（专用生成 Style 类）。
+- [ ] 运行 Generator Semantic 测试、目标控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`。
+- [ ] **强制停止：** 保持 SplitButton 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
 
 ## 批次收尾
 

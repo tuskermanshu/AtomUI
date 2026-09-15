@@ -82,7 +82,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 
 ### 2.3 AtomUI 纳入映射
 
-下表覆盖 60 个准入家族，其中 `Button` 已完成，其余 59 个进入五个实施批次。映射只证明“允许进入 Gate A”，不预先
+下表覆盖 61 个准入家族，其中 `Button` 已完成，其余 60 个进入实施批次；`SplitButton` 为 2026-09-15 用户指令新增（原排除判定撤销），随第四批计划执行。映射只证明“允许进入 Gate A”，不预先
 承诺具体 Part 名称或数量；每个 Part 仍必须从 AtomUI 自身源码、主题和生命周期事实中设计。
 
 | AtomUI 控件家族 | Ant Design 6.6.0 公开 owner | 结论 |
@@ -136,6 +136,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `TreeSelect` | `TreeSelect` | Batch 3 |
 | `Upload` | `Upload` | Batch 3 |
 | `DropdownButton` | `Dropdown` | Batch 4；AtomUI owner 直接拥有 `DropdownFlyout` / `MenuFlyout` 命令弹层，映射上游 `Dropdown` 的弹层 Semantic DOM，不映射 deprecated `Dropdown.Button` 的 split-trigger 组合结构 |
+| `SplitButton` | `Dropdown` | Batch 4 范围新增（2026-09-15 用户指令）；AtomUI owner 直接拥有 `Flyout` / `MenuFlyout` 命令弹层，映射上游 `Dropdown` 的弹层 Semantic DOM，不映射 deprecated `Dropdown.Button` 的 split-trigger 组合结构；触发侧补充发布 `primary` / `secondary`——上游消费者自持触发按钮，AtomUI 触发按钮为模板内部件，属显式能力补充 |
 | `ImagePreviewer` | `Image`、`Image.PreviewGroup` | Batch 4 |
 | `InfoFlyout` | `Popover` | Batch 4 |
 | `ToolTip` | `Tooltip` | Batch 4 |
@@ -161,7 +162,6 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `Rate` | Ant Design 稳定版 `Rate` 没有公开 Semantic DOM Props。 | 新稳定版公开并实际消费对应 API。 |
 | `Watermark` | Ant Design 稳定版 `Watermark` 没有公开 Semantic DOM Props。 | 新稳定版公开并实际消费对应 API。 |
 | `Icon` | Ant Design Icons 不提供与 AtomUI `Icon` 对应的公开 Semantic DOM owner。 | 稳定发布出现对应公开组件 API。 |
-| `SplitButton` | 按钮组合结构无独立 owner：deprecated `Dropdown.Button` 仅在类型上继承 `DropdownProps`，实现把调用方传入的 `classNames` / `styles` 经 `...restProps` 透传给 `Space.Compact` 根 `div`，不进入任何语义消费路径（已对 6.6.0–6.6.3 源码逐版本核对）；组合内 Button 能力不能上浮。弹层菜单区域的语义 API 属于 `Dropdown` owner（`root` / `item` / `itemTitle` / `itemIcon` / `itemContent`，6.0.0 起公开且实现实际消费），其中非 `root` 键由 `Dropdown` 实现转发给内部 `Menu`；AtomUI 侧该区域不落在本控件上——弹层根由 `FlyoutHost` 的 `popup.*` 契约承载（SplitButton 的 `Flyout` 即 `FlyoutHost` 所承载的 AtomUI `Flyout`），菜单项语义由 `NavMenu → Menu`（第五批）承载。 | 稳定版为 split-button 按钮组合结构提供独立并实际消费的 Semantic DOM API。 |
 | `FlexPanel` | Ant Design 稳定版没有与该布局 Panel 对应的公开 Semantic DOM owner。 | 新稳定版出现职责直接对应的公开 owner。 |
 | `Grid / Row / Col` | Ant Design Grid 没有公开 Semantic DOM Props；`Layout.Sider` 不能映射到通用 Grid。 | 新稳定版公开 Grid/Row/Col 对应 API。 |
 | `TabStrip` | Ant Design 只在 `Tabs` owner 上公开 API，没有独立 `TabStrip` owner。 | 新稳定版出现独立公开 owner。 |
@@ -188,10 +188,15 @@ owner、public child control、internal presenter、item container、runtime-cre
   但作为独立文档叶子另行审核其搜索按钮和 decorated box 契约。
 - `Modal / Dialog` 包含 `Dialog`、`DialogSurface`、Overlay host、Window host、header、resizer 和 button box。
 - `DataGrid` 包含 grid、row、cell、header、presenter、filter flyout 和虚拟化/回收路径。
-- `SplitButton` 等组合控件即使复用已支持的 Button，也不能继承准入资格；公开 owner 必须独立通过
-  2.1 的 Gate。
+- 组合控件即使复用已支持的 Button，也不能继承准入资格；公开 owner 必须独立通过 2.1 的 Gate。
 - `DropdownButton` 虽复用 Button 与 MenuFlyout 基础设施，仍以自己的 public owner 直接拥有下拉命令弹层，并已独立通过
   2.1 的 Gate；其语义契约映射上游 `Dropdown`，不借用 deprecated `Dropdown.Button` 的组合 owner 资格。
+- `SplitButton` 同理：虽复用 Button 与共享 MenuFlyout 基础设施，仍以自己的 public owner 直接拥有下拉命令弹层
+  （`Flyout`，Gallery 全部示例均为 `MenuFlyout`），2026-09-15 经用户指令撤销原排除判定并独立通过 2.1 的 Gate；
+  其弹层侧映射上游 `Dropdown` 的 Semantic DOM，不借用 deprecated `Dropdown.Button` 的组合 owner 资格。触发侧
+  补充发布 `primary` / `secondary` 是上游没有的显式能力补充：上游 DropdownButton 消费者自持两个触发 Button，
+  而 AtomUI 的两个触发 Button 是模板内部件，不发布则完全不可定制——DropdownButton 因继承 Button 天然继承
+  触发侧 `icon` / `content` 部件，SplitButton 是 ContentControl，无此继承路径。
 
 同一家族的 descriptor 与模板 marker 必须一起审核和实现，不能让父控件与其容器、Popup 或派生模板在不同 commit 中短暂
 形成不完整公共契约。
@@ -446,7 +451,7 @@ git diff --check
 | Batch 1 | 16 | 基础视觉与状态控件，建立可复用审核节奏。 | 派生主题、尺寸、adorner、状态替代节点。 |
 | Batch 2 | 16 | 集合、容器与导航结构。 | container、runtime-created、虚拟化、多重 cardinality。 |
 | Batch 3 | 15 | 输入、选择与日期/时间类控件。 | SizeType、Popup、内部 editor、候选项容器。 |
-| Batch 4 | 10 | Popup、Overlay 与服务宿主。 | 跨视觉根、session 生命周期、多宿主隔离。 |
+| Batch 4 | 10 + 1 | Popup、Overlay 与服务宿主（原 10 个家族已于 2026-09-12 收尾；`SplitButton` 为 2026-09-15 用户指令新增，随本批次计划执行）。 | 跨视觉根、session 生命周期、多宿主隔离。 |
 | Batch 5 | 2 | 高密度复合控件。 | 大量 container、Popup、虚拟化和性能。 |
 
 批次表达审核顺序，不构成批量提交边界。始终一次只推进一个控件家族，并在 Gate A 与 Gate B 后等待用户确认。

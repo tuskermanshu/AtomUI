@@ -1,12 +1,10 @@
 using AtomUI.Animations;
 using AtomUI.Controls;
-using AtomUI.Data;
 using AtomUI.Generated.AtomUIDesktopControls;
 using AtomUI.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
-using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -150,7 +148,6 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
 
     internal bool IsPointerOverSubMenu => _popup?.IsPointerOverPopup ?? false;
 
-    private IDisposable? _popupPinnedOpenBinding;
 
     #endregion
 
@@ -210,14 +207,31 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         {
             ConfigureMaxPopupHeight();
         }
+        else if (change.Property == IsPopupPinnedOpenProperty || change.Property == ItemCountProperty)
+        {
+            UpdateSubMenuPopupPinnedOpen();
+            if (change.Property == IsPopupPinnedOpenProperty &&
+                change.GetNewValue<bool>() &&
+                HasSubMenu &&
+                !IsSubMenuOpen)
+            {
+                SetCurrentValue(IsSubMenuOpenProperty, true);
+            }
+        }
         else if (((change.Property == IsPopupPinnedOpenProperty && change.GetNewValue<bool>()) ||
-                  (change.Property == IsSubMenuOpenProperty && !change.GetNewValue<bool>() && IsPopupPinnedOpen)) &&
+                  (change.Property == IsSubMenuOpenProperty && !change.GetNewValue<bool>() && IsPopupPinnedOpen && CanReboundSubMenuOpen)) &&
                  HasSubMenu &&
                  !IsSubMenuOpen)
         {
             SetCurrentValue(IsSubMenuOpenProperty, true);
         }
     }
+
+    // 钉住回弹（关闭 → 立即置回 true）只在菜单树确实可见时允许。宿主弹层做生命周期关闭
+    //（页签切走 / 滚出视口）期间 placement target 已失效，此刻回弹会把子菜单弹层拉起成一个
+    // 无法正常呈现的空壳，滞留在 overlay 层（只剩圆角白底与阴影）。不可见时不回弹，
+    // 展开状态由宿主重开后的重新附着延迟同步恢复。
+    private bool CanReboundSubMenuOpen => IsEffectivelyVisible;
 
     private void UpdatePseudoClasses()
     {
@@ -310,6 +324,8 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
             menuItem[!SizeTypeProperty]              = this[!SizeTypeProperty];
             menuItem[!IsMotionEnabledProperty]       = this[!IsMotionEnabledProperty];
             menuItem[!ShouldUseOverlayPopupProperty] = this[!ShouldUseOverlayPopupProperty];
+            // 钉住语义沿容器层级递归下发：子菜单项的子菜单同样要在宿主生命周期关闭期间保留状态。
+            menuItem[!IsPopupPinnedOpenProperty]     = this[!IsPopupPinnedOpenProperty];
             PrepareMenuItem(menuItem, item, index);
         }
         else if (container is MenuSeparator menuSeparator)
@@ -349,8 +365,6 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         ClearDetachedTitleBarPopupPlacement();
-        _popupPinnedOpenBinding?.Dispose();
-        _popupPinnedOpenBinding = null;
         if (_popup is not null)
         {
             _popup.Opened -= HandleSubMenuPopupOpened;
@@ -364,11 +378,7 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         {
             _popup.Opened += HandleSubMenuPopupOpened;
             _popup.Closed += HandleSubMenuPopupClosed;
-            _popupPinnedOpenBinding = BindUtils.RelayBind(
-                this,
-                IsPopupPinnedOpenProperty,
-                _popup,
-                Popup.IsPopupPinnedOpenProperty);
+            UpdateSubMenuPopupPinnedOpen();
             if (IsSubMenuOpen)
             {
                 DeferSubMenuPopupOpen(_popup);
@@ -377,6 +387,19 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         ConfigureDetachedTitleBarPopupPlacement();
         UpdatePseudoClasses();
         ConfigureMaxPopupHeight();
+    }
+
+    // 钉住语义按菜单树下发（宿主 Flyout → Presenter → 各级 MenuItem），但只允许作用在
+    // 真正承载子菜单的弹层上：pinned 弹层会自行强制打开，叶子项的 PART_Popup 若被置为
+    // pinned，会打开成一个没有内容的空白弹层并遗留在 overlay 层（只剩圆角白底与阴影）。
+    private void UpdateSubMenuPopupPinnedOpen()
+    {
+        if (_popup is null)
+        {
+            return;
+        }
+
+        _popup.IsPopupPinnedOpen = IsPopupPinnedOpen && HasSubMenu;
     }
 
     private void SyncSubMenuPopupOpenState()
@@ -400,6 +423,17 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         _isSyncingSubMenuPopupState = true;
         try
         {
+            // 宿主弹层已关闭（页签切走 / 滚出触发的生命周期关闭后，钉住回弹把 IsSubMenuOpen
+            // 重新置 true）时不写子弹层的打开状态：此刻打开会把子弹层悬挂成只剩卡片阴影的
+            // 空白孤儿弹层。IsSubMenuOpen 的状态值已保留，宿主重开、菜单树重新附着后由
+            // OnAttachedToVisualTree 的延迟同步恢复呈现。仅当菜单树确实挂在弹层宿主下
+            //（MenuFlyout 场景）才拦截；plain Menu 没有弹层宿主，不受影响。
+            if (IsSubMenuOpen &&
+                this.FindLogicalAncestorOfType<Popup>() is { IsOpen: false })
+            {
+                return;
+            }
+
             _popup.IsOpen = IsSubMenuOpen;
         }
         finally
@@ -436,6 +470,18 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         if (IsSubMenuOpen)
         {
             SetCurrentValue(IsSubMenuOpenProperty, false);
+        }
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        // 钉住弹层的宿主生命周期关闭 / 重开会把菜单树整体从视觉树摘下再挂回；
+        // IsSubMenuOpen 的属性值在钉住期间被保留（见 IsPopupPinnedOpen 回弹），但子弹层
+        // 的打开状态不会随属性值自动恢复，重新附着时补一次延迟同步。
+        if (IsSubMenuOpen && _popup is { IsOpen: false })
+        {
+            DeferSubMenuPopupOpen(_popup);
         }
     }
 

@@ -10,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Input.TextInput;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.Threading;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 
@@ -200,6 +201,7 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
     private int _lifecycleCloseDepth;
     private int _pinnedOpenGeneration;
     private bool _isPinnedOpenSuspended;
+    private bool _isPinnedOpenReconcileRetried;
     private readonly List<Visual> _pinnedOpenTargetStateSubscriptions = [];
     private Control? _pinnedOpenTrackingTarget;
     private Control? _placementTransformTrackingTarget;
@@ -864,13 +866,31 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
 
         if (HasValidPinnedOpenTarget())
         {
+            _isPinnedOpenReconcileRetried = false;
             _isPinnedOpenSuspended = false;
             QueuePinnedOpen();
+            return;
         }
-        else
+
+        // IsVisible 恢复的同帧里放置目标尚未重新布局（TransformToVisual 未就绪 / 尺寸为零），
+        // 立即判无效会错过这次恢复信号——之后不再有属性变化触发 reconcile，弹层就再也打不开。
+        // 无法呈现时延后一帧重试一次，重试仍无效才按目标失效关闭。
+        if (!_isPinnedOpenReconcileRetried)
         {
-            CloseForLifecycle();
+            _isPinnedOpenReconcileRetried = true;
+            var generation = _pinnedOpenGeneration;
+            Dispatcher.Post(() =>
+            {
+                if (generation == _pinnedOpenGeneration)
+                {
+                    ReconcilePinnedOpenTargetState();
+                }
+            }, DispatcherPriority.Loaded);
+            return;
         }
+
+        _isPinnedOpenReconcileRetried = false;
+        CloseForLifecycle();
     }
 
     private bool HasValidPinnedOpenTarget()

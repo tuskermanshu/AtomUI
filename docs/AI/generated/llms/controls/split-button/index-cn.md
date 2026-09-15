@@ -42,7 +42,7 @@ SplitButton 的公共契约由 public/protected 类型成员、Avalonia 属性�
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
 | 内容与数据 | `Content`、`Icon` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `IsArrowVisible`、`IsDanger`、`IsMotionEnabled`、`IsPointAtCenter`、`IsPrimaryButtonType`、`IsWaveSpiritEnabled`、`ShouldUseOverlayPopup` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
+| 交互与状态 | `IsArrowVisible`、`IsDanger`、`IsMotionEnabled`、`IsPointAtCenter`、`IsPopupPinnedOpen`、`IsPrimaryButtonType`、`IsWaveSpiritEnabled`、`ShouldUseOverlayPopup` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
 | 视觉与布局 | `Placement`、`PlacementAnchor`、`PlacementGravity`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 弹层与窗口 | `Flyout`、`GutterToFlyout` | 控制 popup、flyout、dialog、window 或 overlay 宿主协作。 |
 | 动效与异步 | `MouseEnterDelay`、`MouseLeaveDelay` | 约束动效开关、异步加载、播放速度、超时和任务边界。 |
@@ -137,6 +137,8 @@ Token 来源：
 主要源码文件：
 
 - `src/AtomUI.Desktop.Controls/SplitButton/SplitButton.cs`
+- `src/AtomUI.Desktop.Controls/SplitButton/SplitButton.SemanticParts.cs`
+- `src/AtomUI.Desktop.Controls/SplitButton/SplitButtonToken.cs`
 - `src/AtomUI.Desktop.Controls/Buttons/Themes/SplitButtonTheme.axaml`
 
 职责边界：
@@ -150,5 +152,6 @@ Token 来源：
 
 - 源设计文档：`docs/controls/desktop/general/split-button/overview.md`
 - 实现文档：`docs/controls/desktop/general/split-button/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/general/split-button/semantic-part.md`
 - 变更记录：`docs/controls/desktop/general/split-button/changelog.md`
 - 语义结构：`./semantic-cn.md`
