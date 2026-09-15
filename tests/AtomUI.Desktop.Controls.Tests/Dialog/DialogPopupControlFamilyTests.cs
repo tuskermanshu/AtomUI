@@ -410,7 +410,7 @@ public class DialogPopupControlFamilyTests
             AvaloniaHeadlessPlatform.ForceRenderTimerTick(1);
             DialogPopupTestHost.Pump();
             var scrollViewer = tabControl.GetVisualDescendants()
-                                         .OfType<AtomUI.Desktop.Controls.TabControlScrollViewer>()
+                                         .OfType<AtomUI.Desktop.Controls.TabScrollViewer>()
                                          .Single();
             scrollViewer.Extent.Width.ShouldBeGreaterThan(scrollViewer.Viewport.Width);
             var menuIndicator = scrollViewer.GetVisualDescendants()

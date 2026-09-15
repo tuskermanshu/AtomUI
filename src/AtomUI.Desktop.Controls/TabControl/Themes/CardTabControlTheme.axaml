@@ -29,15 +29,17 @@
                                         Name="PART_TabsContainer"
                                         TabStripPlacement="{TemplateBinding TabStripPlacement}">
                                         <atom:TabsContainerPanel.TabScrollViewer>
-                                            <atom:TabControlScrollViewer
-                                                Name="PART_CardTabStripScrollViewer"
-                                                IsScrollChainingEnabled="False"
-                                                TabStripPlacement="{TemplateBinding TabStripPlacement}"
-                                                IsMotionEnabled="{TemplateBinding IsMotionEnabled}">
+                                    <atom:TabScrollViewer
+                                        Name="PART_CardTabStripScrollViewer"
+                                        IsScrollChainingEnabled="False"
+                                        TabStripPlacement="{TemplateBinding TabStripPlacement}"
+                                        IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
+                                        IsPopupPinnedOpen="{TemplateBinding IsPopupPinnedOpen}"
+                                        OverflowPopupTemplate="{TemplateBinding OverflowPopupTemplate}">
                                                 <ItemsPresenter
                                                     Name="PART_ItemsPresenter"
                                                     ItemsPanel="{TemplateBinding ItemsPanel}" />
-                                            </atom:TabControlScrollViewer>
+                                    </atom:TabScrollViewer>
                                         </atom:TabsContainerPanel.TabScrollViewer>
                                         <atom:TabsContainerPanel.AddTabButton>
                                             <atom:IconButton

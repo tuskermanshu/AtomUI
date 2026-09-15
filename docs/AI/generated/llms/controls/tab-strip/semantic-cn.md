@@ -10,7 +10,7 @@
 | `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
 | `item` | `导航项区域` | 承载当前项、选中项、禁用项、排序项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
 | `reorder` | `拖动排序区域` | 承载拖动源、实时让位预览、自动滚动和集合顺序提交。 | `IsTabReorderEnabled`、`TabReordering`、`TabReordered` | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `popup` | `PART_OverflowPopup` 与模板内容 | 承载默认 overflow menu 或 `OverflowPopupTemplate`，消费 `TabOverflowPopupContext`。 | `OverflowPopupTemplate` | 复用 Popup/Menu/Input 与 TabControl 家族 Token | stable |
 | `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
 
 ## Abstract AXAML Structure
@@ -24,12 +24,12 @@
             <DockPanel Name="HeaderLayout">
                 <ContentPresenter Name="HeaderStartExtraContent" />
                 <ContentPresenter Name="HeaderEndExtraContent" />
-                <TabStripScrollViewer Name="PART_TabsContainer">
+                <TabScrollViewer Name="PART_TabsContainer">
                     <Panel>
                         <ItemsPresenter Name="PART_ItemsPresenter" />
                         <Border Name="PART_SelectedItemIndicator" />
                     </Panel>
-                </TabStripScrollViewer>
+                </TabScrollViewer>
             </DockPanel>
         </Border>
     </Panel>
@@ -38,13 +38,89 @@
 
 ## Composition Model
 
-该控件主要由 public 控件和 ControlTheme 模板直接表达，没有额外运行时组合层。
+该章节由控件 `Themes/` 文件夹中的真实主题文件生成，用于说明 public 控件与内部协作对象之间的运行时结构。内部节点只用于理解和维护，不应指导用户代码直接依赖。
+
+### 控件角色图
+
+```text
+TabStrip
+  -> TabItem (item container control theme, BaseTabItemTheme.axaml)
+     -> Border#Frame (template-stable)
+        -> StackPanel (template-stable)
+           -> IconPresenter#ItemIconPresenter (internal-observable)
+           -> ContentPresenter#ContentPresenter (internal-observable)
+           -> IconButton#PART_ItemCloseButton (template-stable)
+  -> TabItem (item container control theme, CardTabItemTheme.axaml)
+     -> Panel (template-stable)
+        -> PixelAlignedBorder#Frame (template-stable)
+           -> StackPanel (template-stable)
+              -> IconPresenter#ItemIconPresenter (internal-observable)
+              -> ContentPresenter#ContentPresenter (internal-observable)
+              -> IconButton#PART_ItemCloseButton (template-stable)
+        -> Rectangle#LineMask (template-stable)
+  -> TabItem (item container control theme, TabItemTheme.axaml)
+  -> TabOverflowMenu (control theme, TabOverflowMenuTheme.axaml)
+     -> ScrollViewer (template-stable)
+        -> Border (template-stable)
+           -> ItemsPresenter#PART_ItemsPresenter (template-stable)
+  -> TabOverflowMenuItem (item container control theme, TabOverflowMenuTheme.axaml)
+     -> Border#Frame (template-stable)
+        -> Grid (template-stable)
+           -> ContentPresenter#ItemTextPresenter (internal-observable)
+           -> IconButton#PART_ItemCloseButton (template-stable)
+  -> TabScrollViewer (control theme, TabScrollViewerTheme.axaml)
+     -> Panel#RootLayout (template-stable)
+        -> DockPanel#ScrollViewLayout (template-stable)
+           -> IconButton#PART_ScrollMenuIndicator (template-stable)
+           -> Panel#ScrollContentViewport (template-stable)
+              -> TabScrollContentPresenter#ScrollViewContent (internal-observable)
+              -> Canvas (template-stable)
+                 -> TabOverflowEdgeIndicator#PART_ScrollStartEdgeIndicator (template-stable)
+                 -> TabOverflowEdgeIndicator#PART_ScrollEndEdgeIndicator (template-stable)
+        -> Popup#PART_OverflowPopup (template-stable)
+```
+
+### 协作节点
+
+| 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `TabStrip` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `TabItem` | item container control theme | `BaseTabItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `CloseButtonOpacity`, `CloseIcon`, `Foreground`, `Header`, `HeaderTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Frame` | template node (Border) | `BaseTabItemTheme.axaml` | TabItem | `Background`, `CloseButtonOpacity`, `CloseIcon`, `Header`, `HeaderTemplate`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `StackPanel` | template node (StackPanel) | `BaseTabItemTheme.axaml` | TabItem | `CloseButtonOpacity`, `CloseIcon`, `Header`, `HeaderTemplate`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ItemIconPresenter` | template node (IconPresenter) | `BaseTabItemTheme.axaml` | TabItem | `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ContentPresenter` | template node (ContentPresenter) | `BaseTabItemTheme.axaml` | TabItem | `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ItemCloseButton` | template node (IconButton) | `BaseTabItemTheme.axaml` | TabItem | `CloseButtonOpacity`, `CloseIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `TabItem` | item container control theme | `CardTabItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `CloseButtonOpacity`, `CloseIcon`, `CornerRadius` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `CardTabItemTheme.axaml` | TabItem | `Background`, `BorderBrush`, `BorderThickness`, `CloseButtonOpacity`, `CloseIcon`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Frame` | template node (PixelAlignedBorder) | `CardTabItemTheme.axaml` | TabItem | `Background`, `BorderBrush`, `BorderThickness`, `CloseButtonOpacity`, `CloseIcon`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `StackPanel` | template node (StackPanel) | `CardTabItemTheme.axaml` | TabItem | `CloseButtonOpacity`, `CloseIcon`, `Header`, `HeaderTemplate`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ItemIconPresenter` | template node (IconPresenter) | `CardTabItemTheme.axaml` | TabItem | `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ContentPresenter` | template node (ContentPresenter) | `CardTabItemTheme.axaml` | TabItem | `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ItemCloseButton` | template node (IconButton) | `CardTabItemTheme.axaml` | TabItem | `CloseButtonOpacity`, `CloseIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `LineMask` | template node (Rectangle) | `CardTabItemTheme.axaml` | TabItem | `Background`, `LineMaskMargin` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `TabItem` | item container control theme | `TabItemTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `TabOverflowMenu` | control theme | `TabOverflowMenuTheme.axaml` | TabStrip | `Background`, `CornerRadius`, `ItemsPanel`, `Padding` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ItemsPresenter` | template node (ItemsPresenter) | `TabOverflowMenuTheme.axaml` | TabOverflowMenu | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `TabOverflowMenuItem` | item container control theme | `TabOverflowMenuTheme.axaml` | TabStrip | `Background`, `CornerRadius`, `Header`, `HeaderTemplate`, `Padding` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Frame` | template node (Border) | `TabOverflowMenuTheme.axaml` | TabOverflowMenuItem | `Background`, `CornerRadius`, `Header`, `HeaderTemplate`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ItemTextPresenter` | template node (ContentPresenter) | `TabOverflowMenuTheme.axaml` | TabOverflowMenuItem | `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ItemCloseButton` | template node (IconButton) | `TabOverflowMenuTheme.axaml` | TabOverflowMenuItem | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `TabScrollViewer` | control theme | `TabScrollViewerTheme.axaml` | TabStrip | `HorizontalSnapPointsAlignment`, `HorizontalSnapPointsType`, `IsMotionEnabled`, `IsPopupPinnedOpen`, `OverflowPopupPlacement`, `Padding` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `RootLayout` | template node (Panel) | `TabScrollViewerTheme.axaml` | TabScrollViewer | `HorizontalSnapPointsAlignment`, `HorizontalSnapPointsType`, `IsMotionEnabled`, `IsPopupPinnedOpen`, `OverflowPopupPlacement`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ScrollViewLayout` | template node (DockPanel) | `TabScrollViewerTheme.axaml` | TabScrollViewer | `HorizontalSnapPointsAlignment`, `HorizontalSnapPointsType`, `Padding`, `TabStripPlacement`, `VerticalSnapPointsAlignment`, `VerticalSnapPointsType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ScrollMenuIndicator` | template node (IconButton) | `TabScrollViewerTheme.axaml` | TabScrollViewer | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ScrollContentViewport` | template node (Panel) | `TabScrollViewerTheme.axaml` | TabScrollViewer | `HorizontalSnapPointsAlignment`, `HorizontalSnapPointsType`, `Padding`, `TabStripPlacement`, `VerticalSnapPointsAlignment`, `VerticalSnapPointsType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ScrollViewContent` | template node (TabScrollContentPresenter) | `TabScrollViewerTheme.axaml` | TabScrollViewer | `HorizontalSnapPointsAlignment`, `HorizontalSnapPointsType`, `Padding`, `TabStripPlacement`, `VerticalSnapPointsAlignment`, `VerticalSnapPointsType` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ScrollStartEdgeIndicator` | template node (TabOverflowEdgeIndicator) | `TabScrollViewerTheme.axaml` | TabScrollViewer | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ScrollEndEdgeIndicator` | template node (TabOverflowEdgeIndicator) | `TabScrollViewerTheme.axaml` | TabScrollViewer | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_OverflowPopup` | template node (Popup) | `TabScrollViewerTheme.axaml` | TabScrollViewer | `IsMotionEnabled`, `IsPopupPinnedOpen`, `OverflowPopupPlacement` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `CloseIcon`、`HeaderEndEdgePadding`、`HeaderEndExtraContent`、`HeaderEndExtraContentTemplate`、`HeaderStartEdgePadding`、`HeaderStartExtraContent`、`HeaderStartExtraContentTemplate`、`Icon` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
+| 内容与数据 | `CloseIcon`、`HeaderEndEdgePadding`、`HeaderEndExtraContent`、`HeaderEndExtraContentTemplate`、`HeaderStartEdgePadding`、`HeaderStartExtraContent`、`HeaderStartExtraContentTemplate`、`Icon`、`OverflowPopupTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口；`OverflowPopupTemplate` 的 data item 固定为 `TabOverflowPopupContext`。 |
 | 选择与集合 | `IsTabReorderEnabled`、`TabActivationTrigger`、`SelectedIndex`、`SelectedItem`、`ItemsSource` | 维护页签选择触发时机、集合顺序和拖动排序状态。 |
 | 交互与状态 | `IsAutoHideCloseButton`、`IsClosable`、`IsMotionEnabled`、`IsShowAddTabButton`、`IsTabAutoHideCloseButton`、`IsTabClosable` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
 | 视觉与布局 | `SizeType`、`TabAlignmentCenter`、`TabStripPlacement` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
@@ -78,13 +154,20 @@ Public API / inherited command / item source / user input
 - `IsTabClosable` 是生成 `TabStripItem` 的模板级默认值；overflow 菜单使用容器最终生效的 `IsClosable`，因此控件级默认、单项覆盖和 overflow 呈现必须保持同一语义。
 - 拖动排序开启后，排序结果必须提交到 `ItemsSource` 或 `Items` 的逻辑集合顺序；拖动过程采用 Chrome 式轨道内实时让位预览，被拖 Tab 只沿 Tab 轨道主轴移动并覆盖在兄弟 Tab 上方，其他 Tab 通过临时 transform 让出目标位置，不能直接把 `ItemsPresenter.Panel.Children` 当作排序数据源。
 - `TabStripPlacement=Top/Bottom` 时主轴为 X 轴，被拖 Tab 的 Y 位移必须保持为 0；`TabStripPlacement=Left/Right` 时主轴为 Y 轴，被拖 Tab 的 X 位移必须保持为 0。目标位置由被拖 Tab 的前进边缘跨过被覆盖兄弟 Tab 主轴中线决定：向后拖动使用 trailing edge，向前拖动使用 leading edge，相当于覆盖兄弟 Tab 约一半宽度或高度即触发让位，而不是由 pointer 的非主轴偏移决定。
-- overflow 菜单项是对应 `TabStripItem` 的临时替代呈现，不拥有独立的关闭语义；其 `IsClosable` 必须复制源 Tab 的有效值，关闭请求必须回到 `BaseTabStrip.CloseTab` 统一处理。
+- overflow 是当前打开会话的不可变 `TabOverflowItem` 快照，不拥有独立的选择或关闭语义；`TryActivate` 与 `TryClose` 必须经 `BaseTabStrip` 统一提交，旧会话 item 必须被拒绝。
+- `OverflowPopupTemplate=null` 使用默认菜单；非空模板只替换弹层内容，不能改变溢出判定、placement、light-dismiss、选择或关闭 owner。
+- `OverflowPopupTemplate` 默认值为 `null`，由 `TabStrip` 与 `CardTabStrip` 继承。模板 data item 固定为
+  `TabOverflowPopupContext`；模板只能通过 `TryActivate`、`TryClose` 与 `Dismiss` 提交操作。
+- pointer 点击 `PART_ScrollMenuIndicator` 打开 overflow Popup 时不得自动聚焦选中项、第一项、Popup 根节点或搜索框；焦点保持在激活器，只有用户后续显式 Tab/方向键导航或点击输入框时才进入弹层内容。
+- 水平布局必须先为可见的 `PART_ScrollMenuIndicator` 保留空间；父级宽度缩窄、瀑布流换列或最终 arrange 小于先前 measure 时，激活器仍必须可见且完整落在 owner 边界内。
 
 ## Theme and Token Boundaries
 
 TabStrip 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的控件 Token 共同构成。
 
-当前控件未抽取到专属 AXAML 主题文件；视觉契约主要来自继承控件、共享主题和资源 key。
+TabStrip 的 Line/Card ControlTheme 位于 `TabControl/Themes/TabStrip`，并复用 TabControl 家族统一的
+`TabScrollViewerTheme` 与 `TabOverflowMenuTheme`。统一主题承载 edge indicator、更多按钮、静态 Popup shell 和默认菜单；
+TabStrip 自身主题只负责 owner 布局与外观映射。
 
 TabStrip 当前没有专属 Token 文档；主题通过 SharedToken、关联控件 Token 或继承主题资源表达视觉语义。运行时状态不得写入 Token 模型。
 
@@ -93,7 +176,10 @@ TabStrip 当前没有专属 Token 文档；主题通过 SharedToken、关联控�
 - 不删除或重命名已经稳定的 ControlTheme key、template part、伪类和资源 key。
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
-- `BaseOverflowMenuItemTheme` 必须根据 `IsClosable` 控制 `PART_ItemCloseButton` 的可见性：不可关闭项隐藏关闭按钮，可关闭项显示关闭按钮；该规则对 `TabStrip`、`CardTabStrip` 及其对应 overflow item 统一生效。
+- 默认 `TabOverflowMenuTheme` 必须根据不可变 projection 的 `IsClosable` 控制关闭入口：不可关闭项不显示也不命中关闭按钮；可关闭项只通过 context `TryClose` 转发。
+- 自定义 `OverflowPopupTemplate` 的 surface、搜索和空状态由应用模板负责；Popup host 仍由 AtomUI 负责定位、light-dismiss、pinned 与生命周期释放。
+- Popup host 沿嵌套 `ContentPresenter` 解析最终 surface 的圆角；模板根与可见背景必须暴露一致的
+  `CornerRadius`，item header/template 必须通过控件自身的 content pipeline 呈现，不能生成空白菜单项。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
 
 Token 边界：
@@ -104,7 +190,7 @@ Token 边界：
 
 维护 TabStrip 时必须保持以下不变量：
 
-- 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
+- `OverflowPopupTemplate`、`TabOverflowPopupContext` 与 `TabOverflowItem` 是稳定 public customization contract；internal overflow host、默认菜单和容器不是兼容入口。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - 不把拖动排序实现为视觉容器重排；排序必须由集合 owner 提交，选择、overflow 菜单和滚动状态都从同一个集合顺序推导。
@@ -122,8 +208,11 @@ Token 边界：
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - 拖动排序释放时必须修改逻辑集合顺序，拖动中允许用 `RenderTransform` 和临时 `ZIndex` 做实时视觉预览，但不能只调整 `Panel.Children`、`ZIndex` 或 transform 作为最终排序结果。
 - 选中项必须跟随同一个逻辑 item，不能跟随旧 index；重排后指示条、overflow 菜单和关闭状态必须从新顺序统一推导。
-- overflow 菜单不能提供独立于源 Tab 的关闭能力；`IsClosable=False` 时不得显示或执行关闭入口，所有关闭结果必须经过 `BaseTabStrip.CloseTab`。
-- `Closing` 被取消或 owner 拒绝关闭时，源 Tab、集合、选中状态和 overflow 菜单项必须保持不变；成功关闭后才允许清理对应菜单项。
+- overflow 内容不能提供独立于源 Tab 的选择或关闭能力；所有 action 必须验证当前会话并经过 `BaseTabStrip`。
+- `Closing` 被取消或 owner 拒绝关闭时，源 Tab、集合和选中状态保持不变；任何外部 collection mutation 都使 projection 失效并关闭。
+- 普通关闭后不得保留 snapshot 数据或 owner action target；完整 teardown 后不得保留 Popup child、context、template root 或打开态订阅。
+- edge indicator 必须与真实 scroll content viewport 同边对齐；四个 placement 的方向阴影、尺寸和开始/结束可见性必须一致，不能以 DockPanel 外层 margin 或渐变遮罩代替。
+- overflow 列表隐藏 scrollbar 时必须继续可滚动，item hover/selected surface 的左右间距必须相等。
 - `TabActivationTrigger` 只能改变 pointer 激活提交时机，不能改变键盘选择、access key、关闭后选择、程序化选择或拖动排序后的选中项回放语义。
 - `PointerReleased` 候选激活状态必须由控件 owner 持有并按 pointer 会话释放，不能让旧 `TabStripItem` 或旧 pointer 引用跨 template reapply / detach 存活。
 - 所有拖动临时状态必须在提交、取消、capture lost、template reapply 和 detach 时释放，不能保留旧容器或旧 adorner。

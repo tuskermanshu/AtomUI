@@ -94,7 +94,9 @@ internal class ShadowsAwareContainer : Decorator
     
     private PopupFrameRenderer? _frameRenderer;
     private CompositeDisposable? _frameRenderBindings;
-    private IDisposable? _contentPresenterChildSubscription;
+    private readonly List<ContentPresenter> _contentPresenterChain = [];
+    private CompositeDisposable? _surfaceBindings;
+    private bool _isContentSurfaceTrackingActive;
 
     private bool HasBoxShadow => BoxShadow.Count != 0;
     private bool HasSurfaceBackground => SurfaceBackground is not null;
@@ -130,6 +132,8 @@ internal class ShadowsAwareContainer : Decorator
     protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
         base.OnAttachedToLogicalTree(e);
+        _isContentSurfaceTrackingActive = true;
+        ConfigureContentSurface();
         var popup = this.FindLogicalAncestorOfType<Popup>();
         if (popup != null)
         {
@@ -144,11 +148,11 @@ internal class ShadowsAwareContainer : Decorator
 
     protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
-        base.OnDetachedFromLogicalTree(e);
+        _isContentSurfaceTrackingActive = false;
+        ClearContentSurfaceTracking();
         _frameRenderBindings?.Dispose();
         _frameRenderBindings = null;
-        _contentPresenterChildSubscription?.Dispose();
-        _contentPresenterChildSubscription = null;
+        base.OnDetachedFromLogicalTree(e);
     }
 
     protected override Size MeasureOverride(Size availableSize)
@@ -241,20 +245,10 @@ internal class ShadowsAwareContainer : Decorator
         {
             EnsureFrameRenderer();
         }
-        _contentPresenterChildSubscription?.Dispose();
-        _contentPresenterChildSubscription = null;
 
-        if (Child is ContentPresenter contentPresenter)
+        if (_isContentSurfaceTrackingActive)
         {
-            _contentPresenterChildSubscription = contentPresenter
-                .GetObservable(ContentPresenter.ChildProperty)
-                .Subscribe(PostConfigureShadowsInfo);
-
-            PostConfigureShadowsInfo(contentPresenter.Child);
-        }
-        else if (Child != null)
-        {
-            ConfigureShadowsInfo(Child);
+            ConfigureContentSurface();
         }
     }
 
@@ -305,34 +299,77 @@ internal class ShadowsAwareContainer : Decorator
         LogicalChildren.Insert(0, _frameRenderer);
     }
 
-    private void PostConfigureShadowsInfo(Control? child)
+    private void ConfigureContentSurface()
     {
-        if (child != null)
+        ClearContentSurfaceTracking();
+
+        Control? surface = Child;
+        while (surface is ContentPresenter presenter)
         {
-            ConfigureShadowsInfo(child);
+            presenter.PropertyChanged += HandleContentPresenterPropertyChanged;
+            _contentPresenterChain.Add(presenter);
+            surface = presenter.Child;
+        }
+
+        ConfigureShadowsInfo(surface);
+    }
+
+    private void ClearContentSurfaceTracking()
+    {
+        foreach (var presenter in _contentPresenterChain)
+        {
+            presenter.PropertyChanged -= HandleContentPresenterPropertyChanged;
+        }
+        _contentPresenterChain.Clear();
+
+        _surfaceBindings?.Dispose();
+        _surfaceBindings = null;
+    }
+
+    private void HandleContentPresenterPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == ContentPresenter.ChildProperty)
+        {
+            ConfigureContentSurface();
         }
     }
 
-    private void ConfigureShadowsInfo(Control child)
+    private void ConfigureShadowsInfo(Control? child)
     {
+        _surfaceBindings = new CompositeDisposable();
         if (child is IArrowAwareShadowMaskInfoProvider arrowAwareShadowMaskInfoProvider)
         {
             var arrowDecoratedBox = arrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox();
-            this[!CornerRadiusProperty]               = arrowDecoratedBox[!CornerRadiusProperty];
-            this[!ArrowSizeProperty]                  = arrowDecoratedBox[!ArrowSizeProperty];
-            this[!ArrowIndicatorLayoutBoundsProperty] = arrowDecoratedBox[!ArrowDecoratedBox.ArrowIndicatorLayoutBoundsProperty];
-            this[!ArrowDirectionProperty]             = arrowDecoratedBox[!ArrowDirectionProperty];
-            this[!IsArrowVisibleProperty]             = arrowDecoratedBox[!IsArrowVisibleProperty];
+            _surfaceBindings.Add(BindUtils.RelayBind(
+                arrowDecoratedBox, ArrowDecoratedBox.CornerRadiusProperty, this, CornerRadiusProperty));
+            _surfaceBindings.Add(BindUtils.RelayBind(
+                arrowDecoratedBox, ArrowDecoratedBox.ArrowSizeProperty, this, ArrowSizeProperty));
+            _surfaceBindings.Add(BindUtils.RelayBind(
+                arrowDecoratedBox,
+                ArrowDecoratedBox.ArrowIndicatorLayoutBoundsProperty,
+                this,
+                ArrowIndicatorLayoutBoundsProperty));
+            _surfaceBindings.Add(BindUtils.RelayBind(
+                arrowDecoratedBox, ArrowDecoratedBox.ArrowDirectionProperty, this, ArrowDirectionProperty));
+            _surfaceBindings.Add(BindUtils.RelayBind(
+                arrowDecoratedBox, ArrowDecoratedBox.IsArrowVisibleProperty, this, IsArrowVisibleProperty));
         }
         else if (child is Border bordered)
         {
             SetCurrentValue(IsArrowVisibleProperty, false);
-            this[!CornerRadiusProperty] = bordered[!Border.CornerRadiusProperty];
+            _surfaceBindings.Add(BindUtils.RelayBind(
+                bordered, Border.CornerRadiusProperty, this, CornerRadiusProperty));
         }
         else if (child is TemplatedControl templatedControl)
         {
             SetCurrentValue(IsArrowVisibleProperty, false);
-            this[!CornerRadiusProperty] = templatedControl[!TemplatedControl.CornerRadiusProperty];
+            _surfaceBindings.Add(BindUtils.RelayBind(
+                templatedControl, TemplatedControl.CornerRadiusProperty, this, CornerRadiusProperty));
+        }
+        else
+        {
+            SetCurrentValue(IsArrowVisibleProperty, false);
+            SetCurrentValue(CornerRadiusProperty, default);
         }
     }
 

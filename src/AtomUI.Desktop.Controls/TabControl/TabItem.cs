@@ -225,6 +225,21 @@ public class TabItem : HeaderedContentControl, ISelectable
         NotifyIconSlotOwner();
     }
 
+    protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromLogicalTree(e);
+        // A direct detach (e.Source == this) means the tab control dropped this item from
+        // its logical children. Items that are their own container never receive
+        // ClearContainerForItemOverride, so the owner-created indexer bindings must be
+        // released here or the owner keeps the removed item alive for its lifetime.
+        // Cascaded detach (whole tree teardown) carries an ancestor's args and must keep
+        // the bindings so re-attaching the tree restores the property sync.
+        if (ReferenceEquals(e.Source, this) && e.Parent is BaseTabControl tabControl)
+        {
+            tabControl.ReleaseTabItemOwnerBindings(this);
+        }
+    }
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);

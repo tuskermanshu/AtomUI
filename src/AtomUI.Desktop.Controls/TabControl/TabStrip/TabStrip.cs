@@ -36,7 +36,7 @@ public class TabStrip : BaseTabStrip
 
     private Border? _selectedIndicator;
     private ItemsPresenter? _itemsPresenter;
-    private TabStripScrollViewer? _scrollViewer;
+    private TabScrollViewer? _scrollViewer;
     private IDisposable? _selectedItemBoundsSubscription;
 
     public TabStrip()
@@ -164,10 +164,9 @@ public class TabStrip : BaseTabStrip
             _scrollViewer.PropertyChanged -= HandleScrollViewerPropertyChanged;
         }
 
-        _scrollViewer = e.NameScope.Find<TabStripScrollViewer>("PART_TabsContainer");
+        _scrollViewer = e.NameScope.Find<TabScrollViewer>("PART_TabsContainer");
         if (_scrollViewer != null)
         {
-            _scrollViewer.TabStrip        = this;
             _scrollViewer.PropertyChanged += HandleScrollViewerPropertyChanged;
         }
 

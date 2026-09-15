@@ -42,10 +42,10 @@ public class TabControlShowCasePageTests
         CountOccurrences(source, "Classes=\"info-value\"").ShouldBe(0);
         source.ShouldNotContain("LineHeight=\"22\"");
         source.ShouldContain("Description=\"{gallery:TabControlShowCaseLangResource PageDescription}\"");
-        CountShowCaseItemElements(source).ShouldBe(15);
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(15);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(15);
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:TabControlViewModel\"").ShouldBe(15);
+        CountShowCaseItemElements(source).ShouldBe(16);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(16);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(16);
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:TabControlViewModel\"").ShouldBe(16);
         CountOccurrences(source, "BadgeText=\"v6.0.8\"").ShouldBe(2);
         source.ShouldContain("TabControlShowCaseLangResource TabControlBasicTitle");
         source.ShouldContain("TabControlShowCaseLangResource TabControlItemsSourceTitle");

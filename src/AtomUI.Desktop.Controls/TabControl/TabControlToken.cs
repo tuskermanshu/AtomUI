@@ -1,4 +1,5 @@
-﻿using AtomUI.Theme.DesignTokens;
+﻿using AtomUI.Media;
+using AtomUI.Theme.DesignTokens;
 using Avalonia;
 using Avalonia.Media;
 
@@ -139,6 +140,26 @@ internal sealed class TabControlToken : AbstractControlDesignToken
     public double MenuEdgeThickness { get; set; }
 
     /// <summary>
+    /// 左侧滚动溢出阴影
+    /// </summary>
+    public BoxShadows BoxShadowTabsOverflowLeft { get; set; }
+
+    /// <summary>
+    /// 右侧滚动溢出阴影
+    /// </summary>
+    public BoxShadows BoxShadowTabsOverflowRight { get; set; }
+
+    /// <summary>
+    /// 顶部滚动溢出阴影
+    /// </summary>
+    public BoxShadows BoxShadowTabsOverflowTop { get; set; }
+
+    /// <summary>
+    /// 底部滚动溢出阴影
+    /// </summary>
+    public BoxShadows BoxShadowTabsOverflowBottom { get; set; }
+
+    /// <summary>
     /// 水平添加按钮外边距
     /// </summary>
     public Thickness AddTabButtonMarginHorizontal { get; set; }
@@ -206,7 +227,37 @@ internal sealed class TabControlToken : AbstractControlDesignToken
         MenuIndicatorPaddingVertical   = new Thickness(0, EffectiveGlobalToken.UniformlyPaddingXS, 0, 0);
         CloseIconMargin                = new Thickness(EffectiveGlobalToken.UniformlyMarginXXS, 0, 0, 0);
 
-        MenuEdgeThickness   = 20;
+        var tabsOverflowShadowColor = ColorUtils.FromRgbF(0.08, 0, 0, 0);
+        BoxShadowTabsOverflowLeft   = new BoxShadows(new BoxShadow
+        {
+            OffsetX = 10,
+            Blur    = 8,
+            Spread  = -8,
+            Color   = tabsOverflowShadowColor
+        });
+        BoxShadowTabsOverflowRight  = new BoxShadows(new BoxShadow
+        {
+            OffsetX = -10,
+            Blur    = 8,
+            Spread  = -8,
+            Color   = tabsOverflowShadowColor
+        });
+        BoxShadowTabsOverflowTop    = new BoxShadows(new BoxShadow
+        {
+            OffsetY = 10,
+            Blur    = 8,
+            Spread  = -8,
+            Color   = tabsOverflowShadowColor
+        });
+        BoxShadowTabsOverflowBottom = new BoxShadows(new BoxShadow
+        {
+            OffsetY = -10,
+            Blur    = 8,
+            Spread  = -8,
+            Color   = tabsOverflowShadowColor
+        });
+
+        MenuEdgeThickness   = EffectiveGlobalToken.ControlHeight;
         TabAndContentGutter = EffectiveGlobalToken.UniformlyMarginSM;
     }
     
