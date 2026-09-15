@@ -40,7 +40,7 @@ SearchEdit 专项 API：
 | API | 类型 | 语义 |
 | --- | --- | --- |
 | `SearchButtonStyle` | `SearchButtonType` | 搜索按钮样式，支持 `Default` 和 `Primary`。 |
-| `SearchButtonText` | `string` | 搜索按钮显示文本；未设置时按钮以搜索图标为主要视觉。 |
+| `SearchButtonText` | `object?` | 搜索按钮显示文本；未设置时按钮以搜索图标为主要视觉。 |
 | `IsOperating` | `bool` | 搜索进行中状态；为 `true` 时显示按钮 loading 并阻止重复触发搜索请求。 |
 | `IsSearchOnEnterEnabled` | `bool` | 是否允许未处理的 Enter `KeyUp` 触发搜索请求，默认值为 `true`。 |
 | `SearchButtonTheme` | `ControlTheme?` | 搜索按钮 Semantic Part Theme；`TargetType` 必须兼容 public `Button`。 |
@@ -55,7 +55,7 @@ SearchEdit 专项 API：
 | `StyleVariant` | 输入表面样式。 |
 | `Status` | 显式输入反馈状态；最终视觉由 `InputControlFrame.EffectiveStatus` 计算，native validation error 以 `DataValidationErrors` 为唯一真源。 |
 | `IsAllowClear` / `ClearIcon` | 搜索文本清除入口。 |
-| `InnerLeftContent` / `InnerRightContent` | 输入框内部前后缀内容。 |
+| `InnerLeftContentTemplate` / `InnerRightContentTemplate` | 输入框内部前后缀内容模板。 |
 | `LeftAddOn` / `LeftAddOnTemplate` | 输入框左侧外部附加内容。 |
 | `IsMotionEnabled` | 内部按钮和输入壳体动效开关。 |
 
@@ -202,13 +202,27 @@ SearchEdit 的 `SizeType=Custom` 走 LineEdit 家族的 Custom size 规则。未
 
 LLMS 语义区域：
 
+SearchEdit 是输入控件家族中带专属搜索按钮的 public owner，公开 5 个 Selector 部件（`root` 由生成器隐式合成）。
+所有 Part 均为 `Single`、`Customization` 为 `Selector`、`CrossVisualRoot=false`。
+
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `SearchEdit` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | `SearchEdit` | 根语义区域，承载搜索输入 public API、文本值、验证状态和主题入口。 | `Text`、`PlaceholderText`、`Status`、`SizeType`、`StyleVariant` | SearchEdit 无 Own Token，统一消费 SharedToken 与 `InputControlFrame` | stable |
+| `prefix` | `AddOnContentPresenter`（`Classes.semantic-prefix`） | 输入框内部前缀内容承载；路由经 `semantic-scope-prefix` 作用域锚点限定。 | `InnerLeftContentTemplate` | SharedToken 输入前缀视觉 | stable |
+| `input` | `InputTextPresenter#PART_TextPresenter`（`Classes.semantic-input`） | 文本显示、光标、选择、滚动与密码 reveal。 | `Text`、`SelectionStart`、`SelectionEnd`、`PasswordChar`（继承自 `AvaloniaTextBox`） | SharedToken 输入文本与光标视觉 | stable |
+| `suffix` | `StackPanel`（`Classes.semantic-suffix`） | 输入框内部后缀内容承载；路由经 `semantic-scope-suffix` 作用域锚点限定，清除入口位于其下。 | `InnerRightContentTemplate`、`IsAllowClear` | SharedToken 输入后缀视觉 | stable |
+| `clear` | `InputClearIconButton#PART_ClearButton`（`Classes.semantic-clear`） | 清除当前搜索文本的入口。 | `IsAllowClear`、`ClearIcon` | SharedToken 清除图标视觉 | stable |
+| `button` | public `Button#PART_RightAddOn`（`Classes.semantic-button`，运行时创建） | 搜索按钮：图标/文本、loading 状态与点击触发搜索请求。 | `SearchButtonStyle`、`SearchButtonText`、`IsOperating`、`SearchButtonTheme`、`SearchRequested` | SharedToken 按钮视觉 | stable |
+
+路由说明：
+
+- 5 个 Part 的 `SelectorRoute` 全部以 `/template/ .semantic-scope-input-frame` 为锚点，经
+  `SearchEditDecoratedBoxTheme.axaml` 里的 `semantic-scope-prefix` / `semantic-scope-suffix` 作用域类收敛到具体节点。
+  `button` 的 `RuntimeCreated=true`（节点由 `SearchEditDecoratedBoxTheme.axaml` 的 `PART_RightAddOn` 承载，
+  以 public `Button` 为 `ContractType`）。
+- `SearchEditTheme.axaml` 另含 `semantic-content`（`Panel`）与 `semantic-placeholder`（`TextBlock`）两个
+  **非 Part 的路由/视觉辅助 marker**，它们不注册 descriptor、不生成 Style，也不属于对外语义契约。
+  维护时不要把它们当作 Public Part 使用。
 
 Token 说明：
 

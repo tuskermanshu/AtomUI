@@ -2,6 +2,22 @@
 
 本文档记录 SearchEdit 控件级设计、API、主题契约、Token 和实现结构的变化。它用于维护控件设计历史，不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-15
+
+- Documentation
+  - Replace the placeholder semantic contract in `overview.md` with the real five Selector Parts published by
+    `SearchEdit.SemanticParts.cs`: `root`、`prefix`、`input`、`suffix`、`clear`、`button`. The previous table listed
+    generic placeholder entries (`input` / `trigger` / `popup` / `validation`) that did not correspond to any declared
+    descriptor, and the LLMS generator projected that table verbatim into `controls/search-edit/semantic-cn.md`.
+  - Record the routing anchors (`semantic-scope-input-frame`、`semantic-scope-prefix`、`semantic-scope-suffix`) and
+    clarify that `semantic-content` / `semantic-placeholder` are non-Part routing/visual helper markers, not public
+    contract.
+- API documentation
+  - Correct two public-surface descriptions that did not match the source: `SearchButtonText` is typed `object?`
+    (not `string`), and the inherited inner-content entry points are `InnerLeftContentTemplate` /
+    `InnerRightContentTemplate` (there are no `InnerLeftContent` / `InnerRightContent` properties on the
+    `LineEdit` base).
+
 ## 2026-09-01
 
 - API
