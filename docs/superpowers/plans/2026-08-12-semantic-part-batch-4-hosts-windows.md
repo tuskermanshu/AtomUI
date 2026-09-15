@@ -195,11 +195,11 @@
 
 **风险类型：** MenuFlyout 跨视觉根（弹层锚定模板内 `PART_SecondaryButton`）、运行时 MenuItem 容器、共享菜单节点 owner 隔离、primary 形态接缝分隔线视觉对齐。
 
-- [ ] **Gate A 设计审核：** 将 AtomUI `SplitButton` 作为直接拥有下拉命令弹层的 public owner 映射到上游 `Dropdown` 的弹层 Semantic DOM（`root` / `itemTitle` / `item` / `itemContent` / `itemIcon`），不映射 deprecated `Dropdown.Button` 的 split-trigger 组合；上游弹层 `root` 映射为 `popup.root`；触发侧补充发布 `primary` / `secondary`（`PART_PrimaryButton` / `PART_SecondaryButton`，静态 marker）——上游消费者自持触发按钮、AtomUI 触发按钮为模板内部件，属显式能力补充；复核 primary 形态接缝分隔线与 antd `button/style/compact.ts` 的差距（分隔线颜色 `colorPrimaryHover` / `colorErrorHover`、次按钮 hover 时隐藏）。
-- [ ] 完成 `overview.md`、`implementation.md` 与新增 `semantic-part.md`，记录 `primary` / `secondary` / `popup.root` / `itemTitle` / `item` / `itemContent` / `itemIcon` 的 route、cardinality、跨根与嵌套 owner 边界及触发侧补充发布的理由；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
-- [ ] **Gate B 实现与验证：** `SplitButtonSemanticPartTests` 覆盖 descriptor（7 部件形态）、触发侧静态 marker（`primary` / `secondary`）与模板变体覆盖、pinned-open 弹层物化（含声明式子菜单）、owner-scoped 生成 Style 命中、light-dismiss 禁用、分隔线颜色与 hover 隐藏回归；Gallery 页面新增 Semantic Parts Tab（`IsPopupPinnedOpen` 钉住 + 弹层根显式注册 `AdditionalRoots`）与 SemanticStyles 示例（专用生成 Style 类）。
+- [x] **Gate A 设计审核：** 将 AtomUI `SplitButton` 作为直接拥有下拉命令弹层的 public owner 映射到上游 `Dropdown` 的弹层 Semantic DOM（`root` / `itemTitle` / `item` / `itemContent` / `itemIcon`），不映射 deprecated `Dropdown.Button` 的 split-trigger 组合；上游弹层 `root` 映射为 `popup.root`；触发侧补充发布 `primary` / `secondary`（`PART_PrimaryButton` / `PART_SecondaryButton`，静态 marker）——上游消费者自持触发按钮、AtomUI 触发按钮为模板内部件，属显式能力补充；复核 primary 形态接缝分隔线与 antd `button/style/compact.ts` 的差距（分隔线颜色 `colorPrimaryHover` / `colorErrorHover`、次按钮 hover 时隐藏）。（2026-09-15：已完成并落地为 7 部件契约，见 `general/split-button/semantic-part.md`。）
+- [x] 完成 `overview.md`、`implementation.md` 与新增 `semantic-part.md`，记录 `primary` / `secondary` / `popup.root` / `itemTitle` / `item` / `itemContent` / `itemIcon` 的 route、cardinality、跨根与嵌套 owner 边界及触发侧补充发布的理由；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。（2026-09-15：三份文档同步完成，`docs/AI/generated` 由生成器重生成，随 `44cd1494a` 一并提交。）
+- [x] **Gate B 实现与验证：** `SplitButtonSemanticPartTests` 覆盖 descriptor（7 部件形态）、触发侧静态 marker（`primary` / `secondary`）与模板变体覆盖、pinned-open 弹层物化（含声明式子菜单）、owner-scoped 生成 Style 命中、light-dismiss 禁用、分隔线颜色与 hover 隐藏回归；Gallery 页面新增 Semantic Parts Tab（`IsPopupPinnedOpen` 钉住 + 弹层根显式注册 `AdditionalRoots`）与 SemanticStyles 示例（专用生成 Style 类）。（2026-09-15：`tests/AtomUI.Desktop.Controls.Tests/Buttons/SplitButtonSemanticPartTests.cs` 已落地，同目录另含 `SplitButtonSeparatorStabilityTests`、`SplitButtonPinnedSubMenuPopupTests`、`SplitButtonLayoutTests`；Gallery 侧含 `SplitButtonShowCasePageTests` 与 `SplitButtonSemanticPartHighlightTests`。）
 - [ ] 运行 Generator Semantic 测试、目标控件测试、GalleryBase 和 Gallery 测试、LLMS verify、NativeAOT publish 以及 `git diff --check`。
-- [ ] **强制停止：** 保持 SplitButton 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。
+- [x] **强制停止：** 保持 SplitButton 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。（2026-09-15：用户授权提交（Gate C）；单个控件家族提交 `44cd1494a`「feat(Semantic): 增加 SplitButton 语义部件并修复弹层钉住与子菜单状态递归」，未推送。）
 
 ## 批次收尾
 

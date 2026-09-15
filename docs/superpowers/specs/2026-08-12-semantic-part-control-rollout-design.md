@@ -32,11 +32,12 @@ Semantic Part 的公共模型、Selector 契约和生成器规则分别由
 | 状态 | 数量 | 范围 |
 | --- | ---: | --- |
 | 已完成基线 | 1 | `Button` |
-| 本轮待改造 | 61 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton` 与 `Expander`） |
-| 不适用 | 16 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
+| 本轮待改造 | 63 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`） |
+| 不适用 | 14 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
 
 > 2026-09-15 计数核对：本节三行合计 78，与 78 个正式控件文档叶子一致；`本轮待改造` 与 `不适用` 已与 §2.3、§2.4 的行数
-> 对齐。原记录为 58 / 19，在 `SplitButton` 增补时未同步，本次随 `Expander` 撤销排除一并校正。
+> 对齐。原记录为 58 / 19，在 `SplitButton` 增补时未同步，随后随 `Expander` 撤销排除校正为 61 / 16；本次 `TabStrip` 与
+> `Menu` 撤销排除后调整为 63 / 14。每次撤销排除都必须重算本表，不要增量累加后忘记总数。
 
 `Button` 是首个完整样例，用于校验 descriptor、静态 marker、Selector、尺寸协调和 Gallery Preview 的全链路；它不作为
 其他控件 Part 命名的机械模板。
@@ -81,7 +82,8 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 - `collapse` 的 schema 属于 `Collapse`；`Collapse.Panel` 没有独立公开 Semantic DOM Props。
 - `dropdown` 的 schema 属于 `Dropdown`；deprecated `Dropdown.Button` 虽在类型上继承 `DropdownProps`，实现没有消费调用方传入
   的 `classNames` / `styles`，不能作为独立 Semantic DOM owner。
-- `tabs` 的 schema 属于 `Tabs`；不存在独立公开 `TabStrip` Semantic DOM owner。
+- `tabs` 的 schema 属于 `Tabs`；不存在独立公开 `TabStrip` Semantic DOM owner。AtomUI `TabStrip` / `CardTabStrip` / `TabStripItem`
+  因此与 `TabControl` 映射同一个上游 `Tabs` owner，作为独立文档叶子单独通过 Gate A（2026-09-15 用户指令纳入）。
 
 ### 2.3 AtomUI 纳入映射
 
@@ -125,6 +127,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `Pagination` | `Pagination` | Batch 2 |
 | `Steps` | `Steps` | Batch 2 |
 | `TabControl` | `Tabs` | Batch 2 |
+| `TabStrip` | `Tabs` | Batch 2 范围新增（2026-09-15 用户指令，原排除判定撤销）；与 `TabControl` 映射同一个上游 `Tabs` owner，但作为独立文档叶子单独完成 Gate A：`TabStrip` / `CardTabStrip` 是独立 public owner 的页签条，`TabStripItem` 是二者的 item container。上游 owner 数量不是准入必要条件，职责直接对应才是（§2.1 第 4 条） |
 | `AutoComplete` | `AutoComplete` | Batch 3 |
 | `Cascader` | `Cascader` | Batch 3 |
 | `ColorPicker` | `ColorPicker` | Batch 3 |
@@ -152,6 +155,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `Notification` | `notification` | Batch 4 |
 | `PopupConfirm` | `Popconfirm` | Batch 4 |
 | `NavMenu` | `Menu` | Batch 5；两者均是层级页面/模块导航 owner |
+| `Menu` | `Menu` | Batch 5 范围新增（2026-09-15 用户指令，原排除判定撤销）；与 `NavMenu` 映射同一个上游 `Menu` owner、公开键路径逐字相同（`root` / `itemTitle` / `list` / `item` / `itemIcon` / `itemContent` / `subMenu.*` / `popup.root`，按 6.6.3 稳定发布源码审计）。AtomUI `Menu` 是桌面命令、ContextMenu 与 MenuFlyout 家族，与上游 `Menu` 共用同一套菜单语义键，职责直接对应（§2.1 第 4 条） |
 | `DataGrid` | `Table` | Batch 5 |
 
 ### 2.4 排除映射
@@ -168,12 +172,10 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `Icon` | Ant Design Icons 不提供与 AtomUI `Icon` 对应的公开 Semantic DOM owner。 | 稳定发布出现对应公开组件 API。 |
 | `FlexPanel` | Ant Design 稳定版没有与该布局 Panel 对应的公开 Semantic DOM owner。 | 新稳定版出现职责直接对应的公开 owner。 |
 | `Grid / Row / Col` | Ant Design Grid 没有公开 Semantic DOM Props；`Layout.Sider` 不能映射到通用 Grid。 | 新稳定版公开 Grid/Row/Col 对应 API。 |
-| `TabStrip` | Ant Design 只在 `Tabs` owner 上公开 API，没有独立 `TabStrip` owner。 | 新稳定版出现独立公开 owner。 |
 | `ButtonSpinner` | Ant Design 没有职责直接对应的公开 Semantic DOM owner；`InputNumber` 的 handle 是其内部区域。 | 新稳定版出现独立 spinner owner。 |
 | `ComboBox` | Ant Design 没有公开 `ComboBox` 组件；`Select` 的 internal combobox mode 不能作为公开 owner。 | 新稳定版出现公开 ComboBox owner。 |
 | `BorderBeam` | Ant Design 稳定版没有该公开组件或对应 Semantic DOM API。 | 稳定版出现职责直接对应的公开 owner。 |
 | `Splash` | Ant Design 稳定版没有职责直接对应的公开 Semantic DOM owner。 | 新稳定版出现对应公开 owner。 |
-| `Menu` | AtomUI `Menu` 是桌面命令、ContextMenu 与 MenuFlyout 家族；Ant Design `Menu` 是页面/模块导航，直接对应 AtomUI `NavMenu`。 | Ant Design 出现职责对应桌面命令菜单的独立公开 owner。 |
 | `WindowTitleBar` | Ant Design Web 组件体系没有对应的公开 Semantic DOM owner。 | 稳定版出现职责直接对应的公开 owner。 |
 | `Window` | Ant Design Web 组件体系没有对应的公开 Semantic DOM owner；Modal 不能替代 TopLevel Window。 | 稳定版出现职责直接对应的公开 owner。 |
 
@@ -185,6 +187,21 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 理由检验的是上游 owner 数量，而 §2.1 第 4 条要求的是“AtomUI 控件与该公开 owner 的产品职责直接对应”。AtomUI `Expander`
 是单面板折叠容器，与上游 `Collapse` 的单个面板承担同一产品职责，上游 `Collapse` 已公开 `root` / `header` / `icon` /
 `title` / `body` 五个语义键，因此映射成立。该撤销不改变其他排除项的判定依据。
+
+范围变更（2026-09-15）：`TabStrip` 与 `Menu` 的原排除判定经用户指令撤销，从本表移入 §2.3 纳入映射。二者此前已随
+`TabControl`（第二批）与 `NavMenu`（第五批）的提交一并实施，本次为**追认**并补齐范围记录，使文档与实现一致：
+
+- `TabStrip`：原判定以“Ant Design 只在 `Tabs` owner 上公开 API，没有独立 `TabStrip` owner”为由拒绝映射。该理由同
+  `Expander` 一样检验的是上游 owner 数量，而 §2.1 第 4 条要求的是产品职责直接对应。`TabStrip` / `CardTabStrip` 是
+  独立 public owner 的页签条、`TabStripItem` 是二者的 item container，与上游 `Tabs` 映射成立，随第二批执行。
+- `Menu`：原判定以“AtomUI `Menu` 是桌面命令、ContextMenu 与 MenuFlyout 家族；Ant Design `Menu` 是页面/模块导航，
+  直接对应 AtomUI `NavMenu`”为由拒绝映射。实际 AtomUI `Menu` 与上游 `Menu` 共用同一套菜单语义键，
+  `docs/controls/desktop/navigation/menu/semantic-part.md` 记录的 12 个公开键路径（`root`、`itemTitle`、`list`、`item`、
+  `itemIcon`、`itemContent`、`subMenu.*`、`popup.root`，按 6.6.3 稳定发布源码审计）与 `NavMenu` 逐字相同，职责直接对应，
+  随第五批执行。
+
+上述三次撤销的共同判据是：**上游 owner 数量不是准入必要条件，§2.1 第 4 条的产品职责直接对应才是**。引用本表作
+排除依据前，先确认该项未被后续日期化撤销覆盖。
 
 ## 3. 最小交付单位
 
@@ -459,12 +476,22 @@ git diff --check
 | 批次 | 数量 | 目标 | 主要风险 |
 | --- | ---: | --- | --- |
 | Batch 1 | 16 | 基础视觉与状态控件，建立可复用审核节奏。 | 派生主题、尺寸、adorner、状态替代节点。 |
-| Batch 2 | 16 + 1 | 集合、容器与导航结构（`Expander` 为 2026-09-15 用户指令新增，随本批次计划执行）。 | container、runtime-created、虚拟化、多重 cardinality。 |
+| Batch 2 | 16 + 2 | 集合、容器与导航结构（`Expander` 与 `TabStrip` 均为 2026-09-15 用户指令新增，随本批次计划执行）。 | container、runtime-created、虚拟化、多重 cardinality。 |
 | Batch 3 | 15 | 输入、选择与日期/时间类控件。 | SizeType、Popup、内部 editor、候选项容器。 |
 | Batch 4 | 10 + 1 | Popup、Overlay 与服务宿主（原 10 个家族已于 2026-09-12 收尾；`SplitButton` 为 2026-09-15 用户指令新增，随本批次计划执行）。 | 跨视觉根、session 生命周期、多宿主隔离。 |
-| Batch 5 | 2 | 高密度复合控件。 | 大量 container、Popup、虚拟化和性能。 |
+| Batch 5 | 2 + 1 | 高密度复合控件（`NavMenu` 2026-09-14 提交 `1e22ed1a3`；`DataGrid` 2026-09-14 提交 `454cc0d00`，可选包独立验证工程；`Menu` 为 2026-09-15 用户指令新增并追认，随本批次执行）。 | 大量 container、Popup、虚拟化和性能。 |
 
 批次表达审核顺序，不构成批量提交边界。始终一次只推进一个控件家族，并在 Gate A 与 Gate B 后等待用户确认。
+
+> 2026-09-15 状态同步：五个批次的 63 个家族**全部已实现并经用户授权提交**，无剩余待改造家族。遗留项集中在验收与证据侧，
+> 不涉及控件是否纳入范围：第三批的 ColorPicker / Select / DatePicker 待视觉验收，Mentions / TimePicker / TreeSelect
+> 尚无验收文档；第五批三套控件的改造前后性能基线未归档。逐批次明细见
+> [全量改造总计划](2026-08-12-semantic-part-control-rollout.md) 的「批次进度」。
+>
+> 2026-09-15 基线版本说明：§2 登记的上游审计基线为 2026-08-12 时的 Ant Design 6.6.0。此后个别家族的契约文档已在
+> 6.6.3 稳定发布源码上重新对齐（如 `DataGrid`、`Menu` 的语义表明确写「对齐 Ant Design 6.6.3」），但 §2.2 的组件目录清单
+> 与 §2.3 映射表仍按 6.6.0 登记。这不改变任何家族的准入结论，但引用上游键路径时需以各控件 `semantic-part.md` /
+> `overview.md` 中写明的版本为准。若后续要统一升级基线，应按 §2.1 重新审计公开 Props、包导出与实现消费点。
 
 ## 11. 兼容性纪律
 

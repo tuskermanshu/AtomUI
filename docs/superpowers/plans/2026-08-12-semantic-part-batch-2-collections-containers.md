@@ -266,9 +266,25 @@
 - [x] **真机视觉验证与缺陷修复：** 用户验收 Gallery 时发现圆角处背景未被正确裁剪。（2026-09-15：用临时探针测试实测确认根因——`PART_Frame` 只把圆角画在自己身上，而 `PixelAlignedBorder` 的 `ClipToBounds` 只做**矩形**裁剪、`PART_Frame` 未开启 `ClipContentToCornerRadius`，导致紧贴左上角 `(0,0)`、自身 `CornerRadius=0` 且带背景的 `PART_HeaderDecorator` 把圆弧覆盖成方角。触发条件是 header 背景必须不透明：默认主题 `HeaderBg = ColorFillAlter` 实测 alpha≈2% 几乎不可见，`IsGhostStyle`（header 背景为完全不透明的 `ColorBgContainer`）与本次 Gallery 语义示例的不透明 `#f0f0f0` / `#f5efff` 都会显形——因此该缺陷在本次改造之前即已存在，`git diff` 确认本次对 `ExpanderTheme.axaml` 的改动只有 4 行新增 `Classes.semantic-*="True"`，不影响布局与绘制。对照组：`Collapse` 无此问题，`CollapseItemTheme.axaml` 给 header/content 各自绑了由 `Collapse.ConfigureItemCorners`（`Collapse.cs:414`）按 first/last 计算的 `HeaderCornerRadius` / `ContentCornerRadius`，注释明确目的是让子节点背景「follow the container's rounded border instead of covering it」。修复方案 A（用户确认）：`PART_Frame` 增加 `ClipContentToCornerRadius="True"`，由根节点统一把整棵子树裁到圆角内框——一行改动、与展开状态/方向/视觉模式无关、同时覆盖 header 与 body 两侧，与 `ListBoxTheme` / `ListViewTheme` 既有用法一致；未采用方案 B（复制 Collapse 的逐 corner 计算，Expander 是单面板控件、没有 item 索引语义，且折叠态 header 需要四角圆、展开态只需上两角，会引入状态依赖）。回归测试：`ExpanderBehaviorTests` 新增 `Frame_Enables_Content_Clip_To_Corner_Radius`（5 组 Theory 覆盖展开/收起 × Ghost × Borderless，断言 `ClipContentToCornerRadius` 为 `true`、`CornerRadius` 非零、且 header 左上角落在圆角方形区域内即该裁剪确实承担遮挡职责）与 `Frame_Corner_Radius_Comes_From_The_Theme_And_Stays_Non_Degenerate`。测试限制已确认并写入文档：headless 测试平台的几何包含性无法表示圆角图形，`DashedBorder.UpdateClip` 会按设计把裁剪降级为**不应用**（`DashedBorderClipContentTests.Clip_Is_Not_Applied_When_The_Platform_Cannot_Hit_Test_The_Rounded_Figure` 专门断言该行为），因此 `Child.Clip` 与 `Geometry.FillContains` 在测试宿主中均不可用，自动化只能断言模板契约与几何前置条件。文档同步：`semantic-part.md` §2.1（新增裁剪说明段落）、§6（新增「圆角裁剪的可见前提」条目）、§7（新增裁剪验证条目）；`implementation.md` 新增 §4.2「圆角裁剪（Part 背景不溢出圆角）」、§9 维护不变量、§10 验证范围；`overview.md` 模板节点表与验证策略表。复验：Desktop 4030/4031（唯一失败的 `DialogPopupControlFamilyTests.PopupConfirm_In_Dialog_Confirms_And_Closes_Its_Flyout` 隔离复跑 23/23 全绿，为预存在加载顺序抖动，与本次改动无关）、Generator 528/528、GalleryBase 185/185、Gallery 644/644、LLMS generate + verify 通过、`git diff --check` 干净。**真机视觉验收（2026-09-15）：用户在 Gallery 桌面宿主（真实 Skia 后端）确认圆角裁剪已正确生效，视觉验收通过。**）
 - [x] **强制停止：** 保持 Expander 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。（2026-09-15：Gate B 与真机视觉验收完成后，用户明确授权提交（Gate C）；已创建单个控件家族提交 `be7b8dc71`「feat(Semantic): 增加 Expander 语义部件并修复圆角裁剪失效」，涵盖 Semantic Part 改造与圆角裁剪修复，未推送。）
 
+### 任务 17：TabStrip（2026-09-15 用户指令撤销排除并追认）
+
+**控件文档：** `docs/controls/desktop/navigation/tab-strip/overview.md`、`docs/controls/desktop/navigation/tab-strip/implementation.md`、`docs/controls/desktop/navigation/tab-strip/semantic-part.md`
+
+**证据范围：** `src/AtomUI.Desktop.Controls/TabControl/TabStrip/**/*.cs`、`src/AtomUI.Desktop.Controls/TabControl/TabStrip/Themes/**/*.axaml`；测试 `tests/AtomUI.Desktop.Controls.Tests/TabControl`（`TabStripSemanticPartTests`）；Gallery `controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip`。
+
+**风险类型：** 三个独立 public owner（`TabStrip` / `CardTabStrip` / `TabStripItem`）共享 `ControlTheme` 资源边界；`item` 为运行时创建的容器 marker，`add` / `close` / `icon` / `label` 为模板静态 marker；独立页签条不承载内容页。
+
+**范围说明：** 本家族原被设计文档 §2.4 以「Ant Design 只在 `Tabs` owner 上公开 API，没有独立 `TabStrip` owner」为由排除。该理由检验的是上游 owner 数量，而设计文档 §2.1 第 4 条要求的是产品职责直接对应；`TabStrip` / `CardTabStrip` 是独立 public owner 的页签条、`TabStripItem` 是二者的 item container，与上游 `Tabs` 映射成立。经用户指令撤销排除并追认——实现此前已随 `TabControl` 家族一并完成，本次补齐范围记录。
+
+- [x] **Gate A 设计审核：** 确认为三个独立 public owner 分别建立 descriptor：`TabStrip`（`root` / `item`）、`CardTabStrip`（`root` / `add` / `item`）、`TabStripItem`（`root` / `close` / `icon` / `label`）；确认 `BaseTabStrip`、`TabStripOverflowMenuItem`、`TabStripScrollViewer`、`TabsContainerPanel` 是基类或 internal 协作类型，不持有独立 descriptor；确认独立页签条不公开 `content` Part。（2026-09-14：已完成并落地于 `docs/controls/desktop/navigation/tab-strip/semantic-part.md`。）
+- [x] 完成 `overview.md`、`implementation.md` 与 `semantic-part.md`，记录三个 owner 的 Part、selector、ContractType、cardinality、marker 放置位置（运行时容器注入 vs 模板静态声明）、owner 边界与定制风格入口；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。（2026-09-14：三份文档齐备，`docs/AI/generated` 由生成器重生成，随 `TabControl` 家族提交一并提交。）
+- [x] **Gate B 实现与验证：** `TabStrip.SemanticParts.cs` / `CardTabStrip.SemanticParts.cs` / `TabStripItem.SemanticParts.cs` 三个 descriptor 文件与 `TabStripSemanticPartTests` 落地，覆盖 descriptor 数量/顺序/字段、`item` 运行时 marker 与 `add` / `close` / `icon` / `label` 静态 marker、生成 Style 各精确命中一个节点、选中/关闭/尺寸档切换后命中数量不变。（2026-09-14：已随 `TabControl` 家族完成。）
+- [x] 运行 Generator Semantic 测试、目标 Desktop 测试、GalleryBase 和 Gallery 测试、LLMS verify 以及 `git diff --check`。（2026-09-15：Generator 528/528、Desktop 4031/4031、Gallery 644/644 全绿；LLMS verify 通过（79 控件 / 161 文件）；`git diff --check` 干净。TabStrip 语义预览挂载于页面内的 `SemanticPartPreview`，无需 Gallery NativeAOT publish。）
+- [x] **强制停止：** 保持 TabStrip 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。（2026-09-14：用户授权提交（Gate C）；已随 `TabControl` 家族提交一并实施，未推送。）
+
 ## 批次收尾
 
-- [ ] 确认 16 个控件家族分别拥有用户授权的独立提交。
+- [ ] 确认 18 个控件家族分别拥有用户授权的独立提交。
 - [ ] 运行完整 Desktop Controls、Generator、GalleryBase 和 Gallery 测试工程，并执行集合/虚拟化回归筛选。
 - [ ] 运行 LLMS verify、NativeAOT publish 和 `git diff --check`。
 - [ ] 更新总计划清单，不创建批次提交。
