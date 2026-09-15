@@ -288,6 +288,69 @@ public class BadgeShowCasePageTests
             .ShouldBe(NormalizeMarkup(approved));
     }
 
+    [Fact]
+    public void Badge_Examples_Layer_Adorners_Are_Hidden_While_Semantic_Tab_Is_Active()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+
+        var page = new BadgeShowCase
+        {
+            DataContext = new BadgeViewModel(new TestScreen())
+        };
+
+        ShowInWindow(page, 1280, 900, () =>
+        {
+            var host = page.GetVisualDescendants().OfType<GalleryShowCaseHost>().Single();
+            var examplesBadges = page.GetVisualDescendants()
+                                     .OfType<AtomUI.Desktop.Controls.CountBadge>()
+                                     .Where(static badge => badge.IsEffectivelyVisible)
+                                     .ToArray();
+            examplesBadges.ShouldNotBeEmpty("the deferred Examples items materialize CountBadge instances.");
+
+            host.SelectedTab = GalleryShowCaseTab.SemanticParts;
+            Dispatcher.UIThread.RunJobs();
+
+            var adornerLayer = AdornerLayer.GetAdornerLayer(page).ShouldNotBeNull();
+            var staleAdorners = adornerLayer.Children
+                                            .Where(static child =>
+                                                AdornerLayer.GetAdornedElement(child) is { } adorned &&
+                                                !adorned.IsEffectivelyVisible &&
+                                                child.IsVisible)
+                                            .ToArray();
+            staleAdorners.ShouldBeEmpty(
+                "hidden Examples badges must not paint indicators through the window adorner layer.");
+
+            var semanticOwner = page.GetVisualDescendants()
+                                    .OfType<AtomUI.Desktop.Controls.CountBadge>()
+                                    .Single(static badge => badge.Name == "CountBadgeSemanticOwner");
+            var semanticAdorner = adornerLayer.Children.Single(child =>
+                ReferenceEquals(AdornerLayer.GetAdornedElement(child), semanticOwner));
+            semanticAdorner.IsVisible.ShouldBeTrue(
+                "the visible semantic preview owner must keep its indicator.");
+
+            host.SelectedTab = GalleryShowCaseTab.Examples;
+            Dispatcher.UIThread.RunJobs();
+
+            var hiddenWhileExamplesActive = adornerLayer.Children
+                                                       .Where(static child =>
+                                                           AdornerLayer.GetAdornedElement(child) is { } adorned &&
+                                                           !adorned.IsEffectivelyVisible &&
+                                                           child.IsVisible)
+                                                       .ToArray();
+            hiddenWhileExamplesActive.ShouldBeEmpty();
+            foreach (var badge in examplesBadges)
+            {
+                var adorner = adornerLayer.Children.SingleOrDefault(child =>
+                    ReferenceEquals(AdornerLayer.GetAdornedElement(child), badge));
+                if (adorner is not null && badge.BadgeIsVisible)
+                {
+                    adorner.IsVisible.ShouldBeTrue(
+                        "switching back to Examples must restore the layer indicators.");
+                }
+            }
+        });
+    }
+
     private static string ExtractBadgeExampleItems(string source)
     {
         const string firstItemMarker  = "<gallery:ShowCaseItem";
