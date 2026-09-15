@@ -32,8 +32,11 @@ Semantic Part 的公共模型、Selector 契约和生成器规则分别由
 | 状态 | 数量 | 范围 |
 | --- | ---: | --- |
 | 已完成基线 | 1 | `Button` |
-| 本轮待改造 | 58 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族 |
-| 不适用 | 19 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
+| 本轮待改造 | 61 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton` 与 `Expander`） |
+| 不适用 | 16 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
+
+> 2026-09-15 计数核对：本节三行合计 78，与 78 个正式控件文档叶子一致；`本轮待改造` 与 `不适用` 已与 §2.3、§2.4 的行数
+> 对齐。原记录为 58 / 19，在 `SplitButton` 增补时未同步，本次随 `Expander` 撤销排除一并校正。
 
 `Button` 是首个完整样例，用于校验 descriptor、静态 marker、Selector、尺寸协调和 Gallery Preview 的全链路；它不作为
 其他控件 Part 命名的机械模板。
@@ -82,7 +85,8 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 
 ### 2.3 AtomUI 纳入映射
 
-下表覆盖 61 个准入家族，其中 `Button` 已完成，其余 60 个进入实施批次；`SplitButton` 为 2026-09-15 用户指令新增（原排除判定撤销），随第四批计划执行。映射只证明“允许进入 Gate A”，不预先
+下表覆盖 62 个准入家族，其中 `Button` 已完成，其余 61 个进入实施批次；`SplitButton`（原排除判定撤销，随第四批执行）与
+`Expander`（原排除判定撤销，随第二批执行）为 2026-09-15 用户指令新增。映射只证明“允许进入 Gate A”，不预先
 承诺具体 Part 名称或数量；每个 Part 仍必须从 AtomUI 自身源码、主题和生命周期事实中设计。
 
 | AtomUI 控件家族 | Ant Design 6.6.0 公开 owner | 结论 |
@@ -106,6 +110,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `ToggleSwitch` | `Switch` | Batch 1 |
 | `Calendar` | `Calendar` | Batch 2 |
 | `Collapse` | `Collapse` | Batch 2 |
+| `Expander` | `Collapse` | Batch 2 范围新增（2026-09-15 用户指令）；AtomUI 单面板折叠容器与上游 `Collapse` 的单个面板承担同一产品职责，映射上游 `Collapse` 已公开的 `root` / `header` / `icon` / `title` / `body` 五个语义键；上游 owner 数量不是准入必要条件，职责直接对应才是（§2.1 第 4 条） |
 | `ListBox` | `Listy` | Batch 2；Gate A 按 `root` / `item` 语义键设计（无分组，`groupHeader` 不适用） |
 | `ListView` | `Listy` | Batch 2；Gate A 按 `root` / `item` / `groupHeader` 语义键设计（6.6.0 新组件，旧 `List` 已 deprecated） |
 | `Segmented` | `Segmented` | Batch 2 |
@@ -157,7 +162,6 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | --- | --- | --- |
 | `Avatar` | Ant Design `AvatarProps` 与 `AvatarGroupProps` 没有公开分区式 `classNames` / `styles`；ConfigProvider 测试不构成组件 API。 | 新稳定版公开并实际消费对应 API。 |
 | `Carousel` | Ant Design 稳定版 `Carousel` 没有公开 Semantic DOM Props。 | 新稳定版公开并实际消费对应 API。 |
-| `Expander` | Ant Design 只有 `Collapse` owner；`Collapse.Panel` 也没有独立 API，不能为独立 Expander 建立映射。 | 新稳定版出现职责直接对应的公开 owner。 |
 | `GroupBox` | Ant Design 没有职责直接对应的公开 Semantic DOM owner。 | 新稳定版出现职责直接对应的公开 owner。 |
 | `Rate` | Ant Design 稳定版 `Rate` 没有公开 Semantic DOM Props。 | 新稳定版公开并实际消费对应 API。 |
 | `Watermark` | Ant Design 稳定版 `Watermark` 没有公开 Semantic DOM Props。 | 新稳定版公开并实际消费对应 API。 |
@@ -175,6 +179,12 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 
 排除不是根据 AtomUI 模板复杂度做出的判断，也不能因为某控件内部有可定制节点而改变。只有新的稳定发布公开 API 通过
 2.1 的完整 Gate 后，才能重新进入任务规划。
+
+范围变更（2026-09-15）：`Expander` 的原排除判定经用户指令撤销，从本表移入 §2.3 纳入映射，随第二批执行。原判定以
+“Ant Design 只有 `Collapse` owner；`Collapse.Panel` 也没有独立 API，不能为独立 Expander 建立映射”为由拒绝映射，但该
+理由检验的是上游 owner 数量，而 §2.1 第 4 条要求的是“AtomUI 控件与该公开 owner 的产品职责直接对应”。AtomUI `Expander`
+是单面板折叠容器，与上游 `Collapse` 的单个面板承担同一产品职责，上游 `Collapse` 已公开 `root` / `header` / `icon` /
+`title` / `body` 五个语义键，因此映射成立。该撤销不改变其他排除项的判定依据。
 
 ## 3. 最小交付单位
 
@@ -449,7 +459,7 @@ git diff --check
 | 批次 | 数量 | 目标 | 主要风险 |
 | --- | ---: | --- | --- |
 | Batch 1 | 16 | 基础视觉与状态控件，建立可复用审核节奏。 | 派生主题、尺寸、adorner、状态替代节点。 |
-| Batch 2 | 16 | 集合、容器与导航结构。 | container、runtime-created、虚拟化、多重 cardinality。 |
+| Batch 2 | 16 + 1 | 集合、容器与导航结构（`Expander` 为 2026-09-15 用户指令新增，随本批次计划执行）。 | container、runtime-created、虚拟化、多重 cardinality。 |
 | Batch 3 | 15 | 输入、选择与日期/时间类控件。 | SizeType、Popup、内部 editor、候选项容器。 |
 | Batch 4 | 10 + 1 | Popup、Overlay 与服务宿主（原 10 个家族已于 2026-09-12 收尾；`SplitButton` 为 2026-09-15 用户指令新增，随本批次计划执行）。 | 跨视觉根、session 生命周期、多宿主隔离。 |
 | Batch 5 | 2 | 高密度复合控件。 | 大量 container、Popup、虚拟化和性能。 |

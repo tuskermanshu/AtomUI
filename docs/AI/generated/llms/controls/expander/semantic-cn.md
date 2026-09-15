@@ -4,13 +4,148 @@
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Expander` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`Expander` 公开 `root`、`header`、`icon`、`title` 与 `body` 五个职责区域，与上游稳定 Semantic DOM 对齐。上游基线为
+6.6.0 稳定发布的 `CollapseSemanticType` 与 Semantic DOM 演示：
+
+- `header`、`body` 自上游 5.21.0 公开；
+- `root`、`icon`、`title` 自上游 6.0.0 公开。
+
+Expander 是单面板折叠容器，与上游 `Collapse` 的单个面板承担同一产品职责：Header 表达内容主题，展开图标表达折叠状态
+和方向，Content 承载可延迟阅读的内容。上游 `Collapse` 的 Semantic DOM 按 item 组织，而 AtomUI `Expander` 恰好是
+“一个面板”的独立 owner，因此两者按职责一一对应，不需要新的上游 owner。
+
+准入依据按[全量改造设计 §2.1](../../../../superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md)第 4 条
+“AtomUI 控件与该公开 owner 的产品职责直接对应”判定：上游 owner 数量不是必要条件，职责对应关系才是。Expander 直接消费
+上游 `Collapse` 已公开的五个语义键，Part 名称与 Collapse 保持同构。
+
+范围变更（2026-09-15）：Expander 的原排除判定经用户指令撤销。原判定以“上游只有 `Collapse` 一个 owner、`Collapse.Panel`
+没有独立 API”为由拒绝映射，但该理由检验的是 owner 数量而非职责对应关系，与 §2.1 第 4 条不符。Expander 以自身 public
+owner 独立通过准入 Gate，移入第二批计划执行（见
+[第二批任务清单](../../../../superpowers/plans/2026-08-12-semantic-part-batch-2-collections-containers.md)任务 16）。
+
+AtomUI 五个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+
+Expander 不引入额外 owner：它是单面板控件，没有 item 容器或独立子控件 owner，五个 Part 全部属于 `Expander` 自身。
+
+### 1.1 `Expander`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `root` |
+| Selector | Expander 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Expander` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Expander owner（根边框投影到 `PART_Frame`） |
+| 职责 | Expander root 是单面板展开状态、展开方向、视觉模式与根边框样式的统一 owner。 |
+| 相关 API | `IsExpanded`、`ExpandDirection`、`IsBorderless`、`IsGhostStyle`、`BorderThickness`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled`、`HeaderPadding`、`ContentPadding`、`Header`、`Content`、`AddOnContent` |
+| 相关 Token | ExpanderToken、SharedToken |
+| 稳定性 | stable since 6.0 |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `/template/ .semantic-header` |
+| Style Type | `ExpanderHeaderStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `PixelAlignedBorder#PART_HeaderDecorator` |
+| 职责 | 统一表示头部区域的背景、内边距、字体/行高与命中光标；对应上游 `.ant-collapse-header` 的内边距、颜色、行高、光标与过渡动画职责。 |
+| 相关 API | `SizeType`、`HeaderPadding`、`TriggerType`、`IsGhostStyle`、`IsEnabled`、`ExpandDirection` |
+| 相关 Token | `HeaderBg`、`HeaderPadding`、`HeaderPaddingSM`、`HeaderPaddingLG`、SharedToken |
+| 稳定性 | stable since 6.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `ExpanderIconStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `IconButton#PART_ExpandButton` |
+| 职责 | 统一表示展开/收起箭头的大小、位置、边距与旋转视觉；对应上游 `.ant-collapse-expand-icon` 的字体大小、过渡动画与旋转变换职责。 |
+| 相关 API | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsExpanded`、`ExpandDirection`、`HeaderPadding`、`TriggerType`、`IsEnabled` |
+| 相关 Token | `IconSizeSM`、`LeftExpandButtonHMargin`、`RightExpandButtonHMargin`、SharedToken |
+| 稳定性 | stable since 6.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `ExpanderTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_HeaderPresenter` |
+| 职责 | 统一表示标题文字的布局、颜色、字体与对齐；对应上游 `.ant-collapse-title` 的自适应布局与边距职责。 |
+| 相关 API | `Header`、`HeaderTemplate`、`SizeType`、`IsEnabled`、`HeaderPadding` |
+| 相关 Token | `ColorTextHeading`、`ColorTextDisabled`、SharedToken |
+| 稳定性 | stable since 6.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `ExpanderBodyStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_ContentPresenter` |
+| 职责 | 统一表示内容区域的内边距、背景与内容呈现；对应上游 `.ant-collapse-body` 的内边距、颜色与背景职责。 |
+| 相关 API | `Content`、`ContentTemplate`、`ContentPadding`、`SizeType`、`IsBorderless`、`IsGhostStyle` |
+| 相关 Token | `ContentPadding`、`ContentPaddingSM`、`ContentPaddingLG`、`ContentBg`、`HeaderBg`、SharedToken |
+| 稳定性 | stable since 6.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header` 的承载节点是公开的
+`PixelAlignedBorder`，`icon` 是公开的 `IconButton`，`title` 与 `body` 是公开的 `ContentPresenter`，均取节点真实 public
+类型作为最低依赖类型。
+
+`header`、`icon`、`title`、`body` 全部是 `ExpanderTheme.axaml` 单一 `ControlTemplate` 内的静态节点，`TemplatedParent` 为
+Expander owner 本身，因此四个 Part 声明 `RuntimeCreated=false` 且不携带显式 `SelectorRoute`；生成器按
+[Semantic Part Generator §2.3](../../../../modules/generator/semantic-part-generator.md)把静态根模板 Part 的 route 规范化为
+`/template/ .<SelectorClass>`。`header` 位于 `LayoutTransformControl#PART_HeaderLayoutTransform` 内部，`body` 位于
+`LayoutAwareMotionActor#PART_ContentMotionActor` 内部，但两者都不跨越第二层模板边界，`TemplatedParent` 仍是 Expander
+owner，因此单一 `/template/` 路由已经足够，不需要为它们声明更宽的 logical descendant 路由。Expander 没有任何由 C# 创建
+并注入 marker 的 Part，也不存在跨视觉根 Part。
+
+`body` 的数量语义是 `Optional` 而不是 `Single`：折叠稳定态下 `PART_ContentMotionActor` 的 `IsVisible=false`，其内部
+`ContentPresenter` 只保留逻辑子级、不挂接视觉子级，因此 `body` 节点从视觉树中**完全缺席**（不是隐藏）；展开后才物化。
+`header` / `icon` / `title` 是模板常驻节点，折叠与展开都存在于视觉树，因此声明 `Single`。该结论由 Gate B 的 selector 命中
+测试实测得出，见 [§7 兼容性与验证](#7-兼容性与验证)。
 
 ## Abstract AXAML Structure
 
@@ -80,7 +215,7 @@ Expander
 
 | Template Part | 类型 | 职责 |
 | --- | --- | --- |
-| `PART_Frame` | `PixelAlignedBorder` | 根边框、裁剪和整体布局承载。 |
+| `PART_Frame` | `PixelAlignedBorder` | 根边框、矩形裁剪与圆角裁剪（`ClipToBounds` + `ClipContentToCornerRadius`）和整体布局承载。 |
 | `PART_MainLayout` | `DockPanel` | Header 与 Content 的 dock 布局。 |
 | `PART_HeaderLayoutTransform` | `LayoutTransformControl` | 横向展开方向下旋转 Header。 |
 | `PART_HeaderDecorator` | `PixelAlignedBorder` | Header 背景和 padding 承载，也是 Header 点击范围；不绘制 Header/Content 分隔线。 |
@@ -234,3 +369,13 @@ ExpanderToken 不承载以下状态：
 - 自定义 HeaderPadding 下的图标间距必须跟随 HeaderPadding 对应方向，不回退到默认 SizeType token。
 - `:custom-header-padding` 和 `:custom-content-padding` 的伪类语义不能混用。
 - Expander 不引入多面板或手风琴状态；这属于 Collapse 的职责。
+- Semantic Part 的 marker 放置（`ExpanderTheme.axaml` 的 `semantic-header`、`semantic-icon`、`semantic-title`、
+  `semantic-body` 四个静态 marker）属于维护不变量：除 `body` 的“首次呈现前缺席”这一呈现历史差异外，状态切换、方向切换、
+  尺寸档切换、自定义 padding 伪类、模板重应用和 detach 都不得增删 marker，默认主题不得消费 `.semantic-*` selector，
+  `header` 与 `body` 的单一 `/template/` 路由不得因模板结构调整而退化为宽泛 logical descendant。`body` 的
+  `Optional` cardinality 与 `PART_ContentMotionActor` 的 `IsVisible` 语义绑定：不得把 `semantic-body` 移到 actor 自身
+  （会失去 `Padding` / `Background` 的承载节点），也不得为规避 0/1 差异而改变 actor 的可见性模型。
+- 圆角裁剪：`PART_Frame` 的 `ClipContentToCornerRadius="True"` 属于维护不变量，不得移除。移除后 header/body 的不透明
+  背景会重新覆盖 `PART_Frame` 的圆角（默认外观因 `HeaderBg` alpha≈2% 而不易察觉，但任何不透明 Part 背景都会显形）。
+  也不要改用「给子节点各自设圆角」之外的方式绕过——若将来改为 Collapse 式的逐 corner 绑定，必须同步更新 §4.2 与
+  对应测试断言。

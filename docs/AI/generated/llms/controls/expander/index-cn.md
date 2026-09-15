@@ -68,7 +68,7 @@ AtomUI 扩展契约：
 
 | Template Part | 类型 | 职责 |
 | --- | --- | --- |
-| `PART_Frame` | `PixelAlignedBorder` | 根边框、裁剪和整体布局承载。 |
+| `PART_Frame` | `PixelAlignedBorder` | 根边框、矩形裁剪与圆角裁剪（`ClipToBounds` + `ClipContentToCornerRadius`）和整体布局承载。 |
 | `PART_MainLayout` | `DockPanel` | Header 与 Content 的 dock 布局。 |
 | `PART_HeaderLayoutTransform` | `LayoutTransformControl` | 横向展开方向下旋转 Header。 |
 | `PART_HeaderDecorator` | `PixelAlignedBorder` | Header 背景和 padding 承载，也是 Header 点击范围；不绘制 Header/Content 分隔线。 |
@@ -93,6 +93,37 @@ AtomUI 扩展契约：
 | `[TriggerType=Header]` / `[TriggerType=Icon]` | Cursor 和点击路径分支。 |
 
 Expander 没有专用 routed event 或 command。展开状态通过继承的 `IsExpanded` 表达。
+
+### 3.5 Semantic Part 契约
+
+`Expander` 公开与上游 Collapse 面板稳定 Semantic DOM 对齐的五个 Semantic Part，完整契约见 [Expander Semantic Part 契约](semantic-part.md)：
+
+| Part | Selector | AtomUI 节点 | Cardinality | 定制方式 |
+| --- | --- | --- | --- | --- |
+| `root` | 控件本身 | `Expander` owner（根边框投影到 `PART_Frame`） | `Single` | owner 选择器 + 公开属性 |
+| `header` | `.semantic-header` | `PixelAlignedBorder#PART_HeaderDecorator` | `Single` | `ExpanderHeaderStyle` |
+| `icon` | `.semantic-icon` | `IconButton#PART_ExpandButton` | `Single` | `ExpanderIconStyle` |
+| `title` | `.semantic-title` | `ContentPresenter#PART_HeaderPresenter` | `Single` | `ExpanderTitleStyle` |
+| `body` | `.semantic-body` | `ContentPresenter#PART_ContentPresenter` | `Optional` | `ExpanderBodyStyle` |
+
+Expander 是单面板控件，五个 Part 全部是 `ExpanderTheme.axaml` 单一模板内的静态节点，`TemplatedParent` 为 Expander owner
+本身。因此 `header`、`icon`、`title`、`body` 都声明 `RuntimeCreated=false`、`CrossVisualRoot=false`，生成 Style 路由是单一的
+`/template/` 边界，没有 `.semantic-scope-*` 中间锚点，也没有容器创建、prepare/clear/recycle 或跨视觉根路径。
+
+`body` 是唯一声明 `Optional` 的 Part：它位于 `PART_ContentMotionActor` 内部，而该 actor 折叠稳定态下 `IsVisible=false`，
+其内部 `ContentPresenter` 在首次呈现前不挂接视觉子级，因此 `body` 节点在从未展开的实例中从视觉树缺席；首次展开后节点
+物化并保持存在。`header` / `icon` / `title` 是常驻节点，任何状态下都恰好命中一个。除 `body` 的这一条呈现历史差异外，
+marker 不随展开、禁用、方向、尺寸档、图标位置、触发模式与视觉模式切换增删。定制摘要：
+
+- 状态型定制（展开/收起、展开方向、禁用、Ghost、Borderless、TriggerType、ExpandIconPosition、SizeType、自定义 padding）
+  通过 owner 公开属性完成，不改变 marker 数量。
+- 局部视觉定制通过生成的 Semantic Style 完成，`ContractType` 收缩到公开类型（`PixelAlignedBorder` / `IconButton` /
+  `ContentPresenter`），internal 节点不作为公共依赖类型。
+- 布局型 Setter（固定 `Height` / `Width` / Min/Max 等）不作为公共定制路径：头部与内容高度由尺寸档 Padding/字体链与
+  content motion 的尺寸进度共同驱动，见 [semantic-part.md §5](semantic-part.md#5-尺寸基线)。
+- Header/Content 分隔线（`PART_ContentMotionActor` 内未命名 `PixelAlignedBorder`）、`PART_AddOnContentPresenter`、模板结构
+  节点、动效 actor 与根表面背景/圆角/内边距都不属于 Semantic Part，见
+  [semantic-part.md §6](semantic-part.md#6-定制边界)。
 
 ## 事件与命令
 
@@ -285,8 +316,12 @@ AOT 边界：
 - `src/AtomUI.Desktop.Controls/Expander/Expander.cs`：公共 API、内部 effective state、template part 接入、触发区域、默认图标、边框状态、动效状态机和自定义 padding 度量。
 - `src/AtomUI.Desktop.Controls/Expander/ExpanderPseudoClass.cs`：方向、自定义 padding 和展开状态相关伪类常量。
 - `src/AtomUI.Desktop.Controls/Expander/ExpanderToken.cs`：Expander 控件 Token。
-- `src/AtomUI.Desktop.Controls/Expander/Themes/ExpanderTheme.axaml`：控件模板、SizeType 分支、方向分支、图标位置分支、触发分支、Borderless/Ghost 分支和 token 引用。
+- `src/AtomUI.Desktop.Controls/Expander/Expander.SemanticParts.cs`：五个 Semantic Part 的声明与生成式 descriptor 输入
+  （本次改造新增，Gate B 交付）；`body` 在此声明 `Cardinality=Optional`。
+- `src/AtomUI.Desktop.Controls/Expander/Themes/ExpanderTheme.axaml`：控件模板、SizeType 分支、方向分支、图标位置分支、触发分支、Borderless/Ghost 分支和 token 引用；四个静态 `.semantic-*` marker 在此声明。
 - `tests/AtomUI.Desktop.Controls.Tests/Expander/ExpanderBehaviorTests.cs`：Expander 行为和布局回归测试。
+- `tests/AtomUI.Desktop.Controls.Tests/Expander/ExpanderSemanticPartTests.cs`：Semantic Part descriptor、模板 marker 契约、
+  生成 Style 命中与 `body` 呈现语义的回归测试（本次改造新增，Gate B 交付）。
 - `src/AtomUI.Core/MotionScene/ContentExpansionAnimator.cs`：共用内容测量、进度插值与执行资源 owner。
 - `tests/AtomUI.Desktop.Controls.Tests/Motion`：共用展开机制的帧级几何和边界回归。
 
@@ -294,6 +329,7 @@ AOT 边界：
 
 - 源设计文档：`docs/controls/desktop/data-display/expander/overview.md`
 - 实现文档：`docs/controls/desktop/data-display/expander/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/data-display/expander/semantic-part.md`
 - Token 文档：`docs/controls/desktop/data-display/expander/token.md`
 - 变更记录：`docs/controls/desktop/data-display/expander/changelog.md`
 - 语义结构：`./semantic-cn.md`

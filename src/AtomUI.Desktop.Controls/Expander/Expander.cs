@@ -34,7 +34,7 @@ public enum ExpanderIconPosition
     ExpanderPseudoClass.ExpandDown,
     ExpanderPseudoClass.ExpandLeft,
     ExpanderPseudoClass.ExpandRight)]
-public class Expander : AvaloniaExpander, IMotionAwareControl
+public partial class Expander : AvaloniaExpander, IMotionAwareControl
 {
     #region 公共属性定义
 

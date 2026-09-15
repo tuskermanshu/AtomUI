@@ -32,7 +32,7 @@
 | `docs/superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md` | 稳定的改造范围、门禁、风险模型、性能和兼容性规则。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-control-rollout.md` | 总体顺序、状态、通用执行循环和跨批次收尾。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-1-basic-controls.md` | 16 个基础视觉与状态控件家族。 |
-| `docs/superpowers/plans/2026-08-12-semantic-part-batch-2-collections-containers.md` | 16 个集合、容器和导航控件家族。 |
+| `docs/superpowers/plans/2026-08-12-semantic-part-batch-2-collections-containers.md` | 16 个集合、容器和导航控件家族，另有 2026-09-15 追加的 `Expander`。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-3-input-selection.md` | 15 个输入和选择控件家族。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-4-hosts-windows.md` | 10 个 Popup、Overlay 和服务宿主控件家族。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-5-high-density.md` | `NavMenu` 和 `DataGrid` 两个性能敏感控件家族。 |
@@ -47,7 +47,7 @@
 
 ### 不适用
 
-- [x] `Avatar`、`Carousel`、`Expander`、`GroupBox`、`Rate`、`Watermark`。
+- [x] `Avatar`、`Carousel`、`GroupBox`、`Rate`、`Watermark`。
 - [x] `Icon`、`FlexPanel`、`Grid / Row / Col`、`TabStrip`。
 - [x] `ButtonSpinner`、`ComboBox`、`BorderBeam`、`Splash`。
 - [x] `Menu`、`WindowTitleBar`、`Window`。
@@ -56,6 +56,13 @@
 > Part。它以自身 public owner 直接拥有下拉命令弹层（`Flyout`），按 `DropdownButton` 先例独立通过准入 Gate，
 > 移入第四批计划执行（见下方批次清单与[第四批任务清单](2026-08-12-semantic-part-batch-4-hosts-windows.md)任务 11）。
 
+> 范围变更（2026-09-15）：`Expander` 的原排除判定经用户指令撤销——AtomUI 需要让 `Expander` 支持 Semantic Part。原判定
+> 以“上游只有 `Collapse` 一个 owner、`Collapse.Panel` 没有独立 API”为由拒绝映射，但该理由检验的是上游 owner 数量，而
+> [全量改造设计 §2.1](../specs/2026-08-12-semantic-part-control-rollout-design.md)第 4 条要求的是“AtomUI 控件与该公开
+> owner 的产品职责直接对应”。`Expander` 是单面板折叠容器，与上游 `Collapse` 的单个面板承担同一产品职责，上游已公开
+> `root` / `header` / `icon` / `title` / `body` 五个语义键，因此映射成立。移入第二批计划执行（见下方批次清单与
+> [第二批任务清单](2026-08-12-semantic-part-batch-2-collections-containers.md)任务 16）。
+
 逐项公开 API 证据、产品职责映射和重新评估条件以全量改造设计的“排除映射”为准。不得因 AtomUI 模板内部存在
 可定制节点而绕过准入 Gate。
 
@@ -63,12 +70,13 @@
 
 - [x] 第一批：基础控件，共 16 个家族。
 - [x] 第二批：集合与容器，共 16 个家族。（2026-08-27 复核：全部家族均已按用户授权提交）
+- [ ] 第二批追加：`Expander`（2026-09-15 用户指令新增，原排除判定撤销；单面板折叠容器，映射上游 `Collapse` 面板 Semantic DOM，共 5 部件，见第二批任务 16）。
 - [x] 第三批：输入与选择，共 15 个家族。（2026-09-10 复核：15 个家族全部按用户授权提交；视觉验收 NumericUpDown、Form、Transfer、AutoComplete、Cascader 已关闭，ColorPicker、Select、DatePicker 待视觉验收，Mentions、TimePicker、TreeSelect 尚无验收文档；本批次收尾测试尚未执行。）
 - [x] 第四批：Popup 与独立宿主，共 10 个家族。（2026-09-12 收尾：10 个家族全部按用户授权提交——ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、Message、PopupConfirm、Notification、Modal/Dialog；收尾验证 Desktop Controls 3737/3737、Generator 532/532、GalleryBase 181/181、Gallery 621/621、LLMS verify、NativeAOT `osx-arm64` 通过；真机视觉验收已关闭的家族见各自 `docs/superpowers/specs/` 验收记录，Modal/Dialog 悬停高亮由自动化回归覆盖。已知非阻塞：两条先于本批的间歇性测试抖动。）
 - [ ] 第四批追加：`SplitButton`（2026-09-15 用户指令新增，原排除判定撤销；弹层侧映射上游 `Dropdown` 5 部件，触发侧补充发布 `primary` / `secondary`，共 7 部件，见第四批任务 11）。
 - [ ] 第五批：高密度控件，共 2 个家族。（未开始：NavMenu、DataGrid。）
 
-合计待改造：60 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`）。
+合计待改造：61 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton` 与 `Expander`）。
 
 ## 3. 单控件强制执行循环
 
@@ -146,7 +154,7 @@
 
 - [x] 只有第一批形成稳定审核节奏后才能开始，除非用户明确调整优先级。
 - [x] 每个适用家族都必须提供容器和运行时创建 marker 的生命周期证据。
-- [ ] 15 个家族全部提交后，运行集合/虚拟化回归测试和完整通用检查。
+- [ ] 17 个家族全部提交后，运行集合/虚拟化回归测试和完整通用检查。
     - 2026-08-27 复跑受阻：`ImageLoaderDisposeTests.Dispose_On_UI_Thread_Does_Not_Block_An_InFlight_UI_Dispatch`（`d58243b15` 引入，非 Semantic Part 改动）在本机 headless 下稳定挂起并中止套件；其前 201 个用例通过。此外 Gallery 套件另有与本改造无关的存量失败（CustomizeTheme 算法断言）。上述存量问题修复后需完整重跑再勾选。
 
 ### 任务 3：第三批 - 输入与选择
@@ -188,6 +196,14 @@ dotnet run --project tools/AtomUI.Docs.LLMsGenerator/AtomUI.Docs.LLMsGenerator.c
 git diff --check
 ```
 
+Gate A 修改 `overview.md` / `implementation.md` / 新增 `semantic-part.md` 后，`verify` 会报告 `docs/AI/generated` 下的
+`controls/<control>/index-cn.md`、`controls/<control>/semantic-cn.md`、`llms-full-cn.txt`、`llms-semantic-cn.md` 过期。
+此时必须用生成器重生成，不得手工编辑 `docs/AI/generated`：
+
+```bash
+dotnet run --project tools/AtomUI.Docs.LLMsGenerator/AtomUI.Docs.LLMsGenerator.csproj -- generate --config docs/AI/generated/llms.config.json
+```
+
 Desktop 控件实现：
 
 ```bash
@@ -211,9 +227,9 @@ pwsh -NoLogo -NoProfile -File controlgallery/AtomUIGallery.Desktop/scripts/Publi
 
 ## 6. 全量改造收尾
 
-- [ ] 确认 60 个家族都通过各自经用户授权的提交达到 `Committed` 状态。
+- [ ] 确认 61 个家族都通过各自经用户授权的提交达到 `Committed` 状态。
 - [ ] 重新扫描 public 控件和全部叶子主题，检查未声明的 `.semantic-*`、缺少的已批准 marker，以及 Descriptor 与文档不一致。
-- [ ] 确认 17 个排除控件仍然没有通过最新稳定发布源码公开 API 准入 Gate。
+- [ ] 确认 16 个排除控件仍然没有通过最新稳定发布源码公开 API 准入 Gate。
 - [ ] 运行全部通用测试、DataGrid 测试、LLMS verify、NativeAOT publish 和 `git diff --check`。
 - [ ] 审核每个 Gallery 页面，确认保持 Examples-first 行为，并且选择 Tab 前不会实例化 Semantic Preview。
 - [ ] 输出最终兼容性与性能摘要；除非用户明确要求，否则不得额外创建 squash 或批次提交。
