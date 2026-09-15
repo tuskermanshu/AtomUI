@@ -397,7 +397,6 @@
             <gallery:ShowCaseItem
                 Title="{gallery:TabControlShowCaseLangResource TabControlCardShapePositionTitle}"
                 Description="{gallery:TabControlShowCaseLangResource TabControlCardShapePositionDescription}"
-                Margin="0, 0, 10, 0"
                 IsDeferredContentEnabled="True">
                 <gallery:ShowCaseItem.DeferredContentTemplate>
                     <DataTemplate x:DataType="vm:TabControlViewModel">
@@ -474,7 +473,7 @@
 
             <gallery:ShowCaseItem
                 Title="{gallery:TabControlShowCaseLangResource TabControlAddCloseTitle}"
-                Description="{gallery:TabControlShowCaseLangResource TabControlAddCloseDescription}" Margin="0, 0, 30, 0"
+                Description="{gallery:TabControlShowCaseLangResource TabControlAddCloseDescription}"
                 IsDeferredContentEnabled="True">
                 <gallery:ShowCaseItem.DeferredContentTemplate>
                     <DataTemplate x:DataType="vm:TabControlViewModel">

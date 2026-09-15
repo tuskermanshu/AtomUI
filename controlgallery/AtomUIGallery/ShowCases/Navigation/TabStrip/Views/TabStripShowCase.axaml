@@ -397,7 +397,6 @@
     <gallery:ShowCaseItem
         Title="{gallery:TabStripShowCaseLangResource TabStripCardShapePositionTitle}"
         Description="{gallery:TabStripShowCaseLangResource TabStripCardShapePositionDescription}"
-        Margin="0, 0, 10, 0"
         IsDeferredContentEnabled="True">
         <gallery:ShowCaseItem.DeferredContentTemplate>
             <DataTemplate x:DataType="vm:TabStripViewModel">
@@ -471,7 +470,6 @@
     <gallery:ShowCaseItem
         Title="{gallery:TabStripShowCaseLangResource TabStripAddCloseTitle}"
         Description="{gallery:TabStripShowCaseLangResource TabStripAddCloseDescription}"
-        Margin="0, 0, 30, 0"
         IsDeferredContentEnabled="True">
         <gallery:ShowCaseItem.DeferredContentTemplate>
             <DataTemplate x:DataType="vm:TabStripViewModel">

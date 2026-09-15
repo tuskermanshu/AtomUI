@@ -38,9 +38,19 @@ public class GalleryBaseCatalogTests
         var application = Application.Current.ShouldNotBeNull();
         var languageManager = application.GetLanguageManager().ShouldNotBeNull();
         var localizer = application.GetLocalizer().ShouldNotBeNull();
-        AssertLanguage(LanguageTags.EnUS, expected.Select(static entry => (entry.Kind, entry.En)), languageManager, localizer);
-        AssertLanguage(LanguageTags.ZhCN, expected.Select(static entry => (entry.Kind, entry.ZhCn)), languageManager, localizer);
-        AssertLanguage(LanguageTags.ZhTW, expected.Select(static entry => (entry.Kind, entry.ZhTw)), languageManager, localizer);
+        // The application-level language is shared state for the whole test run; restore
+        // it so later tests that assert on English labels are not affected.
+        var originalLanguage = languageManager.Current.CurrentLanguage;
+        try
+        {
+            AssertLanguage(LanguageTags.EnUS, expected.Select(static entry => (entry.Kind, entry.En)), languageManager, localizer);
+            AssertLanguage(LanguageTags.ZhCN, expected.Select(static entry => (entry.Kind, entry.ZhCn)), languageManager, localizer);
+            AssertLanguage(LanguageTags.ZhTW, expected.Select(static entry => (entry.Kind, entry.ZhTw)), languageManager, localizer);
+        }
+        finally
+        {
+            languageManager.ChangeLanguage(originalLanguage);
+        }
 
         resourceKindType.Assembly.GetType("AtomUI.Toolkits.GalleryBase.Localization.en_US").ShouldBeNull();
         resourceKindType.Assembly.GetType("AtomUI.Toolkits.GalleryBase.Localization.zh_CN").ShouldBeNull();

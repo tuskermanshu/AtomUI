@@ -269,6 +269,12 @@ internal sealed class TabScrollViewer : ScrollViewer, ITabOverflowPopupActionTar
         {
             _overflowPopup.Closed += HandlePopupClosed;
             _overflowPopup.PlacementTarget = _menuIndicator;
+            // Presses on the indicator must bypass the light-dismiss layer: without this
+            // the layer treats an open popup's indicator press as an outside press (the
+            // dismiss closes the popup, then the re-raised press reaches the button whose
+            // Click on release reopens it). With the pass-through element the press is
+            // delivered straight to the indicator and the popup stays open.
+            _overflowPopup.OverlayInputPassThroughElement = _menuIndicator;
             _overflowPopup.SetCurrentValue(Popup.RequestedPlacementProperty, OverflowPopupPlacement);
         }
 
@@ -621,6 +627,7 @@ internal sealed class TabScrollViewer : ScrollViewer, ITabOverflowPopupActionTar
         {
             _overflowPopup.Closed -= HandlePopupClosed;
             _overflowPopup.PlacementTarget = null;
+            _overflowPopup.OverlayInputPassThroughElement = null;
         }
         _menuIndicator = null;
         _startEdgeIndicator = null;
