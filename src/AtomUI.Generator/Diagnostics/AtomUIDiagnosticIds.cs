@@ -48,4 +48,6 @@ internal static class AtomUIDiagnosticIds
     public const string LinkedPackageEntryMissing = "ATOMUILINK008";
     public const string LinkedPackageEntryInvalid = "ATOMUILINK009";
     public const string LinkedDynamicUsageUncovered = "ATOMUILINK010";
+    public const string LinkedExplicitUnitConflict = "ATOMUILINK011";
+    public const string LinkedFileUnitConflict = "ATOMUILINK012";
 }

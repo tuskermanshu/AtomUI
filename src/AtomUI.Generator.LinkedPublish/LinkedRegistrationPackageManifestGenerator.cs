@@ -12,6 +12,10 @@ namespace AtomUI.Generator.LinkedRegistration;
 [Generator]
 public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGenerator
 {
+    private const string AotTrimUnitAttributeFullName = "AtomUI.Registration.AotTrimUnitAttribute";
+    private const string ExplicitUnitConflictReason = "ExplicitUnitConflict";
+    private const string FileUnitConflictReason = "FileUnitConflict";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var candidates = LinkedCSharpUsageCandidateProvider.Create(context).Collect();
@@ -50,7 +54,13 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
             projectDirectory,
             optionsProvider,
             out var knownUnits,
-            out var controlTypes);
+            out var controlTypes,
+            out var fileUnitOverrides,
+            out var unitConflicts);
+        foreach (var conflict in unitConflicts)
+        {
+            ReportUnitConflict(context, optionsProvider, conflict);
+        }
         var edges = new HashSet<UnitEdge>(UnitEdgeComparer.Instance);
         var rootUnits = new HashSet<string>(StringComparer.Ordinal);
         var fallbacks = new HashSet<Fallback>(FallbackComparer.Instance);
@@ -118,6 +128,7 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
                     projectDirectory,
                     optionsProvider,
                     treesByPath,
+                    fileUnitOverrides,
                     knownUnits);
                 if (sourceUnitId is null)
                 {
@@ -217,19 +228,39 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
         string projectDirectory,
         AnalyzerConfigOptionsProvider optionsProvider,
         out HashSet<string> knownUnits,
-        out HashSet<string> controlTypes)
+        out HashSet<string> controlTypes,
+        out Dictionary<string, string> fileUnitOverrides,
+        out List<UnitConflict> unitConflicts)
     {
         var types = GetTypes(compilation.Assembly.GlobalNamespace).ToArray();
         var candidateUnits = new Dictionary<INamedTypeSymbol, string?>(SymbolEqualityComparer.Default);
         knownUnits = new HashSet<string>(StringComparer.Ordinal);
         controlTypes = new HashSet<string>(StringComparer.Ordinal);
+        fileUnitOverrides = new Dictionary<string, string>(StringComparer.Ordinal);
+        unitConflicts = new List<UnitConflict>();
+        var reportedConflicts = new HashSet<string>(StringComparer.Ordinal);
+        var conflictedFiles = new HashSet<string>(StringComparer.Ordinal);
         foreach (var type in types)
         {
+            var attributeUnitName = GetAotTrimUnitName(type);
+            if (attributeUnitName is not null)
+            {
+                CollectAotTrimUnitDeclarations(
+                    type,
+                    attributeUnitName,
+                    packageId,
+                    optionsProvider,
+                    fileUnitOverrides,
+                    conflictedFiles,
+                    unitConflicts,
+                    reportedConflicts);
+            }
             var unitId = GetUnitIdForType(
                 type,
                 packageId,
                 projectDirectory,
-                optionsProvider);
+                optionsProvider,
+                attributeUnitName);
             candidateUnits[type] = unitId;
             if (IsControlType(type))
             {
@@ -252,11 +283,124 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
         return result;
     }
 
+    private static void CollectAotTrimUnitDeclarations(
+        INamedTypeSymbol type,
+        string attributeUnitName,
+        string packageId,
+        AnalyzerConfigOptionsProvider optionsProvider,
+        Dictionary<string, string> fileUnitOverrides,
+        HashSet<string> conflictedFiles,
+        List<UnitConflict> unitConflicts,
+        HashSet<string> reportedConflicts)
+    {
+        var attributeUnit = RegistrationUnitId.Create(
+            packageId,
+            RegistrationUnitGranularity.Directory,
+            null,
+            null,
+            type.Name,
+            attributeUnitName);
+        var location = GetAotTrimUnitLocation(type);
+        var typeDisplay = LinkedRegistrationSymbolName.GetTypeMetadataName(type);
+
+        foreach (var reference in type.DeclaringSyntaxReferences)
+        {
+            if (optionsProvider.GetOptions(reference.SyntaxTree).TryGetValue(
+                    "build_metadata.Compile.AtomUIRegistrationUnit",
+                    out var metadataUnit) &&
+                !string.IsNullOrWhiteSpace(metadataUnit))
+            {
+                var qualifiedMetadataUnit = RegistrationUnitId.Create(
+                    packageId,
+                    RegistrationUnitGranularity.Directory,
+                    null,
+                    null,
+                    type.Name,
+                    metadataUnit);
+                if (!string.Equals(qualifiedMetadataUnit, attributeUnit, StringComparison.Ordinal) &&
+                    reportedConflicts.Add(
+                        $"{ExplicitUnitConflictReason}|{typeDisplay}|{reference.SyntaxTree.FilePath}"))
+                {
+                    unitConflicts.Add(new UnitConflict(
+                        ExplicitUnitConflictReason,
+                        location,
+                        attributeUnitName,
+                        metadataUnit,
+                        typeDisplay));
+                }
+            }
+
+            var filePath = reference.SyntaxTree.FilePath;
+            if (filePath.Length == 0 || conflictedFiles.Contains(filePath))
+            {
+                continue;
+            }
+            if (fileUnitOverrides.TryGetValue(filePath, out var existingUnit))
+            {
+                if (!string.Equals(existingUnit, attributeUnit, StringComparison.Ordinal))
+                {
+                    if (reportedConflicts.Add($"{FileUnitConflictReason}|{filePath}"))
+                    {
+                        unitConflicts.Add(new UnitConflict(
+                            FileUnitConflictReason,
+                            location,
+                            filePath,
+                            existingUnit,
+                            attributeUnit));
+                    }
+                    fileUnitOverrides.Remove(filePath);
+                    conflictedFiles.Add(filePath);
+                }
+            }
+            else
+            {
+                fileUnitOverrides[filePath] = attributeUnit;
+            }
+        }
+    }
+
+    private static string? GetAotTrimUnitName(INamedTypeSymbol type)
+    {
+        foreach (var attributeData in type.GetAttributes())
+        {
+            if (attributeData.AttributeClass?.ToDisplayString() != AotTrimUnitAttributeFullName)
+            {
+                continue;
+            }
+            if (attributeData.ConstructorArguments.Length == 1 &&
+                attributeData.ConstructorArguments[0].Value is string unitName &&
+                unitName.Length != 0)
+            {
+                return unitName;
+            }
+            return null;
+        }
+        return null;
+    }
+
+    private static Location? GetAotTrimUnitLocation(INamedTypeSymbol type)
+    {
+        foreach (var attributeData in type.GetAttributes())
+        {
+            if (attributeData.AttributeClass?.ToDisplayString() != AotTrimUnitAttributeFullName)
+            {
+                continue;
+            }
+            var reference = attributeData.ApplicationSyntaxReference;
+            if (reference is not null)
+            {
+                return Location.Create(reference.SyntaxTree, reference.Span);
+            }
+        }
+        return type.Locations.FirstOrDefault();
+    }
+
     private static string? GetUnitIdForType(
         INamedTypeSymbol type,
         string packageId,
         string projectDirectory,
-        AnalyzerConfigOptionsProvider optionsProvider)
+        AnalyzerConfigOptionsProvider optionsProvider,
+        string? attributeUnitName)
     {
         var candidates = type.DeclaringSyntaxReferences.Select(reference =>
                 CreateUnitId(
@@ -264,7 +408,8 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
                     packageId,
                     projectDirectory,
                     type.Name,
-                    optionsProvider))
+                    optionsProvider,
+                    attributeUnitName))
             .Distinct(StringComparer.Ordinal)
             .ToArray();
         return candidates.Length == 1 ? candidates[0] : null;
@@ -276,11 +421,16 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
         string projectDirectory,
         AnalyzerConfigOptionsProvider optionsProvider,
         IReadOnlyDictionary<string, SyntaxTree> treesByPath,
+        IReadOnlyDictionary<string, string> fileUnitOverrides,
         ISet<string> knownUnits)
     {
         if (!treesByPath.TryGetValue(source, out var tree))
         {
             return null;
+        }
+        if (fileUnitOverrides.TryGetValue(tree.FilePath, out var overrideUnit))
+        {
+            return knownUnits.Contains(overrideUnit) ? overrideUnit : null;
         }
         var unitId = CreateUnitId(
             tree,
@@ -296,11 +446,16 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
         string packageId,
         string projectDirectory,
         string fallbackName,
-        AnalyzerConfigOptionsProvider optionsProvider)
+        AnalyzerConfigOptionsProvider optionsProvider,
+        string? attributeUnit = null)
     {
-        optionsProvider.GetOptions(tree).TryGetValue(
-            "build_metadata.Compile.AtomUIRegistrationUnit",
-            out var explicitUnit);
+        var explicitUnit = attributeUnit;
+        if (explicitUnit is null)
+        {
+            optionsProvider.GetOptions(tree).TryGetValue(
+                "build_metadata.Compile.AtomUIRegistrationUnit",
+                out explicitUnit);
+        }
         return RegistrationUnitId.Create(
             packageId,
             RegistrationUnitGranularity.Directory,
@@ -371,6 +526,35 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
         return normalized.Length == 0 ? "<Unknown>" : normalized;
     }
 
+    private static void ReportUnitConflict(
+        SourceProductionContext context,
+        AnalyzerConfigOptionsProvider optionsProvider,
+        UnitConflict conflict)
+    {
+        var descriptor = string.Equals(conflict.Reason, FileUnitConflictReason, StringComparison.Ordinal)
+            ? AtomUIDiagnosticDescriptors.LinkedFileUnitConflict
+            : AtomUIDiagnosticDescriptors.LinkedExplicitUnitConflict;
+        if (LinkedRegistrationOptions.IsRegistrationStrict(optionsProvider))
+        {
+            descriptor = new DiagnosticDescriptor(
+                descriptor.Id,
+                descriptor.Title,
+                descriptor.MessageFormat,
+                descriptor.Category,
+                DiagnosticSeverity.Error,
+                descriptor.IsEnabledByDefault,
+                descriptor.Description,
+                descriptor.HelpLinkUri,
+                descriptor.CustomTags.ToArray());
+        }
+        context.ReportDiagnostic(Diagnostic.Create(
+            descriptor,
+            conflict.Location,
+            conflict.FirstArg,
+            conflict.SecondArg,
+            conflict.ThirdArg));
+    }
+
     private static void ReportFallback(
         SourceProductionContext context,
         AnalyzerConfigOptionsProvider optionsProvider,
@@ -400,6 +584,29 @@ public sealed class LinkedRegistrationPackageManifestGenerator : IIncrementalGen
             fallback.Location,
             fallback.Reason,
             fallback.PackageId));
+    }
+
+    private sealed class UnitConflict
+    {
+        internal UnitConflict(
+            string reason,
+            Location? location,
+            string firstArg,
+            string secondArg,
+            string thirdArg)
+        {
+            Reason = reason;
+            Location = location;
+            FirstArg = firstArg;
+            SecondArg = secondArg;
+            ThirdArg = thirdArg;
+        }
+
+        internal string Reason { get; }
+        internal Location? Location { get; }
+        internal string FirstArg { get; }
+        internal string SecondArg { get; }
+        internal string ThirdArg { get; }
     }
 
     private sealed class UnitEdge

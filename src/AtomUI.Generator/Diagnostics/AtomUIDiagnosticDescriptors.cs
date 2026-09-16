@@ -95,6 +95,24 @@ internal static class AtomUIDiagnosticDescriptors
         isEnabledByDefault: true,
         customTags: [WellKnownDiagnosticTags.Telemetry]);
 
+    public static readonly DiagnosticDescriptor LinkedExplicitUnitConflict = new(
+        AtomUIDiagnosticIds.LinkedExplicitUnitConflict,
+        "Explicit registration unit declarations conflict",
+        "AotTrimUnit '{0}' and AtomUIRegistrationUnit metadata '{1}' declare different Registration Units for '{2}'; the attribute takes precedence. Align both declarations or remove one.",
+        AtomUIDiagnosticCategories.LinkedRegistration,
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        customTags: [WellKnownDiagnosticTags.Telemetry]);
+
+    public static readonly DiagnosticDescriptor LinkedFileUnitConflict = new(
+        AtomUIDiagnosticIds.LinkedFileUnitConflict,
+        "One file declares multiple explicit registration units",
+        "File '{0}' contains types declaring different explicit Registration Units ('{1}' and '{2}'); split the file or align the AotTrimUnit values. The file falls back to directory-derived attribution.",
+        AtomUIDiagnosticCategories.LinkedRegistration,
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        customTags: [WellKnownDiagnosticTags.Telemetry]);
+
     public static readonly DiagnosticDescriptor AotMissingGeneratedAccessor = new(
         AtomUIDiagnosticIds.AotMissingGeneratedAccessor,
         "AOT-sensitive data member path requires generated accessor",

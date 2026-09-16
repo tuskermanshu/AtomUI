@@ -63,6 +63,7 @@ dotnet_diagnostic.ATOMUIAOT001.severity = error
 | `XAML` | AXAML | AXAML 静态结构、绑定、资源引用 |
 | `TOKEN` | Theme / Token | Token 定义、注册、资源键、主题约束 |
 | `LOC` | Localization | Language Catalog、XLIFF、语言元数据和静态语言包 |
+| `LINK` | Linked Registration | AOT/Trim 注册管线：粒度、Unit 归属、sidecar 协议与应用计划 |
 
 新增领域前缀前必须先更新本文档，说明用途和 owner。
 
@@ -96,6 +97,18 @@ dotnet_diagnostic.ATOMUIAOT001.severity = error
 | `ATOMUILOC008` | Localization | Error | 应用类型无法实现生成式语言 bootstrap | 保留唯一的非抽象 partial Avalonia Application host，或移除应用级语言输入 | LocalizationGenerator |
 | `ATOMUILOC009` | Localization | Error | 静态语言包包含运行时代码/二进制、非法路径、缺失必需 metadata、未满足 Verified 要求或混合目标语言 | 删除运行时资产，并使用模板生成的声明式 contentFiles/buildTransitive 包结构 | AtomUI.Build.Tasks |
 | `ATOMUILOC010` | Localization | Warning | 静态语言包没有取得目标模块的权威 `en-US` 契约，打包只能执行延迟契约校验 | 添加作者期 `PrivateAssets=all` 组件 PackageReference；社区包也可保留 Deferred 并由消费应用完成完整校验 | AtomUI.Build.Tasks |
+| `ATOMUILINK001` | LinkedRegistration | Error | linked 应用的 Application Plan owner 不唯一 | 保证只有一个入口工程满足 plan owner 条件 | LinkedPublishGenerator |
+| `ATOMUILINK002` | LinkedRegistration | Warning | 动态 AtomUI usage 无法解析到 Registration Unit，当前包使用 full fallback | Unit 已知时添加 `AtomUIRegistrationUnitRoot`，完全动态时添加 `AtomUIPackageRoot` | LinkedPublishGenerator |
+| `ATOMUILINK003` | LinkedRegistration | Warning | 包没有兼容的 linked manifest，需要 full fallback | 升级包版本，或添加 `AtomUIPackageRoot` 显式声明边界 | LinkedPublishGenerator |
+| `ATOMUILINK004` | LinkedRegistration | Error | 显式 root 无法解析 | 已知 Unit 使用 `AtomUIRegistrationUnitRoot`，整包使用 `AtomUIPackageRoot` | LinkedPublishGenerator |
+| `ATOMUILINK005` | LinkedRegistration | Error | 包的粒度、Unit 或 PackageShared 声明非法，或 sidecar 候选未经解析到达 Generator | 修正包声明；消费端先按 assembly identity 与 contractHash 完成 canonical resolution | LinkedPublishGenerator、AtomUI.Build.Tasks |
+| `ATOMUILINK006` | LinkedRegistration | Error | linked-registration 输入 manifest 不兼容或损坏 | 修复 sidecar 版本或内容后重新生成 | AtomUI.Build.Tasks |
+| `ATOMUILINK007` | LinkedRegistration | Warning | loose AXAML 或动态资源源可能加载某包，该包使用 full fallback | 添加 `AtomUIPackageRoot` 显式声明边界 | LinkedPublishGenerator |
+| `ATOMUILINK008` | LinkedRegistration | Error | 包被使用但其 `UseXxxControls()` 注册入口未被调用 | 在应用入口调用注册方法或声明对应 root | LinkedPublishGenerator |
+| `ATOMUILINK009` | LinkedRegistration | Error | Control package 注册入口方法无效 | 按 `[ControlPackageRegistrationEntry]` 契约修正入口签名 | OrdinaryGenerator |
+| `ATOMUILINK010` | LinkedRegistration | Warning | 动态 usage 未被静态注册计划覆盖，仅经该点创建的控件不会注册 | Unit 已知时添加 `AtomUIRegistrationUnitRoot`，完全动态时添加 `AtomUIPackageRoot`；该点从不创建 AtomUI 控件时无需处理 | LinkedPublishGenerator |
+| `ATOMUILINK011` | LinkedRegistration | Warning | `[AotTrimUnit]` attribute 与 `AtomUIRegistrationUnit` metadata 对同一文件声明了不同 Unit | 统一两处声明的 Unit 值，或删除其一 | LinkedPublishGenerator |
+| `ATOMUILINK012` | LinkedRegistration | Warning | 同一文件内多个类型声明了不同的显式 Registration Unit | 拆分文件，或统一为同一 Unit 值 | LinkedPublishGenerator |
 
 `ATOMUIGEN005` 和 `ATOMUIGEN006` 原本约束 `[ControlDesignToken]` 类型上的 `public const ID`，该手工 ID 契约已
 删除，因此这两个诊断不在新主题架构中复用。无参数 `[ControlDesignToken]` 本身继续保留，只负责标记 Own Token

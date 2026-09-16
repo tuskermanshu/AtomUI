@@ -1,6 +1,7 @@
 using System.Reactive.Disposables;
 using AtomUI.Controls;
 using AtomUI.Input;
+using AtomUI.Registration;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -10,6 +11,7 @@ using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
 
+[AotTrimUnit(AotTrimGeneralUnits.Core)]
 public sealed class ToolTipService : IDisposable
 {
     private readonly IDisposable _subscriptions;

@@ -1,6 +1,6 @@
 # AOT Registration Unit 粒度
 
-> 状态：截至 2026-08-15，`ControlPackageRegistrationEntry`、默认 `Package` 粒度和显式 `Directory` 粒度均已实现并完成完整发布验证。
+> 状态：截至 2026-08-15，`ControlPackageRegistrationEntry`、默认 `Package` 粒度和显式 `Directory` 粒度均已实现并完成完整发布验证。2026-09-16 设计新增 `AotTrimUnit` 显式归属注解（见 4.1 与第 7 节），随 6.0 实现。
 
 本文是 AtomUI Control Package 的 Registration Unit 粒度、资源归属和第三方包接入边界的正式所有者。
 
@@ -102,6 +102,35 @@ Unit，不要求作者维护依赖列表或修改公开资源地址。
 Directory 模式是体积优化承诺，不是 AOT 正确性的前置条件。没有真实体积收益、行为测试和发布验证的包不得为了目录整齐
 启用该模式。
 
+### 4.1 显式归属注解 `AotTrimUnit`
+
+Directory 模式下，C# 文件的 Unit 归属按以下优先级推导：
+
+1. 类型声明的 `[AotTrimUnit("UnitName")]` attribute。
+2. `Compile` item 的 `AtomUIRegistrationUnit` metadata（仅限无法添加注解的生成代码）。
+3. 一级控件族目录约定。
+
+`AotTrimUnitAttribute` 与常量类 `AotTrimGeneralUnits` 是 `AtomUI.Core` 的公共 API（命名空间 `AtomUI.Registration`，与
+`[ControlPackageRegistrationEntry]` 同族）。常量类只收录跨控件族的通用 Unit，控件族 Unit 由目录派生，不设常量：
+
+```csharp
+using AtomUI.Registration;
+
+[AotTrimUnit(AotTrimGeneralUnits.Core)]
+internal static class DialogInputCaptureTracker { }
+```
+
+约束与语义：
+
+- 注解同时决定声明类型的归属和所在文件的证据归属：被注解文件内的调用不按目录归入控件族 Unit，不产生 UnitEdge，
+  也不形成 Root。
+- 注解 Unit 对 Control 的直接类型证据仍按第 7 节 Package Core 证据规则进入 Unit closure。
+- 只在 Directory 模式生效；Package 模式忽略注解。
+- 同一文件内多个类型的注解值必须一致；注解与 `AtomUIRegistrationUnit` metadata 声明不一致时构建期报告
+  `ATOMUILINK011`，同文件多值冲突报告 `ATOMUILINK012`，strict 模式下升级为 Error。
+- 注解值由包 id 限定（`<PackageId>/<UnitName>`），第三方包与第一方包不冲突。
+- 专用共享目录（如历史上的 `PackageCore/`）与注解二选一，语义等价；目录约定仍对任何启用方合法。
+
 ## 5. ControlMap 与资源归属
 
 ControlMap 表示 CLR Control 的定义程序集 ownership，不等于 Theme descriptor 清单。当前 Package 定义的每个 public、
@@ -145,6 +174,9 @@ resource-only Theme：
 
 它是高级归属逃生口，不是普通第三方接入步骤，也不能用于维护跨 Unit 依赖图。
 
+C# 侧的显式 Unit 归属由 `[AotTrimUnit]` attribute 承担（见 4.1）。`Compile` item 上的 `AtomUIRegistrationUnit` metadata
+只作为无法添加注解的生成代码的兜底通道；两者声明不一致时报告 `ATOMUILINK011`。
+
 Package 模式忽略目录拆分，因而不得为内部 Theme 添加这类 metadata。DataGrid、ColorPicker 等单一控件族包中用于修补目录
 拆分的现有 `AvaloniaXaml Update` 必须在迁移完成后删除。
 
@@ -158,7 +190,8 @@ Package 模式忽略目录拆分，因而不得为内部 Theme 添加这类 meta
 - Dialog、Tooltip、Motion、Responsive 等 initializer。
 - 显式 PackageShared 资源。
 
-入口直接调用的 initializer、input service 等非 Control helper 必须位于 Package Core 源码边界，不能因为文件恰好放在
+入口直接调用的 initializer、input service 等非 Control helper 必须位于 Package Core 源码边界，或使用
+`[AotTrimUnit(AotTrimGeneralUnits.Core)]` 显式声明 Package Core 归属（见 4.1）；未声明的 helper 不能因为文件恰好放在
 `Dialog`、`Tooltip` 等控件族目录，就把该控件族无条件写成 Root Unit。真正由 Package Core 直接构造或静态使用的 Control
 仍按静态证据进入 Unit closure。
 

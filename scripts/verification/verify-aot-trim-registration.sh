@@ -244,7 +244,10 @@ verify_plan_artifacts() {
     local publish_dir="$1"
     local fixture="$2"
     local runtime_config
-    runtime_config="$(find "$publish_dir" -maxdepth 1 -name '*.runtimeconfig.json' -print -quit)"
+    # 只检查 fixture 自身的 runtimeconfig；发布目录可能混入其他程序集（如
+    # AtomUI.Build.Tasks）的 runtimeconfig，它们不携带 AotTrimRegistration 开关。
+    runtime_config="$(find "$publish_dir" -maxdepth 1 \
+        -name "AtomUI.LinkedRegistration.Fixtures.$fixture.runtimeconfig.json" -print -quit)"
     if [[ -n "$runtime_config" ]]; then
         grep -q 'AtomUI.AotTrimRegistration.Enabled' "$runtime_config"
     fi

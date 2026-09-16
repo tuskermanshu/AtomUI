@@ -23,9 +23,11 @@ public sealed class LinkedRegistrationDiagnosticContractTests
             "ATOMUILINK007",
             "ATOMUILINK008",
             "ATOMUILINK009",
-            "ATOMUILINK010"
+            "ATOMUILINK010",
+            "ATOMUILINK011",
+            "ATOMUILINK012"
         ]);
-        descriptors.Select(static descriptor => descriptor.Id).Distinct().Count().ShouldBe(10);
+        descriptors.Select(static descriptor => descriptor.Id).Distinct().Count().ShouldBe(12);
     }
 
     [Fact]
@@ -43,6 +45,8 @@ public sealed class LinkedRegistrationDiagnosticContractTests
         descriptors[7].DefaultSeverity.ShouldBe(DiagnosticSeverity.Error);
         descriptors[8].DefaultSeverity.ShouldBe(DiagnosticSeverity.Error);
         descriptors[9].DefaultSeverity.ShouldBe(DiagnosticSeverity.Warning);
+        descriptors[10].DefaultSeverity.ShouldBe(DiagnosticSeverity.Warning);
+        descriptors[11].DefaultSeverity.ShouldBe(DiagnosticSeverity.Warning);
         descriptors.ShouldAllBe(descriptor =>
             descriptor.Category == AtomUIDiagnosticCategories.LinkedRegistration);
     }
@@ -64,6 +68,9 @@ public sealed class LinkedRegistrationDiagnosticContractTests
         messages[8].ShouldContain("registration entry");
         messages[9].ShouldContain("AtomUIRegistrationUnitRoot");
         messages[9].ShouldContain("AtomUIPackageRoot");
+        messages[10].ShouldContain("AotTrimUnit");
+        messages[10].ShouldContain("AtomUIRegistrationUnit");
+        messages[11].ShouldContain("split the file");
     }
 
     private static DiagnosticDescriptor[] GetDescriptors()
@@ -79,7 +86,9 @@ public sealed class LinkedRegistrationDiagnosticContractTests
             AtomUIDiagnosticDescriptors.LinkedLooseAxamlWidened,
             AtomUIDiagnosticDescriptors.LinkedPackageEntryMissing,
             AtomUIDiagnosticDescriptors.LinkedPackageEntryInvalid,
-            AtomUIDiagnosticDescriptors.LinkedDynamicUsageUncovered
+            AtomUIDiagnosticDescriptors.LinkedDynamicUsageUncovered,
+            AtomUIDiagnosticDescriptors.LinkedExplicitUnitConflict,
+            AtomUIDiagnosticDescriptors.LinkedFileUnitConflict
         ];
     }
 }

@@ -250,7 +250,7 @@ Tooltip Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 - `src/AtomUI.Desktop.Controls/Tooltip/ToolTipPseudoClass.cs`
 - `src/AtomUI.Desktop.Controls/Tooltip/ToolTipToken.cs`
 - `src/AtomUI.Desktop.Controls/Tooltip/OverflowTip.cs`
-- `src/AtomUI.Desktop.Controls/PackageCore/ToolTipService.cs`
+- `src/AtomUI.Desktop.Controls/Tooltip/ToolTipService.cs`
 
 职责边界：
 

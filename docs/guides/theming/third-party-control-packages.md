@@ -309,6 +309,7 @@ linker XML
 - AXAML 和 C# 中的跨 Unit 直接证据能够生成 Sidecar UnitEdge；不确定性必须允许 Package full fallback。
 - 只有无法从 public owner 推导的 resource-only Theme 才使用 `AtomUIRegistrationUnit`。
 - 只有真正跨多个 Unit 且必须随 Package Core 加载的资源才使用 `AtomUIPackageSharedTheme`。
+- 物理位于控件族目录、但注册归属为 Package Core 的非 Control 共享服务，使用 `[AotTrimUnit(AotTrimGeneralUnits.Core)]` 显式声明，而不是搬进专用共享目录。
 - CI 覆盖 generated registration、trimmed JIT、NativeAOT 和体积对比。
 
 Directory 模式是高级体积优化，不是 AOT 正确性的前置条件。无法证明它有收益时，继续使用默认 Package 模式。

@@ -261,7 +261,7 @@ TabControl Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - 未打开实例只有一个无 Child 的静态 Popup shell，不建立打开态订阅；第一次打开创建一次内容树，重复打开只重建 immutable projection。
 - `PART_ScrollMenuIndicator.Click` 与 `PART_OverflowPopup.Closed` 是 template-part 生命周期订阅，可在关闭态存在，但必须在 re-template / detach 时成对解除；“无打开态订阅”只指 collection/selection、per-item、command、dispatcher 与 owner-action 会话订阅。
 - 每次打开不得创建 Flyout、`CompositeDisposable`、relay binding、per-item delegate、command 或 dispatcher closure；默认
-  item container 关闭时必须清除旧 item/header/template，允许框架安全回收复用。
+  item container 关闭时清除旧 item/header/template、DataContext 及标题 presenter 的模板子树。默认菜单拥有仅包含空容器的局部缓存，容量随最近一次非空快照缩小；Context 切换时丢弃缓存，完整 teardown 后随菜单根一起释放。
 - 重复 open/close 的 allocated bytes/op 与 Gen0 压力必须相对旧基线至少下降 30%；never-open 创建、布局、滚动不得出现超过 5% 的稳定回退。
 - context 只弱引用 action target；关闭态 Items 为空且无活动打开会话订阅，完整 teardown 后 cached root、context、template 与 DynamicResource anchor 均不得被旧会话保留。
 - 自定义搜索 item 直接把 `Header` / `HeaderTemplate` 交给按钮的原生 content pipeline；不创建嵌套的手工

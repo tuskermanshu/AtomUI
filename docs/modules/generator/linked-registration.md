@@ -96,7 +96,14 @@ Package 粒度输出一个完整 Unit，不运行 dependency analyzer。所有 C
 
 ### 5.2 Directory 粒度
 
-每个 source/AXAML file 必须先经同一个 `RegistrationUnitId` 策略归入 Unit 或 Package Core。直接证据转换规则为：
+每个 source/AXAML file 必须先经同一个 `RegistrationUnitId` 策略归入 Unit 或 Package Core。C# 侧的归属判定必须按统一优先级：
+类型声明的 `[AotTrimUnit]` attribute（按 `AtomUI.Registration.AotTrimUnitAttribute` 完整元数据名识别）优先于
+`build_metadata.Compile.AtomUIRegistrationUnit`，最后才是目录约定。attribute 同时作用于声明类型与所在文件：Package
+manifest generator 在类型遍历时构建 file→unit 覆盖表，候选来源文件命中覆盖表时按注解 Unit 归属，不再按目录归入控件族
+Unit。attribute 与 metadata 声明不一致报告 `ATOMUILINK011`；同一文件多个类型声明不同 Unit 报告 `ATOMUILINK012`。
+Ordinary Generator 与 Package 粒度不消费该注解。
+
+直接证据转换规则为：
 
 - Unit A 直接创建或静态引用 Unit B Control：`A -> B`。
 - Unit A 直接调用 Unit B 拥有的成员：保守 `A -> B`，不进入 B body。
@@ -188,6 +195,8 @@ writer 不生成 `AddDependencies`，不调用其他 Unit，也不调用 `TryEnt
 - missing fragment symbol。
 - analysis budget exceeded。
 - detected usage without registration entry。
+- explicit registration unit conflict（`AotTrimUnit` attribute 与 `AtomUIRegistrationUnit` metadata 不一致）。
+- 一个文件内多个类型声明了不同的显式 Unit。
 
 可安全扩大的问题使用 PackageFallback Warning；协议不兼容、fragment 不存在和入口缺失使用 Error。strict 模式只提升 fallback
 Warning，不改变保留范围。
