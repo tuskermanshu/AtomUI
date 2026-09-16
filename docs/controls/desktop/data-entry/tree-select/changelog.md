@@ -3,6 +3,12 @@
 本文档记录 TreeSelect 控件级设计、API、主题契约、Token 和实现结构的变化。
 它不替代仓库根目录 CHANGELOG.md，也不作为正式版本发布说明。
 
+## 2026-09-16
+
+- Behavior
+  - Relay the owner root `BorderBrush` / `Background` onto the `TreeSelectAddOnDecoratedBox` frame as local values, so an owner-scoped root setter reaches the visible outline instead of being silently ignored. The frame theme's state setters outrank a `TemplateBinding`, so the relay must use `BindingPriority.LocalValue` from code; it carries an ownership flag and only clears a slot when this control wrote it.
+  - Bind `IsMotionEnabled` onto the `TreeSelectAddOnDecoratedBox` frame (`TemplateBinding`); it was previously only propagated to the inner `SelectHandle`.
+
 ## 2026-09-05
 
 - Architecture

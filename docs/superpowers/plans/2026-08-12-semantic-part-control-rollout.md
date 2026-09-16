@@ -36,6 +36,7 @@
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-3-input-selection.md` | 15 个输入和选择控件家族。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-4-hosts-windows.md` | 10 个 Popup、Overlay 和服务宿主控件家族。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-5-high-density.md` | `NavMenu` 和 `DataGrid` 两个性能敏感控件家族。 |
+| 第六批任务清单（见本文档任务 6） | `ButtonSpinner` 一个输入基座控件家族（2026-09-16 新增）。 |
 
 正式控件文档不得将这些计划作为唯一设计来源。它们应链接系统架构，并描述控件自身的当前契约。
 
@@ -49,7 +50,7 @@
 
 - [x] `Avatar`、`Carousel`、`Rate`、`Watermark`。
 - [x] `Icon`、`FlexPanel`、`Grid / Row / Col`。
-- [x] `ButtonSpinner`、`ComboBox`、`BorderBeam`、`Splash`。
+- [x] `ComboBox`、`BorderBeam`、`Splash`。
 - [x] `WindowTitleBar`、`Window`。
 
 > 范围变更（2026-09-15）：`SplitButton` 的原排除判定经用户指令撤销——AtomUI 需要让 `SplitButton` 支持 Semantic
@@ -70,6 +71,15 @@
 > “AtomUI 控件与该公开 owner 的产品职责直接对应”。二者分别移入第二批与第五批计划执行（见下方批次清单，以及
 > [第二批任务清单](2026-08-12-semantic-part-batch-2-collections-containers.md)任务 17 与
 > [第五批任务清单](2026-08-12-semantic-part-batch-5-high-density.md)任务 3）。
+
+> 范围变更（2026-09-16）：`ButtonSpinner` 的原排除判定经用户指令撤销——AtomUI 需要让 `ButtonSpinner` 支持 Semantic
+> Part。原判定以“Ant Design 没有职责直接对应的公开 Semantic DOM owner；`InputNumber` 的 handle 是其内部区域”为由
+> 拒绝映射，但按当前稳定版 `antd@6.6.4` 源码，`InputNumberSemanticType` 公开并实际消费 `root` / `prefix` /
+> `suffix` / `input` / **`actions`** 五个分区键，其中 `actions` 正是包裹上、下步进按钮的容器（由
+> `@rc-component/input-number` 应用）。原判定的“handle 属内部区域”事实前提因此不再成立，按 [全量改造设计 §2.1](../specs/2026-08-12-semantic-part-control-rollout-design.md)
+> 第 4 条的职责直接对应成立。移入第六批执行（见下方批次清单与第六批任务清单）。
+> 注意：上游至今没有独立 spinner 组件 owner，本项准入依据的是上游 `actions` 键 + 用户指令，不是原触发条件
+> 「新稳定版出现独立 spinner owner」自动满足；逐项证据与两点边界记录见设计文档 §2.4。
 
 逐项公开 API 证据、产品职责映射和重新评估条件以全量改造设计的“排除映射”为准。不得因 AtomUI 模板内部存在
 可定制节点而绕过准入 Gate。**引用本清单作排除依据前，先确认该项未被后续日期化撤销覆盖。**
@@ -94,8 +104,9 @@
 - [x] 第五批：高密度控件，共 2 个家族。（2026-09-14：`NavMenu`（`1e22ed1a3`）与 `DataGrid`（`454cc0d00`）均已按用户授权提交，各自持有独立提交。`DataGrid` 属可选包，验证走独立工程 `tests/AtomUI.Desktop.Controls.DataGrid.Tests`。**遗留：** 三套控件的改造前后性能基线从未归档。详见[第五批任务清单](2026-08-12-semantic-part-batch-5-high-density.md)。）
 - [x] 第五批追加：`Menu`（2026-09-15 用户指令撤销排除并追认；与 `NavMenu` 映射同一个上游 `Menu` owner，12 个公开键路径逐字相同，共 11 部件 + 隐式 `root`，见第五批任务 3）。（2026-09-14：已随 `1e22ed1a3` 提交一并实施并持有独立 `semantic-part.md`；本次追认范围。）
 - [ ] 第二批追加：`GroupBox`（2026-09-16 用户指令新增，原排除判定撤销；**无上游 owner**，Part 按 AtomUI 自身模板职责设计，共 4 部件 + 隐式 `root`，见第二批任务 18）。
+- [x] 第六批：`ButtonSpinner`，1 个输入基座控件家族（2026-09-16 用户指令新增，原排除判定撤销；映射上游 `InputNumber` 公开并实际消费的 `root` / `prefix` / `suffix` / `input` / `actions` 分区键，见任务 6）。（2026-09-16：已完成 Gate A / Gate B，并经用户授权提交。）
 
-合计待改造：64 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu` + 2026-09-16 新增的 `GroupBox`）。**截至 2026-09-15，前 63 个家族全部已实现并经用户授权提交；`GroupBox` 于 2026-09-16 进入 Gate A，待用户审核。**
+合计待改造：65 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu` + 2026-09-16 新增的 `GroupBox` 与 `ButtonSpinner`）。**截至 2026-09-15，前 63 个家族全部已实现并经用户授权提交；`ButtonSpinner` 已完成 Gate A / Gate B 并经用户授权提交；`GroupBox` 于 2026-09-16 进入 Gate A，待用户审核。**
 
 ## 3. 单控件强制执行循环
 
@@ -239,6 +250,35 @@
 - [x] 必须证明可见实例数量受限、回收正确，并且没有永久监听器或索引。（2026-09-14：`NavMenuContainerLifetimeTests`、`NavMenuEntryContainerTests`、`MenuSemanticLevelTests`、`MenuSubmenuOpenStateRecursionTests`、`DataGridSemanticPartTests`（回收保持）、`DataGridSemanticPartHighlightTests` 已落地；三者均通过容器生命周期与 marker 稳定性断言。）
 - [ ] 3 个家族全部提交后，运行各自完整测试工程、性能检查、Gallery 和 NativeAOT 验证。（2026-09-16 部分完成：Desktop Controls 4031/4031、DataGrid 293/293、Generator 528/528、GalleryBase 185/185、Gallery 644/644 全绿；**性能检查已执行**——NavMenu 与 DataGrid 各取得 8 场景现状基线，DataGrid 状态验证通过；Gallery NativeAOT publish 未能取证（沙箱阻止 AvaloniaUI BuildServices 写入，挂起 1 小时 6 分无 artifact，见下）。）
 
+### 任务 6：第六批 - `ButtonSpinner`
+
+**计划：** 本任务即第六批清单（单一控件家族，不另建批次文件）。
+
+**状态（2026-09-16）：** Gate A 文档设计进行中。原排除判定经用户指令撤销，准入证据为上游 `InputNumber` 公开并实际
+消费的 `actions` 分区键（`antd@6.6.4`），逐项理由、两点边界与计数调整见
+[改造设计 §2.4](../specs/2026-08-12-semantic-part-control-rollout-design.md)。
+
+本批次与第三批 `NumericUpDown` 存在**共享帧**关系，这是本批最重要的风险点：
+
+- `ButtonSpinner` 与 `NumericUpDown` 共用 `ButtonSpinnerDecoratedBox` 帧模板；`NumericUpDownSpinner`
+  （`ButtonSpinner` 的派生控件）在 `Mode=Spinner` 下使用自有模板。
+- `NumericUpDown` 已发布的 `prefix` route 是宽松后代
+  （`/template/ .semantic-scope-spinner >> .semantic-prefix`），容忍帧节点增加 class。因此 **ButtonSpinner 不得为
+  帧内容槽复用 `semantic-prefix` / `semantic-suffix`**，否则该 route 会命中两个节点，破坏 `NumericUpDown` 已发布的
+  `Single` 契约及其现有测试（该测试以 `.Single()` 解析目标）。
+- 本批必须把 `NumericUpDownSemanticPartTests` 作为强制回归护栏，而不只是跑本控件的测试。
+
+- [ ] 完成 `ButtonSpinner` 的 Gate A：`overview.md` / `implementation.md` 更新 + 新增 `semantic-part.md`，经用户审核。
+- [ ] 完成 Gate B：`[SemanticPart]` 声明、`Classes.semantic-*` marker、失败优先的 descriptor/marker/生成 Style 命中测试、
+      Gallery Semantic Parts Tab 与延迟创建、`changelog.md`。
+- [ ] 实现期间逐步验证五个 `CrossNestedOwners` 部件（帧 `content` / `innerLeftContent` / `innerRightContent` 三个，
+      手柄 `increaseButton` / `decreaseButton` 两个）的跨资产 marker 校验通过。
+- [ ] 验证 `NumericUpDownSemanticPartTests` 仍全绿，且 `NumericUpDown` 四个部件的唯一目标解析未被破坏。
+- [ ] 按 `semantic-part.md` §6 的尺寸基线验证布局型 Setter 与手柄占位、`ContentRightShift` 位移和帧裁剪的协调结果。
+- [ ] 本家族全部提交后，运行 Desktop Controls、Gallery、Generator 与 LLMS 完整检查。
+- [ ] 真机视觉验收按仓库全局强约束执行：先产出书面步骤（含 Gallery 分类与入口路径），以用户回传截图/录屏为唯一
+      视觉证据。
+
 ## 5. 通用验证命令
 
 文档门禁：
@@ -288,8 +328,9 @@ pwsh -NoLogo -NoProfile -File controlgallery/AtomUIGallery.Desktop/scripts/Publi
 
 - [x] 确认 61 个家族都通过各自经用户授权的提交达到 `Committed` 状态。（2026-09-15 复核：63 个家族全部已提交。按批次证据——第一批 16、第二批 16 + `Expander`（`be7b8dc71`）+ `TabStrip`（随 `TabControl` 提交）、第三批 15、第四批 10 + `SplitButton`（`44cd1494a`）、第五批 2 + `Menu`（随 `NavMenu` 提交 `1e22ed1a3`）。）
 
-> 2026-09-16 追加：`GroupBox` 纳入后家族总数由 63 增至 64，是唯一未提交家族。因此本项的历史结论（63 个全部
-> `Committed`）仍成立，但“全部家族已提交”的当前状态不再成立，需在 `GroupBox` 完成 Gate B 并获授权提交后重新核对。
+> 2026-09-16 追加：`GroupBox` 纳入后家族总数由 63 增至 64，`ButtonSpinner` 随后纳入为第六批，总数增至 65。其中
+> `ButtonSpinner` 已完成 Gate A / Gate B 并经用户授权提交；`GroupBox` 是当前唯一未提交家族。因此本项的历史结论
+> （63 个全部 `Committed`）仍成立，但“全部家族已提交”的当前状态不再成立，需在 `GroupBox` 完成 Gate B 并获授权提交后重新核对。
 - [x] 重新扫描 public 控件和全部叶子主题，检查未声明的 `.semantic-*`、缺少的已批准 marker，以及 Descriptor 与文档不一致。（2026-09-15：两项扫描均已完成。
   **marker 差集：** 主题文件里 `Classes.semantic-*` 共 107 种，descriptor 声明的 `SelectorClass` 共 100 种，
   `semantic-scope-*` 锚点 23 种；主题 marker 集合与「声明 ∪ scope 锚点」的差集为**空**，即没有未声明的静态 marker。

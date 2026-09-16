@@ -4,13 +4,223 @@
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ButtonSpinner` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`ButtonSpinner` 公开 `root`、`content`、`innerLeftContent`、`innerRightContent`、`actions`、`increaseButton`、
+`decreaseButton` 七个职责区域（§1.1–1.7），全部为 `Single`。其中 `content`、`innerLeftContent`、`innerRightContent`
+位于帧主题、两个按钮位于手柄主题，因此这四个部件声明 `CrossNestedOwners`；`actions` 的 marker 仍在 ButtonSpinner
+自己的模板内，按宿主模板本地校验。
+
+ButtonSpinner 是 AtomUI 的带步进按钮输入基座，其公开语义区域对应上游 `InputNumber` 已公开并实际消费的
+`root` / `prefix` / `suffix` / `input` / `actions` 键：帧内主内容区映射 `input` 职责，帧内左、右内容槽映射
+`prefix` / `suffix` 职责，步进按钮区映射 `actions`。范围依据与准入记录见
+[改造设计](../../../superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md)。
+
+### 1.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `root` |
+| Selector | ButtonSpinner 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ButtonSpinner` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | ButtonSpinner owner |
+| 职责 | 承载尺寸档、variant、状态、步进开关和 owner-scoped Semantic Style 入口。 |
+| 相关 API | `SizeType`、`StyleVariant`、`Status`、`IsSpinEnabled`、`IsButtonSpinnerVisible`、`IsButtonSpinnerFloatable`、`ButtonSpinnerLocation`、`SpinnerHandleWidth`、`IsEnabled` |
+| 相关 Token | SharedToken、`ButtonSpinnerToken` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 ButtonSpinner 整体 `Opacity`、对齐和尺寸约束。
+
+**根边框定制：** 可见外框由共享输入帧绘制，其状态机拥有 `BorderBrush`。owner 的 `BorderBrush` 会以
+LocalValue 中继到帧节点生效（对齐上游 `styles.root.borderColor` 语义与共享 `AbstractTextInput` 行为），
+因此在 owner-scoped Style 里直接写根 `Setter Property="BorderBrush"` 即可定制外框颜色：
+
+```xml
+<Style Selector="atom|ButtonSpinner.semantic-object">
+    <Setter Property="BorderBrush" Value="#1677FF" />
+    <atom:ButtonSpinnerActionsStyle x:SetterTargetType="TemplatedControl">
+        <Setter Property="Background" Value="#F0F5FF" />
+    </atom:ButtonSpinnerActionsStyle>
+</Style>
+```
+
+定制期间该属性槽的 hover / focus 变色冻结（LocalValue 优先于帧状态机），focus 的 `BoxShadow` 光晕不受影响；
+置空（或不设置）后恢复帧状态机。中继带接管标记：仅当本控件实际写入过该槽位时才在置空时清除，因此
+`NumericUpDown` 这种「自身持有中继、内部 spinner 是其派生实现」的嵌套场景不会被外层清除。
+
+### 1.2 `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-scope-frame /template/ .semantic-content` |
+| Style Type | `ButtonSpinnerContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（锚点 `.semantic-scope-frame` 解析到 `ButtonSpinnerDecoratedBox` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 帧模板内的主内容 presenter（`PART_ContentPresenter`） |
+| 职责 | 承载 `Content` 与 `ContentTemplate` 的最终呈现，即 ButtonSpinner 的内容表面。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | 输入尺寸 padding、`FontSize` 继承 |
+| 稳定性 | stable since 6.2.0 |
+
+`content` 是 ButtonSpinner 自己的内容表面。ButtonSpinner 不拥有文本编辑面，因此不发布 `input` 部件；派生控件
+（如 `NumericUpDown`）自行在自己的 owner 上发布 `input`，其契约不通过 ButtonSpinner 继承。`Content=null` 时
+presenter 仍属于静态模板结构。适合定制 `Opacity`、`Margin`、`Padding`、`Foreground` 和对齐；内容子树由用户或
+派生控件拥有，不由 `content` 契约继续展开。
+
+### 1.3 `innerLeftContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `innerLeftContent` |
+| Selector | `.semantic-inner-left-content` |
+| SelectorRoute | `/template/ .semantic-scope-frame /template/ .semantic-inner-left-content` |
+| Style Type | `ButtonSpinnerInnerLeftContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（锚点 `.semantic-scope-frame` 解析到 `ButtonSpinnerDecoratedBox` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 帧模板内的内容左槽 presenter（`PART_ContentLeftAddOn`，internal `AddOnContentPresenter`） |
+| 职责 | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 |
+| 相关 API | `InnerLeftContent`、`InnerLeftContentTemplate` |
+| 相关 Token | `SpacingXXS`、输入尺寸 padding |
+| 稳定性 | stable since 6.2.0 |
+
+`innerLeftContent` 对应上游 `prefix` 职责，但**不使用 `semantic-prefix` class**：`NumericUpDown` 为其自有
+`prefix` 发布的 route 是宽松后代（`/template/ .semantic-scope-spinner >> .semantic-prefix`），而 ButtonSpinner 的
+帧节点位于 `NumericUpDownSpinner` 的子树内。若 ButtonSpinner 额外标记 `semantic-prefix`，该 route 会命中两个节点，
+破坏 `NumericUpDown` 已发布的 `Single` 契约与其现有测试（该测试用 `.Single()` 解析目标）。改用与 ButtonSpinner
+公开 API 同名的 `innerLeftContent` 可在不修改任何已发布契约的前提下保持唯一目标，且与仓库已有的
+`itemContent` / `listContent` 命名法一致。帧槽位在空内容时自折叠，因此该部件呈现的是「有内容时才可见的左槽」。
+
+### 1.4 `innerRightContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `innerRightContent` |
+| Selector | `.semantic-inner-right-content` |
+| SelectorRoute | `/template/ .semantic-scope-frame /template/ .semantic-inner-right-content` |
+| Style Type | `ButtonSpinnerInnerRightContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（锚点 `.semantic-scope-frame` 解析到 `ButtonSpinnerDecoratedBox` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 帧模板内的内容右槽 presenter（`PART_ContentRightAddOn`，internal `AddOnContentPresenter`） |
+| 职责 | 承载 `InnerRightContent` 与 `InnerRightContentTemplate` 的最终呈现。 |
+| 相关 API | `InnerRightContent`、`InnerRightContentTemplate` |
+| 相关 Token | `SpacingXXS`、输入尺寸 padding |
+| 稳定性 | stable since 6.2.0 |
+
+`innerRightContent` 对应上游 `suffix` 职责，命名理由同 §1.3。它与浮动手柄在 hover 时的 `ContentRightShift`
+位移共享同一布局链路：定制其 `Margin` / `Padding` 时要按 §7.1 审计与手柄占位的协调结果。
+
+### 1.5 `actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `actions` |
+| Selector | `.semantic-actions` |
+| SelectorRoute | `/template/ .semantic-scope-frame >> .semantic-actions` |
+| Style Type | `ButtonSpinnerActionsStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `false`（marker 在 owner 模板内） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 帧内 `SpinnerContent` 承载的步进手柄（internal `ButtonSpinnerHandle`，最低 public 类型 `TemplatedControl`） |
+| 职责 | 步进按钮区整体表面：手柄背景、分隔线与外框描边、圆角、内边距和悬浮/浮动呈现。 |
+| 相关 API | `IsButtonSpinnerVisible`、`IsButtonSpinnerFloatable`、`ButtonSpinnerLocation`、`SpinnerHandleWidth`、`IsSpinEnabled` |
+| 相关 Token | `ButtonSpinnerToken.HandleWidth`、`HandleBg`、`FilledHandleBg`、`HandleBorderColor`、`HandleActiveBg` |
+| 稳定性 | stable since 6.2.0 |
+
+`actions` 直接对应上游 `InputNumber` 的 `actions` 键——上游把上、下步进按钮包在同一个 `-actions` 容器内，AtomUI
+对应的容器就是 `ButtonSpinnerHandle`。手柄的背景与描边由该节点自身的 `Render` 绘制并在状态变化时重绘，因此它是
+步进区唯一稳定的对外表面。
+
+适合定制的属性只有该节点实际参与绘制的成员：`Background`（填充）、`BorderBrush`（分隔竖线、中线以及
+hover / pressed 颜色来源）、`CornerRadius`（填充外角）和 `Opacity`。**不适合定制：** 手柄描边宽度来自 internal
+`SpinnerBorderThickness`（由 `SharedToken.BorderThickness` 供给），`BorderThickness` 与 `Padding` 在该节点的渲染与
+模板中都没有参与，设置它们不会产生视觉变化，不属于本 Part 的稳定定制面。
+
+步进行为、`ValidSpinDirection`、键盘与滚轮路径仍由 `ButtonSpinner` 拥有，不通过 Semantic Style 改写。
+
+手柄在 `IsButtonSpinnerVisible=false`、或浮动模式下未悬浮、或控件 disabled 时保持存在但 `Opacity` 为 0；节点
+身份与数量不随这些状态变化，因此是 `Single` 而不是 `Optional`。
+
+### 1.6 `increaseButton`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `increaseButton` |
+| Selector | `.semantic-increase-button` |
+| SelectorRoute | `>> .semantic-actions /template/ .semantic-increase-button` |
+| Style Type | `ButtonSpinnerIncreaseButtonStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（以 `.semantic-actions` 为锚点解析到 `ButtonSpinnerHandle` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 手柄主题内的增加按钮（`IconButton#PART_IncreaseButton`） |
+| 职责 | 提供增加步进的交互入口表面。 |
+| 相关 API | `IsSpinEnabled`、`ValidSpinDirection`、`IsButtonSpinnerVisible` |
+| 相关 Token | `HandleIconSize`、`HandleHoverColor`、`ColorPrimaryActive`、`HandleActiveBg` |
+| 稳定性 | stable since 6.2.0 |
+
+`increaseButton` 的最低 public `ContractType` 是 `IconButton`。marker 位于 `ButtonSpinnerHandle` 自己的主题资产
+（嵌套控件的模板），因此按 [Semantic Part 系统设计 §3.3.1](../../../../architecture/systems/theming/semantic-parts.md)
+以 `.semantic-actions` 为锚点校验与解析。它适合定制 `IconBrush`、`IconWidth` / `IconHeight`、`Background`、
+`CornerRadius` 和 `Opacity`。增加按钮的启用状态由 `ValidSpinDirection` 与 `IsSpinEnabled` 推导（`SetButtonUsage`），
+不通过 Semantic Style 改写。
+
+### 1.7 `decreaseButton`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `decreaseButton` |
+| Selector | `.semantic-decrease-button` |
+| SelectorRoute | `>> .semantic-actions /template/ .semantic-decrease-button` |
+| Style Type | `ButtonSpinnerDecreaseButtonStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（以 `.semantic-actions` 为锚点解析到 `ButtonSpinnerHandle` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 手柄主题内的减少按钮（`IconButton#PART_DecreaseButton`） |
+| 职责 | 提供减少步进的交互入口表面。 |
+| 相关 API | `IsSpinEnabled`、`ValidSpinDirection`、`IsButtonSpinnerVisible` |
+| 相关 Token | `HandleIconSize`、`HandleHoverColor`、`ColorPrimaryActive`、`HandleActiveBg` |
+| 稳定性 | stable since 6.2.0 |
+
+与 `increaseButton` 对称；两个按钮是独立职责，因此分别发布为两个 `Single` 部件，允许差异化定制而无需
+`Multiple` 语义。`ButtonSpinnerLocation` 只改变手柄相对内容的位置，不交换这两个按钮的身份。
+
+上游 `InputNumber` 只为整个 `actions` 容器公开一个键，没有为单个上、下按钮公开语义键；本控件额外发布这两个
+部件属于显式能力补充，理由与 `SplitButton` 的 `primary` / `secondary` 一致：它们的宿主是模板内部件，不发布则
+完全不可定制。
 
 ## Abstract AXAML Structure
 
@@ -112,9 +322,9 @@ ButtonSpinner 的视觉模型由控件模板、ControlTheme、SharedToken 和必
 
 | 主题文件 | 职责 |
 | --- | --- |
-| `ButtonSpinnerDecoratedBoxTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
-| `ButtonSpinnerHandleTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
-| `ButtonSpinnerTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
+| `ButtonSpinnerTheme.axaml` | owner 模板：帧宿主（`semantic-scope-frame` 锚点）与 `SpinnerContent` 内的步进手柄；持有 `SizeType` 圆角映射与 `SpinnerHandleWidth` 默认值。 |
+| `ButtonSpinnerDecoratedBoxTheme.axaml` | 帧模板（`BasedOn` 共享 `AddOnDecoratedBoxTheme`）：左右 addon 区、内容框、内容左/右槽与浮动手柄 presenter；`SizeType` padding 与 `MinHeight` 基线。 |
+| `ButtonSpinnerHandleTheme.axaml` | 步进手柄模板：增加/减少按钮、手柄自身的背景与分隔线描边绘制、variant 与 disabled 状态视觉。 |
 
 ButtonSpinner 使用 `ButtonSpinnerToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 motion、visual option 运行时状态。
 

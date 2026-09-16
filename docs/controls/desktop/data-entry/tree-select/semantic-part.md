@@ -47,6 +47,23 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 相关 Token | TreeSelectToken、SharedToken |
 | 稳定性 | stable since 6.2.0 |
 
+**根边框与背景定制：** 可见外框由共享 `AddOnDecoratedBox` 帧绘制，其状态机拥有 `BorderBrush` 与
+`Background`。owner 的 `BorderBrush` / `Background` 会以 LocalValue 中继到帧节点生效（对齐上游 root
+border/background 语义与输入族 `AbstractTextInput.RelayRootSurfaceBrush` 行为），因此在 owner-scoped Style
+里直接写根 `Setter Property="BorderBrush"` / `Property="Background"` 即可定制外框：
+
+```xml
+<Style Selector="atom|TreeSelect.semantic-root-border">
+    <Setter Property="BorderBrush" Value="#1677FF" />
+    <Setter Property="Background" Value="#F0F5FF" />
+</Style>
+```
+
+定制期间该属性槽的 hover / focus / open 变色冻结（LocalValue 优先于帧状态机），focus 的 `BoxShadow` 光晕不受
+影响；置空（或不设置）后恢复帧状态机。中继带接管标记：仅当本控件实际写入过该槽位时才在置空时清除，因此嵌套
+owner 不会被外层清除。
+
+
 #### `prefix`
 
 | 字段 | 值 |

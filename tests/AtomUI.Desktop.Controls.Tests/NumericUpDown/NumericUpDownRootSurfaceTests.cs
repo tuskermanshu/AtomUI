@@ -94,6 +94,68 @@ public class NumericUpDownRootSurfaceTests
         }
     }
 
+    /// <summary>
+    /// Both NumericUpDown templates host a <c>ButtonSpinnerDecoratedBox</c> frame whose theme
+    /// defaults <c>IsMotionEnabled</c> to the shared motion token. Without an explicit owner
+    /// propagation the frame keeps its BorderBrush/Background transitions running even when the
+    /// owner turns motion off, and an in-flight transition then outranks the root BorderBrush relay.
+    /// </summary>
+    [Theory]
+    [InlineData(NumericUpDownMode.Input)]
+    [InlineData(NumericUpDownMode.Spinner)]
+    public void Motion_Setting_Reaches_The_Input_Frame(NumericUpDownMode mode)
+    {
+        var numericUpDown = new AtomUINumericUpDown
+        {
+            Width           = 320,
+            Value           = 66m,
+            Mode            = mode,
+            IsMotionEnabled = false
+        };
+
+        var window = Show(numericUpDown);
+        try
+        {
+            FrameOf(numericUpDown).IsMotionEnabled.ShouldBeFalse(
+                "The owner IsMotionEnabled setting must reach the input frame in both mode templates.");
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [Theory]
+    [InlineData(NumericUpDownMode.Input)]
+    [InlineData(NumericUpDownMode.Spinner)]
+    public void Root_BorderBrush_Live_Change_Applies_Immediately_When_Motion_Is_Disabled(NumericUpDownMode mode)
+    {
+        var numericUpDown = new AtomUINumericUpDown
+        {
+            Width           = 320,
+            Value           = 66m,
+            Mode            = mode,
+            IsMotionEnabled = false
+        };
+
+        var window = Show(numericUpDown);
+        try
+        {
+            var frame        = FrameOf(numericUpDown);
+            var customBorder = new SolidColorBrush(Colors.MediumPurple);
+
+            numericUpDown.BorderBrush = customBorder;
+            Dispatcher.UIThread.RunJobs();
+
+            frame.BorderBrush.ShouldBe(customBorder,
+                "With motion disabled the relayed border must be visible immediately, not animated from the frame rest state.");
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static ButtonSpinnerDecoratedBox FrameOf(AtomUINumericUpDown numericUpDown)
     {
         return numericUpDown.GetVisualDescendants()

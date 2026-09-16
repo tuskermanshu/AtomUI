@@ -8,6 +8,11 @@
 - 不记录临时讨论、纯格式化或没有长期价值的实现细节。
 - 架构文档始终描述最新设计状态；历史变化记录在本文档。
 
+## 2026-09-16
+
+- Behavior
+  - Propagate `IsMotionEnabled` from `NumericUpDown` onto `NumericUpDownSpinner` in both mode templates. The spinner control never received the owner motion setting, so the `ButtonSpinnerDecoratedBox` frame fell back to the frame theme's shared-token default and kept its `BorderBrush` / `Background` transitions running even with motion disabled. Besides the motion defect itself, an in-flight `SolidColorBrush` transition outranks the root `BorderBrush` relay that the frame customization relies on, so a root border set on an already-templated control (the documented `styles.root.borderColor` path, and the Gallery semantic styling example) appeared not to apply.
+
 ## 2026-08-30
 
 - Behavior

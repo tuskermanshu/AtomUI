@@ -218,6 +218,25 @@ OtpLineEdit 以 `Text` 表达完整验证码。内部 cell 的显示字符由 `T
 
 OtpLineEdit 的 native validation error 挂在控件根节点。内部 cell 通过根控件 effective status 获取 error 视觉。控件不提供独立 `ErrorMessage`、`HasError` 或 cell 级 error 集合。
 
+### 8.6 Cell 边框定制模型
+
+每个 cell 都是一个独立 `InputControlFrame`，其边框由 cell 主题的状态机拥有（rest、pointerover、pressed、active、error、warning、disabled）。定制入口有两个，优先级从高到低：
+
+| 入口 | 作用域 | 说明 |
+| --- | --- | --- |
+| `CellBorderBrush` | cell 专用 | 覆盖所有 cell 的 `BorderBrush`，优先于根 `BorderBrush`。置空后回落到根 `BorderBrush`。 |
+| 根 `BorderBrush` | 控件级 | 通用输入族语义；以 LocalValue 中继到每个 cell 的帧节点。 |
+
+```xml
+<Style Selector="atom|OtpLineEdit.semantic-root-border">
+    <Setter Property="BorderBrush" Value="#1677FF" />
+</Style>
+```
+
+两者都以 LocalValue 写入 cell 帧，因此定制期间该属性槽的 hover / pressed / active / status 变色冻结
+（focus 的 `BoxShadow` 光晕不受影响）；两个入口都置空后恢复 cell 主题状态机。`Background` 不参与本中继：
+`OtpLineEdit` 自身的 `Background` 是控件级透明背景，中继到 cell 会覆盖 cell 主题的填充色，因此保持不发布。
+
 ## 9. 文档导航、LLMS 导出与验证策略
 
 关联文档：

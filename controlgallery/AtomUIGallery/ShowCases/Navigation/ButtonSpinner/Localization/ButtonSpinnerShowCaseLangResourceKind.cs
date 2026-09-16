@@ -27,5 +27,14 @@ public enum ButtonSpinnerShowCaseLangResourceKind
     PrefixSuffixTitle,
     PrefixSuffixDescription,
     StatusTitle,
-    StatusDescription
+    StatusDescription,
+    SemanticRootDescription,
+    SemanticContentDescription,
+    SemanticInnerLeftContentDescription,
+    SemanticInnerRightContentDescription,
+    SemanticActionsDescription,
+    SemanticIncreaseButtonDescription,
+    SemanticDecreaseButtonDescription,
+    SemanticPartStyleTitle,
+    SemanticPartStyleDescription
 }

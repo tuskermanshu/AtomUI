@@ -1,6 +1,6 @@
 # ButtonSpinner 桌面版架构设计
 
-本文档定义 `ButtonSpinner` 桌面版的最新设计定位、公共契约、状态模型、视觉主题关系和兼容边界。通用控件研发约束见 [控件研发标准](../../../../engineering/development/control-development-guidelines.md)，内部实现原理见 [ButtonSpinner 桌面版实现原理](implementation.md)，ButtonSpinner Token 的专项设计见 [ButtonSpinner Token 设计](token.md)，设计和契约变化记录见 [ButtonSpinner Changelog](changelog.md)。
+本文档定义 `ButtonSpinner` 桌面版的最新设计定位、公共契约、状态模型、视觉主题关系和兼容边界。通用控件研发约束见 [控件研发标准](../../../../engineering/development/control-development-guidelines.md)，公开语义区域契约见 [ButtonSpinner Semantic Part 契约](semantic-part.md)，内部实现原理见 [ButtonSpinner 桌面版实现原理](implementation.md)，ButtonSpinner Token 的专项设计见 [ButtonSpinner Token 设计](token.md)，设计和契约变化记录见 [ButtonSpinner Changelog](changelog.md)。
 
 ## 1. 控件定位
 
@@ -88,9 +88,9 @@ ButtonSpinner 的视觉模型由控件模板、ControlTheme、SharedToken 和必
 
 | 主题文件 | 职责 |
 | --- | --- |
-| `ButtonSpinnerDecoratedBoxTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
-| `ButtonSpinnerHandleTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
-| `ButtonSpinnerTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
+| `ButtonSpinnerTheme.axaml` | owner 模板：帧宿主（`semantic-scope-frame` 锚点）与 `SpinnerContent` 内的步进手柄；持有 `SizeType` 圆角映射与 `SpinnerHandleWidth` 默认值。 |
+| `ButtonSpinnerDecoratedBoxTheme.axaml` | 帧模板（`BasedOn` 共享 `AddOnDecoratedBoxTheme`）：左右 addon 区、内容框、内容左/右槽与浮动手柄 presenter；`SizeType` padding 与 `MinHeight` 基线。 |
+| `ButtonSpinnerHandleTheme.axaml` | 步进手柄模板：增加/减少按钮、手柄自身的背景与分隔线描边绘制、variant 与 disabled 状态视觉。 |
 
 ButtonSpinner 使用 `ButtonSpinnerToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 motion、visual option 运行时状态。
 
@@ -153,11 +153,22 @@ LLMS 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `ButtonSpinner` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | ButtonSpinner owner | 承载尺寸档、variant、状态、步进开关和 owner-scoped Semantic Style 入口。 | `SizeType`、`StyleVariant`、`Status`、`IsSpinEnabled`、`IsButtonSpinnerFloatable`、`ButtonSpinnerLocation` | SharedToken、`ButtonSpinnerToken` | stable since 6.2.0 |
+| `content` | 帧模板内主内容 presenter | 承载 `Content` 与 `ContentTemplate` 的最终呈现。 | `Content`、`ContentTemplate` | 输入尺寸 padding | stable since 6.2.0 |
+| `innerLeftContent` | 帧模板内容左槽 presenter | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 | `InnerLeftContent`、`InnerLeftContentTemplate` | `SpacingXXS` | stable since 6.2.0 |
+| `innerRightContent` | 帧模板内容右槽 presenter | 承载 `InnerRightContent` 与 `InnerRightContentTemplate` 的最终呈现。 | `InnerRightContent`、`InnerRightContentTemplate` | `SpacingXXS` | stable since 6.2.0 |
+| `actions` | 帧内步进手柄（`ButtonSpinnerHandle`） | 步进按钮区整体表面：背景填充、分隔线描边、填充圆角与悬浮/浮动呈现。 | `IsButtonSpinnerVisible`、`IsButtonSpinnerFloatable`、`ButtonSpinnerLocation`、`SpinnerHandleWidth` | `HandleWidth`、`HandleBg`、`HandleBorderColor`、`HandleActiveBg` | stable since 6.2.0 |
+| `increaseButton` | 手柄主题内增加按钮（`IconButton`） | 提供增加步进的交互入口表面。 | `IsSpinEnabled`、`ValidSpinDirection` | `HandleIconSize`、`HandleHoverColor` | stable since 6.2.0 |
+| `decreaseButton` | 手柄主题内减少按钮（`IconButton`） | 提供减少步进的交互入口表面。 | `IsSpinEnabled`、`ValidSpinDirection` | `HandleIconSize`、`HandleHoverColor` | stable since 6.2.0 |
+
+七个部件均为 `Single`，通过生成的强类型 Semantic Style 定制。完整 Selector、route、`ContractType`、状态矩阵与
+布局基线见 [ButtonSpinner Semantic Part 契约](semantic-part.md)。
+
+公开语义区域的准入范围映射上游 `InputNumber` 已公开并实际消费的 `root` / `prefix` / `suffix` / `input` / `actions`
+键：帧内主内容区对应 `input` 职责（本控件不拥有文本编辑面，故发布为 `content`），帧内容左/右槽对应 `prefix` / `suffix`
+职责（为不破坏 `NumericUpDown` 已发布的 `Single` route，改用与公开 API 同名的 `innerLeftContent` /
+`innerRightContent`），步进按钮区对应 `actions`。单个上/下按钮上游没有公开语义键，属显式能力补充。
+`LeftAddOn` / `RightAddOn` 外部区域不发布部件，与输入家族保持一致。
 
 LLMS 导出来源：
 

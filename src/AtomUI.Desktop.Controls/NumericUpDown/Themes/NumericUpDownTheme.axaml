@@ -10,6 +10,7 @@
                 <atom:NumericUpDownSpinner
                     Name="PART_Spinner"
                     Classes.semantic-scope-spinner="True"
+                    IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
                     IsSpinEnabled="{TemplateBinding AllowSpin}"
                     IsEnabled="{TemplateBinding IsEnabled}"
                     SizeType="{TemplateBinding SizeType}"
@@ -94,6 +95,7 @@
                     <atom:NumericUpDownSpinner
                         Name="PART_Spinner"
                         Classes.semantic-scope-spinner="True"
+                        IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
                         IsSpinEnabled="{TemplateBinding AllowSpin}"
                         IsEnabled="{TemplateBinding IsEnabled}"
                         SizeType="{TemplateBinding SizeType}"

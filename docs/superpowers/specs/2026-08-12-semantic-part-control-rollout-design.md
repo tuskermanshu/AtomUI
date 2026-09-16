@@ -32,16 +32,17 @@ Semantic Part 的公共模型、Selector 契约和生成器规则分别由
 | 状态 | 数量 | 范围 |
 | --- | ---: | --- |
 | 已完成基线 | 1 | `Button` |
-| 本轮待改造 | 64 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`，以及 2026-09-16 新增的 `GroupBox`） |
-| 不适用 | 13 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
+| 本轮待改造 | 65 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`，以及 2026-09-16 新增的 `GroupBox` 与 `ButtonSpinner`） |
+| 不适用 | 12 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
 
 > 2026-09-15 计数核对：本节三行合计 78，与 78 个正式控件文档叶子一致；`本轮待改造` 与 `不适用` 已与 §2.3、§2.4 的行数
-> 对齐。原记录为 58 / 19，在 `SplitButton` 增补时未同步，随后随 `Expander` 撤销排除校正为 61 / 16；本次 `TabStrip` 与
+> 对齐。原记录为 58 / 19，在 `SplitButton` 增补时未同步，随后随 `Expander` 撤销排除校正为 61 / 16；`TabStrip` 与
 > `Menu` 撤销排除后调整为 63 / 14。每次撤销排除都必须重算本表，不要增量累加后忘记总数。
 >
-> 2026-09-16 计数核对：`GroupBox` 纳入后三行为 1 / 64 / 13，合计仍为 78。本次纳入与前三次的判据不同——`GroupBox` **没有**
-> 可映射的上游 owner（见 §2.4 该行的日期化记录），纳入依据是用户直接指令，而非 §2.1 的上游准入 Gate。重算本表时不得把它
-> 错误归因于上游 owner 出现。
+> 2026-09-16 计数核对（当日两次纳入合并）：`GroupBox` 与 `ButtonSpinner` 先后纳入后，三行为 1 / 65 / 12，合计仍为 78。
+> 两次纳入的判据不同，不得混同：`GroupBox` **没有**可映射的上游 owner（见 §2.4 该行的日期化记录），纳入依据是用户直接
+> 指令，而非 §2.1 的上游准入 Gate；`ButtonSpinner` 有上游 `InputNumber` 的 `actions` 分区键支撑职责对应，但同样叠加了
+> 用户指令。重算本表时不要把前者错误归因于上游 owner 出现。
 
 `Button` 是首个完整样例，用于校验 descriptor、静态 marker、Selector、尺寸协调和 Gallery Preview 的全链路；它不作为
 其他控件 Part 命名的机械模板。
@@ -91,9 +92,9 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 
 ### 2.3 AtomUI 纳入映射
 
-下表覆盖 64 个准入家族，其中 `Button` 已完成，其余 63 个进入实施批次；`SplitButton`（原排除判定撤销，随第四批执行）与
-`Expander`（原排除判定撤销，随第二批执行）为 2026-09-15 用户指令新增，`GroupBox` 为 2026-09-16 用户指令新增
-（无上游 owner，纳入依据与本表其他行不同，见 §2.4）。映射只证明“允许进入 Gate A”，不预先
+下表覆盖 65 个准入家族，其中 `Button` 已完成，其余 64 个进入实施批次；`SplitButton`（原排除判定撤销，随第四批执行）与
+`Expander`（原排除判定撤销，随第二批执行）为 2026-09-15 用户指令新增，`GroupBox`（无上游 owner，纳入依据与本表其他行不同，
+见 §2.4）与 `ButtonSpinner`（原排除判定撤销，随第六批执行）为 2026-09-16 用户指令新增。映射只证明“允许进入 Gate A”，不预先
 承诺具体 Part 名称或数量；每个 Part 仍必须从 AtomUI 自身源码、主题和生命周期事实中设计。
 
 | AtomUI 控件家族 | Ant Design 6.6.0 公开 owner | 结论 |
@@ -142,6 +143,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `LineEdit` | `Input`、`Input.Password`、`Input.TextArea` | Batch 3 |
 | `Mentions` | `Mentions` | Batch 3 |
 | `NumericUpDown` | `InputNumber` | Batch 3 |
+| `ButtonSpinner` | `InputNumber` | Batch 6 范围新增（2026-09-16 用户指令，原排除判定撤销）；AtomUI 输入基座，映射上游 `InputNumber` 公开并实际消费的 `root` / `prefix` / `suffix` / `input` / `actions` 分区键。不复制键名：帧内主内容区发布为 `content`、帧内容左/右槽发布为 `innerLeftContent` / `innerRightContent`，避免与 `NumericUpDown` 已发布的 `Single` route 冲突；单个上/下按钮为显式能力补充。理由与边界见 §2.4 日期化撤销段 |
 | `OtpLineEdit` | `Input.OTP` | Batch 3 |
 | `SearchEdit` | `Input.Search` | Batch 3 |
 | `Select` | `Select` | Batch 3 |
@@ -177,7 +179,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `Icon` | Ant Design Icons 不提供与 AtomUI `Icon` 对应的公开 Semantic DOM owner。 | 稳定发布出现对应公开组件 API。 |
 | `FlexPanel` | Ant Design 稳定版没有与该布局 Panel 对应的公开 Semantic DOM owner。 | 新稳定版出现职责直接对应的公开 owner。 |
 | `Grid / Row / Col` | Ant Design Grid 没有公开 Semantic DOM Props；`Layout.Sider` 不能映射到通用 Grid。 | 新稳定版公开 Grid/Row/Col 对应 API。 |
-| `ButtonSpinner` | Ant Design 没有职责直接对应的公开 Semantic DOM owner；`InputNumber` 的 handle 是其内部区域。 | 新稳定版出现独立 spinner owner。 |
+| ~~`ButtonSpinner`~~ | 排除判定已于 2026-09-16 经用户指令撤销，移入 §2.3 纳入映射，随第六批执行（理由见本节末）。 | 已撤销。 |
 | `ComboBox` | Ant Design 没有公开 `ComboBox` 组件；`Select` 的 internal combobox mode 不能作为公开 owner。 | 新稳定版出现公开 ComboBox owner。 |
 | `BorderBeam` | Ant Design 稳定版没有该公开组件或对应 Semantic DOM API。 | 稳定版出现职责直接对应的公开 owner。 |
 | `Splash` | Ant Design 稳定版没有职责直接对应的公开 Semantic DOM owner。 | 新稳定版出现对应公开 owner。 |
@@ -226,6 +228,31 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 - 契约细节见 [GroupBox Semantic Part 契约](../../controls/desktop/data-display/group-box/semantic-part.md) §1.1。
 
 该撤销不改变其他排除项的判定依据；引用 §2.4 作排除依据时，仍需先确认该项未被日期化撤销覆盖。
+范围变更（2026-09-16）：`ButtonSpinner` 的原排除判定经用户指令撤销，从本表移入 §2.3 纳入映射，随第六批执行。
+
+原判定为“Ant Design 没有职责直接对应的公开 Semantic DOM owner；`InputNumber` 的 handle 是其内部区域”，重新评估触
+发条件写作“新稳定版出现独立 spinner owner”。按当前稳定版 `antd@6.6.4` 源码复核，该判定的**事实前提已经过时**：
+
+- `InputNumberSemanticType` 明确公开并实际消费五个分区键 `root` / `prefix` / `suffix` / `input` / **`actions`**
+  （`packages/antd/es/input-number/index.d.ts`，实现把 `mergedClassNames` / `mergedStyles` 透传给
+  `@rc-component/input-number`）。
+- 下游 `@rc-component/input-number` 的 `InputNumber.js` 在 `mode === 'input'` 分支把上、下步进按钮包进同一个
+  `-actions` 容器（`className: clsx(\`${prefixCls}-actions\`, classNames?.actions)`），并按 `prefix` / `suffix` /
+  `input` 分别应用其余键。
+- 即步进按钮区并非“纯内部区域”，而是上游**公开且实际消费**的语义键；ButtonSpinner 的步进手柄与其职责直接对应。
+
+需要如实记录的两点边界：
+
+1. 严格按 §2.1 措辞，触发条件写的是“出现独立 spinner owner”，而上游至今**没有**独立 spinner 组件 owner——`actions`
+   是 `InputNumber` 上的分区键。本次准入因此不是由触发条件自动满足，而是：上游公开消费的 `actions` 键证明了原判定
+   的事实前提（handle 属内部区域）不成立，**叠加用户 2026-09-16 的直接指令**，按 §2.1 第 4 条职责直接对应成立。
+2. AtomUI `ButtonSpinner` 不拥有文本编辑面，且其帧内容左/右槽与 `NumericUpDown` 的 `prefix` / `suffix` 共享同一帧节点。
+   因此本次映射只借用上游 `root` / `prefix` / `suffix` / `input` / `actions` 的**职责**，不复制其键名：帧内主内容区发布为
+   `content`，帧内容左/右槽发布为 `innerLeftContent` / `innerRightContent`，以避免与 `NumericUpDown` 已发布的
+   `Single` route 冲突（详见 [ButtonSpinner Semantic Part 契约](../../../controls/desktop/navigation/button-spinner/semantic-part.md)）。
+   上、下按钮上游没有独立语义键，属显式能力补充。
+
+本合同不影响其他排除项的判定依据。`ButtonSpinner` 与 `GroupBox` 同日纳入后，排除控件由 14 个收缩为 12 个，准入家族由 63 个增至 65 个。
 
 ## 3. 最小交付单位
 

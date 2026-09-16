@@ -99,6 +99,34 @@ internal class OtpLineEditCell : InputControlFrame
         }
     }
 
+    /// <summary>
+    /// Relays the owner's border brush onto this cell frame. <c>CellBorderBrush</c> is the
+    /// cell-specific override and wins over the generic root <c>BorderBrush</c>; when neither is
+    /// set the cell theme state machine owns the rest state.
+    /// </summary>
+    private void RelayOwnerBorderBrush()
+    {
+        if (_owner is null)
+        {
+            return;
+        }
+
+        var value = _owner.GetValue(OtpLineEdit.CellBorderBrushProperty);
+        if (value is null || ReferenceEquals(value, AvaloniaProperty.UnsetValue))
+        {
+            value = _owner.GetValue(BorderBrushProperty);
+        }
+
+        if (value is null || ReferenceEquals(value, AvaloniaProperty.UnsetValue))
+        {
+            ClearValue(BorderBrushProperty);
+        }
+        else
+        {
+            SetValue(BorderBrushProperty, value, BindingPriority.LocalValue);
+        }
+    }
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
@@ -181,7 +209,7 @@ internal class OtpLineEditCell : InputControlFrame
         {
             _owner.PropertyChanged += OwnerPropertyChanged;
             RelayOwnerOverride(OtpLineEdit.CellWidthProperty, WidthProperty);
-            RelayOwnerOverride(OtpLineEdit.CellBorderBrushProperty, BorderBrushProperty);
+            RelayOwnerBorderBrush();
         }
     }
 
@@ -191,9 +219,10 @@ internal class OtpLineEditCell : InputControlFrame
         {
             RelayOwnerOverride(change.Property, WidthProperty);
         }
-        else if (change.Property == OtpLineEdit.CellBorderBrushProperty)
+        else if (change.Property == OtpLineEdit.CellBorderBrushProperty ||
+                 change.Property == BorderBrushProperty)
         {
-            RelayOwnerOverride(change.Property, BorderBrushProperty);
+            RelayOwnerBorderBrush();
         }
     }
 

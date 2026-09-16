@@ -10,6 +10,7 @@
                     <atom:SelectAddOnDecoratedBox
                         Name="{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}"
                         Classes.semantic-scope-input="True"
+                        IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
                         StyleVariant="{TemplateBinding StyleVariant}"
                         SizeType="{TemplateBinding SizeType}"
                         Status="{TemplateBinding Status}"

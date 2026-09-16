@@ -3,6 +3,12 @@
 本文档记录 Select 控件级设计、API、主题契约、Token 和实现结构的变化。
 它不替代仓库根目录 CHANGELOG.md，也不作为正式版本发布说明。
 
+## 2026-09-16
+
+- Behavior
+  - Relay the owner root `BorderBrush` / `Background` onto the `SelectAddOnDecoratedBox` frame as local values, so an owner-scoped root setter reaches the visible outline instead of being silently ignored. The frame state machine owns those two property slots, and the frame theme's `:focus-within` / `[IsInnerBoxHover]` setters outrank a `TemplateBinding`, so the relay must use `BindingPriority.LocalValue` from code. The relay carries an ownership flag and only clears a slot when this control wrote it.
+  - Bind `IsMotionEnabled` onto the `SelectAddOnDecoratedBox` frame (`TemplateBinding`). It was previously only propagated to the inner `SelectHandle`, so the frame kept its `BorderBrush` / `Background` transitions on even with motion disabled; a `SolidColorBrush` transition then keeps its value ahead of the relay's local value and the root customization appeared not to apply.
+
 ## 2026-09-05
 
 - Fix

@@ -26,7 +26,8 @@ public class ButtonSpinnerShowCasePageTests
         source.ShouldNotContain("Tag=\"Examples\"");
         source.ShouldNotContain("Tag=\"Api\"");
         source.ShouldNotContain("Tag=\"DesignToken\"");
-        source.ShouldContain("<gallery:GalleryStickyTabsHost");
+        source.ShouldNotContain("<gallery:GalleryStickyTabsHost");
+        source.ShouldContain("<gallery:GalleryShowCaseHost");
         source.ShouldContain("StickyContentPadding=\"28,0,28,0\"");
         source.ShouldNotContain("<atom:TabStrip Name=\"ScenarioTabs\"");
         source.ShouldNotContain("<ContentControl Name=\"ScenarioContentHost\">");
@@ -42,10 +43,10 @@ public class ButtonSpinnerShowCasePageTests
         CountOccurrences(source, "Classes=\"info-value\"").ShouldBe(0);
         source.ShouldNotContain("LineHeight=\"22\"");
         source.ShouldContain("Description=\"{gallery:ButtonSpinnerShowCaseLangResource PageDescription}\"");
-        CountShowCaseItemElements(source).ShouldBe(7);
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(7);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(7);
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:ButtonSpinnerViewModel\"").ShouldBe(7);
+        CountShowCaseItemElements(source).ShouldBe(8);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(8);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(8);
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:ButtonSpinnerViewModel\"").ShouldBe(9);
         source.ShouldContain("ButtonSpinnerShowCaseLangResource BasicTitle");
         source.ShouldContain("ButtonSpinnerShowCaseLangResource ThreeSizesTitle");
         source.ShouldContain("ButtonSpinnerShowCaseLangResource P2LabelSizeTypeLarge");
@@ -80,6 +81,68 @@ public class ButtonSpinnerShowCasePageTests
         source.ShouldContain("RowDefinitions=\"Auto,Auto,Auto,Auto\"");
         source.ShouldContain("ColumnSpacing=\"12\"");
         source.ShouldNotContain("<atom:TextBlock Width=\"64\"");
+    }
+
+    [Fact]
+    public void ButtonSpinner_ShowCase_Declares_The_Semantic_Previews_And_Style_Example()
+    {
+        var source  = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Navigation/ButtonSpinner/Views/ButtonSpinnerShowCase.axaml");
+        var english = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Navigation/ButtonSpinner/Localization/en-US.xlf");
+
+        source.ShouldContain("<gallery:GalleryShowCaseHost.SemanticPartsContentTemplate>");
+        source.ShouldContain("Name=\"ButtonSpinnerSemanticPreview\"");
+        source.ShouldContain("SemanticOwner=\"{Binding #ButtonSpinnerSemanticOwner}\"");
+        source.ShouldContain("SemanticOwnerType=\"{x:Type atom:ButtonSpinner}\"");
+        source.ShouldContain("SemanticPartStyleTitle");
+        source.ShouldContain("SourceKey=\"buttonspinner-semantic-part\"");
+
+        // One preview only: ButtonSpinner has a single built-in template, and
+        // IsButtonSpinnerFloatable defaults to false. A second preview that does not change
+        // IsButtonSpinnerFloatable renders the identical inline handle and duplicates every
+        // part row, so it must not come back.
+        CountOccurrences(source, "<gallery:SemanticPartPreview ").ShouldBe(1);
+        CountOccurrences(source, "SemanticOwnerType=\"{x:Type atom:ButtonSpinner}\"").ShouldBe(1);
+
+        foreach (var part in new[]
+                 {
+                     "root", "content", "innerLeftContent", "innerRightContent",
+                     "actions", "increaseButton", "decreaseButton"
+                 })
+        {
+            source.ShouldContain($"Path=\"{part}\"");
+        }
+
+        // The published parts must be customized through the generated Semantic Part styles,
+        // never through a code-behind fallback.
+        source.ShouldNotContain("Loaded=\"");
+        source.ShouldNotContain("Unloaded=\"");
+
+        foreach (var styleType in new[]
+                 {
+                     "ButtonSpinnerActionsStyle", "ButtonSpinnerInnerLeftContentStyle",
+                     "ButtonSpinnerIncreaseButtonStyle", "ButtonSpinnerDecreaseButtonStyle"
+                 })
+        {
+            source.ShouldContain(styleType);
+        }
+
+        // Root border customization is expressed as a plain root Setter inside the owner-scoped
+        // Style (root has no generated Style type); it must reach the shared input frame through
+        // the owner BorderBrush relay.
+        source.ShouldContain("<Setter Property=\"BorderBrush\" Value=\"#1677FF\" />");
+        source.ShouldContain("<Setter Property=\"BorderBrush\" Value=\"#722ED1\" />");
+
+        foreach (var key in new[]
+                 {
+                     "SemanticRootDescription", "SemanticContentDescription",
+                     "SemanticInnerLeftContentDescription", "SemanticInnerRightContentDescription",
+                     "SemanticActionsDescription", "SemanticIncreaseButtonDescription",
+                     "SemanticDecreaseButtonDescription", "SemanticPartStyleTitle",
+                     "SemanticPartStyleDescription"
+                 })
+        {
+            english.ShouldContain($"id=\"{key}\"");
+        }
     }
 
     private static string ExtractButtonSpinnerExampleItems(string source)
