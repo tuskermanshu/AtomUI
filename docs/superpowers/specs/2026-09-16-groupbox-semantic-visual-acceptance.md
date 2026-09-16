@@ -1,13 +1,16 @@
 # GroupBox Semantic Part 改造 · 真机视觉验收步骤
 
-> 状态：**待视觉验收**（步骤与自动化证据已就绪；尚未收到用户回传的截图/录屏）。
+> 状态：**部分通过**（已在真机核对：Custom Semantic Part styling 示例全项、Semantic Parts 页签的 `root` 高亮；`header` / `icon` / `title` / `content` 高亮与 Examples 回归仍待用户回传截图）。
 >
 > ## 验收结论记录（文字证据）
 >
 > | 日期 | 证据 | 结论 | 修复记录 |
 > | --- | --- | --- | --- |
 > | 2026-09-16 | 用户截图：`semantic-border` 上方的说明文字横向溢出卡片、被右边界截断 | 确认为缺陷（该说明 `TextBlock` 漏写 `TextWrapping="Wrap"`；Avalonia `TextWrapping` 默认 `NoWrap`） | 补 `TextWrapping="Wrap"`，新增 `Semantic_Border_Caption_Declares_Wrapping_So_It_Does_Not_Overflow_The_Card` 锁定（去掉 `Wrap` 时该用例以 `NoWrap` 失败，已实测） |
-> | 2026-09-16 | 尚无边框 demo 修复后的用户回传截图 | 待视觉验收 | 无 |
+> | 2026-09-16 | 用户截图：`Custom Semantic Part styling` 示例四项（见步骤 2） | **通过**：caption 正常折行；`semantic-object` 灰底 `#f0f0f0` + 深色标题；`semantic-function` 紫底 `#f5efff` + 紫色图标 + 20×20 图标尺寸；`semantic-border` 紫边框 2px + 12px 圆角 + 淡紫底；`semantic-border-plain` 青边框 2px + 2px 圆角 + 透明底，标题下方无边框短线残留。圆角处边框弧线连续、缺口过渡自然。 | 无（另经探针实测 Header 图标默认尺寸为 16，示例覆盖为 20 属真实视觉变化，非空断言） |
+> | 2026-09-16 | 用户截图：Semantic Parts 页签首屏，列表首行显示为 `group` | 判定为**显示假象而非缺陷**：`group` 是 `root` 行说明文字的最后一个词（"…overall appearance of the group"），该行字体为常规字重灰色，与部件名的 SemiBold 明显不同。原因是 `PART_PartsPane` 打开了 `ClipToBounds` 且列表内容略高于可视区，面板处于滚动状态，`root` 行标题与说明前几行被卷出可视区。**未确定滚动由何触发**：headless 复跑切页签后偏移恒为 0，给首行固定按钮聚焦也不滚动（主题已设 `BringIntoViewOnFocusChange="False"`），可能是用户浏览时滚动过，也可能是真实后端上的自动滚动。 | 无需修复（数据本身正确：探针实测 `ITEMS=[root,header,icon,title,content]`、5 行、root 在第一行） |
+> | 2026-09-16 | 用户截图：Semantic Parts 页签滚动到顶，`root` 被选中高亮 | **通过**：`root` 行完整显示（粗体部件名 + 完整说明），琥珀色高亮框完整包围 GroupBox owner 整体，四边完整可见，与 `root` = owner 本身的契约一致。 | 无 |
+> | 2026-09-16 | 尚无 `header` / `icon` / `title` / `content` 高亮与 Examples 回归（步骤 1.2、步骤 3）的回传截图 | 待视觉验收 | 无 |
 
 ## 背景
 
