@@ -32,8 +32,8 @@ Semantic Part 的公共模型、Selector 契约和生成器规则分别由
 | 状态 | 数量 | 范围 |
 | --- | ---: | --- |
 | 已完成基线 | 1 | `Button` |
-| 本轮待改造 | 65 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`，以及 2026-09-16 新增的 `GroupBox` 与 `ButtonSpinner`） |
-| 不适用 | 12 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
+| 本轮待改造 | 66 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`，2026-09-16 新增的 `GroupBox`、`ButtonSpinner` 与 `ComboBox`） |
+| 不适用 | 11 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
 
 > 2026-09-15 计数核对：本节三行合计 78，与 78 个正式控件文档叶子一致；`本轮待改造` 与 `不适用` 已与 §2.3、§2.4 的行数
 > 对齐。原记录为 58 / 19，在 `SplitButton` 增补时未同步，随后随 `Expander` 撤销排除校正为 61 / 16；`TabStrip` 与
@@ -43,6 +43,11 @@ Semantic Part 的公共模型、Selector 契约和生成器规则分别由
 > 两次纳入的判据不同，不得混同：`GroupBox` **没有**可映射的上游 owner（见 §2.4 该行的日期化记录），纳入依据是用户直接
 > 指令，而非 §2.1 的上游准入 Gate；`ButtonSpinner` 有上游 `InputNumber` 的 `actions` 分区键支撑职责对应，但同样叠加了
 > 用户指令。重算本表时不要把前者错误归因于上游 owner 出现。
+>
+> 2026-09-16 计数核对（`ComboBox` 纳入，并入本分支）：`ComboBox` 撤销排除后，三行为 1 / 66 / 11，合计仍为 78。它同样
+> **不是 §2.1 Gate 通过**——上游没有公开 `ComboBox` owner，准入依据是用户指令加上其自身即职责完整的独立 public owner
+> （见 §2.4 该行的日期化范围变更段）。至此 2026-09-16 共三次纳入（`GroupBox`、`ButtonSpinner`、`ComboBox`），三者判据
+> 各不相同，重算时必须逐项对照各自的日期化记录，不得合并归因。
 
 `Button` 是首个完整样例，用于校验 descriptor、静态 marker、Selector、尺寸协调和 Gallery Preview 的全链路；它不作为
 其他控件 Part 命名的机械模板。
@@ -94,8 +99,13 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 
 下表覆盖 65 个准入家族，其中 `Button` 已完成，其余 64 个进入实施批次；`SplitButton`（原排除判定撤销，随第四批执行）与
 `Expander`（原排除判定撤销，随第二批执行）为 2026-09-15 用户指令新增，`GroupBox`（无上游 owner，纳入依据与本表其他行不同，
-见 §2.4）与 `ButtonSpinner`（原排除判定撤销，随第六批执行）为 2026-09-16 用户指令新增。映射只证明“允许进入 Gate A”，不预先
+见 §2.4）、`ButtonSpinner`（原排除判定撤销，随第六批执行）与 `ComboBox`（原排除判定撤销，随第三批执行）为 2026-09-16
+用户指令新增。映射只证明“允许进入 Gate A”，不预先
 承诺具体 Part 名称或数量；每个 Part 仍必须从 AtomUI 自身源码、主题和生命周期事实中设计。
+
+> 计数核对（2026-09-16）：本节表格行数 65，与 §2 的「已完成基线 1 + 本轮待改造 64」一致；65 + §2.4 的 13 = 78，与
+> 78 个正式控件文档叶子一致。原文「覆盖 63 个准入家族 / 其余 62 个进入实施批次」在 `SplitButton`、`Expander`、`TabStrip`
+> 与 `Menu` 相继纳入后未同步，本次一并校正。
 
 | AtomUI 控件家族 | Ant Design 6.6.0 公开 owner | 结论 |
 | --- | --- | --- |
@@ -138,6 +148,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `AutoComplete` | `AutoComplete` | Batch 3 |
 | `Cascader` | `Cascader` | Batch 3 |
 | `ColorPicker` | `ColorPicker` | Batch 3 |
+| `ComboBox` | 无（AtomUI 自有 public owner） | Batch 3 范围新增（2026-09-16 用户指令，原排除判定撤销）；**不是 §2.1 Gate 通过**。上游没有公开 `ComboBox` owner，本项不以上游 API 为依据，而是承认 AtomUI `ComboBox` 作为独立 public owner 自身的输入框、弹层与候选列表职责，其区域分组与上游 `Select` 已公开的 `classNames` / `styles` 分组直接对应；命名参考 `Select`，不发明上游没有的键。原排除依据「`Select` 的 internal combobox mode 不能作为公开 owner」**仍然成立**——本次依据的不是 `Select` 的内部 mode，而是 `ComboBox` 自己就是公开 owner。`GroupBox` 存在同类的「非 Gate 通过」撤销诉求，但其记录在并行的 `feature/semantic-groupbox` 工作中，本分支尚未登记，不作为本项先例引用 |
 | `DatePicker` | `DatePicker`、`RangePicker` | Batch 3 |
 | `Form` | `Form` | Batch 3 |
 | `LineEdit` | `Input`、`Input.Password`、`Input.TextArea` | Batch 3 |
@@ -180,7 +191,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `FlexPanel` | Ant Design 稳定版没有与该布局 Panel 对应的公开 Semantic DOM owner。 | 新稳定版出现职责直接对应的公开 owner。 |
 | `Grid / Row / Col` | Ant Design Grid 没有公开 Semantic DOM Props；`Layout.Sider` 不能映射到通用 Grid。 | 新稳定版公开 Grid/Row/Col 对应 API。 |
 | ~~`ButtonSpinner`~~ | 排除判定已于 2026-09-16 经用户指令撤销，移入 §2.3 纳入映射，随第六批执行（理由见本节末）。 | 已撤销。 |
-| `ComboBox` | Ant Design 没有公开 `ComboBox` 组件；`Select` 的 internal combobox mode 不能作为公开 owner。 | 新稳定版出现公开 ComboBox owner。 |
+| ~~`ComboBox`~~ | 排除判定已于 2026-09-16 经用户指令撤销，移入 §2.3 纳入映射，随第三批执行（理由见本节末）。 | 已撤销。 |
 | `BorderBeam` | Ant Design 稳定版没有该公开组件或对应 Semantic DOM API。 | 稳定版出现职责直接对应的公开 owner。 |
 | `Splash` | Ant Design 稳定版没有职责直接对应的公开 Semantic DOM owner。 | 新稳定版出现对应公开 owner。 |
 | `WindowTitleBar` | Ant Design Web 组件体系没有对应的公开 Semantic DOM owner。 | 稳定版出现职责直接对应的公开 owner。 |
@@ -207,7 +218,27 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
   `itemIcon`、`itemContent`、`subMenu.*`、`popup.root`，按 6.6.3 稳定发布源码审计）与 `NavMenu` 逐字相同，职责直接对应，
   随第五批执行。
 
-上述三次撤销的共同判据是：**上游 owner 数量不是准入必要条件，§2.1 第 4 条的产品职责直接对应才是**。引用本表作
+范围变更（2026-09-16）：`ComboBox` 的原排除判定经用户指令**彻底撤销**（用户原话：把「ComboBox 被排除在 Semantic Part
+范围之外」彻底解除），从本表移入 §2.3 纳入映射，随第三批执行。原判定以“Ant Design 没有公开 `ComboBox` 组件；`Select` 的
+internal combobox mode 不能作为公开 owner”为由拒绝映射。该理由的前半段（上游无公开 owner）在 6.6.0 基线上**依然属实**，
+因此本项**不是一次 §2.1 Gate 通过**，不能按 Gate 通过记录：
+
+- 本次准入依据不是上游 API，而是 AtomUI `ComboBox` 自身就是职责完整、可独立定制的 public owner——它不复用 `Select`
+  的 internal combobox mode，而是直接派生 Avalonia `ComboBox`，并自有输入框、下拉 handle、模板内 Popup 与候选容器
+  创建路径。
+- 原判定后半段（`Select` 的 internal combobox mode 不能作为公开 owner）不做修改，继续有效；§2.1 第 1 条对 `ComboBox`
+  不成立，其准入以用户指令为依据。此项因此是**本表唯一的「非 Gate 通过」例外**：其余各次撤销（`SplitButton`、
+  `Expander`、`TabStrip`、`Menu`）都能在 §2.1 的职责对应条款下自洽论证，`ComboBox` 不能——引用本项时不得把它
+  当作 Gate 通过的先例。（`GroupBox` 有同类诉求，但其记录在并行工作中，本分支未登记，故不并入本表。）
+- 命名与区域分组参考上游 `Select` 已公开的 `classNames` / `styles` 分组，只发布 `ComboBox` 自身确实拥有的区域，
+  不为对齐上游而发明 `ComboBox` 不存在的键（尤其不发布 `ComboBox` 从未实现的清除部件）。
+- 该撤销不改变其他排除项的判定依据，也不放开被排除控件之间的相互隔离要求（如 `Pagination`、`DataGrid` 内部嵌套的
+  `ComboBox` 仍不得因其自身纳入而被借用为宿主语义区域；见 `2026-08-12-semantic-part-batch-2-collections-containers.md`
+  任务 13 与 `2026-08-12-semantic-part-batch-5-high-density.md` 的 owner 隔离说明）。
+
+上述四次撤销中，`SplitButton`、`Expander`、`TabStrip` 与 `Menu` 的共同判据是：**上游 owner 数量不是准入必要条件，
+§2.1 第 4 条的产品职责直接对应才是**。`ComboBox` 不属于这一判据——它连第 1 条也不成立，是唯一的「非 Gate 通过」例外，
+已在上方单独记录，引用时不得与其余四次混同。引用本表作
 排除依据前，先确认该项未被后续日期化撤销覆盖。
 
 范围变更（2026-09-16）：`GroupBox` 的原排除判定经用户指令撤销，从本表移入 §2.3 纳入映射，随第二批执行。此项与上述

@@ -48,6 +48,7 @@
 
                 <atom:AddOnDecoratedBoxContentFrame
                         Name="{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentFramePart}"
+                        Classes.semantic-frame="True"
                         BorderThickness="{TemplateBinding InnerBoxBorderThickness}"
                         CornerRadius="{TemplateBinding InnerBoxCornerRadius}"
                         BorderBrush="{TemplateBinding BorderBrush}"

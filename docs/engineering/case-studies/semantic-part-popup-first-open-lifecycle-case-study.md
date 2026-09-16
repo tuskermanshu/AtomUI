@@ -182,7 +182,7 @@ effective light-dismiss = configured light-dismiss && !IsPopupPinnedOpen
 | ColorPicker / GradientColorPicker | motion 开启的 pinned Preview 首次暴露竞态；直接 Child 还有箭头/阴影转发契约 | 保留代码驱动物理打开，增加 `ColorPickerPopupRootFrame`，共享 Popup 补 actor-ready 对账 |
 | AutoComplete | 已在首次打开前抑制 pinned light-dismiss | 保留现有保护；不以 Gallery 的 `IsMotionEnabled=false` 掩盖共享问题 |
 | Select / Cascader / TreeSelect | 共用 `AbstractSelect`，已有首次打开前的 pinned light-dismiss 保护 | 无需重复修改 |
-| ComboBox | pinned relay 已存在，但首次打开前没有抑制 light-dismiss | 在 `ComboBox` 模板接入和 pin 变化时对账，并补红绿测试 |
+| ComboBox | pinned relay 已存在，但首次打开前没有抑制 light-dismiss | 在 `ComboBox` 模板接入和 pin 变化时对账，并补红绿测试（**已于 2026-09-16 关闭，见下方补记**） |
 | Mentions | pinned relay 已存在，Popup 本身禁用 motion，但 light-dismiss overlay 仍会拦截输入 | 在 `Mentions` 模板接入和 pin 变化时对账，并补红绿测试 |
 | DatePicker / TimePicker 家族 | 共用 `InfoPickerInput`，模板固定启用 light-dismiss，但 pinned 状态未前置覆盖 | 在共享 `InfoPickerInput` 修复，并用 DatePicker 回归测试覆盖 |
 | Flyout 家族 | `FlyoutHost` 和多种控件把 pin 转发给 `Flyout`，但底层 Popup 仍直接使用 configured light-dismiss | 在共享 `Flyout` 计算 effective 值；Click 可恢复 true，Hover / Focus 保持 false |
@@ -232,13 +232,22 @@ effective light-dismiss = configured light-dismiss && !IsPopupPinnedOpen
 - 物理 Popup 打开并收到 pinned relay。
 - 首次打开前 effective light-dismiss 为 false。
 - 取消 pin 后恢复原配置，而不是固定恢复 true。
+- **树上不存在 `IsVisible=true` 的 `LightDismissOverlayLayer`。** 只断言 `IsLightDismissEnabled=false` 不足以证明遮罩
+  未创建：属性被抑制后遮罩仍可能留在树上（`IsVisible=true`）并接管全部命中点。
 
 当前覆盖：
 
 - `FlyoutPinnedOpenTests.Pinned_Flyout_Suppresses_Light_Dismiss_Before_First_Open_And_Unpin_Restores_Configuration`
 - `ComboBoxDisplayMemberBindingTests.Pinned_Open_Request_Suppresses_Light_Dismiss_Before_First_Open_And_Unpin_Restores_It`
+- `ComboBoxPinnedPopupOverlayTests`（遮罩层断言 + `InputHitTest` 行为断言 + 关闭回写；2026-09-16 补）
 - `MentionsBehaviorTests.Popup_Pin_Suppresses_Light_Dismiss_Before_First_Open_And_Unpin_Restores_It`
 - `DatePickerBehaviorTests.Pinned_Open_Request_Suppresses_Light_Dismiss_Before_First_Open_And_Unpin_Restores_It`
+
+**补记（2026-09-16）：** 上表 ComboBox 一行已关闭。原测试只断言属性、未断言遮罩层，因此当“模板绑定 `IsOpen` 导致
+**打开早于抑制**”时测试仍然全绿——属性最终确实是 `false`，但遮罩已经在模板充气阶段建出来并一直可见，实测钉住时
+`InputHitTest` 命中 `LightDismissOverlayLayer`，整页除输入框外不可交互。修法：`PART_Popup` 去掉 `IsOpen` 模板绑定，
+弹层开合改由控件代码接管，`OnApplyTemplate` 先抑制遮罩再补开弹层，并由 `Popup.Closed` 显式补齐关闭回写。
+这与 `AbstractSelect`（Select / Cascader / TreeSelect）的既有约定一致：它们的模板同样不声明 `IsOpen` 绑定。
 
 ### Gallery 首次选择测试
 

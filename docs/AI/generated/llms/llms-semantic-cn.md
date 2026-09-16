@@ -2401,13 +2401,269 @@ Source: ./controls/combo-box/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ComboBox` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+ComboBox 是唯一 Semantic owner，公开 12 个 Semantic Part：隐式 `root` 加 11 个非 root 部件（`prefix`、`frame`、
+`content`、`placeholder`、`input`、`suffix`、`indicator`、`popup.root`、`popup.list`、`popup.listItem`、`popup.empty`）。
+11 个非 root 部件各生成一个 `ComboBox*Style` 类型，`root` 不生成。声明位于 `ComboBox.SemanticParts.cs` partial 文件。
+
+触发区部件的 marker 位于 `ComboBoxTheme.axaml` 宿主模板内：`prefix` / `suffix` 借用共享
+`AddOnDecoratedBoxTheme` 的 `.semantic-scope-prefix` / `.semantic-scope-suffix` scope 锚点路由到宿主模板
+投影给 decorated box 的内容节点（与 `Select` / `TreeSelect` / `Cascader` 同构）；`content` / `placeholder` /
+`input` 直接标注宿主模板节点。`indicator` 声明 `CrossNestedOwners=true`：其物理节点在 ComboBox 自有的
+internal `ComboBoxHandle` 模板内，经宿主模板的 `.semantic-scope-handle` 锚点跨入。弹层四部件位于 owner 自有的
+模板内 Popup：`popup.root` 标注在宿主模板 `PopupFrame` 静态节点上，`popup.list` / `popup.empty` 是
+`PopupFrame` 内的静态节点，`popup.listItem` 的 marker 在运行时容器创建路径注入。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `root` |
+| Selector | ComboBox 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ComboBox` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | ComboBox owner |
+| 职责 | ComboBox root 是数据源、选择、过滤、弹层与输入框状态的组织边界。 |
+| 相关 API | 全部 ComboBox public API |
+| 相关 Token | ComboBoxToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `ComboBoxPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中投影给 `AddOnDecoratedBox.ContentLeftAddOn` 的 `AddOnContentPresenter`（经 `$parent[atom:ComboBox]` 编译绑定呈现公共 API 值） |
+| 职责 | 内容框内联前缀区域，承载 `ContentLeftAddOn` 用户内容。 |
+| 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `frame`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `frame` |
+| Selector | `.semantic-frame` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-frame` |
+| Style Type | `ComboBoxFrameStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `true` |
+| AtomUI 节点 | 共享 `AddOnDecoratedBoxTheme.axaml` 中 `AddOnDecoratedBoxContentFrame`（`Name="PART_ContentFrame"`）；锚点 `.semantic-scope-input` 位于 ComboBox 宿主模板的 `AddOnDecoratedBox` 节点 |
+| 职责 | **输入框边框盒**——outlined / filled / underlined 变体的最内层边框盒，决定输入框的边框颜色、边框宽度、圆角与背景。这是应用最常需要的定制点（如把默认灰边框改成品牌色）。 |
+| 相关 API | `StyleVariant`、`SizeType`、`Status`、`FormStatus`；内部 `EffectiveStatus` 驱动状态色 |
+| 相关 Token | SharedToken（`ColorBorder`、`ColorPrimary`、`ColorError`、`ColorWarning`、`BorderRadius*`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `ComboBoxContentStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` decorated box 内容面板（`PlaceholderText`、`SelectedContentPresenter`、`PART_EditableTextBox` 的公共父节点） |
+| 职责 | 输入内容面板，承载占位符、非编辑态选中内容与编辑态输入框三个互斥/叠加节点。 |
+| 相关 API | `PlaceholderText`、`SelectionBoxItem`、`SelectionBoxItemTemplate`、`IsEditable` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `placeholder`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `placeholder` |
+| Selector | `.semantic-placeholder` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-placeholder` |
+| Style Type | `ComboBoxPlaceholderStyle` |
+| ContractType | `Avalonia.Controls.TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PlaceholderText`（`atom:TextBlock`，基类为 `Avalonia.Controls.TextBlock`） |
+| 职责 | 未选择任何项且非编辑态时显示的占位符文本。 |
+| 相关 API | `PlaceholderText` |
+| 相关 Token | SharedToken（节点以 `Opacity=0.3` 弱化，见定制边界） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-input` |
+| Style Type | `ComboBoxInputStyle` |
+| ContractType | `Avalonia.Controls.TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PART_EditableTextBox`（internal `ComboBoxTextBox : Avalonia.Controls.TextBox`） |
+| 职责 | `IsEditable=true` 时渲染的可编辑 / 过滤输入框；非编辑态节点仍存在但 `IsVisible=false`。 |
+| 相关 API | `IsEditable`、`Text`、`IsFilterEnabled`、`FilterValue` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `ComboBoxSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `ContentRightAddOn` 的 `StackPanel`（承载 `PART_ContentRightAddOnPresenter`、`PART_FormFeedBack`、`PART_ComboBoxHandle`） |
+| 职责 | 内容框右侧后缀区，承载用户后缀内容、Form 校验反馈与下拉指示器。 |
+| 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`FormFeedback` |
+| 相关 Token | SharedToken；`TextElement.Foreground` 默认取 `ColorTextQuaternary`（共享 `AddOnDecoratedBoxTheme` 提供，为本 Part 的下界） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `>> .semantic-scope-handle /template/ .semantic-indicator` |
+| Style Type | `ComboBoxIndicatorStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `true` |
+| AtomUI 节点 | `ComboBoxHandleTheme.axaml` 中 `PART_OpenIndicatorButton`（`atom:IconButton`，图标 `DownOutlined`）；锚点 `.semantic-scope-handle` 位于宿主模板的 `PART_ComboBoxHandle` |
+| 职责 | 下拉展开指示器（箭头按钮）；同时是鼠标点击展开/收起的触发入口。 |
+| 相关 API | `IsDropDownOpen`、`IsEnabled`、`IsMotionEnabled` |
+| 相关 Token | ComboBoxToken（`HandleHoverColor` 驱动 hover 态箭头色） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `ComboBoxPopupRootStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PART_Popup` 的直接子节点 `PopupFrame` |
+| 职责 | 弹层框体，承载候选列表与空态，决定弹层圆角、背景与内边距边界。 |
+| 相关 API | `MaxDropDownHeight`、`PopupContentPadding`（internal）、`EffectivePopupWidth`（internal） |
+| 相关 Token | SharedToken（`ColorBgElevated`）、PopupToken（`PopupCornerRadius`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.list`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `popup.list` |
+| Selector | `.semantic-popup-list` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list` |
+| Style Type | `ComboBoxPopupListStyle` |
+| ContractType | `Avalonia.Controls.ScrollViewer` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PopupFrame` 内的 `atom:ScrollViewer`（内部为 `PART_ItemsPresenter`） |
+| 职责 | 候选列表滚动区，`IsVisible` 与空态互斥，是候选项的排布与滚动边界。 |
+| 相关 API | `MaxDropDownHeight`、`ItemsPanel`、`ScrollViewer.IsLiteMode`、`ScrollViewer.AllowAutoHide` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.listItem`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `popup.listItem` |
+| Selector | `.semantic-popup-list-item` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list-item` |
+| Style Type | `ComboBoxPopupListItemStyle` |
+| ContractType | `ComboBoxItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | 运行时容器：`CreateContainerForItemOverride` / `PrepareContainerForItemOverride` 创建的 `ComboBoxItem` 实例本身（marker 不写在 `ComboBoxItemTheme.axaml` 模板内部节点上，理由见 §2） |
+| 职责 | 单个候选项容器，承载项内容、选中视觉、hover/active 候选视觉、禁用态与过滤隐藏。 |
+| 相关 API | `ItemsSource`、`ItemTemplate`、`SelectedItem`、`SelectedIndex`、`ItemHeight`（internal）、`OptionFontSize` |
+| 相关 Token | ComboBoxToken（`ItemColor`、`ItemBgColor`、`ItemHoverColor`、`ItemHoverBgColor`、`ItemSelectedColor`、`ItemSelectedBgColor`、`ItemPadding`、`ItemMargin`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.empty`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `popup.empty` |
+| Selector | `.semantic-popup-empty` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-empty` |
+| Style Type | `ComboBoxPopupEmptyStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PART_EmptyIndicator`（内含 `atom:Empty`） |
+| 职责 | 生效过滤模式下无匹配项时显示的弹层空态区；`IsVisible` 由 `IsEffectiveEmptyVisible` 驱动，与 `popup.list` 互斥。**仅在 `IsEditable=true` + `IsFilterEnabled=true` + 存在过滤值 + 无匹配项时可见**：未开启过滤时 `IsEffectiveEmptyVisible` 被强制为 `false`，此时弹层显示的是空的列表区而非空态区，空态节点仍存在但隐藏。 |
+| 相关 API | `IsEditable`、`IsFilterEnabled`、`Text` / `FilterValue`；`IsEffectiveEmptyVisible`（internal，由上述状态推导） |
+| 相关 Token | SharedToken（`Padding`） |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -2484,13 +2740,13 @@ ComboBox
 | `Panel` | template node (Panel) | `ComboBoxTextBoxTheme.axaml` | ComboBoxTextBox | `CaretBlinkInterval`, `CaretBrush`, `CaretIndex`, `HorizontalContentAlignment`, `LineHeight`, `PasswordChar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Placeholder` | template node (TextBlock) | `ComboBoxTextBoxTheme.axaml` | ComboBoxTextBox | `HorizontalContentAlignment`, `LineHeight`, `PlaceholderForeground`, `PlaceholderText`, `TextAlignment`, `TextWrapping` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_TextPresenter` | template node (InputTextPresenter) | `ComboBoxTextBoxTheme.axaml` | ComboBoxTextBox | `CaretBlinkInterval`, `CaretBrush`, `CaretIndex`, `HorizontalContentAlignment`, `LineHeight`, `PasswordChar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `ComboBox` | control theme | `ComboBoxTheme.axaml` | 用户代码 / 控件宿主 | `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `EffectivePopupWidth`, `FormStatus`, `IsDropDownOpen` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `ComboBoxTheme.axaml` | ComboBox | `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `EffectivePopupWidth`, `FormStatus`, `IsDropDownOpen` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (AddOnDecoratedBox) | `ComboBoxTheme.axaml` | ComboBox | `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `FormStatus`, `IsEditable`, `IsEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ComboBox` | control theme | `ComboBoxTheme.axaml` | 用户代码 / 控件宿主 | `DataValidationErrors`, `EffectivePopupWidth`, `FormStatus`, `IsEditable`, `IsEffectiveEmptyVisible`, `IsEnabled` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `ComboBoxTheme.axaml` | ComboBox | `DataValidationErrors`, `EffectivePopupWidth`, `FormStatus`, `IsEditable`, `IsEffectiveEmptyVisible`, `IsEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (AddOnDecoratedBox) | `ComboBoxTheme.axaml` | ComboBox | `DataValidationErrors`, `FormStatus`, `IsEditable`, `IsEnabled`, `IsKeyboardFocusWithin`, `IsMotionEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PlaceholderText` | template node (TextBlock) | `ComboBoxTheme.axaml` | ComboBox | `PlaceholderText`, `SelectingItemsControl` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SelectedContentPresenter` | template node (ContentPresenter) | `ComboBoxTheme.axaml` | ComboBox | `IsShowOverflowTip`, `OverflowTipDelay`, `OverflowTipPlacement`, `SelectionBoxItem`, `SelectionBoxItemTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_EditableTextBox` | template node (ComboBoxTextBox) | `ComboBoxTheme.axaml` | ComboBox | `IsEditable`, `PlaceholderForeground`, `PlaceholderText`, `Text` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Popup` | template node (Popup) | `ComboBoxTheme.axaml` | ComboBox | `EffectivePopupWidth`, `IsDropDownOpen`, `IsEffectiveEmptyVisible`, `IsMotionEnabled`, `ItemsPanel`, `MaxDropDownHeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Popup` | template node (Popup) | `ComboBoxTheme.axaml` | ComboBox | `EffectivePopupWidth`, `IsEffectiveEmptyVisible`, `IsMotionEnabled`, `ItemsPanel`, `MaxDropDownHeight`, `PopupContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PopupFrame` | template node (Border) | `ComboBoxTheme.axaml` | ComboBox | `EffectivePopupWidth`, `IsEffectiveEmptyVisible`, `IsMotionEnabled`, `ItemsPanel`, `MaxDropDownHeight`, `PopupContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `ComboBoxTheme.axaml` | ComboBox | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_EmptyIndicator` | template node (Border) | `ComboBoxTheme.axaml` | ComboBox | `IsEffectiveEmptyVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -2501,7 +2757,7 @@ ComboBox
 | --- | --- | --- |
 | 内容与数据 | `ContentLeftAddOn`、`ContentLeftAddOnTemplate`、`ContentRightAddOn`、`ContentRightAddOnTemplate`、`FilterValue`、`FilterValueSelector`、`LeftAddOnTemplate`、`OptionFontSize`、`RightAddOnTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `SelectedItem`、`SelectedIndex`、`DropDownDisplayPageSize`、`Filter`、`IsFilterEnabled` | 维护选择、展开、过滤、分页、分组或集合状态。 |
-| 交互与状态 | `IsAllowClear`、`IsMotionEnabled`、`ShouldUseOverlayPopup`、`Status`、`IsShowOverflowTip`、`OverflowTipDelay`、`OverflowTipPlacement` | 表达用户可观察状态、可用性、清除、加载、反馈和非编辑态选中内容溢出提示语义。Form 校验扩展状态进入内部 `FormStatus`，不覆盖显式 `Status`。 |
+| 交互与状态 | `IsAllowClear`、`IsMotionEnabled`、`ShouldUseOverlayPopup`、`IsPopupPinnedOpen`、`Status`、`IsShowOverflowTip`、`OverflowTipDelay`、`OverflowTipPlacement` | 表达用户可观察状态、可用性、清除、加载、反馈和非编辑态选中内容溢出提示语义。Form 校验扩展状态进入内部 `FormStatus`，不覆盖显式 `Status`。 |
 | 视觉与布局 | `SizeType`、`StyleVariant` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 其他稳定入口 | `LeftAddOn`、`RightAddOn` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -2579,6 +2835,9 @@ ComboBox Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
 - Template part 名称、ControlTheme key、伪类和资源 key。
+- Semantic Part 的 selector class、route、`ContractType`、cardinality 与 marker 归属；静态 marker 与运行时 marker 的
+  注入点必须与 [ComboBox Semantic Part 契约](semantic-part.md) 一致（含 `popup.listItem` 打在容器实例上、在两条容器路径
+  幂等注入的约束）。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。

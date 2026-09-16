@@ -54,7 +54,9 @@ dotnet run --project tools/performances/AtomUI.Performance/AtomUI.Performance.cs
 > 用户已撤销该排除判定：`Menu` 与 `NavMenu` 映射同一个上游 `Menu` owner、12 个公开键路径逐字相同，职责直接对应
 > （设计文档 §2.1 第 4 条）。`Menu` 已从设计文档 §2.4 与总计划「不适用」清单移入 §2.3 纳入映射，作为本批次**任务 3**
 > 单独记录，本批次家族数由 2 增至 3。因此本项约束现在读作：不得给同页的 `ContextMenu` 或真实应用 sidebar 附加 Preview
-> 行为，也不得借 `Menu` 的纳入去改造仍属排除的控件（如 `ComboBox`）。
+> 行为，也不得借 `Menu` 的纳入去改造其他控件（2026-09-16 更正：原文举例为「仍属排除的控件（如 `ComboBox`）」，`ComboBox`
+> 已于 2026-09-16 经用户指令撤销排除并纳入第三批；本项约束的准确含义是 **owner 隔离**——宿主控件不因组合关系向外声明
+> 被组合控件的语义区域，与被组合控件自身是否纳入无关）。
 
 - [ ] **记录改造后基线：** 重新运行与改造前完全相同的命令，输出到 `/tmp/atomui-semantic-navmenu-after.md`；比较 ms/item、KB/item、Visual/root、Logical/root 和状态验证结果。
 
@@ -97,7 +99,8 @@ dotnet run --project tools/performances/AtomUI.Performance/AtomUI.Performance.cs
 - [x] 记录 virtualization ownership、row/cell/header 创建与回收、editing template、row details 重建、group expand/collapse、filter Flyout 延迟实例化、pagination template reapply、drag/reorder adorner、SizeType 和嵌套 semantic-control 隔离。（2026-09-14：已记录于 `data-grid/implementation.md`——静态模板 marker 8 个、运行时 marker 4 类（`DataGridColumnHeader` / `DataGridRow` / `DataGridRowGroupHeader` / `DataGridCell`），运行时 marker 在模板根应用时用生成常量注入一次，回收复用不重复注入；`pagination.item` 复用 `Pagination` 模板既有的 `semantic-item` class，经 `>> .semantic-pagination-root >> .semantic-item` 跨根路由命中。）
 - [x] Table 对应的 DataGrid owner 可以公开自身 filter/pagination 区域，但嵌套的 `Menu`、`ComboBox` 等控件不得
   因组合关系获得 Descriptor、marker 或 Preview；已有独立准入的 `Pagination` 仍遵守自身 owner 边界。（2026-09-14：已满足。`DataGrid` 只公开自身的 `pagination.root` / `pagination.item` 路由；列头 filter Flyout 内的 `Menu` / `Tree` 内容未获得 `DataGrid` 的 descriptor 或 marker。
-  **表述更正（2026-09-15）：** 本项原文把 `Menu` 归类为「被排除控件」，该措辞已过时且易被误读。准确含义是 **owner 隔离**：`DataGrid` 不因内部组合了 `Menu` 而向外声明 `Menu` 的语义区域——这与 `Menu` 自身是否纳入是两个独立议题。`Menu` 已于 2026-09-14 实施并持有自己的 `semantic-part.md`，并经用户于 2026-09-15 追认纳入本批次（见任务 3）。`ComboBox` 则确实仍为排除控件（设计文档 §2.4）。
+  **表述更正（2026-09-15）：** 本项原文把 `Menu` 归类为「被排除控件」，该措辞已过时且易被误读。准确含义是 **owner 隔离**：`DataGrid` 不因内部组合了 `Menu` 而向外声明 `Menu` 的语义区域——这与 `Menu` 自身是否纳入是两个独立议题。`Menu` 已于 2026-09-14 实施并持有自己的 `semantic-part.md`，并经用户于 2026-09-15 追认纳入本批次（见任务 3）。
+  **`ComboBox` 更正（2026-09-16）：** 本项原文并称「`ComboBox` 则确实仍为排除控件（设计文档 §2.4）」，该措辞同样已过时。`ComboBox` 已于 2026-09-16 经用户指令彻底撤销排除并纳入第三批（设计文档 §2.3，非 §2.1 Gate 通过）。本项对 `ComboBox` 的约束应改按 owner 隔离理解：`DataGrid` 不因分页器内部组合了 `ComboBox` 而向外声明 `ComboBox` 的语义区域。隔离要求本身未变，仅排除依据失效。
   **`DataGrid` 明确在范围内**：设计文档 §2.3 纳入映射自 2026-08-12 起即登记 `DataGrid` → 上游 `Table`，批次 5；本计划即为其执行清单。)
 - [x] 为每个已实例化 grid/row/cell/header/container 定义明确的 marker 预算，并证明 scroll、pointer hover、selection、edit、sort、filter 或 row reorder 期间不会发生 Descriptor 查询或 marker 变更。（2026-09-14：`DataGridSemanticPartTests.cs` 覆盖描述符、静态 marker、运行时 marker、回收保持与专用 Style 命中；`DataGridSemanticPartHighlightTests.cs` 覆盖高亮会话；marker 注入为一次性 `Classes.Add`，状态切换不增删。）
 - [x] 更新两份主控件文档；只有符合创建条件时才更新专项设计文档。写明准确的 Descriptor、节点、cardinality、cross-root/runtime 标志、兼容性、性能/AOT 和完整验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。（2026-09-14：`data-grid/overview.md` 与 `data-grid/implementation.md` 同步完成；Gate A 判定两份主文档足以承载契约，未创建独立 `semantic-part.md`（见本节开头的命名更正与实施结论）。`docs/AI/generated` 由生成器重生成，随 `454cc0d00` 一并提交。）

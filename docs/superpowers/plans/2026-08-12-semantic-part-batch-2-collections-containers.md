@@ -216,7 +216,9 @@
 
 - [ ] **Gate A 设计审核：** 审计 `Pagination`、`SimplePagination`、nav/nav item、quick jumper 和 page-size ComboBox item 的 owner，
   确认 previous/next/page/ellipsis/size changer/quick jump regions；记录 page 数量 rebuild、simple/default templates、Popup 和
-  SizeType。ComboBox 作为被排除的嵌套控件保持独立，不得获得 Descriptor 或内部 marker。
+  SizeType。ComboBox 作为嵌套控件保持独立：`Pagination` 不得获得 ComboBox 的 Descriptor，也不得在 ComboBox 的模板节点上
+  打内部 marker；ComboBox 自身已于 2026-09-16 独立撤销排除并持有自己的语义契约，但嵌套 owner 隔离要求不因此改变。
+  （2026-09-16 修订：原文依据「ComboBox 是被排除控件」，该依据已失效，隔离要求本身继续有效。）
 - [ ] 更新两份控件文档，写明准确的 Descriptor、真实模板/运行时节点、owner 边界、排除的 internal wrapper、生命周期/性能不变量和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。
 - [ ] **Gate B 实现与验证：** 新增 `tests/AtomUI.Desktop.Controls.Tests/Pagination/PaginationSemanticPartTests.cs`，覆盖 default/simple、page 数量与 value 变化、生成的 nav item 生命周期、size changer Popup、quick jumper、所有尺寸和 marker 数量。
 - [ ] 运行 Generator Semantic 测试、目标 Desktop 测试、GalleryBase 测试、目标 Gallery 测试、LLMS verify 和 `git diff --check`；涉及 Popup/运行时宿主路径时增加 NativeAOT 验证。

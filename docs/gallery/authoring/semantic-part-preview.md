@@ -410,6 +410,11 @@ public interface ISemanticPartCrossRootProvider
 1. XAML 上设置 `IsDropDownOpen="True"` + `IsPopupPinnedOpen="True"`（钉住后忽略 light-dismiss 关闭请求）。
 2. 产品控件负责在弹层打开前抑制 light-dismiss 遮罩（见架构文档 9.1）；预览基础设施不得在 Popup 打开后改写
    `IsLightDismissEnabled`——Avalonia 仅在打开瞬间读取该属性，打开后修改无效，该路径已被实现并否定。
+   注意第 1 条的 `IsDropDownOpen="True"` 是**挂载前**就为 true：若产品控件的模板把弹层写成
+   `IsOpen="{TemplateBinding IsDropDownOpen}"`，弹层会在模板充气阶段打开，早于控件的遮罩抑制，于是留下一个
+   `IsVisible=true` 的遮罩层挡住整页交互。正确形态是模板**不声明** `IsOpen` 绑定，由控件在抑制遮罩之后以代码补开
+   弹层（`AbstractSelect` 一族与 `ComboBox` 均已如此）。因此产品控件在接入 pinned 预览时，除了断言
+   `IsLightDismissEnabled=false`，还必须断言树上不存在可见的 `LightDismissOverlayLayer`。
 3. `popup.listItem` 等容器部件的 marker 由列表控件容器创建时注入，解析走本节 owner-scoped 路径即可命中，
    Preview 无需额外处理。
 4. 高亮框以 marker 元素 Bounds 为准：内联语义（如 placeholder 文字）的 marker 元素必须紧贴内容排布，

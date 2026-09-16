@@ -41,7 +41,7 @@ public class ComboBoxShowCasePageTests
         source.ShouldNotContain("Tag=\"Examples\"");
         source.ShouldNotContain("Tag=\"Api\"");
         source.ShouldNotContain("Tag=\"DesignToken\"");
-        source.ShouldContain("<gallery:GalleryStickyTabsHost");
+        source.ShouldContain("<gallery:GalleryShowCaseHost");
         source.ShouldContain("StickyContentPadding=\"28,0,28,0\"");
         source.ShouldNotContain("<atom:TabStrip Name=\"ScenarioTabs\"");
         source.ShouldNotContain("<ContentControl Name=\"ScenarioContentHost\">");
@@ -57,10 +57,11 @@ public class ComboBoxShowCasePageTests
         CountOccurrences(source, "Classes=\"info-value\"").ShouldBe(0);
         source.ShouldNotContain("LineHeight=\"22\"");
         source.ShouldContain("Description=\"{gallery:ComboBoxShowCaseLangResource PageDescription}\"");
-        CountShowCaseItemElements(source).ShouldBe(10);
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(10);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(10);
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:ComboBoxViewModel\"").ShouldBe(10);
+        CountShowCaseItemElements(source).ShouldBe(11);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(11);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(11);
+        // 11 个 ShowCaseItem（含 Semantic Part Style 示例）+ 1 个 SemanticPartsContentTemplate 均绑定 ComboBoxViewModel。
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:ComboBoxViewModel\"").ShouldBe(12);
         source.ShouldContain("ComboBoxShowCaseLangResource BasicTitle");
         source.ShouldContain("ComboBoxShowCaseLangResource ItemsSourceTitle");
         source.ShouldContain("ComboBoxShowCaseLangResource BindingTitle");

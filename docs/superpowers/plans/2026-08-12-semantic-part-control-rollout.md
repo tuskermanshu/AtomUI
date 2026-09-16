@@ -10,9 +10,13 @@
 
 ## 全局约束
 
-- 只允许在 `/Users/chinboy/Projects/dotnet/AtomUIV6/.worktrees/semantic` 的 `feature/semantic` 分支中工作。
+- 每个控件家族在自己的独立 worktree 中工作（分支命名 `feature/semantic-<Control>`，worktree 路径 `.worktrees/<control>`），
+  全部从 `feature/semantic` 派生；主 worktree `.worktrees/semantic` 的 `feature/semantic` 保留为集成分支。单控件改动不直接
+  落在集成分支上，避免多控件并行时互相污染（2026-09-16 修订，此前的「只允许在 `.worktrees/semantic` 工作」不再适用）。
 - 遵循[全量改造设计](../specs/2026-08-12-semantic-part-control-rollout-design.md)和正式的 [Semantic Part 系统架构](../../architecture/systems/theming/semantic-parts.md)。
 - 准入只以 Ant Design 最新稳定发布源码中公开且实际消费的 Semantic DOM API 为准；当前基线为 2026-08-12 的 6.6.0。
+  例外：经用户指令撤销排除、且已按「非 §2.1 Gate 通过」口径在设计文档 §2.4 日期化记录项中单独留痕的控件（当前仅
+  `ComboBox`），其准入依据是用户指令而不是该 Gate；除这些已留痕项外，不得自行扩大范围。
 - 官网展示、普通 `className` / `style`、ConfigProvider、internal schema、Props 间接继承或嵌套子组件透传不得作为准入证据。
 - 每次只处理一个控件家族。当前控件等待文档或实现审核时，不得开始下一个控件，除非用户明确调整顺序。
 - 修改源码、主题、测试、Gallery 或 changelog 前，必须先更新该控件的 `overview.md` 和 `implementation.md` 并获得批准。
@@ -33,7 +37,7 @@
 | `docs/superpowers/plans/2026-08-12-semantic-part-control-rollout.md` | 总体顺序、状态、通用执行循环和跨批次收尾。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-1-basic-controls.md` | 16 个基础视觉与状态控件家族。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-2-collections-containers.md` | 16 个集合、容器和导航控件家族，另有 2026-09-15 追加的 `Expander`。 |
-| `docs/superpowers/plans/2026-08-12-semantic-part-batch-3-input-selection.md` | 15 个输入和选择控件家族。 |
+| `docs/superpowers/plans/2026-08-12-semantic-part-batch-3-input-selection.md` | 15 个输入和选择控件家族，另有 2026-09-16 追加的 `ComboBox`。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-4-hosts-windows.md` | 10 个 Popup、Overlay 和服务宿主控件家族。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-5-high-density.md` | `NavMenu` 和 `DataGrid` 两个性能敏感控件家族。 |
 | 第六批任务清单（见本文档任务 6） | `ButtonSpinner` 一个输入基座控件家族（2026-09-16 新增）。 |
@@ -50,7 +54,7 @@
 
 - [x] `Avatar`、`Carousel`、`Rate`、`Watermark`。
 - [x] `Icon`、`FlexPanel`、`Grid / Row / Col`。
-- [x] `ComboBox`、`BorderBeam`、`Splash`。
+- [x] `BorderBeam`、`Splash`。
 - [x] `WindowTitleBar`、`Window`。
 
 > 范围变更（2026-09-15）：`SplitButton` 的原排除判定经用户指令撤销——AtomUI 需要让 `SplitButton` 支持 Semantic
@@ -81,6 +85,17 @@
 > 注意：上游至今没有独立 spinner 组件 owner，本项准入依据的是上游 `actions` 键 + 用户指令，不是原触发条件
 > 「新稳定版出现独立 spinner owner」自动满足；逐项证据与两点边界记录见设计文档 §2.4。
 
+> 范围变更（2026-09-16）：`ComboBox` 的原排除判定经用户指令**彻底撤销**——用户要求把“ComboBox 被排除在 Semantic Part
+> 范围之外”彻底解除。它从本文档「不适用」清单与设计文档 §2.4 移入 §2.3 纳入映射，随第三批执行（见下方批次清单与
+> [第三批任务清单](2026-08-12-semantic-part-batch-3-input-selection.md)任务 16）。
+>
+> **本项不是 §2.1 Gate 通过，不得按 Gate 通过记录**：上游 6.6.0 确实没有公开 `ComboBox` owner，第 1 条不成立。准入依据
+> 是用户指令 + AtomUI `ComboBox` 自身就是职责完整、可独立定制的 public owner（直接派生 Avalonia `ComboBox`，自有输入框、
+> 下拉 handle、模板内 Popup 与候选容器创建路径，不复用 `Select` 的 internal combobox mode）。原判定中「`Select` 的
+> internal combobox mode 不能作为公开 owner」继续有效。命名参考上游 `Select` 已公开的语义分组，不发明 `ComboBox` 不存在
+> 的键。它是本清单唯一的「非 Gate 通过」例外——其余撤销项（`SplitButton`、`Expander`、`TabStrip`、`Menu`）均可在 §2.1
+> 职责对应条款下自洽论证，`ComboBox` 不能，故不得被当作 Gate 通过的先例引用。
+
 逐项公开 API 证据、产品职责映射和重新评估条件以全量改造设计的“排除映射”为准。不得因 AtomUI 模板内部存在
 可定制节点而绕过准入 Gate。**引用本清单作排除依据前，先确认该项未被后续日期化撤销覆盖。**
 
@@ -99,6 +114,7 @@
 - [x] 第二批追加：`Expander`（2026-09-15 用户指令新增，原排除判定撤销；单面板折叠容器，映射上游 `Collapse` 面板 Semantic DOM，共 5 部件，见第二批任务 16）。（2026-09-15：已完成并经用户授权提交 `be7b8dc71`，含 Semantic Part 改造与圆角裁剪修复。）
 - [x] 第二批追加：`TabStrip`（2026-09-15 用户指令撤销排除并追认；`TabStrip` / `CardTabStrip` / `TabStripItem` 三个 public owner 各自持有 descriptor，映射上游 `Tabs`，见第二批任务 17）。（2026-09-14：已随 `TabControl` 家族提交一并实施并持有独立 `semantic-part.md`；本次追认范围。）
 - [x] 第三批：输入与选择，共 15 个家族。（2026-09-10 复核：15 个家族全部按用户授权提交；视觉验收 NumericUpDown、Form、Transfer、AutoComplete、Cascader 已关闭，ColorPicker、Select、DatePicker 待视觉验收，Mentions、TimePicker、TreeSelect 尚无验收文档；本批次收尾测试尚未执行。）
+- [ ] 第三批追加：`ComboBox`（2026-09-16 用户指令，原排除判定彻底撤销；**实现完成、待用户验收与提交授权**；**非 §2.1 Gate 通过**——上游无公开 owner，准入依据为用户指令 + AtomUI `ComboBox` 自身为职责完整的独立 public owner，是本文档唯一的「非 Gate 通过」例外，见「不适用」段的范围变更说明与第三批任务 16）。
 - [x] 第四批：Popup 与独立宿主，共 10 个家族。（2026-09-12 收尾：10 个家族全部按用户授权提交——ImagePreviewer、InfoFlyout、ToolTip、Tour、Drawer、DropdownButton、Message、PopupConfirm、Notification、Modal/Dialog；收尾验证 Desktop Controls 3737/3737、Generator 532/532、GalleryBase 181/181、Gallery 621/621、LLMS verify、NativeAOT `osx-arm64` 通过；真机视觉验收已关闭的家族见各自 `docs/superpowers/specs/` 验收记录，Modal/Dialog 悬停高亮由自动化回归覆盖。已知非阻塞：两条先于本批的间歇性测试抖动。）
 - [x] 第四批追加：`SplitButton`（2026-09-15 用户指令新增，原排除判定撤销；弹层侧映射上游 `Dropdown` 5 部件，触发侧补充发布 `primary` / `secondary`，共 7 部件，见第四批任务 11）。（2026-09-15：已完成并经用户授权提交 `44cd1494a`「feat(Semantic): 增加 SplitButton 语义部件并修复弹层钉住与子菜单状态递归」；第四批任务 11 的逐项检查项待回填。）
 - [x] 第五批：高密度控件，共 2 个家族。（2026-09-14：`NavMenu`（`1e22ed1a3`）与 `DataGrid`（`454cc0d00`）均已按用户授权提交，各自持有独立提交。`DataGrid` 属可选包，验证走独立工程 `tests/AtomUI.Desktop.Controls.DataGrid.Tests`。**遗留：** 三套控件的改造前后性能基线从未归档。详见[第五批任务清单](2026-08-12-semantic-part-batch-5-high-density.md)。）
@@ -106,7 +122,7 @@
 - [ ] 第二批追加：`GroupBox`（2026-09-16 用户指令新增，原排除判定撤销；**无上游 owner**，Part 按 AtomUI 自身模板职责设计，共 4 部件 + 隐式 `root`，见第二批任务 18）。
 - [x] 第六批：`ButtonSpinner`，1 个输入基座控件家族（2026-09-16 用户指令新增，原排除判定撤销；映射上游 `InputNumber` 公开并实际消费的 `root` / `prefix` / `suffix` / `input` / `actions` 分区键，见任务 6）。（2026-09-16：已完成 Gate A / Gate B，并经用户授权提交。）
 
-合计待改造：65 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu` + 2026-09-16 新增的 `GroupBox` 与 `ButtonSpinner`）。**截至 2026-09-15，前 63 个家族全部已实现并经用户授权提交；`ButtonSpinner` 已完成 Gate A / Gate B 并经用户授权提交；`GroupBox` 于 2026-09-16 进入 Gate A，待用户审核。**
+合计待改造：66 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu` + 2026-09-16 纳入的 `GroupBox`、`ButtonSpinner` 与 `ComboBox`）。**截至 2026-09-15，前 63 个家族全部已实现并经用户授权提交；`ButtonSpinner` 已完成 Gate A / Gate B 并经用户授权提交；`GroupBox` 已于 2026-09-16 完成真机视觉验收；`ComboBox` 已完成 Gate A（经用户批准）与 Gate B 实现，与 `GroupBox` 同为待用户验收/授权提交的家族。**
 
 ## 3. 单控件强制执行循环
 
@@ -214,13 +230,18 @@
 
 **计划：** [第三批任务清单](2026-08-12-semantic-part-batch-3-input-selection.md)
 
+**追加（2026-09-16）：** `ComboBox` 已纳入本批次（原排除判定彻底撤销）。它不复用 `Select` 的 internal combobox mode，
+而是直接派生 Avalonia `ComboBox` 并自有输入框、handle、模板内 Popup 与候选容器创建路径，因此以自身 public owner 身份
+发布语义契约；上游 6.6.0 无公开 `ComboBox` owner，本项**不是 §2.1 Gate 通过**，准入依据为用户指令，是本清单唯一的
+「非 Gate 通过」例外。本批次家族数由 15 增至 16。
+
 **进度（2026-09-03）：** Upload、LineEdit（含 TextArea）、SearchEdit、OtpLineEdit、NumericUpDown、Form、Transfer、AutoComplete、Cascader 已提交；NumericUpDown、Form、Transfer、AutoComplete、Cascader 五家族视觉验收已关闭（NumericUpDown、Form 经用户截图走查后确认通过；Transfer、AutoComplete 由用户授权豁免关闭；Cascader 经用户授权按裁剪范围关闭——弹层钉住与 1.6 静态判定截图确认通过，基线回归走查项裁剪，记录见 docs/superpowers/specs/ 各验收文档）；AutoComplete 的暂存实现曾随专用工作树（`feature/semantic-AutoComplete`）丢失，后已按原计划重做并提交；ColorPicker、DatePicker、Mentions、Select、TimePicker、TreeSelect 未开始。
 
 **进度（2026-09-10 复核）：** 上述“未开始”的 6 个家族随后均已按用户授权提交：ColorPicker（`9659cc7e0`，2026-09-04）、Mentions（`96930c96c`）、Select（`6f7c3bac2`）、TreeSelect（`bf570d14e`）、DatePicker（`1cc89992e`）、TimePicker（`683b7dc71`，均 2026-09-05～09-07）。视觉验收：ColorPicker、Select、DatePicker 仍为“待视觉验收”，对应 `docs/superpowers/specs/` 文档未收到用户回传截图；Mentions、TimePicker、TreeSelect 尚未建立验收文档。故 15 个家族已全部提交，但本批次收尾测试与完整视觉验收尚未关闭。
 
 - [ ] 开放 input frame/content/icon 区域前，必须分析 SizeType 和布局 Setter。
 - [ ] candidate、option、calendar 和 time panel 必须提供 Popup 打开-关闭-重新打开的证据。
-- [ ] 15 个家族全部提交后，运行输入、选择、本地化和 Gallery NativeAOT 验证。
+- [ ] 16 个家族全部提交后，运行输入、选择、本地化和 Gallery NativeAOT 验证。（2026-09-16：家族数由 15 增至 16，含当日追加的 `ComboBox`。）
 
 ### 任务 4：第四批 - Popup 与独立宿主
 
@@ -328,9 +349,10 @@ pwsh -NoLogo -NoProfile -File controlgallery/AtomUIGallery.Desktop/scripts/Publi
 
 - [x] 确认 61 个家族都通过各自经用户授权的提交达到 `Committed` 状态。（2026-09-15 复核：63 个家族全部已提交。按批次证据——第一批 16、第二批 16 + `Expander`（`be7b8dc71`）+ `TabStrip`（随 `TabControl` 提交）、第三批 15、第四批 10 + `SplitButton`（`44cd1494a`）、第五批 2 + `Menu`（随 `NavMenu` 提交 `1e22ed1a3`）。）
 
-> 2026-09-16 追加：`GroupBox` 纳入后家族总数由 63 增至 64，`ButtonSpinner` 随后纳入为第六批，总数增至 65。其中
-> `ButtonSpinner` 已完成 Gate A / Gate B 并经用户授权提交；`GroupBox` 是当前唯一未提交家族。因此本项的历史结论
-> （63 个全部 `Committed`）仍成立，但“全部家族已提交”的当前状态不再成立，需在 `GroupBox` 完成 Gate B 并获授权提交后重新核对。
+> 2026-09-16 追加：`GroupBox` 纳入后家族总数由 63 增至 64，`ButtonSpinner` 随后纳入为第六批总数 65，`ComboBox` 并入本分支
+> 后在 `feature/semantic` 基线（已含 65）之上再计入，总数 66。其中 `ButtonSpinner` 已完成 Gate A / Gate B 并经用户授权提交；
+> `GroupBox` 与 `ComboBox` 是当前未提交家族。因此本项的历史结论（63 个全部 `Committed`）仍成立，但“全部家族已提交”的当前
+> 状态不再成立，需在二者完成验收并获授权提交后重新核对。
 - [x] 重新扫描 public 控件和全部叶子主题，检查未声明的 `.semantic-*`、缺少的已批准 marker，以及 Descriptor 与文档不一致。（2026-09-15：两项扫描均已完成。
   **marker 差集：** 主题文件里 `Classes.semantic-*` 共 107 种，descriptor 声明的 `SelectorClass` 共 100 种，
   `semantic-scope-*` 锚点 23 种；主题 marker 集合与「声明 ∪ scope 锚点」的差集为**空**，即没有未声明的静态 marker。
@@ -342,10 +364,14 @@ pwsh -NoLogo -NoProfile -File controlgallery/AtomUIGallery.Desktop/scripts/Publi
 > 2026-09-15 更新：`TabStrip` 与 `Menu` 的原排除判定已经用户指令撤销并追认，两项已从本文档「不适用」清单与设计文档 §2.4
 > 移入 §2.3 纳入映射（`TabStrip` 随第二批、`Menu` 随第五批）。
 >
-> 2026-09-16 更新：`GroupBox` 的原排除判定已经用户指令撤销，从本文档「不适用」清单与设计文档 §2.4 移入 §2.3 纳入映射
-> （随第二批）。与 `TabStrip` / `Menu` 不同，`GroupBox` 在 Ant Design 稳定发布源码中没有可映射的上游 owner，纳入依据是
-> 用户直接指令而非 §2.1 的上游准入 Gate。因此本项核对范围由 16 个收缩为 14 个（三次撤销后），再收缩为 13 个；逐项撤销
-> 理由与判据见设计文档 §2.4 的日期化范围变更段。
+> 2026-09-16 更新：`GroupBox`、`ButtonSpinner` 与 `ComboBox` 的原排除判定先后经用户指令撤销，从本文档「不适用」清单与设计文档
+> §2.4 移入 §2.3 纳入映射（`GroupBox` 随第二批、`ComboBox` 随第三批、`ButtonSpinner` 随第六批）。因此本项核对范围由 16 个
+> 收缩为 14 个（`TabStrip` / `Menu` 外），再依次收缩为 13（`GroupBox`）、12（`ButtonSpinner`）、**11（`ComboBox`）**。
+>
+> 三次撤销的判据各不相同，不得混同：`GroupBox` 与 `ComboBox` 在 Ant Design 稳定发布源码中**都没有**可映射的上游 owner，
+> 纳入依据是用户直接指令（`ComboBox` 另有其自身即职责完整的独立 public owner 为依据），二者都**不是 §2.1 Gate 通过**；
+> `ButtonSpinner` 有上游 `InputNumber` 的 `actions` 分区键支撑职责对应，但同样叠加了用户指令。逐项撤销理由与判据见设计文档
+> §2.4 的日期化范围变更段，引用时不得省略，也不得据此推断其他排除项可被同样处理。
 
 - [ ] 运行全部通用测试、DataGrid 测试、LLMS verify、NativeAOT publish 和 `git diff --check`。（2026-09-15 部分完成：Desktop Controls 4031/4031、DataGrid 293/293、Generator 528/528、GalleryBase 185/185、Gallery 644/644、Docs LLMsGenerator 23/23 全绿；LLMS verify 通过（79 控件 / 161 文件）；`git diff --check` 干净。
   **NativeAOT publish 未能取证：** 沙箱环境阻止 AvaloniaUI BuildServices 写临时文件，进程挂起 1 小时 6 分无任何 artifact 产出，已终止。详见[第五批任务清单](2026-08-12-semantic-part-batch-5-high-density.md)批次收尾第 3 项。该项需在非沙箱环境重跑。）

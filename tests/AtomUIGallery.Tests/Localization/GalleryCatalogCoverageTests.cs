@@ -120,7 +120,8 @@ public class GalleryCatalogCoverageTests
                               .ToArray();
 
         sourceFiles.Length.ShouldBe(81);
-        sourceFiles.Sum(CountUnits).ShouldBe(4749);
+        // 4749（feature/semantic 基线）+ 14（ComboBox Semantic 示例新增单元）= 4763。
+        sourceFiles.Sum(CountUnits).ShouldBe(4763);
         foreach (var sourcePath in sourceFiles)
         {
             var targetPath = Path.Combine(

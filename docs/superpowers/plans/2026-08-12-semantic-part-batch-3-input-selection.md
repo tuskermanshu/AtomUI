@@ -1,8 +1,8 @@
 # Semantic Part 第三批输入与选择实施计划
 
-> **供智能体执行者使用：** 使用 `superpowers:executing-plans` 在当前会话中执行，不得使用 subagent。即使多个控件共享源码目录或 Gallery 页面，每套正式控件文档仍分别执行独立的 Gate A。
+> **供智能体执行者使用：** 使用 `superpowers:executing-plans` 在当前会话中执行，不得使用 subagent。即使多个控件共享源码目录或 Gallery 页面，每套正式控件文档仍分别执行独立的 Gate A。每个控件家族在自己的专用 worktree（`feature/semantic-<Control>`）中执行，见[总计划](2026-08-12-semantic-part-control-rollout.md)全局约束。
 
-**目标：** 为 15 个具有 Ant Design 6.6.0 稳定发布源码公开 Semantic DOM 对应 API 的输入与选择控件家族建立 Semantic Part 契约，同时保持 SizeType、原生文本编辑、Popup、候选项容器和可选包行为。
+**目标：** 为 16 个具有 Ant Design 6.6.0 稳定发布源码公开 Semantic DOM 对应 API 的输入与选择控件家族建立 Semantic Part 契约，同时保持 SizeType、原生文本编辑、Popup、候选项容器和可选包行为。（其中 `ComboBox` 为 2026-09-16 用户指令追加，**非 §2.1 Gate 通过**：上游无公开 `ComboBox` owner，准入依据为用户指令 + 其自身即职责完整的 public owner，见任务 16。）
 
 **架构：** 输入控件 owner 只公开自身稳定区域，不侵占嵌套 public 控件的模板职责。Popup Part 继续使用 selector，并受 owner 作用域约束。只有完整记录 owner、每层 wrapper 以及 `ISizeTypeAware` / `ICustomizableSizeTypeAware` 的测量路径后，才能批准可修改布局的 Part。
 
@@ -229,9 +229,26 @@
 - [x] 运行 Generator Semantic 测试、目标 Desktop 测试、GalleryBase 测试、目标 Gallery 测试、LLMS verify 和 `git diff --check`；对 Popup/可选包/运行时敏感改动执行 NativeAOT 验证。
 - [x] **强制停止：** 保持 Upload 的所有实现改动未提交，直到用户验证运行结果并明确授权提交。
 
+### 任务 16：ComboBox（2026-09-16 追加，原排除判定彻底撤销）
+
+**控件文档：** `docs/controls/desktop/navigation/combo-box/overview.md`, `docs/controls/desktop/navigation/combo-box/implementation.md`
+
+**证据范围：** `src/AtomUI.Desktop.Controls/ComboBox/**/*.cs`、`src/AtomUI.Desktop.Controls/ComboBox/Themes/*Theme.axaml`，以及已批准的共享 `Primitives/AddOnDecoratedBox` 主题；测试 `tests/AtomUI.Desktop.Controls.Tests/ComboBox`；Gallery `controlgallery/AtomUIGallery/ShowCases/Navigation/ComboBox`。
+
+**风险类型：** 直接派生 Avalonia `ComboBox`（无 AtomUI 基类）、ICustomizableSizeTypeAware、模板内 Popup、运行时容器 marker、嵌套 `ComboBoxHandle` owner、非编辑态选中内容与编辑态输入框互斥。
+
+**准入说明（必须先读）：** 本项**不是 §2.1 Gate 通过**。上游 6.6.0 没有公开 `ComboBox` owner，第 1 条不成立；原排除判定中「`Select` 的 internal combobox mode 不能作为公开 owner」继续有效。准入依据是用户指令加上 `ComboBox` 自身就是职责完整、可独立定制的 public owner（直接派生 Avalonia `ComboBox`，自有输入框、下拉 handle、模板内 Popup 与候选容器创建路径）。命名与区域分组参考上游 `Select` 已公开的语义分组，**不得发明 `ComboBox` 实际不存在的键**。
+
+- [x] **Gate A 设计审核：**（2026-09-16：已完成并经用户批准。） 审计 `ComboBox` 自身作为唯一 semantic owner，以及 `ComboBoxHandle`（internal，独立模板）、`ComboBoxItem`（public item container）、`ComboBoxTextBox`（internal）；确认前缀、内容区、占位符、编辑输入框、后缀区、下拉指示器、弹层框体、候选列表区、候选项、空态的职责与存在条件。明确排除 `Pagination` / `DataGrid` 等宿主借组合关系声明 ComboBox 区域，也排除 ComboBox 反向声明嵌套 `AddOnDecoratedBox` 的区域。记录 `SelectedContentPresenter` 与 `PART_EditableTextBox` 的互斥（`IsEditable`）、`IsAllowClear` 为未实现 API 故不发布清除部件、非编辑态 `OverflowTip` 交互、SizeType/Custom、弹层钉住打开与容器生命周期。逐项给出排除理由，避免把每个命名节点都转成 Part。
+- [x] 更新两份控件文档以及 `docs/controls/desktop/navigation/combo-box/semantic-part.md`，写明准确的 Descriptor、真实模板/运行时节点、marker 放置位置、owner 边界、排除的 internal wrapper、布局与 Popup 生命周期、兼容性边界和验证矩阵；**必须把 `overview.md` 中现有的 LLMS 占位语义表（`root` / `trigger` / `item` / `popup` / `motion`）替换为与真实 descriptor 逐条一致的契约**，该占位表是生成器 fallback 产物，与 `ComboBox` 实际结构不符；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。（2026-09-16 已完成：`overview.md`、`implementation.md`、新增 `semantic-part.md`、范围文档同步；LLMS verify 通过、`git diff --check` 干净。）
+- [x] **Gate B 实现与验证：** 新增 `src/AtomUI.Desktop.Controls/ComboBox/ComboBox.SemanticParts.cs` 并让 `ComboBox` 成为 `partial`；新增 `tests/AtomUI.Desktop.Controls.Tests/ComboBox/ComboBoxSemanticPartTests.cs`，覆盖 Descriptor 全字段与顺序、静态 marker 集合、生成专用 Style 恰好命中一个节点、"非 root 部件不生成 Style" 与 "无 code-behind 回退"、弹层打开/关闭/重新打开的弹层部件命中、候选项容器 prepare/clear/recycle 的 marker 稳定性、`IsEditable` 切换下输入框与选中内容节点的命中、所有 SizeType，以及嵌套 owner 隔离。可用 `Popup` 钉住（`IsPopupPinnedOpen`）取证弹层部件。（2026-09-16 已完成：13 个用例全绿。实现中修正了一处文档缺陷——`popup.empty` 实际只在生效过滤模式下可见，未开启过滤时 `IsEffectiveEmptyVisible` 被强制为 false。**范围追加：** 用户在真机走查中提出「输入框边框需要能做定制颜色 demo」，据此新增第 12 个部件 `frame`（`ComboBoxFrameStyle`，`ContractType=PixelAlignedBorder`，`CrossNestedOwners=true`）——其 marker 落在既有 `PART_ContentFrame` 节点上，**未新增或改造共享主题节点结构**；生成 Selector 以 `Nesting()` 起手，因此 owner 作用域隔离，`Select` / `LineEdit` 复用同一主题不受串味影响（先例：`ToolTip` 的 `container` / `arrow` 由共享 `ArrowDecoratedBoxTheme` 承载）。该部件是本次最常用的定制点：应用可直接覆盖输入框边框颜色、宽度、圆角与背景。契约、overview、implementation、changelog 已同步为 12 部件。**弹层钉住：** 用户指出 ComboBox 下拉框未按 AtomUI 标准方式钉住；核实后确认 `IsPopupPinnedOpen` 原为 internal，而同族 11 个控件（`AbstractSelect`、`AbstractAutoComplete`、`InfoPickerInput`、`Mentions`、`AbstractColorPicker`、`Menu`、`NavMenu`、`DropdownButton`、`SplitButton`、`Tour`、`FlyoutHost`）均为 public，故本次提升为 public 并逐字对齐标准 XML 注释，Gallery 预览改为标准钉住方式。附带发现：`PopupPinnedOpenContractTests` 中 `Direct_Popup_Pinned_Open_Contracts_Are_Internal` 与 `Leaf_Controls_Inherit_The_Contract_From_Their_Semantic_Owner` 两个 Theory 因 `MemberData` 不产出数据而**实际执行 0 个用例**，该 internal 断言从未生效；同一列表中多个类型早已是 public，与断言直接矛盾。本次未改测试，已记录于 changelog 供维护者处理。**遮罩遮挡整页（2026-09-16 已修复）：** 真机走查发现钉住时整页除输入框外不可交互。根因是 Avalonia 只在弹层打开瞬间读取 `IsLightDismissEnabled` 创建 light-dismiss 遮罩且该属性无变更回调，而 ComboBox 模板的 `IsOpen="{TemplateBinding IsDropDownOpen}"` 会在模板充气阶段（早于控件抑制遮罩）打开弹层，留下无法消除的遮罩层。修法采用共享 `AbstractSelect` 的既有标准：模板去掉 `IsOpen` 绑定，开合改由控件代码接管（`OnApplyTemplate` 先抑制再补开、`IsDropDownOpen` 变更经 `OpenPopup`/`ClosePopup`），原由 TwoWay 绑定承担的关闭回写改由 `Popup.Closed` 显式补齐。新增 `ComboBoxPinnedPopupOverlayTests`（6 例）断言遮罩层不存在并覆盖 `InputHitTest` 行为断言与关闭回写；预览高亮同时恢复为真实卡片悬停断言（原先因遮罩只能退化为按 marker 在场性判定）。详见 `docs/engineering/case-studies/semantic-part-popup-first-open-lifecycle-case-study.md` 的补记。）
+- [x] 运行 Generator Semantic 测试、目标 Desktop 测试、GalleryBase 测试、目标 Gallery 测试、LLMS verify 和 `git diff --check`；本项含 Popup 与运行时 marker 注入，须执行 NativeAOT 验证（若沙箱阻止 AvaloniaUI BuildServices 写入导致无法取证，如实记录为未取证，不得宣称通过）。（2026-09-16：Generator 528/528、Desktop 4043/4043、GalleryBase 185/185、Gallery 646/646、Docs LLMsGenerator 23/23、LLMS verify 79/161、`git diff --check` 干净；**NativeAOT publish 未执行**——本沙箱此前已确认会阻止 AvaloniaUI BuildServices 写入，故如实标记未取证。）
+- [x] 添加延迟创建的 Gallery Semantic Parts 页签与「Semantic Part Style」示例（4 个语言 xlf 同步），首次选择 Semantic Tab 前不得实例化 Semantic 内容；同步（2026-09-16 已完成：ShowCase 迁移到 `GalleryShowCaseHost`，新增 Semantic Parts 预览与「Custom Semantic Part styling」示例，ShowCase 条目 10 → 11，4 语言新增 14 个 key（每语言 xlf 39 → 53 unit），快照、`CatalogMemberOrder.baseline` 与 `GalleryCatalogCoverageTests` 总 unit 数同步。**弹层钉住已按标准方式落地**：`IsPopupPinnedOpen` 提升为 public 后，Gallery 预览直接用它在预览态钉住弹层并逐卡取证 12 个 marker；此前"internal 导致无法钉住、弹层部件只能由控件级测试覆盖"的记录已作废。**Gallery 预览限制已记录**：钉住时遮罩层仅放行输入框区域的指针输入（`OverlayInputPassThroughElement`，与 `Select` / `AutoComplete` 同机制），因此预览断言的判定依据是 marker 在场性而不是卡片悬停命中。**rebase 计数说明（2026-09-16）**：本项最初基于旧 `feature/semantic` 基线（当时总 unit 数 4732），rebase 到 `ea40d5481` 后基线已增至 4749，故新增 14 个 key 后的最终断言值为 4763；该值由测试实际统计 81 个源文件得出，非手工推算。） `tests/AtomUIGallery.Tests` 的 ShowCase 计数与 `Localization/CatalogMemberOrder.baseline` 基线。
+- [ ] **强制停止：** 保持 ComboBox 的所有实现改动未提交，直到用户验证运行结果并明确授权提交。真机视觉验收由用户回传截图，未回传前只能标注"待视觉验收"。
+
 ## 批次收尾
 
-- [x] 确认 15 个控件家族分别拥有用户授权的独立提交。
+- [x] 确认 15 个控件家族分别拥有用户授权的独立提交。（2026-09-16：`ComboBox` 为当日追加的第 16 个家族，尚未提交，故本条完成状态仅覆盖原 15 个家族。）
 - [ ] 运行完整 Desktop Controls、Generator、GalleryBase 和 Gallery 测试，并执行输入、选择和本地化筛选。
 - [ ] 运行 LLMS verify、Gallery NativeAOT publish 和 `git diff --check`。
 - [ ] 更新总计划清单，不额外创建批次提交。
