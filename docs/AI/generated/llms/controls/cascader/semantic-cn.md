@@ -37,7 +37,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | Cascader root 是数据源、选择、过滤、弹层与状态的组织边界。 |
 | 相关 API | 全部 Cascader public API |
 | 相关 Token | CascaderToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `prefix`
 
@@ -57,7 +57,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 选择框内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -77,7 +77,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 选择内容面板，承载占位符、单选结果文本、搜索输入与多选标签盒。 |
 | 相关 API | `PlaceholderText`、`SelectedOptionPath`、`EffectiveSelectedOptions` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `placeholder`
 
@@ -97,7 +97,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 未选择任何项时显示的占位符文本。 |
 | 相关 API | `PlaceholderText`、`PlaceholderForeground` |
 | 相关 Token | SharedToken（ColorTextPlaceholder） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `input`
 
@@ -117,7 +117,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 过滤模式（`IsFilterEnabled`）下渲染的搜索输入框；非过滤态隐藏但模板节点存在。 |
 | 相关 API | `IsFilterEnabled`、`Filter`、`FilterValue` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `suffix`
 
@@ -137,7 +137,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 内容后缀区域，承载最大数量指示、用户 `ContentRightAddOn` 与选择 handle。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`MaxCount` |
 | 相关 Token | SharedToken `ColorTextQuaternary`（默认前景） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（SelectHandle 内图标）与后缀内容跟随该颜色：
 在 `CascaderSuffixStyle` 上设置 `TextElement.Foreground` 即可同时定制箭头与后缀内容颜色（例如
@@ -162,7 +162,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 后缀 handle 内的清除按钮，`IsAllowClear` 启用、非空选择且输入区 hover / pressed 时可见。 |
 | 相关 API | `IsAllowClear`、`Clear()` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -182,7 +182,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 多选模式下选择器中的选中标签。 |
 | 相关 API | `IsMultiple`、`SelectedOptions`、`MaxTagCount`、`IsResponsiveTagMode` |
 | 相关 Token | SelectToken（MultipleItemBg、MultipleItemHeight*） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -202,7 +202,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 选中标签内的文本内容。 |
 | 相关 API | 无（随 tag 展示） |
 | 相关 Token | TagToken（TagLineHeight） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemRemove`
 
@@ -222,7 +222,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 选中标签内的移除按钮。 |
 | 相关 API | `IsClosable`（经标签机制） |
 | 相关 Token | SharedToken（IconSizeXS） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -242,7 +242,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 级联菜单弹层根 `Border`，可定制弹层边框、背景与宽度。 |
 | 相关 API | `MaxPopupHeight`、`EffectivePopupWidth`、`PopupContentPadding` |
 | 相关 Token | PopupTokenResource（PopupCornerRadius）、SharedToken（ColorBgElevated） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.list`
 
@@ -262,7 +262,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 弹层内的一条级联菜单列；过滤模式下由过滤结果列表替代，同一时刻至多一类可见。 |
 | 相关 API | `ExpandTrigger`、`Filter` |
 | 相关 Token | CascaderToken（ControlItemWidth、MenuPadding） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.listItem`
 
@@ -282,7 +282,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 菜单列中的单个选项条目，均为运行时容器创建，虚拟化回收复用时 marker 保持。 |
 | 相关 API | `OptionTemplate`、`IsAllowSelectParent` |
 | 相关 Token | CascaderToken（OptionPadding、HeaderHeight、OptionSelectedBg） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType` 不参与 selector 匹配，只约束 `x:SetterTargetType` 与兼容性下界；实现节点为 internal 类型时，
 公共契约承诺到最低 public 基类（`input`→`TextBox`、`item`→`Tag`、`popup.list`→`Control`、

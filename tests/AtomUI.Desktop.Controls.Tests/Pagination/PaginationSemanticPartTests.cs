@@ -262,7 +262,7 @@ public class PaginationSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
         part.StyleType.ShouldBeNull();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertItem(
@@ -280,7 +280,7 @@ public class PaginationSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBe(runtimeCreated);
         part.StyleType.ShouldBe(styleType);
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertInfo(SemanticPartDescriptor part)
@@ -294,7 +294,7 @@ public class PaginationSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
         part.StyleType.ShouldBe(typeof(SimplePaginationInfoStyle));
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static PaginationNavItem[] GetVisibleNavItems(Control owner)

@@ -20,7 +20,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-popup-root",
     CrossVisualRoot = true,
     ContractType = typeof(ArrowDecoratedBox),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.mask",
     SelectorClass = "semantic-popup-mask",
@@ -30,7 +30,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Control),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.section",
     SelectorClass = "semantic-container",
@@ -39,7 +39,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(AvaloniaBorder),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.cover",
     SelectorClass = "semantic-popup-cover",
@@ -49,7 +49,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.close",
     SelectorClass = "semantic-popup-close",
@@ -58,7 +58,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(AvaloniaButton),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.header",
     SelectorClass = "semantic-popup-header",
@@ -67,7 +67,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(AvaloniaBorder),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.title",
     SelectorClass = "semantic-popup-title",
@@ -77,7 +77,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.description",
     SelectorClass = "semantic-popup-description",
@@ -87,7 +87,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.footer",
     SelectorClass = "semantic-popup-footer",
@@ -96,7 +96,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(AvaloniaBorder),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.actions",
     SelectorClass = "semantic-popup-actions",
@@ -105,7 +105,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(StackPanel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.indicators",
     SelectorClass = "semantic-popup-indicators",
@@ -115,7 +115,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.indicator",
     SelectorClass = "semantic-popup-indicator",
@@ -125,7 +125,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Multiple,
     ContractType = typeof(Ellipse),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class Tour
 {
 }

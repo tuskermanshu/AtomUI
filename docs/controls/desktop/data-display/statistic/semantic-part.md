@@ -11,13 +11,13 @@ Statistic 公开 `root`、`header`、`title`、`content`、`value`、`prefix` �
 
 | Part | Selector | Style Type | ContractType | Cardinality | AtomUI 节点 | 稳定性 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `root` | Statistic 本身 | 不适用 | `Statistic` | `Single` | owner | stable since 6.0 |
-| `header` | `.semantic-header` | `StatisticHeaderStyle` | `Border` | `Single` | `Border#HeaderLayout` | stable since 6.0 |
-| `title` | `.semantic-title` | `StatisticTitleStyle` | `ContentPresenter` | `Single` | `ContentPresenter#HeaderPresenter` | stable since 6.0 |
-| `content` | `.semantic-content` | `StatisticContentStyle` | `StackPanel` | `Single` | `StackPanel#ContentLayout` | stable since 6.0 |
-| `value` | `.semantic-value` | `StatisticValueStyle` | `ContentPresenter` | `Single` | 数值 `ContentPresenter` | stable since 6.0 |
-| `prefix` | `.semantic-prefix` | `StatisticPrefixStyle` | `ContentPresenter` | `Single` | 前缀 `ContentPresenter` | stable since 6.0 |
-| `suffix` | `.semantic-suffix` | `StatisticSuffixStyle` | `ContentPresenter` | `Single` | 后缀 `ContentPresenter` | stable since 6.0 |
+| `root` | Statistic 本身 | 不适用 | `Statistic` | `Single` | owner | stable since 6.2.0 |
+| `header` | `.semantic-header` | `StatisticHeaderStyle` | `Border` | `Single` | `Border#HeaderLayout` | stable since 6.2.0 |
+| `title` | `.semantic-title` | `StatisticTitleStyle` | `ContentPresenter` | `Single` | `ContentPresenter#HeaderPresenter` | stable since 6.2.0 |
+| `content` | `.semantic-content` | `StatisticContentStyle` | `StackPanel` | `Single` | `StackPanel#ContentLayout` | stable since 6.2.0 |
+| `value` | `.semantic-value` | `StatisticValueStyle` | `ContentPresenter` | `Single` | 数值 `ContentPresenter` | stable since 6.2.0 |
+| `prefix` | `.semantic-prefix` | `StatisticPrefixStyle` | `ContentPresenter` | `Single` | 前缀 `ContentPresenter` | stable since 6.2.0 |
+| `suffix` | `.semantic-suffix` | `StatisticSuffixStyle` | `ContentPresenter` | `Single` | 后缀 `ContentPresenter` | stable since 6.2.0 |
 
 六个 selector Part 的 `SelectorRoute` 均为 `/template/ .semantic-<name>`，`Customization` 为 `Selector`，
 `CrossVisualRoot=false`，`RuntimeCreated=false`。root 的 `Customization` 为 `Root`，不生成 `.semantic-root` 或 Style Type。

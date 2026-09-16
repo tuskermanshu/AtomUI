@@ -189,7 +189,7 @@ public class ToolTipSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.CrossNestedOwners.ShouldBeTrue();
         part.RuntimeCreated.ShouldBeFalse();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldNotBeNull();
     }
 

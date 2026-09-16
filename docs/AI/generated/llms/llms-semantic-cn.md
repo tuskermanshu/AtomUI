@@ -32,7 +32,7 @@ Button 公开 `root`、`icon` 和 `content` 三个 Semantic Part。Part 名称�
 | 职责 | Button root 是动作、状态与根视觉样式的统一 owner。 |
 | 相关 API | 全部 Button public API |
 | 相关 Token | ButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -52,7 +52,7 @@ Button 公开 `root`、`icon` 和 `content` 三个 Semantic Part。Part 名称�
 | 职责 | 统一表示 Button 的用户图标和 loading 图标视觉职责。 |
 | 相关 API | `Icon`、`IsLoading`、`IconPlacement`、`IconWidth`、`IconHeight` |
 | 相关 Token | `IconSize*`、`OnlyIconSize*`、`IconMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -72,7 +72,7 @@ Button 公开 `root`、`icon` 和 `content` 三个 Semantic Part。Part 名称�
 | 职责 | 表示 Button 的用户内容展示与排版区域。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | `ContentFontSize`、`ContentLineHeight`、`FontWeight` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。
@@ -839,7 +839,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | SplitButton root 是动作内容、弹层数据、命令与状态的组织边界。 |
 | 相关 API | 全部 SplitButton public API |
 | 相关 Token | SplitButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `primary`
 
@@ -859,7 +859,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 触发侧主命令按钮区域，承载主动作内容、图标与状态视觉（AtomUI 补充部件，上游无对应）。 |
 | 相关 API | `Content`、`Icon`、`Command`、`IsPrimaryButtonType`、`IsDanger`、`SizeType` |
 | 相关 Token | ButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `secondary`
 
@@ -879,7 +879,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 触发侧次级下拉触发区域，承载 `OpenIndicator` 与弹层触发状态视觉（AtomUI 补充部件，上游无对应）。 |
 | 相关 API | `OpenIndicator`、`Flyout`、`TriggerType`、`Placement` |
 | 相关 Token | ButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -899,7 +899,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 下拉菜单弹层的根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角由 `ArrowDecoratedBox` 渲染，对应上游的 `root`）。 |
 | 相关 API | `Flyout`、`MenuItem.Items`、`MenuItem.Header`、`MenuItem.Icon` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemTitle`
 
@@ -920,7 +920,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 菜单分组标题节点（对应上游的 `itemTitle`，即 `ant-menu-item-group-title`）。 |
 | 相关 API | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -940,7 +940,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 弹层中的单个菜单项容器，承载该项的状态、内容、图标与子菜单（对应上游的 `item`）。 |
 | 相关 API | `MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemIcon`
 
@@ -961,7 +961,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 菜单项模板内的图标节点（对应上游的 `itemIcon`）。 |
 | 相关 API | `MenuItem.Icon` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -982,7 +982,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 菜单项模板内的文本内容节点（对应上游的 `itemContent`）。 |
 | 相关 API | `MenuItem.Header`、`MenuItem.HeaderTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -1317,7 +1317,7 @@ Source: ./controls/masonry/semantic-cn.md
 | 职责 | 瀑布流布局根区域，承载列数、间距、响应式、root chrome、ItemsControl 输入和 item Selector 作用域。 |
 | 相关 API | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`ItemsPanel`、`ColumnCount`、`ColumnInfo`、`MinColumnWidth`、`MaxColumnCount`、`ColumnGap`、`RowGap`、`Gutter`、`Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`、`LayoutChanged` |
 | 相关 Token | 无专属 Token；间距和列宽是实例布局状态。 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.2 `item`
 
@@ -1338,7 +1338,7 @@ Source: ./controls/masonry/semantic-cn.md
 | 职责 | 表示一个被 Masonry 测量、分配列并排列的条目容器。 |
 | 相关 API | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`Masonry.Column`、`Masonry.Span` |
 | 相关 Token | 无专属 Token；item 外观由 item 自身控件或模板负责。 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType=Control` 是有意选择：Masonry 同时支持用户直接提供任意 `Control` 作为条目，以及 `ItemsSource` 场景下由
 Avalonia 生成 `ContentPresenter`。因此 `MasonryItemStyle` 只能稳定依赖 `Control` 共有属性，例如 `Margin`、`Opacity`、
@@ -1630,7 +1630,7 @@ Source: ./controls/splitter/semantic-cn.md
 | 职责 | 分割容器根：承载 `Children` 面板集合、`Orientation` 方向语义、附加面板属性 scope、resize 事件与 Token scope；作为全部 Part 的 owner-scoped Selector 作用域边界。对应上游 `.ant-splitter`。 |
 | 相关 API | `Orientation`、`IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius`、`Splitter.Size`、`Splitter.IsResizable`、`Splitter.IsCollapsed`、`Splitter.Collapsible`、`ResizeStarted` / `ResizeDelta` / `ResizeCompleted` |
 | 相关 Token | `SplitBarHandleSize`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.2 `panel`
 
@@ -1650,7 +1650,7 @@ Source: ./controls/splitter/semantic-cn.md
 | 职责 | 统一表示可调整尺寸的内容面板：面板背景、边框、裁剪与排版入口；面板尺寸与约束由附加属性驱动。对应上游 `.ant-splitter-panel`。 |
 | 相关 API | `Splitter.Size`、`Splitter.DefaultSize`、`Splitter.MinSize`、`Splitter.MaxSize`、`Splitter.IsResizable`、`Splitter.IsCollapsed`、`Splitter.Collapsible` |
 | 相关 Token | 无专属 Token（面板内容与外观属于用户内容容器） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.3 `dragger`
 
@@ -1670,7 +1670,7 @@ Source: ./controls/splitter/semantic-cn.md
 | 职责 | 统一表示相邻面板之间的拖拽命中区：drag 输入入口、方向 cursor 与 grip 视觉宿主；命中区域尺寸由 handle 布局写入。对应上游 `.ant-splitter-bar`。 |
 | 相关 API | `IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius` |
 | 相关 Token | `SplitTriggerSize`、`SplitBarDraggableSize`、`HandleLineThickness`、`HandleLineColor`、`HandleLineHoverColor`、`HandleLineDragColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.4 marker 放置与路由
 
@@ -2419,7 +2419,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | DropdownButton root 是动作内容、菜单数据、弹层与状态的组织边界。 |
 | 相关 API | 全部 DropdownButton public API |
 | 相关 Token | DropdownButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -2439,7 +2439,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 下拉菜单弹层的根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角由 `ArrowDecoratedBox` 渲染，对应上游的 `root`）。 |
 | 相关 API | `DropdownFlyout`、`Items`、`ItemTemplate`、`ItemContainerTheme` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemTitle`
 
@@ -2460,7 +2460,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 菜单分组标题节点（对应上游的 `itemTitle`，即 `ant-menu-item-group-title`）。 |
 | 相关 API | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -2480,7 +2480,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 弹层中的单个菜单项容器，承载该项的状态、内容、图标与子菜单（对应上游的 `item`）。 |
 | 相关 API | `Items`、`MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items`、`ItemTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemIcon`
 
@@ -2501,7 +2501,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 菜单项模板内的图标节点（对应上游的 `itemIcon`）。 |
 | 相关 API | `MenuItem.Icon` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -2522,7 +2522,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 菜单项模板内的文本内容节点（对应上游的 `itemContent`）。 |
 | 相关 API | `MenuItem.Header`、`MenuItem.HeaderTemplate`、`ItemTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -4655,7 +4655,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | Cascader root 是数据源、选择、过滤、弹层与状态的组织边界。 |
 | 相关 API | 全部 Cascader public API |
 | 相关 Token | CascaderToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `prefix`
 
@@ -4675,7 +4675,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 选择框内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -4695,7 +4695,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 选择内容面板，承载占位符、单选结果文本、搜索输入与多选标签盒。 |
 | 相关 API | `PlaceholderText`、`SelectedOptionPath`、`EffectiveSelectedOptions` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `placeholder`
 
@@ -4715,7 +4715,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 未选择任何项时显示的占位符文本。 |
 | 相关 API | `PlaceholderText`、`PlaceholderForeground` |
 | 相关 Token | SharedToken（ColorTextPlaceholder） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `input`
 
@@ -4735,7 +4735,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 过滤模式（`IsFilterEnabled`）下渲染的搜索输入框；非过滤态隐藏但模板节点存在。 |
 | 相关 API | `IsFilterEnabled`、`Filter`、`FilterValue` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `suffix`
 
@@ -4755,7 +4755,7 @@ Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的
 | 职责 | 内容后缀区域，承载最大数量指示、用户 `ContentRightAddOn` 与选择 handle。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`MaxCount` |
 | 相关 Token | SharedToken `ColorTextQuaternary`（默认前景） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（SelectHandle 内图标）与后缀内容跟随该颜色：
 在 `CascaderSuffixStyle` 上设置 `TextElement.Foreground` 即可同时定制箭头与后缀内容颜色（例如
@@ -4780,7 +4780,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 后缀 handle 内的清除按钮，`IsAllowClear` 启用、非空选择且输入区 hover / pressed 时可见。 |
 | 相关 API | `IsAllowClear`、`Clear()` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -4800,7 +4800,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 多选模式下选择器中的选中标签。 |
 | 相关 API | `IsMultiple`、`SelectedOptions`、`MaxTagCount`、`IsResponsiveTagMode` |
 | 相关 Token | SelectToken（MultipleItemBg、MultipleItemHeight*） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -4820,7 +4820,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 选中标签内的文本内容。 |
 | 相关 API | 无（随 tag 展示） |
 | 相关 Token | TagToken（TagLineHeight） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemRemove`
 
@@ -4840,7 +4840,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 选中标签内的移除按钮。 |
 | 相关 API | `IsClosable`（经标签机制） |
 | 相关 Token | SharedToken（IconSizeXS） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -4860,7 +4860,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 级联菜单弹层根 `Border`，可定制弹层边框、背景与宽度。 |
 | 相关 API | `MaxPopupHeight`、`EffectivePopupWidth`、`PopupContentPadding` |
 | 相关 Token | PopupTokenResource（PopupCornerRadius）、SharedToken（ColorBgElevated） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.list`
 
@@ -4880,7 +4880,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 弹层内的一条级联菜单列；过滤模式下由过滤结果列表替代，同一时刻至多一类可见。 |
 | 相关 API | `ExpandTrigger`、`Filter` |
 | 相关 Token | CascaderToken（ControlItemWidth、MenuPadding） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.listItem`
 
@@ -4900,7 +4900,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 菜单列中的单个选项条目，均为运行时容器创建，虚拟化回收复用时 marker 保持。 |
 | 相关 API | `OptionTemplate`、`IsAllowSelectParent` |
 | 相关 Token | CascaderToken（OptionPadding、HeaderHeight、OptionSelectedBg） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType` 不参与 selector 匹配，只约束 `x:SetterTargetType` 与兼容性下界；实现节点为 internal 类型时，
 公共契约承诺到最低 public 基类（`input`→`TextBox`、`item`→`Tag`、`popup.list`→`Control`、
@@ -5172,7 +5172,7 @@ Source: ./controls/check-box/semantic-cn.md
 ## Semantic Parts
 
 CheckBox 主控件公开 `root`、`icon` 与 `label` 三个职责区域，与上游稳定 Semantic DOM
-（`root` / `icon` / `label`，均 since 6.0.0）对齐。`icon` 对应复选框指示框区域，由模板中的 `CheckBoxIndicator`
+（`root` / `icon` / `label`，均 since 6.2.0）对齐。`icon` 对应复选框指示框区域，由模板中的 `CheckBoxIndicator`
 节点承载；`label` 对应文本区域，由模板中的 `ContentPresenter` 节点承载。
 
 `CheckBoxGroup`、`CheckBoxItemsControl` 与 `CheckBoxIndicator` 均不持有独立 Semantic descriptor：上游 Checkbox.Group
@@ -5376,7 +5376,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 触发器容器：边框、圆角、尺寸、状态与布局的组织边界。 |
 | 相关 API | `SizeType`、`Status`、`BorderBrush`、`TriggerPadding` 等 owner public API |
 | 相关 Token | ColorPickerToken、SharedToken（ColorBorder、BorderRadius*） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -5396,7 +5396,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 触发器内的色块容器，承载底色、空色斜线与棋盘格呈现。 |
 | 相关 API | `ColorBlockSize`、`ColorBlockBackground` |
 | 相关 Token | ColorPickerHandlerSize*、ColorBlockInnerShadows |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -5416,7 +5416,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 色块颜色元素，呈现实际选择的颜色填充。 |
 | 相关 API | —（随 owner 的 `Value` 联动，不单独开放） |
 | 相关 Token | ColorBlockInnerShadows |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `description`
 
@@ -5436,7 +5436,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 触发器文本区：单色模式显示格式化颜色文本；渐变模式显示逐 stop 文本格。 |
 | 相关 API | `IsTextVisible`、`ColorTextFormatter`（attached）、`Format` |
 | 相关 Token | TriggerTextMargin、SharedToken（FontSize*、ColorText） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -5456,7 +5456,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 弹层根容器：承载弹层边框、背景类视觉的定制入口；弹层 View 本身由 `CreatePresenter()` 动态创建，不经此 Part 发布。 |
 | 相关 API | `IsPopupPinnedOpen`（6.0 公共化）、`Placement`、`IsArrowVisible` |
 | 相关 Token | ColorPickerInsetShadow、SharedToken（ColorBgElevated） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### GradientColorPicker 差异
 
@@ -5649,7 +5649,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | owner 是日期值、格式化、弹层状态、Form 值与验证状态的组织边界；owner 级 `BorderBrush` 经控件中继为输入框边框颜色（root 级定制入口，未设置时恢复共享状态机）。 |
 | 相关 API | 全部 DatePicker / RangeDatePicker public API |
 | 相关 Token | DatePickerToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `prefix`
 
@@ -5669,7 +5669,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 输入区内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `input`
 
@@ -5689,7 +5689,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 日期文本输入框，承载格式化显示值、占位符与只读/校验状态。 |
 | 相关 API | `Text`、`PlaceholderText`、`Format`、`IsReadOnly`、`PreferredInputWidth` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `secondaryInput`（仅 RangeDatePicker）
 
@@ -5709,7 +5709,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 范围选择的结束端日期文本输入框，与 `input` 共用格式与宽度基线。 |
 | 相关 API | `SecondaryText`、`SecondaryPlaceholderText` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `suffix`
 
@@ -5729,7 +5729,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 输入区后缀区域，承载清除按钮、Form 反馈与用户后缀内容。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `clear`
 
@@ -5750,7 +5750,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 后缀区清除按钮，进入清除模式（hover / focus）时渲染。 |
 | 相关 API | `ShowClearButtonPredicate`（DatePicker）/ 范围清除行为（RangeDatePicker） |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.root`
 
@@ -5770,7 +5770,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 弹层内容根视觉盒子，承载背景、边框、阴影与浮动箭头；`BorderThickness` 定制为非零时盒子进入 `:bordered` 状态，内置主题自动隐藏浮动箭头（内置视觉不支持箭头与边框的融合呈现）。 |
 | 相关 API | `IsArrowVisible`（经 `IsArrowVisibleEffective`）、`ArrowPosition`、`IsMotionEnabled` |
 | 相关 Token | PopupToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.container`
 
@@ -5790,7 +5790,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 日历面板内容容器，组织主体区与底部按钮区的布局。 |
 | 相关 API | 无（面板内容布局容器） |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.header`
 
@@ -5810,7 +5810,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 日历年月导航头部，承载年月标题与前进/后退/翻年按钮。 |
 | 相关 API | 无（导航按钮交互由 CalendarView 内部承担） |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.body`
 
@@ -5830,7 +5830,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 日期面板表格容器，按月视图/年视图模式承载表格布局。 |
 | 相关 API | 无 |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.content`
 
@@ -5850,7 +5850,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 单个月份的 7×7 日期表格本体（含周序号列变体），承载日期格子与周头标题。 |
 | 相关 API | 无（随 `popup.body` 呈现） |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.cell`
 
@@ -5870,7 +5870,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 日期格子按钮，承载可选日期、选中/范围/今天/禁用等状态视觉（伪类见 overview）。 |
 | 相关 API | 无（随 `popup.content` 呈现） |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.footer`
 
@@ -5890,7 +5890,7 @@ Source: ./controls/date-picker/semantic-cn.md
 | 职责 | 面板底部操作区，承载此刻/今天/确认按钮。 |
 | 相关 API | `IsNeedConfirm`、`IsShowNow` |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -6132,7 +6132,7 @@ Avalonia 原生 owner 样式（`atom|Form` 类型 selector、ControlTheme、实�
 | 职责 | 承载字段布局、验证状态、内容接入和 owner-scoped Semantic Style 入口。 |
 | 相关 API | `Layout`、`LabelAlign`、`ValidateStatus`、`ValidateResult`、`IsRequired`、`Content` |
 | 相关 Token | `FormToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 FormItem 整体 `Margin`、`Opacity`、对齐和
 尺寸约束；标签列与内容列的 Grid 几何由 `PART_BodyLayout` 布局算法拥有（见实现原理 §7.1），不通过 Semantic
@@ -6157,7 +6157,7 @@ descriptor。
 | 职责 | 承载 `LabelText` 的文本呈现，包含颜色、字号、对齐和换行。 |
 | 相关 API | `LabelText`、`LabelAlign`、`LabelWrapping`、`IsHideItemLabel` |
 | 相关 Token | `LabelColor`、`LabelFontSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `label` 对齐上游 `classNames.label` 的文本语义：标记（冒号、必填星号、可选文案、tooltip 图标和自定义
 mark）拥有各自的 token 驱动样式，不属于 `label` Part。它适合定制 `Foreground`、`FontSize`、`TextAlignment`、
@@ -6186,7 +6186,7 @@ Semantic Style 覆盖。
 | 职责 | 承载 `Content` 输入控件的最终呈现位置。 |
 | 相关 API | `Content`、`IsValidateContentType`、`ChildrenSpacing` |
 | 相关 Token | `FormItemSpacing`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `content` 对齐上游 `classNames.content` 语义，是内容呈现区域，
 不等于用户 `Content` 子控件本身。适合定制 `Margin`、`Opacity`、`VerticalAlignment` 和 presenter 级排版属性；
@@ -6215,7 +6215,7 @@ owner 契约拥有。
 | 职责 | 承载 `Extra` 与 `ExtraTemplate` 的最终呈现。 |
 | 相关 API | `Extra`、`ExtraTemplate` |
 | 相关 Token | SharedToken `ColorTextDescription`、`ControlHeightSM` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `extra` 对齐上游 `classNames.extra` 语义，是 `Extra` API 的呈现区域。呈现位置与上游一致：位于输入控件
 与 help 区域（`additional` 区）下方、与内容列对齐，不占用控件水平空间；默认主题使用说明文字色
@@ -6241,7 +6241,7 @@ owner 契约拥有。
 | 职责 | 承载验证消息与 `Help` 文案的聚合展示区域。 |
 | 相关 API | `Help`、`ValidateStatus`、`ErrorMessageForeground`、`WarningMessageForeground` |
 | 相关 Token | `FormItemSpacing`、`ColorErrorText`、`ColorWarningText`、`ColorTextDescription` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `help` 对齐上游 `classNames.help`（ErrorList 根节点）语义，覆盖同一段视觉职责：验证错误消息、警告
 消息和 `Help` 帮助文案共同居住在该区域，逐条内容以 `helpItem` 节点呈现（§1.6）。`HasErrorOrWarningMsg=False`
@@ -6270,7 +6270,7 @@ marker 始终存在，数量语义为 `Single`。
 | 职责 | 承载单条验证错误、警告消息或 `Help` 帮助文案的文本呈现。 |
 | 相关 API | `Help`、`ValidateStatus`、`ErrorMessageForeground`、`WarningMessageForeground` |
 | 相关 Token | `ColorErrorText`、`ColorWarningText`、`ColorTextDescription` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `helpItem` 对齐上游 `classNames.helpItem`（ErrorList 逐条消息项）语义。FormItem 在验证结果变化时以代码逐条
 创建消息 `TextBlock`，使用生成的 semantic class 常量添加 marker，并按"错误与警告消息在前、`Help` 文案在后"
@@ -6538,7 +6538,7 @@ descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scope
 | 职责 | 承载文本值、输入状态、尺寸、variant、验证状态和 owner-scoped Semantic Style 入口。 |
 | 相关 API | `Text`、`SizeType`、`StyleVariant`、`Status`、`IsEnabled`、`IsReadOnly`、`IsAllowClear`、`IsShowCount`、`Background`、`BorderBrush` |
 | 相关 Token | SharedToken、`LineEditToken` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 LineEdit 整体 `Background`、`BorderBrush`、
 `BorderThickness`、`Opacity`、对齐和尺寸约束；其中 `Background` / `BorderBrush` 由 `AbstractTextInput` 以 LocalValue
@@ -6564,7 +6564,7 @@ descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scope
 | 职责 | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 |
 | 相关 API | `InnerLeftContent`、`InnerLeftContentTemplate` |
 | 相关 Token | `SpacingXXS`、输入尺寸 padding |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `prefix` 是 LineEdit 模板中的稳定 presenter。internal `AddOnContentPresenter` 保留 template-only 场景的 child 创建与可见性
 语义，同时通过 public 基类 `ContentPresenter` 约束 Setter。`InnerLeftContent=null` 且 template 也为 null 时 presenter 仍属于
@@ -6589,7 +6589,7 @@ descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scope
 | 职责 | 绘制当前文本、光标、选择范围和密码 reveal 结果。 |
 | 相关 API | `Text`、`CaretIndex`、`SelectionStart`、`SelectionEnd`、`PasswordChar`、`RevealPassword` |
 | 相关 Token | `FontSize`、`LineHeight`、选择色与 caret 资源 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `input` 的最低 public `ContractType` 是 Avalonia `TextPresenter`，而不是 internal 实现细节。它适合定制 `Opacity`、
 `FontSize`、`FontWeight`、`FontStyle`、`TextAlignment` 和局部 Margin。文本 viewport、选择布局、caret 与密码显示仍属于文本输入
@@ -6613,7 +6613,7 @@ descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scope
 | 职责 | 组织 clear、reveal、Form feedback、内部右侧内容和 count 的横向布局。 |
 | 相关 API | `InnerRightContent`、`InnerRightContentTemplate`、`IsAllowClear`、`IsEnableRevealButton`、`IsShowCount` |
 | 相关 Token | `UniformlyPaddingXXS`、输入尺寸 padding |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `suffix` 是稳定的布局区域，不等于用户 `InnerRightContent` 本身。适合定制 `Spacing`、`Opacity`、`Margin`、对齐和布局方向；
 clear 与 count 仍拥有各自更窄的 Part。reveal、Form feedback 和用户右侧内容没有独立 Semantic Part，其内部结构也不由
@@ -6637,7 +6637,7 @@ clear 与 count 仍拥有各自更窄的 Part。reveal、Form feedback 和用户
 | 职责 | 提供清除当前文本的操作入口。 |
 | 相关 API | `IsAllowClear`、`ClearIcon`、`IsReadOnly`、`Text` |
 | 相关 Token | clear 按钮主题与 SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `clear` 节点始终存在，`IsEffectiveShowClearButton` 只切换可见性。它适合定制 `Opacity`、`Margin`、`Padding`、`Cursor` 和
 Button 级交互属性；清除命令仍必须进入 `NotifyClearButtonClicked()` / `Clear()` 的统一行为，不通过样式替换文本状态源。
@@ -6660,7 +6660,7 @@ Button 级交互属性；清除命令仍必须进入 `NotifyClearButtonClicked()
 | 职责 | 展示当前文本长度与 `MaxLength` 的计数文案。 |
 | 相关 API | `IsShowCount`、`Text`、`MaxLength` |
 | 相关 Token | `ColorTextPlaceholder`、字体与行高资源 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `count` 节点始终存在，`IsShowCount=false` 只切换可见性。它适合定制 `Foreground`、`FontSize`、`FontWeight`、`Opacity`、
 `Margin` 和对齐；计数格式和刷新时机由 `AbstractTextInput` 维护，不属于 Semantic Style。
@@ -6686,7 +6686,7 @@ Button 级交互属性；清除命令仍必须进入 `NotifyClearButtonClicked()
 | AtomUI 节点 | internal `SearchEditDecoratedBox` 模板内的 `atom:Button#PART_RightAddOn` |
 | 职责 | 承载搜索动作按钮的根视觉、文字与图标（loading 状态沿用按钮自身的 loading 呈现）。 |
 | 相关 API | `SearchButtonStyle`、`SearchButtonText`、`SearchButtonTheme`、`IsOperating` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `button` 的 marker 由 `SearchEditDecoratedBox` 在模板应用后通过 C# 追加（RuntimeCreated 契约），因此主题资产内没有
 静态 `Classes.semantic-button` 声明。`SearchEdit` 不提供 `count` Part：其模板不包含计数指示器。`root` 不生成 Style；
@@ -6713,7 +6713,7 @@ route、`ContractType` 与 LineEdit 同名 Part 一致（`TextArea*` Style 前�
 | AtomUI 节点 | `InputTextPresenter#PART_TextPresenter` |
 | 职责 | 承载多行文本的输入、光标、选择与换行展示。 |
 | 相关 API | `Text`、`Lines`、`MinLines`、`MaxLines`、`IsAutoSize`、`IsResizable` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `TextArea` 的 `count` 位于 owner 模板底部（DockPanel 下缘），route 为默认 `/template/ .semantic-count`；`clear`
 位于右侧 addon 区，route 与 LineEdit 同形。`TextArea` 不提供 `prefix` / `suffix` Part；resize handle 与
@@ -7024,7 +7024,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | Mentions root 是文本值、触发符、候选数据、过滤、弹层与 Form 状态的组织边界。 |
 | 相关 API | 全部 Mentions public API |
 | 相关 Token | MentionsToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `prefix`
 
@@ -7044,7 +7044,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 输入内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -7064,7 +7064,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 输入内容面板，承载占位符和多行文本 presenter。 |
 | 相关 API | `Value`、`PlaceholderText`、`Lines`、`MinLines`、`MaxLines`、`IsAutoSize` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `placeholder`
 
@@ -7084,7 +7084,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 空文本状态下的占位符文本。 |
 | 相关 API | `PlaceholderText`、`PlaceholderForeground`（经 TextArea） |
 | 相关 Token | SharedToken（ColorTextPlaceholder） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `input`
 
@@ -7104,7 +7104,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 多行文本编辑 presenter，承载 `Value` 文本与 caret/selection 状态。 |
 | 相关 API | `Value`、`IsReadOnly`、`IsAutoFocus` |
 | 相关 Token | SharedToken（ColorText、SelectionBackground、CaretBrush） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `clear`
 
@@ -7124,7 +7124,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 输入区后缀内的清除按钮，`IsAllowClear` 启用且内容非空时可见。 |
 | 相关 API | `IsAllowClear`、`ClearIcon` |
 | 相关 Token | SharedToken（IconSizeXS） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -7144,7 +7144,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 候选弹层根 `Border`，可定制弹层边框、背景、宽度与圆角。 |
 | 相关 API | `MaxPopupHeight`、`MinPopupWidth`、`PopupContentPadding` |
 | 相关 Token | PopupTokenResource（PopupCornerRadius）、SharedToken（ColorBgElevated） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.list`
 
@@ -7164,7 +7164,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 弹层内候选列表容器，承载过滤后的候选项。 |
 | 相关 API | `OptionsSource`、`Filter`、`FilterValueSelector`、`OptionTemplate` |
 | 相关 Token | MentionsToken（OptionHeight）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.listItem`
 
@@ -7184,7 +7184,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 候选列表中的单个选项条目，运行时容器创建，虚拟化回收复用时 marker 保持。 |
 | 相关 API | `OptionTemplate`、`DisplayCandidateCount` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType` 不参与 selector 匹配，只约束 `x:SetterTargetType` 与兼容性下界；实现节点为 internal 类型时，
 公共契约承诺到最低 public 基类（`input`→`TextPresenter`、`clear`→`Button`）。
@@ -7399,7 +7399,7 @@ Source: ./controls/numeric-up-down/semantic-cn.md
 | 职责 | 承载数值、尺寸、variant、验证状态和 owner-scoped Semantic Style 入口。 |
 | 相关 API | `Value`、`FormatString`、`SizeType`、`StyleVariant`、`Status`、`IsEnabled`、`IsReadOnly`、`IsAllowClear`、`Increment`、`Maximum`、`Minimum` |
 | 相关 Token | SharedToken、`NumericUpDownToken`、`ButtonSpinnerToken` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 NumericUpDown 整体 `BorderBrush`、`Opacity`、对齐和
 尺寸约束；`BorderBrush` 会以 LocalValue 中继到输入 frame 生效（对齐 LineEdit 与上游 `styles.root.borderColor`
@@ -7424,7 +7424,7 @@ variant、effective status 与 CompactSpace 的状态归一仍由共享 frame �
 | 职责 | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 |
 | 相关 API | `InnerLeftContent`、`InnerLeftContentTemplate` |
 | 相关 Token | `SpacingXXS`、输入尺寸 padding |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `prefix` 是 NumericUpDown 模板中的稳定 presenter，通过 `ButtonSpinner.InnerLeftContent` 传递并由共享 frame 结构的
 content 前缀槽呈现，两个模板变体的呈现槽一致。`InnerLeftContent=null` 且 template 也为 null 时 presenter 仍属于
@@ -7449,7 +7449,7 @@ content 前缀槽呈现，两个模板变体的呈现槽一致。`InnerLeftConte
 | 职责 | 承载数值文本的编辑表面，包含字体、文本对齐、光标与选择呈现。 |
 | 相关 API | `Text`、`PlaceholderText`、`IsReadOnly`、`IsStringMode`、`FormatString`、`IsKeyboardEnabled` |
 | 相关 Token | `FontSize`、文本与 caret 资源 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `input` 的最低 public `ContractType` 是 AtomUI `TextBox`，而不是 internal `EmbeddedTextBox` 实现细节。与 LineEdit 的
 `input`（TextPresenter）不同，NumericUpDown 的文本编辑表面由内嵌 `TextBox` 承担，marker 位于 owner 模板内的
@@ -7475,7 +7475,7 @@ content 前缀槽呈现，两个模板变体的呈现槽一致。`InnerLeftConte
 | 职责 | 组织 clear 与 `InnerRightContent` 的横向布局。 |
 | 相关 API | `InnerRightContent`、`InnerRightContentTemplate`、`IsAllowClear` |
 | 相关 Token | `UniformlyPaddingXXS`、输入尺寸 padding |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `suffix` 是稳定的布局区域，不等于用户 `InnerRightContent` 本身。适合定制 `Spacing`、`Opacity`、`Margin` 和对齐；
 clear 与用户右侧内容仍各有边界，用户内容子树不由 `suffix` 契约继续展开。
@@ -7498,7 +7498,7 @@ clear 与用户右侧内容仍各有边界，用户内容子树不由 `suffix` �
 | 职责 | 提供清空当前数值的操作入口。 |
 | 相关 API | `IsAllowClear`、`ClearIcon`、`IsReadOnly`、`Text` |
 | 相关 Token | clear 按钮主题与 SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `clear` 节点始终存在于两个模板变体的输入段内（与 `input` 同级，紧贴输入文本右缘），`IsEffectiveShowClearButton` 只切换可见性。它适合定制 `Opacity`、`Margin`、`Cursor` 和
 Button 级交互属性；清除命令仍进入 `NotifyClearButtonClicked()` 的统一行为。
@@ -7991,7 +7991,7 @@ Source: ./controls/radio-button/semantic-cn.md
 ## Semantic Parts
 
 RadioButton 主控件公开 `root`、`icon` 与 `label` 三个职责区域，与上游稳定 Semantic DOM
-（`root` / `icon` / `label`，均 since 6.0.0）对齐。`icon` 对应单选指示圆环区域，由模板中的 `RadioIndicator`
+（`root` / `icon` / `label`，均 since 6.2.0）对齐。`icon` 对应单选指示圆环区域，由模板中的 `RadioIndicator`
 节点承载；`label` 对应文本区域，由模板中的 `ContentPresenter` 节点承载。
 
 `RadioButtonGroup`、`RadioIndicator` 与 `OptionButton` / `OptionButtonGroup` 均不持有独立 Semantic descriptor：
@@ -8582,7 +8582,7 @@ Select 是唯一 Semantic owner，公开 13 个 Semantic Part（语义对齐：`
 | 职责 | Select root 是数据源、选择、过滤、弹层与状态的组织边界。 |
 | 相关 API | 全部 Select public API |
 | 相关 Token | SelectToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `prefix`
 
@@ -8602,7 +8602,7 @@ Select 是唯一 Semantic owner，公开 13 个 Semantic Part（语义对齐：`
 | 职责 | 选择框内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -8622,7 +8622,7 @@ Select 是唯一 Semantic owner，公开 13 个 Semantic Part（语义对齐：`
 | 职责 | 选择内容面板，承载占位符、单选结果文本、搜索输入与多选标签盒。 |
 | 相关 API | `PlaceholderText`、`SelectedOption`、`SelectedOptions` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `placeholder`
 
@@ -8642,7 +8642,7 @@ Select 是唯一 Semantic owner，公开 13 个 Semantic Part（语义对齐：`
 | 职责 | 未选择任何项时显示的占位符文本。 |
 | 相关 API | `PlaceholderText`、`PlaceholderForeground` |
 | 相关 Token | SharedToken（ColorTextPlaceholder） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `input`
 
@@ -8662,7 +8662,7 @@ Select 是唯一 Semantic owner，公开 13 个 Semantic Part（语义对齐：`
 | 职责 | 过滤模式（`IsFilterEnabled`）下渲染的搜索输入框；单选态为模板静态节点（非过滤态隐藏但节点存在），多选/标签态为标签盒内运行时搜索框。 |
 | 相关 API | `IsFilterEnabled`、`Filter`、`FilterValue` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `suffix`
 
@@ -8682,7 +8682,7 @@ Select 是唯一 Semantic owner，公开 13 个 Semantic Part（语义对齐：`
 | 职责 | 内容后缀区域，承载最大数量指示、用户 `ContentRightAddOn` 与选择 handle。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`MaxCount` |
 | 相关 Token | SharedToken `ColorTextQuaternary`（默认前景） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（SelectHandle 内图标）与后缀内容跟随该颜色：
 在 `SelectSuffixStyle` 上设置 `TextElement.Foreground` 即可同时定制箭头与后缀内容颜色（例如
@@ -8707,7 +8707,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 后缀 handle 内的清除按钮，`IsAllowClear` 启用、非空选择且输入区 hover / pressed 时可见。 |
 | 相关 API | `IsAllowClear`、`Clear()` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -8727,7 +8727,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 多选模式下选择器中的选中标签。 |
 | 相关 API | `Mode=Multiple`、`SelectedOptions`、`MaxTagCount`、`IsResponsiveTagMode` |
 | 相关 Token | SelectToken（MultipleItemBg、MultipleItemHeight*） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -8747,7 +8747,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 选中标签内的文本内容。 |
 | 相关 API | 无（随 tag 展示） |
 | 相关 Token | TagToken（TagLineHeight） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemRemove`
 
@@ -8767,7 +8767,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 选中标签内的移除按钮。 |
 | 相关 API | `IsClosable`（经标签机制） |
 | 相关 Token | SharedToken（IconSizeXS） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -8787,7 +8787,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 候选弹层根 `Border`，可定制弹层边框、背景与宽度。 |
 | 相关 API | `MaxPopupHeight`、`EffectivePopupWidth`、`PopupContentPadding` |
 | 相关 Token | PopupTokenResource（PopupCornerRadius）、SharedToken（ColorBgElevated） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.list`
 
@@ -8807,7 +8807,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 弹层内候选列表容器，承载过滤后的候选项。 |
 | 相关 API | `OptionsSource`、`Filter`、`IsGroupEnabled` |
 | 相关 Token | SelectToken（OptionPadding、OptionSelectedBg） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.listItem`
 
@@ -8827,7 +8827,7 @@ suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（Select
 | 职责 | 候选列表中的单个选项条目，运行时容器创建，虚拟化回收复用时 marker 保持。 |
 | 相关 API | `OptionTemplate`、`IsHideSelectedOptions` |
 | 相关 Token | SelectToken（OptionPadding、HeaderHeight、OptionSelectedBg） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType` 不参与 selector 匹配，只约束 `x:SetterTargetType` 与兼容性下界；实现节点为 internal 类型时，
 公共契约承诺到最低 public 基类（`input`→`TextBox`、`item`→`Tag`、`popup.list`→`Control`、
@@ -9109,7 +9109,7 @@ Source: ./controls/slider/semantic-cn.md
 | 职责 | 数值选择控件根：承载 `Minimum` / `Maximum` / `Value` / `RangeValues` 值状态、方向、轨道与 mark 配置、键盘与 pointer 交互会话、Tooltip 与 Form 集成；作为全部 Part 的 owner-scoped Selector 作用域边界。对应上游 `.ant-slider`。 |
 | 相关 API | `Orientation`、`IsDirectionReversed`、`IsSnapToTickEnabled`、`TickFrequency`、`IsRangeMode`、`RangeValues`、`DisabledHandles`、`IsDraggableTrack`、`TrackBarBrush`、`TracksBrush`、`Marks`、`IsIncluded`、`ValueFormatTemplate`、`IsMotionEnabled` |
 | 相关 Token | `SliderPaddingHorizontal`、`SliderPaddingVertical`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.2 `rail`
 
@@ -9129,7 +9129,7 @@ Source: ./controls/slider/semantic-cn.md
 | 职责 | 统一表示背景轨道区域：rail 画刷、胶囊圆角与过渡；对应上游 `.ant-slider-rail`。 |
 | 相关 API | `TrackGrooveBrush`（SliderTrack）、`IsEnabled`、`Orientation` |
 | 相关 Token | `RailBg`、`RailHoverBg`、`RailSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.3 `tracks`
 
@@ -9149,7 +9149,7 @@ Source: ./controls/slider/semantic-cn.md
 | 职责 | 统一表示整体活动范围容器：Range 模式覆盖首尾 handle 之间的整段跨度，单值模式覆盖最小到当前值的跨度；对应上游 `.ant-slider-tracks`。 |
 | 相关 API | `TracksBrush`、`IsRangeMode`、`IsIncluded`、`IsDraggableTrack` |
 | 相关 Token | 无专属 Token（默认画刷为 null） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.4 `track`
 
@@ -9169,7 +9169,7 @@ Source: ./controls/slider/semantic-cn.md
 | 职责 | 统一表示相邻 handle 之间的活动轨道段：segment 画刷、胶囊圆角与过渡；对应上游 `.ant-slider-track`。 |
 | 相关 API | `TrackBarBrush`、`RangeValues`、`IsIncluded`、`IsDraggableTrack` |
 | 相关 Token | `TrackBg`、`TrackHoverBg`、`TrackBgDisabled`、`SliderTrackSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.5 `handle`
 
@@ -9189,7 +9189,7 @@ Source: ./controls/slider/semantic-cn.md
 | 职责 | 统一表示滑块控制点：圆点背景、边框、outline、hover / focus / pressed / disabled 视觉与 Tooltip 宿主；对应上游 `.ant-slider-handle`。 |
 | 相关 API | `SliderThumb.OutlineBrush`、`SliderThumb.OutlineThickness`、`SliderThumb.ThumbCircleSize`、`DisabledHandles`、`ValueFormatTemplate` |
 | 相关 Token | `ThumbSize`、`ThumbCircleSize`、`ThumbCircleSizeHover`、`ThumbCircleBorderColor`、`ThumbCircleBorderActiveColor`、`ThumbCircleBorderColorDisabled`、`ThumbCircleBorderThickness`、`ThumbCircleBorderThicknessHover`、`ThumbOutlineColor`、`ThumbOutlineThickness` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.6 marker 放置与路由
 
@@ -9450,7 +9450,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | owner 是时间值、约束、弹层状态、Form 值与验证状态的组织边界。 |
 | 相关 API | 全部 TimePicker / RangeTimePicker public API |
 | 相关 Token | TimePickerToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `prefix`
 
@@ -9470,7 +9470,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 输入区内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `input`
 
@@ -9490,7 +9490,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 时间文本输入框，承载格式化显示值、占位符与只读/校验状态。 |
 | 相关 API | `Text`、`PlaceholderText`、`IsReadOnly`、`PreferredInputWidth` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `secondaryInput`（仅 RangeTimePicker）
 
@@ -9510,7 +9510,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 范围选择的结束端时间文本输入框，与 `input` 共用格式与宽度基线。 |
 | 相关 API | `SecondaryText`、`SecondaryPlaceholderText` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `suffix`
 
@@ -9530,7 +9530,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 输入区后缀区域，承载清除按钮、Form 反馈与用户后缀内容。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `clear`
 
@@ -9551,7 +9551,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 后缀区清除按钮，进入清除模式（hover / focus）时渲染。 |
 | 相关 API | `ShowClearButtonPredicate`、`Clear` / `Reset` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.root`
 
@@ -9571,7 +9571,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 弹层内容根视觉盒子，承载背景、边框、阴影与浮动箭头。 |
 | 相关 API | `IsArrowVisible`（经 `IsArrowVisibleEffective`）、`ArrowPosition`、`IsMotionEnabled` |
 | 相关 Token | PopupToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.container`
 
@@ -9591,7 +9591,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 时间面板内容容器，组织时间区与底部按钮区的布局。 |
 | 相关 API | 无（面板内容布局容器） |
 | 相关 Token | TimePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.content`
 
@@ -9611,7 +9611,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 时间列布局容器，按 12/24 小时制组织全部时间列。 |
 | 相关 API | 无（随 `popup.container` 呈现） |
 | 相关 Token | TimePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.column`
 
@@ -9631,7 +9631,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 单个时间列宿主，承载滚动视口与列宽基线（时/分/秒列宽 = `ItemWidth`，时段列宽 = `PeriodHostWidth`）。 |
 | 相关 API | 无（随 `popup.content` 呈现） |
 | 相关 Token | TimePickerToken（`ItemWidth`、`PeriodHostWidth`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.item`
 
@@ -9651,7 +9651,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 时间格子项，承载可选时间值与选中 / hover 状态视觉。 |
 | 相关 API | 无（随 `popup.column` 呈现） |
 | 相关 Token | TimePickerToken（`ItemHeight`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.footer`
 
@@ -9671,7 +9671,7 @@ Source: ./controls/time-picker/semantic-cn.md
 | 职责 | 面板底部操作区，承载此刻 / 确认按钮。 |
 | 相关 API | `IsNeedConfirm`、`IsShowNow` |
 | 相关 Token | TimePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType` 不参与 selector 匹配，只约束生成 Style 的 `x:SetterTargetType` 与模板校验的类型兼容；internal
 实现类型（`InfoPickerTextBox`、`TimePickerPresenter`、`TimeView`、`DateTimePickerPanel`）统一承诺到最低 public
@@ -9899,7 +9899,7 @@ ToggleSwitch 主控件公开 `root`、`content` 与 `indicator` 三个职责区�
 | 职责 | ToggleSwitch root 是开关值、状态、内容与根视觉样式的统一 owner。 |
 | 相关 API | `IsChecked`、`GrooveBackground`、`OnContent`、`OffContent`、`OnContentTemplate`、`OffContentTemplate`、`SizeType`、`IsLoading`、`IsMotionEnabled`、`IsWaveSpiritEnabled`、`TrackHeight`、`TrackMinWidth`、`TrackPadding`、`KnobSize` |
 | 相关 Token | ToggleSwitchToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -9919,7 +9919,7 @@ ToggleSwitch 主控件公开 `root`、`content` 与 `indicator` 三个职责区�
 | 职责 | 统一表示开关内部 checked / unchecked 内容区域的文本与视觉职责。 |
 | 相关 API | `OnContent`、`OffContent`、`OnContentTemplate`、`OffContentTemplate` |
 | 相关 Token | `ContentIconSize`、`ContentIconSizeSM`、`ExtraInfoFontSize`、`ExtraInfoFontSizeSM`、`InnerMinMargin`、`InnerMaxMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -9939,7 +9939,7 @@ ToggleSwitch 主控件公开 `root`、`content` 与 `indicator` 三个职责区�
 | 职责 | 统一表示开关的滑动把手视觉职责，含把手填充、阴影与 loading 指示。 |
 | 相关 API | `IsChecked`、`IsLoading` |
 | 相关 Token | `HandleBg`、`HandleShadow`、`HandleSize`、`HandleSizeSM`、`SwitchColor`、`OffStateLoadIndicatorColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`indicator` 的 `ContractType` 为
@@ -10142,7 +10142,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 承载数据、选择状态、过滤、布局模式和 owner-scoped Semantic Style 入口。 |
 | 相关 API | `ItemsSource`、`TargetKeys`、`SelectedKeys`、`IsOneWay`、`IsStretchView`、`ListWidth`、`ListHeight`、`IsFilterEnabled`、`PageSize`、`Status`、`SizeType` |
 | 相关 Token | `ListTransferToken` / `TreeTransferToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 owner 级 `Foreground`、`Opacity` 与整体布局约束；
 源/目标面板与中间操作区的结构由各 Part 负责，不通过 root Setter 改写。
@@ -10165,7 +10165,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 源方向列表分区的外框，承载 header、过滤输入、列表宿主和 footer 的组织边界。 |
 | 相关 API | `SourceTitle`、`SourceTitleTemplate`、`SourceViewFooter`、`SourceViewFooterTemplate`、`ListWidth`、`ListHeight` |
 | 相关 Token | `ListTransferToken` / `TreeTransferToken` 的 `HeaderHeight`、`HeaderPadding`、SharedToken 边框圆角 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `source` 对应内部源面板装饰器实例。`BorderBrush`、`BorderThickness`、`CornerRadius` 经模板投影到分区外框
 `Frame`；`Background` 同样投影到 `Frame`（默认为 null，即分区主体保持透明，header 保留自身背景 token）。面板宽度
@@ -10190,7 +10190,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 目标方向列表分区的外框，承载 header、过滤输入、列表宿主和 footer 的组织边界。 |
 | 相关 API | `TargetTitle`、`TargetTitleTemplate`、`TargetViewFooter`、`TargetViewFooterTemplate`、`IsOneWay`、`ListWidth`、`ListHeight` |
 | 相关 Token | 同 `source` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `target` 与 `source` 结构、route 深度和可定制属性完全一致，仅方向不同；`IsOneWay=True` 时目标面板仍存在，只是
 条目选择与回移入口按 API 语义禁用或隐藏。方向差异化定制（如目标面板换背景）是 `source` / `target` 分区级 Part 的
@@ -10214,7 +10214,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 组织"移至目标 / 移回源"两个操作按钮的中间操作区。 |
 | 相关 API | `ToTargetTransferIcon`、`ToSourceTransferIcon`、`ToTargetButtonText`、`ToSourceButtonText`、`IsOneWay` |
 | 相关 Token | `SpacingXXS`（按钮间距）、`SpacingXS`（与面板间距） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `actions` 是操作区容器，适合定制 `Spacing`、`Margin`、`Opacity` 与对齐。`IsOneWay=True` 时"移回源"按钮仅切换
 可见性，容器与 marker 不变。容器内的两个按钮是 public `Button` 实例，属于嵌套 Button 家族契约（§5），不通过
@@ -10238,7 +10238,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 面板头部分区，承载全选指示、选择计数与标题的组织边界。 |
 | 相关 API | `IsShowSelectAllCheckbox`、`IsShowSelectDropdownMenu`、`SelectionsIcon`、`SourceTitle` / `TargetTitle` |
 | 相关 Token | `HeaderHeight`、`HeaderPadding`、`ColorSplit`、`ColorBgContainer` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `header` 的高度由 `HeaderHeight` token 经模板投影（`ControlHeightLG` 派生的固定基线），`Height` 类 Setter 按原生
 优先级参与测量，但需与分区外框和 owner 布局协调（见 implementation.md 尺寸基线）。header 内部的全选
@@ -10265,7 +10265,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 承载 `SourceTitle` / `TargetTitle` 及其模板的最终呈现。 |
 | 相关 API | `SourceTitle`、`SourceTitleTemplate`、`TargetTitle`、`TargetTitleTemplate` |
 | 相关 Token | `HeaderPadding`（右对齐留白） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `title` presenter 始终存在于静态模板结构，`Title=null` 时仍保留节点身份；适合定制 `Foreground`、`Opacity`、
 `Margin` 与对齐。`SourceTitleTemplate` / `TargetTitleTemplate` 创建的用户子树不属于 Transfer Semantic Part。
@@ -10288,7 +10288,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 分区主体区域，承载过滤输入与列表宿主的组织边界。 |
 | 相关 API | `IsFilterEnabled`、`FilterPlaceholderText`、`ListHeight` |
 | 相关 Token | `MarginXS`（过滤输入外距）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `body` 是 header 与 footer 之间的分区主体包裹节点，与上游 `body` 语义键对齐：过滤输入与视图宿主是它的直接子
 节点。`Background`、`Padding`、`Margin` 类 Setter 直接作用于主体区域，与 header 的背景 token 相互独立；过滤输入
@@ -10313,7 +10313,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 承载源/目标视图控件（`TransferListView` / `TransferTreeView`）的宿主分区。 |
 | 相关 API | `ListHeight`、`SourceView` / `TargetView`、`PageSize`、`ItemTemplate` |
 | 相关 Token | `ListHeight`（宿主高度基线）、`BorderRadiusLG`（底部圆角） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `list` 是 Transfer owner 拥有的视图宿主，不是嵌套视图控件本身：宿主的 `Height` 由 `ListHeight` 模板投影，
 `CornerRadius` 由 footer 存在性驱动（有 footer 时底部圆角归零）。条目、分组、分页等视图内部区域的定制属于嵌套
@@ -10338,7 +10338,7 @@ owner 契约（§5）。`Height` 类 Setter 与 owner `ListHeight` API 按原生
 | 职责 | 面板底部分区，承载 `SourceViewFooter` / `TargetViewFooter` 及其模板的呈现边界。 |
 | 相关 API | `SourceViewFooter`、`SourceViewFooterTemplate`、`TargetViewFooter`、`TargetViewFooterTemplate` |
 | 相关 Token | `HeaderPadding`、`ColorSplit` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `footer` 节点始终属于静态模板结构，可见性由对应方向 footer 内容驱动，未设置时隐藏但保留 marker 与对象身份；
 设置 footer 内容时分区 body 的底部圆角归零，由 footer 闭合外框。footer presenter 内的用户内容子树不属于 Transfer
@@ -10365,7 +10365,7 @@ Part；`itemContent` 承载 `ItemTemplate` 内容，其创建的用户子树不�
 ### 1.11 方向限定部件（`source.*` / `target.*`）
 
 每个分区内部件与条目件都有方向限定变体，命名与上游语义键逐字对齐（`.` 为层级分隔符）。限定部件与对应未限定
-部件**共享终端 marker**，由路由中的方向锚点区分实例，因此不新增任何模板 marker；`Since` 均为 `6.0`。
+部件**共享终端 marker**，由路由中的方向锚点区分实例，因此不新增任何模板 marker；`Since` 均为 `6.2.0`。
 
 **owner 级分区限定部件**（`ListTransfer` / `TreeTransfer`，`Single`，`RuntimeCreated=true`）：
 
@@ -10625,7 +10625,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | TreeSelect root 是树数据源、选择/勾选、过滤、弹层与状态的组织边界。 |
 | 相关 API | 全部 TreeSelect public API |
 | 相关 Token | TreeSelectToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `prefix`
 
@@ -10645,7 +10645,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选择框内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -10665,7 +10665,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选择内容面板，组织占位符、过滤输入、选中结果与多选标签的布局。 |
 | 相关 API | `PlaceholderText`、`IsFilterEnabled`、`IsMultiple` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `placeholder`
 
@@ -10685,7 +10685,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 未选择任何项时显示的占位符文本。 |
 | 相关 API | `PlaceholderText`、`PlaceholderForeground` |
 | 相关 Token | SharedToken（ColorTextPlaceholder） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `input`
 
@@ -10705,7 +10705,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 过滤模式的搜索输入框（单选态为模板节点，多选态为标签区运行时搜索框）。 |
 | 相关 API | `IsFilterEnabled`、`FilterValue` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `suffix`
 
@@ -10725,7 +10725,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选择框后缀区域，承载最大数量指示、用户后缀内容与选择 handle。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`SuffixIcon`、`MaxCount` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `clear`
 
@@ -10746,7 +10746,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 后缀 handle 内的清除按钮，启用 `IsAllowClear` 时渲染。 |
 | 相关 API | `IsAllowClear` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -10767,7 +10767,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 多选模式下选择器中的选中标签。 |
 | 相关 API | `SelectedItems`、`IsMultiple`、`MaxTagCount` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -10788,7 +10788,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选中标签内的文本内容。 |
 | 相关 API | 无（随 `item` 呈现） |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemRemove`
 
@@ -10809,7 +10809,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选中标签内的移除按钮。 |
 | 相关 API | 无（随 `item` 呈现） |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -10829,7 +10829,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 候选弹层的根边框节点，承载弹层内容根视觉。 |
 | 相关 API | `PopupContentPadding`、`MaxPopupHeight`、`EffectivePopupWidth` |
 | 相关 Token | PopupToken、TreeSelectToken（MinPopupWidth） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.list`
 
@@ -10849,7 +10849,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 弹层内的候选树容器，承载树形候选数据、展开与勾选状态。 |
 | 相关 API | `ItemsSource`、`TreeViewToggleType`、`IsDefaultExpandAll` |
 | 相关 Token | TreeSelectToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.listItem`
 
@@ -10869,7 +10869,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 候选树中的单个树节点条目，运行时创建。 |
 | 相关 API | 无（随 `popup.list` 呈现） |
 | 相关 Token | TreeSelectToken、TreeViewToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -11452,7 +11452,7 @@ Source: ./controls/badge/semantic-cn.md
 | 职责 | CountBadge root 是数量、可见性、颜色、尺寸、定位和目标组合的状态 owner。 |
 | 相关 API | 全部 CountBadge public API |
 | 相关 Token | CountBadgeToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -11472,7 +11472,7 @@ Source: ./controls/badge/semantic-cn.md
 | 职责 | CountBadge indicator 表示完整数量徽标视觉。 |
 | 相关 API | `Count`、`OverflowCount`、`IsZeroVisible`、`BadgeColor`、`Size`、`Offset` |
 | 相关 Token | CountBadgeToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `DotBadge`
 
@@ -11494,7 +11494,7 @@ Source: ./controls/badge/semantic-cn.md
 | 职责 | DotBadge root 是状态、文本、颜色、可见性、定位和目标组合的状态 owner。 |
 | 相关 API | 全部 DotBadge public API |
 | 相关 Token | DotBadgeToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -11514,7 +11514,7 @@ Source: ./controls/badge/semantic-cn.md
 | 职责 | DotBadge indicator 表示状态点视觉和统一动效边界，不包含独立模式的说明文本。 |
 | 相关 API | `Status`、`DotColor`、`Offset`、`BadgeIsVisible` |
 | 相关 Token | DotBadgeToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.3 `RibbonBadge`
 
@@ -11536,7 +11536,7 @@ Source: ./controls/badge/semantic-cn.md
 | 职责 | RibbonBadge root 是文本、颜色、位置、可见性和目标组合的状态 owner。 |
 | 相关 API | 全部 RibbonBadge public API |
 | 相关 Token | RibbonBadgeToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -11556,7 +11556,7 @@ Source: ./controls/badge/semantic-cn.md
 | 职责 | RibbonBadge indicator 表示完整 Ribbon 视觉、定位和绘制边界。 |
 | 相关 API | `RibbonColor`、`Placement`、`Offset`、`BadgeIsVisible` |
 | 相关 Token | RibbonBadgeToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -11576,7 +11576,7 @@ Source: ./controls/badge/semantic-cn.md
 | 职责 | RibbonBadge content 表示 Ribbon 的文本展示与排版区域。 |
 | 相关 API | `Text` |
 | 相关 Token | RibbonBadgeToken、SharedToken typography |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 所有 root 都是隐式 Part，不添加 `.semantic-root`。所有非 root Part 都由既有 runtime Adorner 生命周期创建，因此为
 `Optional + RuntimeCreated`。CountBadge 与 DotBadge 在 target mode 下把 indicator 显示在 Avalonia `AdornerLayer`，所以
@@ -11737,7 +11737,7 @@ Source: ./controls/calendar/semantic-cn.md
 - `root`、`header`、`body`、`content`、`item` 自上游 6.0.0 公开；
 - `itemContent` 自上游 6.4.0 公开（Semantic DOM 演示中 `itemContent` 的 version 为 `6.4.0`）。
 
-AtomUI 全部六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 全部六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 内部 `CalendarHeader`、`CalendarView`、`CalendarViewCell` 与 `LunarCalendarViewCell` 均不持有独立 Semantic descriptor：
 
@@ -11770,7 +11770,7 @@ Cell 模板承载。
 | 职责 | Calendar root 是日期值、显示模式、面板状态与根视觉样式的统一 owner。 |
 | 相关 API | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate`、`CellTemplate`、`FullCellTemplate`、`HeaderTemplate`、`RangeBars` |
 | 相关 Token | CalendarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -11790,7 +11790,7 @@ Cell 模板承载。
 | 职责 | 统一表示年份选择、月份选择与 Month/Year 模式切换的 Header 区域布局与样式；年/月 Select 与模式切换组默认带白色容器背景（`ColorBgContainer`），选中态仅以主色边框/文字标识。 |
 | 相关 API | `Value`、`Mode`、`Fullscreen`、`ValidRange`、`HeaderTemplate` |
 | 相关 Token | `YearControlWidth`、`MonthControlWidth`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -11810,7 +11810,7 @@ Cell 模板承载。
 | 职责 | 统一表示 Header 下方容纳日历网格与范围条 overlay 的主体区域的内边距、背景与布局。 |
 | 相关 API | `Fullscreen`、`Mode`、`ShowWeek`、`RangeBars` |
 | 相关 Token | `FullBg`、`FullPanelBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -11830,7 +11830,7 @@ Cell 模板承载。
 | 职责 | 统一表示日历表格（周标题行 + 日期/月网格）区域的宽度、高度与表格级样式。面板默认自带 `FullPanelBg`（`ColorBgContainer`）背景，Fullscreen 模式面板背景为 `FullBg`；root 表面的背景定制只落在面板外圈，不渗入面板内部。 |
 | 相关 API | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate`、`CellTemplate`、`FullCellTemplate` |
 | 相关 Token | `FullPanelBg`、`MiniContentHeight`、`FullCellMinHeight`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -11850,7 +11850,7 @@ Cell 模板承载。
 | 职责 | 统一表示单个日期、月份或周序号单元的背景、边框、悬停与选中等交互样式。 |
 | 相关 API | `Value`、`Mode`、`ShowWeek`、`ValidRange`、`DisabledDate` |
 | 相关 Token | `ItemActiveBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -11870,7 +11870,7 @@ Cell 模板承载。
 | 职责 | 统一表示单元格内自定义内容区域（`CellTemplate` / `FullCellTemplate`）的高度、溢出与布局样式。 |
 | 相关 API | `CellTemplate`、`FullCellTemplate`、`CalendarCellContext` |
 | 相关 Token | `ItemActiveBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header`、`content`、`item` 的
@@ -12131,7 +12131,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | Card root 是外观、尺寸、加载、悬停和内容组合的统一 owner。 |
 | 相关 API | 全部 Card public API |
 | 相关 Token | CardToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -12151,7 +12151,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示完整头部表面和标题、额外内容的共同布局边界。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Extra`、`ExtraTemplate`、`SizeType`、`IsInnerMode` |
 | 相关 Token | Header、Extra、Border、Radius Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -12171,7 +12171,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示 Card 标题的展示与排版区域。 |
 | 相关 API | `Header`、`HeaderTemplate` |
 | 相关 Token | Header typography Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `extra`
 
@@ -12191,7 +12191,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示头部尾侧的辅助内容区域。 |
 | 相关 API | `Extra`、`ExtraTemplate` |
 | 相关 Token | `ExtraColor`、Header padding Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `cover`
 
@@ -12211,7 +12211,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示封面内容的裁剪、圆角和布局边界。 |
 | 相关 API | `Cover`、`CoverTemplate` |
 | 相关 Token | Shared radius Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -12231,7 +12231,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示普通、Meta、Grid、Tabs 和 Loading 内容共享的主体表面。 |
 | 相关 API | `Content`、`ContentTemplate`、`IsLoading`、`SizeType` |
 | 相关 Token | Body padding Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `actions`
 
@@ -12251,7 +12251,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示底部操作组的完整表面、均分布局和分隔线边界。 |
 | 相关 API | `Actions`、`IsMotionEnabled` |
 | 相关 Token | Actions、Border、Radius Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `CardMetaContent`
 
@@ -12273,7 +12273,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | Meta root 是头像、标题和描述组合的统一 owner。 |
 | 相关 API | `Avatar`、`Header`、`HeaderTemplate`、`Content`、`ContentTemplate` |
 | 相关 Token | Shared typography、spacing Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `section`
 
@@ -12293,7 +12293,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示标题与描述共同占用的详情布局区域。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Content`、`ContentTemplate` |
 | 相关 Token | Shared spacing Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `avatar`
 
@@ -12313,7 +12313,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示 Meta 头像内容的展示与布局区域。 |
 | 相关 API | `Avatar` |
 | 相关 Token | Shared spacing Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -12333,7 +12333,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示 Meta 标题的展示与排版区域。 |
 | 相关 API | `Header`、`HeaderTemplate` |
 | 相关 Token | Shared heading typography Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `description`
 
@@ -12353,7 +12353,7 @@ Source: ./controls/card/semantic-cn.md
 | 职责 | 表示 Meta 描述内容的展示与排版区域。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | Shared description typography Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 所有 root 都是隐式 Part，不添加 `.semantic-root`。`ContractType` 是 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。
@@ -12814,7 +12814,7 @@ Source: ./controls/collapse/semantic-cn.md
 | 职责 | Collapse root 是面板集合状态、视觉模式与根表面样式（背景、边框、圆角、内边距）的统一 owner。 |
 | 相关 API | `IsAccordion`、`IsBorderless`、`IsGhostStyle`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled`、`ItemHeaderPadding`、`ItemContentPadding`、`Items`、`SelectedItems` |
 | 相关 Token | CollapseToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -12834,7 +12834,7 @@ Source: ./controls/collapse/semantic-cn.md
 | 职责 | 统一表示每个面板头部的背景、内边距、字体/行高、光标与交互视觉；对应上游 `.ant-collapse-header` 的 flex 布局、内边距、颜色、行高、光标与过渡动画职责。 |
 | 相关 API | `SizeType`、`ItemHeaderPadding`、`TriggerType`、`IsGhostStyle`、`IsEnabled` |
 | 相关 Token | `HeaderBg`、`HeaderPadding`、`CollapseHeaderPaddingSM`、`CollapseHeaderPaddingLG`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -12854,7 +12854,7 @@ Source: ./controls/collapse/semantic-cn.md
 | 职责 | 统一表示展开/收起箭头的大小、对齐、边距与动效视觉；对应上游 `.ant-collapse-expand-icon` 的字体大小、过渡动画与旋转变换职责。 |
 | 相关 API | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsSelected` |
 | 相关 Token | `IconSizeSM`、`LeftExpandButtonMargin*`、`RightExpandButtonMargin*`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -12874,7 +12874,7 @@ Source: ./controls/collapse/semantic-cn.md
 | 职责 | 统一表示每个面板标题文字的布局、颜色、字体与对齐；对应上游 `.ant-collapse-title` 的 flex 自适应布局与边距职责。 |
 | 相关 API | `Header`、`HeaderTemplate` |
 | 相关 Token | `ColorTextHeading`、`ColorTextDisabled`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -12894,7 +12894,7 @@ Source: ./controls/collapse/semantic-cn.md
 | 职责 | 统一表示每个面板内容区域的内边距、颜色、背景与内容顶部分隔线；对应上游 `.ant-collapse-body` 的内边距、颜色与背景职责。 |
 | 相关 API | `Content`、`ContentTemplate`、`ItemContentPadding`、`IsBorderless`、`IsGhostStyle` |
 | 相关 Token | `ContentPadding`、`ContentBg`、`HeaderBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header` 与 `body` 的承载节点是
@@ -13301,7 +13301,7 @@ descriptor。
 | 职责 | Descriptions root 是数据、布局、尺寸、边框和响应式状态的统一 owner。 |
 | 相关 API | 全部 Descriptions public API |
 | 相关 Token | DescriptionsToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -13321,7 +13321,7 @@ descriptor。
 | 职责 | 承载标题与辅助内容的完整头部布局区域。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Extra`、`ExtraTemplate` |
 | 相关 Token | `HeaderMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -13341,7 +13341,7 @@ descriptor。
 | 职责 | 展示 Header 内容及其模板结果。 |
 | 相关 API | `Header`、`HeaderTemplate` |
 | 相关 Token | `TitleColor`、SharedToken typography |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `extra`
 
@@ -13361,7 +13361,7 @@ descriptor。
 | 职责 | 展示头部辅助内容及其模板结果。 |
 | 相关 API | `Extra`、`ExtraTemplate` |
 | 相关 Token | `ExtraColor`、SharedToken typography |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `label`
 
@@ -13381,7 +13381,7 @@ descriptor。
 | 职责 | 展示描述项标签，并提供重复标签区域的统一局部样式入口。 |
 | 相关 API | `Items`、`ItemsSource`、`DescriptionItem.Label` |
 | 相关 Token | `LabelBg`、`LabelColor`、`ItemPadding*`、`ColonMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -13401,7 +13401,7 @@ descriptor。
 | 职责 | 展示描述项内容，并提供重复内容区域的统一局部样式入口。 |
 | 相关 API | `Items`、`ItemsSource`、`DescriptionItem.Content` |
 | 相关 Token | `ContentColor`、`ItemPadding*`、SharedToken typography |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`header`、`title` 和 `extra` 是根 ControlTemplate 的静态节点；`label` 和
 `content` 随 `DescriptionItem` 生成视觉物化，并由内部 item control 的模板接入路径把生成的 selector class 添加到目标
@@ -13679,7 +13679,7 @@ ControlTemplate 和 Avalonia 样式优先级作为实现事实。
 | 职责 | 空状态的根布局、整体对齐、可见性和根视觉样式 owner。 |
 | 相关 API | `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`、`StrokeDashArray` 及标准布局属性 |
 | 相关 Token | EmptyToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `image`
 
@@ -13699,7 +13699,7 @@ ControlTemplate 和 Avalonia 样式优先级作为实现事实。
 | 职责 | 展示内置 Default/Simple 图形或 `ImagePath`、`ImageSource` 指定的 SVG 图形。 |
 | 相关 API | `PresetImage`、`ImagePath`、`ImageSource`、`SizeType` |
 | 相关 Token | `EmptyImgHeight`、`EmptyImgHeightMD`、`EmptyImgHeightSM`、图形颜色资源 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `description`
 
@@ -13719,7 +13719,7 @@ ControlTemplate 和 Avalonia 样式优先级作为实现事实。
 | 职责 | 展示本地化默认描述或调用方提供的 `Description`。 |
 | 相关 API | `Description`、`IsDescriptionVisible`、`SizeType` |
 | 相关 Token | `DescriptionMargin`、`DescriptionMarginSM`、SharedToken 文本颜色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `footer`
 
@@ -13739,7 +13739,7 @@ ControlTemplate 和 Avalonia 样式优先级作为实现事实。
 | 职责 | 承载创建、刷新、返回或其他空状态后续操作。 |
 | 相关 API | `Footer`、`FooterTemplate` |
 | 相关 Token | `FooterMargin`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -13899,7 +13899,7 @@ Expander 是单面板折叠容器，与上游 `Collapse` 的单个面板承担�
 owner 独立通过准入 Gate，移入第二批计划执行（见
 [第二批任务清单](../../../../superpowers/plans/2026-08-12-semantic-part-batch-2-collections-containers.md)任务 16）。
 
-AtomUI 五个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 五个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 Expander 不引入额外 owner：它是单面板控件，没有 item 容器或独立子控件 owner，五个 Part 全部属于 `Expander` 自身。
 
@@ -13923,7 +13923,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | Expander root 是单面板展开状态、展开方向、视觉模式与根边框样式的统一 owner。 |
 | 相关 API | `IsExpanded`、`ExpandDirection`、`IsBorderless`、`IsGhostStyle`、`BorderThickness`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled`、`HeaderPadding`、`ContentPadding`、`Header`、`Content`、`AddOnContent` |
 | 相关 Token | ExpanderToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -13943,7 +13943,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | 统一表示头部区域的背景、内边距、字体/行高与命中光标；对应上游 `.ant-collapse-header` 的内边距、颜色、行高、光标与过渡动画职责。 |
 | 相关 API | `SizeType`、`HeaderPadding`、`TriggerType`、`IsGhostStyle`、`IsEnabled`、`ExpandDirection` |
 | 相关 Token | `HeaderBg`、`HeaderPadding`、`HeaderPaddingSM`、`HeaderPaddingLG`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -13963,7 +13963,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | 统一表示展开/收起箭头的大小、位置、边距与旋转视觉；对应上游 `.ant-collapse-expand-icon` 的字体大小、过渡动画与旋转变换职责。 |
 | 相关 API | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsExpanded`、`ExpandDirection`、`HeaderPadding`、`TriggerType`、`IsEnabled` |
 | 相关 Token | `IconSizeSM`、`LeftExpandButtonHMargin`、`RightExpandButtonHMargin`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -13983,7 +13983,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | 统一表示标题文字的布局、颜色、字体与对齐；对应上游 `.ant-collapse-title` 的自适应布局与边距职责。 |
 | 相关 API | `Header`、`HeaderTemplate`、`SizeType`、`IsEnabled`、`HeaderPadding` |
 | 相关 Token | `ColorTextHeading`、`ColorTextDisabled`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -14003,7 +14003,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | 统一表示内容区域的内边距、背景与内容呈现；对应上游 `.ant-collapse-body` 的内边距、颜色与背景职责。 |
 | 相关 API | `Content`、`ContentTemplate`、`ContentPadding`、`SizeType`、`IsBorderless`、`IsGhostStyle` |
 | 相关 Token | `ContentPadding`、`ContentPaddingSM`、`ContentPaddingLG`、`ContentBg`、`HeaderBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header` 的承载节点是公开的
@@ -14606,7 +14606,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 单封面入口（`ImagePreviewer`）/ 多封面入口（`ImageGroupPreviewer`）与完整预览 owner |
 | 相关 API | `ItemsSource`、`CurrentIndex`、`IsOpen`；group 额外 `ItemsPanel` |
 | 相关 Token | SharedToken、ImagePreviewerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `image`
 
@@ -14626,7 +14626,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 关闭态封面图片元素 / 各封面缩略图元素 |
 | 相关 API | `EffectiveCoverImage`、`CoverWidth`、`CoverHeight`；group `ItemsSource`、`ItemsPanel` |
 | 相关 Token | Cover 尺寸相关 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `cover`
 
@@ -14646,7 +14646,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 封面悬浮提示层：遮罩 + 指示内容。遮罩经负 Margin 铺满整个 owner root（含 padding 环与边框），对齐上游 `genImageCoverStyle` 的 `position:absolute; inset:0` cover 几何 |
 | 相关 API | `IsShowCoverMask`、`CoverIndicatorContent(Template)`、owner `Padding` / `BorderThickness`（经中继参与遮罩几何） |
 | 相关 Token | `MaskBgColor`、mask 透明度与圆角 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.root`
 
@@ -14666,7 +14666,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览容器根：承载遮罩层、内容区与关闭按钮的根层（对齐上游 `.ant-image-preview`）；窗口 chrome 不属于契约 |
 | 相关 API | `IsOpen`、`OpenDialog()`、`IsDialogModal`、`IsDialogTopmost` |
 | 相关 Token | Dialog 背景 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.mask`
 
@@ -14686,7 +14686,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览遮罩层：全铺 `popup.root` 的半透明暗色背景，位于 `popup.body` 之下（对齐上游 `.ant-image-preview-mask`）；仅 Overlay 宿主存在 |
 | 相关 API | `IsOpen`（随 overlay 宿主打开出现；点击关闭行为当前未实现，见兼容性与验证） |
 | 相关 Token | 遮罩色使用共享 `ColorBgMask`，与上游 `.ant-image-preview-mask` 的 `colorBgMask` 语义一致 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.body`
 
@@ -14706,7 +14706,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览内容区：居中承载图片渲染与指针交互（对齐上游 `.ant-image-preview-body`） |
 | 相关 API | 缩放、拖拽、旋转与 fit-to-window 交互 API |
 | 相关 Token | 无独立 Token（沿用 viewer 背景与交互 Token） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.footer`
 
@@ -14726,7 +14726,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览页脚：底部居中操作区域，含页码指示与操作组（对齐上游 `.ant-image-preview-footer`） |
 | 相关 API | `CurrentIndex`、Count 与 scale/fit 状态投影 |
 | 相关 Token | `FloatToolbarPadding`、`NavButtonBgColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.actions`
 
@@ -14746,7 +14746,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览操作组：footer 内的胶囊形操作按钮组（对齐上游 `.ant-image-preview-actions`） |
 | 相关 API | 缩放、翻转、旋转与 fit-to-window 命令 |
 | 相关 Token | `PreviewOperationSize`、`PreviewOperationColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -15256,7 +15256,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | InfoFlyout 触发宿主，是内容、触发方式、定位、动效与弹层打开状态的组织边界。 |
 | 相关 API | 全部 FlyoutHost public API |
 | 相关 Token | FlyoutHostToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -15276,7 +15276,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | 弹层根节点，承载弹层背景、边框、内边距与箭头，对应上游 Popover `root` 槽位。 |
 | 相关 API | `Flyout`、`FlyoutPresenterTheme`、`ShouldUseOverlayPopup` |
 | 相关 Token | FlyoutHostToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.container`
 
@@ -15296,7 +15296,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | 弹层内容内层容器，承载背景、边框、圆角与内边距，对应上游 Popover `container` 槽位。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.content`
 
@@ -15316,7 +15316,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | 弹层用户内容呈现区域，对应上游 Popover `content` 槽位。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.arrow`
 
@@ -15336,7 +15336,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | 指向锚点的浮动箭头，对应上游 Popover `arrow` 槽位。 |
 | 相关 API | `IsArrowVisible`、`ArrowPosition`、`ArrowSize` |
 | 相关 Token | ArrowDecoratedBoxToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -15494,7 +15494,7 @@ Part 的 owner 隐式加入，不生成 Style；`item` 是运行时由 ListBox �
 | 职责 | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界；对应上游 `.ant-listy`。 |
 | 相关 API | `ItemsSource`、`ItemTemplate`、`SizeType`、`IsBorderless`、`IsSelectable`、`SelectionMode` |
 | 相关 Token | `ListBoxToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -15514,7 +15514,7 @@ Part 的 owner 隐式加入，不生成 Style；`item` 是运行时由 ListBox �
 | 职责 | 条目元素，设置内间距、底部分割线与悬浮背景；对应上游 `.ant-listy-item`。 |
 | 相关 API | `SizeType`、`ItemHoverBg`、`ItemSelectedBg` |
 | 相关 Token | `ItemPaddingSM`、`ItemPadding`、`ItemPaddingLG`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 的 marker `.semantic-item` 在 `ListBoxItem` 创建路径
 一次性添加，`PrepareContainerForItemOverride` 幂等补齐（覆盖用户直接提供容器与 `CandidateListItem` 派生容器的
@@ -15772,7 +15772,7 @@ ListView 公开 `root`、`item` 与 `groupHeader` 三个职责区域，与上游
 | 职责 | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界；对应上游 `.ant-listy`。 |
 | 相关 API | `ItemsSource`、`ItemTemplate`、`Height`、`SizeType`、`IsBorderless`、`IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` |
 | 相关 Token | `ListViewToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -15792,7 +15792,7 @@ ListView 公开 `root`、`item` 与 `groupHeader` 三个职责区域，与上游
 | 职责 | 条目元素，设置内间距、底部分割线与悬浮背景；对应上游 `.ant-listy-item`。 |
 | 相关 API | `SizeType`、`ItemHoverBg`、`ItemSelectedBg`、`ItemClickMode` |
 | 相关 Token | `ItemPaddingSM`、`ItemPadding`、`ItemPaddingLG`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `groupHeader`
 
@@ -15812,7 +15812,7 @@ ListView 公开 `root`、`item` 与 `groupHeader` 三个职责区域，与上游
 | 职责 | 分组标题元素，设置标题文字与背景；对应上游 `.ant-listy-group-header`。 |
 | 相关 API | `IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` |
 | 相关 Token | `GroupHeaderColor`、`ColorBgContainer`、`ColorFillAlter`、`FontWeightStrong` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 与 `groupHeader` 的 marker 在容器创建路径一次性建立，
 `PrepareContainerForItemOverride` 按容器类型幂等补齐；容器角色由类型决定（分组标题使用专用 `GroupHeaderItem`），
@@ -16126,7 +16126,7 @@ QRCode 公开 `root` 和 `cover` 两个 Semantic Part。二维码 bitmap、中�
 | 职责 | 二维码方形根区域，承载背景、边框、圆角、Padding 和整体布局。 |
 | 相关 API | `Size`、`IsBordered` 及继承的 root 表面属性 |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `cover`
 
@@ -16146,7 +16146,7 @@ QRCode 公开 `root` 和 `cover` 两个 Semantic Part。二维码 bitmap、中�
 | 职责 | 覆盖完整 root，承载 Loading、Expired、Scanned 状态背景与内容。 |
 | 相关 API | `Status`、三组状态内容 API、`RefreshRequested` |
 | 相关 Token | `QRCodeMaskBackgroundColor`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -16349,7 +16349,7 @@ Segmented 主控件公开 `root`、`item`、`icon` 与 `label` 四个职责区�
   渲染路径消费；
 - 上游选中滑块（MotionThumb）没有 Semantic key，AtomUI 同样不公开。
 
-AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 `SegmentedItem` 不持有独立 Semantic descriptor：
 
@@ -16380,7 +16380,7 @@ AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | Segmented root 是选项数据、选择状态、方向、形状与轨道表面样式的统一 owner。轨道背景由 owner `Render` 直接绘制，`Frame` 承载圆角、内边距与内容裁剪。 |
 | 相关 API | `ItemsSource`、`ItemTemplate`、`SelectedIndex`、`SelectedItem`、`SelectionChanged`、`SizeType`、`Orientation`、`Shape`、`IsExpanding`、`IsMotionEnabled` |
 | 相关 Token | `TrackBg`、`TrackPadding`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -16400,7 +16400,7 @@ AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示单个选项容器的背景、前景、圆角、内边距、最小高度、光标与选择 / 悬浮 / 按压 / 禁用视觉；对应上游 `.ant-segmented-item`。 |
 | 相关 API | `SegmentedItem.Icon`、`SegmentedItem.Content`、`SegmentedItem.IsSelected`、`SizeType`、`Shape`、`IsMotionEnabled` |
 | 相关 Token | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、`ItemHoverBg`、`ItemActiveBg`、`ItemSelectedBg`、`ItemMinHeightLG`、`ItemMinHeight`、`ItemMinHeightSM`、`SegmentedItemPadding`、`SegmentedItemPaddingSM` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -16420,7 +16420,7 @@ AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示每个选项的图标区域：图标画刷状态色、图标尺寸与可见性；对应上游 `.ant-segmented-item-icon`。 |
 | 相关 API | `SegmentedItem.Icon`、`SizeType` |
 | 相关 Token | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、SharedToken（`IconSizeLG` / `IconSize` / `IconSizeSM`、`ColorTextDisabled`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `label`
 
@@ -16440,7 +16440,7 @@ AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示每个选项的文本区域：文本呈现、居中对齐、省略与图文间距；对应上游 `.ant-segmented-item-label`。 |
 | 相关 API | `SegmentedItem.Content`、`SegmentedItem.ContentTemplate` |
 | 相关 Token | `SegmentedItemContentMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 的 marker `.semantic-item` 在 `SegmentedItem` 创建路径
 一次性添加，`PrepareContainerForItemOverride` 幂等补齐（覆盖回收容器与用户直接提供容器的路径）。`icon`、`label`
@@ -16660,13 +16660,13 @@ Statistic 公开 `root`、`header`、`title`、`content`、`value`、`prefix` �
 
 | Part | Selector | Style Type | ContractType | Cardinality | AtomUI 节点 | 稳定性 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `root` | Statistic 本身 | 不适用 | `Statistic` | `Single` | owner | stable since 6.0 |
-| `header` | `.semantic-header` | `StatisticHeaderStyle` | `Border` | `Single` | `Border#HeaderLayout` | stable since 6.0 |
-| `title` | `.semantic-title` | `StatisticTitleStyle` | `ContentPresenter` | `Single` | `ContentPresenter#HeaderPresenter` | stable since 6.0 |
-| `content` | `.semantic-content` | `StatisticContentStyle` | `StackPanel` | `Single` | `StackPanel#ContentLayout` | stable since 6.0 |
-| `value` | `.semantic-value` | `StatisticValueStyle` | `ContentPresenter` | `Single` | 数值 `ContentPresenter` | stable since 6.0 |
-| `prefix` | `.semantic-prefix` | `StatisticPrefixStyle` | `ContentPresenter` | `Single` | 前缀 `ContentPresenter` | stable since 6.0 |
-| `suffix` | `.semantic-suffix` | `StatisticSuffixStyle` | `ContentPresenter` | `Single` | 后缀 `ContentPresenter` | stable since 6.0 |
+| `root` | Statistic 本身 | 不适用 | `Statistic` | `Single` | owner | stable since 6.2.0 |
+| `header` | `.semantic-header` | `StatisticHeaderStyle` | `Border` | `Single` | `Border#HeaderLayout` | stable since 6.2.0 |
+| `title` | `.semantic-title` | `StatisticTitleStyle` | `ContentPresenter` | `Single` | `ContentPresenter#HeaderPresenter` | stable since 6.2.0 |
+| `content` | `.semantic-content` | `StatisticContentStyle` | `StackPanel` | `Single` | `StackPanel#ContentLayout` | stable since 6.2.0 |
+| `value` | `.semantic-value` | `StatisticValueStyle` | `ContentPresenter` | `Single` | 数值 `ContentPresenter` | stable since 6.2.0 |
+| `prefix` | `.semantic-prefix` | `StatisticPrefixStyle` | `ContentPresenter` | `Single` | 前缀 `ContentPresenter` | stable since 6.2.0 |
+| `suffix` | `.semantic-suffix` | `StatisticSuffixStyle` | `ContentPresenter` | `Single` | 后缀 `ContentPresenter` | stable since 6.2.0 |
 
 六个 selector Part 的 `SelectorRoute` 均为 `/template/ .semantic-<name>`，`Customization` 为 `Selector`，
 `CrossVisualRoot=false`，`RuntimeCreated=false`。root 的 `Customization` 为 `Root`，不生成 `.semantic-root` 或 Style Type。
@@ -16837,7 +16837,7 @@ Tag 家族由两个独立 owner 公开 Semantic Part，与上游稳定 Semantic 
 - 上游 `CheckableTag` 没有独立 Semantic DOM Props（不消费 `useMergeSemantic`），AtomUI 同样不为其声明
   descriptor；其职责通过 `CheckableTagGroup` 的 `item` Part 对外公开。
 
-AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 以下类型不持有独立 Semantic descriptor：
 
@@ -16868,7 +16868,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | Tag root 是颜色类别、Variant、内容与关闭入口的统一 owner；根表面（背景、边框、圆角、字体、内边距）投影到 `Frame`。 |
 | 相关 API | `TagColor`、`Variant`、`Text`、`Icon`、`CloseIcon`、`IsClosable`、`Closed` |
 | 相关 Token | `DefaultBg`、`DefaultColor`、`TagFontSize`、`TagPadding`、`SolidTextColor`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -16888,7 +16888,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示 Tag 的前置图标区域：图标尺寸、画刷（随 root 前景）与可见性；对应上游 Tag 的 `icon` 语义键。 |
 | 相关 API | `Icon` |
 | 相关 Token | `TagIconSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -16908,7 +16908,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示 Tag 的文本区域：文本呈现、行高、图文/文关内联间距；对应上游 Tag 的 `content` 语义键。 |
 | 相关 API | `Text` |
 | 相关 Token | `TagLineHeight`、`TagTextPaddingInline` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `close`
 
@@ -16928,7 +16928,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示 Tag 的关闭入口：关闭图标尺寸、画刷（随 root 前景）与可见性；承载 `Closed` 事件触发；对应上游 `.ant-tag-close-icon`。 |
 | 相关 API | `CloseIcon`、`IsClosable`、`Closed` |
 | 相关 Token | `TagCloseIconSize`、SharedToken（`IconSizeXS`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `CheckableTagGroup`
 
@@ -16950,7 +16950,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | CheckableTagGroup root 是 Options 数据、单选/多选模式、公开选择值与 Form 语义的统一 owner。 |
 | 相关 API | `Options`、`ItemTemplate`、`IsMultiple`、`CheckedItem`、`CheckedItems`、`DefaultCheckedItem`、`DefaultCheckedItems`、`ItemSpacing`、`LineSpacing`、`Orientation`、`IsMotionEnabled`、`CheckedChanged` |
 | 相关 Token | SharedToken（`SpacingXS`、`EnableMotion`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -16970,7 +16970,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示 Group 内单个可交互选项：背景/前景选择视觉、内边距、圆角、光标与 checked/hover/pressed/disabled 状态；对应上游 `.ant-tag-checkable-group-item`。 |
 | 相关 API | `CheckableTag.Content`、`CheckableTag.Icon`、`CheckableTag.IsChecked`、`IsMultiple` |
 | 相关 Token | `TagFontSize`、`TagLineHeight`、`TagPadding`、`TagIconSize`、SharedToken（`ColorPrimary*`、`ColorTextLightSolid`、`ColorFillSecondary`、`ColorTextDisabled`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。Tag 的 `icon`、`content`、`close` marker 声明在
 `TagTheme.axaml` 模板内的 `IconPresenter#IconPresenter`、`TextBlock#TagTextLabel` 与
@@ -17219,7 +17219,7 @@ Part 的 cardinality 已经是 `Multiple`（天然覆盖每一项）。Gallery S
 （两 item 预览 + 九卡短描述，对应上游逐项视图的 item 级 Part 呈现）；hover 高亮均为 owner 作用域
 （覆盖预览内全部 item），逐项注入式高亮不适用。
 
-AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 以下类型不持有独立 Semantic descriptor：
 
@@ -17251,7 +17251,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | Timeline root 是 Items、Orientation、Mode、IsReverse、Pending 与可见项视觉顺序的统一 owner；根表面（背景、边框、圆角、内边距）投影到 `Frame`。 |
 | 相关 API | `Items`、`ItemsSource`、`Orientation`、`Mode`、`IsReverse`、`Pending`、`PendingIcon` |
 | 相关 Token | SharedToken（`ColorBorder`、`ColorBgContainer`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -17271,7 +17271,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示时间轴单个节点容器：单项 Label、Content、Indicator 的承载入口与视觉顺序派生状态的接收方；对应上游 `<li>`。 |
 | 相关 API | `Label`、`Content`、`ContentTemplate`、`IndicatorIcon`、`IndicatorColor` |
 | 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`IndicatorStartModeMargin`、`IndicatorEndModeMargin`、`IndicatorMiddleModeMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemWrapper`
 
@@ -17291,7 +17291,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点内容包装容器：把 section 铺满自身并承载 IndicatorSpacing 等包装级布局状态；对应上游 item wrapper 节点。 |
 | 相关 API | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） |
 | 相关 Token | SharedToken（`UniformlyPaddingXS`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemIcon`
 
@@ -17311,7 +17311,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点图标区域：无 `IndicatorIcon` 时是内置圆点（`BorderBrush` 即圆环色），有 `IndicatorIcon` 时是图标宿主；对应上游 item icon 节点（上游同一元素两种形态）。 |
 | 相关 API | `IndicatorIcon`、`IndicatorColor` |
 | 相关 Token | `IndicatorSize`、`IndicatorDotSize`、`IndicatorDotBorderWidth`、SharedToken（`ColorPrimary`、`ColorBgContainer`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemSection`
 
@@ -17331,7 +17331,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点区域容器：承载 header、Indicator 与 content 的方向化 Measure/Arrange（Alternate 双侧、同侧紧凑与水平 Label 堆叠模型）；对应上游 item section 节点。 |
 | 相关 API | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） |
 | 相关 Token | SharedToken（`UniformlyPaddingXS`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemHeader`
 
@@ -17351,7 +17351,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点头部容器：承载 title 文本与对齐方式；对应上游 item header 节点。 |
 | 相关 API | `Label`、`Mode`、`Orientation` |
 | 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemTitle`
 
@@ -17371,7 +17371,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点标题/时间标签区域：文本呈现、换行与下内边距；对应上游 item title 节点。 |
 | 相关 API | `Label`、`Mode`、`Orientation` |
 | 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -17391,7 +17391,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点详细内容区域：`Content` / `ContentTemplate` 的呈现、受限宽度换行与下内边距；对应上游 item content 节点。 |
 | 相关 API | `Content`、`ContentTemplate`、`Mode`、`Orientation` |
 | 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`LastItemContentMinHeight` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemRail`
 
@@ -17411,7 +17411,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点连接线（轴线轨道）：承载 IsFirst/IsLast 裁剪后的轨道条，厚度与颜色来自 `IndicatorTailWidth` / `IndicatorTailColor`；对应上游 item rail 节点。 |
 | 相关 API | `IndicatorTailColor`、`IndicatorTailWidth`、`IndicatorColor` |
 | 相关 Token | `IndicatorTailWidth`、`IndicatorTailColor`、`IndicatorDotSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。`itemWrapper`、`itemSection`、`itemHeader`、
 `itemTitle`、`itemContent` 的 marker 静态声明在 `TimelineItemTheme.axaml` 模板内；`itemIcon`、`itemRail` 的
@@ -17631,7 +17631,7 @@ Part 由生成 Style 借助 scope 路由从 `ToolTip` 穿透到共享模板命�
 | 职责 | 工具提示的根语义区域，承载内容、弹层打开状态与主题入口的组织边界 |
 | 相关 API | `Content`、`IsMotionEnabled` |
 | 相关 Token | `ToolTipToken` / SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `container`
 
@@ -17650,7 +17650,7 @@ Part 由生成 Style 借助 scope 路由从 `ToolTip` 穿透到共享模板命�
 | 职责 | 内容盒，承载内边距、背景、圆角与文本样式，内部 `ContentPresenter` 展示用户内容 |
 | 相关 API | `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`（模板绑定）、`Content` |
 | 相关 Token | `ToolTipToken.ToolTipBackground`、`ToolTipToken.ToolTipCornerRadius`、`ToolTipToken.ContentPadding` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.3 `arrow`
 
@@ -17669,7 +17669,7 @@ Part 由生成 Style 借助 scope 路由从 `ToolTip` 穿透到共享模板命�
 | 职责 | 指向锚定控件的箭头指示器 |
 | 相关 API | `IsArrowVisible`、`ArrowSize`、`Background`（`FilledColor` 模板绑定） |
 | 相关 Token | `ArrowDecoratedBoxToken.ArrowStrokeColor`、`ArrowDecoratedBoxToken.ArrowStrokeThickness`、`ArrowDecoratedBoxToken.ArrowSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -17824,7 +17824,7 @@ marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` select
 | 职责 | 引导流程 owner：承载步骤集合、受控开关状态与目标锚定 |
 | 相关 API | `IsOpen`、`CurrentIndex`、`Steps`、`StepsSource`、`ShowTour()` |
 | 相关 Token | 无独立 Token（流程状态不落 Token） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.root`
 
@@ -17843,7 +17843,7 @@ marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` select
 | 职责 | 引导卡片容器根：承载卡片内容与方向箭头（对齐上游 `.ant-tour` 面板根的容器职责） |
 | 相关 API | `Placement`、`IsArrowVisible`、`StyleType` |
 | 相关 Token | `TourBorderRadius`、`ColorBgElevated` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.mask`
 
@@ -17863,7 +17863,7 @@ marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` select
 | 职责 | 遮罩层：覆盖目标区域以外的整屏、镂空高亮当前步骤目标并阻挡交互（对齐上游 mask 的全屏覆盖与指针事件语义） |
 | 相关 API | `IsShowMask`、`MaskColor`、`GapRadius`、`GapOffsetX/Y` |
 | 相关 Token | 遮罩色默认 `ColorBgMask`（经 `MaskColor` 中继） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 遮罩是跨根部件中的特殊形态：物理节点是 VLM 级共享单例（`TourLayer.GetTourLayer` 创建并 `AddLayer`），归属规则
 "谁打开谁拥有，关闭即释放"。`Tour.ShowTour()` 挂载时执行三步：`AddLayer`（VLM 内部把层逻辑挂到自身）→
@@ -17893,7 +17893,7 @@ marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` select
 | 职责 | 卡片主要内容区域：圆角、背景、边框与内边距（对齐上游 `.ant-tour` 内 `section` 的卡片样式职责） |
 | 相关 API | `StyleType`（Primary 经 popup.root 背景表达） |
 | 相关 Token | `TourBorderRadius`、`ColorBgElevated` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 marker 声明在共享 `ArrowDecoratedBoxTheme`（与 ToolTip、DatePicker 等共享容器复用同一 `semantic-container`
 marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 `/template/` 进入嵌套模板；生成器按
@@ -17917,7 +17917,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 卡片封面区域：承载步骤封面图片等内容（对齐上游 `cover`） |
 | 相关 API | `TourStep.Cover`、`CoverTemplate` |
 | 相关 Token | 无独立 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.close`
 
@@ -17937,7 +17937,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 关闭按钮：结束引导流程（对齐上游 `close`，上游自 6.4.0 发布） |
 | 相关 API | `CloseIcon` |
 | 相关 Token | `CloseBtnSize`、`IconSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.header`
 
@@ -17957,7 +17957,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 卡片头部区域：组合标题与关闭按钮的头部容器（对齐上游 `header`） |
 | 相关 API | 无独立 API（内容经 `Title`/`CloseIcon` 进入） |
 | 相关 Token | 无独立 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.title`
 
@@ -17977,7 +17977,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 引导步骤标题文字（对齐上游 `title`） |
 | 相关 API | `TourStep.Title`、`TitleTemplate` |
 | 相关 Token | `HeaderColor`、`FontWeightStrong` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.description`
 
@@ -17997,7 +17997,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 引导步骤描述文字（对齐上游 `description`） |
 | 相关 API | `TourStep.Description`、`DescriptionTemplate` |
 | 相关 Token | 无独立 Token（沿用文本 Token） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.footer`
 
@@ -18017,7 +18017,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 卡片底部操作区域：组合指示器与操作按钮组（对齐上游 `footer`） |
 | 相关 API | 无独立 API（内容经 `Indicator`/`CustomActions` 进入） |
 | 相关 Token | 无独立 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.actions`
 
@@ -18037,7 +18037,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 操作按钮组容器：承载上一步/下一步/完成按钮（对齐上游 `actions`） |
 | 相关 API | `CustomActions`、步骤导航事件 |
 | 相关 Token | `PrimaryPrevBtnBg`、`PrimaryNextBtnHoverBg` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.indicators`
 
@@ -18057,7 +18057,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 指示器组容器：承载当前 `Indicator` 实例（对齐上游 `indicators`） |
 | 相关 API | `Indicator` |
 | 相关 Token | 无独立 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.indicator`
 
@@ -18077,7 +18077,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 单个步骤指示器圆点，含激活态（对齐上游 `indicator`） |
 | 相关 API | `IndicatorSize`、`IndicatorColor`、`IndicatorActiveColor`、`ItemSpacing` |
 | 相关 Token | `IndicatorSize`、`ColorFill`、`ColorPrimary` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 圆点由 `DefaultTourIndicator` 代码物化并只挂 `semantic-popup-indicator` marker 类与 `active` 激活态类；
 视觉（尺寸/颜色/间距）全部由 `DefaultTourIndicatorTheme` 表达——圆点无 TemplatedParent，`/template/` 选择器链
@@ -18289,7 +18289,7 @@ Source: ./controls/tree-view/semantic-cn.md
 | 职责 | 树根是 Items、选择、勾选、展开、过滤、拖拽、异步加载、空状态、switcher 图标与动效配置的统一 owner；作为顶层 `item` Part 的 owner-scoped Selector 作用域边界。 |
 | 相关 API | `Items`、`ItemsSource`、`SelectionMode`、`SelectedItem`、`SelectedItems`、`ToggleType`、`IsCheckStrictly`、`IsDefaultExpandAll`、`DefaultSelectedPaths`、`DefaultCheckedPaths`、`DefaultExpandedPaths`、`IsDraggable`、`IsShowIcon`、`IsShowLine`、`IsShowLeafIcon`、`NodeHoverMode`、`Switcher*Icon`、`IsSwitcherRotation`、`IsSelectable`、`IsSelectOnRightClick`、`DataLoader`、`Filter`、`FilterStrategy`、`EmptyIndicator`、`IsMotionEnabled`、`OpenMotion`、`CloseMotion` |
 | 相关 Token | `TreeViewToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -18309,7 +18309,7 @@ Source: ./controls/tree-view/semantic-cn.md
 | 职责 | 统一表示树中直接挂在 `TreeView` 根下的节点容器，覆盖 `TreeViewItem` 容器为公开 item 容器的顶层形态。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Icon`、`IsChecked`、`IsLeaf`、`IsLoading`、`IsSelected`、`IsExpanded`、`IsEnabled`、`IsDragging`、`IsDragOver`、`NodeHoverMode`、`IsShowLine` |
 | 相关 Token | `TreeItemMargin`、`HeaderHeight`、SharedToken（`ColorBorder`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.2 `TreeViewItem`
 
@@ -18334,7 +18334,7 @@ Source: ./controls/tree-view/semantic-cn.md
 | 职责 | 单个树节点容器：承载节点级状态（selected / checked / expanded / disabled / loading / drag / filter）与树形连线渲染表面；作为子节点容器与节点内容 Part 的 owner-scoped Selector 作用域边界。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Icon`、`IsChecked`、`IsLeaf`、`IsLoading`、`IsSelected`、`IsExpanded`、`IsEnabled`、`IsDragging`、`IsDragOver`、`NodeHoverMode`、`IsShowLine` |
 | 相关 Token | `TreeItemMargin`、`HeaderHeight`、SharedToken（`ColorBorder`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -18354,7 +18354,7 @@ Source: ./controls/tree-view/semantic-cn.md
 | 职责 | 递归表示当前节点容器生成的下一层子节点容器。与 `TreeView.item` 使用同一 `.semantic-item` 身份，共同保证任意深度的节点都可被 `atom|TreeViewItem` / `atom|TreeView` owner scope 命中。 |
 | 相关 API | 同 `TreeViewItem` root |
 | 相关 Token | `TreeItemMargin`、`HeaderHeight` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemSwitcher`
 
@@ -18374,7 +18374,7 @@ Source: ./controls/tree-view/semantic-cn.md
 | 职责 | 统一表示节点展开/收起 switcher 区域：展开、收起、叶子与加载图标入口；对应上游 `.ant-tree-switcher` 节点。 |
 | 相关 API | `SwitcherExpandIcon`、`SwitcherCollapseIcon`、`SwitcherRotationIcon`、`SwitcherLoadingIcon`、`SwitcherLeafIcon`、`IsSwitcherRotation`、`IsLeaf`、`IsLoading`、`IsExpanded` |
 | 相关 Token | `HeaderHeight`、`NodeHoverBg`、`TreeNodeSwitcherMargin`、SharedToken（`IconSize`、`IconSizeXS`、`ColorTextSecondary`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemIndicator`
 
@@ -18394,7 +18394,7 @@ Source: ./controls/tree-view/semantic-cn.md
 | 职责 | 统一表示节点勾选指示区域：checkbox / radio 两个备选形态共用的单一 Part，承载勾选状态、radio 分组与禁用态；对应 AtomUI 的 `ToggleType` 勾选功能节点，非上游 Semantic DOM 键（AtomUI 扩展）。 |
 | 相关 API | `ToggleType`、`IsChecked`、`IsIndicatorEnabled`、`GroupName`、`IsEnabled` |
 | 相关 Token | SharedToken（`ColorBorder`、`ColorPrimary`、`ColorBorderSecondary`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemIcon`
 
@@ -18414,7 +18414,7 @@ Source: ./controls/tree-view/semantic-cn.md
 | 职责 | 统一表示节点图标区域：`Icon` 内容的呈现、尺寸与边距；对应上游 `.ant-tree-iconEle` 节点。 |
 | 相关 API | `Icon`、`IsShowIcon`、`IsShowLeafIcon` |
 | 相关 Token | `TreeNodeIconMargin`、SharedToken（`IconSize`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemTitle`
 
@@ -18434,7 +18434,7 @@ Source: ./controls/tree-view/semantic-cn.md
 | 职责 | 统一表示节点标题文字区域：`Header` / `HeaderTemplate` 内容的呈现、颜色、字体与对齐；对应上游 `.ant-tree-title` 节点。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Content`、`ContentTemplate` |
 | 相关 Token | SharedToken（`ColorText`、`ColorTextDisabled`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.3 marker 放置与路由
 
@@ -18771,13 +18771,13 @@ Alert 只有一个 public descriptor owner：`Alert`。
 
 | Part | Selector | Style Type | ContractType | Cardinality | AtomUI 节点 | 稳定性 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `root` | Alert 本身 | 不适用 | `Alert` | `Single` | owner | stable since 6.0 |
-| `icon` | `.semantic-icon` | `AlertIconStyle` | `Icon` | `Multiple` | 四个 `AlertType` 图标 | stable since 6.0 |
-| `section` | `.semantic-section` | `AlertSectionStyle` | `StackPanel` | `Single` | 消息与描述布局 | stable since 6.0 |
-| `title` | `.semantic-title` | `AlertTitleStyle` | `Control` | `Multiple` | `MessageLabel` 与 `MarqueeLabel` | stable since 6.0 |
-| `description` | `.semantic-description` | `AlertDescriptionStyle` | `Label` | `Single` | `DescriptionLabel` | stable since 6.0 |
-| `actions` | `.semantic-actions` | `AlertActionsStyle` | `ContentPresenter` | `Single` | `ExtraActionPresenter` | stable since 6.0 |
-| `close` | `.semantic-close` | `AlertCloseStyle` | `IconButton` | `Single` | `PART_CloseBtn` | stable since 6.0 |
+| `root` | Alert 本身 | 不适用 | `Alert` | `Single` | owner | stable since 6.2.0 |
+| `icon` | `.semantic-icon` | `AlertIconStyle` | `Icon` | `Multiple` | 四个 `AlertType` 图标 | stable since 6.2.0 |
+| `section` | `.semantic-section` | `AlertSectionStyle` | `StackPanel` | `Single` | 消息与描述布局 | stable since 6.2.0 |
+| `title` | `.semantic-title` | `AlertTitleStyle` | `Control` | `Multiple` | `MessageLabel` 与 `MarqueeLabel` | stable since 6.2.0 |
+| `description` | `.semantic-description` | `AlertDescriptionStyle` | `Label` | `Single` | `DescriptionLabel` | stable since 6.2.0 |
+| `actions` | `.semantic-actions` | `AlertActionsStyle` | `ContentPresenter` | `Single` | `ExtraActionPresenter` | stable since 6.2.0 |
+| `close` | `.semantic-close` | `AlertCloseStyle` | `IconButton` | `Single` | `PART_CloseBtn` | stable since 6.2.0 |
 
 六个 selector Part 的 `SelectorRoute` 均为 `/template/ .semantic-<name>`，`Customization` 为 `Selector`，
 `CrossVisualRoot=false`，`RuntimeCreated=false`。root 的 `Customization` 为 `Root`，不生成 `.semantic-root` 或 Style Type。
@@ -19280,7 +19280,7 @@ WindowMessageManager (root，对应上游 list)
 - 上游 `wrapper` 用 flex `gap: marginXS` + `align-items: center` 排列 icon 与 title；AtomUI `DockPanel` 无 `Spacing`，
   等价的图标间距由 `IconPresenter` 的 `MessageIconMargin`（右外边距 `UniformlyMarginXS`）表达，视觉结果一致。
 
-两个 owner 的 descriptor `Since` 统一为 `6.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
+两个 owner 的 descriptor `Since` 统一为 `6.2.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
 
 以下类型不持有独立 Semantic descriptor：
 
@@ -19309,7 +19309,7 @@ WindowMessageManager (root，对应上游 list)
 | 职责 | 单条消息项根元素：承载 `Message`、`MessageType`、`Icon`、`IsClosing`、`IsClosed`、`IsMotionEnabled` 与进入/退出动效；根表面（背景、圆角、阴影、内边距）投影到模板中的 `Border#PART_Frame`。对应上游 notice root。 |
 | 相关 API | `Message`、`MessageType`、`Icon`、`IsClosing`、`IsClosed`、`IsMotionEnabled`、`Close()`、`MessageClosed` |
 | 相关 Token | `ContentBg`、`ContentPadding`、SharedToken（`BoxShadows`、`BorderRadiusLG`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `wrapper`
 
@@ -19329,7 +19329,7 @@ WindowMessageManager (root，对应上游 list)
 | 职责 | 图标与标题的包裹元素：决定 icon/title 的排列方向、对齐与图标间距。对应上游 notice wrapper。 |
 | 相关 API | `Icon`、`Message`（决定子节点可见性） |
 | 相关 Token | `MessageIconMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -19349,7 +19349,7 @@ WindowMessageManager (root，对应上游 list)
 | 职责 | 状态图标元素：尺寸、画刷与行高；`MessageType` 决定默认图标与状态色（Information/Loading = `ColorPrimary`，Success = `ColorSuccess`，Warning = `ColorWarning`，Error = `ColorError`）。对应上游 notice icon。 |
 | 相关 API | `Icon`、`MessageType` |
 | 相关 Token | `MessageIconSize`、SharedToken（`ColorPrimary`、`ColorSuccess`、`ColorWarning`、`ColorError`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -19369,7 +19369,7 @@ WindowMessageManager (root，对应上游 list)
 | 职责 | 消息文本元素：文本颜色、字号、行高、换行与文本选择样式。对应上游 notice title（上游把 `content` 作为 notice title 渲染）。 |
 | 相关 API | `Message` |
 | 相关 Token | SharedToken（`FontSize`、`FontHeight`、`ColorText`、`SelectionBackground`、`SelectionForeground`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `WindowMessageManager`
 
@@ -19391,7 +19391,7 @@ WindowMessageManager (root，对应上游 list)
 | 职责 | 消息列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`，管理宿主层安装、消息队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度语义。 |
 | 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`Padding`、`IsStackEnabled`、`StackThreshold`、`IsPauseOnHover`、`Show(IMessage)`、`DestroyAll()`、`Dispose()` |
 | 相关 Token | `MessageTopMargin`、SharedToken（`EnableMotion`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `listContent`
 
@@ -19411,7 +19411,7 @@ WindowMessageManager (root，对应上游 list)
 | 职责 | 消息列表内容元素：notice 的排列方向、顺序与对齐；对应上游 `listContent` 的 notice 排列/间距语义。 |
 | 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
 | 相关 Token | SharedToken（`EnableMotion`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 隐式 `root` 不声明 `.semantic-root` marker。`MessageCard` 的 `wrapper`、`icon`、`title` marker 静态声明在
 `MessageCardTheme.axaml` 模板内；`WindowMessageManager` 的 `listContent` marker 静态声明在
@@ -19929,7 +19929,7 @@ WindowNotificationManager (root，对应上游 list)
 - `wrapper` 使用 DockPanel，icon 的右外边距取 `NotificationIconMargin`，并与标题首行顶部对齐。
   `section` 使用 StackPanel，其 `Spacing` 取 `NotificationSectionSpacing`。
 
-两个 owner 的 descriptor `Since` 统一为 `6.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
+两个 owner 的 descriptor `Since` 统一为 `6.2.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
 
 以下类型不持有独立 Semantic descriptor：
 
@@ -19959,7 +19959,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 通知项根元素：承载 `Title`、`Content`、`Icon`、`Actions`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled` 与进入/退出动效；根表面（背景、边框、圆角、阴影、内边距）投影到模板中的 `Border#Frame`。对应上游 notice root。 |
 | 相关 API | `Title`、`Content`、`Icon`、`Actions`、`ActionsTemplate`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled`、`Close()`、`NotificationClosed` |
 | 相关 Token | `NotificationBg`、`NotificationPadding`、SharedToken（`BoxShadows`、`BorderRadiusLG`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `wrapper`
 
@@ -19979,7 +19979,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 图标与内容区域的包裹元素：决定 icon 与 section 的排列方向、对齐与图标间距。对应上游 notice wrapper（flex 行，`align-items: flex-start`）。 |
 | 相关 API | `Icon`、`Title`、`Content`（决定子节点可见性） |
 | 相关 Token | `NotificationIconMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -19999,7 +19999,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 状态图标元素：尺寸、画刷与行高；`NotificationType` 决定默认图标与状态色（Information = `ColorPrimary`，Success = `ColorSuccess`，Warning = `ColorWarning`，Error = `ColorError`）。对应上游 notice icon。 |
 | 相关 API | `Icon`、`NotificationType` |
 | 相关 Token | `NotificationIconSize`、`NotificationIconMargin`、SharedToken（`ColorPrimary`、`ColorSuccess`、`ColorWarning`、`ColorError`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `section`
 
@@ -20019,7 +20019,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 包含标题与描述的内容区域元素：决定两者的纵向间距与对齐。对应上游 notice section（flex column，`gap: marginXS`）。 |
 | 相关 API | `Title`、`Content` |
 | 相关 Token | `NotificationSectionSpacing` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -20039,7 +20039,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 标题元素：文本颜色、字号、行高与右侧留白（为关闭按钮预留）。对应上游 notice title。 |
 | 相关 API | `Title` |
 | 相关 Token | SharedToken（`FontSizeLG`、`FontHeightLG`、`ColorTextHeading`）、`NotificationTitlePadding` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `description`
 
@@ -20059,7 +20059,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 描述元素：正文颜色、字号、行高与换行。对应上游 notice description（在标题下方，不与关闭按钮同排，因此不预留右侧空间）。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken（`FontSize`、`FontHeight`、`ColorText`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `actions`
 
@@ -20079,7 +20079,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 操作组元素：位于 notice 右下角，承载调用方传入的操作内容；`Actions` 为空时节点隐藏。对应上游 notice actions。 |
 | 相关 API | `Actions`、`ActionsTemplate` |
 | 相关 Token | `NotificationActionsMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `close`
 
@@ -20099,7 +20099,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 关闭按钮覆盖元素：位置（右上角）、尺寸、圆角、默认/悬停/按下颜色与聚焦样式。对应上游 notice close（absolute top-right）。 |
 | 相关 API | `Close()`、`NotificationClosed` |
 | 相关 Token | `NotificationCloseButtonSize`、`NotificationCloseButtonPadding`、`NotificationCloseButtonMargin`、SharedToken（`BorderRadiusSM`、`IconSizeSM`、`ColorIcon`、`ColorIconHover`、`ColorBgTextHover`、`ColorBgTextActive`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `progress`
 
@@ -20119,7 +20119,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 进度覆盖元素：展示自动关闭的剩余时间。对应上游 notice progress（absolute bottom）。 |
 | 相关 API | `IsShowProgress`、`Expiration` |
 | 相关 Token | `NotificationProgressHeight`、`NotificationProgressBg`、`NotificationProgressMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `WindowNotificationManager`
 
@@ -20141,7 +20141,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 通知列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`，管理宿主层安装、通知队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度与边缘内边距语义。 |
 | 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`、`Padding`、`IsStackEnabled`、`StackThreshold`、`Show(INotification)`、`DestroyAll()`、`Dispose()` |
 | 相关 Token | `NotificationTopMargin`、`NotificationBottomMargin`、SharedToken（`EnableMotion`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `listContent`
 
@@ -20161,7 +20161,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 通知列表内容元素：notice 的排列方向、顺序、对齐与项间距；对应上游 `listContent` 的 notice 排列/间距语义。 |
 | 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
 | 相关 Token | SharedToken（`EnableMotion`、`UniformlyMargin`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 隐式 `root` 不声明 `.semantic-root` marker。`NotificationCard` 的 `wrapper`、`icon`、`section`、`title`、
 `description`、`actions`、`close` marker 静态声明在 `NotificationCardTheme.axaml` 模板内；`progress` 由控件运行时
@@ -20374,7 +20374,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 触发宿主与确认状态的组织边界，承载 public API、确认/取消事件与主题入口。 |
 | 相关 API | 全部 PopupConfirm public API |
 | 相关 Token | PopupConfirmToken、FlyoutHostToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -20394,7 +20394,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 弹层根节点，承载弹层背景、边框、内边距与箭头，对应上游 Popconfirm `root` 槽位。 |
 | 相关 API | `Flyout`、`ShouldUseOverlayPopup`、`IsArrowVisible` |
 | 相关 Token | FlyoutHostToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.container`
 
@@ -20414,7 +20414,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 弹层内层容器，承载背景、边框、圆角与内边距，对应上游 Popconfirm `container` 槽位。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.content`
 
@@ -20434,7 +20434,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 弹层框体的内容呈现面，承载确认体容器；同为 FlyoutHost 家族的内容槽位，不对应上游 Popconfirm 单独语义 key。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.arrow`
 
@@ -20454,7 +20454,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 指向锚点的浮动箭头，对应上游 Popconfirm `arrow` 槽位。 |
 | 相关 API | `IsArrowVisible`、`Placement` |
 | 相关 Token | ArrowDecoratedBoxToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.icon`
 
@@ -20474,7 +20474,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 确认状态图标，`ConfirmStatus` 通过 `IconBrush` 切换主题/警告/错误色，对应上游 Popconfirm `icon` 槽位。 |
 | 相关 API | `Icon`、`ConfirmStatus` |
 | 相关 Token | PopupConfirmToken、SharedToken（`IconSizeLG`、`ColorPrimary/ColorWarning/ColorError`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.title`
 
@@ -20494,7 +20494,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 确认框标题，对应上游 Popconfirm `title` 槽位；标题文字由 `SharedToken ColorTextHeading` 与 `FontWeight=SemiBold` 承载。 |
 | 相关 API | `Title` |
 | 相关 Token | PopupConfirmToken（`TitleMargin`）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.description`
 
@@ -20514,7 +20514,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 确认描述正文，对应上游 Popconfirm `content` 槽位（AtomUI 因 `popup.content` 已占用而改名为 `popup.description`）。 |
 | 相关 API | `ConfirmContent`、`ConfirmContentTemplate` |
 | 相关 Token | PopupConfirmToken（`ContentContainerMargin`）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.actions`
 
@@ -20534,7 +20534,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 确认/取消操作区，承载 `PART_CancelButton` 与 `PART_OkButton`；对齐 Alert `actions` 先例，上游未把按钮行发布为语义 key。 |
 | 相关 API | `OkText`、`CancelText`、`OkButtonType`、`IsShowCancelButton` |
 | 相关 Token | PopupConfirmToken（`ButtonSpacing`、`ButtonContainerMargin`）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -20699,7 +20699,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 承载进度范围、状态、尺寸、方向、文本位置和 Semantic Style 作用域。 |
 | 相关 API | 全部 `ProgressBar` public API |
 | 相关 Token | ProgressBarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -20719,7 +20719,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 统一承载 rail、track、成功段和 indicator 的布局边界。 |
 | 相关 API | `Orientation`、`PercentPosition`、`IsProgressInfoVisible` |
 | 相关 Token | `LineExtraInfoMargin`、`LineProgressPadding` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `rail`
 
@@ -20739,7 +20739,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 表达线形进度的完整剩余轨道。 |
 | 相关 API | `TrailColor`、`StrokeLineCap`、`IndicatorThickness` |
 | 相关 Token | `RemainingColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `track`
 
@@ -20759,7 +20759,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 表达由 `Value` 计算出的线形已完成区域。 |
 | 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`IndicatorThickness` |
 | 相关 Token | `DefaultColor`、SharedToken 状态色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -20779,7 +20779,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 统一承载格式化百分比、成功图标和异常图标的替代呈现。 |
 | 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`PercentPosition`、`Status`、完成图标 API |
 | 相关 Token | 文本、图标尺寸和状态色 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `StepsProgressBar`
 
@@ -20801,7 +20801,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 承载进度范围、步骤数量、逐步画刷、尺寸、方向和 Semantic Style 作用域。 |
 | 相关 API | 全部 `StepsProgressBar` public API |
 | 相关 Token | ProgressBarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -20821,7 +20821,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 统一承载步骤 track 和 indicator；steps 不创建 rail。 |
 | 相关 API | `Orientation`、`Steps`、`PercentPosition`、`IsProgressInfoVisible` |
 | 相关 Token | `LineExtraInfoMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `track`
 
@@ -20841,7 +20841,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 表达全部步骤单元；完成状态只决定每个 target 使用进度色还是 rail 色。 |
 | 相关 API | `Value`、`Steps`、`StepsStrokeBrush`、`StrokeBrush`、`TrailColor` |
 | 相关 Token | `DefaultColor`、`RemainingColor`、SharedToken 状态色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -20861,7 +20861,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 统一承载步骤进度的百分比、成功图标和异常图标。 |
 | 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`PercentPosition`、`Status` |
 | 相关 Token | 文本、图标尺寸和状态色 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.3 `CircleProgress`
 
@@ -20883,7 +20883,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 承载进度范围、圆形尺寸、分段状态和 Semantic Style 作用域。 |
 | 相关 API | 全部 `CircleProgress` public API |
 | 相关 Token | ProgressBarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -20903,7 +20903,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 统一承载圆形 rail、track、成功弧段和居中 indicator。 |
 | 相关 API | `SizeType`、`Width`、`Height`、`StepCount`、`StepGap` |
 | 相关 Token | 圆形尺寸与信息 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `rail`
 
@@ -20923,7 +20923,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 表达连续圆或分段圆的完整剩余轨道。 |
 | 相关 API | `TrailColor`、`IndicatorThickness`、`StepCount`、`StepGap` |
 | 相关 Token | `RemainingColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `track`
 
@@ -20943,7 +20943,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 表达由 `Value` 计算出的连续或分段圆弧。 |
 | 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`IndicatorThickness`、`StepCount`、`StepGap` |
 | 相关 Token | `DefaultColor`、SharedToken 状态色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -20963,7 +20963,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 统一承载圆心百分比、成功图标和异常图标。 |
 | 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`Status`、完成图标 API |
 | 相关 Token | `CircleMinimumTextFontSize`、`CircleMinimumIconSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.4 `DashboardProgress`
 
@@ -20985,7 +20985,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 承载进度范围、缺口、尺寸、分段状态和 Semantic Style 作用域。 |
 | 相关 API | 全部 `DashboardProgress` public API |
 | 相关 Token | ProgressBarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -21005,7 +21005,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 统一承载仪表盘 rail、track、成功弧段和居中 indicator。 |
 | 相关 API | `SizeType`、`Width`、`Height`、`DashboardGapPosition`、`GapDegree` |
 | 相关 Token | 圆形尺寸与信息 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `rail`
 
@@ -21025,7 +21025,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 表达带指定缺口的连续或分段剩余轨道。 |
 | 相关 API | `TrailColor`、`IndicatorThickness`、`DashboardGapPosition`、`GapDegree`、`StepCount`、`StepGap` |
 | 相关 Token | `RemainingColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `track`
 
@@ -21045,7 +21045,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 表达由 `Value` 计算出的带缺口连续或分段圆弧。 |
 | 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`DashboardGapPosition`、`GapDegree` |
 | 相关 Token | `DefaultColor`、SharedToken 状态色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -21065,7 +21065,7 @@ Source: ./controls/progress-bar/semantic-cn.md
 | 职责 | 统一承载仪表盘百分比、成功图标和异常图标。 |
 | 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`Status`、完成图标 API |
 | 相关 Token | `CircleMinimumTextFontSize`、`CircleMinimumIconSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 所有 root 都是隐式 Part，不添加 `.semantic-root`。四个 owner 均不跨 VisualRoot，也不提供 Semantic Part Theme。
 `ProgressBar`、`CircleProgress` 和 `DashboardProgress` 的非 root Part 是静态模板 target；`StepsProgressBar` 只有 track
@@ -21300,7 +21300,7 @@ Result 的 Part 名称与公开 Result Semantic 结构保持一致：`root`、`i
 | 职责 | 承载整体结果布局、状态、表面属性和 Semantic Style 作用域。 |
 | 相关 API | 全部 Result public API，包含 `StrokeDashArray` 与继承的标准表面属性 |
 | 相关 Token | ResultToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `icon`
 
@@ -21320,7 +21320,7 @@ Result 的 Part 名称与公开 Result Semantic 结构保持一致：`root`、`i
 | 职责 | 表达 Info、Success、Warning、Error 图标和 403、404、500 图像的替代呈现。 |
 | 相关 API | `Status`、`Icon` |
 | 相关 Token | `StatusIconSize`、`StatusImageMargin`、`ImageWidth`、`ImageHeight`、状态色 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `icon` 同时标记 `PART_StatusIconPresenter` 和 `PART_ErrorCodeImage`。两个 target 始终存在，`Status` 只切换可见性；
 Semantic Style 必须适用于两个实现。它适合定制 Margin、Opacity、Width、Height 和对齐。普通 presenter 内由默认状态或 `Icon`
@@ -21344,7 +21344,7 @@ Semantic Style 必须适用于两个实现。它适合定制 Margin、Opacity、
 | 职责 | 展示 Header 内容并提供标题排版边界。 |
 | 相关 API | `Header`、`HeaderTemplate`、`HeaderFontSize` |
 | 相关 Token | `HeaderFontSize`、`HeaderMargin`、标题色与相对行高 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `title` 始终存在，`Header=null` 时通过 `IsVisible=false` 隐藏。它适合定制 Foreground、FontSize、FontStyle、FontWeight、
 LineHeight、Margin、Padding、Opacity、换行和对齐；HeaderTemplate 创建的用户子树不属于 Result Semantic Part。
@@ -21367,7 +21367,7 @@ LineHeight、Margin、Padding、Opacity、换行和对齐；HeaderTemplate 创�
 | 职责 | 展示可选结果说明并提供副标题排版边界。 |
 | 相关 API | `SubHeader`、`SubHeaderTemplate`、`SubHeaderFontSize` |
 | 相关 Token | `SubHeaderFontSize`、描述色与相对行高 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `subTitle` 始终存在，`SubHeader=null` 时隐藏。它适合定制 Foreground、FontSize、FontStyle、FontWeight、LineHeight、Margin、
 Padding、Opacity、换行和对齐；SubHeaderTemplate 创建的用户子树不属于 Result Semantic Part。
@@ -21390,7 +21390,7 @@ Padding、Opacity、换行和对齐；SubHeaderTemplate 创建的用户子树不
 | 职责 | 承载 Extra 内容并提供操作区布局边界。 |
 | 相关 API | `Extra`、`ExtraTemplate` |
 | 相关 Token | `ExtraMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `extra` presenter 始终存在，横向拉伸到 Result 内容区宽度，并在区域内部居中排列 Extra 内容；`Extra=null` 时保持空内容。
 它适合定制 Background、Padding、Margin、Opacity、对齐和 TextAlignment。调用方放入的 Button、Panel 或其他内容子树
@@ -21414,7 +21414,7 @@ Padding、Opacity、换行和对齐；SubHeaderTemplate 创建的用户子树不
 | 职责 | 承载 Content 并提供正文背景、内边距和外边距边界。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | `ContentMargin`、`ContentPadding`、`ColorFillAlter` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `body` 始终存在，`Content=null` 时隐藏。它适合定制 Background、Padding、Margin、Opacity、对齐和 ClipToBounds；
 ContentTemplate 创建的用户子树不属于 Result Semantic Part。

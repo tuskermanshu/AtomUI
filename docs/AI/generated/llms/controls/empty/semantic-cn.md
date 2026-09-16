@@ -27,7 +27,7 @@ ControlTemplate 和 Avalonia 样式优先级作为实现事实。
 | 职责 | 空状态的根布局、整体对齐、可见性和根视觉样式 owner。 |
 | 相关 API | `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`、`StrokeDashArray` 及标准布局属性 |
 | 相关 Token | EmptyToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `image`
 
@@ -47,7 +47,7 @@ ControlTemplate 和 Avalonia 样式优先级作为实现事实。
 | 职责 | 展示内置 Default/Simple 图形或 `ImagePath`、`ImageSource` 指定的 SVG 图形。 |
 | 相关 API | `PresetImage`、`ImagePath`、`ImageSource`、`SizeType` |
 | 相关 Token | `EmptyImgHeight`、`EmptyImgHeightMD`、`EmptyImgHeightSM`、图形颜色资源 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `description`
 
@@ -67,7 +67,7 @@ ControlTemplate 和 Avalonia 样式优先级作为实现事实。
 | 职责 | 展示本地化默认描述或调用方提供的 `Description`。 |
 | 相关 API | `Description`、`IsDescriptionVisible`、`SizeType` |
 | 相关 Token | `DescriptionMargin`、`DescriptionMarginSM`、SharedToken 文本颜色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `footer`
 
@@ -87,7 +87,7 @@ ControlTemplate 和 Avalonia 样式优先级作为实现事实。
 | 职责 | 承载创建、刷新、返回或其他空状态后续操作。 |
 | 相关 API | `Footer`、`FooterTemplate` |
 | 相关 Token | `FooterMargin`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

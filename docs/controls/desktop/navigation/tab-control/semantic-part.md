@@ -61,14 +61,14 @@
 | 职责 | 页签控件根语义区域，承载选择、集合、关闭、排序与内容页状态入口。 |
 | 相关 API | `SelectedIndex`、`SelectedItem`、`SelectedContent`、`ItemsSource`、`TabStripPlacement`、`SizeType`、`IsTabReorderEnabled`、`TabActivationTrigger`、`Closing`、`Closed`、`TabReordering`、`TabReordered` |
 | 相关 Token | TabControl Token + SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是 `TabControl` owner 本身，在控件实例的整个生命周期内始终存在，每个实例恰好一个。它承载页签切换、内容页选择、
 关闭流程与拖动排序的状态入口，并作为 `content` / `item` owner-scoped Selector 的作用域边界。
 
 `TabControlTheme.axaml` 的根模板是 `PixelAlignedBorder#Frame > DockPanel`（header 区 + 内容区）。root 视觉定制直接作用于
 owner 自身的公共视觉属性并 TemplateBinding 到模板根 `Frame`：`Background`、`BackgroundSizing`、`BorderBrush`、
-`BorderThickness`、`CornerRadius`、`Padding` 同名绑定，`BorderDashArray` / `BorderDashOffset`（since 6.2）绑定到
+`BorderThickness`、`CornerRadius`、`Padding` 同名绑定，`BorderDashArray` / `BorderDashOffset`（since 6.2.0）绑定到
 `Frame` 的 `StrokeDashArray` / `StrokeDaskOffset`，因此虚线边框等 root 视觉直接渲染。标签条与内容区之间的分隔线由
 internal `SeparatorBorderBrush` / `SeparatorBorderThickness` 承接主题 token，不再占用公开 `BorderBrush` /
 `BorderThickness` 的默认值。root 不表示模板中的 `PART_AlignWrapper`、`HeaderLayout`、`PART_TabsContainer` 或
@@ -91,7 +91,7 @@ internal `SeparatorBorderBrush` / `SeparatorBorderThickness` 承接主题 token�
 | 职责 | 承载标签条头部区域（页签列表 + 扩展内容）的背景、内边距与对齐视觉。 |
 | 相关 API | `HeaderStartEdgePadding`、`HeaderEndEdgePadding`、`HeaderStartExtraContent`、`HeaderEndExtraContent`、`TabStripPlacement` |
 | 相关 Token | TabControl Token + SharedToken |
-| 稳定性 | stable since 6.2 |
+| 稳定性 | stable since 6.2.0 |
 
 `header` 是内置模板中的静态标记：`TabControlTheme.axaml` 在包裹标签条的 header `Border` 上声明
 `Classes.semantic-header="True"`，每个内置模板恰好一个 marker。它覆盖整个标签条头部区域（含 `HeaderLayout` 与
@@ -116,7 +116,7 @@ internal `SeparatorBorderBrush` / `SeparatorBorderThickness` 承接主题 token�
 | 职责 | 承载当前选中页内容的内容展示区域，可定制内边距、对齐与内容样式。 |
 | 相关 API | `SelectedContent`、`SelectedContentTemplate`、`ContentPadding`、`HorizontalContentAlignment`、`VerticalContentAlignment` |
 | 相关 Token | TabControl Token（`TabAndContentGutter` 等）+ SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `content` 是内置模板中的静态标记：`TabControlTheme.axaml` 在模板末尾承载 `SelectedContent` 的
 `ContentPresenter` 上声明 `Classes.semantic-content="True"`，每个内置模板恰好一个 marker。节点始终存在于模板中，
@@ -143,7 +143,7 @@ TemplateBinding 值，需按 §4 的尺寸基线验证。
 | 职责 | 承载单个页签头的尺寸、状态与点击/关闭语义。 |
 | 相关 API | `Header`、`Icon`、`CloseIcon`、`IsClosable`、`IsAutoHideCloseButton`、`IsSelected`、`SizeType` |
 | 相关 Token | `HorizontalItemPadding(SM/LG)`、`VerticalItemPadding`、`TitleFontSize(SM/LG)`、`ItemColor`、`ItemHoverColor`、`ItemSelectedColor` 等 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `item` 覆盖 tab 条内的全部页签头项。marker 是运行时创建的语义标记：`TabControl` 在
 `CreateContainerForItemOverride` 中把 `semantic-item` 应用到新建的 `TabItem` 容器，并在
@@ -177,7 +177,7 @@ TemplateBinding 值，需按 §4 的尺寸基线验证。
 | 职责 | 承载选中页签指示墨条的视觉样式。 |
 | 相关 API | `SelectedItem`、`SelectedIndex`、`TabStripPlacement` |
 | 相关 Token | `InkBarColor`、`InkBarThickness` + SharedToken |
-| 稳定性 | stable since 6.2 |
+| 稳定性 | stable since 6.2.0 |
 
 `indicator` 是内置模板中的静态标记：`TabControlTheme.axaml` 在 `Border#PART_SelectedItemIndicator` 上声明
 `Classes.semantic-indicator="True"`，每个内置模板恰好一个 marker。墨条是 motion actor——宽度、高度与
@@ -216,7 +216,7 @@ ink bar 的行为一致。
 | 职责 | 承载新增页签的触发按钮视觉。 |
 | 相关 API | `IsShowAddTabButton`、`AddTabRequest` |
 | 相关 Token | `AddTabButtonMarginHorizontal`、`AddTabButtonMarginVertical`、`ItemColor`、`ItemHoverColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `add` 是内置模板中的静态标记：`CardTabControlTheme.axaml` 在 `PART_AddTabButton` 上声明
 `Classes.semantic-add="True"`。按钮节点始终存在于模板中，`IsShowAddTabButton` 只控制可见性，marker 不随该属性
@@ -245,7 +245,7 @@ ink bar 的行为一致。
 | 职责 | 页签项根语义区域，承载单项选择、关闭、图标槽与拖动状态。 |
 | 相关 API | `Header`、`Icon`、`CloseIcon`、`IsSelected`、`IsClosable`、`IsAutoHideCloseButton`、`HasIcon`、`IsIconSlotReserved`、`SizeType`、`TabStripPlacement` |
 | 相关 Token | TabControl Token + SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是 `TabItem` owner 本身，每个 item 实例恰好一个。root 视觉定制作用于 owner 自身的
 `Background`、`Foreground`、`Padding`、`Margin`、`FontSize`、`BorderBrush`、`BorderThickness`、`CornerRadius`
@@ -268,7 +268,7 @@ ink bar 的行为一致。
 | 职责 | 承载页签图标区域的尺寸、间距与视觉样式。 |
 | 相关 API | `Icon`、`HasIcon`、`IsIconSlotReserved`、`SizeType`、`TabStripPlacement` |
 | 相关 Token | `ItemIconMargin` + SharedToken（`IconSize`、`IconSizeSM`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `icon` 是内置模板中的静态标记，声明在 `BaseTabItemTheme.axaml` 与 `CardTabItemTheme.axaml` 的
 `ItemIconPresenter` 上。节点始终存在于模板中；`HasIcon` / `IsIconSlotReserved` 只控制可见性，marker 不随可见性
@@ -291,7 +291,7 @@ ink bar 的行为一致。
 | 职责 | 承载页签标题文本或标题模板的展示区域。 |
 | 相关 API | `Header`、`HeaderTemplate`、`SizeType` |
 | 相关 Token | `TitleFontSize(SM/LG)`、`ItemColor`、`ItemHoverColor`、`ItemSelectedColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `label` 是内置模板中的静态标记，声明在两套 item 模板的标题 `ContentPresenter` 上。它只覆盖页签标题区域，不覆盖
 图标与关闭按钮；适合字体、前景色、内边距等标题样式定制。
@@ -313,7 +313,7 @@ ink bar 的行为一致。
 | 职责 | 承载页签关闭按钮的图标、尺寸与交互视觉。 |
 | 相关 API | `CloseIcon`、`IsClosable`、`IsAutoHideCloseButton` |
 | 相关 Token | `CloseIconMargin` + SharedToken（`IconSizeSM`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `close` 是内置模板中的静态标记，声明在两套 item 模板的 `PART_ItemCloseButton` 上。按钮节点始终存在于模板中，
 `IsClosable` / `IsAutoHideCloseButton` 只控制可见性与透明度（`CloseButtonOpacity`），marker 不随状态增删。

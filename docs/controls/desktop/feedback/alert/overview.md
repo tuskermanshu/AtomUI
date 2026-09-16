@@ -141,13 +141,13 @@ LLMS 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Alert` | 承载整体反馈表面、类型、内容与样式作用域。 | 全部 Alert public API | AlertToken、SharedToken | stable since 6.0 |
-| `icon` | 四个状态 `Icon` | 表达 Success、Info、Warning、Error 的替代图标。 | `Type`、`IsShowIcon` | 图标尺寸与状态色 Token | stable since 6.0 |
-| `section` | `StackPanel` | 纵向组织 title 与 description。 | `Message`、`Description` | 间距与文本 Token | stable since 6.0 |
-| `title` | `Label` / `MarqueeLabel` | 展示普通消息或跑马灯替代呈现。 | `Message`、`IsMessageMarqueeEnabled` | 字号与行高 Token | stable since 6.0 |
-| `description` | `Label` | 展示可选反馈详情。 | `Description` | 描述间距与文本 Token | stable since 6.0 |
-| `actions` | `ContentPresenter` | 承载可选 ExtraAction 内容。 | `ExtraAction` | `ExtraElementMargin` | stable since 6.0 |
-| `close` | `IconButton` | 提供可选关闭请求入口。 | `IsClosable`、`CloseIcon`、`CloseRequest` | 图标尺寸与间距 Token | stable since 6.0 |
+| `root` | `Alert` | 承载整体反馈表面、类型、内容与样式作用域。 | 全部 Alert public API | AlertToken、SharedToken | stable since 6.2.0 |
+| `icon` | 四个状态 `Icon` | 表达 Success、Info、Warning、Error 的替代图标。 | `Type`、`IsShowIcon` | 图标尺寸与状态色 Token | stable since 6.2.0 |
+| `section` | `StackPanel` | 纵向组织 title 与 description。 | `Message`、`Description` | 间距与文本 Token | stable since 6.2.0 |
+| `title` | `Label` / `MarqueeLabel` | 展示普通消息或跑马灯替代呈现。 | `Message`、`IsMessageMarqueeEnabled` | 字号与行高 Token | stable since 6.2.0 |
+| `description` | `Label` | 展示可选反馈详情。 | `Description` | 描述间距与文本 Token | stable since 6.2.0 |
+| `actions` | `ContentPresenter` | 承载可选 ExtraAction 内容。 | `ExtraAction` | `ExtraElementMargin` | stable since 6.2.0 |
+| `close` | `IconButton` | 提供可选关闭请求入口。 | `IsClosable`、`CloseIcon`、`CloseRequest` | 图标尺寸与间距 Token | stable since 6.2.0 |
 
 LLMS 导出来源：
 

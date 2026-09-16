@@ -40,7 +40,7 @@
 | 职责 | Collapse root 是面板集合状态、视觉模式与根表面样式（背景、边框、圆角、内边距）的统一 owner。 |
 | 相关 API | `IsAccordion`、`IsBorderless`、`IsGhostStyle`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled`、`ItemHeaderPadding`、`ItemContentPadding`、`Items`、`SelectedItems` |
 | 相关 Token | CollapseToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -60,7 +60,7 @@
 | 职责 | 统一表示每个面板头部的背景、内边距、字体/行高、光标与交互视觉；对应上游 `.ant-collapse-header` 的 flex 布局、内边距、颜色、行高、光标与过渡动画职责。 |
 | 相关 API | `SizeType`、`ItemHeaderPadding`、`TriggerType`、`IsGhostStyle`、`IsEnabled` |
 | 相关 Token | `HeaderBg`、`HeaderPadding`、`CollapseHeaderPaddingSM`、`CollapseHeaderPaddingLG`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -80,7 +80,7 @@
 | 职责 | 统一表示展开/收起箭头的大小、对齐、边距与动效视觉；对应上游 `.ant-collapse-expand-icon` 的字体大小、过渡动画与旋转变换职责。 |
 | 相关 API | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsSelected` |
 | 相关 Token | `IconSizeSM`、`LeftExpandButtonMargin*`、`RightExpandButtonMargin*`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -100,7 +100,7 @@
 | 职责 | 统一表示每个面板标题文字的布局、颜色、字体与对齐；对应上游 `.ant-collapse-title` 的 flex 自适应布局与边距职责。 |
 | 相关 API | `Header`、`HeaderTemplate` |
 | 相关 Token | `ColorTextHeading`、`ColorTextDisabled`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -120,7 +120,7 @@
 | 职责 | 统一表示每个面板内容区域的内边距、颜色、背景与内容顶部分隔线；对应上游 `.ant-collapse-body` 的内边距、颜色与背景职责。 |
 | 相关 API | `Content`、`ContentTemplate`、`ItemContentPadding`、`IsBorderless`、`IsGhostStyle` |
 | 相关 Token | `ContentPadding`、`ContentBg`、`HeaderBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header` 与 `body` 的承载节点是

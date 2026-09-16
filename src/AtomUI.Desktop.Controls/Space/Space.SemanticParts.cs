@@ -9,7 +9,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item",
     ContractType = typeof(Control),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "separator",
@@ -17,7 +17,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-separator",
     ContractType = typeof(Control),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class Space
 {

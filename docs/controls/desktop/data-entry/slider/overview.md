@@ -226,18 +226,18 @@ LLMS 语义区域：
 
 下表是 LLMS 语义导出使用的区域映射。Semantic Part 的 owner 是 `Slider`，对应上游 Ant Design 6.6.0 稳定发布的
 `SliderSemanticType`（`classNames` / `styles` 均为 `{ root?, tracks?, track?, rail?, handle? }`）：五个 Part 随
-Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.0`。上游 `tracks` 是仅被定制时才渲染的条件节点，
+Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.2.0`。上游 `tracks` 是仅被定制时才渲染的条件节点，
 AtomUI 恒渲染该元素（默认透明）；mark 点 / 标签与 Tooltip 上游没有 Semantic key，AtomUI 同样不公开。完整契约见
 [Slider Semantic Part 契约](semantic-part.md)，marker 归属与生命周期见 [Slider 桌面版实现原理](implementation.md)
 的 Semantic Part 处置一节。
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Slider` | 数值选择控件根语义区域，承载值状态归一、方向与 tick、交互会话、Tooltip 与 Form 集成；对应上游 `.ant-slider`。 | `Orientation`、`IsDirectionReversed`、`IsSnapToTickEnabled`、`IsRangeMode`、`RangeValues`、`DisabledHandles`、`IsDraggableTrack`、`Marks`、`IsIncluded`、`ValueFormatTemplate` | `SliderPaddingHorizontal`、`SliderPaddingVertical`、SharedToken | stable since 6.0 |
-| `rail` | `SliderTrack` 内代码创建的 rail `Border` 元素 | 背景轨道区域，几何与胶囊圆角由控件计算，背景默认 `TrackGrooveBrush`；对应上游 `.ant-slider-rail`。 | `TrackGrooveBrush`、`Orientation` | `RailBg`、`RailHoverBg`、`RailSize` | stable since 6.0 |
-| `tracks` | `SliderTrack` 内代码创建的整体活动范围 `Border` 元素 | 整体活动范围容器（Range 首尾值；单值 `Minimum → Value`），背景默认 `TracksBrush`；对应上游 `.ant-slider-tracks`。 | `TracksBrush`、`IsRangeMode`、`IsIncluded` | 无专属 Token（默认画刷为 null） | stable since 6.0 |
-| `track` | `SliderTrack` 内代码创建的 segment `Border` 元素 | 相邻 handle 之间的活动轨道段（单值 1 个、Range N-1 个），背景默认 `TrackBarBrush`；对应上游 `.ant-slider-track`。 | `TrackBarBrush`、`RangeValues`、`IsIncluded`、`IsDraggableTrack` | `TrackBg`、`TrackHoverBg`、`TrackBgDisabled`、`SliderTrackSize` | stable since 6.0 |
-| `handle` | 每个动态 `SliderThumb` | 滑块控制点，圆点、边框、outline 与 hover / focus / pressed / disabled 视觉，Tooltip 宿主；对应上游 `.ant-slider-handle`。 | `SliderThumb.OutlineBrush`、`SliderThumb.OutlineThickness`、`SliderThumb.ThumbCircleSize`、`DisabledHandles`、`ValueFormatTemplate` | `ThumbSize`、`ThumbCircleSize*`、`ThumbCircleBorder*`、`ThumbOutline*` | stable since 6.0 |
+| `root` | `Slider` | 数值选择控件根语义区域，承载值状态归一、方向与 tick、交互会话、Tooltip 与 Form 集成；对应上游 `.ant-slider`。 | `Orientation`、`IsDirectionReversed`、`IsSnapToTickEnabled`、`IsRangeMode`、`RangeValues`、`DisabledHandles`、`IsDraggableTrack`、`Marks`、`IsIncluded`、`ValueFormatTemplate` | `SliderPaddingHorizontal`、`SliderPaddingVertical`、SharedToken | stable since 6.2.0 |
+| `rail` | `SliderTrack` 内代码创建的 rail `Border` 元素 | 背景轨道区域，几何与胶囊圆角由控件计算，背景默认 `TrackGrooveBrush`；对应上游 `.ant-slider-rail`。 | `TrackGrooveBrush`、`Orientation` | `RailBg`、`RailHoverBg`、`RailSize` | stable since 6.2.0 |
+| `tracks` | `SliderTrack` 内代码创建的整体活动范围 `Border` 元素 | 整体活动范围容器（Range 首尾值；单值 `Minimum → Value`），背景默认 `TracksBrush`；对应上游 `.ant-slider-tracks`。 | `TracksBrush`、`IsRangeMode`、`IsIncluded` | 无专属 Token（默认画刷为 null） | stable since 6.2.0 |
+| `track` | `SliderTrack` 内代码创建的 segment `Border` 元素 | 相邻 handle 之间的活动轨道段（单值 1 个、Range N-1 个），背景默认 `TrackBarBrush`；对应上游 `.ant-slider-track`。 | `TrackBarBrush`、`RangeValues`、`IsIncluded`、`IsDraggableTrack` | `TrackBg`、`TrackHoverBg`、`TrackBgDisabled`、`SliderTrackSize` | stable since 6.2.0 |
+| `handle` | 每个动态 `SliderThumb` | 滑块控制点，圆点、边框、outline 与 hover / focus / pressed / disabled 视觉，Tooltip 宿主；对应上游 `.ant-slider-handle`。 | `SliderThumb.OutlineBrush`、`SliderThumb.OutlineThickness`、`SliderThumb.ThumbCircleSize`、`DisabledHandles`、`ValueFormatTemplate` | `ThumbSize`、`ThumbCircleSize*`、`ThumbCircleBorder*`、`ThumbOutline*` | stable since 6.2.0 |
 | `validation` | Form 校验反馈 | 承载 Slider 的 Form 值变更和数据校验错误。 | `Value`、`RangeValues` | SharedToken / Form 主题资源 | stable |
 
 LLMS 导出来源：

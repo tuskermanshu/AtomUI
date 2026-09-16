@@ -400,6 +400,15 @@ internal static class AtomUIDiagnosticDescriptors
         isEnabledByDefault: true,
         customTags: [WellKnownDiagnosticTags.Telemetry]);
 
+    public static readonly DiagnosticDescriptor SemanticPartInvalidSince = new(
+        AtomUIDiagnosticIds.SemanticPartInvalidSince,
+        "Semantic Part Since must be a three-part release version",
+        "Semantic Part '{0}' on Control '{1}' declares Since '{2}', which is not a major.minor.patch release version such as '6.2.0'",
+        AtomUIDiagnosticCategories.Generator,
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        customTags: [WellKnownDiagnosticTags.Telemetry]);
+
     public static readonly DiagnosticDescriptor SemanticPartTemplateCardinalityMismatch = new(
         AtomUIDiagnosticIds.SemanticPartTemplateCardinalityMismatch,
         "Semantic Part marker cardinality does not match the declaration",

@@ -8,22 +8,22 @@ namespace AtomUI.Desktop.Controls;
     "section",
     SelectorClass = "semantic-section",
     ContractType = typeof(Control),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "avatar",
     SelectorClass = "semantic-avatar",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "title",
     SelectorClass = "semantic-title",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "description",
     SelectorClass = "semantic-description",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class CardMetaContent
 {
 }

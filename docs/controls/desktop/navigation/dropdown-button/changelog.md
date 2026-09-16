@@ -54,7 +54,7 @@
     `itemIcon`
     （`ItemIconPresenter`）、`itemContent`（`ItemTextPresenter`）；`root` 为隐式 owner Part。全部弹层部件声明
     `CrossVisualRoot` + `RuntimeCreated`，`itemIcon` / `itemContent` 另声明 `CrossNestedOwners`，全部
-    `Since = "6.0"`。对齐上游 antd Dropdown Semantic DOM：不发布触发侧部件，省略 `itemTitle`（AtomUI Menu
+    `Since = "6.2.0"`。对齐上游 antd Dropdown Semantic DOM：不发布触发侧部件，省略 `itemTitle`（AtomUI Menu
     无分组标题）。
   - Rewrite the overview LLMS semantic-region table to the 4-part popup contract and record the runtime marker
     injection (`MenuFlyoutPresenter.OnApplyTemplate` for `popup.root` on the `ArrowDecoratedBox` surface;

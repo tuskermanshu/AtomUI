@@ -10,7 +10,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     SelectorRoute = "/template/ .semantic-scope-arrow-decorated-box /template/ .semantic-container",
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "arrow",
     SelectorClass = "semantic-arrow",
@@ -18,7 +18,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-arrow-decorated-box /template/ .semantic-arrow",
     ContractType = typeof(ArrowIndicator),
     Cardinality = SemanticPartCardinality.Optional,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class ToolTip
 {
 }

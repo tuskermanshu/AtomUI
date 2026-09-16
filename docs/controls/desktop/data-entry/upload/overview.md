@@ -304,9 +304,9 @@ LLMS 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Upload` | 上传状态协调器和 Semantic owner，拥有文件集合、输入入口、上传队列、Form 值投影和生命周期。 | `Files`、`ListType`、`TriggerContent`、`UploadTransport`、`FileValueMode` | `UploadToken`、SharedToken | stable since 6.0 |
-| `list` | `UploadList` / `UploadPictureShapeList` | 四种 `ListType` 下唯一活动文件列表，拥有列表滚动或 wrap 布局边界。 | `Files`、`ListType`、`ListMaxHeight`、`ListScrollBarVisibility` | Upload list 主题资源 | stable since 6.0 |
-| `item` | `AbstractUploadListItem` 派生容器 | 每个真实文件的容器，投射状态、进度和操作入口；不包含 picture append trigger。 | `UploadFileItem.Status`、`Progress`、`ErrorMessage`、`Result` | Upload item 主题资源 | stable since 6.0 |
+| `root` | `Upload` | 上传状态协调器和 Semantic owner，拥有文件集合、输入入口、上传队列、Form 值投影和生命周期。 | `Files`、`ListType`、`TriggerContent`、`UploadTransport`、`FileValueMode` | `UploadToken`、SharedToken | stable since 6.2.0 |
+| `list` | `UploadList` / `UploadPictureShapeList` | 四种 `ListType` 下唯一活动文件列表，拥有列表滚动或 wrap 布局边界。 | `Files`、`ListType`、`ListMaxHeight`、`ListScrollBarVisibility` | Upload list 主题资源 | stable since 6.2.0 |
+| `item` | `AbstractUploadListItem` 派生容器 | 每个真实文件的容器，投射状态、进度和操作入口；不包含 picture append trigger。 | `UploadFileItem.Status`、`Progress`、`ErrorMessage`、`Result` | Upload item 主题资源 | stable since 6.2.0 |
 
 LLMS 导出来源：
 

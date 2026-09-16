@@ -15,44 +15,44 @@ namespace AtomUI.Desktop.Controls;
     "wrapper",
     SelectorClass = "semantic-wrapper",
     ContractType = typeof(DockPanel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "icon",
     SelectorClass = "semantic-icon",
     ContractType = typeof(IconPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "section",
     SelectorClass = "semantic-section",
     ContractType = typeof(StackPanel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "title",
     SelectorClass = "semantic-title",
     ContractType = typeof(SelectableTextBlock),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "description",
     SelectorClass = "semantic-description",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "actions",
     SelectorClass = "semantic-actions",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "close",
     SelectorClass = "semantic-close",
     ContractType = typeof(IconButton),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "progress",
     SelectorClass = "semantic-progress",
     SelectorRoute = "/template/ .semantic-progress",
     ContractType = typeof(Control),
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class NotificationCard
 {
 }

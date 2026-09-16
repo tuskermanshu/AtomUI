@@ -57,7 +57,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 触发宿主与确认状态的组织边界，承载 public API、确认/取消事件与主题入口。 |
 | 相关 API | 全部 PopupConfirm public API |
 | 相关 Token | PopupConfirmToken、FlyoutHostToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -77,7 +77,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 弹层根节点，承载弹层背景、边框、内边距与箭头，对应上游 Popconfirm `root` 槽位。 |
 | 相关 API | `Flyout`、`ShouldUseOverlayPopup`、`IsArrowVisible` |
 | 相关 Token | FlyoutHostToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.container`
 
@@ -97,7 +97,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 弹层内层容器，承载背景、边框、圆角与内边距，对应上游 Popconfirm `container` 槽位。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.content`
 
@@ -117,7 +117,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 弹层框体的内容呈现面，承载确认体容器；同为 FlyoutHost 家族的内容槽位，不对应上游 Popconfirm 单独语义 key。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.arrow`
 
@@ -137,7 +137,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 指向锚点的浮动箭头，对应上游 Popconfirm `arrow` 槽位。 |
 | 相关 API | `IsArrowVisible`、`Placement` |
 | 相关 Token | ArrowDecoratedBoxToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.icon`
 
@@ -157,7 +157,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 确认状态图标，`ConfirmStatus` 通过 `IconBrush` 切换主题/警告/错误色，对应上游 Popconfirm `icon` 槽位。 |
 | 相关 API | `Icon`、`ConfirmStatus` |
 | 相关 Token | PopupConfirmToken、SharedToken（`IconSizeLG`、`ColorPrimary/ColorWarning/ColorError`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.title`
 
@@ -177,7 +177,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 确认框标题，对应上游 Popconfirm `title` 槽位；标题文字由 `SharedToken ColorTextHeading` 与 `FontWeight=SemiBold` 承载。 |
 | 相关 API | `Title` |
 | 相关 Token | PopupConfirmToken（`TitleMargin`）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.description`
 
@@ -197,7 +197,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 确认描述正文，对应上游 Popconfirm `content` 槽位（AtomUI 因 `popup.content` 已占用而改名为 `popup.description`）。 |
 | 相关 API | `ConfirmContent`、`ConfirmContentTemplate` |
 | 相关 Token | PopupConfirmToken（`ContentContainerMargin`）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.actions`
 
@@ -217,7 +217,7 @@ PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承
 | 职责 | 确认/取消操作区，承载 `PART_CancelButton` 与 `PART_OkButton`；对齐 Alert `actions` 先例，上游未把按钮行发布为语义 key。 |
 | 相关 API | `OkText`、`CancelText`、`OkButtonType`、`IsShowCancelButton` |
 | 相关 Token | PopupConfirmToken（`ButtonSpacing`、`ButtonContainerMargin`）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

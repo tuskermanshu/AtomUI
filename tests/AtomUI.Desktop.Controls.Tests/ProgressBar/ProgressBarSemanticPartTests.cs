@@ -800,7 +800,7 @@ public class ProgressBarSemanticPartTests
         root.StyleType.ShouldBeNull();
         root.CrossVisualRoot.ShouldBeFalse();
         root.RuntimeCreated.ShouldBeFalse();
-        root.Since.ShouldBe("6.0");
+        root.Since.ShouldBe("6.2.0");
     }
 
     private static void AddPartBackgroundStyle(
@@ -848,7 +848,7 @@ public class ProgressBarSemanticPartTests
             $"AtomUI.Theme.Styling.{ownerType.Name}{char.ToUpperInvariant(name[0])}{name[1..]}Style"));
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBe(runtimeCreated);
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static AvaloniaWindow Show(Control control)

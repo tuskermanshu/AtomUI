@@ -78,7 +78,7 @@
     `SharedTokenResource LineWidthBold` 改绑 `TabControlTokenResource InkBarThickness`，支持按实例
     `Resources[TabControlTokenKind.InkBarThickness]` 覆盖，对齐 antd Tabs `styles.indicator.height`。
 - Semantic Part
-  - `TabControl` 公开 `indicator` Part（since 6.2，静态 marker `semantic-indicator`，`ContractType` 为 `Border`，
+  - `TabControl` 公开 `indicator` Part（since 6.2.0，静态 marker `semantic-indicator`，`ContractType` 为 `Border`，
     覆盖 `PART_SelectedItemIndicator` 墨条），生成 `TabControlIndicatorStyle`；墨条仍为 motion actor，尺寸与位移
     运行时维护，Part 样式只承载视觉定制。`CardTabControl` 不公开该 Part（Card 模板无墨条节点，选中态由
     `LineMask` 表达，与 antd Card 型隐藏 ink bar 一致）。
@@ -99,7 +99,7 @@
 ## 2026-08-23
 
 - Semantic Part
-  - 为 `TabControl` 与 `CardTabControl` 公开 `root` + `content` + `item` Semantic Part（since 6.0），并为
+  - 为 `TabControl` 与 `CardTabControl` 公开 `root` + `content` + `item` Semantic Part（since 6.2.0），并为
     `CardTabControl` 额外公开 `add` Part；新增 `TabControl.SemanticParts.cs`、`CardTabControl.SemanticParts.cs`
     descriptor，生成 `TabControlItemStyle`、`TabControlContentStyle`、`CardTabControlAddStyle`、
     `CardTabControlContentStyle`、`CardTabControlItemStyle`（`AtomUI.Theme.Styling`）。
@@ -108,7 +108,7 @@
     `TabItem` 实例同样获得 marker；`content` 为静态标记，覆盖内容区 `ContentPresenter`。
   - `TabItem` 公开 `root` + `icon` + `label` + `close`，生成 `TabItemIconStyle`、`TabItemLabelStyle`、
     `TabItemCloseStyle`；选中指示墨条、header extra、overflow 菜单项与 Card `LineMask` 不参与 Semantic Part。
-  - 新增 `TabControl.header` 与 `CardTabControl.header`（since 6.2，静态 marker `semantic-header`，
+  - 新增 `TabControl.header` 与 `CardTabControl.header`（since 6.2.0，静态 marker `semantic-header`，
     `ContractType` 为 `Border`），覆盖包裹标签条的 header 区域，生成 `TabControlHeaderStyle` /
     `CardTabControlHeaderStyle`（`AtomUI.Theme.Styling`）。
   - root 视觉 TemplateBinding 到模板根：`TabControlTheme` 根由 `Border#Frame` 换为 `PixelAlignedBorder#Frame`，

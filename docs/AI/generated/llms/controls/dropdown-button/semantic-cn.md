@@ -42,7 +42,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | DropdownButton root 是动作内容、菜单数据、弹层与状态的组织边界。 |
 | 相关 API | 全部 DropdownButton public API |
 | 相关 Token | DropdownButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -62,7 +62,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 下拉菜单弹层的根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角由 `ArrowDecoratedBox` 渲染，对应上游的 `root`）。 |
 | 相关 API | `DropdownFlyout`、`Items`、`ItemTemplate`、`ItemContainerTheme` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemTitle`
 
@@ -83,7 +83,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 菜单分组标题节点（对应上游的 `itemTitle`，即 `ant-menu-item-group-title`）。 |
 | 相关 API | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -103,7 +103,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 弹层中的单个菜单项容器，承载该项的状态、内容、图标与子菜单（对应上游的 `item`）。 |
 | 相关 API | `Items`、`MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items`、`ItemTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemIcon`
 
@@ -124,7 +124,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 菜单项模板内的图标节点（对应上游的 `itemIcon`）。 |
 | 相关 API | `MenuItem.Icon` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -145,7 +145,7 @@ MenuFlyout / MenuItem 控件。
 | 职责 | 菜单项模板内的文本内容节点（对应上游的 `itemContent`）。 |
 | 相关 API | `MenuItem.Header`、`MenuItem.HeaderTemplate`、`ItemTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

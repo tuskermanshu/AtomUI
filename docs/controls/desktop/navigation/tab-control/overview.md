@@ -243,13 +243,13 @@ LLMS 语义区域：
 
 | Part | Owner | AtomUI 节点 | 职责 | 稳定性 |
 | --- | --- | --- | --- | --- |
-| `root` | `TabControl` / `CardTabControl` / `TabItem` | 控件自身 | 标签页控件根语义区域，承载 public API、状态归一和主题入口。 | stable since 6.0 |
-| `content` | `TabControl` / `CardTabControl` | 模板尾随 `ContentPresenter` | 承载内容页展示区域，用于定制内容区字体、颜色与对齐。 | stable since 6.0 |
-| `item` | `TabControl` / `CardTabControl` | `TabItem` 容器（运行时标记） | 承载单个页签的尺寸、状态与点击语义。 | stable since 6.0 |
-| `add` | `CardTabControl` | `PART_AddTabButton` | 承载新建页签入口的按钮视觉与状态。 | stable since 6.0 |
-| `icon` | `TabItem` | `ItemIconPresenter` | 承载页签头部图标呈现。 | stable since 6.0 |
-| `label` | `TabItem` | `ContentPresenter` | 承载页签头部标题文本呈现。 | stable since 6.0 |
-| `close` | `TabItem` | `PART_ItemCloseButton` | 承载页签关闭按钮视觉与状态。 | stable since 6.0 |
+| `root` | `TabControl` / `CardTabControl` / `TabItem` | 控件自身 | 标签页控件根语义区域，承载 public API、状态归一和主题入口。 | stable since 6.2.0 |
+| `content` | `TabControl` / `CardTabControl` | 模板尾随 `ContentPresenter` | 承载内容页展示区域，用于定制内容区字体、颜色与对齐。 | stable since 6.2.0 |
+| `item` | `TabControl` / `CardTabControl` | `TabItem` 容器（运行时标记） | 承载单个页签的尺寸、状态与点击语义。 | stable since 6.2.0 |
+| `add` | `CardTabControl` | `PART_AddTabButton` | 承载新建页签入口的按钮视觉与状态。 | stable since 6.2.0 |
+| `icon` | `TabItem` | `ItemIconPresenter` | 承载页签头部图标呈现。 | stable since 6.2.0 |
+| `label` | `TabItem` | `ContentPresenter` | 承载页签头部标题文本呈现。 | stable since 6.2.0 |
+| `close` | `TabItem` | `PART_ItemCloseButton` | 承载页签关闭按钮视觉与状态。 | stable since 6.2.0 |
 
 Part 的 Selector、ContractType、数量语义与定制边界以 [TabControl Semantic Part 契约](semantic-part.md) 为唯一完整来源；`TabStrip` / `CardTabStrip` / `TabStripItem` 的语义区域见 [TabStrip Semantic Part 契约](../tab-strip/semantic-part.md)。
 

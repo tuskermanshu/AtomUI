@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -61,8 +62,15 @@ public class SemanticPartGeneratorTests
         registration.ShouldContain("            selectedSemanticControls,");
     }
 
+    /// <summary>
+    /// 原先本用例用带控制字符的 <c>Since</c> 证明 manifest writer 会转义控制字符。引入
+    /// <c>ATOMUIGEN038</c> 后该输入按契约非法（<c>Since</c> 必须是三段式发布版本），因此
+    /// "合法声明携带控制字符" 这一前提不再成立：<c>Name</c> / <c>Path</c> / <c>SelectorClass</c>
+    /// 只允许字母数字与连字符，<c>ThemePropertyName</c> 需解析到真实成员，都不接受控制字符。
+    /// 该用例改为锁定新的拒绝契约；writer 的转义逻辑保留为纵深防御，但经声明字段已不可达。
+    /// </summary>
     [Fact]
-    public void Escapes_Control_Characters_In_Since_Metadata()
+    public void Rejects_Control_Characters_In_Since_Metadata()
     {
         const string source = """
             using AtomUI.Theme;
@@ -82,15 +90,73 @@ public class SemanticPartGeneratorTests
             }
             """;
 
+        _ = RunGenerator(source, out var diagnostics);
+
+        diagnostics.ShouldContain(diagnostic =>
+            diagnostic.Id == "ATOMUIGEN038" && diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    [Theory]
+    // 隐式 root 的 Since 取该 Control 已声明 Part 中最早的发布版本：root 随 Control 的第一个 Part 一起引入。
+    [InlineData("6.2.0", "6.2.0", "6.2.0")]
+    [InlineData("6.2.0", "6.4.1", "6.2.0")]
+    [InlineData("7.0.0", "6.10.3", "6.10.3")]
+    public void Implicit_Root_Since_Uses_The_Earliest_Declared_Part_Version(
+        string iconSince,
+        string contentSince,
+        string expectedRootSince)
+    {
+        var source = $$"""
+            using AtomUI.Theme;
+            using Avalonia.Controls;
+            using Avalonia.Controls.Presenters;
+
+            namespace Demo;
+
+            [SemanticPart(
+                "icon",
+                SelectorClass = "semantic-icon",
+                SelectorRoute = "/template/ .semantic-icon",
+                ContractType = typeof(Control),
+                RuntimeCreated = true,
+                Since = "{{iconSince}}")]
+            [SemanticPart(
+                "content",
+                SelectorClass = "semantic-content",
+                SelectorRoute = "/template/ .semantic-content",
+                ContractType = typeof(ContentPresenter),
+                RuntimeCreated = true,
+                Since = "{{contentSince}}")]
+            public partial class Button : Control
+            {
+            }
+            """;
+
         var outputCompilation = RunGenerator(source, out var diagnostics);
 
         diagnostics.ShouldBeEmpty();
-        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken)
-                         .Where(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
-                         .ShouldBeEmpty();
-
         var manifest = GetGeneratedSource(outputCompilation, "GeneratedSemanticPartManifest.g.cs");
-        manifest.ShouldContain("\"6.0\\n\\t\\u0001\",");
+
+        // root 描述块形如 root/root/null/typeof(...)/Single/Root/null/false/<since>/false)
+        manifest.ShouldContain($"                        \"{expectedRootSince}\",");
+    }
+
+    /// <summary>
+    /// root 是生成器隐式加入的描述块，control 上没有声明可以承载它的版本，因此必须从声明的 Part 推导。
+    /// 这里钉住它不能退化为硬编码版本线，否则会与 Part 的版本声明不一致，而 root 自身没有声明可承载该值。
+    /// </summary>
+    [Fact]
+    public void Implicit_Root_Since_Is_A_Three_Part_Release_Version()
+    {
+        var outputCompilation = RunGenerator(ButtonSource, out _, ButtonTheme);
+        var manifest = GetGeneratedSource(outputCompilation, "GeneratedSemanticPartManifest.g.cs");
+
+        var rootBlockStart = manifest.IndexOf("SemanticPartCustomization.Root", StringComparison.Ordinal);
+        rootBlockStart.ShouldBeGreaterThanOrEqualTo(0);
+        var rootBlock = manifest[rootBlockStart..manifest.IndexOf("false)", rootBlockStart, StringComparison.Ordinal)];
+
+        var since = Regex.Match(rootBlock, "\"(\\d+)\\.(\\d+)\\.(\\d+)\"");
+        since.Success.ShouldBeTrue($"implicit root must carry a three-part release version, got: {rootBlock}");
     }
 
     [Fact]
@@ -130,7 +196,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 RuntimeCreated = true,
                 SelectorRoute = "> .semantic-foo-bar",
-                Since = "6.0")]
+                Since = "6.2.0")]
             [SemanticPart(
                 "nestedFooBar",
                 Path = "foo.bar",
@@ -138,7 +204,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 RuntimeCreated = true,
                 SelectorRoute = "> .semantic-nested-foo-bar",
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class CollisionOwner : Control
             {
             }
@@ -170,7 +236,7 @@ public class SemanticPartGeneratorTests
                     ContractType = typeof(Control),
                     RuntimeCreated = true,
                     SelectorRoute = "> .semantic-content",
-                    Since = "6.0")]
+                    Since = "6.2.0")]
                 public partial class Repeated : Control
                 {
                 }
@@ -184,7 +250,7 @@ public class SemanticPartGeneratorTests
                     ContractType = typeof(Control),
                     RuntimeCreated = true,
                     SelectorRoute = "> .semantic-content",
-                    Since = "6.0")]
+                    Since = "6.2.0")]
                 public partial class Repeated : Control
                 {
                 }
@@ -212,7 +278,7 @@ public class SemanticPartGeneratorTests
                     ContractType = typeof(Control),
                     RuntimeCreated = true,
                     SelectorRoute = "> .semantic-content",
-                    Since = "6.0")]
+                    Since = "6.2.0")]
                 public partial class Occupied : Control
                 {
                 }
@@ -294,7 +360,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 RuntimeCreated = true,
                 SelectorRoute = "> .semantic-content",
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class ExistingXmlns : Control
             {
             }
@@ -324,7 +390,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 RuntimeCreated = true,
                 SelectorRoute = "> .semantic-content",
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class AliasedXmlns : Control
             {
             }
@@ -370,7 +436,7 @@ public class SemanticPartGeneratorTests
                 SelectorClass = "semantic-item",
                 ContractType = typeof(Control),
                 RuntimeCreated = true,
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class RuntimeOwner : Control
             {
             }
@@ -398,7 +464,7 @@ public class SemanticPartGeneratorTests
                 SelectorRoute = "/template/ .semantic-scope-items > .semantic-scope-item /template/ .semantic-item",
                 ContractType = typeof(Control),
                 RuntimeCreated = true,
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class RuntimeOwner : Control
             {
             }
@@ -438,7 +504,7 @@ public class SemanticPartGeneratorTests
                 SelectorRoute = "{{selectorRoute}}",
                 ContractType = typeof(Control),
                 RuntimeCreated = true,
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class RuntimeOwner : Control
             {
             }
@@ -506,7 +572,7 @@ public class SemanticPartGeneratorTests
                 SelectorClass = "semantic-description",
                 ContractType = typeof(Control),
                 Cardinality = SemanticPartCardinality.Optional,
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -544,7 +610,7 @@ public class SemanticPartGeneratorTests
                 SelectorClass = "semantic-icon",
                 ContractType = typeof(Control),
                 Cardinality = SemanticPartCardinality.Multiple,
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -553,7 +619,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button
             {
             }
@@ -582,9 +648,9 @@ public class SemanticPartGeneratorTests
 
             namespace Demo;
 
-            [SemanticPart("Icon", SelectorClass = "icon", ContractType = typeof(Control), Since = "6.0")]
-            [SemanticPart("content", SelectorClass = "semantic-content", ContractType = typeof(Control), Since = "6.0")]
-            [SemanticPart("content", SelectorClass = "semantic-other", ContractType = typeof(Control), Since = "6.0")]
+            [SemanticPart("Icon", SelectorClass = "icon", ContractType = typeof(Control), Since = "6.2.0")]
+            [SemanticPart("content", SelectorClass = "semantic-content", ContractType = typeof(Control), Since = "6.2.0")]
+            [SemanticPart("content", SelectorClass = "semantic-other", ContractType = typeof(Control), Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -610,7 +676,7 @@ public class SemanticPartGeneratorTests
                 Path = "root",
                 SelectorClass = "semantic-root",
                 ContractType = typeof(Control),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -635,7 +701,7 @@ public class SemanticPartGeneratorTests
                 Path = "",
                 SelectorClass = "semantic-icon",
                 ContractType = typeof(Control),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -662,7 +728,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 Customization = SemanticPartCustomization.SelectorAndTheme,
                 ThemePropertyName = nameof(ActionTheme),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
                 public ControlTheme? ActionTheme { get; set; }
@@ -709,7 +775,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 Customization = SemanticPartCustomization.SelectorAndTheme,
                 ThemePropertyName = nameof(ActionTheme),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
                 public ControlTheme? ActionTheme { get; set; }
@@ -764,7 +830,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 Customization = SemanticPartCustomization.SelectorAndTheme,
                 ThemePropertyName = nameof(ActionTheme),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
                 public ControlTheme? ActionTheme { get; set; }
@@ -803,7 +869,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 Customization = SemanticPartCustomization.SelectorAndTheme,
                 ThemePropertyName = nameof(ActionTheme),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
                 public ControlTheme? ActionTheme { get; set; }
@@ -883,6 +949,70 @@ public class SemanticPartGeneratorTests
             diagnostic.Id == "ATOMUIGEN031" && diagnostic.Severity == DiagnosticSeverity.Warning);
     }
 
+    /// <summary>
+    /// <c>Since</c> 必须是 <c>major.minor.patch</c> 三段式具体发布版本，例如 <c>6.2.0</c>。
+    /// 只写版本线（<c>6.0</c>、<c>6.2</c>）或段数不符的值都不是可引用的发布版本，
+    /// 会让 descriptor 与文档声称一个不存在的引入版本，因此按声明契约错误阻断构建。
+    /// </summary>
+    [Theory]
+    [InlineData("6.0")]
+    [InlineData("6.2")]
+    [InlineData("6")]
+    [InlineData("6.2.0.1")]
+    [InlineData("v6.2.0")]
+    [InlineData("6.2.0-beta.1")]
+    [InlineData("latest")]
+    public void Reports_Non_Semantic_Version_Since(string since)
+    {
+        var source = $$"""
+            using AtomUI.Theme;
+            using Avalonia.Controls;
+
+            namespace Demo;
+
+            [SemanticPart(
+                "icon",
+                SelectorClass = "semantic-icon",
+                ContractType = typeof(Control),
+                Since = "{{since}}")]
+            public partial class Button : Control
+            {
+            }
+            """;
+
+        _ = RunGenerator(source, out var diagnostics, ButtonTheme);
+
+        diagnostics.ShouldContain(diagnostic =>
+            diagnostic.Id == "ATOMUIGEN038" && diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    [Theory]
+    [InlineData("6.2.0")]
+    [InlineData("6.0.0")]
+    [InlineData("10.12.345")]
+    public void Accepts_Three_Part_Since_Version(string since)
+    {
+        var source = $$"""
+            using AtomUI.Theme;
+            using Avalonia.Controls;
+
+            namespace Demo;
+
+            [SemanticPart(
+                "icon",
+                SelectorClass = "semantic-icon",
+                ContractType = typeof(Control),
+                Since = "{{since}}")]
+            public partial class Button : Control
+            {
+            }
+            """;
+
+        _ = RunGenerator(source, out var diagnostics, ButtonTheme);
+
+        diagnostics.ShouldNotContain(diagnostic => diagnostic.Id == "ATOMUIGEN038");
+    }
+
     [Fact]
     public void Reports_Generic_Semantic_Control()
     {
@@ -897,7 +1027,7 @@ public class SemanticPartGeneratorTests
                 SelectorClass = "semantic-item",
                 ContractType = typeof(Control),
                 RuntimeCreated = true,
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class GenericButton<T> : Control
             {
             }
@@ -923,7 +1053,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 Customization = SemanticPartCustomization.SelectorAndTheme,
                 ThemePropertyName = "ActionTheme",
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
                 public object? ActionTheme { get; set; }
@@ -952,7 +1082,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 Customization = SemanticPartCustomization.SelectorAndTheme,
                 ThemePropertyName = nameof(ActionTheme),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
                 public ControlTheme? ActionTheme { get; private set; }
@@ -980,7 +1110,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 Customization = SemanticPartCustomization.SelectorAndTheme,
                 ThemePropertyName = nameof(ActionTheme),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
                 public ControlTheme? ActionTheme { private get; set; }
@@ -1048,7 +1178,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class DerivedButton : BaseButton
             {
             }
@@ -1100,7 +1230,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class DerivedButton : BaseButton
             {
             }
@@ -1158,7 +1288,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class DerivedButton : BaseButton
             {
             }
@@ -1220,7 +1350,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class DerivedButton : BaseButton
             {
             }
@@ -1277,7 +1407,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class DerivedButton : BaseButton
             {
             }
@@ -1334,7 +1464,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class DerivedButton : BaseButton
             {
             }
@@ -1390,7 +1520,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class DerivedButton : BaseButton
             {
             }
@@ -1431,7 +1561,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -1485,7 +1615,7 @@ public class SemanticPartGeneratorTests
                 "content",
                 SelectorClass = "semantic-content",
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -1573,12 +1703,12 @@ public class SemanticPartGeneratorTests
                 "leading",
                 SelectorClass = "semantic-leading",
                 ContractType = typeof(Control),
-                Since = "6.0")]
+                Since = "6.2.0")]
             [SemanticPart(
                 "trailing",
                 SelectorClass = "semantic-trailing",
                 ContractType = typeof(Control),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -1616,13 +1746,13 @@ public class SemanticPartGeneratorTests
                 SelectorClass = "semantic-icon",
                 ContractType = typeof(Control),
                 Cardinality = SemanticPartCardinality.Multiple,
-                Since = "6.0")]
+                Since = "6.2.0")]
             [SemanticPart(
                 "description",
                 SelectorClass = "semantic-description",
                 ContractType = typeof(Control),
                 Cardinality = SemanticPartCardinality.Optional,
-                Since = "6.0")]
+                Since = "6.2.0")]
             [SemanticPart(
                 "popup",
                 SelectorClass = "semantic-popup",
@@ -1630,7 +1760,7 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(Control),
                 CrossVisualRoot = true,
                 RuntimeCreated = true,
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class Button : Control
             {
             }
@@ -1687,14 +1817,14 @@ public class SemanticPartGeneratorTests
                 ContractType = typeof(TagBox),
                 Cardinality = SemanticPartCardinality.Multiple,
                 RuntimeCreated = true,
-                Since = "6.0")]
+                Since = "6.2.0")]
             [SemanticPart(
                 "itemContent",
                 SelectorClass = "semantic-item-content",
                 SelectorRoute = ">> .semantic-scope-host >> .semantic-item /template/ .semantic-item-content",
                 CrossNestedOwners = true,
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class TagHost : Control
             {
             }
@@ -1772,7 +1902,7 @@ public class SemanticPartGeneratorTests
                 SelectorRoute = ">> .semantic-scope-host >> .semantic-item /template/ .semantic-item-content",
                 CrossNestedOwners = true,
                 ContractType = typeof(ContentPresenter),
-                Since = "6.0")]
+                Since = "6.2.0")]
             public partial class TagHost : Control
             {
             }
@@ -1959,12 +2089,12 @@ public class SemanticPartGeneratorTests
             SelectorClass = "semantic-icon",
             ContractType = typeof(Control),
             Cardinality = SemanticPartCardinality.Multiple,
-            Since = "6.0")]
+            Since = "6.2.0")]
         [SemanticPart(
             "content",
             SelectorClass = "semantic-content",
             ContractType = typeof(ContentPresenter),
-            Since = "6.0")]
+            Since = "6.2.0")]
         public partial class Button : Control
         {
         }
@@ -1981,13 +2111,13 @@ public class SemanticPartGeneratorTests
             "content",
             SelectorClass = "semantic-content",
             ContractType = typeof(ContentPresenter),
-            Since = "6.0")]
+            Since = "6.2.0")]
         [SemanticPart(
             "icon",
             SelectorClass = "semantic-icon",
             ContractType = typeof(Control),
             Cardinality = SemanticPartCardinality.Multiple,
-            Since = "6.0")]
+            Since = "6.2.0")]
         public partial class Button : Control
         {
         }

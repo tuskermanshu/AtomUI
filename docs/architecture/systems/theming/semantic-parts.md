@@ -291,6 +291,10 @@ RuntimeCreated
 `root` 由生成器隐式加入 descriptor，不要求模板增加 `.semantic-root`，其 `StyleType` 为 `null`。其他 Part 的
 `StyleType` 直接引用对应 public 生成类型。
 
+`root` 没有自己的 `[SemanticPart]` 声明，因此也没有可承载 `Since` 的声明位置；它的 `Since` 由生成器取该 Control 已声明
+Part 中**最早的**发布版本——root 随这个 Control 的第一个 Part 一起引入。生成器不得为 root 硬编码版本线或任何固定版本，
+否则 root 的版本会与控制自身的 Part 声明不一致。
+
 公共 descriptor 的对应成员语义为：
 
 ```csharp
@@ -706,16 +710,21 @@ Button/
     SelectorClass = "semantic-icon",
     ContractType = typeof(Control),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "content",
     SelectorClass = "semantic-content",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class Button
 {
 }
 ```
+
+`Since` 必须是可以被用户引用的具体发布版本，即 `major.minor.patch` 三段非负十进制数字（例如 `6.2.0`）。只写版本线
+（`6.0`、`6.2`）会让 descriptor、控件文档与 LLMS 导出声称一个不存在的引入版本，因此按声明契约错误阻断构建
+（`ATOMUIGEN038`）；带 `v` 前缀、预发布后缀或段数不符的写法同样被拒绝。缺失 `Since` 仍是 `ATOMUIGEN031` warning，
+与格式非法区分开。
 
 跨运行时 item 模板的声明显式提供 route：
 
@@ -727,7 +736,7 @@ public partial class Button
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class Descriptions
 {
 }

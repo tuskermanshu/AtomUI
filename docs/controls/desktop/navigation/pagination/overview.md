@@ -187,9 +187,9 @@ LLMS 语义区域：
 
 | Part | Owner | AtomUI 节点 | 职责 | 稳定性 |
 | --- | --- | --- | --- | --- |
-| `root` | `Pagination` / `SimplePagination` | 控件自身 | 分页控件根语义区域，承载分页状态、布局入口和主题视觉。 | stable since 6.0 |
-| `item` | `Pagination` | 上一页/下一页导航项与页码指示项 | 承载单个分页导航单元的尺寸、状态与点击语义；Ellipsis 单元格除外。 | stable since 6.0 |
-| `item` | `SimplePagination` | 上一页/下一页导航项 | 承载简洁模式导航单元的尺寸、状态与点击语义；快速跳转输入与信息文本除外。 | stable since 6.0 |
+| `root` | `Pagination` / `SimplePagination` | 控件自身 | 分页控件根语义区域，承载分页状态、布局入口和主题视觉。 | stable since 6.2.0 |
+| `item` | `Pagination` | 上一页/下一页导航项与页码指示项 | 承载单个分页导航单元的尺寸、状态与点击语义；Ellipsis 单元格除外。 | stable since 6.2.0 |
+| `item` | `SimplePagination` | 上一页/下一页导航项 | 承载简洁模式导航单元的尺寸、状态与点击语义；快速跳转输入与信息文本除外。 | stable since 6.2.0 |
 
 Part 的 Selector、ContractType、数量语义与定制边界以 [Pagination Semantic Part 契约](semantic-part.md) 为唯一完整来源。
 

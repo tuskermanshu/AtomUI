@@ -59,7 +59,7 @@ Part 的 cardinality 已经是 `Multiple`（天然覆盖每一项）。Gallery S
 （两 item 预览 + 九卡短描述，对应上游逐项视图的 item 级 Part 呈现）；hover 高亮均为 owner 作用域
 （覆盖预览内全部 item），逐项注入式高亮不适用。
 
-AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 以下类型不持有独立 Semantic descriptor：
 
@@ -91,7 +91,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | Timeline root 是 Items、Orientation、Mode、IsReverse、Pending 与可见项视觉顺序的统一 owner；根表面（背景、边框、圆角、内边距）投影到 `Frame`。 |
 | 相关 API | `Items`、`ItemsSource`、`Orientation`、`Mode`、`IsReverse`、`Pending`、`PendingIcon` |
 | 相关 Token | SharedToken（`ColorBorder`、`ColorBgContainer`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -111,7 +111,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示时间轴单个节点容器：单项 Label、Content、Indicator 的承载入口与视觉顺序派生状态的接收方；对应上游 `<li>`。 |
 | 相关 API | `Label`、`Content`、`ContentTemplate`、`IndicatorIcon`、`IndicatorColor` |
 | 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`IndicatorStartModeMargin`、`IndicatorEndModeMargin`、`IndicatorMiddleModeMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemWrapper`
 
@@ -131,7 +131,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点内容包装容器：把 section 铺满自身并承载 IndicatorSpacing 等包装级布局状态；对应上游 item wrapper 节点。 |
 | 相关 API | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） |
 | 相关 Token | SharedToken（`UniformlyPaddingXS`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemIcon`
 
@@ -151,7 +151,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点图标区域：无 `IndicatorIcon` 时是内置圆点（`BorderBrush` 即圆环色），有 `IndicatorIcon` 时是图标宿主；对应上游 item icon 节点（上游同一元素两种形态）。 |
 | 相关 API | `IndicatorIcon`、`IndicatorColor` |
 | 相关 Token | `IndicatorSize`、`IndicatorDotSize`、`IndicatorDotBorderWidth`、SharedToken（`ColorPrimary`、`ColorBgContainer`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemSection`
 
@@ -171,7 +171,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点区域容器：承载 header、Indicator 与 content 的方向化 Measure/Arrange（Alternate 双侧、同侧紧凑与水平 Label 堆叠模型）；对应上游 item section 节点。 |
 | 相关 API | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） |
 | 相关 Token | SharedToken（`UniformlyPaddingXS`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemHeader`
 
@@ -191,7 +191,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点头部容器：承载 title 文本与对齐方式；对应上游 item header 节点。 |
 | 相关 API | `Label`、`Mode`、`Orientation` |
 | 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemTitle`
 
@@ -211,7 +211,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点标题/时间标签区域：文本呈现、换行与下内边距；对应上游 item title 节点。 |
 | 相关 API | `Label`、`Mode`、`Orientation` |
 | 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -231,7 +231,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点详细内容区域：`Content` / `ContentTemplate` 的呈现、受限宽度换行与下内边距；对应上游 item content 节点。 |
 | 相关 API | `Content`、`ContentTemplate`、`Mode`、`Orientation` |
 | 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`LastItemContentMinHeight` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemRail`
 
@@ -251,7 +251,7 @@ AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示节点连接线（轴线轨道）：承载 IsFirst/IsLast 裁剪后的轨道条，厚度与颜色来自 `IndicatorTailWidth` / `IndicatorTailColor`；对应上游 item rail 节点。 |
 | 相关 API | `IndicatorTailColor`、`IndicatorTailWidth`、`IndicatorColor` |
 | 相关 Token | `IndicatorTailWidth`、`IndicatorTailColor`、`IndicatorDotSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。`itemWrapper`、`itemSection`、`itemHeader`、
 `itemTitle`、`itemContent` 的 marker 静态声明在 `TimelineItemTheme.axaml` 模板内；`itemIcon`、`itemRail` 的

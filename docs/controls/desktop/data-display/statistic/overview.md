@@ -156,13 +156,13 @@ LLMS 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Statistic` | 整体容器表面，承载背景、边框、虚线、圆角、Padding 和对齐。 | root 表面属性、`StrokeDashArray` | SharedToken | stable since 6.0 |
-| `header` | 标题区 `Border` | 承载标题区布局和可见性。 | `Header`、`HeaderTemplate` | SharedToken | stable since 6.0 |
-| `title` | `ContentPresenter` | 展示标题内容及其字体、前景色。 | `Header`、`HeaderTemplate` | `TitleFontSize`、SharedToken | stable since 6.0 |
-| `content` | 横向 `StackPanel` | 排列 prefix、value、suffix，并承载内容字体和前景色继承。 | `ContentFontSize`、`ContentForeground` | `ContentFontSize`、SharedToken | stable since 6.0 |
-| `value` | `ContentPresenter` | 展示格式化数值或自定义 Content。 | `Value`、`Content`、格式属性 | `ContentFontSize`、SharedToken | stable since 6.0 |
-| `prefix` | `ContentPresenter` | 展示数值前缀或图标。 | `ValuePrefixAddOn`、`ValuePrefixAddOnTemplate` | SharedToken | stable since 6.0 |
-| `suffix` | `ContentPresenter` | 展示数值后缀或单位。 | `ValueSuffixAddOn`、`ValueSuffixAddOnTemplate` | SharedToken | stable since 6.0 |
+| `root` | `Statistic` | 整体容器表面，承载背景、边框、虚线、圆角、Padding 和对齐。 | root 表面属性、`StrokeDashArray` | SharedToken | stable since 6.2.0 |
+| `header` | 标题区 `Border` | 承载标题区布局和可见性。 | `Header`、`HeaderTemplate` | SharedToken | stable since 6.2.0 |
+| `title` | `ContentPresenter` | 展示标题内容及其字体、前景色。 | `Header`、`HeaderTemplate` | `TitleFontSize`、SharedToken | stable since 6.2.0 |
+| `content` | 横向 `StackPanel` | 排列 prefix、value、suffix，并承载内容字体和前景色继承。 | `ContentFontSize`、`ContentForeground` | `ContentFontSize`、SharedToken | stable since 6.2.0 |
+| `value` | `ContentPresenter` | 展示格式化数值或自定义 Content。 | `Value`、`Content`、格式属性 | `ContentFontSize`、SharedToken | stable since 6.2.0 |
+| `prefix` | `ContentPresenter` | 展示数值前缀或图标。 | `ValuePrefixAddOn`、`ValuePrefixAddOnTemplate` | SharedToken | stable since 6.2.0 |
+| `suffix` | `ContentPresenter` | 展示数值后缀或单位。 | `ValueSuffixAddOn`、`ValueSuffixAddOnTemplate` | SharedToken | stable since 6.2.0 |
 
 LLMS 导出来源：
 

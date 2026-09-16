@@ -8,12 +8,12 @@ namespace AtomUI.Desktop.Controls;
     "icon",
     SelectorClass = "semantic-icon",
     ContractType = typeof(TemplatedControl),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "label",
     SelectorClass = "semantic-label",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class CheckBox
 {
 }

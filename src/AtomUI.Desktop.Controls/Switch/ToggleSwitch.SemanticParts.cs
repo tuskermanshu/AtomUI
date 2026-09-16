@@ -9,12 +9,12 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-content",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "indicator",
     SelectorClass = "semantic-indicator",
     ContractType = typeof(TemplatedControl),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class ToggleSwitch
 {
 }

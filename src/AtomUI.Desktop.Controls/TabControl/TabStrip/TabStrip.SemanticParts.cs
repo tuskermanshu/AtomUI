@@ -8,7 +8,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item",
     ContractType = typeof(TabStripItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class TabStrip
 {

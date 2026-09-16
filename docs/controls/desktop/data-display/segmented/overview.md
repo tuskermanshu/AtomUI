@@ -220,17 +220,17 @@ LLMS 语义区域：
 
 下表是 LLMS 语义导出使用的区域映射。Semantic Part 的 owner 是 `Segmented`，对应上游 Ant Design 6.6.0 稳定发布的
 `SegmentedSemanticType`（`classNames` / `styles` 均为 `{ root?, icon?, label?, item? }`）：四个 Part 随 Batch 2
-Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.0`。上游选中滑块（MotionThumb）没有 Semantic key，AtomUI
+Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.2.0`。上游选中滑块（MotionThumb）没有 Semantic key，AtomUI
 的选中滑块由 owner `Render` 直接绘制、没有 Visual 节点，同样不属于 Semantic Part；`SegmentedItem` 是运行时容器，
 不持有独立 descriptor。完整契约见 [Segmented Semantic Part 契约](semantic-part.md)，marker 归属与生命周期见
 [Segmented 桌面版实现原理](implementation.md) 的 Semantic Part 处置一节。
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Segmented` | 轨道根语义区域，承载选项数据、选择状态、方向、形状与轨道表面视觉（背景由 owner `Render` 绘制，圆角/内边距/裁剪投影到 `Frame`）；对应上游 `.ant-segmented`。 | `ItemsSource`、`ItemTemplate`、`SelectedIndex`、`SelectedItem`、`SelectionChanged`、`SizeType`、`Orientation`、`Shape`、`IsExpanding`、`IsMotionEnabled` | `TrackBg`、`TrackPadding`、SharedToken | stable since 6.0 |
-| `item` | 每个 `SegmentedItem` 容器 | 选项容器，设置背景/前景状态色、圆角、内边距、最小高度、光标与选择/悬浮/按压/禁用视觉；对应上游 `.ant-segmented-item`。 | `SegmentedItem.Icon`、`SegmentedItem.Content`、`SegmentedItem.IsSelected`、`SizeType`、`Shape` | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、`ItemHoverBg`、`ItemActiveBg`、`ItemSelectedBg`、`ItemMinHeight*`、`SegmentedItemPadding*` | stable since 6.0 |
-| `icon` | 每个 `SegmentedItem` 模板中的 `IconPresenter#IconPresenter` | 选项图标区域：画刷状态色、图标尺寸与可见性；对应上游 `.ant-segmented-item-icon`。 | `SegmentedItem.Icon`、`SizeType` | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、SharedToken（`IconSize*`、`ColorTextDisabled`） | stable since 6.0 |
-| `label` | 每个 `SegmentedItem` 模板中的 `ContentPresenter#Content` | 选项文本区域：文本呈现、居中对齐、省略与图文间距（`:has-icon`）；对应上游 `.ant-segmented-item-label`。 | `SegmentedItem.Content`、`SegmentedItem.ContentTemplate` | `SegmentedItemContentMargin` | stable since 6.0 |
+| `root` | `Segmented` | 轨道根语义区域，承载选项数据、选择状态、方向、形状与轨道表面视觉（背景由 owner `Render` 绘制，圆角/内边距/裁剪投影到 `Frame`）；对应上游 `.ant-segmented`。 | `ItemsSource`、`ItemTemplate`、`SelectedIndex`、`SelectedItem`、`SelectionChanged`、`SizeType`、`Orientation`、`Shape`、`IsExpanding`、`IsMotionEnabled` | `TrackBg`、`TrackPadding`、SharedToken | stable since 6.2.0 |
+| `item` | 每个 `SegmentedItem` 容器 | 选项容器，设置背景/前景状态色、圆角、内边距、最小高度、光标与选择/悬浮/按压/禁用视觉；对应上游 `.ant-segmented-item`。 | `SegmentedItem.Icon`、`SegmentedItem.Content`、`SegmentedItem.IsSelected`、`SizeType`、`Shape` | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、`ItemHoverBg`、`ItemActiveBg`、`ItemSelectedBg`、`ItemMinHeight*`、`SegmentedItemPadding*` | stable since 6.2.0 |
+| `icon` | 每个 `SegmentedItem` 模板中的 `IconPresenter#IconPresenter` | 选项图标区域：画刷状态色、图标尺寸与可见性；对应上游 `.ant-segmented-item-icon`。 | `SegmentedItem.Icon`、`SizeType` | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、SharedToken（`IconSize*`、`ColorTextDisabled`） | stable since 6.2.0 |
+| `label` | 每个 `SegmentedItem` 模板中的 `ContentPresenter#Content` | 选项文本区域：文本呈现、居中对齐、省略与图文间距（`:has-icon`）；对应上游 `.ant-segmented-item-label`。 | `SegmentedItem.Content`、`SegmentedItem.ContentTemplate` | `SegmentedItemContentMargin` | stable since 6.2.0 |
 
 LLMS 导出来源：
 

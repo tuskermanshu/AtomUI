@@ -173,19 +173,19 @@ LLMS 语义区域（完整字段契约见 [Tour Semantic Part 契约](semantic-p
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Tour` | 引导流程 owner：步骤集合、受控开关状态与目标锚定。 | `IsOpen`、`CurrentIndex`、`Steps` | 无独立 Token | stable since 6.0 |
-| `popup.root` | `PART_ArrowDecorator`（ArrowDecoratedBox） | 引导卡片容器根，承载内容与箭头。 | `Placement`、`IsArrowVisible` | `TourBorderRadius` | stable since 6.0 |
-| `popup.mask` | 共享 `TourLayer`（逻辑父挂载） | 整屏遮罩、镂空高亮目标并阻挡交互。 | `IsShowMask`、`MaskColor`、`GapRadius` | `ColorBgMask` | stable since 6.0 |
-| `popup.section` | ArrowDecoratedBox `PART_ContentDecorator` | 卡片主要内容区域（圆角/背景/内边距）。 | `StyleType` | `TourBorderRadius` | stable since 6.0 |
-| `popup.cover` | TourStep 模板 `CoverPresenter` | 步骤封面区域。 | `TourStep.Cover` | 无 | stable since 6.0 |
-| `popup.close` | TourStep 模板 `CloseButton` | 关闭按钮，结束引导。 | `CloseIcon` | `CloseBtnSize` | stable since 6.0 |
-| `popup.header` | TourStep 模板 header Border | 头部容器（标题 + 关闭按钮）。 | 无独立 API | 无 | stable since 6.0 |
-| `popup.title` | TourStep 模板 `Title` | 标题文字。 | `TourStep.Title` | `HeaderColor` | stable since 6.0 |
-| `popup.description` | TourStep 模板 `DescriptionPresenter` | 描述文字。 | `TourStep.Description` | 无 | stable since 6.0 |
-| `popup.footer` | TourStepsView 模板 `FooterFrame` | 底部操作区（指示器 + 按钮组）。 | 无独立 API | 无 | stable since 6.0 |
-| `popup.actions` | TourStepsView 模板 `ActionsLayout` | 操作按钮组容器。 | `CustomActions` | `PrimaryPrevBtnBg` | stable since 6.0 |
-| `popup.indicators` | TourStepsView 模板 `IndicatorPresenter` | 指示器组容器。 | `Indicator` | 无 | stable since 6.0 |
-| `popup.indicator` | DefaultTourIndicator 物化圆点 | 单个步骤指示器圆点（含激活态）。 | `IndicatorSize`、`IndicatorColor` | `IndicatorSize` | stable since 6.0 |
+| `root` | `Tour` | 引导流程 owner：步骤集合、受控开关状态与目标锚定。 | `IsOpen`、`CurrentIndex`、`Steps` | 无独立 Token | stable since 6.2.0 |
+| `popup.root` | `PART_ArrowDecorator`（ArrowDecoratedBox） | 引导卡片容器根，承载内容与箭头。 | `Placement`、`IsArrowVisible` | `TourBorderRadius` | stable since 6.2.0 |
+| `popup.mask` | 共享 `TourLayer`（逻辑父挂载） | 整屏遮罩、镂空高亮目标并阻挡交互。 | `IsShowMask`、`MaskColor`、`GapRadius` | `ColorBgMask` | stable since 6.2.0 |
+| `popup.section` | ArrowDecoratedBox `PART_ContentDecorator` | 卡片主要内容区域（圆角/背景/内边距）。 | `StyleType` | `TourBorderRadius` | stable since 6.2.0 |
+| `popup.cover` | TourStep 模板 `CoverPresenter` | 步骤封面区域。 | `TourStep.Cover` | 无 | stable since 6.2.0 |
+| `popup.close` | TourStep 模板 `CloseButton` | 关闭按钮，结束引导。 | `CloseIcon` | `CloseBtnSize` | stable since 6.2.0 |
+| `popup.header` | TourStep 模板 header Border | 头部容器（标题 + 关闭按钮）。 | 无独立 API | 无 | stable since 6.2.0 |
+| `popup.title` | TourStep 模板 `Title` | 标题文字。 | `TourStep.Title` | `HeaderColor` | stable since 6.2.0 |
+| `popup.description` | TourStep 模板 `DescriptionPresenter` | 描述文字。 | `TourStep.Description` | 无 | stable since 6.2.0 |
+| `popup.footer` | TourStepsView 模板 `FooterFrame` | 底部操作区（指示器 + 按钮组）。 | 无独立 API | 无 | stable since 6.2.0 |
+| `popup.actions` | TourStepsView 模板 `ActionsLayout` | 操作按钮组容器。 | `CustomActions` | `PrimaryPrevBtnBg` | stable since 6.2.0 |
+| `popup.indicators` | TourStepsView 模板 `IndicatorPresenter` | 指示器组容器。 | `Indicator` | 无 | stable since 6.2.0 |
+| `popup.indicator` | DefaultTourIndicator 物化圆点 | 单个步骤指示器圆点（含激活态）。 | `IndicatorSize`、`IndicatorColor` | `IndicatorSize` | stable since 6.2.0 |
 
 LLMS 导出来源：
 

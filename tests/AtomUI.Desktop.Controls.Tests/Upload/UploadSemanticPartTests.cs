@@ -191,7 +191,7 @@ public class UploadSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
         part.StyleType.ShouldBeNull();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertPart(
@@ -211,7 +211,7 @@ public class UploadSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBe(runtimeCreated);
         part.StyleType.ShouldBe(styleType);
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static Control[] GetSemanticElements(Control owner, string semanticClass)

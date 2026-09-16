@@ -526,7 +526,7 @@ AtomUI 的 semantic 文档描述 AXAML、ControlTemplate、运行时组合结构
 | 职责 | 用户内容区域 |
 | 相关 API | `Content` |
 | 相关 Token | 组件 Token / SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 ```
 
 要求：

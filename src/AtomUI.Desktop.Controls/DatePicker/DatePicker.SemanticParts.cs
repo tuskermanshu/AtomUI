@@ -12,33 +12,33 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-prefix",
     SelectorRoute = "/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "input",
     SelectorClass = "semantic-input",
     SelectorRoute = "/template/ .semantic-input",
     ContractType = typeof(TextBox),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "suffix",
     SelectorClass = "semantic-suffix",
     SelectorRoute = "/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix",
     ContractType = typeof(StackPanel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "clear",
     SelectorClass = "semantic-clear",
     SelectorRoute = ">> .semantic-scope-handle /template/ .semantic-clear",
     CrossNestedOwners = true,
     ContractType = typeof(IconButton),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.root",
     SelectorClass = "semantic-popup-root",
     SelectorRoute = "/template/ .semantic-popup-root",
     CrossVisualRoot = true,
     ContractType = typeof(ArrowDecoratedBox),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.container",
     SelectorClass = "semantic-popup-container",
@@ -46,7 +46,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(DockPanel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.header",
     SelectorClass = "semantic-popup-header",
@@ -54,7 +54,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.body",
     SelectorClass = "semantic-popup-body",
@@ -62,7 +62,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(UniformGrid),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.content",
     SelectorClass = "semantic-popup-content",
@@ -70,7 +70,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(Grid),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.cell",
     SelectorClass = "semantic-cell",
@@ -79,7 +79,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Multiple,
     ContractType = typeof(AvaloniaButton),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.footer",
     SelectorClass = "semantic-popup-footer",
@@ -87,7 +87,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(PixelAlignedBorder),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class DatePicker
 {
 }

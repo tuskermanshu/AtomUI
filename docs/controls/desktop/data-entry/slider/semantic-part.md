@@ -54,7 +54,7 @@ AtomUI 映射与结构改造（internal、public API 不变）：
 3. 上游 handle 圆点由 `::after` box-shadow 表达；AtomUI 圆点由 `SliderThumb` 自绘（`Background` + `BorderBrush` +
    `OutlineBrush`），`handle` 的 Semantic Setter 作用于 `SliderThumb` 的公开视觉属性。
 
-所有 Part 的 `Since` 统一为 `6.0`（上游版本徽标 root 为 5.23.0、其余为 5.10.0，AtomUI 使用自身版本基线）。
+所有 Part 的 `Since` 统一为 `6.2.0`（上游版本徽标 root 为 5.23.0、其余为 5.10.0，AtomUI 使用自身版本基线）。
 
 ## 2. Semantic Parts
 
@@ -76,7 +76,7 @@ AtomUI 映射与结构改造（internal、public API 不变）：
 | 职责 | 数值选择控件根：承载 `Minimum` / `Maximum` / `Value` / `RangeValues` 值状态、方向、轨道与 mark 配置、键盘与 pointer 交互会话、Tooltip 与 Form 集成；作为全部 Part 的 owner-scoped Selector 作用域边界。对应上游 `.ant-slider`。 |
 | 相关 API | `Orientation`、`IsDirectionReversed`、`IsSnapToTickEnabled`、`TickFrequency`、`IsRangeMode`、`RangeValues`、`DisabledHandles`、`IsDraggableTrack`、`TrackBarBrush`、`TracksBrush`、`Marks`、`IsIncluded`、`ValueFormatTemplate`、`IsMotionEnabled` |
 | 相关 Token | `SliderPaddingHorizontal`、`SliderPaddingVertical`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.2 `rail`
 
@@ -96,7 +96,7 @@ AtomUI 映射与结构改造（internal、public API 不变）：
 | 职责 | 统一表示背景轨道区域：rail 画刷、胶囊圆角与过渡；对应上游 `.ant-slider-rail`。 |
 | 相关 API | `TrackGrooveBrush`（SliderTrack）、`IsEnabled`、`Orientation` |
 | 相关 Token | `RailBg`、`RailHoverBg`、`RailSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.3 `tracks`
 
@@ -116,7 +116,7 @@ AtomUI 映射与结构改造（internal、public API 不变）：
 | 职责 | 统一表示整体活动范围容器：Range 模式覆盖首尾 handle 之间的整段跨度，单值模式覆盖最小到当前值的跨度；对应上游 `.ant-slider-tracks`。 |
 | 相关 API | `TracksBrush`、`IsRangeMode`、`IsIncluded`、`IsDraggableTrack` |
 | 相关 Token | 无专属 Token（默认画刷为 null） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.4 `track`
 
@@ -136,7 +136,7 @@ AtomUI 映射与结构改造（internal、public API 不变）：
 | 职责 | 统一表示相邻 handle 之间的活动轨道段：segment 画刷、胶囊圆角与过渡；对应上游 `.ant-slider-track`。 |
 | 相关 API | `TrackBarBrush`、`RangeValues`、`IsIncluded`、`IsDraggableTrack` |
 | 相关 Token | `TrackBg`、`TrackHoverBg`、`TrackBgDisabled`、`SliderTrackSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.5 `handle`
 
@@ -156,7 +156,7 @@ AtomUI 映射与结构改造（internal、public API 不变）：
 | 职责 | 统一表示滑块控制点：圆点背景、边框、outline、hover / focus / pressed / disabled 视觉与 Tooltip 宿主；对应上游 `.ant-slider-handle`。 |
 | 相关 API | `SliderThumb.OutlineBrush`、`SliderThumb.OutlineThickness`、`SliderThumb.ThumbCircleSize`、`DisabledHandles`、`ValueFormatTemplate` |
 | 相关 Token | `ThumbSize`、`ThumbCircleSize`、`ThumbCircleSizeHover`、`ThumbCircleBorderColor`、`ThumbCircleBorderActiveColor`、`ThumbCircleBorderColorDisabled`、`ThumbCircleBorderThickness`、`ThumbCircleBorderThicknessHover`、`ThumbOutlineColor`、`ThumbOutlineThickness` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.6 marker 放置与路由
 

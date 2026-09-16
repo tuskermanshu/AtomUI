@@ -25,7 +25,7 @@ Result 的 Part 名称与公开 Result Semantic 结构保持一致：`root`、`i
 | 职责 | 承载整体结果布局、状态、表面属性和 Semantic Style 作用域。 |
 | 相关 API | 全部 Result public API，包含 `StrokeDashArray` 与继承的标准表面属性 |
 | 相关 Token | ResultToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `icon`
 
@@ -45,7 +45,7 @@ Result 的 Part 名称与公开 Result Semantic 结构保持一致：`root`、`i
 | 职责 | 表达 Info、Success、Warning、Error 图标和 403、404、500 图像的替代呈现。 |
 | 相关 API | `Status`、`Icon` |
 | 相关 Token | `StatusIconSize`、`StatusImageMargin`、`ImageWidth`、`ImageHeight`、状态色 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `icon` 同时标记 `PART_StatusIconPresenter` 和 `PART_ErrorCodeImage`。两个 target 始终存在，`Status` 只切换可见性；
 Semantic Style 必须适用于两个实现。它适合定制 Margin、Opacity、Width、Height 和对齐。普通 presenter 内由默认状态或 `Icon`
@@ -69,7 +69,7 @@ Semantic Style 必须适用于两个实现。它适合定制 Margin、Opacity、
 | 职责 | 展示 Header 内容并提供标题排版边界。 |
 | 相关 API | `Header`、`HeaderTemplate`、`HeaderFontSize` |
 | 相关 Token | `HeaderFontSize`、`HeaderMargin`、标题色与相对行高 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `title` 始终存在，`Header=null` 时通过 `IsVisible=false` 隐藏。它适合定制 Foreground、FontSize、FontStyle、FontWeight、
 LineHeight、Margin、Padding、Opacity、换行和对齐；HeaderTemplate 创建的用户子树不属于 Result Semantic Part。
@@ -92,7 +92,7 @@ LineHeight、Margin、Padding、Opacity、换行和对齐；HeaderTemplate 创�
 | 职责 | 展示可选结果说明并提供副标题排版边界。 |
 | 相关 API | `SubHeader`、`SubHeaderTemplate`、`SubHeaderFontSize` |
 | 相关 Token | `SubHeaderFontSize`、描述色与相对行高 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `subTitle` 始终存在，`SubHeader=null` 时隐藏。它适合定制 Foreground、FontSize、FontStyle、FontWeight、LineHeight、Margin、
 Padding、Opacity、换行和对齐；SubHeaderTemplate 创建的用户子树不属于 Result Semantic Part。
@@ -115,7 +115,7 @@ Padding、Opacity、换行和对齐；SubHeaderTemplate 创建的用户子树不
 | 职责 | 承载 Extra 内容并提供操作区布局边界。 |
 | 相关 API | `Extra`、`ExtraTemplate` |
 | 相关 Token | `ExtraMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `extra` presenter 始终存在，横向拉伸到 Result 内容区宽度，并在区域内部居中排列 Extra 内容；`Extra=null` 时保持空内容。
 它适合定制 Background、Padding、Margin、Opacity、对齐和 TextAlignment。调用方放入的 Button、Panel 或其他内容子树
@@ -139,7 +139,7 @@ Padding、Opacity、换行和对齐；SubHeaderTemplate 创建的用户子树不
 | 职责 | 承载 Content 并提供正文背景、内边距和外边距边界。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | `ContentMargin`、`ContentPadding`、`ColorFillAlter` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `body` 始终存在，`Content=null` 时隐藏。它适合定制 Background、Padding、Margin、Opacity、对齐和 ClipToBounds；
 ContentTemplate 创建的用户子树不属于 Result Semantic Part。

@@ -9,14 +9,14 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-cover /template/ .semantic-image",
     CrossNestedOwners = true,
     ContractType = typeof(Control),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("cover",
     SelectorClass = "semantic-cover",
     SelectorRoute = "/template/ .semantic-scope-cover /template/ .semantic-cover",
     CrossNestedOwners = true,
     RestHidden = true,
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("popup.root",
     SelectorClass = "semantic-popup-root",
     SelectorRoute = ">> .semantic-popup-root",
@@ -24,7 +24,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Panel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("popup.mask",
     SelectorClass = "semantic-popup-mask",
     SelectorRoute = ">> .semantic-popup-mask",
@@ -33,7 +33,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Panel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("popup.body",
     SelectorClass = "semantic-popup-body",
     SelectorRoute = ">> .semantic-popup-body",
@@ -41,7 +41,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Panel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("popup.footer",
     SelectorClass = "semantic-popup-footer",
     SelectorRoute = ">> .semantic-popup-footer",
@@ -49,7 +49,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Control),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("popup.actions",
     SelectorClass = "semantic-popup-actions",
     SelectorRoute = ">> .semantic-popup-footer /template/ .semantic-popup-actions",
@@ -57,7 +57,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class ImagePreviewer
 {
 }

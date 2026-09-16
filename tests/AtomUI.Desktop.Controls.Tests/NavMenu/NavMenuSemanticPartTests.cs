@@ -114,7 +114,7 @@ public class NavMenuSemanticPartTests
         popupRoot.CrossVisualRoot.ShouldBeTrue();
         popupRoot.CrossNestedOwners.ShouldBeTrue();
         popupRoot.RuntimeCreated.ShouldBeTrue();
-        popupRoot.Since.ShouldBe("6.0");
+        popupRoot.Since.ShouldBe("6.2.0");
 
         // The item / group containers are internal, so they cannot own a descriptor.
         registry.TryGetControl(typeof(NavMenuItem), out _).ShouldBeFalse();
@@ -296,7 +296,7 @@ public class NavMenuSemanticPartTests
         part.CrossVisualRoot.ShouldBe(crossVisualRoot);
         part.CrossNestedOwners.ShouldBeTrue();
         part.RuntimeCreated.ShouldBeTrue();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertRoot(SemanticPartDescriptor part)

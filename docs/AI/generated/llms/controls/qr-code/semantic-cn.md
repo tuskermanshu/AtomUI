@@ -26,7 +26,7 @@ QRCode 公开 `root` 和 `cover` 两个 Semantic Part。二维码 bitmap、中�
 | 职责 | 二维码方形根区域，承载背景、边框、圆角、Padding 和整体布局。 |
 | 相关 API | `Size`、`IsBordered` 及继承的 root 表面属性 |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `cover`
 
@@ -46,7 +46,7 @@ QRCode 公开 `root` 和 `cover` 两个 Semantic Part。二维码 bitmap、中�
 | 职责 | 覆盖完整 root，承载 Loading、Expired、Scanned 状态背景与内容。 |
 | 相关 API | `Status`、三组状态内容 API、`RefreshRequested` |
 | 相关 Token | `QRCodeMaskBackgroundColor`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

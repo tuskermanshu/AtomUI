@@ -8,7 +8,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-items > .semantic-item",
     ContractType = typeof(CheckableTag),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class CheckableTagGroup
 {

@@ -26,7 +26,7 @@ ListView 公开 `root`、`item` 与 `groupHeader` 三个职责区域，与上游
 | 职责 | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界；对应上游 `.ant-listy`。 |
 | 相关 API | `ItemsSource`、`ItemTemplate`、`Height`、`SizeType`、`IsBorderless`、`IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` |
 | 相关 Token | `ListViewToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -46,7 +46,7 @@ ListView 公开 `root`、`item` 与 `groupHeader` 三个职责区域，与上游
 | 职责 | 条目元素，设置内间距、底部分割线与悬浮背景；对应上游 `.ant-listy-item`。 |
 | 相关 API | `SizeType`、`ItemHoverBg`、`ItemSelectedBg`、`ItemClickMode` |
 | 相关 Token | `ItemPaddingSM`、`ItemPadding`、`ItemPaddingLG`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `groupHeader`
 
@@ -66,7 +66,7 @@ ListView 公开 `root`、`item` 与 `groupHeader` 三个职责区域，与上游
 | 职责 | 分组标题元素，设置标题文字与背景；对应上游 `.ant-listy-group-header`。 |
 | 相关 API | `IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` |
 | 相关 Token | `GroupHeaderColor`、`ColorBgContainer`、`ColorFillAlter`、`FontWeightStrong` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 与 `groupHeader` 的 marker 在容器创建路径一次性建立，
 `PrepareContainerForItemOverride` 按容器类型幂等补齐；容器角色由类型决定（分组标题使用专用 `GroupHeaderItem`），

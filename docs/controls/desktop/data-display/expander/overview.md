@@ -291,12 +291,12 @@ Expander 是单面板控件，没有 item 容器，因此不存在 `item` 语义
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Expander` | 单面板折叠容器根语义区域，承载 public API、展开状态、展开方向与主题入口。 | `IsExpanded`、`ExpandDirection`、`IsBorderless`、`IsGhostStyle`、`BorderThickness`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled` | ExpanderToken、SharedToken | stable since 6.0 |
-| `header` | `PART_HeaderDecorator` | 头部区域（Semantic Part `header`）。 | `SizeType`、`HeaderPadding`、`TriggerType`、`IsGhostStyle`、`ExpandDirection` | `HeaderBg`、`HeaderPadding`、`HeaderPaddingSM`、`HeaderPaddingLG` | stable since 6.0 |
-| `title` | `PART_HeaderPresenter` | 标题文字区域（Semantic Part `title`）。 | `Header`、`HeaderTemplate`、`SizeType` | `ColorTextHeading`、`ColorTextDisabled` | stable since 6.0 |
-| `icon` | `PART_ExpandButton` | 展开/收起箭头（Semantic Part `icon`）。 | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsExpanded`、`ExpandDirection` | `IconSizeSM`、`LeftExpandButtonHMargin`、`RightExpandButtonHMargin` | stable since 6.0 |
-| `body` | `PART_ContentPresenter` | 内容区域（Semantic Part `body`）。 | `Content`、`ContentTemplate`、`ContentPadding`、`SizeType`、`IsBorderless`、`IsGhostStyle` | `ContentPadding`、`ContentPaddingSM`、`ContentPaddingLG`、`ContentBg`、`HeaderBg` | stable since 6.0 |
-| `motion` | `PART_ContentMotionActor` | 展开/收起动效（LLMS 区域，非 Semantic Part）。 | `IsExpanded`、`IsMotionEnabled`、`ExpandDirection`、`MotionDuration` | `MotionDurationSlow` | stable since 6.0 |
+| `root` | `Expander` | 单面板折叠容器根语义区域，承载 public API、展开状态、展开方向与主题入口。 | `IsExpanded`、`ExpandDirection`、`IsBorderless`、`IsGhostStyle`、`BorderThickness`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled` | ExpanderToken、SharedToken | stable since 6.2.0 |
+| `header` | `PART_HeaderDecorator` | 头部区域（Semantic Part `header`）。 | `SizeType`、`HeaderPadding`、`TriggerType`、`IsGhostStyle`、`ExpandDirection` | `HeaderBg`、`HeaderPadding`、`HeaderPaddingSM`、`HeaderPaddingLG` | stable since 6.2.0 |
+| `title` | `PART_HeaderPresenter` | 标题文字区域（Semantic Part `title`）。 | `Header`、`HeaderTemplate`、`SizeType` | `ColorTextHeading`、`ColorTextDisabled` | stable since 6.2.0 |
+| `icon` | `PART_ExpandButton` | 展开/收起箭头（Semantic Part `icon`）。 | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsExpanded`、`ExpandDirection` | `IconSizeSM`、`LeftExpandButtonHMargin`、`RightExpandButtonHMargin` | stable since 6.2.0 |
+| `body` | `PART_ContentPresenter` | 内容区域（Semantic Part `body`）。 | `Content`、`ContentTemplate`、`ContentPadding`、`SizeType`、`IsBorderless`、`IsGhostStyle` | `ContentPadding`、`ContentPaddingSM`、`ContentPaddingLG`、`ContentBg`、`HeaderBg` | stable since 6.2.0 |
+| `motion` | `PART_ContentMotionActor` | 展开/收起动效（LLMS 区域，非 Semantic Part）。 | `IsExpanded`、`IsMotionEnabled`、`ExpandDirection`、`MotionDuration` | `MotionDurationSlow` | stable since 6.2.0 |
 
 LLMS 导出来源：
 

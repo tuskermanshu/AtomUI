@@ -71,7 +71,7 @@
 ## 2026-09-10
 
 - Semantic Part
-  - Publish two owner descriptors aligned with the upstream Message semantic keys: `MessageCard` exposes `wrapper` / `icon` / `title` (plus implicit `root`) for the notice card, and `WindowMessageManager` exposes `listContent` (plus implicit `root`, which maps the upstream list). `Since` is `6.0` for both.
+  - Publish two owner descriptors aligned with the upstream Message semantic keys: `MessageCard` exposes `wrapper` / `icon` / `title` (plus implicit `root`) for the notice card, and `WindowMessageManager` exposes `listContent` (plus implicit `root`, which maps the upstream list). `Since` is `6.2.0` for both.
   - Add generated semantic style types `MessageCardWrapperStyle`, `MessageCardIconStyle`, `MessageCardTitleStyle` and `WindowMessageManagerListContentStyle`.
   - Add static `Classes.semantic-*` markers in `MessageCardTheme.axaml` and `WindowMessageManagerTheme.axaml`; the built-in themes do not consume `.semantic-*` for default visuals.
   - Add `docs/controls/desktop/feedback/message/semantic-part.md` as the authoritative Part contract, and document the descriptor/marker mapping in `implementation.md`.

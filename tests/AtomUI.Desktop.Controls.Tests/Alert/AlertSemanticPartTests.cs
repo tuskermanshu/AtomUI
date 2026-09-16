@@ -319,7 +319,7 @@ public class AlertSemanticPartTests
         part.StyleType.ShouldBeNull();
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertPart(
@@ -340,7 +340,7 @@ public class AlertSemanticPartTests
             $"AtomUI.Theme.Styling.Alert{char.ToUpperInvariant(name[0])}{name[1..]}Style"));
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AddGeneratedPartStyle(

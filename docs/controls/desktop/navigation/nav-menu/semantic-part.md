@@ -79,7 +79,7 @@ owner 拆分；菜单项容器的 `ContractType` 取其最近的 public 基类 `
 `CrossVisualRoot=true`。Inline 模式下这些节点位于主视觉树内，声明不影响其可达性。
 弹层内容的处理一致。
 
-所有 Part 的 `Since` 统一为 `6.0`。
+所有 Part 的 `Since` 统一为 `6.2.0`。
 
 ## 2. Semantic Parts
 

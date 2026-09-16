@@ -106,13 +106,55 @@ internal sealed class SemanticPartManifestWriter
         source.AppendLine("                        global::AtomUI.Theme.SemanticPartCustomization.Root,");
         source.AppendLine("                        null,");
         source.AppendLine("                        false,");
-        source.AppendLine("                        \"6.0\",");
+        source.Append("                        ").Append(FormatStringLiteral(ResolveRootSince(control))).AppendLine(",");
         source.AppendLine("                        false),");
         foreach (var part in control.Parts.OrderBy(static part => part.Path, StringComparer.Ordinal))
         {
             WritePartDescriptor(source, control, part);
         }
         source.AppendLine("                }),");
+    }
+
+    /// <summary>
+    /// 隐式 <c>root</c> 描述块没有自己的声明可以承载版本：它由生成器加入，而 <c>Since</c> 只存在于
+    /// <c>[SemanticPart]</c> 上。因此 root 的版本取该 Control 已声明 Part 中最早的发布版本——root 随这个
+    /// Control 的第一个 Part 一起引入。不得硬编码版本线或具体版本，否则会与 Part 声明不一致。
+    /// </summary>
+    private static string ResolveRootSince(SemanticControlDeclaration control)
+    {
+        return control.Parts
+                      .Select(static part => part.Since)
+                      .Where(static since => !string.IsNullOrWhiteSpace(since))
+                      .Select(static since => since!)
+                      .OrderBy(ParseReleaseVersion)
+                      .FirstOrDefault() ?? string.Empty;
+    }
+
+    /// <summary>
+    /// 把三段式发布版本折叠成可比较的数值，避免按字符串排序把 <c>6.10.0</c> 排在 <c>6.4.0</c> 之前。
+    /// 声明校验已保证格式合法；无法解析时退回该段的最大值，使其排在有效版本之后而不改变主序。
+    /// </summary>
+    private static long ParseReleaseVersion(string? since)
+    {
+        if (string.IsNullOrWhiteSpace(since))
+        {
+            return long.MaxValue;
+        }
+
+        long value = 0;
+        var segments = 0;
+        foreach (var segment in since!.Split('.'))
+        {
+            if (!int.TryParse(segment, out var number) || segments == 3)
+            {
+                return long.MaxValue;
+            }
+
+            value = (value * 100_000) + number;
+            segments++;
+        }
+
+        return segments == 3 ? value : long.MaxValue;
     }
 
     private static void WritePartDescriptor(

@@ -10,7 +10,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item",
     ContractType = typeof(SegmentedItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "icon",
@@ -18,7 +18,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-icon",
     ContractType = typeof(IconPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "label",
@@ -26,7 +26,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-label",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class Segmented
 {

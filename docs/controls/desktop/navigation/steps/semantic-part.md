@@ -5,7 +5,7 @@
 [AtomUI Semantic Part 系统设计](../../../../architecture/systems/theming/semantic-parts.md)。
 
 Steps 的公开语义结构与 Ant Design 6 的 Semantic DOM 对齐：`StepsSemanticType = { root, item, itemWrapper,
-itemIcon, itemTitle, itemSubtitle, itemSection, itemContent, itemRail }`（since 6.0.0）。`root` 是隐式
+itemIcon, itemTitle, itemSubtitle, itemSection, itemContent, itemRail }`（since 6.2.0）。`root` 是隐式
 owner，`item` 覆盖 `StepsItem` 步骤容器，七个 item 子 Part 覆盖 item 模板内的包裹层、图标、标题、副标题、
 内容区、详情和连接线。上游把 `styles.item` 应用到整个步骤项，把 `styles.itemWrapper` / `styles.itemIcon` /
 `styles.itemTitle` / `styles.itemSubtitle` / `styles.itemSection` / `styles.itemContent` /
@@ -60,7 +60,7 @@ item 被移除时随模板销毁；`Steps` 自身不包含任何子 Part marker�
 | 职责 | 步骤条根语义区域，承载流程状态、布局入口和主题视觉。 |
 | 相关 API | `Current`、`Initial`、`Status`、`Percent`、`Type`、`Orientation`、`TitlePlacement`、`SizeType`、`IsItemClickable` |
 | 相关 Token | Steps Token + SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是 `Steps` owner 本身，在控件实例的整个生命周期内始终存在，每个实例恰好一个。它负责：
 
@@ -94,7 +94,7 @@ root 不表示模板中的 `PART_ItemsPresenter`、`StepsPanel` 或各 item 内�
 | 职责 | 承载单个步骤项的状态、内容与交互语义。 |
 | 相关 API | `Header`、`SubHeader`、`Content`、`Icon`、`Status`、`IsEnabled` |
 | 相关 Token | `ItemHeaderForeground`、`ItemSubHeaderForeground`、`ItemRailBackground` 实例语义覆盖之外的 Steps Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `item` 覆盖步骤条内的全部 `StepsItem` 容器：直接声明的 `StepsItem` 与普通数据项生成的容器完全等价。
 marker 由 `Steps.PrepareContainerForItemOverride` 在容器准备时写入，容器回收复用后重新准备时再次写入；

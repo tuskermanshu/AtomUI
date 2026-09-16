@@ -42,7 +42,7 @@ public class OtpLineEditSemanticPartTests
         cellList.ContractType.ShouldBe(typeof(ItemsControl));
         cellList.Cardinality.ShouldBe(SemanticPartCardinality.Single);
         cellList.RuntimeCreated.ShouldBeFalse();
-        cellList.Since.ShouldBe("6.0");
+        cellList.Since.ShouldBe("6.2.0");
         cellList.StyleType.ShouldBe(typeof(AtomUI.Theme.Styling.OtpLineEditCellListStyle));
 
         var cell = descriptor.Parts.Single(static part => part.Name == "cell");
@@ -51,7 +51,7 @@ public class OtpLineEditSemanticPartTests
         cell.ContractType.ShouldBe(typeof(ContentControl));
         cell.Cardinality.ShouldBe(SemanticPartCardinality.Multiple);
         cell.RuntimeCreated.ShouldBeTrue();
-        cell.Since.ShouldBe("6.0");
+        cell.Since.ShouldBe("6.2.0");
         cell.StyleType.ShouldBe(typeof(AtomUI.Theme.Styling.OtpLineEditCellStyle));
 
         var separator = descriptor.Parts.Single(static part => part.Name == "separator");
@@ -60,7 +60,7 @@ public class OtpLineEditSemanticPartTests
         separator.ContractType.ShouldBe(typeof(Border));
         separator.Cardinality.ShouldBe(SemanticPartCardinality.Multiple);
         separator.RuntimeCreated.ShouldBeTrue();
-        separator.Since.ShouldBe("6.0");
+        separator.Since.ShouldBe("6.2.0");
         separator.StyleType.ShouldBe(typeof(AtomUI.Theme.Styling.OtpLineEditSeparatorStyle));
 
         registry.TryGetControl(typeof(OtpLineEditCell), out _).ShouldBeFalse();

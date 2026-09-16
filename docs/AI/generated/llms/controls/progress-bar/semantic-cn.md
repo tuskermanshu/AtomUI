@@ -29,7 +29,7 @@
 | 职责 | 承载进度范围、状态、尺寸、方向、文本位置和 Semantic Style 作用域。 |
 | 相关 API | 全部 `ProgressBar` public API |
 | 相关 Token | ProgressBarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -49,7 +49,7 @@
 | 职责 | 统一承载 rail、track、成功段和 indicator 的布局边界。 |
 | 相关 API | `Orientation`、`PercentPosition`、`IsProgressInfoVisible` |
 | 相关 Token | `LineExtraInfoMargin`、`LineProgressPadding` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `rail`
 
@@ -69,7 +69,7 @@
 | 职责 | 表达线形进度的完整剩余轨道。 |
 | 相关 API | `TrailColor`、`StrokeLineCap`、`IndicatorThickness` |
 | 相关 Token | `RemainingColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `track`
 
@@ -89,7 +89,7 @@
 | 职责 | 表达由 `Value` 计算出的线形已完成区域。 |
 | 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`IndicatorThickness` |
 | 相关 Token | `DefaultColor`、SharedToken 状态色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -109,7 +109,7 @@
 | 职责 | 统一承载格式化百分比、成功图标和异常图标的替代呈现。 |
 | 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`PercentPosition`、`Status`、完成图标 API |
 | 相关 Token | 文本、图标尺寸和状态色 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `StepsProgressBar`
 
@@ -131,7 +131,7 @@
 | 职责 | 承载进度范围、步骤数量、逐步画刷、尺寸、方向和 Semantic Style 作用域。 |
 | 相关 API | 全部 `StepsProgressBar` public API |
 | 相关 Token | ProgressBarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -151,7 +151,7 @@
 | 职责 | 统一承载步骤 track 和 indicator；steps 不创建 rail。 |
 | 相关 API | `Orientation`、`Steps`、`PercentPosition`、`IsProgressInfoVisible` |
 | 相关 Token | `LineExtraInfoMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `track`
 
@@ -171,7 +171,7 @@
 | 职责 | 表达全部步骤单元；完成状态只决定每个 target 使用进度色还是 rail 色。 |
 | 相关 API | `Value`、`Steps`、`StepsStrokeBrush`、`StrokeBrush`、`TrailColor` |
 | 相关 Token | `DefaultColor`、`RemainingColor`、SharedToken 状态色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -191,7 +191,7 @@
 | 职责 | 统一承载步骤进度的百分比、成功图标和异常图标。 |
 | 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`PercentPosition`、`Status` |
 | 相关 Token | 文本、图标尺寸和状态色 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.3 `CircleProgress`
 
@@ -213,7 +213,7 @@
 | 职责 | 承载进度范围、圆形尺寸、分段状态和 Semantic Style 作用域。 |
 | 相关 API | 全部 `CircleProgress` public API |
 | 相关 Token | ProgressBarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -233,7 +233,7 @@
 | 职责 | 统一承载圆形 rail、track、成功弧段和居中 indicator。 |
 | 相关 API | `SizeType`、`Width`、`Height`、`StepCount`、`StepGap` |
 | 相关 Token | 圆形尺寸与信息 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `rail`
 
@@ -253,7 +253,7 @@
 | 职责 | 表达连续圆或分段圆的完整剩余轨道。 |
 | 相关 API | `TrailColor`、`IndicatorThickness`、`StepCount`、`StepGap` |
 | 相关 Token | `RemainingColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `track`
 
@@ -273,7 +273,7 @@
 | 职责 | 表达由 `Value` 计算出的连续或分段圆弧。 |
 | 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`IndicatorThickness`、`StepCount`、`StepGap` |
 | 相关 Token | `DefaultColor`、SharedToken 状态色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -293,7 +293,7 @@
 | 职责 | 统一承载圆心百分比、成功图标和异常图标。 |
 | 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`Status`、完成图标 API |
 | 相关 Token | `CircleMinimumTextFontSize`、`CircleMinimumIconSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.4 `DashboardProgress`
 
@@ -315,7 +315,7 @@
 | 职责 | 承载进度范围、缺口、尺寸、分段状态和 Semantic Style 作用域。 |
 | 相关 API | 全部 `DashboardProgress` public API |
 | 相关 Token | ProgressBarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -335,7 +335,7 @@
 | 职责 | 统一承载仪表盘 rail、track、成功弧段和居中 indicator。 |
 | 相关 API | `SizeType`、`Width`、`Height`、`DashboardGapPosition`、`GapDegree` |
 | 相关 Token | 圆形尺寸与信息 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `rail`
 
@@ -355,7 +355,7 @@
 | 职责 | 表达带指定缺口的连续或分段剩余轨道。 |
 | 相关 API | `TrailColor`、`IndicatorThickness`、`DashboardGapPosition`、`GapDegree`、`StepCount`、`StepGap` |
 | 相关 Token | `RemainingColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `track`
 
@@ -375,7 +375,7 @@
 | 职责 | 表达由 `Value` 计算出的带缺口连续或分段圆弧。 |
 | 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`DashboardGapPosition`、`GapDegree` |
 | 相关 Token | `DefaultColor`、SharedToken 状态色 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -395,7 +395,7 @@
 | 职责 | 统一承载仪表盘百分比、成功图标和异常图标。 |
 | 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`Status`、完成图标 API |
 | 相关 Token | `CircleMinimumTextFontSize`、`CircleMinimumIconSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 所有 root 都是隐式 Part，不添加 `.semantic-root`。四个 owner 均不跨 VisualRoot，也不提供 Semantic Part Theme。
 `ProgressBar`、`CircleProgress` 和 `DashboardProgress` 的非 root Part 是静态模板 target；`StepsProgressBar` 只有 track

@@ -24,7 +24,7 @@ Steps 不负责：
 
 Steps 的公开语义区域使用 `root`、`item`、`itemWrapper`、`itemIcon`、`itemTitle`、`itemSubtitle`、
 `itemSection`、`itemContent` 和 `itemRail` 九个 Semantic Part，与上游步骤语义结构 `StepsSemanticType`
-对齐（since 6.0.0）。`root` 是隐式 owner，`item` 覆盖 `StepsItem` 容器，七个 item 子 Part 覆盖 item 模板内
+对齐（since 6.2.0）。`root` 是隐式 owner，`item` 覆盖 `StepsItem` 容器，七个 item 子 Part 覆盖 item 模板内
 的包裹层、图标、标题、副标题、内容区、详情和连接线。完整契约见 [Steps Semantic Part 契约](semantic-part.md)。
 
 ## 包与命名空间
@@ -126,15 +126,15 @@ LLMS 语义区域：
 
 | Part | Owner | AtomUI 节点 | 职责 | 稳定性 |
 | --- | --- | --- | --- | --- |
-| `root` | `Steps` | 控件自身 | 步骤条根语义区域，承载流程状态、布局入口和主题视觉。 | stable since 6.0 |
-| `item` | `Steps` | `StepsItem` | 单项状态、内容和交互语义。 | stable since 6.0 |
-| `itemWrapper` | `Steps` | `ItemWrapper`（`StepsPanelItemFrame`） | item 包裹层，承载单项整体视觉。 | stable since 6.0 |
-| `itemIcon` | `Steps` | `PART_Indicator`（`StepsItemIndicator`） | 数字、状态图标、Dot、自定义 Icon、Progress 和 Wave 目标。 | stable since 6.0 |
-| `itemTitle` | `Steps` | `HeaderPresenter` | 标题。 | stable since 6.0 |
-| `itemSubtitle` | `Steps` | `SubHeaderPresenter` | 副标题。 | stable since 6.0 |
-| `itemSection` | `Steps` | `Section`（`StepsItemSectionPanel`） | item 内容区，承载标题行与详情内容的分组布局容器。 | stable since 6.0 |
-| `itemContent` | `Steps` | `ContentPresenter` | 步骤详情。 | stable since 6.0 |
-| `itemRail` | `Steps` | `Connector` | 当前 item 与下一个 item 的连接线。 | stable since 6.0 |
+| `root` | `Steps` | 控件自身 | 步骤条根语义区域，承载流程状态、布局入口和主题视觉。 | stable since 6.2.0 |
+| `item` | `Steps` | `StepsItem` | 单项状态、内容和交互语义。 | stable since 6.2.0 |
+| `itemWrapper` | `Steps` | `ItemWrapper`（`StepsPanelItemFrame`） | item 包裹层，承载单项整体视觉。 | stable since 6.2.0 |
+| `itemIcon` | `Steps` | `PART_Indicator`（`StepsItemIndicator`） | 数字、状态图标、Dot、自定义 Icon、Progress 和 Wave 目标。 | stable since 6.2.0 |
+| `itemTitle` | `Steps` | `HeaderPresenter` | 标题。 | stable since 6.2.0 |
+| `itemSubtitle` | `Steps` | `SubHeaderPresenter` | 副标题。 | stable since 6.2.0 |
+| `itemSection` | `Steps` | `Section`（`StepsItemSectionPanel`） | item 内容区，承载标题行与详情内容的分组布局容器。 | stable since 6.2.0 |
+| `itemContent` | `Steps` | `ContentPresenter` | 步骤详情。 | stable since 6.2.0 |
+| `itemRail` | `Steps` | `Connector` | 当前 item 与下一个 item 的连接线。 | stable since 6.2.0 |
 
 Part 的 Selector、ContractType、数量语义与定制边界以 [Steps Semantic Part 契约](semantic-part.md) 为唯一完整来源。
 

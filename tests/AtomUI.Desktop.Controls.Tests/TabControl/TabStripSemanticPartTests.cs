@@ -224,7 +224,7 @@ public class TabStripSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
         part.StyleType.ShouldBeNull();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertPart(
@@ -244,7 +244,7 @@ public class TabStripSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBe(runtimeCreated);
         part.StyleType.ShouldBe(styleType);
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertItemSubPartMarkers(Control owner)

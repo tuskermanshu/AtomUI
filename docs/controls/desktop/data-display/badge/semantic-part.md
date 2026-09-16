@@ -29,7 +29,7 @@ Badge 的整体设计见 [Badge 桌面版架构设计](overview.md)，真实 Ado
 | 职责 | CountBadge root 是数量、可见性、颜色、尺寸、定位和目标组合的状态 owner。 |
 | 相关 API | 全部 CountBadge public API |
 | 相关 Token | CountBadgeToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -49,7 +49,7 @@ Badge 的整体设计见 [Badge 桌面版架构设计](overview.md)，真实 Ado
 | 职责 | CountBadge indicator 表示完整数量徽标视觉。 |
 | 相关 API | `Count`、`OverflowCount`、`IsZeroVisible`、`BadgeColor`、`Size`、`Offset` |
 | 相关 Token | CountBadgeToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `DotBadge`
 
@@ -71,7 +71,7 @@ Badge 的整体设计见 [Badge 桌面版架构设计](overview.md)，真实 Ado
 | 职责 | DotBadge root 是状态、文本、颜色、可见性、定位和目标组合的状态 owner。 |
 | 相关 API | 全部 DotBadge public API |
 | 相关 Token | DotBadgeToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -91,7 +91,7 @@ Badge 的整体设计见 [Badge 桌面版架构设计](overview.md)，真实 Ado
 | 职责 | DotBadge indicator 表示状态点视觉和统一动效边界，不包含独立模式的说明文本。 |
 | 相关 API | `Status`、`DotColor`、`Offset`、`BadgeIsVisible` |
 | 相关 Token | DotBadgeToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.3 `RibbonBadge`
 
@@ -113,7 +113,7 @@ Badge 的整体设计见 [Badge 桌面版架构设计](overview.md)，真实 Ado
 | 职责 | RibbonBadge root 是文本、颜色、位置、可见性和目标组合的状态 owner。 |
 | 相关 API | 全部 RibbonBadge public API |
 | 相关 Token | RibbonBadgeToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -133,7 +133,7 @@ Badge 的整体设计见 [Badge 桌面版架构设计](overview.md)，真实 Ado
 | 职责 | RibbonBadge indicator 表示完整 Ribbon 视觉、定位和绘制边界。 |
 | 相关 API | `RibbonColor`、`Placement`、`Offset`、`BadgeIsVisible` |
 | 相关 Token | RibbonBadgeToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -153,7 +153,7 @@ Badge 的整体设计见 [Badge 桌面版架构设计](overview.md)，真实 Ado
 | 职责 | RibbonBadge content 表示 Ribbon 的文本展示与排版区域。 |
 | 相关 API | `Text` |
 | 相关 Token | RibbonBadgeToken、SharedToken typography |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 所有 root 都是隐式 Part，不添加 `.semantic-root`。所有非 root Part 都由既有 runtime Adorner 生命周期创建，因此为
 `Optional + RuntimeCreated`。CountBadge 与 DotBadge 在 target mode 下把 indicator 显示在 Avalonia `AdornerLayer`，所以

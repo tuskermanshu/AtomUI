@@ -12,17 +12,17 @@ namespace AtomUI.Desktop.Controls;
     "wrapper",
     SelectorClass = "semantic-wrapper",
     ContractType = typeof(DockPanel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "icon",
     SelectorClass = "semantic-icon",
     ContractType = typeof(IconPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "title",
     SelectorClass = "semantic-title",
     ContractType = typeof(Avalonia.Controls.SelectableTextBlock),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class MessageCard
 {
 }

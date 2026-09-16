@@ -6,7 +6,7 @@
 ## 2026-08-22
 
 - Semantic Part
-  - 为 `Steps` 公开 `root`、`item`、`itemWrapper`、`itemIcon`、`itemTitle`、`itemSubtitle`、`itemSection`、`itemContent` 和 `itemRail` 九个 Semantic Part，对齐 Ant Design 6 的 `StepsSemanticType`（since 6.0.0）；新增 `Steps.SemanticParts.cs` descriptor，生成 `StepsItemStyle`、`StepsItemWrapperStyle`、`StepsItemIconStyle`、`StepsItemTitleStyle`、`StepsItemSubtitleStyle`、`StepsItemSectionStyle`、`StepsItemContentStyle` 与 `StepsItemRailStyle`（`AtomUI.Theme.Styling`）。
+  - 为 `Steps` 公开 `root`、`item`、`itemWrapper`、`itemIcon`、`itemTitle`、`itemSubtitle`、`itemSection`、`itemContent` 和 `itemRail` 九个 Semantic Part，对齐 Ant Design 6 的 `StepsSemanticType`（since 6.2.0）；新增 `Steps.SemanticParts.cs` descriptor，生成 `StepsItemStyle`、`StepsItemWrapperStyle`、`StepsItemIconStyle`、`StepsItemTitleStyle`、`StepsItemSubtitleStyle`、`StepsItemSectionStyle`、`StepsItemContentStyle` 与 `StepsItemRailStyle`（`AtomUI.Theme.Styling`）。
   - `item` 为运行时标记（`RuntimeCreated`），由 `Steps` 在容器准备时为每个 `StepsItem` 写入 `semantic-item` marker；七个 item 子 Part 为 `StepsItemTheme.axaml` 内的静态标记，路由经 `> .semantic-item /template/ .semantic-item-x` 跨越 ItemsControl 容器边界进入 item 模板。
   - `itemSection` 的 `ContractType` 为 `Panel`（正文分组容器 `StepsItemSectionPanel` 的 public 基类），对应 antd `styles.itemSection` 的内容区布局与对齐定制面。
   - `itemRail` 的 `ContractType` 修正为 `DashedBorder`（Connector 节点 `PixelAlignedBorder` 的 public 基类）；原 `Border` 与节点类型不兼容，owner-scoped 解析永远拒绝 Connector，导致 Gallery 预览中 itemRail 高亮缺失。

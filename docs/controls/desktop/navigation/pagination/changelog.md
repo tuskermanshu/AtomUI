@@ -6,7 +6,7 @@
 
 - Semantic Part
   - 为 `Pagination` 与 `SimplePagination` 公开 `root` + `item` Semantic Part，对齐 Ant Design 6 的
-    `PaginationSemanticType`（since 6.0.0）；新增 `Pagination.SemanticParts.cs` 与
+    `PaginationSemanticType`（since 6.2.0）；新增 `Pagination.SemanticParts.cs` 与
     `SimplePagination.SemanticParts.cs` descriptor，生成 `PaginationItemStyle` 与
     `SimplePaginationItemStyle`（`AtomUI.Theme.Styling`）。
   - `Pagination.item` 为运行时标记（`RuntimeCreated`），路由经 `semantic-scope-nav` 作用域；Ellipsis 单元格

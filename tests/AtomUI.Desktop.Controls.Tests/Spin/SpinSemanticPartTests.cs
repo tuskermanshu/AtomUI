@@ -324,7 +324,7 @@ public class SpinSemanticPartTests
         root.ContractType.ShouldBe(ownerType);
         root.Cardinality.ShouldBe(SemanticPartCardinality.Single);
         root.Customization.ShouldBe(SemanticPartCustomization.Root);
-        root.Since.ShouldBe("6.0");
+        root.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertPart(
@@ -341,7 +341,7 @@ public class SpinSemanticPartTests
         part.Cardinality.ShouldBe(cardinality);
         part.Customization.ShouldBe(SemanticPartCustomization.Selector);
         part.StyleType.ShouldNotBeNull();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static T FindSemanticControl<T>(Control owner, string semanticClass)

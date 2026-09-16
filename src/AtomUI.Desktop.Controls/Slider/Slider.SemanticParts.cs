@@ -9,7 +9,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-rail",
     ContractType = typeof(Border),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "tracks",
@@ -17,7 +17,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-tracks",
     ContractType = typeof(Border),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "track",
@@ -25,7 +25,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-track",
     ContractType = typeof(Border),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "handle",
@@ -33,7 +33,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-handle",
     ContractType = typeof(SliderThumb),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class Slider
 {

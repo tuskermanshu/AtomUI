@@ -16,7 +16,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("section",
     SelectorClass = "semantic-section",
     SelectorRoute = ">> .semantic-section",
@@ -24,7 +24,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("header",
     SelectorClass = "semantic-header",
     SelectorRoute = ">> .semantic-header",
@@ -32,7 +32,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Avalonia.Controls.Grid),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("title",
     SelectorClass = "semantic-title",
     SelectorRoute = ">> .semantic-title",
@@ -40,7 +40,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(TextBlock),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("extra",
     SelectorClass = "semantic-extra",
     SelectorRoute = ">> .semantic-extra",
@@ -48,7 +48,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("body",
     SelectorClass = "semantic-body",
     SelectorRoute = ">> .semantic-body",
@@ -56,7 +56,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("footer",
     SelectorClass = "semantic-footer",
     SelectorRoute = ">> .semantic-footer",
@@ -64,7 +64,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart("close",
     SelectorClass = "semantic-close",
     SelectorRoute = ">> .semantic-close",
@@ -72,7 +72,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(IconButton),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class Drawer
 {
 }

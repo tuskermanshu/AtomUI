@@ -27,7 +27,7 @@
 | 职责 | 承载数值、尺寸、variant、验证状态和 owner-scoped Semantic Style 入口。 |
 | 相关 API | `Value`、`FormatString`、`SizeType`、`StyleVariant`、`Status`、`IsEnabled`、`IsReadOnly`、`IsAllowClear`、`Increment`、`Maximum`、`Minimum` |
 | 相关 Token | SharedToken、`NumericUpDownToken`、`ButtonSpinnerToken` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 NumericUpDown 整体 `BorderBrush`、`Opacity`、对齐和
 尺寸约束；`BorderBrush` 会以 LocalValue 中继到输入 frame 生效（对齐 LineEdit 与上游 `styles.root.borderColor`
@@ -52,7 +52,7 @@ variant、effective status 与 CompactSpace 的状态归一仍由共享 frame �
 | 职责 | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 |
 | 相关 API | `InnerLeftContent`、`InnerLeftContentTemplate` |
 | 相关 Token | `SpacingXXS`、输入尺寸 padding |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `prefix` 是 NumericUpDown 模板中的稳定 presenter，通过 `ButtonSpinner.InnerLeftContent` 传递并由共享 frame 结构的
 content 前缀槽呈现，两个模板变体的呈现槽一致。`InnerLeftContent=null` 且 template 也为 null 时 presenter 仍属于
@@ -77,7 +77,7 @@ content 前缀槽呈现，两个模板变体的呈现槽一致。`InnerLeftConte
 | 职责 | 承载数值文本的编辑表面，包含字体、文本对齐、光标与选择呈现。 |
 | 相关 API | `Text`、`PlaceholderText`、`IsReadOnly`、`IsStringMode`、`FormatString`、`IsKeyboardEnabled` |
 | 相关 Token | `FontSize`、文本与 caret 资源 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `input` 的最低 public `ContractType` 是 AtomUI `TextBox`，而不是 internal `EmbeddedTextBox` 实现细节。与 LineEdit 的
 `input`（TextPresenter）不同，NumericUpDown 的文本编辑表面由内嵌 `TextBox` 承担，marker 位于 owner 模板内的
@@ -103,7 +103,7 @@ content 前缀槽呈现，两个模板变体的呈现槽一致。`InnerLeftConte
 | 职责 | 组织 clear 与 `InnerRightContent` 的横向布局。 |
 | 相关 API | `InnerRightContent`、`InnerRightContentTemplate`、`IsAllowClear` |
 | 相关 Token | `UniformlyPaddingXXS`、输入尺寸 padding |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `suffix` 是稳定的布局区域，不等于用户 `InnerRightContent` 本身。适合定制 `Spacing`、`Opacity`、`Margin` 和对齐；
 clear 与用户右侧内容仍各有边界，用户内容子树不由 `suffix` 契约继续展开。
@@ -126,7 +126,7 @@ clear 与用户右侧内容仍各有边界，用户内容子树不由 `suffix` �
 | 职责 | 提供清空当前数值的操作入口。 |
 | 相关 API | `IsAllowClear`、`ClearIcon`、`IsReadOnly`、`Text` |
 | 相关 Token | clear 按钮主题与 SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `clear` 节点始终存在于两个模板变体的输入段内（与 `input` 同级，紧贴输入文本右缘），`IsEffectiveShowClearButton` 只切换可见性。它适合定制 `Opacity`、`Margin`、`Cursor` 和
 Button 级交互属性；清除命令仍进入 `NotifyClearButtonClicked()` 的统一行为。

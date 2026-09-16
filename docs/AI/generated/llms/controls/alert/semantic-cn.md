@@ -8,13 +8,13 @@ Alert 只有一个 public descriptor owner：`Alert`。
 
 | Part | Selector | Style Type | ContractType | Cardinality | AtomUI 节点 | 稳定性 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `root` | Alert 本身 | 不适用 | `Alert` | `Single` | owner | stable since 6.0 |
-| `icon` | `.semantic-icon` | `AlertIconStyle` | `Icon` | `Multiple` | 四个 `AlertType` 图标 | stable since 6.0 |
-| `section` | `.semantic-section` | `AlertSectionStyle` | `StackPanel` | `Single` | 消息与描述布局 | stable since 6.0 |
-| `title` | `.semantic-title` | `AlertTitleStyle` | `Control` | `Multiple` | `MessageLabel` 与 `MarqueeLabel` | stable since 6.0 |
-| `description` | `.semantic-description` | `AlertDescriptionStyle` | `Label` | `Single` | `DescriptionLabel` | stable since 6.0 |
-| `actions` | `.semantic-actions` | `AlertActionsStyle` | `ContentPresenter` | `Single` | `ExtraActionPresenter` | stable since 6.0 |
-| `close` | `.semantic-close` | `AlertCloseStyle` | `IconButton` | `Single` | `PART_CloseBtn` | stable since 6.0 |
+| `root` | Alert 本身 | 不适用 | `Alert` | `Single` | owner | stable since 6.2.0 |
+| `icon` | `.semantic-icon` | `AlertIconStyle` | `Icon` | `Multiple` | 四个 `AlertType` 图标 | stable since 6.2.0 |
+| `section` | `.semantic-section` | `AlertSectionStyle` | `StackPanel` | `Single` | 消息与描述布局 | stable since 6.2.0 |
+| `title` | `.semantic-title` | `AlertTitleStyle` | `Control` | `Multiple` | `MessageLabel` 与 `MarqueeLabel` | stable since 6.2.0 |
+| `description` | `.semantic-description` | `AlertDescriptionStyle` | `Label` | `Single` | `DescriptionLabel` | stable since 6.2.0 |
+| `actions` | `.semantic-actions` | `AlertActionsStyle` | `ContentPresenter` | `Single` | `ExtraActionPresenter` | stable since 6.2.0 |
+| `close` | `.semantic-close` | `AlertCloseStyle` | `IconButton` | `Single` | `PART_CloseBtn` | stable since 6.2.0 |
 
 六个 selector Part 的 `SelectorRoute` 均为 `/template/ .semantic-<name>`，`Customization` 为 `Selector`，
 `CrossVisualRoot=false`，`RuntimeCreated=false`。root 的 `Customization` 为 `Root`，不生成 `.semantic-root` 或 Style Type。

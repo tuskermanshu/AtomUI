@@ -54,7 +54,7 @@
 | 职责 | owner 是日期值、格式化、弹层状态、Form 值与验证状态的组织边界；owner 级 `BorderBrush` 经控件中继为输入框边框颜色（root 级定制入口，未设置时恢复共享状态机）。 |
 | 相关 API | 全部 DatePicker / RangeDatePicker public API |
 | 相关 Token | DatePickerToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `prefix`
 
@@ -74,7 +74,7 @@
 | 职责 | 输入区内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `input`
 
@@ -94,7 +94,7 @@
 | 职责 | 日期文本输入框，承载格式化显示值、占位符与只读/校验状态。 |
 | 相关 API | `Text`、`PlaceholderText`、`Format`、`IsReadOnly`、`PreferredInputWidth` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `secondaryInput`（仅 RangeDatePicker）
 
@@ -114,7 +114,7 @@
 | 职责 | 范围选择的结束端日期文本输入框，与 `input` 共用格式与宽度基线。 |
 | 相关 API | `SecondaryText`、`SecondaryPlaceholderText` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `suffix`
 
@@ -134,7 +134,7 @@
 | 职责 | 输入区后缀区域，承载清除按钮、Form 反馈与用户后缀内容。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `clear`
 
@@ -155,7 +155,7 @@
 | 职责 | 后缀区清除按钮，进入清除模式（hover / focus）时渲染。 |
 | 相关 API | `ShowClearButtonPredicate`（DatePicker）/ 范围清除行为（RangeDatePicker） |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.root`
 
@@ -175,7 +175,7 @@
 | 职责 | 弹层内容根视觉盒子，承载背景、边框、阴影与浮动箭头；`BorderThickness` 定制为非零时盒子进入 `:bordered` 状态，内置主题自动隐藏浮动箭头（内置视觉不支持箭头与边框的融合呈现）。 |
 | 相关 API | `IsArrowVisible`（经 `IsArrowVisibleEffective`）、`ArrowPosition`、`IsMotionEnabled` |
 | 相关 Token | PopupToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.container`
 
@@ -195,7 +195,7 @@
 | 职责 | 日历面板内容容器，组织主体区与底部按钮区的布局。 |
 | 相关 API | 无（面板内容布局容器） |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.header`
 
@@ -215,7 +215,7 @@
 | 职责 | 日历年月导航头部，承载年月标题与前进/后退/翻年按钮。 |
 | 相关 API | 无（导航按钮交互由 CalendarView 内部承担） |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.body`
 
@@ -235,7 +235,7 @@
 | 职责 | 日期面板表格容器，按月视图/年视图模式承载表格布局。 |
 | 相关 API | 无 |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.content`
 
@@ -255,7 +255,7 @@
 | 职责 | 单个月份的 7×7 日期表格本体（含周序号列变体），承载日期格子与周头标题。 |
 | 相关 API | 无（随 `popup.body` 呈现） |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.cell`
 
@@ -275,7 +275,7 @@
 | 职责 | 日期格子按钮，承载可选日期、选中/范围/今天/禁用等状态视觉（伪类见 overview）。 |
 | 相关 API | 无（随 `popup.content` 呈现） |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.footer`
 
@@ -295,7 +295,7 @@
 | 职责 | 面板底部操作区，承载此刻/今天/确认按钮。 |
 | 相关 API | `IsNeedConfirm`、`IsShowNow` |
 | 相关 Token | DatePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

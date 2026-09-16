@@ -58,7 +58,7 @@ public class BadgeSemanticPartTests
         indicator.Customization.ShouldBe(SemanticPartCustomization.Selector);
         indicator.CrossVisualRoot.ShouldBe(ownerType != typeof(Desktop.Controls.RibbonBadge));
         indicator.RuntimeCreated.ShouldBeTrue();
-        indicator.Since.ShouldBe("6.0");
+        indicator.Since.ShouldBe("6.2.0");
         indicator.SelectorRoute.ShouldBe(
             ownerType == typeof(Desktop.Controls.RibbonBadge)
                 ? RibbonIndicatorSelectorRoute
@@ -75,7 +75,7 @@ public class BadgeSemanticPartTests
             content.Customization.ShouldBe(SemanticPartCustomization.Selector);
             content.CrossVisualRoot.ShouldBeFalse();
             content.RuntimeCreated.ShouldBeTrue();
-            content.Since.ShouldBe("6.0");
+            content.Since.ShouldBe("6.2.0");
             content.SelectorRoute.ShouldBe(RibbonContentSelectorRoute);
         }
         else

@@ -44,7 +44,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 承载数据、选择状态、过滤、布局模式和 owner-scoped Semantic Style 入口。 |
 | 相关 API | `ItemsSource`、`TargetKeys`、`SelectedKeys`、`IsOneWay`、`IsStretchView`、`ListWidth`、`ListHeight`、`IsFilterEnabled`、`PageSize`、`Status`、`SizeType` |
 | 相关 Token | `ListTransferToken` / `TreeTransferToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 owner 级 `Foreground`、`Opacity` 与整体布局约束；
 源/目标面板与中间操作区的结构由各 Part 负责，不通过 root Setter 改写。
@@ -67,7 +67,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 源方向列表分区的外框，承载 header、过滤输入、列表宿主和 footer 的组织边界。 |
 | 相关 API | `SourceTitle`、`SourceTitleTemplate`、`SourceViewFooter`、`SourceViewFooterTemplate`、`ListWidth`、`ListHeight` |
 | 相关 Token | `ListTransferToken` / `TreeTransferToken` 的 `HeaderHeight`、`HeaderPadding`、SharedToken 边框圆角 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `source` 对应内部源面板装饰器实例。`BorderBrush`、`BorderThickness`、`CornerRadius` 经模板投影到分区外框
 `Frame`；`Background` 同样投影到 `Frame`（默认为 null，即分区主体保持透明，header 保留自身背景 token）。面板宽度
@@ -92,7 +92,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 目标方向列表分区的外框，承载 header、过滤输入、列表宿主和 footer 的组织边界。 |
 | 相关 API | `TargetTitle`、`TargetTitleTemplate`、`TargetViewFooter`、`TargetViewFooterTemplate`、`IsOneWay`、`ListWidth`、`ListHeight` |
 | 相关 Token | 同 `source` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `target` 与 `source` 结构、route 深度和可定制属性完全一致，仅方向不同；`IsOneWay=True` 时目标面板仍存在，只是
 条目选择与回移入口按 API 语义禁用或隐藏。方向差异化定制（如目标面板换背景）是 `source` / `target` 分区级 Part 的
@@ -116,7 +116,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 组织"移至目标 / 移回源"两个操作按钮的中间操作区。 |
 | 相关 API | `ToTargetTransferIcon`、`ToSourceTransferIcon`、`ToTargetButtonText`、`ToSourceButtonText`、`IsOneWay` |
 | 相关 Token | `SpacingXXS`（按钮间距）、`SpacingXS`（与面板间距） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `actions` 是操作区容器，适合定制 `Spacing`、`Margin`、`Opacity` 与对齐。`IsOneWay=True` 时"移回源"按钮仅切换
 可见性，容器与 marker 不变。容器内的两个按钮是 public `Button` 实例，属于嵌套 Button 家族契约（§5），不通过
@@ -140,7 +140,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 面板头部分区，承载全选指示、选择计数与标题的组织边界。 |
 | 相关 API | `IsShowSelectAllCheckbox`、`IsShowSelectDropdownMenu`、`SelectionsIcon`、`SourceTitle` / `TargetTitle` |
 | 相关 Token | `HeaderHeight`、`HeaderPadding`、`ColorSplit`、`ColorBgContainer` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `header` 的高度由 `HeaderHeight` token 经模板投影（`ControlHeightLG` 派生的固定基线），`Height` 类 Setter 按原生
 优先级参与测量，但需与分区外框和 owner 布局协调（见 implementation.md 尺寸基线）。header 内部的全选
@@ -167,7 +167,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 承载 `SourceTitle` / `TargetTitle` 及其模板的最终呈现。 |
 | 相关 API | `SourceTitle`、`SourceTitleTemplate`、`TargetTitle`、`TargetTitleTemplate` |
 | 相关 Token | `HeaderPadding`（右对齐留白） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `title` presenter 始终存在于静态模板结构，`Title=null` 时仍保留节点身份；适合定制 `Foreground`、`Opacity`、
 `Margin` 与对齐。`SourceTitleTemplate` / `TargetTitleTemplate` 创建的用户子树不属于 Transfer Semantic Part。
@@ -190,7 +190,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 分区主体区域，承载过滤输入与列表宿主的组织边界。 |
 | 相关 API | `IsFilterEnabled`、`FilterPlaceholderText`、`ListHeight` |
 | 相关 Token | `MarginXS`（过滤输入外距）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `body` 是 header 与 footer 之间的分区主体包裹节点，与上游 `body` 语义键对齐：过滤输入与视图宿主是它的直接子
 节点。`Background`、`Padding`、`Margin` 类 Setter 直接作用于主体区域，与 header 的背景 token 相互独立；过滤输入
@@ -215,7 +215,7 @@ owner 不穿透这些嵌套 owner 的模板（§5）。
 | 职责 | 承载源/目标视图控件（`TransferListView` / `TransferTreeView`）的宿主分区。 |
 | 相关 API | `ListHeight`、`SourceView` / `TargetView`、`PageSize`、`ItemTemplate` |
 | 相关 Token | `ListHeight`（宿主高度基线）、`BorderRadiusLG`（底部圆角） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `list` 是 Transfer owner 拥有的视图宿主，不是嵌套视图控件本身：宿主的 `Height` 由 `ListHeight` 模板投影，
 `CornerRadius` 由 footer 存在性驱动（有 footer 时底部圆角归零）。条目、分组、分页等视图内部区域的定制属于嵌套
@@ -240,7 +240,7 @@ owner 契约（§5）。`Height` 类 Setter 与 owner `ListHeight` API 按原生
 | 职责 | 面板底部分区，承载 `SourceViewFooter` / `TargetViewFooter` 及其模板的呈现边界。 |
 | 相关 API | `SourceViewFooter`、`SourceViewFooterTemplate`、`TargetViewFooter`、`TargetViewFooterTemplate` |
 | 相关 Token | `HeaderPadding`、`ColorSplit` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `footer` 节点始终属于静态模板结构，可见性由对应方向 footer 内容驱动，未设置时隐藏但保留 marker 与对象身份；
 设置 footer 内容时分区 body 的底部圆角归零，由 footer 闭合外框。footer presenter 内的用户内容子树不属于 Transfer
@@ -267,7 +267,7 @@ Part；`itemContent` 承载 `ItemTemplate` 内容，其创建的用户子树不�
 ### 1.11 方向限定部件（`source.*` / `target.*`）
 
 每个分区内部件与条目件都有方向限定变体，命名与上游语义键逐字对齐（`.` 为层级分隔符）。限定部件与对应未限定
-部件**共享终端 marker**，由路由中的方向锚点区分实例，因此不新增任何模板 marker；`Since` 均为 `6.0`。
+部件**共享终端 marker**，由路由中的方向锚点区分实例，因此不新增任何模板 marker；`Since` 均为 `6.2.0`。
 
 **owner 级分区限定部件**（`ListTransfer` / `TreeTransfer`，`Single`，`RuntimeCreated=true`）：
 

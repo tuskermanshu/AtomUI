@@ -58,7 +58,7 @@ descriptor；它们是基类或 internal 协作类型，不能作为公共 descr
 | 职责 | 页签条根语义区域，承载选择、集合、关闭与排序状态入口。 |
 | 相关 API | `SelectedIndex`、`SelectedItem`、`ItemsSource`、`TabStripPlacement`、`SizeType`、`IsTabReorderEnabled`、`TabActivationTrigger`、`Closing`、`Closed`、`TabReordering`、`TabReordered` |
 | 相关 Token | 关联控件 Token（TabControl Token）+ SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是 `TabStrip` owner 本身，在控件实例的整个生命周期内始终存在，每个实例恰好一个。`TabStripTheme.axaml` 的
 根模板是 `Border#Frame > Panel#AlignWrapper`（header 区），root 视觉定制直接作用于 owner 自身的公共属性
@@ -82,7 +82,7 @@ descriptor；它们是基类或 internal 协作类型，不能作为公共 descr
 | 职责 | 承载单个页签项的尺寸、状态与点击/关闭语义。 |
 | 相关 API | `Content`、`ContentTemplate`、`Icon`、`CloseIcon`、`IsClosable`、`IsAutoHideCloseButton`、`IsSelected`、`SizeType` |
 | 相关 Token | `HorizontalItemPadding(SM/LG)`、`VerticalItemPadding`、`TitleFontSize(SM/LG)`、`ItemColor`、`ItemHoverColor`、`ItemSelectedColor` 等 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `item` 覆盖页签条内的全部页签项。marker 是运行时创建的语义标记：`TabStrip` 在
 `CreateContainerForItemOverride` 中把 `semantic-item` 应用到新建的 `TabStripItem` 容器，并在
@@ -123,7 +123,7 @@ descriptor；它们是基类或 internal 协作类型，不能作为公共 descr
 | 职责 | 承载新增页签的触发按钮视觉。 |
 | 相关 API | `IsShowAddTabButton`、`AddTabRequest` |
 | 相关 Token | `AddTabButtonMarginHorizontal`、`AddTabButtonMarginVertical`、`ItemColor`、`ItemHoverColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `add` 是内置模板中的静态标记：`CardTabStripTheme.axaml` 在 `PART_AddTabButton` 上声明
 `Classes.semantic-add="True"`。按钮节点始终存在于模板中，`IsShowAddTabButton` 只控制可见性，marker 不随该属性
@@ -152,7 +152,7 @@ descriptor；它们是基类或 internal 协作类型，不能作为公共 descr
 | 职责 | 页签项根语义区域，承载单项选择、关闭、图标槽与拖动状态。 |
 | 相关 API | `Content`、`ContentTemplate`、`Icon`、`CloseIcon`、`IsSelected`、`IsClosable`、`IsAutoHideCloseButton`、`HasIcon`、`IsIconSlotReserved`、`SizeType`、`TabStripPlacement` |
 | 相关 Token | 关联控件 Token（TabControl Token）+ SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是 `TabStripItem` owner 本身，每个 item 实例恰好一个。root 视觉定制作用于 owner 自身的
 `Background`、`Foreground`、`Padding`、`Margin`、`FontSize`、`BorderBrush`、`BorderThickness`、`CornerRadius`
@@ -175,7 +175,7 @@ descriptor；它们是基类或 internal 协作类型，不能作为公共 descr
 | 职责 | 承载页签图标区域的尺寸、间距与视觉样式。 |
 | 相关 API | `Icon`、`HasIcon`、`IsIconSlotReserved`、`SizeType`、`TabStripPlacement` |
 | 相关 Token | `ItemIconMargin` + SharedToken（`IconSize`、`IconSizeSM`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `icon` 是内置模板中的静态标记，声明在 `BaseTabStripItemTheme.axaml` 与 `CardTabStripItemTheme.axaml` 的
 `ItemIconPresenter` 上。节点始终存在于模板中；`HasIcon` / `IsIconSlotReserved` 只控制可见性，marker 不随可见性
@@ -198,7 +198,7 @@ descriptor；它们是基类或 internal 协作类型，不能作为公共 descr
 | 职责 | 承载页签标题文本或标题模板的展示区域。 |
 | 相关 API | `Content`、`ContentTemplate`、`SizeType` |
 | 相关 Token | `TitleFontSize(SM/LG)`、`ItemColor`、`ItemHoverColor`、`ItemSelectedColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `label` 是内置模板中的静态标记，声明在两套 item 模板的标题 `ContentPresenter` 上。它只覆盖页签标题区域，不覆盖
 图标与关闭按钮。
@@ -220,7 +220,7 @@ descriptor；它们是基类或 internal 协作类型，不能作为公共 descr
 | 职责 | 承载页签关闭按钮的图标、尺寸与交互视觉。 |
 | 相关 API | `CloseIcon`、`IsClosable`、`IsAutoHideCloseButton` |
 | 相关 Token | `CloseIconMargin` + SharedToken（`IconSizeSM`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `close` 是内置模板中的静态标记，声明在两套 item 模板的 `PART_ItemCloseButton` 上。按钮节点始终存在于模板中，
 `IsClosable` / `IsAutoHideCloseButton` 只控制可见性与透明度（`CloseButtonOpacity`），marker 不随状态增删。

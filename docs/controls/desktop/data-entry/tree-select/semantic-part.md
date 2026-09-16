@@ -45,7 +45,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | TreeSelect root 是树数据源、选择/勾选、过滤、弹层与状态的组织边界。 |
 | 相关 API | 全部 TreeSelect public API |
 | 相关 Token | TreeSelectToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `prefix`
 
@@ -65,7 +65,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选择框内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -85,7 +85,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选择内容面板，组织占位符、过滤输入、选中结果与多选标签的布局。 |
 | 相关 API | `PlaceholderText`、`IsFilterEnabled`、`IsMultiple` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `placeholder`
 
@@ -105,7 +105,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 未选择任何项时显示的占位符文本。 |
 | 相关 API | `PlaceholderText`、`PlaceholderForeground` |
 | 相关 Token | SharedToken（ColorTextPlaceholder） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `input`
 
@@ -125,7 +125,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 过滤模式的搜索输入框（单选态为模板节点，多选态为标签区运行时搜索框）。 |
 | 相关 API | `IsFilterEnabled`、`FilterValue` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `suffix`
 
@@ -145,7 +145,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选择框后缀区域，承载最大数量指示、用户后缀内容与选择 handle。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`SuffixIcon`、`MaxCount` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `clear`
 
@@ -166,7 +166,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 后缀 handle 内的清除按钮，启用 `IsAllowClear` 时渲染。 |
 | 相关 API | `IsAllowClear` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -187,7 +187,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 多选模式下选择器中的选中标签。 |
 | 相关 API | `SelectedItems`、`IsMultiple`、`MaxTagCount` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -208,7 +208,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选中标签内的文本内容。 |
 | 相关 API | 无（随 `item` 呈现） |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemRemove`
 
@@ -229,7 +229,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 选中标签内的移除按钮。 |
 | 相关 API | 无（随 `item` 呈现） |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -249,7 +249,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 候选弹层的根边框节点，承载弹层内容根视觉。 |
 | 相关 API | `PopupContentPadding`、`MaxPopupHeight`、`EffectivePopupWidth` |
 | 相关 Token | PopupToken、TreeSelectToken（MinPopupWidth） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.list`
 
@@ -269,7 +269,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 弹层内的候选树容器，承载树形候选数据、展开与勾选状态。 |
 | 相关 API | `ItemsSource`、`TreeViewToggleType`、`IsDefaultExpandAll` |
 | 相关 Token | TreeSelectToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.listItem`
 
@@ -289,7 +289,7 @@ ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner �
 | 职责 | 候选树中的单个树节点条目，运行时创建。 |
 | 相关 API | 无（随 `popup.list` 呈现） |
 | 相关 Token | TreeSelectToken、TreeViewToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## 2. 职责与存在条件
 

@@ -197,18 +197,18 @@ LLMS 语义区域：
 `close`（对齐上游 `TagSemanticType`，`classNames` / `styles` 均为 `{ root?, icon?, content?, close? }`）；
 `CheckableTagGroup` 公开 `root` / `item`（对齐上游 `CheckableTagGroupSemanticType`，`classNames` / `styles`
 均为 `{ root?, item? }`）。上游 `CheckableTag` 没有独立 Semantic DOM Props，AtomUI 同样不为其声明 descriptor，
-其职责由 `item` Part 表达。六个 Part 随 Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.0`。
+其职责由 `item` Part 表达。六个 Part 随 Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.2.0`。
 完整契约见 [Tag Semantic Part 契约](semantic-part.md)，marker 归属与生命周期见
 [Tag 桌面版实现原理](implementation.md) 的 Semantic Part 处置一节。
 
 | Part | Owner | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `root` | `Tag` | `Tag`（表面投影到 `Frame`） | 标签根语义区域，承载颜色类别、Variant、内容与关闭入口；对应上游 `.ant-tag`。 | `TagColor`、`Variant`、`Text`、`Icon`、`CloseIcon`、`IsClosable`、`Closed` | `DefaultBg`、`DefaultColor`、`TagFontSize`、`TagPadding`、`SolidTextColor`、SharedToken | stable since 6.0 |
-| `icon` | `Tag` | `IconPresenter#IconPresenter` | 前置图标区域：图标尺寸、画刷与可见性；对应上游 Tag 的 `icon` 键。 | `Icon` | `TagIconSize` | stable since 6.0 |
-| `content` | `Tag` | `TextBlock#TagTextLabel` | 文本区域：文本呈现、行高与内联间距；对应上游 Tag 的 `content` 键。 | `Text` | `TagLineHeight`、`TagTextPaddingInline` | stable since 6.0 |
-| `close` | `Tag` | `IconButton#PART_CloseButton` | 关闭入口：关闭图标尺寸、画刷与可见性，承载 `Closed`；对应上游 `.ant-tag-close-icon`。 | `CloseIcon`、`IsClosable`、`Closed` | `TagCloseIconSize`、SharedToken（`IconSizeXS`） | stable since 6.0 |
-| `root` | `CheckableTagGroup` | `CheckableTagGroup` | 选择组根语义区域，承载 Options、单选/多选模式、公开选择值与 Form 语义；对应上游 `.ant-tag-checkable-group`。 | `Options`、`ItemTemplate`、`IsMultiple`、`CheckedItem(s)`、`DefaultCheckedItem(s)`、`ItemSpacing`、`LineSpacing`、`Orientation`、`CheckedChanged` | SharedToken（`SpacingXS`、`EnableMotion`） | stable since 6.0 |
-| `item` | `CheckableTagGroup` | 每个 `CheckableTag` 容器 | Group 内单个可交互选项，承载选择视觉与 checked/hover/pressed/disabled 状态；对应上游 `.ant-tag-checkable-group-item`。 | `CheckableTag.Content`、`CheckableTag.Icon`、`CheckableTag.IsChecked`、`IsMultiple` | `TagFontSize`、`TagLineHeight`、`TagPadding`、`TagIconSize`、SharedToken（`ColorPrimary*`、`ColorTextLightSolid`） | stable since 6.0 |
+| `root` | `Tag` | `Tag`（表面投影到 `Frame`） | 标签根语义区域，承载颜色类别、Variant、内容与关闭入口；对应上游 `.ant-tag`。 | `TagColor`、`Variant`、`Text`、`Icon`、`CloseIcon`、`IsClosable`、`Closed` | `DefaultBg`、`DefaultColor`、`TagFontSize`、`TagPadding`、`SolidTextColor`、SharedToken | stable since 6.2.0 |
+| `icon` | `Tag` | `IconPresenter#IconPresenter` | 前置图标区域：图标尺寸、画刷与可见性；对应上游 Tag 的 `icon` 键。 | `Icon` | `TagIconSize` | stable since 6.2.0 |
+| `content` | `Tag` | `TextBlock#TagTextLabel` | 文本区域：文本呈现、行高与内联间距；对应上游 Tag 的 `content` 键。 | `Text` | `TagLineHeight`、`TagTextPaddingInline` | stable since 6.2.0 |
+| `close` | `Tag` | `IconButton#PART_CloseButton` | 关闭入口：关闭图标尺寸、画刷与可见性，承载 `Closed`；对应上游 `.ant-tag-close-icon`。 | `CloseIcon`、`IsClosable`、`Closed` | `TagCloseIconSize`、SharedToken（`IconSizeXS`） | stable since 6.2.0 |
+| `root` | `CheckableTagGroup` | `CheckableTagGroup` | 选择组根语义区域，承载 Options、单选/多选模式、公开选择值与 Form 语义；对应上游 `.ant-tag-checkable-group`。 | `Options`、`ItemTemplate`、`IsMultiple`、`CheckedItem(s)`、`DefaultCheckedItem(s)`、`ItemSpacing`、`LineSpacing`、`Orientation`、`CheckedChanged` | SharedToken（`SpacingXS`、`EnableMotion`） | stable since 6.2.0 |
+| `item` | `CheckableTagGroup` | 每个 `CheckableTag` 容器 | Group 内单个可交互选项，承载选择视觉与 checked/hover/pressed/disabled 状态；对应上游 `.ant-tag-checkable-group-item`。 | `CheckableTag.Content`、`CheckableTag.Icon`、`CheckableTag.IsChecked`、`IsMultiple` | `TagFontSize`、`TagLineHeight`、`TagPadding`、`TagIconSize`、SharedToken（`ColorPrimary*`、`ColorTextLightSolid`） | stable since 6.2.0 |
 
 LLMS 导出来源：
 

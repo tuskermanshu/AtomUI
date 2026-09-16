@@ -148,12 +148,12 @@ LLMS 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Result` | 承载整体结果布局、状态和 Semantic Style 作用域。 | 全部 Result public API | ResultToken、SharedToken | stable since 6.0 |
-| `icon` | 普通图标 presenter / 异常状态 SVG | 表达普通反馈图标和 403/404/500 图像的替代呈现。 | `Status`、`Icon` | 图标尺寸、状态色、异常图尺寸 Token | stable since 6.0 |
-| `title` | 标题 `ContentPresenter` | 展示主结果标题。 | `Header`、`HeaderTemplate`、`HeaderFontSize` | 标题字号、行高、间距和文本色 Token | stable since 6.0 |
-| `subTitle` | 副标题 `ContentPresenter` | 展示可选结果说明。 | `SubHeader`、`SubHeaderTemplate`、`SubHeaderFontSize` | 副标题字号、行高和文本色 Token | stable since 6.0 |
-| `extra` | 操作区 `ContentPresenter` | 承载可选操作或辅助内容。 | `Extra`、`ExtraTemplate` | `ExtraMargin` | stable since 6.0 |
-| `body` | 正文 `ContentPresenter` | 承载可选详细内容区域。 | `Content`、`ContentTemplate` | `ContentMargin`、`ContentPadding`、填充色 Token | stable since 6.0 |
+| `root` | `Result` | 承载整体结果布局、状态和 Semantic Style 作用域。 | 全部 Result public API | ResultToken、SharedToken | stable since 6.2.0 |
+| `icon` | 普通图标 presenter / 异常状态 SVG | 表达普通反馈图标和 403/404/500 图像的替代呈现。 | `Status`、`Icon` | 图标尺寸、状态色、异常图尺寸 Token | stable since 6.2.0 |
+| `title` | 标题 `ContentPresenter` | 展示主结果标题。 | `Header`、`HeaderTemplate`、`HeaderFontSize` | 标题字号、行高、间距和文本色 Token | stable since 6.2.0 |
+| `subTitle` | 副标题 `ContentPresenter` | 展示可选结果说明。 | `SubHeader`、`SubHeaderTemplate`、`SubHeaderFontSize` | 副标题字号、行高和文本色 Token | stable since 6.2.0 |
+| `extra` | 操作区 `ContentPresenter` | 承载可选操作或辅助内容。 | `Extra`、`ExtraTemplate` | `ExtraMargin` | stable since 6.2.0 |
+| `body` | 正文 `ContentPresenter` | 承载可选详细内容区域。 | `Content`、`ContentTemplate` | `ContentMargin`、`ContentPadding`、填充色 Token | stable since 6.2.0 |
 
 LLMS 导出来源：
 

@@ -189,12 +189,12 @@ Semantic Parts 摘要（完整契约见 [Message Semantic Part 契约](semantic-
 
 | Owner | Part | Style Type | ContractType | 节点 | 职责 | 稳定性 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `MessageCard` | `root` | 不适用（root） | `MessageCard` | owner 本身（表面投影 `Border#PART_Frame`） | 单条消息项根：内容、状态、关闭与进出场动效；对应上游 notice root。 | stable since 6.0 |
-| `MessageCard` | `wrapper` | `MessageCardWrapperStyle` | `DockPanel` | `DockPanel#PART_HeaderContainer` | 图标与标题的包裹布局；对应上游 notice wrapper。 | stable since 6.0 |
-| `MessageCard` | `icon` | `MessageCardIconStyle` | `IconPresenter` | `IconPresenter#PART_IconContent` | 状态图标尺寸与画刷；对应上游 notice icon。 | stable since 6.0 |
-| `MessageCard` | `title` | `MessageCardTitleStyle` | `Avalonia.Controls.SelectableTextBlock` | `SelectableTextBlock#PART_Message` | 消息文本颜色、字号、行高；对应上游 notice title。 | stable since 6.0 |
-| `WindowMessageManager` | `root` | 不适用（root） | `WindowMessageManager` | owner 本身（宿主层覆盖层；无宿主时为内联实例） | 消息列表根：定位、层级、队列、超时与宿主生命周期；对应上游 list。 | stable since 6.0 |
-| `WindowMessageManager` | `listContent` | `WindowMessageManagerListContentStyle` | `ItemsControl` | `FeedbackStackPresenter#PART_Items` | 列表内容区域；通过 ItemsControl 公共属性定制尺寸与对齐。 | stable since 6.0 |
+| `MessageCard` | `root` | 不适用（root） | `MessageCard` | owner 本身（表面投影 `Border#PART_Frame`） | 单条消息项根：内容、状态、关闭与进出场动效；对应上游 notice root。 | stable since 6.2.0 |
+| `MessageCard` | `wrapper` | `MessageCardWrapperStyle` | `DockPanel` | `DockPanel#PART_HeaderContainer` | 图标与标题的包裹布局；对应上游 notice wrapper。 | stable since 6.2.0 |
+| `MessageCard` | `icon` | `MessageCardIconStyle` | `IconPresenter` | `IconPresenter#PART_IconContent` | 状态图标尺寸与画刷；对应上游 notice icon。 | stable since 6.2.0 |
+| `MessageCard` | `title` | `MessageCardTitleStyle` | `Avalonia.Controls.SelectableTextBlock` | `SelectableTextBlock#PART_Message` | 消息文本颜色、字号、行高；对应上游 notice title。 | stable since 6.2.0 |
+| `WindowMessageManager` | `root` | 不适用（root） | `WindowMessageManager` | owner 本身（宿主层覆盖层；无宿主时为内联实例） | 消息列表根：定位、层级、队列、超时与宿主生命周期；对应上游 list。 | stable since 6.2.0 |
+| `WindowMessageManager` | `listContent` | `WindowMessageManagerListContentStyle` | `ItemsControl` | `FeedbackStackPresenter#PART_Items` | 列表内容区域；通过 ItemsControl 公共属性定制尺寸与对齐。 | stable since 6.2.0 |
 
 定制与兼容性摘要：
 

@@ -57,7 +57,7 @@
   - Publish two owner descriptors aligned with the upstream Notification semantic keys: `NotificationCard` exposes
     `wrapper` / `icon` / `section` / `title` / `description` / `actions` / `close` / `progress` (plus implicit `root`),
     and `WindowNotificationManager` exposes `listContent` (plus implicit `root`, which maps the upstream list).
-    `Since` is `6.0` for both.
+    `Since` is `6.2.0` for both.
   - Restructure `NotificationCardTheme.axaml` to the upstream notice DOM
     (`root > [wrapper > (icon, section > (title, description)), actions, close, progress]`): add a real `section`
     (`StackPanel`) that owns the title/description gap, add an `actions` region, and express `close` / `progress` as

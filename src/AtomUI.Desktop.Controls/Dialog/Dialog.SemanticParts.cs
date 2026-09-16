@@ -20,7 +20,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Border),
-    Since = "6.2")]
+    Since = "6.2.0")]
 [SemanticPart("wrapper",
     SelectorClass = "semantic-wrapper",
     SelectorRoute = ">> .semantic-scope-presenter > .semantic-wrapper",
@@ -29,7 +29,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Avalonia.Controls.Control),
-    Since = "6.2")]
+    Since = "6.2.0")]
 [SemanticPart("container",
     SelectorClass = "semantic-container",
     SelectorRoute = ">> .semantic-scope-frame-host > .semantic-container",
@@ -37,7 +37,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Border),
-    Since = "6.2")]
+    Since = "6.2.0")]
 [SemanticPart("header",
     SelectorClass = "semantic-header",
     SelectorRoute = ">> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-header",
@@ -46,7 +46,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Border),
-    Since = "6.2")]
+    Since = "6.2.0")]
 [SemanticPart("title",
     SelectorClass = "semantic-title",
     SelectorRoute = ">> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-title",
@@ -55,7 +55,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Avalonia.Controls.TextBlock),
-    Since = "6.2")]
+    Since = "6.2.0")]
 [SemanticPart("body",
     SelectorClass = "semantic-body",
     SelectorRoute = ">> .semantic-scope-content-layer > .semantic-body",
@@ -63,7 +63,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Border),
-    Since = "6.2")]
+    Since = "6.2.0")]
 [SemanticPart("footer",
     SelectorClass = "semantic-footer",
     SelectorRoute = ">> .semantic-scope-content-layer > .semantic-footer",
@@ -71,7 +71,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(Border),
-    Since = "6.2")]
+    Since = "6.2.0")]
 [SemanticPart("close",
     SelectorClass = "semantic-close",
     SelectorRoute = ">> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-close",
@@ -80,7 +80,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Optional,
     ContractType = typeof(Avalonia.Controls.Button),
-    Since = "6.2")]
+    Since = "6.2.0")]
 public partial class Dialog
 {
 }

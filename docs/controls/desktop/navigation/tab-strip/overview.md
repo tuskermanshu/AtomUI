@@ -206,12 +206,12 @@ LLMS 语义区域：
 
 | Part | Owner | AtomUI 节点 | 职责 | 稳定性 |
 | --- | --- | --- | --- | --- |
-| `root` | `TabStrip` / `CardTabStrip` / `TabStripItem` | 控件自身 | 标签条控件根语义区域，承载 public API、状态归一和主题入口。 | stable since 6.0 |
-| `item` | `TabStrip` / `CardTabStrip` | `TabStripItem` 容器（运行时标记） | 承载单个页签的尺寸、状态与点击语义。 | stable since 6.0 |
-| `add` | `CardTabStrip` | `PART_AddTabButton` | 承载新建页签入口的按钮视觉与状态。 | stable since 6.0 |
-| `icon` | `TabStripItem` | `ItemIconPresenter` | 承载页签头部图标呈现。 | stable since 6.0 |
-| `label` | `TabStripItem` | `ContentPresenter` | 承载页签头部标题文本呈现。 | stable since 6.0 |
-| `close` | `TabStripItem` | `PART_ItemCloseButton` | 承载页签关闭按钮视觉与状态。 | stable since 6.0 |
+| `root` | `TabStrip` / `CardTabStrip` / `TabStripItem` | 控件自身 | 标签条控件根语义区域，承载 public API、状态归一和主题入口。 | stable since 6.2.0 |
+| `item` | `TabStrip` / `CardTabStrip` | `TabStripItem` 容器（运行时标记） | 承载单个页签的尺寸、状态与点击语义。 | stable since 6.2.0 |
+| `add` | `CardTabStrip` | `PART_AddTabButton` | 承载新建页签入口的按钮视觉与状态。 | stable since 6.2.0 |
+| `icon` | `TabStripItem` | `ItemIconPresenter` | 承载页签头部图标呈现。 | stable since 6.2.0 |
+| `label` | `TabStripItem` | `ContentPresenter` | 承载页签头部标题文本呈现。 | stable since 6.2.0 |
+| `close` | `TabStripItem` | `PART_ItemCloseButton` | 承载页签关闭按钮视觉与状态。 | stable since 6.2.0 |
 
 Part 的 Selector、ContractType、数量语义与定制边界以 [TabStrip Semantic Part 契约](semantic-part.md) 为唯一完整来源；内容页版本的 `TabControl` 家族语义区域见 [TabControl Semantic Part 契约](../tab-control/semantic-part.md)。
 

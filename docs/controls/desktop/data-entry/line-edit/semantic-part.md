@@ -31,7 +31,7 @@ descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scope
 | 职责 | 承载文本值、输入状态、尺寸、variant、验证状态和 owner-scoped Semantic Style 入口。 |
 | 相关 API | `Text`、`SizeType`、`StyleVariant`、`Status`、`IsEnabled`、`IsReadOnly`、`IsAllowClear`、`IsShowCount`、`Background`、`BorderBrush` |
 | 相关 Token | SharedToken、`LineEditToken` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 LineEdit 整体 `Background`、`BorderBrush`、
 `BorderThickness`、`Opacity`、对齐和尺寸约束；其中 `Background` / `BorderBrush` 由 `AbstractTextInput` 以 LocalValue
@@ -57,7 +57,7 @@ descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scope
 | 职责 | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 |
 | 相关 API | `InnerLeftContent`、`InnerLeftContentTemplate` |
 | 相关 Token | `SpacingXXS`、输入尺寸 padding |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `prefix` 是 LineEdit 模板中的稳定 presenter。internal `AddOnContentPresenter` 保留 template-only 场景的 child 创建与可见性
 语义，同时通过 public 基类 `ContentPresenter` 约束 Setter。`InnerLeftContent=null` 且 template 也为 null 时 presenter 仍属于
@@ -82,7 +82,7 @@ descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scope
 | 职责 | 绘制当前文本、光标、选择范围和密码 reveal 结果。 |
 | 相关 API | `Text`、`CaretIndex`、`SelectionStart`、`SelectionEnd`、`PasswordChar`、`RevealPassword` |
 | 相关 Token | `FontSize`、`LineHeight`、选择色与 caret 资源 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `input` 的最低 public `ContractType` 是 Avalonia `TextPresenter`，而不是 internal 实现细节。它适合定制 `Opacity`、
 `FontSize`、`FontWeight`、`FontStyle`、`TextAlignment` 和局部 Margin。文本 viewport、选择布局、caret 与密码显示仍属于文本输入
@@ -106,7 +106,7 @@ descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scope
 | 职责 | 组织 clear、reveal、Form feedback、内部右侧内容和 count 的横向布局。 |
 | 相关 API | `InnerRightContent`、`InnerRightContentTemplate`、`IsAllowClear`、`IsEnableRevealButton`、`IsShowCount` |
 | 相关 Token | `UniformlyPaddingXXS`、输入尺寸 padding |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `suffix` 是稳定的布局区域，不等于用户 `InnerRightContent` 本身。适合定制 `Spacing`、`Opacity`、`Margin`、对齐和布局方向；
 clear 与 count 仍拥有各自更窄的 Part。reveal、Form feedback 和用户右侧内容没有独立 Semantic Part，其内部结构也不由
@@ -130,7 +130,7 @@ clear 与 count 仍拥有各自更窄的 Part。reveal、Form feedback 和用户
 | 职责 | 提供清除当前文本的操作入口。 |
 | 相关 API | `IsAllowClear`、`ClearIcon`、`IsReadOnly`、`Text` |
 | 相关 Token | clear 按钮主题与 SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `clear` 节点始终存在，`IsEffectiveShowClearButton` 只切换可见性。它适合定制 `Opacity`、`Margin`、`Padding`、`Cursor` 和
 Button 级交互属性；清除命令仍必须进入 `NotifyClearButtonClicked()` / `Clear()` 的统一行为，不通过样式替换文本状态源。
@@ -153,7 +153,7 @@ Button 级交互属性；清除命令仍必须进入 `NotifyClearButtonClicked()
 | 职责 | 展示当前文本长度与 `MaxLength` 的计数文案。 |
 | 相关 API | `IsShowCount`、`Text`、`MaxLength` |
 | 相关 Token | `ColorTextPlaceholder`、字体与行高资源 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `count` 节点始终存在，`IsShowCount=false` 只切换可见性。它适合定制 `Foreground`、`FontSize`、`FontWeight`、`Opacity`、
 `Margin` 和对齐；计数格式和刷新时机由 `AbstractTextInput` 维护，不属于 Semantic Style。
@@ -179,7 +179,7 @@ Button 级交互属性；清除命令仍必须进入 `NotifyClearButtonClicked()
 | AtomUI 节点 | internal `SearchEditDecoratedBox` 模板内的 `atom:Button#PART_RightAddOn` |
 | 职责 | 承载搜索动作按钮的根视觉、文字与图标（loading 状态沿用按钮自身的 loading 呈现）。 |
 | 相关 API | `SearchButtonStyle`、`SearchButtonText`、`SearchButtonTheme`、`IsOperating` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `button` 的 marker 由 `SearchEditDecoratedBox` 在模板应用后通过 C# 追加（RuntimeCreated 契约），因此主题资产内没有
 静态 `Classes.semantic-button` 声明。`SearchEdit` 不提供 `count` Part：其模板不包含计数指示器。`root` 不生成 Style；
@@ -206,7 +206,7 @@ route、`ContractType` 与 LineEdit 同名 Part 一致（`TextArea*` Style 前�
 | AtomUI 节点 | `InputTextPresenter#PART_TextPresenter` |
 | 职责 | 承载多行文本的输入、光标、选择与换行展示。 |
 | 相关 API | `Text`、`Lines`、`MinLines`、`MaxLines`、`IsAutoSize`、`IsResizable` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `TextArea` 的 `count` 位于 owner 模板底部（DockPanel 下缘），route 为默认 `/template/ .semantic-count`；`clear`
 位于右侧 addon 区，route 与 LineEdit 同形。`TextArea` 不提供 `prefix` / `suffix` Part；resize handle 与

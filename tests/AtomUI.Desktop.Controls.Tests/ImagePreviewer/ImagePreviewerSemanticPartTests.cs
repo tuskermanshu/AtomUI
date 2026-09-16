@@ -482,7 +482,7 @@ public class ImagePreviewerSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.CrossNestedOwners.ShouldBe(crossNestedOwners);
         part.RuntimeCreated.ShouldBe(runtimeCreated);
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldNotBeNull();
     }
 
@@ -504,7 +504,7 @@ public class ImagePreviewerSemanticPartTests
         part.CrossVisualRoot.ShouldBeTrue();
         part.CrossNestedOwners.ShouldBeTrue();
         part.RuntimeCreated.ShouldBeTrue();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldNotBeNull();
     }
 

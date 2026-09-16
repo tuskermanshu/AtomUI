@@ -7,7 +7,7 @@
 ## 1. Semantic Parts
 
 RadioButton 主控件公开 `root`、`icon` 与 `label` 三个职责区域，与上游稳定 Semantic DOM
-（`root` / `icon` / `label`，均 since 6.0.0）对齐。`icon` 对应单选指示圆环区域，由模板中的 `RadioIndicator`
+（`root` / `icon` / `label`，均 since 6.2.0）对齐。`icon` 对应单选指示圆环区域，由模板中的 `RadioIndicator`
 节点承载；`label` 对应文本区域，由模板中的 `ContentPresenter` 节点承载。
 
 `RadioButtonGroup`、`RadioIndicator` 与 `OptionButton` / `OptionButtonGroup` 均不持有独立 Semantic descriptor：

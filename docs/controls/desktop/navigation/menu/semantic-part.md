@@ -83,7 +83,7 @@ route 都以 `>>` 开头，按生成器 route 语法（以 `>>` 开头仅允许 
 （`itemTitle` / `list` / `subMenu.itemTitle` / `subMenu.list`）都声明为**同一模板节点的双层级静态 marker**，由 route 的
 容器 anchor 决定命中哪一层；具体落点见第 3 节。
 
-所有 Part 的 `Since` 统一为 `6.0`。
+所有 Part 的 `Since` 统一为 `6.2.0`。
 
 ## 2. Semantic Parts
 

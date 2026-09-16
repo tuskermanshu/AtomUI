@@ -10,14 +10,14 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-list",
     ContractType = typeof(ItemsControl),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "item",
     SelectorClass = "semantic-item",
     SelectorRoute = "/template/ .semantic-list > .semantic-item",
     ContractType = typeof(TemplatedControl),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class Upload
 {

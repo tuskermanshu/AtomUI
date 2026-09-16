@@ -73,7 +73,7 @@
 ## 2026-08-23
 
 - Semantic Part
-  - 为 `TabStrip` 与 `CardTabStrip` 公开 `root` + `item` Semantic Part（since 6.0），并为 `CardTabStrip` 额外
+  - 为 `TabStrip` 与 `CardTabStrip` 公开 `root` + `item` Semantic Part（since 6.2.0），并为 `CardTabStrip` 额外
     公开 `add` Part；新增 `TabStrip.SemanticParts.cs`、`CardTabStrip.SemanticParts.cs` descriptor，生成
     `TabStripItemStyle`、`CardTabStripAddStyle`、`CardTabStripItemStyle`（`AtomUI.Theme.Styling`）。
   - `item` 为运行时标记（`RuntimeCreated`），路由 `> .semantic-item`，由 owner 在

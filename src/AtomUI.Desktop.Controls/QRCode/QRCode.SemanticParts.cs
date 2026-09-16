@@ -7,7 +7,7 @@ namespace AtomUI.Desktop.Controls;
     "cover",
     SelectorClass = "semantic-cover",
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class QRCode
 {
 }

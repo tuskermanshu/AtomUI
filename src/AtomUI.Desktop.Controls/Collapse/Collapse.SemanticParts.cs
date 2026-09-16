@@ -10,7 +10,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-scope-item /template/ .semantic-header",
     ContractType = typeof(PixelAlignedBorder),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "icon",
@@ -18,7 +18,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-scope-item /template/ .semantic-icon",
     ContractType = typeof(IconButton),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "title",
@@ -26,7 +26,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-scope-item /template/ .semantic-title",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "body",
@@ -34,7 +34,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-scope-item /template/ .semantic-body",
     ContractType = typeof(PixelAlignedBorder),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class Collapse
 {

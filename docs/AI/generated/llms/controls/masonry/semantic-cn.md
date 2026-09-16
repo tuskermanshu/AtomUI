@@ -23,7 +23,7 @@
 | 职责 | 瀑布流布局根区域，承载列数、间距、响应式、root chrome、ItemsControl 输入和 item Selector 作用域。 |
 | 相关 API | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`ItemsPanel`、`ColumnCount`、`ColumnInfo`、`MinColumnWidth`、`MaxColumnCount`、`ColumnGap`、`RowGap`、`Gutter`、`Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`、`LayoutChanged` |
 | 相关 Token | 无专属 Token；间距和列宽是实例布局状态。 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.2 `item`
 
@@ -44,7 +44,7 @@
 | 职责 | 表示一个被 Masonry 测量、分配列并排列的条目容器。 |
 | 相关 API | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`Masonry.Column`、`Masonry.Span` |
 | 相关 Token | 无专属 Token；item 外观由 item 自身控件或模板负责。 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType=Control` 是有意选择：Masonry 同时支持用户直接提供任意 `Control` 作为条目，以及 `ItemsSource` 场景下由
 Avalonia 生成 `ContentPresenter`。因此 `MasonryItemStyle` 只能稳定依赖 `Control` 共有属性，例如 `Margin`、`Opacity`、

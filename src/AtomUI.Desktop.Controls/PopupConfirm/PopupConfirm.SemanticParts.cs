@@ -29,7 +29,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(FlyoutPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.container",
     SelectorClass = "semantic-popup-container",
@@ -37,7 +37,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.content",
     SelectorClass = "semantic-popup-content",
@@ -45,7 +45,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.arrow",
     SelectorClass = "semantic-popup-arrow",
@@ -53,7 +53,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(ArrowIndicator),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.icon",
     SelectorClass = "semantic-popup-icon",
@@ -61,7 +61,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(IconPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.title",
     SelectorClass = "semantic-popup-title",
@@ -69,7 +69,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(Avalonia.Controls.TextBlock),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.description",
     SelectorClass = "semantic-popup-description",
@@ -77,7 +77,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.actions",
     SelectorClass = "semantic-popup-actions",
@@ -85,7 +85,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(StackPanel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class PopupConfirm
 {
 }

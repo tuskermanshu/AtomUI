@@ -35,7 +35,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | SplitButton root 是动作内容、弹层数据、命令与状态的组织边界。 |
 | 相关 API | 全部 SplitButton public API |
 | 相关 Token | SplitButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `primary`
 
@@ -55,7 +55,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 触发侧主命令按钮区域，承载主动作内容、图标与状态视觉（AtomUI 补充部件，上游无对应）。 |
 | 相关 API | `Content`、`Icon`、`Command`、`IsPrimaryButtonType`、`IsDanger`、`SizeType` |
 | 相关 Token | ButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `secondary`
 
@@ -75,7 +75,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 触发侧次级下拉触发区域，承载 `OpenIndicator` 与弹层触发状态视觉（AtomUI 补充部件，上游无对应）。 |
 | 相关 API | `OpenIndicator`、`Flyout`、`TriggerType`、`Placement` |
 | 相关 Token | ButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -95,7 +95,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 下拉菜单弹层的根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角由 `ArrowDecoratedBox` 渲染，对应上游的 `root`）。 |
 | 相关 API | `Flyout`、`MenuItem.Items`、`MenuItem.Header`、`MenuItem.Icon` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemTitle`
 
@@ -116,7 +116,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 菜单分组标题节点（对应上游的 `itemTitle`，即 `ant-menu-item-group-title`）。 |
 | 相关 API | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -136,7 +136,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 弹层中的单个菜单项容器，承载该项的状态、内容、图标与子菜单（对应上游的 `item`）。 |
 | 相关 API | `MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemIcon`
 
@@ -157,7 +157,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 菜单项模板内的图标节点（对应上游的 `itemIcon`）。 |
 | 相关 API | `MenuItem.Icon` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -178,7 +178,7 @@ ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs
 | 职责 | 菜单项模板内的文本内容节点（对应上游的 `itemContent`）。 |
 | 相关 API | `MenuItem.Header`、`MenuItem.HeaderTemplate` |
 | 相关 Token | MenuToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

@@ -25,7 +25,7 @@
 | `popup.root` | 弹层根容器 | View 模板根 `Border #Frame` | `Border` | Single | `CrossVisualRoot=true`、`RuntimeCreated=true`（View 由 `CreatePresenter()` 动态创建） |
 
 - 声明文件：`ColorPicker.SemanticParts.cs`、`GradientColorPicker.SemanticParts.cs`（新文件）。
-- `Since = "6.0"`。
+- `Since = "6.2.0"`。
 - 跨模板 route 沿用 Cascader scope 语法；若 `SemanticPartTemplateValidator` 需扩展（跨两个 `/template/`），
   按 Cascader 提交对 validator 的扩展方式处理。
 

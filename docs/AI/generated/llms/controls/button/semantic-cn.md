@@ -26,7 +26,7 @@ Button 公开 `root`、`icon` 和 `content` 三个 Semantic Part。Part 名称�
 | 职责 | Button root 是动作、状态与根视觉样式的统一 owner。 |
 | 相关 API | 全部 Button public API |
 | 相关 Token | ButtonToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -46,7 +46,7 @@ Button 公开 `root`、`icon` 和 `content` 三个 Semantic Part。Part 名称�
 | 职责 | 统一表示 Button 的用户图标和 loading 图标视觉职责。 |
 | 相关 API | `Icon`、`IsLoading`、`IconPlacement`、`IconWidth`、`IconHeight` |
 | 相关 Token | `IconSize*`、`OnlyIconSize*`、`IconMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -66,7 +66,7 @@ Button 公开 `root`、`icon` 和 `content` 三个 Semantic Part。Part 名称�
 | 职责 | 表示 Button 的用户内容展示与排版区域。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | `ContentFontSize`、`ContentLineHeight`、`FontWeight` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。

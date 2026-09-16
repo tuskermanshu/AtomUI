@@ -334,7 +334,7 @@ public class SemanticPartPreviewTests
                .OfType<AtomUI.Desktop.Controls.Tag>()
                .ShouldBeEmpty();
         preview.Items.Select(static item => item.Since)
-               .ShouldAllBe(static since => since == "6.0");
+               .ShouldAllBe(static since => since == "6.2.0");
         foreach (var row in rows)
         {
             var rowBorder = row.GetVisualDescendants()

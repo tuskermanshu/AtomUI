@@ -163,12 +163,12 @@ LLMS 语义区域（完整 Part 契约见 [DropdownButton Semantic Part 契约](
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `DropdownButton` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | DropdownButtonToken、SharedToken | stable since 6.0 |
-| `popup.root` | `ArrowDecoratedBox`（弹层根视觉面） | 下拉菜单弹层根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角，对应上游 antd 的 `root`）。 | `DropdownFlyout`、`Items`、`ItemTemplate`、`ItemContainerTheme` | MenuToken、SharedToken | stable since 6.0 |
-| `itemTitle` | `MenuItemGroup` 模板 `GroupTitlePresenter` | 菜单分组标题节点（对应上游 antd 的 `itemTitle` / `ant-menu-item-group-title`，`Multiple`）。 | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` | MenuToken、SharedToken | stable since 6.0 |
-| `item` | `MenuItem` 容器 | 弹层中的单个菜单项容器，覆盖顶层与子菜单（`Multiple`）。 | `Items`、`MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items` | MenuToken、SharedToken | stable since 6.0 |
-| `itemContent` | `MenuItem` 模板 `ItemTextPresenter` | 菜单项模板内的文本内容节点。 | `MenuItem.Header`、`MenuItem.HeaderTemplate` | MenuToken、SharedToken | stable since 6.0 |
-| `itemIcon` | `MenuItem` 模板 `ItemIconPresenter` | 菜单项模板内的图标节点。 | `MenuItem.Icon` | MenuToken、SharedToken | stable since 6.0 |
+| `root` | `DropdownButton` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | DropdownButtonToken、SharedToken | stable since 6.2.0 |
+| `popup.root` | `ArrowDecoratedBox`（弹层根视觉面） | 下拉菜单弹层根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角，对应上游 antd 的 `root`）。 | `DropdownFlyout`、`Items`、`ItemTemplate`、`ItemContainerTheme` | MenuToken、SharedToken | stable since 6.2.0 |
+| `itemTitle` | `MenuItemGroup` 模板 `GroupTitlePresenter` | 菜单分组标题节点（对应上游 antd 的 `itemTitle` / `ant-menu-item-group-title`，`Multiple`）。 | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` | MenuToken、SharedToken | stable since 6.2.0 |
+| `item` | `MenuItem` 容器 | 弹层中的单个菜单项容器，覆盖顶层与子菜单（`Multiple`）。 | `Items`、`MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items` | MenuToken、SharedToken | stable since 6.2.0 |
+| `itemContent` | `MenuItem` 模板 `ItemTextPresenter` | 菜单项模板内的文本内容节点。 | `MenuItem.Header`、`MenuItem.HeaderTemplate` | MenuToken、SharedToken | stable since 6.2.0 |
+| `itemIcon` | `MenuItem` 模板 `ItemIconPresenter` | 菜单项模板内的图标节点。 | `MenuItem.Icon` | MenuToken、SharedToken | stable since 6.2.0 |
 
 Token 说明：
 

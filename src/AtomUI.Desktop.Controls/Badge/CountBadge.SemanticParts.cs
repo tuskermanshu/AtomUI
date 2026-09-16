@@ -10,7 +10,7 @@ namespace AtomUI.Desktop.Controls;
     ContractType = typeof(Control),
     Cardinality = SemanticPartCardinality.Optional,
     CrossVisualRoot = true,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class CountBadge
 {

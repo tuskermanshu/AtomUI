@@ -21,7 +21,7 @@
   - 对齐 Ant Design 6.6.3 Table Semantic DOM：`DataGrid` 作为语义 owner 声明 `section`、`header.wrapper`、`header.cell`、`title`、`body.wrapper`、`body.row`、`body.cell`、`footer`、`content` 九个部件（`root` 由生成器隐式合成；`header.row` 无独立节点不声明）。
   - `body.row` 同时覆盖数据行与分组头行；`header.cell`/`body.cell`/`body.row` 的 marker 由目标控件构造时注入并在类被 `Classes.Replace` 清空后重挂，列拖拽 ghost 显式排除。
 - API
-  - 新增生成的专用部件 Style 类（`DataGridSectionStyle`、`DataGridTitleStyle`、`DataGridContentStyle`、`DataGridHeaderWrapperStyle`、`DataGridHeaderCellStyle`、`DataGridBodyWrapperStyle`、`DataGridBodyRowStyle`、`DataGridBodyCellStyle`、`DataGridFooterStyle`）与 `DataGridSemanticParts` 常量（Since 6.0）。
+  - 新增生成的专用部件 Style 类（`DataGridSectionStyle`、`DataGridTitleStyle`、`DataGridContentStyle`、`DataGridHeaderWrapperStyle`、`DataGridHeaderCellStyle`、`DataGridBodyWrapperStyle`、`DataGridBodyRowStyle`、`DataGridBodyCellStyle`、`DataGridFooterStyle`）与 `DataGridSemanticParts` 常量（Since 6.2.0）。
 - Token
   - `CellPaddingMD` 从 12×12 修正为横向 8、纵向 12（AntD `cellPaddingInlineMD=paddingXS`、`cellPaddingBlockMD=paddingSM`）。
   - `HeaderSplitColor` 从 `ColorSplit` 修正为 `ColorBorderSecondary`（AntD `headerSplitColor`）。

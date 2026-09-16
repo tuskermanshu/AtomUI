@@ -8,7 +8,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item",
     ContractType = typeof(ListViewItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "groupHeader",
@@ -16,7 +16,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-group-header",
     ContractType = typeof(ListViewItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class ListView
 {

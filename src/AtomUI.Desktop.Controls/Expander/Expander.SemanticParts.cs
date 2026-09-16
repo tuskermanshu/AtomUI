@@ -8,17 +8,17 @@ namespace AtomUI.Desktop.Controls;
     "header",
     SelectorClass = "semantic-header",
     ContractType = typeof(PixelAlignedBorder),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "icon",
     SelectorClass = "semantic-icon",
     ContractType = typeof(IconButton),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "title",
     SelectorClass = "semantic-title",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 // body 的承载节点是 PART_ContentMotionActor（LayoutAwareMotionActor，ContentControl）的内容：
 // 折叠稳定态下 actor 的 IsVisible=False，其内部 ContentPresenter 不挂接视觉子级，节点从视觉树中
 // 完全缺席（仅保留逻辑子级），展开后才物化。因此 body 声明 Optional（0 或 1 个静态 marker），
@@ -28,7 +28,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-body",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Optional,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class Expander
 {
 }

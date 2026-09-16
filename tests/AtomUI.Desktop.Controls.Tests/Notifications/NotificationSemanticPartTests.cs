@@ -563,7 +563,7 @@ public class NotificationSemanticPartTests
         root.StyleType.ShouldBeNull();
         root.CrossVisualRoot.ShouldBeFalse();
         root.RuntimeCreated.ShouldBeFalse();
-        root.Since.ShouldBe("6.0");
+        root.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertPart(
@@ -582,7 +582,7 @@ public class NotificationSemanticPartTests
         part.Customization.ShouldBe(SemanticPartCustomization.Selector);
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBe(runtimeCreated);
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldNotBeNull();
         part.StyleType.Name.ShouldBe($"{descriptor.ControlType.Name}{Pascal(name)}Style");
     }

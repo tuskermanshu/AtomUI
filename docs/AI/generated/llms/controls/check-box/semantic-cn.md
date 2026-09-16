@@ -5,7 +5,7 @@
 ## Semantic Parts
 
 CheckBox 主控件公开 `root`、`icon` 与 `label` 三个职责区域，与上游稳定 Semantic DOM
-（`root` / `icon` / `label`，均 since 6.0.0）对齐。`icon` 对应复选框指示框区域，由模板中的 `CheckBoxIndicator`
+（`root` / `icon` / `label`，均 since 6.2.0）对齐。`icon` 对应复选框指示框区域，由模板中的 `CheckBoxIndicator`
 节点承载；`label` 对应文本区域，由模板中的 `ContentPresenter` 节点承载。
 
 `CheckBoxGroup`、`CheckBoxItemsControl` 与 `CheckBoxIndicator` 均不持有独立 Semantic descriptor：上游 Checkbox.Group

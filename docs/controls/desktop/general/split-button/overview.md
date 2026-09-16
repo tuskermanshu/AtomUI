@@ -156,14 +156,14 @@ LLMS 语义区域（完整 Part 契约见 [SplitButton Semantic Part 契约](sem
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `SplitButton` | 通用控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | SplitButtonToken、SharedToken | stable since 6.0 |
-| `primary` | `PART_PrimaryButton`（`Button`） | 触发侧主命令按钮区域（AtomUI 补充部件，上游无对应）。 | `Content`、`Icon`、`Command`、`IsPrimaryButtonType` | ButtonToken、SharedToken | stable since 6.0 |
-| `secondary` | `PART_SecondaryButton`（`Button`） | 触发侧次级下拉触发区域（AtomUI 补充部件，上游无对应）。 | `OpenIndicator`、`Flyout`、`TriggerType`、`Placement` | ButtonToken、SharedToken | stable since 6.0 |
-| `popup.root` | `ArrowDecoratedBox`（弹层根视觉面） | 下拉菜单弹层根视觉面，承载菜单项集合与弹层根视觉（对应上游 antd 的 `root`）。 | `Flyout`、`MenuItem.Items` | MenuToken、SharedToken | stable since 6.0 |
-| `itemTitle` | `MenuItemGroup` 模板 `GroupTitlePresenter` | 菜单分组标题节点（对应上游 antd 的 `itemTitle`，`Multiple`）。 | `MenuItemGroup.Header` | MenuToken、SharedToken | stable since 6.0 |
-| `item` | `MenuItem` 容器 | 弹层中的单个菜单项容器，覆盖顶层与子菜单（`Multiple`）。 | `MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items` | MenuToken、SharedToken | stable since 6.0 |
-| `itemContent` | `MenuItem` 模板 `ItemTextPresenter` | 菜单项模板内的文本内容节点。 | `MenuItem.Header` | MenuToken、SharedToken | stable since 6.0 |
-| `itemIcon` | `MenuItem` 模板 `ItemIconPresenter` | 菜单项模板内的图标节点。 | `MenuItem.Icon` | MenuToken、SharedToken | stable since 6.0 |
+| `root` | `SplitButton` | 通用控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | SplitButtonToken、SharedToken | stable since 6.2.0 |
+| `primary` | `PART_PrimaryButton`（`Button`） | 触发侧主命令按钮区域（AtomUI 补充部件，上游无对应）。 | `Content`、`Icon`、`Command`、`IsPrimaryButtonType` | ButtonToken、SharedToken | stable since 6.2.0 |
+| `secondary` | `PART_SecondaryButton`（`Button`） | 触发侧次级下拉触发区域（AtomUI 补充部件，上游无对应）。 | `OpenIndicator`、`Flyout`、`TriggerType`、`Placement` | ButtonToken、SharedToken | stable since 6.2.0 |
+| `popup.root` | `ArrowDecoratedBox`（弹层根视觉面） | 下拉菜单弹层根视觉面，承载菜单项集合与弹层根视觉（对应上游 antd 的 `root`）。 | `Flyout`、`MenuItem.Items` | MenuToken、SharedToken | stable since 6.2.0 |
+| `itemTitle` | `MenuItemGroup` 模板 `GroupTitlePresenter` | 菜单分组标题节点（对应上游 antd 的 `itemTitle`，`Multiple`）。 | `MenuItemGroup.Header` | MenuToken、SharedToken | stable since 6.2.0 |
+| `item` | `MenuItem` 容器 | 弹层中的单个菜单项容器，覆盖顶层与子菜单（`Multiple`）。 | `MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items` | MenuToken、SharedToken | stable since 6.2.0 |
+| `itemContent` | `MenuItem` 模板 `ItemTextPresenter` | 菜单项模板内的文本内容节点。 | `MenuItem.Header` | MenuToken、SharedToken | stable since 6.2.0 |
+| `itemIcon` | `MenuItem` 模板 `ItemIconPresenter` | 菜单项模板内的图标节点。 | `MenuItem.Icon` | MenuToken、SharedToken | stable since 6.2.0 |
 
 Token 说明：
 

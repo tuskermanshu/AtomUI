@@ -10,7 +10,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-panel > .semantic-scope-handle /template/ .semantic-dragger",
     ContractType = typeof(Thumb),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "panel",
@@ -18,7 +18,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-panel > .semantic-panel",
     ContractType = typeof(Control),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class Splitter
 {

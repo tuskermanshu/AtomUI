@@ -32,7 +32,7 @@ Part 由生成 Style 借助 scope 路由从 `ToolTip` 穿透到共享模板命�
 | 职责 | 工具提示的根语义区域，承载内容、弹层打开状态与主题入口的组织边界 |
 | 相关 API | `Content`、`IsMotionEnabled` |
 | 相关 Token | `ToolTipToken` / SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `container`
 
@@ -51,7 +51,7 @@ Part 由生成 Style 借助 scope 路由从 `ToolTip` 穿透到共享模板命�
 | 职责 | 内容盒，承载内边距、背景、圆角与文本样式，内部 `ContentPresenter` 展示用户内容 |
 | 相关 API | `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`（模板绑定）、`Content` |
 | 相关 Token | `ToolTipToken.ToolTipBackground`、`ToolTipToken.ToolTipCornerRadius`、`ToolTipToken.ContentPadding` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.3 `arrow`
 
@@ -70,7 +70,7 @@ Part 由生成 Style 借助 scope 路由从 `ToolTip` 穿透到共享模板命�
 | 职责 | 指向锚定控件的箭头指示器 |
 | 相关 API | `IsArrowVisible`、`ArrowSize`、`Background`（`FilledColor` 模板绑定） |
 | 相关 Token | `ArrowDecoratedBoxToken.ArrowStrokeColor`、`ArrowDecoratedBoxToken.ArrowStrokeThickness`、`ArrowDecoratedBoxToken.ArrowSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

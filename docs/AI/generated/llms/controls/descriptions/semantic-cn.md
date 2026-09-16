@@ -28,7 +28,7 @@ descriptor。
 | 职责 | Descriptions root 是数据、布局、尺寸、边框和响应式状态的统一 owner。 |
 | 相关 API | 全部 Descriptions public API |
 | 相关 Token | DescriptionsToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -48,7 +48,7 @@ descriptor。
 | 职责 | 承载标题与辅助内容的完整头部布局区域。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Extra`、`ExtraTemplate` |
 | 相关 Token | `HeaderMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -68,7 +68,7 @@ descriptor。
 | 职责 | 展示 Header 内容及其模板结果。 |
 | 相关 API | `Header`、`HeaderTemplate` |
 | 相关 Token | `TitleColor`、SharedToken typography |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `extra`
 
@@ -88,7 +88,7 @@ descriptor。
 | 职责 | 展示头部辅助内容及其模板结果。 |
 | 相关 API | `Extra`、`ExtraTemplate` |
 | 相关 Token | `ExtraColor`、SharedToken typography |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `label`
 
@@ -108,7 +108,7 @@ descriptor。
 | 职责 | 展示描述项标签，并提供重复标签区域的统一局部样式入口。 |
 | 相关 API | `Items`、`ItemsSource`、`DescriptionItem.Label` |
 | 相关 Token | `LabelBg`、`LabelColor`、`ItemPadding*`、`ColonMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -128,7 +128,7 @@ descriptor。
 | 职责 | 展示描述项内容，并提供重复内容区域的统一局部样式入口。 |
 | 相关 API | `Items`、`ItemsSource`、`DescriptionItem.Content` |
 | 相关 Token | `ContentColor`、`ItemPadding*`、SharedToken typography |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`header`、`title` 和 `extra` 是根 ControlTemplate 的静态节点；`label` 和
 `content` 随 `DescriptionItem` 生成视觉物化，并由内部 item control 的模板接入路径把生成的 selector class 添加到目标

@@ -65,7 +65,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | owner 是时间值、约束、弹层状态、Form 值与验证状态的组织边界。 |
 | 相关 API | 全部 TimePicker / RangeTimePicker public API |
 | 相关 Token | TimePickerToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `prefix`
 
@@ -85,7 +85,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 输入区内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `input`
 
@@ -105,7 +105,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 时间文本输入框，承载格式化显示值、占位符与只读/校验状态。 |
 | 相关 API | `Text`、`PlaceholderText`、`IsReadOnly`、`PreferredInputWidth` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `secondaryInput`（仅 RangeTimePicker）
 
@@ -125,7 +125,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 范围选择的结束端时间文本输入框，与 `input` 共用格式与宽度基线。 |
 | 相关 API | `SecondaryText`、`SecondaryPlaceholderText` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `suffix`
 
@@ -145,7 +145,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 输入区后缀区域，承载清除按钮、Form 反馈与用户后缀内容。 |
 | 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `clear`
 
@@ -166,7 +166,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 后缀区清除按钮，进入清除模式（hover / focus）时渲染。 |
 | 相关 API | `ShowClearButtonPredicate`、`Clear` / `Reset` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.root`
 
@@ -186,7 +186,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 弹层内容根视觉盒子，承载背景、边框、阴影与浮动箭头。 |
 | 相关 API | `IsArrowVisible`（经 `IsArrowVisibleEffective`）、`ArrowPosition`、`IsMotionEnabled` |
 | 相关 Token | PopupToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.container`
 
@@ -206,7 +206,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 时间面板内容容器，组织时间区与底部按钮区的布局。 |
 | 相关 API | 无（面板内容布局容器） |
 | 相关 Token | TimePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.content`
 
@@ -226,7 +226,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 时间列布局容器，按 12/24 小时制组织全部时间列。 |
 | 相关 API | 无（随 `popup.container` 呈现） |
 | 相关 Token | TimePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.column`
 
@@ -246,7 +246,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 单个时间列宿主，承载滚动视口与列宽基线（时/分/秒列宽 = `ItemWidth`，时段列宽 = `PeriodHostWidth`）。 |
 | 相关 API | 无（随 `popup.content` 呈现） |
 | 相关 Token | TimePickerToken（`ItemWidth`、`PeriodHostWidth`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.item`
 
@@ -266,7 +266,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 时间格子项，承载可选时间值与选中 / hover 状态视觉。 |
 | 相关 API | 无（随 `popup.column` 呈现） |
 | 相关 Token | TimePickerToken（`ItemHeight`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.footer`
 
@@ -286,7 +286,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | 职责 | 面板底部操作区，承载此刻 / 确认按钮。 |
 | 相关 API | `IsNeedConfirm`、`IsShowNow` |
 | 相关 Token | TimePickerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType` 不参与 selector 匹配，只约束生成 Style 的 `x:SetterTargetType` 与模板校验的类型兼容；internal
 实现类型（`InfoPickerTextBox`、`TimePickerPresenter`、`TimeView`、`DateTimePickerPanel`）统一承诺到最低 public

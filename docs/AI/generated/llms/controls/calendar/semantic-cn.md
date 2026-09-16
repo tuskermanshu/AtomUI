@@ -10,7 +10,7 @@
 - `root`、`header`、`body`、`content`、`item` 自上游 6.0.0 公开；
 - `itemContent` 自上游 6.4.0 公开（Semantic DOM 演示中 `itemContent` 的 version 为 `6.4.0`）。
 
-AtomUI 全部六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 全部六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 内部 `CalendarHeader`、`CalendarView`、`CalendarViewCell` 与 `LunarCalendarViewCell` 均不持有独立 Semantic descriptor：
 
@@ -43,7 +43,7 @@ Cell 模板承载。
 | 职责 | Calendar root 是日期值、显示模式、面板状态与根视觉样式的统一 owner。 |
 | 相关 API | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate`、`CellTemplate`、`FullCellTemplate`、`HeaderTemplate`、`RangeBars` |
 | 相关 Token | CalendarToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -63,7 +63,7 @@ Cell 模板承载。
 | 职责 | 统一表示年份选择、月份选择与 Month/Year 模式切换的 Header 区域布局与样式；年/月 Select 与模式切换组默认带白色容器背景（`ColorBgContainer`），选中态仅以主色边框/文字标识。 |
 | 相关 API | `Value`、`Mode`、`Fullscreen`、`ValidRange`、`HeaderTemplate` |
 | 相关 Token | `YearControlWidth`、`MonthControlWidth`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -83,7 +83,7 @@ Cell 模板承载。
 | 职责 | 统一表示 Header 下方容纳日历网格与范围条 overlay 的主体区域的内边距、背景与布局。 |
 | 相关 API | `Fullscreen`、`Mode`、`ShowWeek`、`RangeBars` |
 | 相关 Token | `FullBg`、`FullPanelBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -103,7 +103,7 @@ Cell 模板承载。
 | 职责 | 统一表示日历表格（周标题行 + 日期/月网格）区域的宽度、高度与表格级样式。面板默认自带 `FullPanelBg`（`ColorBgContainer`）背景，Fullscreen 模式面板背景为 `FullBg`；root 表面的背景定制只落在面板外圈，不渗入面板内部。 |
 | 相关 API | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate`、`CellTemplate`、`FullCellTemplate` |
 | 相关 Token | `FullPanelBg`、`MiniContentHeight`、`FullCellMinHeight`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -123,7 +123,7 @@ Cell 模板承载。
 | 职责 | 统一表示单个日期、月份或周序号单元的背景、边框、悬停与选中等交互样式。 |
 | 相关 API | `Value`、`Mode`、`ShowWeek`、`ValidRange`、`DisabledDate` |
 | 相关 Token | `ItemActiveBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `itemContent`
 
@@ -143,7 +143,7 @@ Cell 模板承载。
 | 职责 | 统一表示单元格内自定义内容区域（`CellTemplate` / `FullCellTemplate`）的高度、溢出与布局样式。 |
 | 相关 API | `CellTemplate`、`FullCellTemplate`、`CalendarCellContext` |
 | 相关 Token | `ItemActiveBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header`、`content`、`item` 的

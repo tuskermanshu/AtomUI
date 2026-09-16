@@ -127,6 +127,16 @@ internal sealed class SemanticPartContractValidator
                 part.Name,
                 control.ControlType.ToDisplayString()));
         }
+        else if (!IsReleaseVersion(part.Since!))
+        {
+            _reportDiagnostic(Diagnostic.Create(
+                AtomUIDiagnosticDescriptors.SemanticPartInvalidSince,
+                part.Location,
+                part.Name,
+                control.ControlType.ToDisplayString(),
+                part.Since));
+            valid = false;
+        }
 
         if (!ValidateThemeContract(control, part, out var themeTargetType))
         {
@@ -135,6 +145,48 @@ internal sealed class SemanticPartContractValidator
 
         validatedPart = validatedPart.WithThemeTargetType(themeTargetType);
         return valid;
+    }
+
+    /// <summary>
+    /// <c>Since</c> 必须是可以被用户引用的具体发布版本，即 <c>major.minor.patch</c> 三段非负十进制数字
+    /// （例如 <c>6.2.0</c>）。只写版本线（<c>6.0</c>、<c>6.2</c>）会让 descriptor、文档与 LLMS 导出声称一个
+    /// 不存在的引入版本；预发布后缀、前导 <c>v</c> 与任意字符串同样不属于可比较的发布版本。
+    /// 这里按字符显式解析而不使用正则，与 Generator 不引入正则依赖的既有约定一致。
+    /// </summary>
+    internal static bool IsReleaseVersion(string since)
+    {
+        var partIndex = 0;
+        for (var segment = 0; segment < 3; segment++)
+        {
+            var digitStart = partIndex;
+            while (partIndex < since.Length && since[partIndex] >= '0' && since[partIndex] <= '9')
+            {
+                partIndex++;
+            }
+
+            if (partIndex == digitStart)
+            {
+                return false;
+            }
+
+            // 多段数字过长几乎必然是误写（如时间戳或内部构建号），拒绝以免污染兼容契约。
+            if (partIndex - digitStart > 5)
+            {
+                return false;
+            }
+
+            if (segment < 2)
+            {
+                if (partIndex >= since.Length || since[partIndex] != '.')
+                {
+                    return false;
+                }
+
+                partIndex++;
+            }
+        }
+
+        return partIndex == since.Length;
     }
 
     internal bool ValidateUniqueParts(

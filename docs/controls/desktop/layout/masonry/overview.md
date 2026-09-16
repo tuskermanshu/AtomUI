@@ -222,8 +222,8 @@ LLMS 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Masonry` | 布局控件根语义区域，承载布局 public API、ItemsControl 输入、尺寸和 item Selector 作用域。 | 见 API 与契约模型；完整契约见 `semantic-part.md` | 无专属 Token | stable since 6.0 |
-| `item` | item container | 参与 Masonry 测量、列分配和排列的直接子元素或 generated `ContentPresenter`。 | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`Masonry.Column`、`Masonry.Span` | 无专属 Token | stable since 6.0 |
+| `root` | `Masonry` | 布局控件根语义区域，承载布局 public API、ItemsControl 输入、尺寸和 item Selector 作用域。 | 见 API 与契约模型；完整契约见 `semantic-part.md` | 无专属 Token | stable since 6.2.0 |
+| `item` | item container | 参与 Masonry 测量、列分配和排列的直接子元素或 generated `ContentPresenter`。 | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`Masonry.Column`、`Masonry.Span` | 无专属 Token | stable since 6.2.0 |
 
 Token 说明：
 

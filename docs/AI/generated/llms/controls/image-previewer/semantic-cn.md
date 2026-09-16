@@ -45,7 +45,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 单封面入口（`ImagePreviewer`）/ 多封面入口（`ImageGroupPreviewer`）与完整预览 owner |
 | 相关 API | `ItemsSource`、`CurrentIndex`、`IsOpen`；group 额外 `ItemsPanel` |
 | 相关 Token | SharedToken、ImagePreviewerToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `image`
 
@@ -65,7 +65,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 关闭态封面图片元素 / 各封面缩略图元素 |
 | 相关 API | `EffectiveCoverImage`、`CoverWidth`、`CoverHeight`；group `ItemsSource`、`ItemsPanel` |
 | 相关 Token | Cover 尺寸相关 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `cover`
 
@@ -85,7 +85,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 封面悬浮提示层：遮罩 + 指示内容。遮罩经负 Margin 铺满整个 owner root（含 padding 环与边框），对齐上游 `genImageCoverStyle` 的 `position:absolute; inset:0` cover 几何 |
 | 相关 API | `IsShowCoverMask`、`CoverIndicatorContent(Template)`、owner `Padding` / `BorderThickness`（经中继参与遮罩几何） |
 | 相关 Token | `MaskBgColor`、mask 透明度与圆角 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.root`
 
@@ -105,7 +105,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览容器根：承载遮罩层、内容区与关闭按钮的根层（对齐上游 `.ant-image-preview`）；窗口 chrome 不属于契约 |
 | 相关 API | `IsOpen`、`OpenDialog()`、`IsDialogModal`、`IsDialogTopmost` |
 | 相关 Token | Dialog 背景 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.mask`
 
@@ -125,7 +125,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览遮罩层：全铺 `popup.root` 的半透明暗色背景，位于 `popup.body` 之下（对齐上游 `.ant-image-preview-mask`）；仅 Overlay 宿主存在 |
 | 相关 API | `IsOpen`（随 overlay 宿主打开出现；点击关闭行为当前未实现，见兼容性与验证） |
 | 相关 Token | 遮罩色使用共享 `ColorBgMask`，与上游 `.ant-image-preview-mask` 的 `colorBgMask` 语义一致 |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.body`
 
@@ -145,7 +145,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览内容区：居中承载图片渲染与指针交互（对齐上游 `.ant-image-preview-body`） |
 | 相关 API | 缩放、拖拽、旋转与 fit-to-window 交互 API |
 | 相关 Token | 无独立 Token（沿用 viewer 背景与交互 Token） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.footer`
 
@@ -165,7 +165,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览页脚：底部居中操作区域，含页码指示与操作组（对齐上游 `.ant-image-preview-footer`） |
 | 相关 API | `CurrentIndex`、Count 与 scale/fit 状态投影 |
 | 相关 Token | `FloatToolbarPadding`、`NavButtonBgColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.actions`
 
@@ -185,7 +185,7 @@ Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`co
 | 职责 | 预览操作组：footer 内的胶囊形操作按钮组（对齐上游 `.ant-image-preview-actions`） |
 | 相关 API | 缩放、翻转、旋转与 fit-to-window 命令 |
 | 相关 Token | `PreviewOperationSize`、`PreviewOperationColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

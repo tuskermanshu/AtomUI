@@ -28,7 +28,7 @@ namespace AtomUI.Desktop.Controls;
     Cardinality = SemanticPartCardinality.Multiple,
     CrossNestedOwners = true,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "itemIcon",
     SelectorClass = "semantic-item-icon",
@@ -37,7 +37,7 @@ namespace AtomUI.Desktop.Controls;
     Cardinality = SemanticPartCardinality.Multiple,
     CrossNestedOwners = true,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "itemContent",
     SelectorClass = "semantic-item-content",
@@ -46,7 +46,7 @@ namespace AtomUI.Desktop.Controls;
     Cardinality = SemanticPartCardinality.Multiple,
     CrossNestedOwners = true,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "itemTitle",
     SelectorClass = "semantic-item-title",
@@ -55,7 +55,7 @@ namespace AtomUI.Desktop.Controls;
     Cardinality = SemanticPartCardinality.Multiple,
     CrossNestedOwners = true,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "list",
     SelectorClass = "semantic-list",
@@ -64,7 +64,7 @@ namespace AtomUI.Desktop.Controls;
     Cardinality = SemanticPartCardinality.Multiple,
     CrossNestedOwners = true,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "subMenu.item",
     SelectorClass = "semantic-sub-menu-item",
@@ -74,7 +74,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     CrossVisualRoot = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "subMenu.itemIcon",
     SelectorClass = "semantic-sub-menu-item-icon",
@@ -84,7 +84,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     CrossVisualRoot = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "subMenu.itemContent",
     SelectorClass = "semantic-sub-menu-item-content",
@@ -94,7 +94,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     CrossVisualRoot = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "subMenu.itemTitle",
     SelectorClass = "semantic-sub-menu-item-title",
@@ -104,7 +104,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     CrossVisualRoot = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "subMenu.list",
     SelectorClass = "semantic-sub-menu-list",
@@ -114,7 +114,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     CrossVisualRoot = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.root",
     SelectorClass = "semantic-popup-root",
@@ -124,7 +124,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     CrossNestedOwners = true,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class NavMenu
 {
 }

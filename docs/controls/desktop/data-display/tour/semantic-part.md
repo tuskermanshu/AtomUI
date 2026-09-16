@@ -41,7 +41,7 @@ marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` select
 | 职责 | 引导流程 owner：承载步骤集合、受控开关状态与目标锚定 |
 | 相关 API | `IsOpen`、`CurrentIndex`、`Steps`、`StepsSource`、`ShowTour()` |
 | 相关 Token | 无独立 Token（流程状态不落 Token） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.root`
 
@@ -60,7 +60,7 @@ marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` select
 | 职责 | 引导卡片容器根：承载卡片内容与方向箭头（对齐上游 `.ant-tour` 面板根的容器职责） |
 | 相关 API | `Placement`、`IsArrowVisible`、`StyleType` |
 | 相关 Token | `TourBorderRadius`、`ColorBgElevated` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.mask`
 
@@ -80,7 +80,7 @@ marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` select
 | 职责 | 遮罩层：覆盖目标区域以外的整屏、镂空高亮当前步骤目标并阻挡交互（对齐上游 mask 的全屏覆盖与指针事件语义） |
 | 相关 API | `IsShowMask`、`MaskColor`、`GapRadius`、`GapOffsetX/Y` |
 | 相关 Token | 遮罩色默认 `ColorBgMask`（经 `MaskColor` 中继） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 遮罩是跨根部件中的特殊形态：物理节点是 VLM 级共享单例（`TourLayer.GetTourLayer` 创建并 `AddLayer`），归属规则
 "谁打开谁拥有，关闭即释放"。`Tour.ShowTour()` 挂载时执行三步：`AddLayer`（VLM 内部把层逻辑挂到自身）→
@@ -110,7 +110,7 @@ marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` select
 | 职责 | 卡片主要内容区域：圆角、背景、边框与内边距（对齐上游 `.ant-tour` 内 `section` 的卡片样式职责） |
 | 相关 API | `StyleType`（Primary 经 popup.root 背景表达） |
 | 相关 Token | `TourBorderRadius`、`ColorBgElevated` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 marker 声明在共享 `ArrowDecoratedBoxTheme`（与 ToolTip、DatePicker 等共享容器复用同一 `semantic-container`
 marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 `/template/` 进入嵌套模板；生成器按
@@ -134,7 +134,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 卡片封面区域：承载步骤封面图片等内容（对齐上游 `cover`） |
 | 相关 API | `TourStep.Cover`、`CoverTemplate` |
 | 相关 Token | 无独立 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.close`
 
@@ -154,7 +154,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 关闭按钮：结束引导流程（对齐上游 `close`，上游自 6.4.0 发布） |
 | 相关 API | `CloseIcon` |
 | 相关 Token | `CloseBtnSize`、`IconSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.header`
 
@@ -174,7 +174,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 卡片头部区域：组合标题与关闭按钮的头部容器（对齐上游 `header`） |
 | 相关 API | 无独立 API（内容经 `Title`/`CloseIcon` 进入） |
 | 相关 Token | 无独立 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.title`
 
@@ -194,7 +194,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 引导步骤标题文字（对齐上游 `title`） |
 | 相关 API | `TourStep.Title`、`TitleTemplate` |
 | 相关 Token | `HeaderColor`、`FontWeightStrong` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.description`
 
@@ -214,7 +214,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 引导步骤描述文字（对齐上游 `description`） |
 | 相关 API | `TourStep.Description`、`DescriptionTemplate` |
 | 相关 Token | 无独立 Token（沿用文本 Token） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.footer`
 
@@ -234,7 +234,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 卡片底部操作区域：组合指示器与操作按钮组（对齐上游 `footer`） |
 | 相关 API | 无独立 API（内容经 `Indicator`/`CustomActions` 进入） |
 | 相关 Token | 无独立 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.actions`
 
@@ -254,7 +254,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 操作按钮组容器：承载上一步/下一步/完成按钮（对齐上游 `actions`） |
 | 相关 API | `CustomActions`、步骤导航事件 |
 | 相关 Token | `PrimaryPrevBtnBg`、`PrimaryNextBtnHoverBg` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.indicators`
 
@@ -274,7 +274,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 指示器组容器：承载当前 `Indicator` 实例（对齐上游 `indicators`） |
 | 相关 API | `Indicator` |
 | 相关 Token | 无独立 Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### `popup.indicator`
 
@@ -294,7 +294,7 @@ marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 
 | 职责 | 单个步骤指示器圆点，含激活态（对齐上游 `indicator`） |
 | 相关 API | `IndicatorSize`、`IndicatorColor`、`IndicatorActiveColor`、`ItemSpacing` |
 | 相关 Token | `IndicatorSize`、`ColorFill`、`ColorPrimary` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 圆点由 `DefaultTourIndicator` 代码物化并只挂 `semantic-popup-indicator` marker 类与 `active` 激活态类；
 视觉（尺寸/颜色/间距）全部由 `DefaultTourIndicatorTheme` 表达——圆点无 TemplatedParent，`/template/` 选择器链

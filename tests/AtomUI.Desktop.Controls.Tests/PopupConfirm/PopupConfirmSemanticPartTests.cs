@@ -334,7 +334,7 @@ public class PopupConfirmSemanticPartTests
         part.ContractType.ShouldBe(contractType);
         part.Cardinality.ShouldBe(SemanticPartCardinality.Single);
         part.Customization.ShouldBe(SemanticPartCustomization.Selector);
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldNotBeNull();
     }
 

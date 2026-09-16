@@ -64,7 +64,7 @@ public class FormSemanticPartTests
         helpItem.Customization.ShouldBe(SemanticPartCustomization.Selector);
         helpItem.CrossVisualRoot.ShouldBeFalse();
         helpItem.RuntimeCreated.ShouldBeTrue();
-        helpItem.Since.ShouldBe("6.0");
+        helpItem.Since.ShouldBe("6.2.0");
         helpItem.StyleType.ShouldNotBeNull();
 
         registry.TryGetControl(typeof(AtomUIForm), out _).ShouldBeFalse();
@@ -439,7 +439,7 @@ public class FormSemanticPartTests
         part.Customization.ShouldBe(SemanticPartCustomization.Selector);
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldNotBeNull();
     }
 

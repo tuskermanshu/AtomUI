@@ -141,7 +141,7 @@ public class TextAreaSemanticPartTests
         part.Customization.ShouldBe(SemanticPartCustomization.Selector);
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldNotBeNull();
     }
 

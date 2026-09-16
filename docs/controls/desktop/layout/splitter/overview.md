@@ -226,9 +226,9 @@ LLMS 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Splitter` | 控件根语义区域，承载 public API、Children、事件和 Token scope。 | `Orientation`、`IsLazy`、`HandleSize`、`Children` | `SplitBarHandleSize` | stable since 6.0 |
-| `panel` | 用户面板子控件 | 可调整尺寸的内容面板。 | attached panel properties | 无专属 Token | stable since 6.0 |
-| `dragger` | `SplitterHandle` 模板中的 `PART_DragBar` | 相邻面板之间的拖拽命中区。 | `IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius` | `SplitTriggerSize`、`SplitBarDraggableSize`、`HandleLineThickness` | stable since 6.0 |
+| `root` | `Splitter` | 控件根语义区域，承载 public API、Children、事件和 Token scope。 | `Orientation`、`IsLazy`、`HandleSize`、`Children` | `SplitBarHandleSize` | stable since 6.2.0 |
+| `panel` | 用户面板子控件 | 可调整尺寸的内容面板。 | attached panel properties | 无专属 Token | stable since 6.2.0 |
+| `dragger` | `SplitterHandle` 模板中的 `PART_DragBar` | 相邻面板之间的拖拽命中区。 | `IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius` | `SplitTriggerSize`、`SplitBarDraggableSize`、`HandleLineThickness` | stable since 6.2.0 |
 
 LLMS 导出来源：
 

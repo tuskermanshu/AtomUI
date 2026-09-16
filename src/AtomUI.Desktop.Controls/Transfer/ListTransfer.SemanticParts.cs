@@ -11,26 +11,26 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-source",
     ContractType = typeof(TemplatedControl),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "target.section",
     SelectorClass = "semantic-target",
     ContractType = typeof(TemplatedControl),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "actions",
     SelectorClass = "semantic-actions",
     ContractType = typeof(StackPanel),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "header",
     SelectorClass = "semantic-header",
     SelectorRoute = "/template/ .semantic-scope-section /template/ .semantic-header",
     ContractType = typeof(PixelAlignedBorder),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "title",
@@ -38,7 +38,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-section /template/ .semantic-title",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "body",
@@ -46,7 +46,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-section /template/ .semantic-body",
     ContractType = typeof(DockPanel),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "list",
@@ -54,7 +54,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-section /template/ .semantic-list",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "footer",
@@ -62,7 +62,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-scope-section /template/ .semantic-footer",
     ContractType = typeof(PixelAlignedBorder),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "source.header",
@@ -70,7 +70,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-source /template/ .semantic-header",
     ContractType = typeof(PixelAlignedBorder),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "target.header",
@@ -78,7 +78,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-target /template/ .semantic-header",
     ContractType = typeof(PixelAlignedBorder),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "source.title",
@@ -86,7 +86,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-source /template/ .semantic-title",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "target.title",
@@ -94,7 +94,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-target /template/ .semantic-title",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "source.body",
@@ -102,7 +102,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-source /template/ .semantic-body",
     ContractType = typeof(DockPanel),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "target.body",
@@ -110,7 +110,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-target /template/ .semantic-body",
     ContractType = typeof(DockPanel),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "source.list",
@@ -118,7 +118,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-source /template/ .semantic-list",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "target.list",
@@ -126,7 +126,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-target /template/ .semantic-list",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "source.footer",
@@ -134,7 +134,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-source /template/ .semantic-footer",
     ContractType = typeof(PixelAlignedBorder),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "target.footer",
@@ -142,7 +142,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "/template/ .semantic-target /template/ .semantic-footer",
     ContractType = typeof(PixelAlignedBorder),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "item",
@@ -150,7 +150,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-item",
     ContractType = typeof(TransferListItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 [SemanticPart(
@@ -159,7 +159,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-source-item",
     ContractType = typeof(TransferListItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 [SemanticPart(
@@ -168,7 +168,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-target-item",
     ContractType = typeof(TransferListItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 [SemanticPart(
@@ -177,7 +177,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-item /template/ .semantic-item-icon",
     ContractType = typeof(CheckBox),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 [SemanticPart(
@@ -186,7 +186,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-source-item /template/ .semantic-item-icon",
     ContractType = typeof(CheckBox),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 [SemanticPart(
@@ -195,7 +195,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-target-item /template/ .semantic-item-icon",
     ContractType = typeof(CheckBox),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 [SemanticPart(
@@ -204,7 +204,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-item /template/ .semantic-item-content",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 [SemanticPart(
@@ -213,7 +213,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-source-item /template/ .semantic-item-content",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 [SemanticPart(
@@ -222,7 +222,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = ">> .semantic-target-item /template/ .semantic-item-content",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true,
     CrossNestedOwners = true)]
 public partial class ListTransfer

@@ -211,15 +211,15 @@ cardinality 已经是 `Multiple`（Gallery 用 "Timeline" 与 "Timeline Items" �
 
 | Part | Owner | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `root` | `Timeline` | `Timeline`（表面投影到 `Border#Frame`） | 时间轴根语义区域，承载 Items、方向、Mode、Reverse 与 Pending；对应上游 `<ol>`。 | `Items`、`ItemsSource`、`Orientation`、`Mode`、`IsReverse`、`Pending`、`PendingIcon` | SharedToken（`ColorBorder`、`ColorBgContainer`） | stable since 6.0 |
-| `item` | `Timeline` | 每个 `TimelineItem` 容器 | 单个节点容器，承载单项 Label、Content、Indicator 与视觉顺序派生状态；对应上游 `<li>`。 | `Label`、`Content`、`ContentTemplate`、`IndicatorIcon`、`IndicatorColor` | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`Indicator*ModeMargin` | stable since 6.0 |
-| `itemWrapper` | `Timeline` | `TimelineItemPanel#RootLayout` | 节点内容包装根容器，铺满 section；对应上游 item wrapper 节点。 | `Orientation`、`Mode`、`IsLabelLayout`（internal 投影） | SharedToken（`UniformlyPaddingXS`） | stable since 6.0 |
-| `itemIcon` | `Timeline` | `Border#PART_Dot` / `Border#PART_IconHost`（互斥可见） | 节点图标区域：无 `IndicatorIcon` 时是内置圆点（`BorderBrush` 即圆环色），有 `IndicatorIcon` 时是图标宿主；对应上游 item icon 节点。 | `IndicatorIcon`、`IndicatorColor` | `IndicatorSize`、`IndicatorDotSize`、`IndicatorDotBorderWidth`、SharedToken（`ColorPrimary`、`ColorBgContainer`） | stable since 6.0 |
-| `itemSection` | `Timeline` | `TimelineSectionPanel#Section` | 节点区域容器，承载 header/Indicator/content 的方向化 Measure/Arrange；对应上游 item section 节点。 | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） | SharedToken（`UniformlyPaddingXS`） | stable since 6.0 |
-| `itemHeader` | `Timeline` | `StackPanel#Header` | 节点头部容器，承载 title 与对齐方式；对应上游 item header 节点。 | `Label`、`Mode`、`Orientation` | - | stable since 6.0 |
-| `itemTitle` | `Timeline` | `TextBlock#Label` | 节点标题/时间标签区域，文本呈现与换行；对应上游 item title 节点。 | `Label`、`Mode`、`Orientation` | - | stable since 6.0 |
-| `itemContent` | `Timeline` | `ContentPresenter#ContentPresenter` | 节点详细内容区域，Content/ContentTemplate 呈现与受限换行；对应上游 item content 节点。 | `Content`、`ContentTemplate`、`Mode`、`Orientation` | `LastItemContentMinHeight` | stable since 6.0 |
-| `itemRail` | `Timeline` | `Border#PART_Rail` | 节点连接线（轴线轨道条），首尾裁剪 + 圆点掩膜；对应上游 item rail 节点。 | `IndicatorTailColor`、`IndicatorTailWidth`、`IndicatorColor` | `IndicatorTailWidth`、`IndicatorTailColor`、`IndicatorDotSize` | stable since 6.0 |
+| `root` | `Timeline` | `Timeline`（表面投影到 `Border#Frame`） | 时间轴根语义区域，承载 Items、方向、Mode、Reverse 与 Pending；对应上游 `<ol>`。 | `Items`、`ItemsSource`、`Orientation`、`Mode`、`IsReverse`、`Pending`、`PendingIcon` | SharedToken（`ColorBorder`、`ColorBgContainer`） | stable since 6.2.0 |
+| `item` | `Timeline` | 每个 `TimelineItem` 容器 | 单个节点容器，承载单项 Label、Content、Indicator 与视觉顺序派生状态；对应上游 `<li>`。 | `Label`、`Content`、`ContentTemplate`、`IndicatorIcon`、`IndicatorColor` | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`Indicator*ModeMargin` | stable since 6.2.0 |
+| `itemWrapper` | `Timeline` | `TimelineItemPanel#RootLayout` | 节点内容包装根容器，铺满 section；对应上游 item wrapper 节点。 | `Orientation`、`Mode`、`IsLabelLayout`（internal 投影） | SharedToken（`UniformlyPaddingXS`） | stable since 6.2.0 |
+| `itemIcon` | `Timeline` | `Border#PART_Dot` / `Border#PART_IconHost`（互斥可见） | 节点图标区域：无 `IndicatorIcon` 时是内置圆点（`BorderBrush` 即圆环色），有 `IndicatorIcon` 时是图标宿主；对应上游 item icon 节点。 | `IndicatorIcon`、`IndicatorColor` | `IndicatorSize`、`IndicatorDotSize`、`IndicatorDotBorderWidth`、SharedToken（`ColorPrimary`、`ColorBgContainer`） | stable since 6.2.0 |
+| `itemSection` | `Timeline` | `TimelineSectionPanel#Section` | 节点区域容器，承载 header/Indicator/content 的方向化 Measure/Arrange；对应上游 item section 节点。 | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） | SharedToken（`UniformlyPaddingXS`） | stable since 6.2.0 |
+| `itemHeader` | `Timeline` | `StackPanel#Header` | 节点头部容器，承载 title 与对齐方式；对应上游 item header 节点。 | `Label`、`Mode`、`Orientation` | - | stable since 6.2.0 |
+| `itemTitle` | `Timeline` | `TextBlock#Label` | 节点标题/时间标签区域，文本呈现与换行；对应上游 item title 节点。 | `Label`、`Mode`、`Orientation` | - | stable since 6.2.0 |
+| `itemContent` | `Timeline` | `ContentPresenter#ContentPresenter` | 节点详细内容区域，Content/ContentTemplate 呈现与受限换行；对应上游 item content 节点。 | `Content`、`ContentTemplate`、`Mode`、`Orientation` | `LastItemContentMinHeight` | stable since 6.2.0 |
+| `itemRail` | `Timeline` | `Border#PART_Rail` | 节点连接线（轴线轨道条），首尾裁剪 + 圆点掩膜；对应上游 item rail 节点。 | `IndicatorTailColor`、`IndicatorTailWidth`、`IndicatorColor` | `IndicatorTailWidth`、`IndicatorTailColor`、`IndicatorDotSize` | stable since 6.2.0 |
 
 LLMS 导出来源：
 

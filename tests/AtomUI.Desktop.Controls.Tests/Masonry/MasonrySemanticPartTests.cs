@@ -199,7 +199,7 @@ public class MasonrySemanticPartTests
         part.Customization.ShouldBe(SemanticPartCustomization.Selector);
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeTrue();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldBe(typeof(MasonryItemStyle));
     }
 

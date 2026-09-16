@@ -133,6 +133,6 @@ public class MenuSemanticPartTests
         part.CrossVisualRoot.ShouldBe(crossVisualRoot);
         part.CrossNestedOwners.ShouldBeTrue();
         part.RuntimeCreated.ShouldBeTrue();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 }

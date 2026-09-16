@@ -60,7 +60,7 @@ WindowNotificationManager (root，对应上游 list)
 - `wrapper` 使用 DockPanel，icon 的右外边距取 `NotificationIconMargin`，并与标题首行顶部对齐。
   `section` 使用 StackPanel，其 `Spacing` 取 `NotificationSectionSpacing`。
 
-两个 owner 的 descriptor `Since` 统一为 `6.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
+两个 owner 的 descriptor `Since` 统一为 `6.2.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
 
 以下类型不持有独立 Semantic descriptor：
 
@@ -90,7 +90,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 通知项根元素：承载 `Title`、`Content`、`Icon`、`Actions`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled` 与进入/退出动效；根表面（背景、边框、圆角、阴影、内边距）投影到模板中的 `Border#Frame`。对应上游 notice root。 |
 | 相关 API | `Title`、`Content`、`Icon`、`Actions`、`ActionsTemplate`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled`、`Close()`、`NotificationClosed` |
 | 相关 Token | `NotificationBg`、`NotificationPadding`、SharedToken（`BoxShadows`、`BorderRadiusLG`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `wrapper`
 
@@ -110,7 +110,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 图标与内容区域的包裹元素：决定 icon 与 section 的排列方向、对齐与图标间距。对应上游 notice wrapper（flex 行，`align-items: flex-start`）。 |
 | 相关 API | `Icon`、`Title`、`Content`（决定子节点可见性） |
 | 相关 Token | `NotificationIconMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -130,7 +130,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 状态图标元素：尺寸、画刷与行高；`NotificationType` 决定默认图标与状态色（Information = `ColorPrimary`，Success = `ColorSuccess`，Warning = `ColorWarning`，Error = `ColorError`）。对应上游 notice icon。 |
 | 相关 API | `Icon`、`NotificationType` |
 | 相关 Token | `NotificationIconSize`、`NotificationIconMargin`、SharedToken（`ColorPrimary`、`ColorSuccess`、`ColorWarning`、`ColorError`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `section`
 
@@ -150,7 +150,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 包含标题与描述的内容区域元素：决定两者的纵向间距与对齐。对应上游 notice section（flex column，`gap: marginXS`）。 |
 | 相关 API | `Title`、`Content` |
 | 相关 Token | `NotificationSectionSpacing` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -170,7 +170,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 标题元素：文本颜色、字号、行高与右侧留白（为关闭按钮预留）。对应上游 notice title。 |
 | 相关 API | `Title` |
 | 相关 Token | SharedToken（`FontSizeLG`、`FontHeightLG`、`ColorTextHeading`）、`NotificationTitlePadding` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `description`
 
@@ -190,7 +190,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 描述元素：正文颜色、字号、行高与换行。对应上游 notice description（在标题下方，不与关闭按钮同排，因此不预留右侧空间）。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken（`FontSize`、`FontHeight`、`ColorText`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `actions`
 
@@ -210,7 +210,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 操作组元素：位于 notice 右下角，承载调用方传入的操作内容；`Actions` 为空时节点隐藏。对应上游 notice actions。 |
 | 相关 API | `Actions`、`ActionsTemplate` |
 | 相关 Token | `NotificationActionsMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `close`
 
@@ -230,7 +230,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 关闭按钮覆盖元素：位置（右上角）、尺寸、圆角、默认/悬停/按下颜色与聚焦样式。对应上游 notice close（absolute top-right）。 |
 | 相关 API | `Close()`、`NotificationClosed` |
 | 相关 Token | `NotificationCloseButtonSize`、`NotificationCloseButtonPadding`、`NotificationCloseButtonMargin`、SharedToken（`BorderRadiusSM`、`IconSizeSM`、`ColorIcon`、`ColorIconHover`、`ColorBgTextHover`、`ColorBgTextActive`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `progress`
 
@@ -250,7 +250,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 进度覆盖元素：展示自动关闭的剩余时间。对应上游 notice progress（absolute bottom）。 |
 | 相关 API | `IsShowProgress`、`Expiration` |
 | 相关 Token | `NotificationProgressHeight`、`NotificationProgressBg`、`NotificationProgressMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `WindowNotificationManager`
 
@@ -272,7 +272,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 通知列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`，管理宿主层安装、通知队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度与边缘内边距语义。 |
 | 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`、`Padding`、`IsStackEnabled`、`StackThreshold`、`Show(INotification)`、`DestroyAll()`、`Dispose()` |
 | 相关 Token | `NotificationTopMargin`、`NotificationBottomMargin`、SharedToken（`EnableMotion`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `listContent`
 
@@ -292,7 +292,7 @@ WindowNotificationManager (root，对应上游 list)
 | 职责 | 通知列表内容元素：notice 的排列方向、顺序、对齐与项间距；对应上游 `listContent` 的 notice 排列/间距语义。 |
 | 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
 | 相关 Token | SharedToken（`EnableMotion`、`UniformlyMargin`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 隐式 `root` 不声明 `.semantic-root` marker。`NotificationCard` 的 `wrapper`、`icon`、`section`、`title`、
 `description`、`actions`、`close` marker 静态声明在 `NotificationCardTheme.axaml` 模板内；`progress` 由控件运行时

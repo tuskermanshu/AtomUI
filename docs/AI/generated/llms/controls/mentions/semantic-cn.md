@@ -32,7 +32,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | Mentions root 是文本值、触发符、候选数据、过滤、弹层与 Form 状态的组织边界。 |
 | 相关 API | 全部 Mentions public API |
 | 相关 Token | MentionsToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `prefix`
 
@@ -52,7 +52,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 输入内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
 | 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -72,7 +72,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 输入内容面板，承载占位符和多行文本 presenter。 |
 | 相关 API | `Value`、`PlaceholderText`、`Lines`、`MinLines`、`MaxLines`、`IsAutoSize` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `placeholder`
 
@@ -92,7 +92,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 空文本状态下的占位符文本。 |
 | 相关 API | `PlaceholderText`、`PlaceholderForeground`（经 TextArea） |
 | 相关 Token | SharedToken（ColorTextPlaceholder） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `input`
 
@@ -112,7 +112,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 多行文本编辑 presenter，承载 `Value` 文本与 caret/selection 状态。 |
 | 相关 API | `Value`、`IsReadOnly`、`IsAutoFocus` |
 | 相关 Token | SharedToken（ColorText、SelectionBackground、CaretBrush） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `clear`
 
@@ -132,7 +132,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 输入区后缀内的清除按钮，`IsAllowClear` 启用且内容非空时可见。 |
 | 相关 API | `IsAllowClear`、`ClearIcon` |
 | 相关 Token | SharedToken（IconSizeXS） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -152,7 +152,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 候选弹层根 `Border`，可定制弹层边框、背景、宽度与圆角。 |
 | 相关 API | `MaxPopupHeight`、`MinPopupWidth`、`PopupContentPadding` |
 | 相关 Token | PopupTokenResource（PopupCornerRadius）、SharedToken（ColorBgElevated） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.list`
 
@@ -172,7 +172,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 弹层内候选列表容器，承载过滤后的候选项。 |
 | 相关 API | `OptionsSource`、`Filter`、`FilterValueSelector`、`OptionTemplate` |
 | 相关 Token | MentionsToken（OptionHeight）、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.listItem`
 
@@ -192,7 +192,7 @@ Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因
 | 职责 | 候选列表中的单个选项条目，运行时容器创建，虚拟化回收复用时 marker 保持。 |
 | 相关 API | `OptionTemplate`、`DisplayCandidateCount` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `ContractType` 不参与 selector 匹配，只约束 `x:SetterTargetType` 与兼容性下界；实现节点为 internal 类型时，
 公共契约承诺到最低 public 基类（`input`→`TextPresenter`、`clear`→`Button`）。

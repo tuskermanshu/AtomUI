@@ -48,11 +48,11 @@ public class TabControlSemanticPartTests
         AssertPart(tabControlDescriptor.Parts.Single(static part => part.Name == "header"),
             HeaderClass, "/template/ .semantic-header", typeof(Border),
             SemanticPartCardinality.Single, typeof(TabControlHeaderStyle), runtimeCreated: false,
-            since: "6.2");
+            since: "6.2.0");
         AssertPart(tabControlDescriptor.Parts.Single(static part => part.Name == "indicator"),
             IndicatorClass, "/template/ .semantic-indicator", typeof(Border),
             SemanticPartCardinality.Single, typeof(TabControlIndicatorStyle), runtimeCreated: false,
-            since: "6.2");
+            since: "6.2.0");
         AssertPart(tabControlDescriptor.Parts.Single(static part => part.Name == "content"),
             ContentClass, "/template/ .semantic-content", typeof(ContentPresenter),
             SemanticPartCardinality.Single, typeof(TabControlContentStyle), runtimeCreated: false);
@@ -68,7 +68,7 @@ public class TabControlSemanticPartTests
         AssertPart(cardDescriptor.Parts.Single(static part => part.Name == "header"),
             HeaderClass, "/template/ .semantic-header", typeof(Border),
             SemanticPartCardinality.Single, typeof(CardTabControlHeaderStyle), runtimeCreated: false,
-            since: "6.2");
+            since: "6.2.0");
         AssertPart(cardDescriptor.Parts.Single(static part => part.Name == "add"),
             AddClass, "/template/ .semantic-add", typeof(IconButton),
             SemanticPartCardinality.Single, typeof(CardTabControlAddStyle), runtimeCreated: false);
@@ -360,7 +360,7 @@ public class TabControlSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
         part.StyleType.ShouldBeNull();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertPart(
@@ -371,7 +371,7 @@ public class TabControlSemanticPartTests
         SemanticPartCardinality cardinality,
         Type styleType,
         bool runtimeCreated,
-        string since = "6.0")
+        string since = "6.2.0")
     {
         part.SelectorClass.ShouldBe(selectorClass);
         part.SelectorRoute.ShouldBe(selectorRoute);

@@ -74,7 +74,7 @@ public class ColorPickerSemanticPartTests
         popupRoot.SelectorRoute.ShouldBe("/template/ .semantic-popup-root");
         popupRoot.ContractType.ShouldBe(typeof(Border));
         popupRoot.CrossVisualRoot.ShouldBeTrue();
-        popupRoot.Since.ShouldBe("6.0");
+        popupRoot.Since.ShouldBe("6.2.0");
         popupRoot.StyleType.ShouldNotBeNull();
     }
 
@@ -105,7 +105,7 @@ public class ColorPickerSemanticPartTests
         popupRoot.SelectorRoute.ShouldBe("/template/ .semantic-popup-root");
         popupRoot.ContractType.ShouldBe(typeof(Border));
         popupRoot.CrossVisualRoot.ShouldBeTrue();
-        popupRoot.Since.ShouldBe("6.0");
+        popupRoot.Since.ShouldBe("6.2.0");
         popupRoot.StyleType.ShouldNotBeNull();
     }
 
@@ -396,7 +396,7 @@ public class ColorPickerSemanticPartTests
         part.ContractType.ShouldBe(contractType);
         part.Cardinality.ShouldBe(cardinality);
         part.Customization.ShouldBe(SemanticPartCustomization.Selector);
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.StyleType.ShouldNotBeNull();
     }
 }

@@ -12,7 +12,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item",
     ContractType = typeof(StepsItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "itemWrapper",
@@ -20,7 +20,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-item-wrapper",
     ContractType = typeof(Border),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "itemIcon",
@@ -28,7 +28,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-item-icon",
     ContractType = typeof(TemplatedControl),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "itemTitle",
@@ -36,7 +36,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-item-title",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "itemSubtitle",
@@ -44,7 +44,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-item-subtitle",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "itemSection",
@@ -52,7 +52,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-item-section",
     ContractType = typeof(Panel),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "itemContent",
@@ -60,7 +60,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-item-content",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "itemRail",
@@ -68,7 +68,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorRoute = "> .semantic-item /template/ .semantic-item-rail",
     ContractType = typeof(DashedBorder),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0",
+    Since = "6.2.0",
     RuntimeCreated = true)]
 public partial class Steps
 {

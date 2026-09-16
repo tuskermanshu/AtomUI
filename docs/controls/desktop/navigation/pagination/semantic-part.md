@@ -4,7 +4,7 @@
 [Pagination 桌面版架构设计](overview.md)，真实模板与生命周期见 [Pagination 桌面版实现原理](implementation.md)，系统级规则见
 [AtomUI Semantic Part 系统设计](../../../../architecture/systems/theming/semantic-parts.md)。
 
-Pagination 的公开语义结构与 Ant Design 6 的 Semantic DOM 对齐：`PaginationSemanticType = { root, item }`（since 6.0.0）。
+Pagination 的公开语义结构与 Ant Design 6 的 Semantic DOM 对齐：`PaginationSemanticType = { root, item }`（since 6.2.0）。
 `root` 是隐式 owner，`item` 覆盖上一页/下一页按钮与页码项。上游 `rc-pagination` 把 `styles.item` 应用到页码项、上一页/下一页
 与 simple pager，但不应用到 jump-prev / jump-next；AtomUI 将这一排除映射到 Ellipsis 单元格——Ellipsis 单元格动态移除
 `semantic-item` marker，不属于 `item` Part。
@@ -54,7 +54,7 @@ Ant Design 没有对应的 Semantic DOM（simple pager 的文本位于 item 内�
 | 职责 | 分页控件根语义区域，承载分页状态、布局入口和主题视觉。 |
 | 相关 API | `CurrentPage`、`PageSize`、`Total`、`SizeType`、`Align`、`IsShowTotalInfo`、`IsShowSizeChanger`、`IsShowQuickJumper` |
 | 相关 Token | Pagination Token + SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是 `Pagination` owner 本身，在控件实例的整个生命周期内始终存在，每个实例恰好一个。它负责：
 
@@ -87,7 +87,7 @@ root 不表示模板中的 `StackPanel#PART_RootLayout`、`PART_Nav` 或各 pres
 | 职责 | 承载单个分页导航单元的尺寸、状态与点击语义。 |
 | 相关 API | `CurrentPage`、`PageSize`、`PaginationItemType` |
 | 相关 Token | `ItemSize`、`ItemSizeSM`、`ItemBg`、`ItemActiveBg` 等 Pagination Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `item` 覆盖分页导航区域内的所有可交互导航单元：
 
@@ -126,7 +126,7 @@ marker；有效可见 item 数量由当前显示区间决定。
 | 职责 | 简洁分页控件根语义区域，承载分页状态、布局入口和主题视觉。 |
 | 相关 API | `CurrentPage`、`PageSize`、`Total`、`SizeType`、`Align`、`IsReadOnly` |
 | 相关 Token | Pagination Token + SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是 `SimplePagination` owner 本身，语义与 `Pagination` 的 `root` 一致。`SimplePaginationTheme.axaml` 的根模板
 同样在 `StackPanel#PART_RootLayoutPart` 外包裹 TemplateBind 根视觉属性（含虚线边框属性）的
@@ -149,7 +149,7 @@ marker；有效可见 item 数量由当前显示区间决定。
 | 职责 | 承载简洁模式上一页/下一页导航单元的尺寸、状态与点击语义。 |
 | 相关 API | `CurrentPage`、`IsReadOnly`、`IsEnabled` |
 | 相关 Token | `ItemSize`、`ItemSizeSM` 等 Pagination Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `item` 是内置模板中的静态标记：`SimplePaginationTheme.axaml` 在 `PART_PreviousNavItem` 与
 `PART_NextNavItem` 上声明 `Classes.semantic-item="True"`，每个内置模板恰好两个 marker。
@@ -174,7 +174,7 @@ marker；有效可见 item 数量由当前显示区间决定。
 | 职责 | 承载简洁模式 "当前页 / 总页数" 信息文本的字体、颜色与对齐等文本样式。 |
 | 相关 API | `CurrentPage`、`Total`、`IsEnabled` |
 | 相关 Token | Pagination Token（`ItemSize`、`ItemSizeSM` 等） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `info` 是内置模板中的静态标记：`SimplePaginationTheme.axaml` 在 `PART_InfoIndicator` 上声明
 `Classes.semantic-info="True"`，每个内置模板恰好一个 marker，不随 `CurrentPage`、`IsReadOnly` 或禁用状态增删。

@@ -48,7 +48,7 @@ public class QRCodeSemanticPartTests
         root.StyleType.ShouldBeNull();
         root.CrossVisualRoot.ShouldBeFalse();
         root.RuntimeCreated.ShouldBeFalse();
-        root.Since.ShouldBe("6.0");
+        root.Since.ShouldBe("6.2.0");
 
         var cover = descriptor.Parts.Single(static part => part.Name == "cover");
         cover.Path.ShouldBe("cover");
@@ -60,7 +60,7 @@ public class QRCodeSemanticPartTests
         cover.StyleType.ShouldBe(typeof(AtomUIQRCode).Assembly.GetType("AtomUI.Theme.Styling.QRCodeCoverStyle"));
         cover.CrossVisualRoot.ShouldBeFalse();
         cover.RuntimeCreated.ShouldBeFalse();
-        cover.Since.ShouldBe("6.0");
+        cover.Since.ShouldBe("6.2.0");
     }
 
     [Fact]

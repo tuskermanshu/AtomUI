@@ -47,7 +47,7 @@ public class ButtonSemanticPartTests
         icon.ContractType.ShouldBe(typeof(Control));
         icon.Cardinality.ShouldBe(SemanticPartCardinality.Multiple);
         icon.Customization.ShouldBe(SemanticPartCustomization.Selector);
-        icon.Since.ShouldBe("6.0");
+        icon.Since.ShouldBe("6.2.0");
 
         var content = descriptor.Parts.Single(static part => part.Name == "content");
         content.Path.ShouldBe("content");
@@ -55,7 +55,7 @@ public class ButtonSemanticPartTests
         content.ContractType.ShouldBe(typeof(ContentPresenter));
         content.Cardinality.ShouldBe(SemanticPartCardinality.Single);
         content.Customization.ShouldBe(SemanticPartCustomization.Selector);
-        content.Since.ShouldBe("6.0");
+        content.Since.ShouldBe("6.2.0");
     }
 
     [Theory]

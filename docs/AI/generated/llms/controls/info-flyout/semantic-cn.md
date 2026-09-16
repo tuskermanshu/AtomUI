@@ -51,7 +51,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | InfoFlyout 触发宿主，是内容、触发方式、定位、动效与弹层打开状态的组织边界。 |
 | 相关 API | 全部 FlyoutHost public API |
 | 相关 Token | FlyoutHostToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -71,7 +71,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | 弹层根节点，承载弹层背景、边框、内边距与箭头，对应上游 Popover `root` 槽位。 |
 | 相关 API | `Flyout`、`FlyoutPresenterTheme`、`ShouldUseOverlayPopup` |
 | 相关 Token | FlyoutHostToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.container`
 
@@ -91,7 +91,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | 弹层内容内层容器，承载背景、边框、圆角与内边距，对应上游 Popover `container` 槽位。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.content`
 
@@ -111,7 +111,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | 弹层用户内容呈现区域，对应上游 Popover `content` 槽位。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.arrow`
 
@@ -131,7 +131,7 @@ owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
 | 职责 | 指向锚点的浮动箭头，对应上游 Popover `arrow` 槽位。 |
 | 相关 API | `IsArrowVisible`、`ArrowPosition`、`ArrowSize` |
 | 相关 Token | ArrowDecoratedBoxToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 

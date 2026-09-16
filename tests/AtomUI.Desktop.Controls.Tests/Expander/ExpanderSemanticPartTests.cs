@@ -502,7 +502,7 @@ public class ExpanderSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
         part.CrossNestedOwners.ShouldBeFalse();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
         part.Theme.ShouldBeNull();
         part.StyleType.ShouldNotBeNull();
         part.StyleType!.Name.ShouldBe(expectedStyleTypeName);

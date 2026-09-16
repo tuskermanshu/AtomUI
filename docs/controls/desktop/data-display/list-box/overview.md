@@ -240,8 +240,8 @@ filter 高亮与 empty 不属于对外 Semantic Part。完整契约见 [ListBox 
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `ListBox` | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界，表面投影到 `Frame` / `ScrollViewer`；对应上游 `.ant-listy`。 | `ItemsSource`、`ItemTemplate`、`SizeType`、`IsBorderless`、`IsSelectable`、`SelectionMode` | `ListBoxToken`、SharedToken | stable since 6.0 |
-| `item` | 每个 `ListBoxItem` 容器 | 条目元素，设置内间距、分割线与悬浮背景；对应上游 `.ant-listy-item`。 | `SizeType`、`ItemHoverBg`、`ItemSelectedBg` | `ItemPadding*`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` | stable since 6.0 |
+| `root` | `ListBox` | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界，表面投影到 `Frame` / `ScrollViewer`；对应上游 `.ant-listy`。 | `ItemsSource`、`ItemTemplate`、`SizeType`、`IsBorderless`、`IsSelectable`、`SelectionMode` | `ListBoxToken`、SharedToken | stable since 6.2.0 |
+| `item` | 每个 `ListBoxItem` 容器 | 条目元素，设置内间距、分割线与悬浮背景；对应上游 `.ant-listy-item`。 | `SizeType`、`ItemHoverBg`、`ItemSelectedBg` | `ItemPadding*`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` | stable since 6.2.0 |
 
 LLMS 导出来源：
 

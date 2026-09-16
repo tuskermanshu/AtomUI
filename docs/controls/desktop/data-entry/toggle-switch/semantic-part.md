@@ -41,7 +41,7 @@ ToggleSwitch 主控件公开 `root`、`content` 与 `indicator` 三个职责区�
 | 职责 | ToggleSwitch root 是开关值、状态、内容与根视觉样式的统一 owner。 |
 | 相关 API | `IsChecked`、`GrooveBackground`、`OnContent`、`OffContent`、`OnContentTemplate`、`OffContentTemplate`、`SizeType`、`IsLoading`、`IsMotionEnabled`、`IsWaveSpiritEnabled`、`TrackHeight`、`TrackMinWidth`、`TrackPadding`、`KnobSize` |
 | 相关 Token | ToggleSwitchToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -61,7 +61,7 @@ ToggleSwitch 主控件公开 `root`、`content` 与 `indicator` 三个职责区�
 | 职责 | 统一表示开关内部 checked / unchecked 内容区域的文本与视觉职责。 |
 | 相关 API | `OnContent`、`OffContent`、`OnContentTemplate`、`OffContentTemplate` |
 | 相关 Token | `ContentIconSize`、`ContentIconSizeSM`、`ExtraInfoFontSize`、`ExtraInfoFontSizeSM`、`InnerMinMargin`、`InnerMaxMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `indicator`
 
@@ -81,7 +81,7 @@ ToggleSwitch 主控件公开 `root`、`content` 与 `indicator` 三个职责区�
 | 职责 | 统一表示开关的滑动把手视觉职责，含把手填充、阴影与 loading 指示。 |
 | 相关 API | `IsChecked`、`IsLoading` |
 | 相关 Token | `HandleBg`、`HandleShadow`、`HandleSize`、`HandleSizeSM`、`SwitchColor`、`OffStateLoadIndicatorColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`indicator` 的 `ContractType` 为

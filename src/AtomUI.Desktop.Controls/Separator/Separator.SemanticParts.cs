@@ -9,12 +9,12 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-rail",
     ContractType = typeof(SeparatorRail),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "content",
     SelectorClass = "semantic-content",
     ContractType = typeof(TextBlock),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class Separator
 {
 }

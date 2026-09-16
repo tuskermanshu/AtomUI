@@ -160,7 +160,7 @@ marker 与路由：
   `itemHeader` / `itemTitle` / `itemContent`）与 `TimelineIndicatorTheme.axaml`（`itemIcon` /
   `itemRail`）上，route 均为 `> .semantic-item /template/ .semantic-*`；`itemIcon` / `itemRail` 经
   `.semantic-indicator` 跳点（`TimelineIndicator#Indicator` 上的 marker，不是 Part）进入 Indicator 模板。
-- 全部八个 item 级 Part 声明 `RuntimeCreated=true`、`Cardinality=Multiple`、`Since="6.0"`，生成器不按
+- 全部八个 item 级 Part 声明 `RuntimeCreated=true`、`Cardinality=Multiple`、`Since="6.2.0"`，生成器不按
   owner 主题资产做静态校验。
 - marker 与状态解耦：title/content/icon 节点在容器模板中常驻，`Label` / `Content` / `IndicatorIcon` 为空
   时渲染空内容但 marker 保留；Mode、Orientation、`IsReverse`、Label 布局与 Pending 切换只改变有效视觉

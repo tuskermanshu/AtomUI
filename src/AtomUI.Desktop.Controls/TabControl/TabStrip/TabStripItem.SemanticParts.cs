@@ -9,19 +9,19 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-close",
     ContractType = typeof(IconButton),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "icon",
     SelectorClass = "semantic-icon",
     ContractType = typeof(IconPresenter),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "label",
     SelectorClass = "semantic-label",
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Single,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class TabStripItem
 {
 }

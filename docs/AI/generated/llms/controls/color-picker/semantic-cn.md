@@ -31,7 +31,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 触发器容器：边框、圆角、尺寸、状态与布局的组织边界。 |
 | 相关 API | `SizeType`、`Status`、`BorderBrush`、`TriggerPadding` 等 owner public API |
 | 相关 Token | ColorPickerToken、SharedToken（ColorBorder、BorderRadius*） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -51,7 +51,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 触发器内的色块容器，承载底色、空色斜线与棋盘格呈现。 |
 | 相关 API | `ColorBlockSize`、`ColorBlockBackground` |
 | 相关 Token | ColorPickerHandlerSize*、ColorBlockInnerShadows |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -71,7 +71,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 色块颜色元素，呈现实际选择的颜色填充。 |
 | 相关 API | —（随 owner 的 `Value` 联动，不单独开放） |
 | 相关 Token | ColorBlockInnerShadows |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `description`
 
@@ -91,7 +91,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 触发器文本区：单色模式显示格式化颜色文本；渐变模式显示逐 stop 文本格。 |
 | 相关 API | `IsTextVisible`、`ColorTextFormatter`（attached）、`Format` |
 | 相关 Token | TriggerTextMargin、SharedToken（FontSize*、ColorText） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `popup.root`
 
@@ -111,7 +111,7 @@ marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板�
 | 职责 | 弹层根容器：承载弹层边框、背景类视觉的定制入口；弹层 View 本身由 `CreatePresenter()` 动态创建，不经此 Part 发布。 |
 | 相关 API | `IsPopupPinnedOpen`（6.0 公共化）、`Placement`、`IsArrowVisible` |
 | 相关 Token | ColorPickerInsetShadow、SharedToken（ColorBgElevated） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### GradientColorPicker 差异
 

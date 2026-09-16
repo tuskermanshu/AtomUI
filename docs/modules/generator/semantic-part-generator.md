@@ -86,6 +86,9 @@ Since
 RuntimeCreated
 ```
 
+`Since` 是具体的三段式发布版本（`major.minor.patch`，例如 `6.2.0`）：生成器按声明契约校验该格式，只写版本线的
+`6.0` / `6.2` 会报告 `ATOMUIGEN038` 并阻断 manifest 与 Style 输出。缺失 `Since` 仍为 `ATOMUIGEN031` warning。
+
 静态根模板 Part 未声明 `SelectorRoute` 时生成器规范化为 `/template/ .<SelectorClass>`。`RuntimeCreated=true` 必须显式提供
 route，防止生成器、Gallery 或文档回退成无 owner 边界的 logical descendant。
 
@@ -376,6 +379,7 @@ recycle 和 owner 切换后的实际 marker。
 | `ATOMUIGEN029` | Error | `ContractType` 不是 public `StyledElement`。 |
 | `ATOMUIGEN030` | Error | `SelectorAndTheme` 的 public get/set `ControlTheme` 属性契约非法。 |
 | `ATOMUIGEN031` | Warning | Part 未声明 `Since`。 |
+| `ATOMUIGEN038` | Error | Part 的 `Since` 不是 `major.minor.patch` 三段式发布版本（如版本线 `6.0` / `6.2`、带 `v` 前缀或预发布后缀）。 |
 | `ATOMUIGEN032` | Error | 某个模板的 marker 数量不满足 `Single`、`Optional` 或 `Multiple`。 |
 | `ATOMUIGEN033` | Error | marker 节点类型不能赋值给 `ContractType`。 |
 | `ATOMUIGEN034` | Error | Control 声明了静态 Part，但没有适用的可分析 ControlTemplate。 |

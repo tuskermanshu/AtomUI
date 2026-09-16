@@ -19,7 +19,7 @@
     子菜单 `subMenu.item`、`subMenu.itemIcon`、`subMenu.itemContent`、`subMenu.itemTitle`、`subMenu.list`，以及
     `popup.root`；新增 `NavMenu.SemanticParts.cs` descriptor，`NavMenu` 改为 partial，生成 `NavMenuItemStyle`、
     `NavMenuItemIconStyle`、`NavMenuSubMenuItemStyle`、`NavMenuPopupRootStyle` 等 11 个 `AtomUI.Theme.Styling` 类型
-    （since 6.0）。
+    （since 6.2.0）。
   - `NavMenuItem`、`NavMenuGroupItem`、`NavMenuDividerItem` 是 internal 容器，不能持有 descriptor，也不能作为
     `ContractType`，因此 Part 全部声明在唯一的 public owner `NavMenu` 上；菜单项容器的 `ContractType` 取最近 public
     基类 `HeaderedSelectingItemsControl`，弹层框体取 `Border`。

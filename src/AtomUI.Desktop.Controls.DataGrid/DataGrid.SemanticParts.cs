@@ -14,13 +14,13 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-section",
     SelectorRoute = "/template/ .semantic-section",
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "header.wrapper",
     SelectorClass = "semantic-header-wrapper",
     SelectorRoute = "/template/ .semantic-header-wrapper",
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "header.cell",
     SelectorClass = "semantic-header-cell",
@@ -28,19 +28,19 @@ namespace AtomUI.Desktop.Controls;
     ContractType = typeof(ContentControl),
     Cardinality = SemanticPartCardinality.Multiple,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "title",
     SelectorClass = "semantic-title",
     SelectorRoute = "/template/ .semantic-title",
     ContractType = typeof(PixelAlignedBorder),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "body.wrapper",
     SelectorClass = "semantic-body-wrapper",
     SelectorRoute = "/template/ .semantic-body-wrapper",
     ContractType = typeof(DataGridRowsPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "body.row",
     SelectorClass = "semantic-body-row",
@@ -48,7 +48,7 @@ namespace AtomUI.Desktop.Controls;
     ContractType = typeof(TemplatedControl),
     Cardinality = SemanticPartCardinality.Multiple,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "body.cell",
     SelectorClass = "semantic-body-cell",
@@ -56,26 +56,26 @@ namespace AtomUI.Desktop.Controls;
     ContractType = typeof(DataGridCell),
     Cardinality = SemanticPartCardinality.Multiple,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "footer",
     SelectorClass = "semantic-footer",
     SelectorRoute = "/template/ .semantic-footer",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "content",
     SelectorClass = "semantic-content",
     SelectorRoute = "/template/ .semantic-content",
     ContractType = typeof(Grid),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "pagination.root",
     SelectorClass = "semantic-pagination-root",
     SelectorRoute = "/template/ .semantic-pagination-root",
     ContractType = typeof(Pagination),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "pagination.item",
     SelectorClass = "semantic-item",
@@ -83,7 +83,7 @@ namespace AtomUI.Desktop.Controls;
     ContractType = typeof(ContentControl),
     Cardinality = SemanticPartCardinality.Multiple,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class DataGrid
 {
 }

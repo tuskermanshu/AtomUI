@@ -34,7 +34,7 @@ Avalonia 原生 owner 样式（`atom|Form` 类型 selector、ControlTheme、实�
 | 职责 | 承载字段布局、验证状态、内容接入和 owner-scoped Semantic Style 入口。 |
 | 相关 API | `Layout`、`LabelAlign`、`ValidateStatus`、`ValidateResult`、`IsRequired`、`Content` |
 | 相关 Token | `FormToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 FormItem 整体 `Margin`、`Opacity`、对齐和
 尺寸约束；标签列与内容列的 Grid 几何由 `PART_BodyLayout` 布局算法拥有（见实现原理 §7.1），不通过 Semantic
@@ -59,7 +59,7 @@ descriptor。
 | 职责 | 承载 `LabelText` 的文本呈现，包含颜色、字号、对齐和换行。 |
 | 相关 API | `LabelText`、`LabelAlign`、`LabelWrapping`、`IsHideItemLabel` |
 | 相关 Token | `LabelColor`、`LabelFontSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `label` 对齐上游 `classNames.label` 的文本语义：标记（冒号、必填星号、可选文案、tooltip 图标和自定义
 mark）拥有各自的 token 驱动样式，不属于 `label` Part。它适合定制 `Foreground`、`FontSize`、`TextAlignment`、
@@ -88,7 +88,7 @@ Semantic Style 覆盖。
 | 职责 | 承载 `Content` 输入控件的最终呈现位置。 |
 | 相关 API | `Content`、`IsValidateContentType`、`ChildrenSpacing` |
 | 相关 Token | `FormItemSpacing`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `content` 对齐上游 `classNames.content` 语义，是内容呈现区域，
 不等于用户 `Content` 子控件本身。适合定制 `Margin`、`Opacity`、`VerticalAlignment` 和 presenter 级排版属性；
@@ -117,7 +117,7 @@ owner 契约拥有。
 | 职责 | 承载 `Extra` 与 `ExtraTemplate` 的最终呈现。 |
 | 相关 API | `Extra`、`ExtraTemplate` |
 | 相关 Token | SharedToken `ColorTextDescription`、`ControlHeightSM` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `extra` 对齐上游 `classNames.extra` 语义，是 `Extra` API 的呈现区域。呈现位置与上游一致：位于输入控件
 与 help 区域（`additional` 区）下方、与内容列对齐，不占用控件水平空间；默认主题使用说明文字色
@@ -143,7 +143,7 @@ owner 契约拥有。
 | 职责 | 承载验证消息与 `Help` 文案的聚合展示区域。 |
 | 相关 API | `Help`、`ValidateStatus`、`ErrorMessageForeground`、`WarningMessageForeground` |
 | 相关 Token | `FormItemSpacing`、`ColorErrorText`、`ColorWarningText`、`ColorTextDescription` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `help` 对齐上游 `classNames.help`（ErrorList 根节点）语义，覆盖同一段视觉职责：验证错误消息、警告
 消息和 `Help` 帮助文案共同居住在该区域，逐条内容以 `helpItem` 节点呈现（§1.6）。`HasErrorOrWarningMsg=False`
@@ -172,7 +172,7 @@ marker 始终存在，数量语义为 `Single`。
 | 职责 | 承载单条验证错误、警告消息或 `Help` 帮助文案的文本呈现。 |
 | 相关 API | `Help`、`ValidateStatus`、`ErrorMessageForeground`、`WarningMessageForeground` |
 | 相关 Token | `ColorErrorText`、`ColorWarningText`、`ColorTextDescription` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `helpItem` 对齐上游 `classNames.helpItem`（ErrorList 逐条消息项）语义。FormItem 在验证结果变化时以代码逐条
 创建消息 `TextBlock`，使用生成的 semantic class 常量添加 marker，并按"错误与警告消息在前、`Help` 文案在后"

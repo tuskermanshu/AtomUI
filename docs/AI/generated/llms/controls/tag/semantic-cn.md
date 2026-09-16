@@ -16,7 +16,7 @@ Tag 家族由两个独立 owner 公开 Semantic Part，与上游稳定 Semantic 
 - 上游 `CheckableTag` 没有独立 Semantic DOM Props（不消费 `useMergeSemantic`），AtomUI 同样不为其声明
   descriptor；其职责通过 `CheckableTagGroup` 的 `item` Part 对外公开。
 
-AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 以下类型不持有独立 Semantic descriptor：
 
@@ -47,7 +47,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | Tag root 是颜色类别、Variant、内容与关闭入口的统一 owner；根表面（背景、边框、圆角、字体、内边距）投影到 `Frame`。 |
 | 相关 API | `TagColor`、`Variant`、`Text`、`Icon`、`CloseIcon`、`IsClosable`、`Closed` |
 | 相关 Token | `DefaultBg`、`DefaultColor`、`TagFontSize`、`TagPadding`、`SolidTextColor`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -67,7 +67,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示 Tag 的前置图标区域：图标尺寸、画刷（随 root 前景）与可见性；对应上游 Tag 的 `icon` 语义键。 |
 | 相关 API | `Icon` |
 | 相关 Token | `TagIconSize` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `content`
 
@@ -87,7 +87,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示 Tag 的文本区域：文本呈现、行高、图文/文关内联间距；对应上游 Tag 的 `content` 语义键。 |
 | 相关 API | `Text` |
 | 相关 Token | `TagLineHeight`、`TagTextPaddingInline` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `close`
 
@@ -107,7 +107,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示 Tag 的关闭入口：关闭图标尺寸、画刷（随 root 前景）与可见性；承载 `Closed` 事件触发；对应上游 `.ant-tag-close-icon`。 |
 | 相关 API | `CloseIcon`、`IsClosable`、`Closed` |
 | 相关 Token | `TagCloseIconSize`、SharedToken（`IconSizeXS`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `CheckableTagGroup`
 
@@ -129,7 +129,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | CheckableTagGroup root 是 Options 数据、单选/多选模式、公开选择值与 Form 语义的统一 owner。 |
 | 相关 API | `Options`、`ItemTemplate`、`IsMultiple`、`CheckedItem`、`CheckedItems`、`DefaultCheckedItem`、`DefaultCheckedItems`、`ItemSpacing`、`LineSpacing`、`Orientation`、`IsMotionEnabled`、`CheckedChanged` |
 | 相关 Token | SharedToken（`SpacingXS`、`EnableMotion`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -149,7 +149,7 @@ AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示 Group 内单个可交互选项：背景/前景选择视觉、内边距、圆角、光标与 checked/hover/pressed/disabled 状态；对应上游 `.ant-tag-checkable-group-item`。 |
 | 相关 API | `CheckableTag.Content`、`CheckableTag.Icon`、`CheckableTag.IsChecked`、`IsMultiple` |
 | 相关 Token | `TagFontSize`、`TagLineHeight`、`TagPadding`、`TagIconSize`、SharedToken（`ColorPrimary*`、`ColorTextLightSolid`、`ColorFillSecondary`、`ColorTextDisabled`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。Tag 的 `icon`、`content`、`close` marker 声明在
 `TagTheme.axaml` 模板内的 `IconPresenter#IconPresenter`、`TextBlock#TagTextLabel` 与

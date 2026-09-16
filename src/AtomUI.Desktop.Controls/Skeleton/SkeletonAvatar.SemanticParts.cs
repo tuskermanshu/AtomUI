@@ -8,7 +8,7 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-content",
     ContractType = typeof(Border),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class SkeletonAvatar
 {
 }

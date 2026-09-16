@@ -12,7 +12,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(FlyoutPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.container",
     SelectorClass = "semantic-popup-container",
@@ -20,7 +20,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.content",
     SelectorClass = "semantic-popup-content",
@@ -28,7 +28,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.arrow",
     SelectorClass = "semantic-popup-arrow",
@@ -36,7 +36,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(ArrowIndicator),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class FlyoutHost
 {
 }

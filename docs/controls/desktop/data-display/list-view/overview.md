@@ -330,15 +330,15 @@ LLMS 语义区域：
 下表是 LLMS 语义导出使用的区域映射。Semantic Part 的 owner 是 `ListView`，对应上游 Ant Design 6.6.0 新增的
 `Listy` 组件（`import { Listy } from 'antd'`，高性能虚拟化列表，旧 `List` 已 deprecated）：`root`、`item`、
 `groupHeader` 三个 Part 自上游 6.6.0 公开，`root` 由生成器为带非 root Part 的 owner 隐式加入；AtomUI 三个 Part
-随 Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.0`。selection（`SelectedIndicator`）、pagination、
+随 Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.2.0`。selection（`SelectedIndicator`）、pagination、
 empty/loading 与普通条目 content 不属于对外 Semantic Part。完整契约见 [ListView Semantic Part 契约](semantic-part.md)，
 设计与证据见 [ListView 桌面版实现原理](implementation.md) 的 Semantic Part 处置一节。
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `ListView` | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界，表面投影到 `Frame` / `ScrollViewer`；对应上游 `.ant-listy`。 | `ItemsSource`、`ItemTemplate`、`Height`、`SizeType`、`IsBorderless`、`IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` | `ListViewToken`、SharedToken | stable since 6.0 |
-| `item` | 每个非分组 `ListViewItem` 容器 | 条目元素，设置内间距、分割线与悬浮背景；对应上游 `.ant-listy-item`。 | `SizeType`、`ItemHoverBg`、`ItemSelectedBg`、`ItemClickMode` | `ItemPadding*`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` | stable since 6.0 |
-| `groupHeader` | 每个分组标题容器（专用 `GroupHeaderItem`，`IsGroupItem` 恒为 true） | 分组标题元素，设置吸顶定位与背景色；对应上游 `.ant-listy-group-header`。 | `IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` | `GroupHeaderColor`、`ColorBgContainer`、`ColorFillAlter`、`FontWeightStrong` | stable since 6.0 |
+| `root` | `ListView` | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界，表面投影到 `Frame` / `ScrollViewer`；对应上游 `.ant-listy`。 | `ItemsSource`、`ItemTemplate`、`Height`、`SizeType`、`IsBorderless`、`IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` | `ListViewToken`、SharedToken | stable since 6.2.0 |
+| `item` | 每个非分组 `ListViewItem` 容器 | 条目元素，设置内间距、分割线与悬浮背景；对应上游 `.ant-listy-item`。 | `SizeType`、`ItemHoverBg`、`ItemSelectedBg`、`ItemClickMode` | `ItemPadding*`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` | stable since 6.2.0 |
+| `groupHeader` | 每个分组标题容器（专用 `GroupHeaderItem`，`IsGroupItem` 恒为 true） | 分组标题元素，设置吸顶定位与背景色；对应上游 `.ant-listy-group-header`。 | `IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` | `GroupHeaderColor`、`ColorBgContainer`、`ColorFillAlter`、`FontWeightStrong` | stable since 6.2.0 |
 
 LLMS 导出来源：
 

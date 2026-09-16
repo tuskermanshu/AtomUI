@@ -23,7 +23,7 @@ Expander 是单面板折叠容器，与上游 `Collapse` 的单个面板承担�
 owner 独立通过准入 Gate，移入第二批计划执行（见
 [第二批任务清单](../../../../superpowers/plans/2026-08-12-semantic-part-batch-2-collections-containers.md)任务 16）。
 
-AtomUI 五个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 五个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 Expander 不引入额外 owner：它是单面板控件，没有 item 容器或独立子控件 owner，五个 Part 全部属于 `Expander` 自身。
 
@@ -47,7 +47,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | Expander root 是单面板展开状态、展开方向、视觉模式与根边框样式的统一 owner。 |
 | 相关 API | `IsExpanded`、`ExpandDirection`、`IsBorderless`、`IsGhostStyle`、`BorderThickness`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled`、`HeaderPadding`、`ContentPadding`、`Header`、`Content`、`AddOnContent` |
 | 相关 Token | ExpanderToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -67,7 +67,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | 统一表示头部区域的背景、内边距、字体/行高与命中光标；对应上游 `.ant-collapse-header` 的内边距、颜色、行高、光标与过渡动画职责。 |
 | 相关 API | `SizeType`、`HeaderPadding`、`TriggerType`、`IsGhostStyle`、`IsEnabled`、`ExpandDirection` |
 | 相关 Token | `HeaderBg`、`HeaderPadding`、`HeaderPaddingSM`、`HeaderPaddingLG`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -87,7 +87,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | 统一表示展开/收起箭头的大小、位置、边距与旋转视觉；对应上游 `.ant-collapse-expand-icon` 的字体大小、过渡动画与旋转变换职责。 |
 | 相关 API | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsExpanded`、`ExpandDirection`、`HeaderPadding`、`TriggerType`、`IsEnabled` |
 | 相关 Token | `IconSizeSM`、`LeftExpandButtonHMargin`、`RightExpandButtonHMargin`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -107,7 +107,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | 统一表示标题文字的布局、颜色、字体与对齐；对应上游 `.ant-collapse-title` 的自适应布局与边距职责。 |
 | 相关 API | `Header`、`HeaderTemplate`、`SizeType`、`IsEnabled`、`HeaderPadding` |
 | 相关 Token | `ColorTextHeading`、`ColorTextDisabled`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -127,7 +127,7 @@ Expander 不引入额外 owner：它是单面板控件，没有 item 容器或�
 | 职责 | 统一表示内容区域的内边距、背景与内容呈现；对应上游 `.ant-collapse-body` 的内边距、颜色与背景职责。 |
 | 相关 API | `Content`、`ContentTemplate`、`ContentPadding`、`SizeType`、`IsBorderless`、`IsGhostStyle` |
 | 相关 Token | `ContentPadding`、`ContentPaddingSM`、`ContentPaddingLG`、`ContentBg`、`HeaderBg`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header` 的承载节点是公开的

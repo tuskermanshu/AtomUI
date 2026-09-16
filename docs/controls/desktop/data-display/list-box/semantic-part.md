@@ -29,7 +29,7 @@ Part 的 owner 隐式加入，不生成 Style；`item` 是运行时由 ListBox �
 | 职责 | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界；对应上游 `.ant-listy`。 |
 | 相关 API | `ItemsSource`、`ItemTemplate`、`SizeType`、`IsBorderless`、`IsSelectable`、`SelectionMode` |
 | 相关 Token | `ListBoxToken`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -49,7 +49,7 @@ Part 的 owner 隐式加入，不生成 Style；`item` 是运行时由 ListBox �
 | 职责 | 条目元素，设置内间距、底部分割线与悬浮背景；对应上游 `.ant-listy-item`。 |
 | 相关 API | `SizeType`、`ItemHoverBg`、`ItemSelectedBg` |
 | 相关 Token | `ItemPaddingSM`、`ItemPadding`、`ItemPaddingLG`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 的 marker `.semantic-item` 在 `ListBoxItem` 创建路径
 一次性添加，`PrepareContainerForItemOverride` 幂等补齐（覆盖用户直接提供容器与 `CandidateListItem` 派生容器的

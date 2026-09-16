@@ -15,13 +15,13 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-primary",
     SelectorRoute = "/template/ .semantic-primary",
     ContractType = typeof(Button),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "secondary",
     SelectorClass = "semantic-secondary",
     SelectorRoute = "/template/ .semantic-secondary",
     ContractType = typeof(Button),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.root",
     SelectorClass = "semantic-popup-root",
@@ -29,7 +29,7 @@ namespace AtomUI.Desktop.Controls;
     CrossVisualRoot = true,
     RuntimeCreated = true,
     ContractType = typeof(ArrowDecoratedBox),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "itemTitle",
     SelectorClass = "semantic-item-title",
@@ -39,7 +39,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     ContractType = typeof(ContentPresenter),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "item",
     SelectorClass = "semantic-item",
@@ -48,7 +48,7 @@ namespace AtomUI.Desktop.Controls;
     RuntimeCreated = true,
     ContractType = typeof(MenuItem),
     Cardinality = SemanticPartCardinality.Multiple,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "itemContent",
     SelectorClass = "semantic-item-content",
@@ -57,7 +57,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "itemIcon",
     SelectorClass = "semantic-item-icon",
@@ -66,7 +66,7 @@ namespace AtomUI.Desktop.Controls;
     CrossNestedOwners = true,
     RuntimeCreated = true,
     ContractType = typeof(IconPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class SplitButton
 {
 }

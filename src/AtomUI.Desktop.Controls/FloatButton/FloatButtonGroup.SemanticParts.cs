@@ -8,12 +8,12 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-trigger",
     ContractType = typeof(FloatButton),
     Cardinality = SemanticPartCardinality.Optional,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "list",
     SelectorClass = "semantic-list",
     ContractType = typeof(TemplatedControl),
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class FloatButtonGroup
 {
 }

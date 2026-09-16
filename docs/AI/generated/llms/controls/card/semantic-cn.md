@@ -27,7 +27,7 @@
 | 职责 | Card root 是外观、尺寸、加载、悬停和内容组合的统一 owner。 |
 | 相关 API | 全部 Card public API |
 | 相关 Token | CardToken、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `header`
 
@@ -47,7 +47,7 @@
 | 职责 | 表示完整头部表面和标题、额外内容的共同布局边界。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Extra`、`ExtraTemplate`、`SizeType`、`IsInnerMode` |
 | 相关 Token | Header、Extra、Border、Radius Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -67,7 +67,7 @@
 | 职责 | 表示 Card 标题的展示与排版区域。 |
 | 相关 API | `Header`、`HeaderTemplate` |
 | 相关 Token | Header typography Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `extra`
 
@@ -87,7 +87,7 @@
 | 职责 | 表示头部尾侧的辅助内容区域。 |
 | 相关 API | `Extra`、`ExtraTemplate` |
 | 相关 Token | `ExtraColor`、Header padding Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `cover`
 
@@ -107,7 +107,7 @@
 | 职责 | 表示封面内容的裁剪、圆角和布局边界。 |
 | 相关 API | `Cover`、`CoverTemplate` |
 | 相关 Token | Shared radius Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `body`
 
@@ -127,7 +127,7 @@
 | 职责 | 表示普通、Meta、Grid、Tabs 和 Loading 内容共享的主体表面。 |
 | 相关 API | `Content`、`ContentTemplate`、`IsLoading`、`SizeType` |
 | 相关 Token | Body padding Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `actions`
 
@@ -147,7 +147,7 @@
 | 职责 | 表示底部操作组的完整表面、均分布局和分隔线边界。 |
 | 相关 API | `Actions`、`IsMotionEnabled` |
 | 相关 Token | Actions、Border、Radius Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 1.2 `CardMetaContent`
 
@@ -169,7 +169,7 @@
 | 职责 | Meta root 是头像、标题和描述组合的统一 owner。 |
 | 相关 API | `Avatar`、`Header`、`HeaderTemplate`、`Content`、`ContentTemplate` |
 | 相关 Token | Shared typography、spacing Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `section`
 
@@ -189,7 +189,7 @@
 | 职责 | 表示标题与描述共同占用的详情布局区域。 |
 | 相关 API | `Header`、`HeaderTemplate`、`Content`、`ContentTemplate` |
 | 相关 Token | Shared spacing Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `avatar`
 
@@ -209,7 +209,7 @@
 | 职责 | 表示 Meta 头像内容的展示与布局区域。 |
 | 相关 API | `Avatar` |
 | 相关 Token | Shared spacing Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `title`
 
@@ -229,7 +229,7 @@
 | 职责 | 表示 Meta 标题的展示与排版区域。 |
 | 相关 API | `Header`、`HeaderTemplate` |
 | 相关 Token | Shared heading typography Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `description`
 
@@ -249,7 +249,7 @@
 | 职责 | 表示 Meta 描述内容的展示与排版区域。 |
 | 相关 API | `Content`、`ContentTemplate` |
 | 相关 Token | Shared description typography Token |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 所有 root 都是隐式 Part，不添加 `.semantic-root`。`ContractType` 是 Setter 可以稳定依赖的最低 public 类型，并通过
 `x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。

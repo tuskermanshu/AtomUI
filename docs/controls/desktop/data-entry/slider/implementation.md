@@ -82,10 +82,10 @@ visual tree；这些节点都设置外层 `Slider` 为 TemplatedParent，因此 
 | --- | --- | --- | --- | --- | --- | --- |
 | Slider | public control | `Slider.cs` / `SliderTheme.axaml` | 调用方与 Avalonia 控件树 | 全部 Slider API | public | 用户可直接创建和绑定。 |
 | `PART_Track` | `SliderTrack` | `SliderTheme.axaml` | Slider template | Template Part、轨道画刷、方向和 Range 状态 | template-stable | 自定义主题必须保留名称与类型。 |
-| rail / tracks 元素 | `Border` | `SliderTrack` attach 时创建 | `SliderTrack` | Semantic Part `rail` / `tracks` | stable since 6.0 | 通过 `SliderRailStyle` / `SliderTracksStyle` 定制，不得依赖 internal 创建路径。 |
-| segment 元素 | `Border` | `SliderTrack` 按值数量同步 | `SliderTrack` | Semantic Part `track` | stable since 6.0 | 通过 `SliderTrackStyle` 定制。 |
+| rail / tracks 元素 | `Border` | `SliderTrack` attach 时创建 | `SliderTrack` | Semantic Part `rail` / `tracks` | stable since 6.2.0 | 通过 `SliderRailStyle` / `SliderTracksStyle` 定制，不得依赖 internal 创建路径。 |
+| segment 元素 | `Border` | `SliderTrack` 按值数量同步 | `SliderTrack` | Semantic Part `track` | stable since 6.2.0 | 通过 `SliderTrackStyle` 定制。 |
 | mark 元素 | `SliderMarksElement` | `SliderTrack` attach 时创建 | `SliderTrack` | `Marks` 视觉 | internal-observable | 不属于 Semantic Part，可用于理解行为，不得依赖。 |
-| 动态 thumb | `SliderThumb` | `SliderTrack.EnsureThumbs()` | `SliderTrack` | Semantic Part `handle`、handle 数量、disabled、Tooltip 和交互 | stable since 6.0 | 通过 `SliderHandleStyle` 定制，不得依赖固定数量或固定名称。 |
+| 动态 thumb | `SliderThumb` | `SliderTrack.EnsureThumbs()` | `SliderTrack` | Semantic Part `handle`、handle 数量、disabled、Tooltip 和交互 | stable since 6.2.0 | 通过 `SliderHandleStyle` 定制，不得依赖固定数量或固定名称。 |
 | `RenderContextData` | private geometry cache | `SliderTrack.cs` | `SliderTrack` | 轨道和 mark 的可观察几何 | private | 仅作为实现维护依据，不是扩展 API。 |
 
 ## 6. 生命周期与模板接入

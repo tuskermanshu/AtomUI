@@ -12,7 +12,7 @@ Segmented 主控件公开 `root`、`item`、`icon` 与 `label` 四个职责区�
   渲染路径消费；
 - 上游选中滑块（MotionThumb）没有 Semantic key，AtomUI 同样不公开。
 
-AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.0`。
+AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
 
 `SegmentedItem` 不持有独立 Semantic descriptor：
 
@@ -43,7 +43,7 @@ AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | Segmented root 是选项数据、选择状态、方向、形状与轨道表面样式的统一 owner。轨道背景由 owner `Render` 直接绘制，`Frame` 承载圆角、内边距与内容裁剪。 |
 | 相关 API | `ItemsSource`、`ItemTemplate`、`SelectedIndex`、`SelectedItem`、`SelectionChanged`、`SizeType`、`Orientation`、`Shape`、`IsExpanding`、`IsMotionEnabled` |
 | 相关 Token | `TrackBg`、`TrackPadding`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `item`
 
@@ -63,7 +63,7 @@ AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示单个选项容器的背景、前景、圆角、内边距、最小高度、光标与选择 / 悬浮 / 按压 / 禁用视觉；对应上游 `.ant-segmented-item`。 |
 | 相关 API | `SegmentedItem.Icon`、`SegmentedItem.Content`、`SegmentedItem.IsSelected`、`SizeType`、`Shape`、`IsMotionEnabled` |
 | 相关 Token | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、`ItemHoverBg`、`ItemActiveBg`、`ItemSelectedBg`、`ItemMinHeightLG`、`ItemMinHeight`、`ItemMinHeightSM`、`SegmentedItemPadding`、`SegmentedItemPaddingSM` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `icon`
 
@@ -83,7 +83,7 @@ AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示每个选项的图标区域：图标画刷状态色、图标尺寸与可见性；对应上游 `.ant-segmented-item-icon`。 |
 | 相关 API | `SegmentedItem.Icon`、`SizeType` |
 | 相关 Token | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、SharedToken（`IconSizeLG` / `IconSize` / `IconSizeSM`、`ColorTextDisabled`） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 #### `label`
 
@@ -103,7 +103,7 @@ AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `
 | 职责 | 统一表示每个选项的文本区域：文本呈现、居中对齐、省略与图文间距；对应上游 `.ant-segmented-item-label`。 |
 | 相关 API | `SegmentedItem.Content`、`SegmentedItem.ContentTemplate` |
 | 相关 Token | `SegmentedItemContentMargin` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 `root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 的 marker `.semantic-item` 在 `SegmentedItem` 创建路径
 一次性添加，`PrepareContainerForItemOverride` 幂等补齐（覆盖回收容器与用户直接提供容器的路径）。`icon`、`label`

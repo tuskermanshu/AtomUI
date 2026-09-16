@@ -25,7 +25,7 @@ AtomUI 映射：
 - `SplitterHandle` 是 internal 交互边界，其公开语义通过 `Splitter` 的 `dragger` Part 表达，不单独声明 descriptor。
 - `SplitterDragBar` 是 internal 拖拽入口，作为 `dragger` Part 的节点出现，不单独声明 descriptor。
 
-所有 Part 的 `Since` 统一为 `6.0`。
+所有 Part 的 `Since` 统一为 `6.2.0`。
 
 ## 2. Semantic Parts
 
@@ -47,7 +47,7 @@ AtomUI 映射：
 | 职责 | 分割容器根：承载 `Children` 面板集合、`Orientation` 方向语义、附加面板属性 scope、resize 事件与 Token scope；作为全部 Part 的 owner-scoped Selector 作用域边界。对应上游 `.ant-splitter`。 |
 | 相关 API | `Orientation`、`IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius`、`Splitter.Size`、`Splitter.IsResizable`、`Splitter.IsCollapsed`、`Splitter.Collapsible`、`ResizeStarted` / `ResizeDelta` / `ResizeCompleted` |
 | 相关 Token | `SplitBarHandleSize`、SharedToken |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.2 `panel`
 
@@ -67,7 +67,7 @@ AtomUI 映射：
 | 职责 | 统一表示可调整尺寸的内容面板：面板背景、边框、裁剪与排版入口；面板尺寸与约束由附加属性驱动。对应上游 `.ant-splitter-panel`。 |
 | 相关 API | `Splitter.Size`、`Splitter.DefaultSize`、`Splitter.MinSize`、`Splitter.MaxSize`、`Splitter.IsResizable`、`Splitter.IsCollapsed`、`Splitter.Collapsible` |
 | 相关 Token | 无专属 Token（面板内容与外观属于用户内容容器） |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.3 `dragger`
 
@@ -87,7 +87,7 @@ AtomUI 映射：
 | 职责 | 统一表示相邻面板之间的拖拽命中区：drag 输入入口、方向 cursor 与 grip 视觉宿主；命中区域尺寸由 handle 布局写入。对应上游 `.ant-splitter-bar`。 |
 | 相关 API | `IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius` |
 | 相关 Token | `SplitTriggerSize`、`SplitBarDraggableSize`、`HandleLineThickness`、`HandleLineColor`、`HandleLineHoverColor`、`HandleLineDragColor` |
-| 稳定性 | stable since 6.0 |
+| 稳定性 | stable since 6.2.0 |
 
 ### 2.4 marker 放置与路由
 

@@ -11,37 +11,37 @@ namespace AtomUI.Desktop.Controls;
     SelectorClass = "semantic-prefix",
     SelectorRoute = "/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix",
     ContractType = typeof(ContentPresenter),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "content",
     SelectorClass = "semantic-content",
     ContractType = typeof(Panel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "placeholder",
     SelectorClass = "semantic-placeholder",
     SelectorRoute = "/template/ .semantic-content > .semantic-placeholder",
     ContractType = typeof(TextBlock),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "input",
     SelectorClass = "semantic-input",
     SelectorRoute = "/template/ .semantic-content > .semantic-input",
     ContractType = typeof(TextBox),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "suffix",
     SelectorClass = "semantic-suffix",
     SelectorRoute = "/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix",
     ContractType = typeof(StackPanel),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "clear",
     SelectorClass = "semantic-clear",
     SelectorRoute = ">> .semantic-scope-handle /template/ .semantic-clear",
     CrossNestedOwners = true,
     ContractType = typeof(AvaloniaButton),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "item",
     SelectorClass = "semantic-item",
@@ -50,27 +50,27 @@ namespace AtomUI.Desktop.Controls;
     ContractType = typeof(Tag),
     Cardinality = SemanticPartCardinality.Multiple,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "itemContent",
     SelectorClass = "semantic-item-content",
     SelectorRoute = ">> .semantic-scope-tags >> .semantic-item /template/ .semantic-item-content",
     CrossNestedOwners = true,
     ContractType = typeof(TextBlock),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "itemRemove",
     SelectorClass = "semantic-item-remove",
     SelectorRoute = ">> .semantic-scope-tags >> .semantic-item /template/ .semantic-item-remove",
     CrossNestedOwners = true,
     ContractType = typeof(IconButton),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.root",
     SelectorClass = "semantic-popup-root",
     CrossVisualRoot = true,
     ContractType = typeof(Border),
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.list",
     SelectorClass = "semantic-popup-list",
@@ -79,7 +79,7 @@ namespace AtomUI.Desktop.Controls;
     ContractType = typeof(Control),
     Cardinality = SemanticPartCardinality.Multiple,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 [SemanticPart(
     "popup.listItem",
     SelectorClass = "semantic-popup-list-item",
@@ -88,7 +88,7 @@ namespace AtomUI.Desktop.Controls;
     ContractType = typeof(TemplatedControl),
     Cardinality = SemanticPartCardinality.Multiple,
     RuntimeCreated = true,
-    Since = "6.0")]
+    Since = "6.2.0")]
 public partial class Cascader
 {
 }

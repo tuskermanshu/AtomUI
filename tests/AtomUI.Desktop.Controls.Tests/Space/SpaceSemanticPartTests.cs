@@ -151,7 +151,7 @@ public class SpaceSemanticPartTests
         part.Customization.ShouldBe(SemanticPartCustomization.Root);
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeFalse();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static void AssertPart(
@@ -169,7 +169,7 @@ public class SpaceSemanticPartTests
         part.CrossVisualRoot.ShouldBeFalse();
         part.RuntimeCreated.ShouldBeTrue();
         part.StyleType.ShouldNotBeNull();
-        part.Since.ShouldBe("6.0");
+        part.Since.ShouldBe("6.2.0");
     }
 
     private static Control[] GetSemanticElements(AtomUISpace space, string semanticClass)
