@@ -2,7 +2,7 @@
 
 > **供智能体执行者使用：** 使用 `superpowers:executing-plans` 在当前会话中执行，不得使用 subagent。每个控件在 Gate A 后停止等待用户批准，Gate B 改动保持未提交。
 
-**目标：** 为 17 个具有 Ant Design 6.6.0 公开 Semantic DOM 对应 API 的集合、容器、布局和导航控件家族建立 Semantic Part 契约，同时保持容器、虚拟化和运行时节点性能。
+**目标：** 为 19 个集合、容器、布局和导航控件家族建立 Semantic Part 契约，同时保持容器、虚拟化和运行时节点性能。其中 16 个家族具有 Ant Design 6.6.0 公开 Semantic DOM 对应 API，`Expander`（映射上游 `Collapse`）、`TabStrip`（映射上游 `Tabs`）为 2026-09-15 用户指令新增，`GroupBox` 为 2026-09-16 用户指令新增且**没有**上游对应 owner（Part 从 AtomUI 自身模板职责设计）。
 
 **架构：** 父级 owner 只公开自身稳定区域；public item/container 控件在适用时拥有自己的 Descriptor。运行时生成节点只在现有创建路径中使用生成常量添加 marker，并提供 prepare/clear/recycle 证据。
 
@@ -282,9 +282,26 @@
 - [x] 运行 Generator Semantic 测试、目标 Desktop 测试、GalleryBase 和 Gallery 测试、LLMS verify 以及 `git diff --check`。（2026-09-15：Generator 528/528、Desktop 4031/4031、Gallery 644/644 全绿；LLMS verify 通过（79 控件 / 161 文件）；`git diff --check` 干净。TabStrip 语义预览挂载于页面内的 `SemanticPartPreview`，无需 Gallery NativeAOT publish。）
 - [x] **强制停止：** 保持 TabStrip 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。（2026-09-14：用户授权提交（Gate C）；已随 `TabControl` 家族提交一并实施，未推送。）
 
+### 任务 18：GroupBox（2026-09-16 用户指令新增，原排除判定撤销）
+
+**控件文档：** `docs/controls/desktop/data-display/group-box/overview.md`、`docs/controls/desktop/data-display/group-box/implementation.md`、`docs/controls/desktop/data-display/group-box/semantic-part.md`（Gate A 新增）
+
+**证据范围：** `src/AtomUI.Desktop.Controls/GroupBox/**/*.cs`、`src/AtomUI.Desktop.Controls/GroupBox/Themes/GroupBoxTheme.axaml`；测试 `tests/AtomUI.Desktop.Controls.Tests/GroupBox`（新增 `GroupBoxSemanticPartTests`）；Gallery `controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox`。
+
+**风险类型：** **无上游 owner**，Part 必须从 AtomUI 自身模板职责设计（不得照抄上游 owner 的键集）；可见边框与背景由 `GroupBox.Render` 自绘、模板中没有承载节点，`root` 因此是边框/背景的唯一入口；`PART_HeaderContent` 需由 `Decorator` 提升为 `Border` 才能提供 `Background`，该提升会牵动主题中两个以节点类型开头的 selector；Header 缺口是几何排除而非背景遮挡，需证明不透明 Header 背景不会还原边框短线。
+
+**范围说明：** 本家族原被设计文档 §2.4 以「Ant Design 没有职责直接对应的公开 Semantic DOM owner」为由排除。经 2026-09-16 用户指令撤销排除：Ant Design 6.6.3 稳定发布源码 `components/` 下确实不存在 fieldset、group 或 group-box 类组件、`GroupBox` 标识零命中，因此本次纳入**不是**一次新的 §2.1 上游准入 Gate 通过，而是用户直接指令下对排除判定的撤销，先例为 `SplitButton` 触发侧的能力补充。Part 参照上游 `Card` 的分区键命名（不借用其 owner 资格），`extra` / `cover` / `actions` 等 Card 专属键不虚构到 GroupBox 模板上。
+
+- [x] **Gate A 设计审核：** 确认为单一 public owner `GroupBox` 建立 descriptor，公开 `root` / `header` / `icon` / `title` / `content` 五个 Part；确认 `header`（`PART_HeaderContent`）、`icon`（`PART_HeaderIconPresenter`）、`title`（`PART_HeaderPresenter`）、`content`（`PART_ContentPresenter`）全部是 `GroupBoxTheme.axaml` 单一模板内的静态节点（`RuntimeCreated=false`、无显式 `SelectorRoute`、无 `.semantic-scope-*` 锚点、无跨视觉根 Part）；确认 `PART_Frame`、`PART_HeaderContainer`、Header 缺口几何、Header 内部 `StackPanel` 排布、GroupBox Token 保留值（`TextPaddingInline` / `OrientationMarginPercent` / `VerticalMarginInline`）以及用户内容子树都不进入契约；确认 `title` 的 `ContractType` 取 `Avalonia.Controls.TextBlock` 基类而非节点派生类型，`header` 取 `Border`。（2026-09-16：Gate A 文档已产出并经用户确认（用户回复「确认」）——`semantic-part.md` 新增五 Part 完整契约；`overview.md` 补 §3.5 与 LLMS 语义表；`implementation.md` 补 `GroupBox.SemanticParts.cs`、§5.1 marker 所有权、§5.2 自绘几何边界；并记录 `PART_HeaderContent` 由 `Decorator` 提升到 `Border` 的理由。准入无上游 owner 这一事实已按日期化范围变更记入设计文档 §2.4 与总计划。）
+- [x] 更新两份控件文档，写明准确的 Descriptor、真实模板/运行时节点、owner 边界、排除的 internal wrapper、生命周期/性能不变量和验证矩阵；运行 LLMS verify 和 `git diff --check`；随后停止并等待用户批准。（2026-09-16：三份文档齐备；LLMS generate + verify 通过（79 控件 / 161 文件）；`git diff --check` 干净。**注：** verify 首轮报 `forbidden external project name` 与 `stale component path`——原因是生成器会把 `## Semantic Parts` 整节原样抽进产物，而该节内的上游对照文本带出了外部项目名与组件目录路径；已按 `time-picker` 等既有文档的写法改为「上游设计体系」后告警消除。）
+- [x] **Gate B 实现与验证：** 新增 `tests/AtomUI.Desktop.Controls.Tests/GroupBox/GroupBoxSemanticPartTests.cs`，覆盖 descriptor 五部件的数量/顺序/字段、四个静态 marker 的存在与节点类型、生成的 `GroupBoxHeaderStyle` / `GroupBoxIconStyle` / `GroupBoxTitleStyle` / `GroupBoxContentStyle` 各精确命中一个节点、`HeaderIcon` 为空、`HeaderTitlePosition` 三档、`Background` 三态与模板重应用后命中数量不变；验证 `PART_HeaderContent` 类型提升后 `Find<Decorator>` 与缺口 `Bounds` 语义不变，且不透明 Header 背景不还原边框短线；验证 Semantic Setter 覆盖 Token/Padding 基线与 `HeaderTitleColor` 投影的优先级关系。（2026-09-16：`GroupBox.SemanticParts.cs` 声明四 Part，`GroupBoxTheme.axaml` 增加四个静态 `.semantic-*` marker 并把 `PART_HeaderContent` 由 `Decorator` 提升为 `Border`、同步两处类型开头 selector，`GroupBox.cs` 加 `partial`。TDD：先写 15 个测试确认 **13 红**（1 个既有行为守卫测试通过），再实现至 **15/15 全绿**。实现期关键发现：`[SemanticPart]` 的 `ContractType = typeof(TextBlock)` 会解析到**同命名空间的派生类型** `AtomUI.Desktop.Controls.TextBlock` 而非 `Avalonia.Controls.TextBlock` 基类，必须完全限定；测试内嵌套 Style 必须用 `Nesting()`（父 Style 提供 owner selector）而非 `Template()` 起始，否则 Avalonia 抛 "Template selector must be preceeded by a selector"。另新增尺寸基线失败回归 `Fixed_Height_On_The_Header_Part_Suppresses_The_Natural_Auto_Height_Baseline`，并**实测其可失败**（把 `Height=1` 换成 `NaN` 后该用例确实失败），证明非空断言。Gallery：`GroupBoxShowCase.axaml` 由 `GalleryStickyTabsHost` 迁移为 `GalleryShowCaseHost` + `SemanticPartsContentTemplate`（1 个 `SemanticPartPreview`、5 张 Part 描述卡）+ `SourceKey="group-box-semantic-part"` 样式示例（`GroupBoxHeaderStyle`×2 / `GroupBoxTitleStyle`×2 / `GroupBoxContentStyle`×1 / `GroupBoxIconStyle`×1，含 `x:SetterTargetType`）+ 7 个本地化 key × 4 语言；同步 `CatalogMemberOrder.baseline`（GroupBox 行插入 7 个成员）与 `GalleryCatalogCoverageTests` 单元计数 4732→4739。）
+- [x] 运行 Generator Semantic 测试、目标 Desktop 测试、GalleryBase 测试、目标 Gallery 测试、LLMS verify 和 `git diff --check`；GroupBox 无 Popup/运行时宿主路径，按计划条件不需要 NativeAOT 验证。（2026-09-16：Desktop Controls **4047/4047**、Generator **528/528**、GalleryBase **185/185**、Gallery **647/647**、Docs LLMsGenerator **23/23**；LLMS generate + verify 通过（79 控件 / 161 文件）；`git diff --check` 干净。GroupBox 无 Popup、Overlay、Window 或可选包路径，按计划条件不需要 NativeAOT publish。**边框定制 demo 追加：** 用户要求提供可定制边框的 demo，随后补 `Root_Border_And_Background_Are_Customizable_Through_Owner_Scoped_Style`（实测 owner 作用域 Style 覆盖 ControlTheme 的 `BorderBrush` / `BorderThickness` / `CornerRadius` / `Background`，且覆盖值真正进入 `_cachedBorderThickness` / `_cachedCornerRadius` 与 Render 输出画笔）与 Gallery 示例 `semantic-border` / `semantic-border-plain`；两者均**实测可失败**（移除 demo 的边框 Setter 后 `GroupBox_Semantic_Style_Example_Applies_The_Official_Style_Values` 确实失败），证明非空断言。过程中确认 `GroupBox.Render` 把背景与边框都作为**填充几何**绘制（`DrawGeometry` 的 pen 为 `null`），最初按 pen 断言边框色的写法属测试自身错误，已修正。单元计数随之 4739→4740。）
+- [ ] **真机视觉验证：** 用户在 Gallery 桌面宿主（真实 Skia 后端）走查缺口几何、三档标题位置、不透明 Header 背景不还原边框短线、Header 背景的圆角裁剪，以及 Semantic 示例中图标尺寸/颜色与边框定制四项（颜色/粗细/圆角/背景）是否生效。（2026-09-16：步骤已写入 [GroupBox 语义部件真机视觉验收步骤](../specs/2026-09-16-groupbox-semantic-visual-acceptance.md)，覆盖 Semantic Parts 页签、Custom Semantic Part styling 示例（含边框定制步骤 2.6-2.8）与三类 Examples 回归；**待用户回传截图/录屏**，当前状态为「待视觉验收」。）
+- [ ] **强制停止：** 保持 GroupBox 的所有实现改动未提交，直到用户验证真实宿主行为并明确授权提交。（2026-09-16：全部实现与文档改动保持未提交，等待视觉验收与提交授权。）
+
 ## 批次收尾
 
-- [ ] 确认 18 个控件家族分别拥有用户授权的独立提交。
+- [ ] 确认 19 个控件家族分别拥有用户授权的独立提交。
 - [ ] 运行完整 Desktop Controls、Generator、GalleryBase 和 Gallery 测试工程，并执行集合/虚拟化回归筛选。
 - [ ] 运行 LLMS verify、NativeAOT publish 和 `git diff --check`。
 - [ ] 更新总计划清单，不创建批次提交。

@@ -15476,6 +15476,36 @@ GroupBox 在未显式设置 `Height` / `MaxHeight` 等外部约束时，会根�
 | `PART_HeaderPresenter` | `TextBlock` | Header 标题展示。 |
 | `PART_ContentPresenter` | `ContentPresenter` | 内容承载。 |
 
+### 3.5 Semantic Part 契约
+
+`GroupBox` 公开 `root`、`header`、`icon`、`title`、`content` 五个职责区域，完整契约见 [GroupBox Semantic Part 契约](semantic-part.md)：
+
+| Part | Selector | AtomUI 节点 | Cardinality | 定制方式 |
+| --- | --- | --- | --- | --- |
+| `root` | 控件本身 | `GroupBox` owner（边框与背景由 owner 自绘） | `Single` | owner 选择器 + 公开属性 |
+| `header` | `.semantic-header` | `Border#PART_HeaderContent` | `Single` | `GroupBoxHeaderStyle` |
+| `icon` | `.semantic-icon` | `IconPresenter#PART_HeaderIconPresenter` | `Single` | `GroupBoxIconStyle` |
+| `title` | `.semantic-title` | `TextBlock#PART_HeaderPresenter` | `Single` | `GroupBoxTitleStyle` |
+| `content` | `.semantic-content` | `ContentPresenter#PART_ContentPresenter` | `Single` | `GroupBoxContentStyle` |
+
+GroupBox 是独立控件，五个 Part 全部是 `GroupBoxTheme.axaml` 单一模板内的静态节点，`TemplatedParent` 为 GroupBox owner
+本身。因此四个非 root Part 都声明 `RuntimeCreated=false`、`CrossVisualRoot=false`，生成 Style 路由是单一的 `/template/`
+边界，没有 `.semantic-scope-*` 中间锚点，也没有条件分支模板、容器创建、prepare/clear/recycle 或跨视觉根路径；五个 Part
+在任何状态下都恰好命中一个，不存在 `Optional` 或 `Multiple` Part。定制摘要：
+
+- 分组边框与背景（`BorderBrush`、`Background`、`BorderThickness`、`CornerRadius`）由 owner 自绘，模板中没有承载它们的
+  节点，因此只能通过 root 的公开属性定制；任何 Part 上的 `Background` / `BorderBrush` Setter 只作用于该 Part 自身，不会
+  改变分组边框。见 [semantic-part.md §2.1](semantic-part.md#21-root)。
+- Header 区域的背景、内边距与标题/图标样式通过生成的 Semantic Style 定制；缺口是几何排除而非背景遮挡，因此给 `header`
+  设置不透明背景不会在标题下方还原出边框短线。
+- `header` 的承载节点在本次改造中由 `Decorator` 提升为 `Border`，以获得 `Background` 能力；它仍是 `Decorator` 的子类，
+  模板 part 查找、`Bounds` 语义与缺口几何都不变。
+- 标题字体/颜色与内容内边距的主路径仍是 owner 的 `HeaderTitleColor`、`HeaderFontSize`、`HeaderFontWeight`、
+  `HeaderFontStyle` 与 `Padding`；Semantic Style 用于 class 级批量覆盖以及 owner 未暴露的属性（如 `TextDecorations`、
+  图标尺寸与图标颜色）。
+- Header 缺口几何、`PART_Frame`、`PART_HeaderContainer` 与 Token 保留值都不属于 Semantic Part，见
+  [semantic-part.md §6](semantic-part.md#6-定制边界)。
+
 ## 事件与命令
 
 GroupBox 的事件与命令以控件文档、源码 public surface 和 Avalonia 基类契约为准；生成器不从源码发明额外事件。
@@ -15488,7 +15518,7 @@ GroupBox 的事件与命令以控件文档、源码 public surface 和 Avalonia 
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox/Views/GroupBoxShowCase.axaml:36`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox/Views/GroupBoxShowCase.axaml:69`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -15502,7 +15532,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 自动高度
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox/Views/GroupBoxShowCase.axaml:52`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox/Views/GroupBoxShowCase.axaml:85`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -15518,7 +15548,7 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 标题位置
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox/Views/GroupBoxShowCase.axaml:69`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox/Views/GroupBoxShowCase.axaml:102`
 
 Gallery key：`ExamplesContent` / item `2`
 
@@ -15544,7 +15574,7 @@ Gallery key：`ExamplesContent` / item `2`
 
 ### 标题样式
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox/Views/GroupBoxShowCase.axaml:96`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/GroupBox/Views/GroupBoxShowCase.axaml:129`
 
 Gallery key：`ExamplesContent` / item `3`
 
@@ -15628,13 +15658,15 @@ Token 通过动态资源进入 Theme，不应在 `Render` 中主动查找全局�
 主要源码：
 
 - `src/AtomUI.Desktop.Controls/GroupBox/GroupBox.cs`：公共 API、template part 获取、测量 bounds、渲染和失效逻辑。
+- `src/AtomUI.Desktop.Controls/GroupBox/GroupBox.SemanticParts.cs`：`[SemanticPart]` 声明（`header` / `icon` / `title` / `content`），只承载声明与空 partial class 块。
 - `src/AtomUI.Desktop.Controls/GroupBox/GroupBoxToken.cs`：GroupBox 控件 Token。
-- `src/AtomUI.Desktop.Controls/GroupBox/Themes/GroupBoxTheme.axaml`：模板结构、Header 对齐、TokenResource 引用和默认视觉属性。
+- `src/AtomUI.Desktop.Controls/GroupBox/Themes/GroupBoxTheme.axaml`：模板结构、Semantic marker、Header 对齐、TokenResource 引用和默认视觉属性。
 
 ## 相关文档
 
 - 源设计文档：`docs/controls/desktop/data-display/group-box/overview.md`
 - 实现文档：`docs/controls/desktop/data-display/group-box/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/data-display/group-box/semantic-part.md`
 - Token 文档：`docs/controls/desktop/data-display/group-box/token.md`
 - 变更记录：`docs/controls/desktop/data-display/group-box/changelog.md`
 - 语义结构：`./semantic-cn.md`

@@ -5,6 +5,15 @@ namespace AtomUIGallery.Localization;
 [LanguageCatalog]
 public enum GroupBoxShowCaseLangResourceKind
 {
+    ScenarioExamples,
+    SemanticPartStyleTitle,
+    SemanticPartStyleDescription,
+    SemanticRootDescription,
+    SemanticHeaderDescription,
+    SemanticIconDescription,
+    SemanticTitleDescription,
+    SemanticContentDescription,
+    SemanticBorderDescription,
     BasicTitle,
     BasicDescription,
     AutoHeightTitle,
@@ -20,7 +29,6 @@ public enum GroupBoxShowCaseLangResourceKind
     AutoHeightContentOverview,
     AutoHeightContentDetail,
     AutoHeightContentFooter,
-    ScenarioExamples,
     PageSubtitle,
     PageDescription,
     ComponentCategory,

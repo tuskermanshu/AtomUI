@@ -47,7 +47,7 @@
 
 ### 不适用
 
-- [x] `Avatar`、`Carousel`、`GroupBox`、`Rate`、`Watermark`。
+- [x] `Avatar`、`Carousel`、`Rate`、`Watermark`。
 - [x] `Icon`、`FlexPanel`、`Grid / Row / Col`。
 - [x] `ButtonSpinner`、`ComboBox`、`BorderBeam`、`Splash`。
 - [x] `WindowTitleBar`、`Window`。
@@ -74,6 +74,14 @@
 逐项公开 API 证据、产品职责映射和重新评估条件以全量改造设计的“排除映射”为准。不得因 AtomUI 模板内部存在
 可定制节点而绕过准入 Gate。**引用本清单作排除依据前，先确认该项未被后续日期化撤销覆盖。**
 
+> 范围变更（2026-09-16）：`GroupBox` 的原排除判定经用户指令撤销——AtomUI 需要让 `GroupBox` 支持 Semantic Part。
+> 此项与 `SplitButton` / `Expander` / `TabStrip` / `Menu` 的撤销**判据不同**：那四项都能落到上游某个公开 owner 的
+> 职责对应关系上，而 `GroupBox` 在 Ant Design 6.6.3 稳定发布源码中**没有**可映射的公开 owner（`components/` 下不存在
+> fieldset、group 或 group-box 类组件，`GroupBox` 标识零命中）。因此本次纳入**不是**一次新的 §2.1 上游准入 Gate 通过，
+> 而是用户直接指令下对排除判定的撤销，纳入依据是 AtomUI 自身需要，先例为 `SplitButton` 触发侧的能力补充。
+> Part 从 AtomUI 自身模板职责设计（`root` / `header` / `icon` / `title` / `content`），移入第二批计划执行（见下方
+> 批次清单与[第二批任务清单](2026-08-12-semantic-part-batch-2-collections-containers.md)任务 18）。
+
 ### 批次进度
 
 - [x] 第一批：基础控件，共 16 个家族。
@@ -85,8 +93,9 @@
 - [x] 第四批追加：`SplitButton`（2026-09-15 用户指令新增，原排除判定撤销；弹层侧映射上游 `Dropdown` 5 部件，触发侧补充发布 `primary` / `secondary`，共 7 部件，见第四批任务 11）。（2026-09-15：已完成并经用户授权提交 `44cd1494a`「feat(Semantic): 增加 SplitButton 语义部件并修复弹层钉住与子菜单状态递归」；第四批任务 11 的逐项检查项待回填。）
 - [x] 第五批：高密度控件，共 2 个家族。（2026-09-14：`NavMenu`（`1e22ed1a3`）与 `DataGrid`（`454cc0d00`）均已按用户授权提交，各自持有独立提交。`DataGrid` 属可选包，验证走独立工程 `tests/AtomUI.Desktop.Controls.DataGrid.Tests`。**遗留：** 三套控件的改造前后性能基线从未归档。详见[第五批任务清单](2026-08-12-semantic-part-batch-5-high-density.md)。）
 - [x] 第五批追加：`Menu`（2026-09-15 用户指令撤销排除并追认；与 `NavMenu` 映射同一个上游 `Menu` owner，12 个公开键路径逐字相同，共 11 部件 + 隐式 `root`，见第五批任务 3）。（2026-09-14：已随 `1e22ed1a3` 提交一并实施并持有独立 `semantic-part.md`；本次追认范围。）
+- [ ] 第二批追加：`GroupBox`（2026-09-16 用户指令新增，原排除判定撤销；**无上游 owner**，Part 按 AtomUI 自身模板职责设计，共 4 部件 + 隐式 `root`，见第二批任务 18）。
 
-合计待改造：63 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`）。**截至 2026-09-15，63 个家族全部已实现并经用户授权提交，无剩余待改造家族。**
+合计待改造：64 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu` + 2026-09-16 新增的 `GroupBox`）。**截至 2026-09-15，前 63 个家族全部已实现并经用户授权提交；`GroupBox` 于 2026-09-16 进入 Gate A，待用户审核。**
 
 ## 3. 单控件强制执行循环
 
@@ -180,9 +189,13 @@
 去重说明：上段「TabControl 家族（含 TabStrip、CardTabStrip）」指的是三者共享 `ControlTheme` 资源边界；
 按设计文档 §3「两个文档叶子即使共享源码目录，也必须分别完成 Gate A」，它们是**独立的控件家族**，因此单独计数。
 
+**追加（2026-09-16）：** `GroupBox` 已纳入本批次（原排除判定撤销，用户直接指令）。与上面的追认不同，它是**全新待改造**家族
+（不是补齐范围记录），且**没有**上游对应 owner，本批次家族数由 18 增至 19。见
+[第二批任务清单](2026-08-12-semantic-part-batch-2-collections-containers.md)任务 18。
+
 - [x] 只有第一批形成稳定审核节奏后才能开始，除非用户明确调整优先级。
 - [x] 每个适用家族都必须提供容器和运行时创建 marker 的生命周期证据。
-- [ ] 18 个家族全部提交后，运行集合/虚拟化回归测试和完整通用检查。
+- [ ] 19 个家族全部提交后，运行集合/虚拟化回归测试和完整通用检查。
     - 2026-08-27 复跑受阻：`ImageLoaderDisposeTests.Dispose_On_UI_Thread_Does_Not_Block_An_InFlight_UI_Dispatch`（`d58243b15` 引入，非 Semantic Part 改动）在本机 headless 下稳定挂起并中止套件；其前 201 个用例通过。此外 Gallery 套件另有与本改造无关的存量失败（CustomizeTheme 算法断言）。上述存量问题修复后需完整重跑再勾选。
     - 2026-09-15 复核：上述两类存量问题已不复现——Desktop Controls **4031/4031** 全绿、Gallery 644/644 全部通过。批次收尾检查仍待其余追加范围（`SplitButton`、`TabStrip`）落定后统一执行。
 
@@ -274,17 +287,24 @@ pwsh -NoLogo -NoProfile -File controlgallery/AtomUIGallery.Desktop/scripts/Publi
 ## 6. 全量改造收尾
 
 - [x] 确认 61 个家族都通过各自经用户授权的提交达到 `Committed` 状态。（2026-09-15 复核：63 个家族全部已提交。按批次证据——第一批 16、第二批 16 + `Expander`（`be7b8dc71`）+ `TabStrip`（随 `TabControl` 提交）、第三批 15、第四批 10 + `SplitButton`（`44cd1494a`）、第五批 2 + `Menu`（随 `NavMenu` 提交 `1e22ed1a3`）。）
+
+> 2026-09-16 追加：`GroupBox` 纳入后家族总数由 63 增至 64，是唯一未提交家族。因此本项的历史结论（63 个全部
+> `Committed`）仍成立，但“全部家族已提交”的当前状态不再成立，需在 `GroupBox` 完成 Gate B 并获授权提交后重新核对。
 - [x] 重新扫描 public 控件和全部叶子主题，检查未声明的 `.semantic-*`、缺少的已批准 marker，以及 Descriptor 与文档不一致。（2026-09-15：两项扫描均已完成。
   **marker 差集：** 主题文件里 `Classes.semantic-*` 共 107 种，descriptor 声明的 `SelectorClass` 共 100 种，
   `semantic-scope-*` 锚点 23 种；主题 marker 集合与「声明 ∪ scope 锚点」的差集为**空**，即没有未声明的静态 marker。
   另有 16 个声明类只在代码中运行时注入（`semantic-body-row`、`semantic-item` 等），不出现在主题静态 marker 中，属预期而非缺失。
   **Descriptor 与文档一致性：** 全局集合比对（全部 116 个声明部件名 vs 全部目标家族生成文档的部件名）确认无遗漏；
   唯一不符合项 `SearchEdit` 已修正（其 `overview.md` 语义表原为生成器默认占位）。）
-- [ ] 确认 14 个排除控件仍然没有通过最新稳定发布源码公开 API 准入 Gate。
+- [ ] 确认 13 个排除控件仍然没有通过最新稳定发布源码公开 API 准入 Gate。
 
 > 2026-09-15 更新：`TabStrip` 与 `Menu` 的原排除判定已经用户指令撤销并追认，两项已从本文档「不适用」清单与设计文档 §2.4
-> 移入 §2.3 纳入映射（`TabStrip` 随第二批、`Menu` 随第五批）。因此本项核对范围由 16 个收缩为 14 个，且不再有待裁决的偏离。
-> 逐项撤销理由与判据见设计文档 §2.4 的日期化范围变更段。
+> 移入 §2.3 纳入映射（`TabStrip` 随第二批、`Menu` 随第五批）。
+>
+> 2026-09-16 更新：`GroupBox` 的原排除判定已经用户指令撤销，从本文档「不适用」清单与设计文档 §2.4 移入 §2.3 纳入映射
+> （随第二批）。与 `TabStrip` / `Menu` 不同，`GroupBox` 在 Ant Design 稳定发布源码中没有可映射的上游 owner，纳入依据是
+> 用户直接指令而非 §2.1 的上游准入 Gate。因此本项核对范围由 16 个收缩为 14 个（三次撤销后），再收缩为 13 个；逐项撤销
+> 理由与判据见设计文档 §2.4 的日期化范围变更段。
 
 - [ ] 运行全部通用测试、DataGrid 测试、LLMS verify、NativeAOT publish 和 `git diff --check`。（2026-09-15 部分完成：Desktop Controls 4031/4031、DataGrid 293/293、Generator 528/528、GalleryBase 185/185、Gallery 644/644、Docs LLMsGenerator 23/23 全绿；LLMS verify 通过（79 控件 / 161 文件）；`git diff --check` 干净。
   **NativeAOT publish 未能取证：** 沙箱环境阻止 AvaloniaUI BuildServices 写临时文件，进程挂起 1 小时 6 分无任何 artifact 产出，已终止。详见[第五批任务清单](2026-08-12-semantic-part-batch-5-high-density.md)批次收尾第 3 项。该项需在非沙箱环境重跑。）

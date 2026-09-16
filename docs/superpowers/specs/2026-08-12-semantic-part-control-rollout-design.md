@@ -32,12 +32,16 @@ Semantic Part 的公共模型、Selector 契约和生成器规则分别由
 | 状态 | 数量 | 范围 |
 | --- | ---: | --- |
 | 已完成基线 | 1 | `Button` |
-| 本轮待改造 | 63 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`） |
-| 不适用 | 14 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
+| 本轮待改造 | 64 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`，以及 2026-09-16 新增的 `GroupBox`） |
+| 不适用 | 13 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
 
 > 2026-09-15 计数核对：本节三行合计 78，与 78 个正式控件文档叶子一致；`本轮待改造` 与 `不适用` 已与 §2.3、§2.4 的行数
 > 对齐。原记录为 58 / 19，在 `SplitButton` 增补时未同步，随后随 `Expander` 撤销排除校正为 61 / 16；本次 `TabStrip` 与
 > `Menu` 撤销排除后调整为 63 / 14。每次撤销排除都必须重算本表，不要增量累加后忘记总数。
+>
+> 2026-09-16 计数核对：`GroupBox` 纳入后三行为 1 / 64 / 13，合计仍为 78。本次纳入与前三次的判据不同——`GroupBox` **没有**
+> 可映射的上游 owner（见 §2.4 该行的日期化记录），纳入依据是用户直接指令，而非 §2.1 的上游准入 Gate。重算本表时不得把它
+> 错误归因于上游 owner 出现。
 
 `Button` 是首个完整样例，用于校验 descriptor、静态 marker、Selector、尺寸协调和 Gallery Preview 的全链路；它不作为
 其他控件 Part 命名的机械模板。
@@ -87,8 +91,9 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 
 ### 2.3 AtomUI 纳入映射
 
-下表覆盖 62 个准入家族，其中 `Button` 已完成，其余 61 个进入实施批次；`SplitButton`（原排除判定撤销，随第四批执行）与
-`Expander`（原排除判定撤销，随第二批执行）为 2026-09-15 用户指令新增。映射只证明“允许进入 Gate A”，不预先
+下表覆盖 64 个准入家族，其中 `Button` 已完成，其余 63 个进入实施批次；`SplitButton`（原排除判定撤销，随第四批执行）与
+`Expander`（原排除判定撤销，随第二批执行）为 2026-09-15 用户指令新增，`GroupBox` 为 2026-09-16 用户指令新增
+（无上游 owner，纳入依据与本表其他行不同，见 §2.4）。映射只证明“允许进入 Gate A”，不预先
 承诺具体 Part 名称或数量；每个 Part 仍必须从 AtomUI 自身源码、主题和生命周期事实中设计。
 
 | AtomUI 控件家族 | Ant Design 6.6.0 公开 owner | 结论 |
@@ -128,6 +133,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `Steps` | `Steps` | Batch 2 |
 | `TabControl` | `Tabs` | Batch 2 |
 | `TabStrip` | `Tabs` | Batch 2 范围新增（2026-09-15 用户指令，原排除判定撤销）；与 `TabControl` 映射同一个上游 `Tabs` owner，但作为独立文档叶子单独完成 Gate A：`TabStrip` / `CardTabStrip` 是独立 public owner 的页签条，`TabStripItem` 是二者的 item container。上游 owner 数量不是准入必要条件，职责直接对应才是（§2.1 第 4 条） |
+| `GroupBox` | 无上游 owner | Batch 2 范围新增（2026-09-16 用户指令，原排除判定撤销）；Ant Design 6.6.3 稳定发布源码中不存在职责对应的公开 Semantic DOM owner，纳入依据是用户直接指令与 AtomUI 自身的分组容器职责，**不是** §2.1 的上游准入 Gate。Part 按 AtomUI 自身模板职责设计（`root` / `header` / `icon` / `title` / `content`），参照上游 `Card` 的分区键命名，不借用 `Card` 的 owner 资格，先例为 `SplitButton` 触发侧的能力补充；详见 §2.4 |
 | `AutoComplete` | `AutoComplete` | Batch 3 |
 | `Cascader` | `Cascader` | Batch 3 |
 | `ColorPicker` | `ColorPicker` | Batch 3 |
@@ -166,7 +172,6 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | --- | --- | --- |
 | `Avatar` | Ant Design `AvatarProps` 与 `AvatarGroupProps` 没有公开分区式 `classNames` / `styles`；ConfigProvider 测试不构成组件 API。 | 新稳定版公开并实际消费对应 API。 |
 | `Carousel` | Ant Design 稳定版 `Carousel` 没有公开 Semantic DOM Props。 | 新稳定版公开并实际消费对应 API。 |
-| `GroupBox` | Ant Design 没有职责直接对应的公开 Semantic DOM owner。 | 新稳定版出现职责直接对应的公开 owner。 |
 | `Rate` | Ant Design 稳定版 `Rate` 没有公开 Semantic DOM Props。 | 新稳定版公开并实际消费对应 API。 |
 | `Watermark` | Ant Design 稳定版 `Watermark` 没有公开 Semantic DOM Props。 | 新稳定版公开并实际消费对应 API。 |
 | `Icon` | Ant Design Icons 不提供与 AtomUI `Icon` 对应的公开 Semantic DOM owner。 | 稳定发布出现对应公开组件 API。 |
@@ -202,6 +207,25 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 
 上述三次撤销的共同判据是：**上游 owner 数量不是准入必要条件，§2.1 第 4 条的产品职责直接对应才是**。引用本表作
 排除依据前，先确认该项未被后续日期化撤销覆盖。
+
+范围变更（2026-09-16）：`GroupBox` 的原排除判定经用户指令撤销，从本表移入 §2.3 纳入映射，随第二批执行。此项与上述
+三次撤销**判据不同，必须区分**：
+
+- 三次追认/撤销的共同前提是“AtomUI 控件与上游公开 owner 的产品职责直接对应”，检验的只是 owner 数量还是职责对应。
+  `GroupBox` 没有这个前提：Ant Design 6.6.3 稳定发布源码 `components/` 下不存在 fieldset、group 或 group-box 类组件，
+  `GroupBox` 标识在组件源码中零命中，**不存在可映射的上游 owner**。
+- 原排除判定登记的正向触发条件是“新稳定版出现职责直接对应的公开 owner”。该条件**未发生**，因此本次纳入不是一次新的
+  §2.1 上游 Gate 通过，而是用户直接指令下对排除判定的撤销，纳入依据是 AtomUI 需要让 `GroupBox` 支持 Semantic Part。
+- 既有先例是 `SplitButton` 的触发侧按键：上游没有对应键时，AtomUI 承认自身模板结构并把 Part 作为**显式能力补充**发布，
+  而不是因为“上游没有”就拒绝任何定制。`GroupBox` 沿用同一处理：Part 从 AtomUI 自身源码与模板职责设计，`root` /
+  `header` / `icon` / `title` / `content` 五个名称中 `header` / `title` 与上游 `Card` 的分区键职责对应，`icon` /
+  `content` 按 GroupBox 的 Header API 与 `ContentControl.Content` 命名。
+- 最近的产品职责参照是上游 `Card`（`root` / `header` / `title` / `body` / `extra` / `cover` / `actions`），它是“带标题的
+  边框容器”这一职责的分区式参照。`GroupBox` 只借鉴键名语义，**不借用** `Card` 的 owner 准入资格，也不把 `Card` 专属的
+  `extra` / `cover` / `actions` 虚构到自身模板上（见全量改造设计 §5.1 对虚构 Part 的禁止）。
+- 契约细节见 [GroupBox Semantic Part 契约](../../controls/desktop/data-display/group-box/semantic-part.md) §1.1。
+
+该撤销不改变其他排除项的判定依据；引用 §2.4 作排除依据时，仍需先确认该项未被日期化撤销覆盖。
 
 ## 3. 最小交付单位
 
@@ -476,7 +500,7 @@ git diff --check
 | 批次 | 数量 | 目标 | 主要风险 |
 | --- | ---: | --- | --- |
 | Batch 1 | 16 | 基础视觉与状态控件，建立可复用审核节奏。 | 派生主题、尺寸、adorner、状态替代节点。 |
-| Batch 2 | 16 + 2 | 集合、容器与导航结构（`Expander` 与 `TabStrip` 均为 2026-09-15 用户指令新增，随本批次计划执行）。 | container、runtime-created、虚拟化、多重 cardinality。 |
+| Batch 2 | 16 + 3 | 集合、容器与导航结构（`Expander` 与 `TabStrip` 均为 2026-09-15 用户指令新增，`GroupBox` 为 2026-09-16 用户指令新增，随本批次计划执行）。 | container、runtime-created、虚拟化、多重 cardinality。 |
 | Batch 3 | 15 | 输入、选择与日期/时间类控件。 | SizeType、Popup、内部 editor、候选项容器。 |
 | Batch 4 | 10 + 1 | Popup、Overlay 与服务宿主（原 10 个家族已于 2026-09-12 收尾；`SplitButton` 为 2026-09-15 用户指令新增，随本批次计划执行）。 | 跨视觉根、session 生命周期、多宿主隔离。 |
 | Batch 5 | 2 + 1 | 高密度复合控件（`NavMenu` 2026-09-14 提交 `1e22ed1a3`；`DataGrid` 2026-09-14 提交 `454cc0d00`，可选包独立验证工程；`Menu` 为 2026-09-15 用户指令新增并追认，随本批次执行）。 | 大量 container、Popup、虚拟化和性能。 |
@@ -487,6 +511,10 @@ git diff --check
 > 不涉及控件是否纳入范围：第三批的 ColorPicker / Select / DatePicker 待视觉验收，Mentions / TimePicker / TreeSelect
 > 尚无验收文档；第五批三套控件的改造前后性能基线未归档。逐批次明细见
 > [全量改造总计划](2026-08-12-semantic-part-control-rollout.md) 的「批次进度」。
+>
+> 2026-09-16 状态更新：`GroupBox` 经用户指令纳入（原排除判定撤销，无上游 owner），家族总数由 63 增至 64。上段“63 个家族
+> 全部已实现”的历史结论不变，但“无剩余待改造家族”不再成立——`GroupBox` 目前处于 Gate A 文档审核阶段。范围记录见 §2.3 与
+> §2.4 的日期化范围变更段。
 >
 > 2026-09-15 基线版本说明：§2 登记的上游审计基线为 2026-08-12 时的 Ant Design 6.6.0。此后个别家族的契约文档已在
 > 6.6.3 稳定发布源码上重新对齐（如 `DataGrid`、`Menu` 的语义表明确写「对齐 Ant Design 6.6.3」），但 §2.2 的组件目录清单
