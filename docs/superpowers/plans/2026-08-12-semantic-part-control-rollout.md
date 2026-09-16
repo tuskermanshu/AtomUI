@@ -41,6 +41,7 @@
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-4-hosts-windows.md` | 10 个 Popup、Overlay 和服务宿主控件家族。 |
 | `docs/superpowers/plans/2026-08-12-semantic-part-batch-5-high-density.md` | `NavMenu` 和 `DataGrid` 两个性能敏感控件家族。 |
 | 第六批任务清单（见本文档任务 6） | `ButtonSpinner` 一个输入基座控件家族（2026-09-16 新增）。 |
+| 第七批任务清单（见本文档任务 7） | `Splash` 一个桌面启动反馈控件家族（2026-09-16 新增）。 |
 
 正式控件文档不得将这些计划作为唯一设计来源。它们应链接系统架构，并描述控件自身的当前契约。
 
@@ -54,7 +55,7 @@
 
 - [x] `Avatar`、`Carousel`、`Rate`、`Watermark`。
 - [x] `Icon`、`FlexPanel`、`Grid / Row / Col`。
-- [x] `BorderBeam`、`Splash`。
+- [x] `BorderBeam`。
 - [x] `WindowTitleBar`、`Window`。
 
 > 范围变更（2026-09-15）：`SplitButton` 的原排除判定经用户指令撤销——AtomUI 需要让 `SplitButton` 支持 Semantic
@@ -107,6 +108,14 @@
 > Part 从 AtomUI 自身模板职责设计（`root` / `header` / `icon` / `title` / `content`），移入第二批计划执行（见下方
 > 批次清单与[第二批任务清单](2026-08-12-semantic-part-batch-2-collections-containers.md)任务 18）。
 
+> 范围变更（2026-09-16）：`Splash` 的原排除判定经用户指令撤销——AtomUI 需要让 `Splash` 支持 Semantic Part。此项与
+> `GroupBox` 同属“**无可映射上游 owner**、依据用户直接指令纳入”的一类，与 `SplitButton` / `Expander` / `TabStrip` /
+> `Menu` 的“owner 数量 vs 职责对应”追认判据不同，不得混同：Splash 是桌面应用的启动反馈控件（“启动中但应用尚不可
+> 交互”），上游稳定发布源码中不存在承载该职责的公开组件 owner，因此原触发条件「新稳定版出现对应公开 owner」并未发生。
+> 纳入依据是用户直接指令与 AtomUI 自身需要，先例为 `SplitButton` 触发侧的能力补充。Part 从 AtomUI 自身模板职责设计
+> （隐式 `root` 与 `logo` / `title` / `subtitle` / `content` / `spin` / `progressBar` / `message` / `detail` / `footer`），
+> 移入第七批执行（见下方批次清单与本文档任务 7）。逐项证据见设计文档 §2.4。
+
 ### 批次进度
 
 - [x] 第一批：基础控件，共 16 个家族。
@@ -121,8 +130,9 @@
 - [x] 第五批追加：`Menu`（2026-09-15 用户指令撤销排除并追认；与 `NavMenu` 映射同一个上游 `Menu` owner，12 个公开键路径逐字相同，共 11 部件 + 隐式 `root`，见第五批任务 3）。（2026-09-14：已随 `1e22ed1a3` 提交一并实施并持有独立 `semantic-part.md`；本次追认范围。）
 - [ ] 第二批追加：`GroupBox`（2026-09-16 用户指令新增，原排除判定撤销；**无上游 owner**，Part 按 AtomUI 自身模板职责设计，共 4 部件 + 隐式 `root`，见第二批任务 18）。
 - [x] 第六批：`ButtonSpinner`，1 个输入基座控件家族（2026-09-16 用户指令新增，原排除判定撤销；映射上游 `InputNumber` 公开并实际消费的 `root` / `prefix` / `suffix` / `input` / `actions` 分区键，见任务 6）。（2026-09-16：已完成 Gate A / Gate B，并经用户授权提交。）
+- [ ] 第七批：`Splash`，1 个桌面启动反馈控件家族（2026-09-16 用户指令新增，原排除判定撤销；**无上游 owner**，Part 按 AtomUI 自身模板职责设计，共 9 部件 + 隐式 `root`，见任务 7）。
 
-合计待改造：66 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu` + 2026-09-16 纳入的 `GroupBox`、`ButtonSpinner` 与 `ComboBox`）。**截至 2026-09-15，前 63 个家族全部已实现并经用户授权提交；`ButtonSpinner` 已完成 Gate A / Gate B 并经用户授权提交；`GroupBox` 已于 2026-09-16 完成真机视觉验收；`ComboBox` 已完成 Gate A（经用户批准）与 Gate B 实现，与 `GroupBox` 同为待用户验收/授权提交的家族。**
+合计待改造：67 个控件家族（原 59 个 + 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu` + 2026-09-16 纳入的 `GroupBox`、`ButtonSpinner`、`ComboBox` 与 `Splash`）。**截至 2026-09-15，前 63 个家族全部已实现并经用户授权提交；`ButtonSpinner` 与 `Splash` 已完成 Gate A / Gate B 并经用户授权提交；`GroupBox` 已于 2026-09-16 完成真机视觉验收；`ComboBox` 已完成 Gate A（经用户批准）与 Gate B 实现。**
 
 ## 3. 单控件强制执行循环
 
@@ -300,6 +310,48 @@
 - [ ] 真机视觉验收按仓库全局强约束执行：先产出书面步骤（含 Gallery 分类与入口路径），以用户回传截图/录屏为唯一
       视觉证据。
 
+### 任务 7：第七批 - `Splash`
+
+**计划：** 本任务即第七批清单（单一控件家族，不另建批次文件）。
+
+**状态（2026-09-16）：** Gate A / Gate B 实现进行中。原排除判定经用户指令撤销，纳入依据是用户直接指令与 AtomUI
+自身的启动页职责——上游稳定发布源码中不存在承载“启动中但应用尚不可交互”职责的公开组件 owner，因此**不存在可映射的
+上游 owner**，本批次不是一次 §2.1 上游准入 Gate 通过（与 `GroupBox` 同类）。逐项理由与计数调整见
+[改造设计 §2.4](../specs/2026-08-12-semantic-part-control-rollout-design.md)。
+
+本批次的核心事实与风险点：
+
+- **Splash 是 `AtomUI.Desktop.Controls.Extras` 中首个采用 Semantic Part 的控件。** 该包此前生成的
+  `GeneratedSemanticPartManifest` 返回空列表，也没有 `SemanticPartXmlnsDefinition.g.cs`；本批将首次为该包生成 descriptor、
+  `Splash*Style` 类型与 `https://atomui.net` → `AtomUI.Theme.Styling` 的映射。必须确认新生成类型名与既有生成 Style 名
+  无冲突（重名是 generation-blocking diagnostic）。
+- 九个非 root Part 全部是 `SplashTheme.axaml` 单一模板内的静态节点，全部 `Single`，无 `Optional` / `Multiple`、无
+  `RuntimeCreated`、无 `CrossVisualRoot`、无 `CrossNestedOwners`、无 `.semantic-scope-*` 锚点。
+- 进度区刻意拆分为 `spin` 与 `progressBar` 两个 `Single` Part（不同控件、不同 Token、互斥可见），而不是合并为一个
+  `Multiple` Part；后者会把 `ContractType` 放宽到 `TemplatedControl` 并丢失 `x:SetterTargetType` 上下文。
+- `SplashWindow` 不发布 Semantic Part；其模板 `SplashWindowTheme.axaml` 不得出现任何 `Classes.semantic-*`。
+- Gallery 专用的 `GalleryWindowSplash` 原本通过 `/template/` + `PART_*` 选择器穿透 Splash 模板，本批已迁移到生成的专用
+  Semantic Part Style（系统设计 §5.4 的强约束），迁移必须保持 `:loading` / `:success` / `:error` 的可观察颜色不变。
+- 进度区互斥可见与「预览跳过不可见目标」冲突：Semantic Parts 预览舞台必须放两个实例（确定态与不确定态），否则
+  `spin` 与 `progressBar` 无法同时被定位高亮。
+
+- [ ] 完成 `Splash` 的 Gate A（已完成设计并经用户审核）：`overview.md` / `implementation.md` 更新 + 新增
+      `semantic-part.md`。
+- [ ] 完成 Gate B：`Splash.SemanticParts.cs` 声明、`Classes.semantic-*` marker、失败优先的 descriptor/marker/生成 Style
+      命中测试、状态矩阵与尺寸基线回归、Gallery Semantic Parts Tab 与专用 Style 演示、`changelog.md`。
+- [ ] 验证 Extras 首次生成的 descriptor 与 `Splash*Style` 类型进入 PackageRegistration 与冻结 registry。
+- [ ] 验证 `GalleryWindowSplash` 迁移后四个文本位的可观察前景色与状态色语义不变（既有 Gallery 测试已锁定）。
+- [x] 修复预览舞台双实例被裁切的布局缺陷（2026-09-16）：单预览页签的画布高度在部分视口下被钳制，
+      纵向堆叠的第二个实例被 `PART_PreviewContentHost` 静默裁掉。改为两列等分 `Grid` 并新增 12 档视口的
+      参数化包含关系回归（实测 520×380 至 1920×1080 全部通过；把布局退回堆叠时该回归 12/12 失败）。
+- [x] 修复样式示例徽标溢出 presenter 的缺陷（2026-09-16 复验发现）：`logo` Part 的尺寸作用在 presenter 上，
+      而示例的 `LogoTemplate` 内容是固定 48×48，撑破 36×36 的 presenter（每边溢出 6 px），Part Setter 对可见尺寸失效。
+      示例改为 `Stretch` 填满 presenter，并新增「可见徽标 Bounds 等于 Part 设定值」断言。
+- [ ] 本家族全部提交后，运行 Desktop Controls、Gallery、Generator 与 LLMS 完整检查；Extras 首次纳入 Semantic Part，
+      另需按 `semantic-part.md` §7 执行 Gallery NativeAOT publish 验证。
+- [ ] 真机视觉验收按仓库全局强约束执行：先产出书面步骤（含 Gallery 分类与入口路径），以用户回传截图/录屏为唯一
+      视觉证据。
+
 ## 5. 通用验证命令
 
 文档门禁：
@@ -364,12 +416,13 @@ pwsh -NoLogo -NoProfile -File controlgallery/AtomUIGallery.Desktop/scripts/Publi
 > 2026-09-15 更新：`TabStrip` 与 `Menu` 的原排除判定已经用户指令撤销并追认，两项已从本文档「不适用」清单与设计文档 §2.4
 > 移入 §2.3 纳入映射（`TabStrip` 随第二批、`Menu` 随第五批）。
 >
-> 2026-09-16 更新：`GroupBox`、`ButtonSpinner` 与 `ComboBox` 的原排除判定先后经用户指令撤销，从本文档「不适用」清单与设计文档
-> §2.4 移入 §2.3 纳入映射（`GroupBox` 随第二批、`ComboBox` 随第三批、`ButtonSpinner` 随第六批）。因此本项核对范围由 16 个
-> 收缩为 14 个（`TabStrip` / `Menu` 外），再依次收缩为 13（`GroupBox`）、12（`ButtonSpinner`）、**11（`ComboBox`）**。
+> 2026-09-16 更新：`GroupBox`、`ButtonSpinner`、`ComboBox` 与 `Splash` 的原排除判定先后经用户指令撤销，从本文档「不适用」清单与设计文档
+> §2.4 移入 §2.3 纳入映射（`GroupBox` 随第二批、`ComboBox` 随第三批、`ButtonSpinner` 随第六批、`Splash` 随第七批）。因此本项核对
+> 范围由 16 个收缩为 14 个（`TabStrip` / `Menu` 外），再依次收缩为 13（`GroupBox`）、12（`ButtonSpinner`）、**11（`ComboBox`）**、
+> **10（`Splash`）**。
 >
-> 三次撤销的判据各不相同，不得混同：`GroupBox` 与 `ComboBox` 在 Ant Design 稳定发布源码中**都没有**可映射的上游 owner，
-> 纳入依据是用户直接指令（`ComboBox` 另有其自身即职责完整的独立 public owner 为依据），二者都**不是 §2.1 Gate 通过**；
+> 四次撤销的判据各不相同，不得混同：`GroupBox`、`ComboBox` 与 `Splash` 在 Ant Design 稳定发布源码中**都没有**可映射的上游 owner，
+> 纳入依据是用户直接指令（`ComboBox` 另有其自身即职责完整的独立 public owner 为依据），三者都**不是 §2.1 Gate 通过**；
 > `ButtonSpinner` 有上游 `InputNumber` 的 `actions` 分区键支撑职责对应，但同样叠加了用户指令。逐项撤销理由与判据见设计文档
 > §2.4 的日期化范围变更段，引用时不得省略，也不得据此推断其他排除项可被同样处理。
 

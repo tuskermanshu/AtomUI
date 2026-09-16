@@ -32,8 +32,8 @@ Semantic Part 的公共模型、Selector 契约和生成器规则分别由
 | 状态 | 数量 | 范围 |
 | --- | ---: | --- |
 | 已完成基线 | 1 | `Button` |
-| 本轮待改造 | 66 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`，2026-09-16 新增的 `GroupBox`、`ButtonSpinner` 与 `ComboBox`） |
-| 不适用 | 11 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
+| 本轮待改造 | 67 | 五个批次中与稳定版公开 Semantic DOM API 对应的控件家族（含 2026-09-15 新增的 `SplitButton`、`Expander`、`TabStrip` 与 `Menu`，2026-09-16 新增的 `GroupBox`、`ButtonSpinner`、`ComboBox` 与 `Splash`） |
+| 不适用 | 10 | 没有对应公开 API、只有内部/间接能力或产品职责不对应的控件家族 |
 
 > 2026-09-15 计数核对：本节三行合计 78，与 78 个正式控件文档叶子一致；`本轮待改造` 与 `不适用` 已与 §2.3、§2.4 的行数
 > 对齐。原记录为 58 / 19，在 `SplitButton` 增补时未同步，随后随 `Expander` 撤销排除校正为 61 / 16；`TabStrip` 与
@@ -44,10 +44,11 @@ Semantic Part 的公共模型、Selector 契约和生成器规则分别由
 > 指令，而非 §2.1 的上游准入 Gate；`ButtonSpinner` 有上游 `InputNumber` 的 `actions` 分区键支撑职责对应，但同样叠加了
 > 用户指令。重算本表时不要把前者错误归因于上游 owner 出现。
 >
-> 2026-09-16 计数核对（`ComboBox` 纳入，并入本分支）：`ComboBox` 撤销排除后，三行为 1 / 66 / 11，合计仍为 78。它同样
-> **不是 §2.1 Gate 通过**——上游没有公开 `ComboBox` owner，准入依据是用户指令加上其自身即职责完整的独立 public owner
-> （见 §2.4 该行的日期化范围变更段）。至此 2026-09-16 共三次纳入（`GroupBox`、`ButtonSpinner`、`ComboBox`），三者判据
-> 各不相同，重算时必须逐项对照各自的日期化记录，不得合并归因。
+> 2026-09-16 计数核对（当日四次纳入：`GroupBox`、`ButtonSpinner`、`ComboBox`、`Splash`）：四者先后撤销排除后，三行为
+> 1 / 67 / 10，合计仍为 78。四次纳入的判据各不相同，不得混同：`GroupBox`、`ComboBox` 与 `Splash` 在 Ant Design 稳定发布
+> 源码中**都没有**可映射的上游 owner，纳入依据是用户直接指令（`ComboBox` 另有其自身即职责完整的独立 public owner 为依据），
+> 三者都**不是 §2.1 Gate 通过**；`ButtonSpinner` 有上游 `InputNumber` 的 `actions` 分区键支撑职责对应，但同样叠加了用户指令。
+> 重算本表时不得把前三者错误归因于上游 owner 出现，也不得据此推断其他排除项可被同样处理。
 
 `Button` 是首个完整样例，用于校验 descriptor、静态 marker、Selector、尺寸协调和 Gallery Preview 的全链路；它不作为
 其他控件 Part 命名的机械模板。
@@ -97,15 +98,15 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 
 ### 2.3 AtomUI 纳入映射
 
-下表覆盖 65 个准入家族，其中 `Button` 已完成，其余 64 个进入实施批次；`SplitButton`（原排除判定撤销，随第四批执行）与
+下表覆盖 68 个准入家族，其中 `Button` 已完成，其余 67 个进入实施批次；`SplitButton`（原排除判定撤销，随第四批执行）与
 `Expander`（原排除判定撤销，随第二批执行）为 2026-09-15 用户指令新增，`GroupBox`（无上游 owner，纳入依据与本表其他行不同，
-见 §2.4）、`ButtonSpinner`（原排除判定撤销，随第六批执行）与 `ComboBox`（原排除判定撤销，随第三批执行）为 2026-09-16
-用户指令新增。映射只证明“允许进入 Gate A”，不预先
+见 §2.4）、`ButtonSpinner`（原排除判定撤销，随第六批执行）、`ComboBox`（原排除判定撤销，随第三批执行）与 `Splash`
+（无上游 owner，纳入依据见 §2.4）为 2026-09-16 用户指令新增。映射只证明“允许进入 Gate A”，不预先
 承诺具体 Part 名称或数量；每个 Part 仍必须从 AtomUI 自身源码、主题和生命周期事实中设计。
 
-> 计数核对（2026-09-16）：本节表格行数 65，与 §2 的「已完成基线 1 + 本轮待改造 64」一致；65 + §2.4 的 13 = 78，与
+> 计数核对（2026-09-16）：本节表格行数 68，与 §2 的「已完成基线 1 + 本轮待改造 67」一致；68 + §2.4 的 10 = 78，与
 > 78 个正式控件文档叶子一致。原文「覆盖 63 个准入家族 / 其余 62 个进入实施批次」在 `SplitButton`、`Expander`、`TabStrip`
-> 与 `Menu` 相继纳入后未同步，本次一并校正。
+> 与 `Menu` 相继纳入后未同步，本次一并校正；`GroupBox`、`ButtonSpinner`、`ComboBox`、`Splash` 四次纳入后再次重算。
 
 | AtomUI 控件家族 | Ant Design 6.6.0 公开 owner | 结论 |
 | --- | --- | --- |
@@ -176,6 +177,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | `NavMenu` | `Menu` | Batch 5；两者均是层级页面/模块导航 owner |
 | `Menu` | `Menu` | Batch 5 范围新增（2026-09-15 用户指令，原排除判定撤销）；与 `NavMenu` 映射同一个上游 `Menu` owner、公开键路径逐字相同（`root` / `itemTitle` / `list` / `item` / `itemIcon` / `itemContent` / `subMenu.*` / `popup.root`，按 6.6.3 稳定发布源码审计）。AtomUI `Menu` 是桌面命令、ContextMenu 与 MenuFlyout 家族，与上游 `Menu` 共用同一套菜单语义键，职责直接对应（§2.1 第 4 条） |
 | `DataGrid` | `Table` | Batch 5 |
+| `Splash` | 无上游 owner | Batch 7 范围新增（2026-09-16 用户指令，原排除判定撤销）；上游稳定发布源码中不存在承载桌面启动反馈职责的公开 Semantic DOM owner，纳入依据是用户直接指令与 AtomUI 自身的启动页职责，**不是** §2.1 的上游准入 Gate。Part 按 AtomUI 自身模板职责设计（`root` 隐式，以及 `logo` / `title` / `subtitle` / `content` / `spin` / `progressBar` / `message` / `detail` / `footer`），命名对齐 `Result` / `Empty` / `Alert` / `GroupBox` 的同职责键；详见 §2.4 日期化撤销段 |
 
 ### 2.4 排除映射
 
@@ -193,7 +195,7 @@ steps switch table tabs tag time-picker timeline tooltip tour transfer tree tree
 | ~~`ButtonSpinner`~~ | 排除判定已于 2026-09-16 经用户指令撤销，移入 §2.3 纳入映射，随第六批执行（理由见本节末）。 | 已撤销。 |
 | ~~`ComboBox`~~ | 排除判定已于 2026-09-16 经用户指令撤销，移入 §2.3 纳入映射，随第三批执行（理由见本节末）。 | 已撤销。 |
 | `BorderBeam` | Ant Design 稳定版没有该公开组件或对应 Semantic DOM API。 | 稳定版出现职责直接对应的公开 owner。 |
-| `Splash` | Ant Design 稳定版没有职责直接对应的公开 Semantic DOM owner。 | 新稳定版出现对应公开 owner。 |
+| ~~`Splash`~~ | 排除判定已于 2026-09-16 经用户指令撤销，移入 §2.3 纳入映射，随第七批执行（理由见本节末）。 | 已撤销。 |
 | `WindowTitleBar` | Ant Design Web 组件体系没有对应的公开 Semantic DOM owner。 | 稳定版出现职责直接对应的公开 owner。 |
 | `Window` | Ant Design Web 组件体系没有对应的公开 Semantic DOM owner；Modal 不能替代 TopLevel Window。 | 稳定版出现职责直接对应的公开 owner。 |
 
@@ -284,6 +286,30 @@ internal combobox mode 不能作为公开 owner”为由拒绝映射。该理由
    上、下按钮上游没有独立语义键，属显式能力补充。
 
 本合同不影响其他排除项的判定依据。`ButtonSpinner` 与 `GroupBox` 同日纳入后，排除控件由 14 个收缩为 12 个，准入家族由 63 个增至 65 个。
+
+范围变更（2026-09-16）：`Splash` 的原排除判定经用户指令撤销，从本表移入 §2.3 纳入映射，随第七批执行。该项与
+`GroupBox` 同属“**无可映射上游 owner**、依据用户直接指令纳入”的一类，与上述三次“owner 数量 vs 职责对应”的追认
+判据不同，不得混同：
+
+- Splash 是桌面应用的启动反馈控件，职责是“启动中但应用尚不可交互”。上游稳定发布源码中不存在承载该职责的公开组件
+  owner，因此原排除判定登记的正向触发条件（“新稳定版出现对应公开 owner”）**未发生**，本次纳入不是一次新的 §2.1 上游
+  Gate 通过。
+- 纳入依据是用户 2026-09-16 的直接指令与 AtomUI 自身的启动页职责。既有先例同样是 `SplitButton` 的触发侧按键：
+  上游没有对应键时，AtomUI 按自身模板结构把 Part 作为**显式能力补充**发布。
+- 十个 Part 全部从 AtomUI 自身模板与 API 职责设计：`root` 隐式；`logo` / `message` / `detail` 按 Splash 自身 API
+  （`Logo` / `Message` / `Detail`）命名；`title` / `subtitle` / `content` / `footer` 与已改造的 `Result` / `Empty` /
+  `Alert` / `GroupBox` 同职责键一致；`spin` / `progressBar` 按真实承载控件命名。Splash 不借用任何其他控件的 owner 准入
+  资格，也不为对称而虚构模板中不存在的区域。
+- 进度区刻意拆分为 `spin` 与 `progressBar` 两个 `Single` Part，而不是合并为一个 `Multiple` Part；理由与契约细节见
+  [Splash Semantic Part 契约](../../controls/desktop/feedback/splash/semantic-part.md) §1.1、§2.6。
+- `SplashWindow` 不发布 Semantic Part（窗口壳层已是 public API，表面阴影与宿主圆角属 Token 语义），见同一契约 §6.1。
+- Splash 是 `AtomUI.Desktop.Controls.Extras` 中首个采用 Semantic Part 的控件。
+
+该撤销不改变其他排除项的判定依据；引用 §2.4 作排除依据时，仍需先确认该项未被日期化撤销覆盖。
+
+> 累计结论（2026-09-16，`GroupBox`、`ButtonSpinner`、`ComboBox`、`Splash` 四次纳入合并后）：排除控件由 16 个收缩为 **10 个**，
+> 准入家族由 63 个增至 **67 个**，三行为 1 / 67 / 10，合计仍为 78。上文本节的逐条日期化段落记录的是各次纳入*当时*的中间
+> 状态（14 → 12 → 11 与 63 → 65 → 66），不得作为当前计数引用；当前计数以本段与 §2 的表格为准。
 
 ## 3. 最小交付单位
 
@@ -570,9 +596,11 @@ git diff --check
 > 尚无验收文档；第五批三套控件的改造前后性能基线未归档。逐批次明细见
 > [全量改造总计划](2026-08-12-semantic-part-control-rollout.md) 的「批次进度」。
 >
-> 2026-09-16 状态更新：`GroupBox` 经用户指令纳入（原排除判定撤销，无上游 owner），家族总数由 63 增至 64。上段“63 个家族
-> 全部已实现”的历史结论不变，但“无剩余待改造家族”不再成立——`GroupBox` 目前处于 Gate A 文档审核阶段。范围记录见 §2.3 与
-> §2.4 的日期化范围变更段。
+> 2026-09-16 状态更新：`GroupBox`、`ButtonSpinner`、`ComboBox` 与 `Splash` 先后经用户指令纳入（均为原排除判定撤销，分别随
+> 第二批、第六批、第三批、第七批），家族总数由 63 增至 67。上段“63 个家族全部已实现”的历史结论不变，但“无剩余待改造家族”
+> 不再成立。其中：`ButtonSpinner` 与 `Splash` 已完成 Gate A / Gate B 并经用户授权提交，`GroupBox` 已完成
+> 真机视觉验收，`ComboBox` 已完成 Gate A（经用户批准）与 Gate B 实现。范围记录见 §2.3 与 §2.4 的
+> 日期化范围变更段。
 >
 > 2026-09-15 基线版本说明：§2 登记的上游审计基线为 2026-08-12 时的 Ant Design 6.6.0。此后个别家族的契约文档已在
 > 6.6.3 稳定发布源码上重新对齐（如 `DataGrid`、`Menu` 的语义表明确写「对齐 Ant Design 6.6.3」），但 §2.2 的组件目录清单

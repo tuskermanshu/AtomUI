@@ -6,8 +6,8 @@
              xmlns:vm="using:AtomUIGallery.ShowCases.Splash"
              x:DataType="vm:SplashViewModel">
     <Grid Background="{atom:SharedTokenResource ColorBgLayout}">
-        <gallery:GalleryStickyTabsHost StickyContentPadding="28,0,28,0">
-            <gallery:GalleryStickyTabsHost.Header>
+        <gallery:GalleryShowCaseHost StickyContentPadding="28,0,28,0">
+            <gallery:GalleryShowCaseHost.Header>
                 <gallery:GalleryShowCaseHeader
                     Title="Splash"
                     Category="{gallery:SplashShowCaseLangResource ComponentCategory}"
@@ -20,8 +20,109 @@
                     Package="AtomUI.Desktop.Controls.Extras"
                     BaseClass="ContentControl"
                     MetadataValueWidth="240" />
-            </gallery:GalleryStickyTabsHost.Header>
+            </gallery:GalleryShowCaseHost.Header>
 
+            <gallery:GalleryShowCaseHost.SemanticPartsContentTemplate>
+                <DataTemplate x:DataType="vm:SplashViewModel">
+                    <!-- 进度区两个部件互斥：Spin 只在不确定态可见、ProgressBar 只在确定态可见，
+                         而语义预览跳过不可见节点。因此舞台上放两个实例，分别固定确定态与不确定态，
+                         使 spin 与 progressBar 都能被定位高亮（预览会合并同类型实例的命中）。
+                         单预览页签的画布高度在部分视口下被钳制到视口剩余高度，超出部分会被静默裁掉
+                         （真机表现为第二个实例只剩一条顶部白边）。因此这里用两列等分 Grid：
+                         列宽自适应画布、永远不会换行到第二行；两个实例的 Width 置为 NaN 以覆盖主题
+                         的 WindowWidth，改由列宽决定宽度。文案保持极短，避免窄列下多行换行把实例撑高。 -->
+                    <gallery:SemanticPartPreview Name="SplashSemanticPreview"
+                                                 Title="Splash"
+                                                 SemanticOwner="{Binding #SplashSemanticOwner}"
+                                                 SemanticOwnerType="{x:Type atom:Splash}"
+                                                 PreviewContentAlignment="Top"
+                                                 PreviewStageMinHeight="420">
+                        <gallery:SemanticPartPreview.PreviewContent>
+                            <Grid ColumnDefinitions="*,*"
+                                  ColumnSpacing="16"
+                                  MaxWidth="720"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Top">
+                                <!-- 不确定态：spin 可见、progressBar 隐藏。不写 Detail，
+                                     避免在不确定进度下出现具体百分比造成语义矛盾。 -->
+                                <atom:Splash Grid.Column="0"
+                                             Name="SplashSemanticOwner"
+                                             Width="NaN"
+                                             MinHeight="220"
+                                             Padding="18,16"
+                                             Title="AtomUI"
+                                             Subtitle="{gallery:SplashShowCaseLangResource P2SemanticSubtitle}"
+                                             Message="{gallery:SplashShowCaseLangResource P2SemanticMessageLoading}"
+                                             IsIndeterminate="True"
+                                             Footer="{gallery:SplashShowCaseLangResource P2SemanticFooter}">
+                                    <atom:Splash.Logo>
+                                        <!-- 同上：徽标填满 logo Part 的 presenter，不自带固定尺寸。 -->
+                                        <Border HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                CornerRadius="10"
+                                                Background="{atom:SharedTokenResource ColorPrimary}">
+                                            <atom:TextBlock Text="A"
+                                                            Foreground="White"
+                                                            FontSize="16"
+                                                            FontWeight="Bold"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center" />
+                                        </Border>
+                                    </atom:Splash.Logo>
+                                </atom:Splash>
+                                <!-- 确定态：progressBar 可见、spin 隐藏。 -->
+                                <atom:Splash Grid.Column="1"
+                                             Width="NaN"
+                                             MinHeight="220"
+                                             Padding="18,16"
+                                             Title="AtomUI"
+                                             Message="{gallery:SplashShowCaseLangResource P2SemanticMessageModules}"
+                                             Detail="{gallery:SplashShowCaseLangResource P2SemanticDetailProgress}"
+                                             Progress="{Binding ProgressValue}"
+                                             IsIndeterminate="False"
+                                             Footer="{gallery:SplashShowCaseLangResource P2SemanticFooter}">
+                                    <StackPanel>
+                                        <atom:Tag Text="{gallery:SplashShowCaseLangResource P2SemanticContentTag}"
+                                                  TagColor="success" />
+                                    </StackPanel>
+                                </atom:Splash>
+                            </Grid>
+                        </gallery:SemanticPartPreview.PreviewContent>
+                        <gallery:SemanticPartPreview.PartDescriptions>
+                            <gallery:SemanticPartDescription
+                                Path="root"
+                                Description="{gallery:SplashShowCaseLangResource SemanticRootDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="logo"
+                                Description="{gallery:SplashShowCaseLangResource SemanticLogoDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="title"
+                                Description="{gallery:SplashShowCaseLangResource SemanticTitleDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="subtitle"
+                                Description="{gallery:SplashShowCaseLangResource SemanticSubtitleDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="content"
+                                Description="{gallery:SplashShowCaseLangResource SemanticContentDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="spin"
+                                Description="{gallery:SplashShowCaseLangResource SemanticSpinDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="progressBar"
+                                Description="{gallery:SplashShowCaseLangResource SemanticProgressBarDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="message"
+                                Description="{gallery:SplashShowCaseLangResource SemanticMessageDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="detail"
+                                Description="{gallery:SplashShowCaseLangResource SemanticDetailDescription}" />
+                            <gallery:SemanticPartDescription
+                                Path="footer"
+                                Description="{gallery:SplashShowCaseLangResource SemanticFooterDescription}" />
+                        </gallery:SemanticPartPreview.PartDescriptions>
+                    </gallery:SemanticPartPreview>
+                </DataTemplate>
+            </gallery:GalleryShowCaseHost.SemanticPartsContentTemplate>
 
             <gallery:ShowCasePanel Name="ExamplesContent"
                                    IsScrollEnabled="False"
@@ -212,7 +313,96 @@
                         </DataTemplate>
                     </gallery:ShowCaseItem.DeferredContentTemplate>
                 </gallery:ShowCaseItem>
+
+                <gallery:ShowCaseItem
+                    Title="{gallery:SplashShowCaseLangResource SemanticPartStyleTitle}"
+                    Description="{gallery:SplashShowCaseLangResource SemanticPartStyleDescription}"
+                    SourceKey="splash-semantic-part"
+                    BadgeText="{x:Static gallery:GalleryVersionInfo.DisplayVersion}"
+                    Span="Full"
+                    IsDeferredContentEnabled="True">
+                    <gallery:ShowCaseItem.DeferredContentTemplate>
+                        <DataTemplate x:DataType="vm:SplashViewModel">
+                            <WrapPanel Orientation="Horizontal"
+                                       ItemSpacing="20"
+                                       LineSpacing="20">
+                                <WrapPanel.Styles>
+                                    <!-- 生成的专用 Semantic Part Style 是唯一的部件定制入口：
+                                         外层 Style 负责 owner 类型与业务 class，生成类型封装模板路由。 -->
+                                    <Style Selector="atom|Splash.semantic-parts">
+                                        <atom:SplashLogoStyle x:SetterTargetType="ContentPresenter">
+                                            <Setter Property="Width" Value="36" />
+                                            <Setter Property="Height" Value="36" />
+                                        </atom:SplashLogoStyle>
+                                        <atom:SplashTitleStyle x:SetterTargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#531DAB" />
+                                            <Setter Property="FontSize" Value="22" />
+                                        </atom:SplashTitleStyle>
+                                        <atom:SplashSubtitleStyle x:SetterTargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#722ED1" />
+                                        </atom:SplashSubtitleStyle>
+                                        <atom:SplashMessageStyle x:SetterTargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#1D39C4" />
+                                        </atom:SplashMessageStyle>
+                                        <atom:SplashDetailStyle x:SetterTargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#08979C" />
+                                            <Setter Property="FontSize" Value="13" />
+                                        </atom:SplashDetailStyle>
+                                        <atom:SplashProgressBarStyle x:SetterTargetType="atom:ProgressBar">
+                                            <Setter Property="Height" Value="10" />
+                                        </atom:SplashProgressBarStyle>
+                                    </Style>
+                                    <!-- root 语义区域的定制入口：表面背景、圆角与内边距由 owner 属性承载，
+                                         因此用 owner 作用域的普通 Setter 而不是 Part Style。 -->
+                                    <Style Selector="atom|Splash.semantic-parts-root">
+                                        <Setter Property="Background" Value="#F9F0FF" />
+                                        <Setter Property="CornerRadius" Value="16" />
+                                        <Setter Property="Padding" Value="28,24" />
+                                    </Style>
+                                </WrapPanel.Styles>
+
+                                <atom:Splash Classes="semantic-parts"
+                                             Width="360"
+                                             MinHeight="270"
+                                             Title="AtomUI"
+                                             Subtitle="{gallery:SplashShowCaseLangResource P2SubtitleDesktopBoot}"
+                                             Message="{gallery:SplashShowCaseLangResource P2MessageLoadingModules}"
+                                             Detail="{gallery:SplashShowCaseLangResource P2DetailProgress}"
+                                             Progress="{Binding ProgressValue}"
+                                             IsIndeterminate="False"
+                                             Footer="{gallery:SplashShowCaseLangResource P2FooterStaticPreview}">
+                                    <atom:Splash.Logo>
+                                        <!-- 徽标跟随 logo Part 的 presenter 尺寸填满，不自带固定尺寸：
+                                             否则内层固定尺寸会撑破 presenter，Part Setter 对可见外观失效。 -->
+                                        <Border HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                CornerRadius="12"
+                                                Background="{atom:SharedTokenResource ColorPrimary}">
+                                            <atom:TextBlock Text="A"
+                                                            Foreground="White"
+                                                            FontSize="20"
+                                                            FontWeight="Bold"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center" />
+                                        </Border>
+                                    </atom:Splash.Logo>
+                                </atom:Splash>
+
+                                <atom:Splash Classes="semantic-parts-root"
+                                             Width="360"
+                                             MinHeight="270"
+                                             Title="AtomUI"
+                                             Subtitle="{gallery:SplashShowCaseLangResource P2SubtitleDesktopBoot}"
+                                             Message="{gallery:SplashShowCaseLangResource P2MessageReady}"
+                                             Detail="{gallery:SplashShowCaseLangResource P2DetailReady}"
+                                             Status="Success"
+                                             Progress="1"
+                                             IsIndeterminate="False" />
+                            </WrapPanel>
+                        </DataTemplate>
+                    </gallery:ShowCaseItem.DeferredContentTemplate>
+                </gallery:ShowCaseItem>
             </gallery:ShowCasePanel>
-        </gallery:GalleryStickyTabsHost>
+        </gallery:GalleryShowCaseHost>
     </Grid>
 </UserControl>

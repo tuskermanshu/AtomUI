@@ -1,6 +1,6 @@
 # Splash 桌面版架构设计
 
-本文档定义 `Splash` 桌面版的设计定位、公共契约、状态模型、视觉主题关系和兼容边界。通用控件研发约束见 [控件研发标准](../../../../engineering/development/control-development-guidelines.md)，内部实现原理见 [Splash 桌面版实现原理](implementation.md)，Splash Token 的专项设计见 [Splash Token 设计](token.md)，设计和契约变化记录见 [Splash Changelog](changelog.md)。
+本文档定义 `Splash` 桌面版的设计定位、公共契约、状态模型、视觉主题关系和兼容边界。通用控件研发约束见 [控件研发标准](../../../../engineering/development/control-development-guidelines.md)，内部实现原理见 [Splash 桌面版实现原理](implementation.md)，Splash Token 的专项设计见 [Splash Token 设计](token.md)，公共 Semantic Part 契约见 [Splash Semantic Part 契约](semantic-part.md)，设计和契约变化记录见 [Splash Changelog](changelog.md)。
 
 ## 1. 控件定位
 
@@ -227,25 +227,34 @@ SplashWindow
 
 - [Splash 桌面版实现原理](implementation.md)
 - [Splash Token 设计](token.md)
+- [Splash Semantic Part 契约](semantic-part.md)
 - [Splash Changelog](changelog.md)
 
-LLMS 语义区域：
+Semantic Part 摘要（完整契约、Selector 用法、排除项与验证要求见
+[Splash Semantic Part 契约](semantic-part.md)）：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Splash` | 启动反馈控件根语义区域，承载 public API、状态和主题入口。 | `Logo`、`Title`、`Status`、`Progress` | `SplashToken` | stable |
-| `host` | `SplashWindow` | 承载独立桌面启动窗口和关闭动效。 | `MinimumShowDuration`、`CloseDelay`、`FadeOutDuration` | `WindowWidth`、`WindowMinHeight` | stable |
-| `brand` | `PART_LogoPresenter`、`PART_TitleBlock`、`PART_SubtitleBlock` | 展示品牌和应用身份。 | `Logo`、`LogoTemplate`、`Title`、`Subtitle` | `LogoSize`、`TitleFontSize` | template-stable |
-| `status` | `PART_MessageBlock`、`PART_DetailBlock` | 展示启动阶段、错误详情或补充说明。 | `Message`、`Detail`、`Status` | `MessageFontSize`、`DetailFontSize` | template-stable |
-| `progress` | `PART_ProgressBar`、`PART_Spin` | 展示确定或不确定进度。 | `Progress`、`IsIndeterminate` | `ProgressMarginTop`、`IndicatorSize` | template-stable |
-| `content` | `PART_ContentPresenter`、`PART_FooterPresenter` | 承载自定义内容和底部区域。 | `Content`、`ContentTemplate`、`Footer`、`FooterTemplate` | `ContentGap`、`FooterMarginTop` | template-stable |
+| `root` | `Splash` | 启动页根语义区域，承载表面背景、圆角、内容内边距与窗口尺寸基线。 | `Background`、`CornerRadius`、`Padding`、`Width`、`MinHeight`、`Status`、`Progress` | `SurfaceBackground`、`SurfaceCornerRadius`、`ContentPadding`、`WindowWidth`、`WindowMinHeight` | stable since 6.2.0 |
+| `logo` | `ContentPresenter#PART_LogoPresenter` | 展示品牌标识，承载标识尺寸与对齐。 | `Logo`、`LogoTemplate` | `LogoSize` | stable since 6.2.0 |
+| `title` | `TextBlock#PART_TitleBlock` | 展示主标题，承载颜色、字号、字重与行高。 | `Title` | `ColorTextHeading`、`TitleFontSize`、`TitleLineHeight` | stable since 6.2.0 |
+| `subtitle` | `TextBlock#PART_SubtitleBlock` | 展示副标题，承载颜色与字号。 | `Subtitle` | `SubtleForeground`、`SubtitleFontSize` | stable since 6.2.0 |
+| `content` | `ContentPresenter#PART_ContentPresenter` | 承载扩展内容，承载内边距、背景与对齐。 | `Content`、`ContentTemplate` | `ContentGap` | stable since 6.2.0 |
+| `spin` | `Spin#PART_Spin` | 展示不确定加载指示器，承载尺寸与颜色。 | `IsIndeterminate` | `IndicatorSize` | stable since 6.2.0 |
+| `progressBar` | `ProgressBar#PART_ProgressBar` | 展示确定进度，承载高度与颜色。 | `Progress`、`IsIndeterminate` | `ProgressBarHeight` | stable since 6.2.0 |
+| `message` | `TextBlock#PART_MessageBlock` | 展示启动阶段消息，含 `:success` / `:error` 状态色。 | `Message`、`Status`、`SetMessage`、`SetStatus`、`SetError` | `ColorText`、`MessageFontSize`、`SuccessColor`、`ErrorColor` | stable since 6.2.0 |
+| `detail` | `TextBlock#PART_DetailBlock` | 展示详细信息或错误详情，承载颜色、字号与换行。 | `Detail`、`SetError` | `SubtleForeground`、`DetailFontSize` | stable since 6.2.0 |
+| `footer` | `ContentPresenter#PART_FooterPresenter` | 承载底部区域（版本、版权或启动失败操作入口）。 | `Footer`、`FooterTemplate` | `FooterMarginTop` | stable since 6.2.0 |
+
+`SplashWindow` 不发布 Semantic Part；窗口模板结构、`PART_SurfaceHost` 与窗口级覆盖入口见
+[Splash Semantic Part 契约 §6.1](semantic-part.md#61-splashwindow-不发布语义部件)。
 
 LLMS 导出来源：
 
 | LLMS 内容 | 来源 | 说明 |
 | --- | --- | --- |
 | 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/splash/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/splash/semantic-cn.md` |
+| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/splash/semantic-cn.md` |
 | API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
 | Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
 | 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
@@ -259,5 +268,6 @@ LLMS 导出来源：
 | Public API | 覆盖视觉控件默认值、服务默认值、静态 API 委托和窗口默认值。 |
 | 状态模型 | 覆盖 `Loading`、`Success`、`Error`、确定进度、不确定进度、重复关闭和取消。 |
 | AXAML/Theme | 检查 template part、伪类、资源 key、Light/Dark 主题和窗口宿主主题。 |
+| Semantic Part | 按 [Splash Semantic Part 契约 §7](semantic-part.md#7-兼容性与验证) 覆盖 descriptor、marker、生成 Style 命中、状态矩阵、尺寸基线与 Gallery 专用 Style 契约。 |
 | Token | 检查 TokenKind、AXAML token resource、Token 类型、生成数据和 token.md和文档同步。 |
-| Gallery | 走查基础启动页、确定进度、不确定进度、自定义内容和错误状态示例。 |
+| Gallery | 走查基础启动页、确定进度、不确定进度、自定义内容、错误状态示例与 Semantic Parts 预览页签。 |

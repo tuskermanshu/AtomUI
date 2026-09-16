@@ -1,6 +1,6 @@
 # Splash 桌面版实现原理
 
-本文档描述 Splash 桌面版的内部实现范围、源码职责、状态流、生命周期、服务编排和维护规则。公共设计与 API 契约见 [Splash 桌面版架构设计](overview.md)，变化记录见 [Splash Changelog](changelog.md)。涉及控件 Token 的实现应同时阅读 [Splash Token 设计](token.md)。
+本文档描述 Splash 桌面版的内部实现范围、源码职责、状态流、生命周期、服务编排和维护规则。公共设计与 API 契约见 [Splash 桌面版架构设计](overview.md)，公共 Semantic Part 契约见 [Splash Semantic Part 契约](semantic-part.md)，变化记录见 [Splash Changelog](changelog.md)。涉及控件 Token 的实现应同时阅读 [Splash Token 设计](token.md)。
 
 ## 1. 实现定位
 
@@ -11,6 +11,7 @@
 主要源码文件：
 
 - `src/AtomUI.Desktop.Controls.Extras/Splash/Splash.cs`
+- `src/AtomUI.Desktop.Controls.Extras/Splash/Splash.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls.Extras/Splash/Splash.StaticAPI.cs`
 - `src/AtomUI.Desktop.Controls.Extras/Splash/SplashWindow.cs`
 - `src/AtomUI.Desktop.Controls.Extras/Splash/SplashOptions.cs`
@@ -27,6 +28,7 @@
 职责边界：
 
 - `Splash.cs` 保留视觉控件 public/protected API、状态写入方法、Avalonia 属性注册、伪类同步和主要模板生命周期入口。
+- `Splash.SemanticParts.cs` 只承载九个公开 Part 的 `[SemanticPart]` 声明与空的 partial class 块，不含模板节点、Setter、Style 实例或运行时 VisualTree 查找；Part 语义与排除项见 [Splash Semantic Part 契约](semantic-part.md)。
 - `Splash.StaticAPI.cs` 只放静态便利入口，所有逻辑委托给 `Splash.DefaultService`。
 - `SplashWindow.cs` 负责窗口级 `Splash` 内容承载属性、展示时间记录、淡出关闭和关闭请求状态；`SplashWindowTheme.axaml` 负责透明无装饰窗口默认值、窗口模板、阴影宿主和内容承载边界。
 - `SplashService.cs` 是启动编排 owner，负责创建窗口、创建或复用 `Splash` 实例、应用运行时 options、更新状态、关闭窗口和 UI thread 调度。
@@ -97,15 +99,17 @@ SplashWindow
         -> Splash
            -> Border#PART_RootLayout (template-stable)
               -> Border#PART_SurfaceLayout (template-stable)
-                 -> ContentPresenter#PART_LogoPresenter (template-stable)
-                 -> TextBlock#PART_TitleBlock (template-stable)
-                 -> TextBlock#PART_SubtitleBlock (template-stable)
-                 -> ContentPresenter#PART_ContentPresenter (template-stable)
-                 -> Spin#PART_Spin (template-stable)
-                 -> ProgressBar#PART_ProgressBar (template-stable)
-                 -> TextBlock#PART_MessageBlock (template-stable)
-                 -> TextBlock#PART_DetailBlock (template-stable)
-                 -> ContentPresenter#PART_FooterPresenter (template-stable)
+                 -> StackPanel#PART_ContentLayout (template-stable)
+                    -> ContentPresenter#PART_LogoPresenter (template-stable, .semantic-logo)
+                    -> TextBlock#PART_TitleBlock (template-stable, .semantic-title)
+                    -> TextBlock#PART_SubtitleBlock (template-stable, .semantic-subtitle)
+                    -> ContentPresenter#PART_ContentPresenter (template-stable, .semantic-content)
+                    -> Panel#PART_ProgressLayout (template-stable)
+                       -> Spin#PART_Spin (template-stable, .semantic-spin)
+                       -> ProgressBar#PART_ProgressBar (template-stable, .semantic-progress-bar)
+                    -> TextBlock#PART_MessageBlock (template-stable, .semantic-message)
+                    -> TextBlock#PART_DetailBlock (template-stable, .semantic-detail)
+                    -> ContentPresenter#PART_FooterPresenter (template-stable, .semantic-footer)
 
 Splash static API
   -> ISplashService DefaultService (public)
@@ -123,10 +127,30 @@ Splash static API
 | `ISplashService` | public service contract | `ISplashService.cs` | 调用方 | show/update/close 编排 | public | 推荐测试和 DI 使用。 |
 | `SplashService` | public service implementation | `SplashService.cs` | 调用方或 `Splash.DefaultService` | 默认服务行为 | public | 一次只管理一个启动流。 |
 | `PART_SurfaceHost` | template part | `SplashWindowTheme.axaml` | `SplashWindow` template | 窗口表面阴影和阴影遮罩圆角 | template-stable | 使用 `ShadowsAwareContainer`，不通过 C# token bridge 绑定资源。 |
-| `PART_RootLayout` | template part | `SplashTheme.axaml` | `Splash` template | Splash 内容裁剪边界 | template-stable | 主题维护可依赖名称，用户不直接操作。 |
-| `PART_SurfaceLayout` | template part | `SplashTheme.axaml` | `Splash` template | 背景、内容 padding 和表面圆角裁剪 | template-stable | 与 `PART_SurfaceHost` 共用表面圆角 token。 |
-| `PART_ProgressBar` | template part | `SplashTheme.axaml` | `Splash` template | `Progress` | template-stable | 表达确定进度，不承载业务任务。 |
-| `PART_Spin` | template part | `SplashTheme.axaml` | `Splash` template | `IsIndeterminate` | template-stable | 表达不确定加载，不替代 Spin 控件文档。 |
+| `PART_RootLayout` | template part | `SplashTheme.axaml` | `Splash` template | Splash 内容裁剪边界 | template-stable | 主题维护可依赖名称，用户不直接操作；不是 Semantic Part（不带背景）。 |
+| `PART_SurfaceLayout` | template part | `SplashTheme.axaml` | `Splash` template | 背景、内容 padding 和表面圆角裁剪 | template-stable | 与 `PART_SurfaceHost` 共用表面圆角 token；表面定制走 owner 的 `Background` / `CornerRadius` / `Padding`，不发布为 Part。 |
+| `PART_ContentLayout` | template part | `SplashTheme.axaml` | `Splash` template | 内容列间距（`ContentGap`） | template-stable | 纯布局脊柱，不是 Semantic Part；间距调整走 Token。 |
+| `PART_ProgressLayout` | template part | `SplashTheme.axaml` | `Splash` template | 进度区上外边距（`ProgressMarginTop`） | template-stable | 纯布局包装，不是 Semantic Part。 |
+| `PART_ProgressBar` | template part | `SplashTheme.axaml` | `Splash` template | `Progress` | template-stable | 表达确定进度，不承载业务任务；公开为 `progressBar` Part。 |
+| `PART_Spin` | template part | `SplashTheme.axaml` | `Splash` template | `IsIndeterminate` | template-stable | 表达不确定加载，不替代 Spin 控件文档；公开为 `spin` Part。 |
+
+Semantic Part marker 映射（`Classes.semantic-*="True"`，静态声明在 `SplashTheme.axaml` 单一模板内，`TemplatedParent` 均为
+`Splash` owner，无 C# marker 注入）：
+
+| Part | marker 所在节点 |
+| --- | --- |
+| `logo` | `ContentPresenter#PART_LogoPresenter` |
+| `title` | `TextBlock#PART_TitleBlock` |
+| `subtitle` | `TextBlock#PART_SubtitleBlock` |
+| `content` | `ContentPresenter#PART_ContentPresenter` |
+| `spin` | `Spin#PART_Spin` |
+| `progressBar` | `ProgressBar#PART_ProgressBar` |
+| `message` | `TextBlock#PART_MessageBlock` |
+| `detail` | `TextBlock#PART_DetailBlock` |
+| `footer` | `ContentPresenter#PART_FooterPresenter` |
+
+marker 只增加 `Classes` 条目，不参与默认视觉：`SplashTheme.axaml` 的默认外观仍由内部 `#PART_*` selector 与 Token
+提供。`SplashWindowTheme.axaml` 不声明任何 semantic marker，`SplashWindow` 不是 Semantic owner。
 
 ## 5. 生命周期与模板接入
 

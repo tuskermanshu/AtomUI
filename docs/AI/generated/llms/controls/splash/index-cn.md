@@ -91,7 +91,7 @@ Splash 的事件与命令以控件文档、源码 public surface 和 Avalonia �
 
 ### 基础
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml:49`
+来源：`controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml:150`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -124,7 +124,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 确定进度
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml:83`
+来源：`controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml:184`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -158,7 +158,7 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 状态
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml:119`
+来源：`controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml:220`
 
 Gallery key：`ExamplesContent` / item `2`
 
@@ -186,7 +186,7 @@ Gallery key：`ExamplesContent` / item `2`
 
 ### Logo、内容与页脚
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml:149`
+来源：`controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml:250`
 
 Gallery key：`ExamplesContent` / item `3`
 
@@ -328,6 +328,7 @@ Splash Token 只表达组件级视觉变量，例如窗口尺寸、内容间距�
 主要源码文件：
 
 - `src/AtomUI.Desktop.Controls.Extras/Splash/Splash.cs`
+- `src/AtomUI.Desktop.Controls.Extras/Splash/Splash.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls.Extras/Splash/Splash.StaticAPI.cs`
 - `src/AtomUI.Desktop.Controls.Extras/Splash/SplashWindow.cs`
 - `src/AtomUI.Desktop.Controls.Extras/Splash/SplashOptions.cs`
@@ -344,6 +345,7 @@ Splash Token 只表达组件级视觉变量，例如窗口尺寸、内容间距�
 职责边界：
 
 - `Splash.cs` 保留视觉控件 public/protected API、状态写入方法、Avalonia 属性注册、伪类同步和主要模板生命周期入口。
+- `Splash.SemanticParts.cs` 只承载九个公开 Part 的 `[SemanticPart]` 声明与空的 partial class 块，不含模板节点、Setter、Style 实例或运行时 VisualTree 查找；Part 语义与排除项见 [Splash Semantic Part 契约](semantic-part.md)。
 - `Splash.StaticAPI.cs` 只放静态便利入口，所有逻辑委托给 `Splash.DefaultService`。
 - `SplashWindow.cs` 负责窗口级 `Splash` 内容承载属性、展示时间记录、淡出关闭和关闭请求状态；`SplashWindowTheme.axaml` 负责透明无装饰窗口默认值、窗口模板、阴影宿主和内容承载边界。
 - `SplashService.cs` 是启动编排 owner，负责创建窗口、创建或复用 `Splash` 实例、应用运行时 options、更新状态、关闭窗口和 UI thread 调度。
@@ -355,6 +357,7 @@ Splash Token 只表达组件级视觉变量，例如窗口尺寸、内容间距�
 
 - 源设计文档：`docs/controls/desktop/feedback/splash/overview.md`
 - 实现文档：`docs/controls/desktop/feedback/splash/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/feedback/splash/semantic-part.md`
 - Token 文档：`docs/controls/desktop/feedback/splash/token.md`
 - 变更记录：`docs/controls/desktop/feedback/splash/changelog.md`
 - 语义结构：`./semantic-cn.md`
