@@ -149,7 +149,7 @@ SegmentedTheme / SegmentedItemTheme
 track + selected thumb + item states
 ```
 
-根控件在 `Render()` 中绘制轨道背景和选中滑块。item 模板绘制每个选项自身的背景、图标、内容和状态颜色。选中滑块位置来自当前选中容器相对根控件的坐标，尺寸来自当前选中容器最终排列后的 `Bounds.Size`。
+根控件在 `Render()` 中绘制轨道背景和选中滑块。item 模板绘制每个选项自身的 hover/pressed 背景遮罩、图标、内容和状态颜色。选中背景由选中滑块独占承载：item 的 `:selected` 不绘制背景，选中滑块飞行途中目标项也不会提前点亮；滑块飞行期间非选中 item 的 hover/pressed 背景遮罩被屏蔽，对齐上游 `thumb ~ item::after` 透明规则。无选中项时滑块不绘制。选中滑块位置来自当前选中容器相对根控件的坐标，尺寸来自当前选中容器最终排列后的 `Bounds.Size`。
 
 `Shape=Default` 时，根、item 和滑块圆角继续由 SizeType 对应的 SharedToken 决定。`Shape=Round` 时，Shape 分支在 SizeType 分支之后统一覆盖根、item 和滑块圆角为胶囊几何；该覆盖不新增 Design Token，也不改变模板结构。
 
@@ -191,7 +191,14 @@ Segmented 的共享实现位于 `AtomUI.Controls`，桌面实现位于 `AtomUI.D
 
 ### 8.1 选中滑块模型
 
-选中滑块是根控件 render 层的视觉，不是单独的 visual child。它的 `SelectedThumbPos` 来自选中容器相对根控件的坐标，`SelectedThumbSize` 来自选中容器最终排列后的 `Bounds.Size`。选择变化时立即同步一次；布局完成后再次按最终 Bounds 校准，从而覆盖方向、expanding、可见性和父容器尺寸变化。
+选中滑块是根控件 render 层的视觉，不是单独的 visual child。它的 `SelectedThumbPos` 来自选中容器相对根控件的坐标，`SelectedThumbSize` 来自选中容器最终排列后的 `Bounds.Size`。
+
+滑块矩形同步分两条路径：选择变化时（`SelectionChanged`）允许动画飞行，滑块位移与尺寸同时插值，时长取
+SharedToken `MotionDurationSlow`（300ms），缓动为 `cubic-bezier(0.645, 0.045, 0.355, 1)`（对齐上游
+motionEaseInOut）；布局完成后（`ArrangeOverride`）按最终 Bounds 校准，一律瞬移动画。滑块首次出现、无选中来源
+容器、过渡系统尚未就绪或目标矩形无变化时也一律瞬移。无选中项（如 Form `ClearFormValue`）时滑块停止绘制。
+
+item 的文字和图标颜色切换不受滑块飞行约束，立即生效并由 `MotionDurationMid` 柔化过渡。
 
 该模型要求 item 布局完成后再同步滑块尺寸。修改布局、容器创建或选择时序时，必须验证滑块和 item 边界一致。
 
@@ -227,8 +234,8 @@ Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.2.0`。上游�
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Segmented` | 轨道根语义区域，承载选项数据、选择状态、方向、形状与轨道表面视觉（背景由 owner `Render` 绘制，圆角/内边距/裁剪投影到 `Frame`）；对应上游 `.ant-segmented`。 | `ItemsSource`、`ItemTemplate`、`SelectedIndex`、`SelectedItem`、`SelectionChanged`、`SizeType`、`Orientation`、`Shape`、`IsExpanding`、`IsMotionEnabled` | `TrackBg`、`TrackPadding`、SharedToken | stable since 6.2.0 |
-| `item` | 每个 `SegmentedItem` 容器 | 选项容器，设置背景/前景状态色、圆角、内边距、最小高度、光标与选择/悬浮/按压/禁用视觉；对应上游 `.ant-segmented-item`。 | `SegmentedItem.Icon`、`SegmentedItem.Content`、`SegmentedItem.IsSelected`、`SizeType`、`Shape` | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、`ItemHoverBg`、`ItemActiveBg`、`ItemSelectedBg`、`ItemMinHeight*`、`SegmentedItemPadding*` | stable since 6.2.0 |
+| `root` | `Segmented` | 轨道根语义区域，承载选项数据、选择状态、方向、形状与轨道表面视觉（背景由 owner `Render` 绘制，圆角/内边距/裁剪投影到 `Frame`）；对应上游 `.ant-segmented`。 | `ItemsSource`、`ItemTemplate`、`SelectedIndex`、`SelectedItem`、`SelectionChanged`、`SizeType`、`Orientation`、`Shape`、`IsExpanding`、`IsMotionEnabled` | `TrackBg`、`TrackPadding`、`ItemSelectedBg`（选中滑块背景）、SharedToken | stable since 6.2.0 |
+| `item` | 每个 `SegmentedItem` 容器 | 选项容器，设置背景/前景状态色、圆角、内边距、最小高度、光标与选择/悬浮/按压/禁用视觉；对应上游 `.ant-segmented-item`。 | `SegmentedItem.Icon`、`SegmentedItem.Content`、`SegmentedItem.IsSelected`、`SizeType`、`Shape` | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、`ItemHoverBg`、`ItemActiveBg`、`ItemMinHeight*`、`SegmentedItemPadding*` | stable since 6.2.0 |
 | `icon` | 每个 `SegmentedItem` 模板中的 `IconPresenter#IconPresenter` | 选项图标区域：画刷状态色、图标尺寸与可见性；对应上游 `.ant-segmented-item-icon`。 | `SegmentedItem.Icon`、`SizeType` | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、SharedToken（`IconSize*`、`ColorTextDisabled`） | stable since 6.2.0 |
 | `label` | 每个 `SegmentedItem` 模板中的 `ContentPresenter#Content` | 选项文本区域：文本呈现、居中对齐、省略与图文间距（`:has-icon`）；对应上游 `.ant-segmented-item-label`。 | `SegmentedItem.Content`、`SegmentedItem.ContentTemplate` | `SegmentedItemContentMargin` | stable since 6.2.0 |
 
@@ -249,7 +256,7 @@ LLMS 导出来源：
 | --- | --- |
 | Public API | `SizeType`、`Orientation`、`Shape`、`IsExpanding`、`IsMotionEnabled`、`SelectedIndex`、`SelectedItem`、`SelectionChanged`、`SegmentedItem.Icon`、`SegmentedItem.IsSelected`。 |
 | 状态行为 | 默认选择、显式选择保留、绑定选择保留、pointer release 选择、四方向键循环选择、Form value、disabled item、hidden item。 |
-| 布局与滑块 | 横向/纵向自然布局、水平 expanding、垂直宽度适配、动态方向切换、最终 Bounds 滑块矩形。 |
+| 布局与滑块 | 横向/纵向自然布局、水平 expanding、垂直宽度适配、动态方向切换、最终 Bounds 滑块矩形；滑块过渡时长/缓动契约（300ms + `cubic-bezier(0.645, 0.045, 0.355, 1)`）、飞行期间 item 背景遮罩抑制、无选中时滑块隐藏、detach 清理。 |
 | AXAML / Template | 根 `Frame`、`PART_ItemsPresenter`、`SegmentedStackPanel`、item `Frame`、`IconPresenter`、`Content` 和 SizeType/Shape 样式分支。 |
 | Semantic Part | descriptor 只含 `root`/`item`/`icon`/`label`；`semantic-item` marker 随容器创建/prepare 幂等就位，`semantic-icon`/`semantic-label` marker 位于 item 模板节点；集合重置、图文/纯图标/纯文本选项与选择变化不增删 marker；owner-scoped Semantic Style 命中最低 public 类型；选中滑块不属于任何 Part。 |
 | Token | 轨道 padding/background、item 文本/背景状态色、item 最小高度、图标和图文间距。 |

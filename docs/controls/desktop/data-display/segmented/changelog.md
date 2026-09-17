@@ -3,6 +3,26 @@
 本文档记录 Segmented 控件级设计、API、主题契约、Token 和实现结构的变化。
 它不替代仓库根目录 CHANGELOG.md，也不作为正式版本发布说明。
 
+## 2026-09-17
+
+- Motion
+  - 选中滑块飞行动画对齐上游 antd 契约：位移与尺寸同时插值，时长 `MotionDurationSlow`（300ms），缓动
+    `cubic-bezier(0.645, 0.045, 0.355, 1)`（motionEaseInOut），替代此前的 200ms 线性过渡。
+  - item 文字与图标颜色切换加入 `MotionDurationMid` 柔化过渡，对齐上游 item color transition。
+- Design
+  - 选中背景改为由选中滑块独占承载：item 的 `:selected` 不再绘制 `ItemSelectedBg`，任何时刻选中背景只由
+    根控件 render 层滑块表达，消除滑块飞行期间目标项提前点亮的双重选中视觉。
+  - 滑块飞行期间屏蔽非选中 item 的 hover/pressed 背景遮罩（item 内部状态 `IsThumbMotionActive`），对齐上游
+    `thumb ~ item::after` 透明规则。
+- Implementation
+  - `SetupSelectedThumbRect(bool animate)` 区分选择切换（允许飞行）与布局校准（瞬移）；滑块首次出现、
+    无选中来源、布局跟随一律瞬移。
+  - 无选中项（如 Form `ClearFormValue`）时滑块停止绘制，不再残留幽灵滑块。
+  - 飞行抑制态由过渡时长驱动的 `DispatcherTimer` 清除，控件 detach 时停止并清理。
+- Tests
+  - 新增 `SegmentedThumbMotionTests`：滑块过渡时长/缓动契约、选中 item 背景透明、飞行抑制态生命周期、
+    motion 关闭不置位、清除选中隐藏滑块、detach 清理。
+
 ## 2026-08-19
 
 - Design

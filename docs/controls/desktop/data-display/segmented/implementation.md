@@ -30,6 +30,7 @@ Gallery 和测试：
 
 - `controlgallery/AtomUIGallery/ShowCases/DataDisplay/Segmented/`：Segmented 示例、源码片段和本地化文案。
 - `tests/AtomUI.Desktop.Controls.Tests/Segmented/SegmentedSelectionInitializationTests.cs`：选择初始化、Form value 和 expanding 布局回归测试。
+- `tests/AtomUI.Desktop.Controls.Tests/Segmented/SegmentedThumbMotionTests.cs`：选中滑块动效契约测试（过渡时长/缓动、选中 item 背景透明、飞行抑制态生命周期、无选中隐藏滑块、detach 清理）。
 - `tests/AtomUI.Desktop.Controls.Tests/SizeType/CustomizableSizeTypeContractTests.cs`：`ICustomizableSizeTypeAware` 契约测试。
 - `tests/AtomUIGallery.Tests/ShowCases/SegmentedShowCasePageTests.cs`：Gallery 页面结构和示例快照测试。
 
@@ -78,7 +79,7 @@ pointer left button released on item
   → owner.UpdateSelectionFromPointerEvent()
   → SelectingItemsControl selection update
   → SelectionChanged
-  → SetupSelectedThumbRect()
+  → SetupSelectedThumbRect(animate: true)
 ```
 
 默认选择流：
@@ -119,7 +120,7 @@ IFormItemAware.ClearFormValue()   → SelectedItem = null
 初始化和加载：
 
 - 根控件和 item 在 `OnInitialized()` 中临时禁用 transitions。
-- `OnLoaded()` 通过 dispatcher 重新启用 transitions，避免初次布局时出现无意义动画。
+- `OnLoaded()` 通过 dispatcher 重新启用 transitions 并置位 `_transitionsReady`，避免初次布局时出现无意义动画；`_transitionsReady` 置位前所有滑块矩形同步一律瞬移。
 
 模板接入：
 
@@ -130,7 +131,7 @@ IFormItemAware.ClearFormValue()   → SelectedItem = null
 视觉树生命周期：
 
 - `OnAttachedToVisualTree()` 订阅 `SelectionChanged`。
-- `OnDetachedFromVisualTree()` 解除 `SelectionChanged`。
+- `OnDetachedFromVisualTree()` 解除 `SelectionChanged`，并停止滑块飞行计时器、清理全部 item 的飞行抑制态。
 - `ArrangeOverride()` 在子项完成最终排列后校准选中滑块矩形。
 
 ### 5.1 Semantic Part 处置
@@ -187,27 +188,48 @@ Segmented 不定义命令、弹层或异步数据加载路径。
 
 容器准备阶段还会把 owner 的 `SizeType`、`Shape` 和 `IsMotionEnabled` 绑定给 item，确保生成 item 与根控件使用同一尺寸、形状和 motion 分支。`Orientation` 只控制 owner 与 items panel，不需要进入 item 状态。
 
-### 7.2 选中滑块矩形
+### 7.2 选中滑块矩形与飞行状态
 
-`SetupSelectedThumbRect()` 只在 `SelectedItem` 非空且能找到对应容器时更新滑块：
+`SetupSelectedThumbRect(bool animate)` 是滑块状态的唯一入口，按 `SelectedItem` 与容器状态分三条路径：
 
 ```text
-container = ContainerFromItem(SelectedItem)
-offset = container.TranslatePoint((0, 0), owner)
-SelectedThumbPos = offset
-SelectedThumbSize = container.Bounds.Size
+SelectedItem == null
+  → 停止飞行计时器，SetThumbVisible(false)，滑块不再绘制（清除幽灵滑块）
+
+container == null（选中项尚无容器）
+  → 直接返回，等待排列后校准
+
+正常路径
+  → targetPos = container.TranslatePoint((0, 0), owner)
+  → targetSize = container.Bounds.Size
+  → canAnimate = animate && _transitionsReady && 滑块已可见 && 目标矩形有变化
+  → canAnimate：直接 SetValue，由 ControlTheme 的 PointTransition/SizeTransition 插值
+  → 否则：DisableTransitions 包裹的瞬移
+  → SetThumbVisible(true)
+  → canAnimate 时 BeginThumbMotion()
 ```
 
-滑块矩形是 render 输入，不是 visual tree 中的独立控件。选择变化时可以立即读取已排列容器；`ArrangeOverride()` 在布局完成后再次按最终 Bounds 校准。这样水平 expanding、垂直全宽、方向动态切换和父容器尺寸变化都使用同一坐标模型。
+瞬移路径覆盖滑块首次出现（避免从原点飞入）、选择变化之外的所有布局校准（`ArrangeOverride`、方向/expanding/
+父容器尺寸变化）以及过渡系统未就绪的初始化阶段。这样水平 expanding、垂直全宽、方向动态切换和父容器尺寸变化都
+使用同一坐标模型，且不会把布局跟随误播成飞行动画。
+
+`BeginThumbMotion()` 从 ControlTheme 的 `Transitions` 中读取 `SelectedThumbPos` 过渡的实际时长（找不到或时长
+为零则不进入飞行态），把所有 item 的内部状态 `IsThumbMotionActive` 置位，并启动一个
+`DispatcherTimer`（间隔为过渡时长加一帧补偿，保证抑制态晚于视觉落地结束）。计时器 tick 或控件 detach 时
+统一清除：停止计时器、复位全部 item 的 `IsThumbMotionActive`。`PrepareContainerForItemOverride` 会把当前
+抑制态同步给新建容器。item 主题的 `^[IsThumbMotionActive=True]:not(^:selected)` 样式在飞行期间屏蔽非选中
+item 的 hover/pressed 背景遮罩，对齐上游 `thumb ~ item::after` 透明规则。
 
 ### 7.3 根控件 Render
 
 `AbstractSegmented.Render()` 绘制两层矩形：
 
 1. 使用 `Background` 和根 `CornerRadius` 绘制轨道背景。
-2. 使用 `SelectedThumbBg`、`SelectedThumbCornerRadius` 和 `SelectedThumbBoxShadows` 绘制选中滑块。
+2. 仅当 `_isThumbVisible` 为 true 时，使用 `SelectedThumbBg`、`SelectedThumbCornerRadius` 和
+   `SelectedThumbBoxShadows` 绘制选中滑块。
 
-item 本身的背景和文本状态仍由 `SegmentedItemTheme.axaml` 负责。
+`SetThumbVisible` 变化时调用 `InvalidateVisual()` 触发重绘。item 本身的 hover/pressed 背景遮罩和文本状态仍由
+`SegmentedItemTheme.axaml` 负责；选中背景只由滑块绘制，item 的 `:selected` 不绘制背景。
 
 ### 7.4 方向布局
 
@@ -250,6 +272,8 @@ Segmented 不依赖运行时反射或动态成员访问。主题协作通过固�
 - 容器的 `SizeType`、`Shape` 和 `IsMotionEnabled` 是生成容器与 owner 的固定关系，生命周期由容器准备和 Avalonia 绑定系统管理。
 - `SelectionChanged` 订阅必须在 attach/detach 中成对管理。
 - 选中滑块动画只在 `IsMotionEnabled=true` 时通过 transitions 启用。
+- 滑块飞行计时器（`DispatcherTimer`）在 detach 时必须停止并清理抑制态，避免回调持有已分离控件；其生命周期与
+  ControlTheme 声明的过渡时长绑定，修改主题过渡时长会自动跟随，不存在第二份时长配置。
 
 方向和 Shape 不新增 Visual、缓存、timer、subscription 或运行时对象图。Panel 的 measure/arrange 仍为 O(n)，Shape 只增加一个 owner-to-container AvaloniaProperty 绑定；滑块继续使用值类型的 `Point` 和 `Size`，不拆分为方向专用 motion 对象。
 
@@ -272,6 +296,10 @@ AOT 边界：
 - 生成容器必须接收 owner 的 `SizeType`、`Shape` 和 `IsMotionEnabled`。
 - 水平 `IsExpanding` 只能按可见 `AbstractSegmentedItem` 计数；垂直模式不能扩展父容器高度。
 - 选中滑块矩形必须跟随当前选中容器最终的 `Bounds` 布局结果。
+- 选中背景只能由根 render 层滑块表达；item 的 `:selected` 不得恢复背景绘制。
+- 滑块首次出现、无选中来源、布局校准和过渡未就绪路径必须瞬移，只有选择变化且滑块已可见时才允许飞行。
+- 无选中项时滑块必须停止绘制；飞行抑制态必须有确定的清除路径（计时器 tick 或 detach）。
+- 滑块飞行期间非选中 item 的 hover/pressed 背景遮罩必须被屏蔽。
 - 键盘导航必须首尾循环并跳过 disabled 和 hidden item。
 - Round 必须覆盖所有 SizeType 圆角，但不能改变其他尺寸、颜色、状态或模板契约。
 - 根 render 绘制和 item 主题状态不能互相替代；轨道/滑块在根，item 状态在 item。
@@ -287,6 +315,8 @@ AOT 边界：
 
 - Segmented 选择测试：绑定选择保留、显式选择保留、默认选择、Form value、四方向键循环和 disabled/hidden 跳过。
 - Segmented 布局测试：横向/纵向自然布局、水平 expanding、无限约束退化、垂直宽度适配、动态方向切换和滑块 Bounds。
+- Segmented 滑块动效测试（`SegmentedThumbMotionTests`）：滑块过渡时长/缓动对齐上游契约、选中 item 背景保持透明、
+  飞行抑制态在飞行窗口内置位并随计时器清除、motion 关闭时不置位、清除选中隐藏滑块、detach 清理飞行状态。
 - Segmented 主题测试：Orientation/Shape 属性默认值和传递、Round 对根/item/thumb 的最终圆角覆盖、各 SizeType 与 Custom 组合。
 - Segmented Semantic Part 测试：explicit / generated items 两条容器路径、图文 / 纯图标 / 纯文本选项、集合重置与选择变化下 marker 数量稳定、owner-scoped Semantic Style（`SegmentedItemStyle` / `SegmentedIconStyle` / `SegmentedLabelStyle`）命中对应最低 public 类型（`SegmentedSemanticPartTests`）。
 - `CustomizableSizeTypeContractTests`：`AbstractSegmented`、`Segmented`、`AbstractSegmentedItem`、`SegmentedItem` 支持 `CustomizableSizeType`。
