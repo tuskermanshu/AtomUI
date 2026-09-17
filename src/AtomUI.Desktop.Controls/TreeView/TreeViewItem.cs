@@ -11,6 +11,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 
@@ -439,6 +440,21 @@ public class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
 
     internal void PrepareTreeItemNodeData(ITreeItemNode treeItemData, IResourceHost resourceHost)
     {
+        // Node bindings are only valid while this container belongs to a TreeView's logical
+        // tree: that membership is what guarantees Avalonia's EnsureTreeView cannot throw and
+        // what keeps the container collectable once discarded. Membership can genuinely be
+        // absent here because Avalonia re-realizes containers from a still-live ItemsView
+        // while a detached parent is being torn down (RefreshContainers triggered by the
+        // ItemTemplate clear in ClearContainerForItemOverride). All three call sites — the
+        // TreeView-level prepare (also reached for nested containers through Avalonia's
+        // TreeViewItem._treeView forwarding, which is never reset after detach), the
+        // TreeViewItem-level prepare, and logical re-attach — funnel through this method, so
+        // the membership invariant is enforced here rather than at each caller.
+        if (!this.GetLogicalAncestors().OfType<TreeView>().Any())
+        {
+            return;
+        }
+
         ClearTreeItemNodeBindingDisposables();
 
         if (treeItemData is BindableTreeItemNode bindableTreeItemNode)
@@ -465,6 +481,9 @@ public class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
     internal void ClearPreparedTreeItemNodeData()
     {
         ClearTreeItemNodeBindingDisposables();
+        // Only template-bound BindableTreeItemNode containers may drop ItemsSource here: the
+        // resulting ItemsView reset synchronizes removed children out of TreeView.CheckedItems
+        // and SelectedItems, which would destroy state that outlives the container otherwise.
         if (Header is BindableTreeItemNode)
         {
             ClearValue(ItemsSourceProperty);
@@ -499,7 +518,6 @@ public class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        ClearPreparedTreeItemNodeData();
         base.OnDetachedFromVisualTree(e);
         OwnerTreeView = null;
     }
@@ -508,15 +526,32 @@ public class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
     {
         base.OnAttachedToVisualTree(e);
         OwnerTreeView = this.FindAncestorOfType<TreeView>();
+    }
 
+    protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToLogicalTree(e);
+
+        // Node bindings follow logical-tree membership: this is the same ancestor chain Avalonia
+        // uses for TreeViewItem._treeView (EnsureTreeView), so base.PrepareContainerForItemOverride
+        // is guaranteed not to throw here. A visual-tree attach handler cannot provide that
+        // guarantee: during container teardown a container can still be visually attached while
+        // its logical chain is already cut.
+        var treeView = this.GetLogicalAncestors().OfType<TreeView>().FirstOrDefault();
         if (_treeItemNodeBindingDisposables is null &&
             Header is BindableTreeItemNode bindableTreeItemNode &&
-            OwnerTreeView is not null)
+            treeView is not null)
         {
             base.PrepareContainerForItemOverride(this, bindableTreeItemNode, -1);
-            var resourceHost = this.FindAncestorOfType<TreeViewItem>() as IResourceHost ?? OwnerTreeView;
+            var resourceHost = this.GetLogicalAncestors().OfType<TreeViewItem>().FirstOrDefault() as IResourceHost ?? treeView;
             PrepareTreeItemNodeData(bindableTreeItemNode, resourceHost);
         }
+    }
+
+    protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        ClearPreparedTreeItemNodeData();
+        base.OnDetachedFromLogicalTree(e);
     }
     
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -891,7 +926,7 @@ public class TreeViewItem : AvaloniaTreeItem, IRadioButton, ITreeItemNode
         if (container is TreeViewItem treeViewItem)
         {
             treeViewItem.OwnerTreeView = OwnerTreeView;
-            
+
             if (item != null && item is not Visual && item is ITreeItemNode treeViewItemData)
             {
                 treeViewItem.PrepareTreeItemNodeData(treeViewItemData, this);
