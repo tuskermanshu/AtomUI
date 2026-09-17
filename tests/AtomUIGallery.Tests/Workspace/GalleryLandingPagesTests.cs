@@ -124,7 +124,8 @@ public class GalleryLandingPagesTests
     {
         var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/General/Community/Views/CommunityPage.axaml");
 
-        source.ShouldContain("QinwareLogo");
+        source.ShouldContain("AtomInnovationLogo");
+        source.ShouldNotContain("qinware-logo.png");
         source.ShouldNotContain("<Svg Name=\"TLAIC\"");
         source.ShouldContain("<Svg Name=\"TLAICIncubationLogo\"");
         source.ShouldContain("VisionLabel");
@@ -144,6 +145,31 @@ public class GalleryLandingPagesTests
         File.Exists(GetRepoFile("controlgallery/AtomUIGallery/Assets/atomui-telegram.png")).ShouldBeTrue();
         source.ShouldNotContain("AtomUIOSS-release-banner.png");
         source.ShouldNotContain("dotnet add package AtomUI.Desktop.Controls");
+    }
+
+    [Fact]
+    public void Community_Company_Logo_Uses_Dtd_Free_Vector_Assets_For_Both_Theme_Variants()
+    {
+        var source    = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/General/Community/Views/CommunityPage.axaml");
+        var lightLogo = ReadRepoFile("controlgallery/AtomUIGallery/Assets/atom-innovation-logo.svg");
+        var darkLogo  = ReadRepoFile("controlgallery/AtomUIGallery/Assets/atom-innovation-logo-white.svg");
+
+        source.ShouldContain("/Assets/atom-innovation-logo.svg");
+
+        var darkThemeScopeIndex = source.IndexOf("views|CommunityPage[IsDarkThemeMode=True]", StringComparison.Ordinal);
+        darkThemeScopeIndex.ShouldBeGreaterThanOrEqualTo(0);
+        source.IndexOf("/Assets/atom-innovation-logo-white.svg", StringComparison.Ordinal)
+              .ShouldBeGreaterThan(darkThemeScopeIndex);
+
+        lightLogo.ShouldContain("fill=\"#da1219\"");
+        darkLogo.ShouldContain("fill=\"#ffffff\"");
+        foreach (var logo in new[] { lightLogo, darkLogo })
+        {
+            logo.ShouldContain("xmlns=\"http://www.w3.org/2000/svg\"");
+            logo.ShouldNotContain("<!DOCTYPE");
+            logo.ShouldNotContain("<!ENTITY");
+            logo.ShouldNotContain("SYSTEM");
+        }
     }
 
     [Fact]
