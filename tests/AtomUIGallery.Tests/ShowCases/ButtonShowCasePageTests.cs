@@ -1,13 +1,21 @@
+using System.Reflection;
 using AtomUI.Toolkits.GalleryBase.Controls;
+using AtomUI.Theme;
+using AtomUI.Theme.Resources;
 using AtomUIGallery.ShowCases.Button;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Headless;
+using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using ReactiveUI;
 using Shouldly;
 using Xunit;
+using ButtonType = AtomUI.Desktop.Controls.ButtonType;
 using AtomRibbonBadge = AtomUI.Desktop.Controls.RibbonBadge;
 using AvaloniaWindow = Avalonia.Controls.Window;
 
@@ -26,7 +34,6 @@ public class ButtonShowCasePageTests
         source.ShouldNotContain("ButtonShowCaseLangResource InfoPackageLabel");
         source.ShouldNotContain("ButtonShowCaseLangResource InfoBaseClassLabel");
         source.ShouldNotContain("MinHeight=\"48\"");
-        source.ShouldNotContain("Padding=\"16,8\"");
         source.ShouldNotContain("ItemSpacing=\"48\"");
         source.ShouldNotContain("LineSpacing=\"8\"");
         source.ShouldNotContain("Selector=\"atom|TextBlock.info-label\"");
@@ -52,7 +59,7 @@ public class ButtonShowCasePageTests
         source.ShouldNotContain("Tag=\"Examples\"");
         source.ShouldNotContain("Tag=\"Api\"");
         source.ShouldNotContain("Tag=\"DesignToken\"");
-        source.ShouldContain("<gallery:GalleryStickyTabsHost");
+        source.ShouldContain("<gallery:GalleryShowCaseHost");
         source.ShouldContain("StickyContentPadding=\"28,0,28,0\"");
         source.ShouldNotContain("<atom:TabStrip Name=\"ScenarioTabs\"");
         source.ShouldNotContain("<ContentControl Name=\"ScenarioContentHost\">");
@@ -90,13 +97,175 @@ public class ButtonShowCasePageTests
     }
 
     [Fact]
-    public void Button_Color_And_Variant_Example_Is_Last_Full_Row_With_Version_Badge()
+    public void Button_ShowCase_Declares_A_Deferred_Semantic_Part_Preview()
+    {
+        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml");
+
+        source.ShouldContain("<gallery:GalleryShowCaseHost.SemanticPartsContentTemplate>");
+        source.ShouldContain("<gallery:SemanticPartPreview");
+        source.ShouldContain("SemanticOwnerType=\"{x:Type atom:Button}\"");
+        source.ShouldContain("Name=\"SemanticPartDemoButton\"");
+        CountOccurrences(source, "<gallery:SemanticPartDescription").ShouldBe(3);
+        source.ShouldContain("Path=\"root\"");
+        source.ShouldContain("Path=\"icon\"");
+        source.ShouldContain("Path=\"content\"");
+    }
+
+    [Fact]
+    public void Button_Semantic_Preview_Is_Materialized_Only_After_The_Tab_Is_Selected()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+
+        var page = new ButtonShowCase
+        {
+            DataContext = new ButtonViewModel(new TestScreen())
+        };
+
+        ShowInWindow(page, 1280, 800, () =>
+        {
+            page.GetVisualDescendants().OfType<SemanticPartPreview>().ShouldBeEmpty();
+            page.GetVisualDescendants()
+                .OfType<AtomUI.Desktop.Controls.Button>()
+                .ShouldNotContain(static button => button.Name == "SemanticPartDemoButton");
+
+            var host = page.GetVisualDescendants().OfType<GalleryShowCaseHost>().Single();
+            host.SelectedTab = GalleryShowCaseTab.SemanticParts;
+            Dispatcher.UIThread.RunJobs();
+
+            page.GetVisualDescendants().OfType<SemanticPartPreview>().Count().ShouldBe(1);
+            page.GetVisualDescendants()
+                .OfType<AtomUI.Desktop.Controls.Button>()
+                .Count(static button => button.Name == "SemanticPartDemoButton")
+                .ShouldBe(1);
+        });
+    }
+
+    [Fact]
+    public void Button_Semantic_Part_Example_Matches_Object_And_Function_Contract()
+    {
+        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml");
+        var localization =
+            ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/General/Button/Localization/en-US.xlf");
+        var examples = ExtractButtonExampleItems(source);
+
+        var item = ExtractShowCaseItemByTitle(
+            examples,
+            "ButtonShowCaseLangResource SemanticPartStyleTitle");
+
+        item.ShouldContain("SourceKey=\"button-semantic-part\"");
+        item.ShouldContain("BadgeText=\"v6.1.3\"");
+        item.ShouldContain("Span=\"Full\"");
+        item.ShouldContain("IsDeferredContentEnabled=\"True\"");
+        item.ShouldContain("<gallery:ShowCaseItem.DeferredContentTemplate>");
+        item.ShouldContain("ButtonShowCaseLangResource SemanticPartStyleDescription");
+        item.ShouldContain("ButtonShowCaseLangResource P2ContentSemanticObject");
+        item.ShouldContain("ButtonShowCaseLangResource P2ContentSemanticFunction");
+        item.ShouldContain("Selector=\"atom|Button.semantic-part-demo\"");
+        item.ShouldContain("<atom:ButtonContentStyle x:SetterTargetType=\"ContentPresenter\">");
+        item.ShouldContain("Selector=\"atom|Button.semantic-part-demo.semantic-object\"");
+        item.ShouldContain("Selector=\"atom|Button.semantic-part-demo[ButtonType=Primary]\"");
+        item.ShouldContain("<atom:ButtonContentStyle x:SetterTargetType=\"ContentPresenter\">");
+        item.ShouldContain("x:SetterTargetType=\"ContentPresenter\"");
+        item.ShouldContain("<Setter Property=\"Background\" Value=\"#171717\" />");
+        item.ShouldContain("Property=\"Foreground\"");
+        item.ShouldContain("Value=\"{atom:SharedTokenResource ColorText}\"");
+        item.ShouldContain("<Setter Property=\"Foreground\" Value=\"#FFFFFF\" />");
+        CountOccurrences(item, "Classes=\"semantic-part-demo").ShouldBe(2);
+        item.ShouldNotContain("Selector=\".semantic-content\"");
+        item.ShouldNotContain("/template/ .semantic-content");
+        localization.ShouldContain("<source>Custom Semantic Part styling</source>");
+        localization.ShouldContain(
+            "<source>Use owner-scoped selectors and Button state selectors to customize published Semantic Parts.</source>");
+        localization.ShouldNotContain("Semantic DOM");
+        localization.ShouldNotContain("semantic dom");
+        localization.ShouldNotContain("classNames");
+        localization.ShouldContain("<source>Object</source>");
+        localization.ShouldContain("<source>Function</source>");
+    }
+
+    [Fact]
+    public void Button_Semantic_Part_Example_Applies_Styles_To_Runtime_Parts()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+
+        var page = new ButtonShowCase
+        {
+            DataContext = new ButtonViewModel(new TestScreen())
+        };
+
+        ShowInWindow(page, 1280, 1000, _ =>
+        {
+            var panel = page.GetVisualDescendants().OfType<ShowCasePanel>().Single();
+            var item = panel.Children
+                            .OfType<ShowCaseItem>()
+                            .Single(static candidate => candidate.SourceKey == "button-semantic-part");
+            item.MaterializeDeferredContent();
+            Dispatcher.UIThread.RunJobs();
+
+            var buttons = page.GetVisualDescendants()
+                              .OfType<AtomUI.Desktop.Controls.Button>()
+                              .Where(static button => button.Classes.Contains("semantic-part-demo"))
+                              .ToArray();
+            buttons.Length.ShouldBe(2);
+
+            var objectButton = buttons.Single(static button => button.Classes.Contains("semantic-object"));
+            var functionButton = buttons.Single(static button => button.ButtonType == ButtonType.Primary);
+
+            objectButton.Effect.ShouldBeOfType<DropShadowEffect>().BlurRadius.ShouldBe(2);
+            objectButton.Effect.ShouldBeOfType<DropShadowEffect>().OffsetY.ShouldBe(1);
+            functionButton.Background.ShouldBeAssignableTo<ISolidColorBrush>();
+            ((ISolidColorBrush)functionButton.Background!).Color.ShouldBe(Color.Parse("#171717"));
+
+            var objectContent = GetSemanticContent(objectButton);
+            var functionContent = GetSemanticContent(functionButton);
+            BrushShouldHaveSameColor(
+                objectContent.Foreground,
+                GetThemeResource<IBrush>(SharedTokenKind.ColorText));
+            BrushShouldHaveSameColor(functionContent.Foreground, Brushes.White);
+
+            SetPseudoClass(objectButton, ":pointerover", true);
+            Dispatcher.UIThread.RunJobs();
+
+            BrushShouldHaveSameColor(
+                objectContent.Foreground,
+                GetThemeResource<IBrush>(SharedTokenKind.ColorText));
+
+            SetPseudoClass(functionButton, ":pointerover", true);
+            Dispatcher.UIThread.RunJobs();
+            functionButton.IsMotionEnabled.ShouldBeTrue();
+            functionButton.IsWaveSpiritEnabled.ShouldBeTrue();
+
+            BrushShouldHaveSameColor(functionContent.Foreground, Brushes.White);
+            BrushShouldHaveSameColor(
+                functionButton.BorderBrush,
+                GetThemeResource<IBrush>(SharedTokenKind.ColorBorder));
+
+            SetPrivatePropertyValue(functionButton, "IsPressed", true);
+            functionButton.IsPressed.ShouldBeTrue();
+            SetPrivatePropertyValue(functionButton, "IsPressed", false);
+            functionButton.IsPressed.ShouldBeFalse();
+            Dispatcher.UIThread.RunJobs();
+
+            var waveSpiritDecorator = GetPrivateFieldValue(functionButton, "_waveSpiritDecorator");
+            var waveBrush = GetPublicPropertyValue<IBrush?>(waveSpiritDecorator, "WaveBrush");
+            BrushShouldHaveSameColor(
+                waveBrush,
+                GetThemeResource<IBrush>(SharedTokenKind.ColorBorder));
+        });
+    }
+
+    [Fact]
+    public void Button_Color_And_Variant_Example_Precedes_The_Final_Semantic_Part_Example()
     {
         var source   = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml");
         var examples = ExtractButtonExampleItems(source);
 
         var colorVariantIndex = examples.IndexOf("ButtonShowCaseLangResource ColorVariantTitle", StringComparison.Ordinal);
+        var semanticPartIndex = examples.IndexOf(
+            "ButtonShowCaseLangResource SemanticPartStyleTitle",
+            StringComparison.Ordinal);
         colorVariantIndex.ShouldBeGreaterThanOrEqualTo(0);
+        semanticPartIndex.ShouldBeGreaterThan(colorVariantIndex);
         colorVariantIndex.ShouldBeGreaterThan(
             examples.IndexOf("ButtonShowCaseLangResource DisabledTitle", StringComparison.Ordinal));
         colorVariantIndex.ShouldBeGreaterThan(
@@ -115,7 +284,7 @@ public class ButtonShowCasePageTests
     }
 
     [Fact]
-    public void Button_Gradient_Example_Is_Separate_ShowCase_With_Two_Custom_Backgrounds()
+    public void Button_Gradient_Example_Is_Separate_ShowCase_With_Two_Root_Backgrounds()
     {
         var source   = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml");
         var examples = ExtractButtonExampleItems(source);
@@ -128,8 +297,8 @@ public class ButtonShowCasePageTests
         var gradientItem = ExtractShowCaseItemByTitle(examples, "ButtonShowCaseLangResource GradientButtonTitle");
         gradientItem.ShouldContain("BadgeText=\"v6.0.5\"");
         gradientItem.ShouldNotContain("Span=\"Full\"");
-        gradientItem.ShouldContain("CustomBackground");
-        CountOccurrences(gradientItem, "<atom:Button.CustomBackground>").ShouldBe(2);
+        gradientItem.ShouldNotContain("CustomBackground");
+        CountOccurrences(gradientItem, "<atom:Button.Background>").ShouldBe(2);
         CountOccurrences(gradientItem, "<LinearGradientBrush").ShouldBe(2);
         gradientItem.ShouldContain("#6253E1");
         gradientItem.ShouldContain("#04BEFE");
@@ -314,6 +483,15 @@ public class ButtonShowCasePageTests
 
     private static void ShowInWindow(Control content, double width, double height, Action assertion)
     {
+        ShowInWindow(content, width, height, _ => assertion());
+    }
+
+    private static void ShowInWindow(
+        Control content,
+        double width,
+        double height,
+        Action<AvaloniaWindow> assertion)
+    {
         var window = new AvaloniaWindow
         {
             Content = content,
@@ -324,13 +502,75 @@ public class ButtonShowCasePageTests
         {
             window.Show();
             Dispatcher.UIThread.RunJobs();
-            assertion();
+            assertion(window);
         }
         finally
         {
             window.Close();
             Dispatcher.UIThread.RunJobs();
         }
+    }
+
+    private static ContentPresenter GetSemanticContent(Control button)
+    {
+        var content = button.GetVisualDescendants()
+                            .OfType<ContentPresenter>()
+                            .SingleOrDefault(static presenter => presenter.Classes.Contains("semantic-content"));
+        content.ShouldNotBeNull();
+        return content!;
+    }
+
+    private static T GetThemeResource<T>(object key)
+    {
+        var application = Application.Current.ShouldNotBeNull();
+        application.TryGetResource(key, application.ActualThemeVariant, out var value).ShouldBeTrue();
+        value.ShouldBeAssignableTo<T>();
+        return (T)value!;
+    }
+
+    private static void BrushShouldHaveSameColor(IBrush? actual, IBrush? expected)
+    {
+        actual.ShouldNotBeNull();
+        expected.ShouldNotBeNull();
+        actual.ShouldBeAssignableTo<ISolidColorBrush>();
+        expected.ShouldBeAssignableTo<ISolidColorBrush>();
+        ((ISolidColorBrush)actual!).Color.ShouldBe(((ISolidColorBrush)expected!).Color);
+    }
+
+    private static object GetPrivateFieldValue(object target, string fieldName)
+    {
+        var field = target.GetType().GetField(
+            fieldName,
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        field.ShouldNotBeNull();
+        var value = field.GetValue(target);
+        value.ShouldNotBeNull();
+        return value;
+    }
+
+    private static T GetPublicPropertyValue<T>(object target, string propertyName)
+    {
+        var property = target.GetType().GetProperty(
+            propertyName,
+            BindingFlags.Instance | BindingFlags.Public);
+        property.ShouldNotBeNull();
+        return (T)property.GetValue(target)!;
+    }
+
+    private static void SetPrivatePropertyValue<T>(object target, string propertyName, T value)
+    {
+        var property = typeof(Avalonia.Controls.Button).GetProperty(
+            propertyName,
+            BindingFlags.Instance | BindingFlags.Public);
+        property.ShouldNotBeNull();
+        var setter = property.GetSetMethod(true);
+        setter.ShouldNotBeNull();
+        setter.Invoke(target, [value]);
+    }
+
+    private static void SetPseudoClass(Control control, string pseudoClass, bool value)
+    {
+        ((IPseudoClasses)control.Classes).Set(pseudoClass, value);
     }
 
     private sealed class TestScreen : IScreen

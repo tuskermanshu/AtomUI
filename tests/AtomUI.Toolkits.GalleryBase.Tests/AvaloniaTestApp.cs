@@ -2,21 +2,28 @@ using AtomUI.Desktop.Controls;
 using AtomUI.Localization;
 using Avalonia;
 using Avalonia.Headless;
+using Avalonia.Headless.XUnit;
 using ReactiveUI.Avalonia;
 using Xunit;
 
 [assembly: AvaloniaTestApplication(typeof(AtomUI.Toolkits.GalleryBase.Tests.TestAppBuilder))]
+[assembly: AvaloniaTestIsolation(AvaloniaTestIsolationLevel.PerTest)]
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace AtomUI.Toolkits.GalleryBase.Tests;
 
 internal static class AvaloniaTestApp
 {
-    private static int _initialized;
+    private static int s_initialized;
 
     public static void EnsureInitialized()
     {
-        if (Interlocked.Exchange(ref _initialized, 1) == 1)
+        if (Application.Current is not null)
+        {
+            return;
+        }
+
+        if (Interlocked.Exchange(ref s_initialized, 1) == 1)
         {
             return;
         }

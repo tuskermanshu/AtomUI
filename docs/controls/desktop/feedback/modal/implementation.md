@@ -11,17 +11,19 @@
 | 路径 | 职责 |
 | --- | --- |
 | `Dialog.cs` | public 属性、事件、内容、按钮和内部协作入口。 |
+| `Dialog.SemanticParts.cs` | `Dialog` 的 Semantic Part 声明：`root` 之外的 8 个部件 metadata，不含模板节点、marker 或 Setter。 |
 | `Dialog.Lifecycle.cs` | `IsOpen` reconcile、`OpenAsync`、事件通知和 presenter 选择。 |
 | `Dialog.StaticAPI.cs` | 静态 modeless/modal 异步创建入口。 |
 | `DialogSession.cs` | 单次展示状态机、关闭仲裁、取消、结果、焦点和 teardown。 |
 | `IDialogPresenter.cs` | Overlay/Window 共用的最小异步协议。 |
 | `DialogSurface.cs` | 标题、内容、Footer、按钮和 Overlay resize 的共享表面；负责 `PART_SurfaceContentLayer` 的 template part 生命周期。 |
 | `ButtonBox/DialogButtonBox.cs` | 标准按钮生成、唯一有效按钮序列和自定义集合同步。 |
-| `OverlayHost/DialogOverlayLayer.cs` | 解析 owning TopLevel 的 Avalonia `OverlayLayer` 或局部 scope fallback，并管理 owner scope 内的 presenter stack。 |
+| `OverlayHost/DialogOverlayLayer.cs` | 解析 owning TopLevel 的 Avalonia `OverlayLayer`、`OverlayScope` 指定的作用域或局部 scope fallback，并管理 owner scope 内的 presenter stack。 |
 | `OverlayHost/OverlayDialogPresenter.cs` | 同时拥有 mask、Surface、placement、drag/resize 和 Overlay close motion choreography。 |
 | `WindowHost/WindowDialogPresenter.cs` | 原生 Window 属性映射、modal owner、尺寸、位置和生命周期。 |
 | `WindowHost/DialogWindow.cs` | 原生 caption close 仲裁和显式尺寸应用。 |
 | `MessageBox/MessageBox.cs` | Dialog 派生的消息语义、静态 API 和按钮配置。 |
+| `MessageBox/MessageBox.SemanticParts.cs` | `MessageBox` 复用同一组 Semantic Part 的独立 descriptor 声明（生成器不继承基类 descriptor）。 |
 | `MessageBox/MessageBoxContent.cs` | MessageBox 的图标与内容组合。 |
 | `Dialog/Themes` / `MessageBox/Themes` | 共享 Surface、Overlay presenter 和 MessageBox AXAML 结构。 |
 | `src/AtomUI.Core/MotionScene/AbstractMotion.cs` | 共享 Motion 的 transition completion boundary；等待全部 transition 或安全超时后才报告完成。 |
@@ -38,6 +40,9 @@
 - `DialogOverlayLayer` 解析当前 owner 的视觉宿主，并管理同一 owner scope 内的 presenter 顺序、可用尺寸和栈顶键盘路由。
 - `OverlayDialogPresenter` 是 Dialog layer 的直接子节点；mask 与 Surface 不拆成独立 popup。
 - `WindowDialogPresenter` 拥有一个 `DialogWindow`，并将同一个 `DialogSurface` 作为原生 Window 内容。
+  `DialogWindow` 逻辑父是 owner `Dialog`（presenter 构造时 `SetParent`），并按 `PopupRoot` 既有范式覆写
+  `IStyleHost.StylingParent => Parent`，使 owner 实例级 Semantic Style 能级联进独立窗口宿主；owner 未生根
+  （脱离页面树直接构造 presenter）时退回 `Application`，保证 ControlTheme 仍可达。
 - `MessageBox` 不拥有隐藏 Dialog；它覆盖 Surface 内容和按钮配置 hook。
 
 ## 4. 状态与数据流
@@ -104,6 +109,31 @@ flowchart TD
 
 Window 和 Overlay 各自拥有一个 Surface 实例，不共享同一个视觉对象；“共享 Surface”指共享类型、主题与行为实现。
 
+### 5.1 Semantic Part 节点映射
+
+`Dialog` 没有人 own 的 `ControlTemplate`，全部 Part 的 marker 静态声明在运行时宿主的主题文件上，并统一声明
+`RuntimeCreated`/`CrossVisualRoot`/`CrossNestedOwners`、以 `>>` 从 owner 定位：
+
+| Part | marker 所在主题 | 节点 |
+| --- | --- | --- |
+| `mask` | `OverlayDialogMaskTheme.axaml` | `Border#Frame` |
+| `wrapper` | `OverlayDialogPresenterTheme.axaml` | `MotionActor#PART_SurfaceMotionActor` |
+| `container` | `DialogSurfaceTheme.axaml` | `Border#Frame` |
+| `header` | `OverlayDialogHeaderTheme.axaml` | `Border#HeaderFrame` |
+| `title` | `OverlayDialogHeaderTheme.axaml` | `TextBlock#Title` |
+| `body` | `DialogSurfaceTheme.axaml` | `Border#ContentFrame` |
+| `footer` | `DialogSurfaceTheme.axaml` | `Border#FooterFrame` |
+| `close` | `OverlayDialogHeaderTheme.axaml` | `DialogCaptionButton#PART_CloseButton` |
+
+Overlay 可达性依赖两条实现不变量：`OverlayDialogPresenter` 必须在加入 `DialogOverlayLayer` **之前**被显式设为
+`Dialog` 的逻辑子节点（`((ISetLogicalParent)presenter).SetParent(_dialog)`，先例：`DrawerContainer`），否则 owner
+作用域生成的 Semantic Style 无法沿逻辑祖先链命中 presenter 子树；`Dialog` 必须实现
+`ISemanticPartCrossRootProvider` 并在 presenter 附加/释放时上报 `GetCrossRoots()`，供 Gallery 语义预览收集跨根。
+Window 宿主同样上报：跨根是原生 `DialogWindow`（`GetCrossRoots()` 在 `HostWindow.IsVisible` 时返回该窗口，
+`WindowDialogPresenter` 在窗口显示、Opened 与 teardown 时触发 `CrossRootsChanged`），语义预览据此在该窗口内解析并
+高亮部件（Adorner 落在宿主窗口自己的 AdornerLayer）；该上报只服务跨根解析，owner 作用域的样式级联仍不跨 TopLevel。
+完整契约见 [Modal / Dialog Semantic Part 契约](semantic-part.md)。
+
 ## 6. 生命周期与模板接入
 
 | 获取 | Owner | 释放 |
@@ -128,6 +158,10 @@ Overlay presenter 在外层 Surface、内容层和 modal mask 的关闭任务全
 ## 7. 交互与事件处理
 
 - DialogSurface 把标准/自定义按钮点击转成 `DialogPresenterCloseRequestedEventArgs`，Session 决定是否关闭。
+- `IsPinnedOpen=true` 时，`OverlayDialogPresenter` 的 `HandleSurfaceCloseRequested` 与 `HandleHostCloseRequested`
+  （遮罩外点复用后者）在发起 `CloseRequested` 前直接返回，因此关闭按钮、Escape、Footer 按钮与遮罩外点都不再请求关闭。
+  门控只存在于 presenter 的用户输入路径，不进入 `DialogSession` veto 层：外部 `IsOpen=false` 仍走正常关闭管道。
+  Window 宿主不使用该开关（由原生窗口关闭流程负责）。
 - Enter/Escape 由栈顶 Overlay presenter 或当前 Window 转发给 Surface 的有效按钮序列。
 - modal mask 只在左键、真实 mask visual subtree、且 presenter 为栈顶时请求关闭；`IsMaskClosable=false` 时该输入被吞掉且不发起任何关闭请求。该门控只存在于 Overlay presenter 的 mask 输入路径，不复制到 mask 控件或 Session veto 层。
 - modeless presenter 在 Surface 外不阻断 pointer hit-test；点击 Surface 会把整个 presenter 激活到栈顶。
@@ -168,7 +202,7 @@ Overlay 的 mask 和 Surface motion 并行等待；关闭时 `OverlayDialogPrese
 
 ### 8.5 Overlay 宿主与窗口几何
 
-`DialogOverlayLayer` 优先解析 placement target 所属 `TopLevel` 的 Avalonia `OverlayLayer`；该层高于普通 Window content，低于 `LightDismissOverlayLayer` 与 `PopupOverlayLayer`。无可用 TopLevel overlay 时，使用 placement target 所在的 `ScopeAwareOverlayLayer` fallback。TopLevel host 的 `AvailableSize` 以 `TopLevel.ClientSize` 为真源；局部 scope 使用 scope layer 的可用尺寸。最后一个 presenter 移除后，Dialog layer 从实际 host 删除，并释放 host size 与 TopLevel size 订阅。
+`DialogOverlayLayer` 优先解析 `Dialog.OverlayScope` 指定的作用域；未指定时解析 placement target 所属 `TopLevel` 的 Avalonia `OverlayLayer`（该层高于普通 Window content，低于 `LightDismissOverlayLayer` 与 `PopupOverlayLayer`）。无可用 TopLevel overlay 时，使用 placement target 所在的 `ScopeAwareOverlayLayer` fallback。TopLevel host 的 `AvailableSize` 以 `TopLevel.ClientSize` 为真源；局部 scope（含 `OverlayScope` 作用域）使用 scope layer 的可用尺寸，且不解析 owning Window，因此不参与 frame 内缩与 drawn chrome 抑制。最后一个 presenter 移除后，Dialog layer 从实际 host 删除，并释放 host size 与 TopLevel size 订阅。
 
 `WindowDrawnDecorations` overlay 是 `TopLevelHost` 中与 Window 同级的 chrome 视觉，不参与 Dialog 宿主解析。modal presenter 活跃时获取 Window chrome suppression lease；多个 Dialog 或 Drawer 通过引用计数共享可见性 owner，最后一个 lease 释放后恢复 drawn chrome。
 
@@ -196,6 +230,9 @@ Dialog 内容区内的 popup 沿 placement target 解析同一 Window `TopLevel`
 - Overlay presenter 在 Dialog 已附加时以 Dialog 为 inheritance parent，否则以 placement target 为 parent。
 - Window 保留 DialogSurface 到 Window `ContentPresenter` 的正常 styling parent 链，避免在未附加树中提前实例化的嵌套控件失去 ControlTheme。Dialog/owner 资源由 presenter-owned `DialogResourceBridge` 转发到 Window resources；bridge 对称转发 `ResourcesChanged`，并在 `DisposeAsync` 中移除和退订。
 - runtime binding 只用于动态 presenter/Surface/按钮关系，并由 owning presenter、Surface 或 ButtonBox 对称释放。
+- Semantic Part marker 使用静态 `Classes.semantic-*="True"`，在模板初始化时执行一次 `Classes.Set`，不建立 Binding 或
+  持久 listener；内置主题不消费 `.semantic-*` selector，descriptor 与生成 Style 全部来自编译期生成数据，不引入运行时
+  反射、程序集扫描或 VisualTree 搜索。
 - Presenter 为 Surface 复用单一 `MatrixTransform` 作为位置 owner。拖动 `PointerMoved` 只更新 Matrix translation 并同步不触发布局的 `Dialog.OffsetX/Y`；位置先按 DPI 取整，再二次 clamp 到 body owner bounds，避免取整重新越界。
 - drawn decorations 反射兼容边界只读取 frame/titlebar 几何；Modal 不反射发现业务 host，也不新增 trimming root。实现不使用反射修改 TemplatedParent，不扫描程序集发现 Dialog API，不使用同步 DispatcherFrame。
 - Session、Presenter、Surface 和 Content 的关闭回收由 Overlay/Window WeakReference 测试覆盖。
@@ -220,6 +257,10 @@ Dialog 内容区内的 popup 沿 placement target 解析同一 Window `TopLevel`
 - MessageBox 继续作为 Dialog 派生类，不增加平行 host/session/button cache 生命周期。
 - mask 外点关闭入口只由 `IsMaskClosable` 在 Overlay presenter 的 mask 输入路径统一门控；不引入第二条 mask 关闭路径，也不在 Session veto 层复制该判断。
 - 新增 binding、事件、资源 parent、motion source 或内容引用时，必须在同一个 owner 中增加释放点和回归测试。
+- Overlay presenter 的逻辑父必须指向 `Dialog`（加入 layer 前设置、teardown 后清空），否则 owner 作用域 Semantic Style
+  与 Gallery 语义预览均不可达；`Dialog.GetCrossRoots()` 只在 presenter 已附加时上报存活根，释放后不得保留引用。
+- Semantic Part marker 必须保持静态声明，不得按 `IsModal`/`IsLoading`/`DialogHostType` 等状态动态增删；`Optional` 语义
+  由节点是否存在（模板/开关）表达，不由 marker 增删表达。
 
 ## 11. 测试与验证
 
@@ -230,6 +271,9 @@ Dialog 内容区内的 popup 沿 placement target 解析同一 Window `TopLevel`
 - `OverlayDialogPresenterTests` / `DialogContentPopupLayeringTests`: mask ownership、modal/modeless 输入、栈顶路由、`IsMaskClosable` 门控、TopLevel ownership、popup/light-dismiss、chrome suppression 引用计数、完整 mask bounds、平台 body bounds、结构性最小尺寸、拖动 resize、capacity 退化、maximize/restore 和 motion。
 - `WindowDialogPresenterTests`: Opened/Closed 原生生命周期、首帧几何、原生关闭、owner close、自然尺寸、Surface/chrome constraints 换算、native resize、placement 和资源 parent。
 - `DialogButtonBoxTests` / `DialogSurfaceTests`: 有效按钮集合、template 生命周期、内容和配置。
+- `DialogSemanticPartTests`: descriptor（`Dialog`/`MessageBox` 各 8 个部件）、四个主题的静态 marker 清单、Overlay
+  宿主生成 Style 命中、`mask`/`wrapper` 的 Optional 与 Window 宿主边界、owner 逻辑父不变量、`GetCrossRoots` 上报与
+  释放、嵌套会话隔离、布局型 Setter 与 structural minimum 的协调结果。
 - MessageBox tests: 派生结构、语义样式、motion anchor、重入和按钮引用释放。
 - `DialogPopupPrimitiveLayeringTests`、`DialogPopupControlFamilyTests`、`DataGridFilterDialogPopupTests` 与 `PopupEntryInventoryTests` 分别覆盖原语、控件家族、DataGrid 和入口库存契约；真实窗口证据按平台独立记录。
 

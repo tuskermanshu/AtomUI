@@ -13,18 +13,26 @@
         </LinearGradientBrush>
     </atom:Splash.Background>
 
+    <!-- 专用启动页视觉通过生成的 Semantic Part Style 表达，不穿透 Splash 模板。
+         外层 Style 负责 owner 类型与业务 class，生成的 Style 类型封装模板路由与 Setter 契约。 -->
     <atom:Splash.Styles>
-        <Style Selector="atom|Splash.gallery-window-splash /template/ atom|TextBlock#PART_TitleBlock">
-            <Setter Property="Foreground" Value="White" />
+        <Style Selector="atom|Splash.gallery-window-splash">
+            <atom:SplashTitleStyle x:SetterTargetType="TextBlock">
+                <Setter Property="Foreground" Value="White" />
+            </atom:SplashTitleStyle>
+            <atom:SplashSubtitleStyle x:SetterTargetType="TextBlock">
+                <Setter Property="Foreground" Value="#D6E4FF" />
+            </atom:SplashSubtitleStyle>
+            <atom:SplashDetailStyle x:SetterTargetType="TextBlock">
+                <Setter Property="Foreground" Value="#D6E4FF" />
+            </atom:SplashDetailStyle>
         </Style>
 
-        <Style Selector="atom|Splash.gallery-window-splash:loading /template/ atom|TextBlock#PART_MessageBlock">
-            <Setter Property="Foreground" Value="#F5F8FF" />
-        </Style>
-
-        <Style Selector="atom|Splash.gallery-window-splash /template/ atom|TextBlock#PART_SubtitleBlock,
-                         atom|Splash.gallery-window-splash /template/ atom|TextBlock#PART_DetailBlock">
-            <Setter Property="Foreground" Value="#D6E4FF" />
+        <!-- 普通消息覆盖只在 :loading 生效；Success / Error 继续使用标准主题的状态色。 -->
+        <Style Selector="atom|Splash.gallery-window-splash:loading">
+            <atom:SplashMessageStyle x:SetterTargetType="TextBlock">
+                <Setter Property="Foreground" Value="#F5F8FF" />
+            </atom:SplashMessageStyle>
         </Style>
     </atom:Splash.Styles>
 </atom:Splash>

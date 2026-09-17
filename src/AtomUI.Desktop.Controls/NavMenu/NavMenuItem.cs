@@ -935,12 +935,9 @@ internal class NavMenuItem : HeaderedSelectingItemsControl,
 
                 RaiseEvent(new RoutedEventArgs(value ? SubmenuOpenedEvent : SubmenuClosedEvent));
               
-                for (var i = 0; i < ItemsView.Count; i++)
+                foreach (var item in NavMenuSemanticNavigator.EnumerateDirectItems(this))
                 {
-                    if (ItemsView[i] is NavMenuItem item)
-                    {
-                        item.TryUpdateCanExecute();
-                    }
+                    item.TryUpdateCanExecute();
                 }
             });
         }
@@ -948,12 +945,9 @@ internal class NavMenuItem : HeaderedSelectingItemsControl,
         {
             if (value)
             {
-                for (var i = 0; i < ItemsView.Count; i++)
+                foreach (var item in NavMenuSemanticNavigator.EnumerateDirectItems(this))
                 {
-                    if (ItemsView[i] is NavMenuItem item)
-                    {
-                        item.TryUpdateCanExecute();
-                    }
+                    item.TryUpdateCanExecute();
                 }
                 RaiseEvent(new RoutedEventArgs(SubmenuOpenedEvent));
             }
@@ -1087,7 +1081,7 @@ internal class NavMenuItem : HeaderedSelectingItemsControl,
     protected virtual void NotifyClicked(RoutedEventArgs e)
     {
         var (command, parameter) = (Command, CommandParameter);
-        if (!e.Handled && command is not null && command.CanExecute(parameter) == true)
+        if (ReferenceEquals(e.Source, this) && !e.Handled && command is not null && command.CanExecute(parameter))
         {
             command.Execute(parameter);
             e.Handled = true;

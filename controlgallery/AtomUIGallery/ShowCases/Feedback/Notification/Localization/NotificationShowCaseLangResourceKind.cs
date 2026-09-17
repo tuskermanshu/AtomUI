@@ -5,6 +5,8 @@ namespace AtomUIGallery.Localization;
 [LanguageCatalog]
 public enum NotificationShowCaseLangResourceKind
 {
+    ActionsTitle,
+    ActionsDescription,
     BasicTitle,
     BasicDescription,
     DurationTitle,
@@ -21,6 +23,19 @@ public enum NotificationShowCaseLangResourceKind
     StackDescription,
     StackEnabledLabel,
     StackThresholdLabel,
+        SemanticPartStyleTitle,
+    SemanticPartStyleDescription,
+    SemanticRootDescription,
+    SemanticWrapperDescription,
+    SemanticIconDescription,
+    SemanticSectionDescription,
+    SemanticTitleDescription,
+    SemanticDescriptionDescription,
+    SemanticCloseDescription,
+    SemanticActionsDescription,
+    SemanticProgressDescription,
+    SemanticListRootDescription,
+    SemanticListContentDescription,
     ComponentCategory,
     ComponentStatusStable,
     PageSubtitle,
@@ -42,6 +57,9 @@ public enum NotificationShowCaseLangResourceKind
     P2ContentPauseOnHover,
     P2ContentDonTPauseOnHover,
     P2ContentDestroyAll,
+    P2ContentConfirm,
+    P2ContentDefaultNotification,
+    P2ContentErrorNotification,
     P2NotificationTitle,
     P2NotificationTopTitle,
     P2NotificationBottomTitle,
@@ -49,10 +67,12 @@ public enum NotificationShowCaseLangResourceKind
     P2NotificationTopRightTitle,
     P2NotificationBottomLeftTitle,
     P2NotificationBottomRightTitle,
+    P2NotificationDescription,
     P2NotificationHello,
     P2NotificationContent,
     P2NotificationNeverCloseContent,
     P2NotificationStackedTitleFormat,
     P2NotificationStackedFormat,
-    P2NotificationLongStackedFormat
+    P2NotificationLongStackedFormat,
+    P2NotificationActionsContent
 }

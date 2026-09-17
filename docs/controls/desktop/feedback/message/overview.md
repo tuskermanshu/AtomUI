@@ -52,6 +52,10 @@ Message 的公共契约由 public/protected 类型成员、Avalonia 属性、事
 - 类型：`Message`、`MessageCard`、`WindowMessageManager`、`IMessageManager`。
 - 枚举：`MessageType`。
 
+Semantic Part owner 为两个 public Control：`MessageCard`（单条消息卡片）与 `WindowMessageManager`（服务型消息宿主）。
+两个 owner 各自公开独立 descriptor，完整 Part 表、selector、`ContractType`、cardinality、节点映射与定制边界见
+[Message Semantic Part 契约](semantic-part.md)。
+
 稳定 template part：
 
 | Template Part | 类型 | 职责 |
@@ -100,6 +104,10 @@ Message 使用 internal `MessageCardToken` 作为控件 Token scope。Token 只�
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
+
+列表的公开样式入口是 `WindowMessageManager.Padding` 与生成的 `WindowMessageManagerListContentStyle`。
+前者控制队列边缘间隔；后者以 `ItemsControl` 为公共目标，支持宽度、最小宽度与对齐等属性。
+项间距和卡片顺序由内部反馈栈管理，不能以 `Spacing` / `ReverseOrder` 作为 listContent 的公开 Setter。
 
 ## 6. 控件家族或集成关系
 
@@ -177,22 +185,35 @@ Gallery 的 Stack 示例使用独立 manager，不与基础、类型、loading �
 - [Message Changelog](changelog.md)
 - [Feedback 堆叠基础设施](../../../../architecture/systems/control-infrastructure/feedback-stack.md)
 
-LLMS 语义区域：
+Semantic Parts 摘要（完整契约见 [Message Semantic Part 契约](semantic-part.md)）：
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Message` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| Owner | Part | Style Type | ContractType | 节点 | 职责 | 稳定性 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `MessageCard` | `root` | 不适用（root） | `MessageCard` | owner 本身（表面投影 `Border#PART_Frame`） | 单条消息项根：内容、状态、关闭与进出场动效；对应上游 notice root。 | stable since 6.2.0 |
+| `MessageCard` | `wrapper` | `MessageCardWrapperStyle` | `DockPanel` | `DockPanel#PART_HeaderContainer` | 图标与标题的包裹布局；对应上游 notice wrapper。 | stable since 6.2.0 |
+| `MessageCard` | `icon` | `MessageCardIconStyle` | `IconPresenter` | `IconPresenter#PART_IconContent` | 状态图标尺寸与画刷；对应上游 notice icon。 | stable since 6.2.0 |
+| `MessageCard` | `title` | `MessageCardTitleStyle` | `Avalonia.Controls.SelectableTextBlock` | `SelectableTextBlock#PART_Message` | 消息文本颜色、字号、行高；对应上游 notice title。 | stable since 6.2.0 |
+| `WindowMessageManager` | `root` | 不适用（root） | `WindowMessageManager` | owner 本身（宿主层覆盖层；无宿主时为内联实例） | 消息列表根：定位、层级、队列、超时与宿主生命周期；对应上游 list。 | stable since 6.2.0 |
+| `WindowMessageManager` | `listContent` | `WindowMessageManagerListContentStyle` | `ItemsControl` | `FeedbackStackPresenter#PART_Items` | 列表内容区域；通过 ItemsControl 公共属性定制尺寸与对齐。 | stable since 6.2.0 |
+
+定制与兼容性摘要：
+
+- 定制入口是生成的强类型 Semantic Style（`MessageCardWrapperStyle` / `MessageCardIconStyle` /
+  `MessageCardTitleStyle` / `WindowMessageManagerListContentStyle`），以 owner-scoped 外层 `Style` 嵌套使用，
+  并显式声明 `x:SetterTargetType`。应用不手写 `/template/ .semantic-*` route，也不依赖 `PART_*`。
+- `root` 由 owner 侧普通 Setter 或 owner API 定制，不生成 Semantic Style 类型。
+- `.semantic-*` marker 只在 owner 自身 `ControlTheme` 中静态声明；AtomUI 内置主题不使用 `.semantic-*` 实现默认视觉。
+- 删除或重命名 Part、修改 selector class、收窄 `ContractType`、改变 cardinality，或让任一内置模板缺少 marker，
+  均属于公共主题契约变更（见 [系统架构兼容性表](../../../../architecture/systems/theming/semantic-parts.md)）。
+- 行为、关闭状态机、队列与宿主层装卸不属于 Semantic Part；`Message` / `IMessage` / `IMessageManager` /
+  `MessageCardToken` 不持有 descriptor。
 
 LLMS 导出来源：
 
 | LLMS 内容 | 来源 | 说明 |
 | --- | --- | --- |
 | 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/message/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/message/semantic-cn.md` |
+| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/message/semantic-cn.md` |
 | API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
 | Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
 | 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |

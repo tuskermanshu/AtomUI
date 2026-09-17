@@ -136,6 +136,36 @@
         <source>Workspace ready</source>
       </segment>
     </unit>
+    <unit id="P2SemanticContentTag">
+      <segment>
+        <source>core</source>
+      </segment>
+    </unit>
+    <unit id="P2SemanticDetailProgress">
+      <segment>
+        <source>68%</source>
+      </segment>
+    </unit>
+    <unit id="P2SemanticFooter">
+      <segment>
+        <source>v6</source>
+      </segment>
+    </unit>
+    <unit id="P2SemanticMessageLoading">
+      <segment>
+        <source>Loading</source>
+      </segment>
+    </unit>
+    <unit id="P2SemanticMessageModules">
+      <segment>
+        <source>Modules</source>
+      </segment>
+    </unit>
+    <unit id="P2SemanticSubtitle">
+      <segment>
+        <source>Boot</source>
+      </segment>
+    </unit>
     <unit id="P2SubtitleDesktopBoot">
       <segment>
         <source>Desktop boot sequence</source>
@@ -214,6 +244,66 @@
     <unit id="ScenarioExamples">
       <segment>
         <source>Examples</source>
+      </segment>
+    </unit>
+    <unit id="SemanticContentDescription">
+      <segment>
+        <source>Content element hosting custom startup content with its padding and alignment</source>
+      </segment>
+    </unit>
+    <unit id="SemanticDetailDescription">
+      <segment>
+        <source>Detail text element with font size, color and wrapping</source>
+      </segment>
+    </unit>
+    <unit id="SemanticFooterDescription">
+      <segment>
+        <source>Footer element hosting version info, copyright info or retry actions for a failed startup</source>
+      </segment>
+    </unit>
+    <unit id="SemanticLogoDescription">
+      <segment>
+        <source>Logo element carrying the brand mark with its size and alignment</source>
+      </segment>
+    </unit>
+    <unit id="SemanticMessageDescription">
+      <segment>
+        <source>Status message text element, including the success and error state colors</source>
+      </segment>
+    </unit>
+    <unit id="SemanticPartStyleDescription">
+      <segment>
+        <source>Use owner-scoped selectors and generated Semantic Part styles to customize the published parts of Splash.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticPartStyleTitle">
+      <segment>
+        <source>Custom Semantic Part styling</source>
+      </segment>
+    </unit>
+    <unit id="SemanticProgressBarDescription">
+      <segment>
+        <source>Determinate progress element with its height and color</source>
+      </segment>
+    </unit>
+    <unit id="SemanticRootDescription">
+      <segment>
+        <source>Root element with background, corner radius, padding and window sizing that control the overall startup surface</source>
+      </segment>
+    </unit>
+    <unit id="SemanticSpinDescription">
+      <segment>
+        <source>Loading indicator element for the indeterminate state with its size and color</source>
+      </segment>
+    </unit>
+    <unit id="SemanticSubtitleDescription">
+      <segment>
+        <source>Subtitle text element with its font size and color</source>
+      </segment>
+    </unit>
+    <unit id="SemanticTitleDescription">
+      <segment>
+        <source>Title text element with its font size, weight, line height and color</source>
       </segment>
     </unit>
     <unit id="StatusDescription">

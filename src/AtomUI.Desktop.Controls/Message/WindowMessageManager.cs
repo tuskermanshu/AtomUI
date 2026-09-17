@@ -18,7 +18,7 @@ namespace AtomUI.Desktop.Controls;
     NotificationPseudoClass.BottomRight,
     NotificationPseudoClass.TopCenter,
     NotificationPseudoClass.BottomCenter)]
-public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAwareControl, IDisposable
+public partial class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAwareControl, IDisposable
 {
     public static readonly StyledProperty<NotificationPosition> PositionProperty =
         AvaloniaProperty.Register<WindowMessageManager, NotificationPosition>(
@@ -48,6 +48,7 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
     private FeedbackStackPresenter? _presenter;
     private FeedbackLifetimeScheduler? _lifetimeScheduler;
     private bool _isLifecyclePaused = true;
+    private bool _hasBeenAttached;
     private bool _isStackPaused;
     private const int MaxHostLayerRetryCount = 30;
     private bool _hostLayerRetryScheduled;
@@ -97,7 +98,23 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
 
     internal bool IsLifetimePaused => _lifetimeScheduler?.IsAllPaused ?? _isLifecyclePaused;
 
-    public WindowMessageManager(TopLevel? host)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WindowMessageManager" /> class without a host.
+    /// The manager is not installed into any layer; it renders inline wherever the caller places it,
+    /// which is the AtomUI equivalent of rendering a message list in a local container instead of the
+    /// window feedback layer. This also makes the control declaratively usable from XAML, mirroring
+    /// <see cref="WindowNotificationManager" />.
+    /// </summary>
+    public WindowMessageManager()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WindowMessageManager" /> class.
+    /// </summary>
+    /// <param name="host">The TopLevel that will host the control. Pass <c>null</c> to skip installing
+    /// the manager into a TopLevel layer; the manager then renders inline wherever the caller places it.</param>
+    public WindowMessageManager(TopLevel? host) : this()
     {
         if (host is not null)
         {
@@ -139,6 +156,7 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
     {
         base.OnAttachedToVisualTree(e);
         _isLifecyclePaused = false;
+        _hasBeenAttached = true;
         UpdateSchedulerPauseState();
     }
 
@@ -147,8 +165,43 @@ public class WindowMessageManager : TemplatedControl, IMessageManager, IMotionAw
         _isLifecyclePaused = true;
         UpdateSchedulerPauseState();
         base.OnDetachedFromVisualTree(e);
+        ScheduleReleaseCardsOnHostDetach();
     }
 
+    // 宿主层释放契约：manager 运行途中离开视觉树即释放其上的全部卡片（对齐上游 message-list 卸载行为）。
+    // 必须推迟到 detach 级联完成之后：在 detach 过程中同步关闭卡片会让 presenter 重建容器树，
+    // 触发 Avalonia 视觉树内部集合越界。从未 attach 过的 manager 不适用——release/6.0 允许 attach 前 Show。
+    private void ScheduleReleaseCardsOnHostDetach()
+    {
+        if (!_hasBeenAttached || _isDisposed)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            // 执行时已重新入树（反馈层迁移等瞬时 detach）则不释放。
+            if (_isDisposed || !_isLifecyclePaused)
+            {
+                return;
+            }
+
+            // 关闭回调可能同步修改 _cards，先拷贝快照。
+            var cards = _cards.ToArray();
+            for (var i = 0; i < cards.Length; i++)
+            {
+                var card = cards[i];
+                _lifetimeScheduler?.Remove(card);
+                card.Close();
+            }
+        });
+    }
+
+    /// <summary>
+    /// Shows a Message
+    /// </summary>
+    /// <param name="message">the content of the message</param>
+    /// <param name="classes">style classes to apply</param>
     public void Show(IMessage message, string[]? classes = null)
     {
         Dispatcher.VerifyAccess();

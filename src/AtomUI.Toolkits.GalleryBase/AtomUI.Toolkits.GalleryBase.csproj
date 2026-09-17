@@ -11,6 +11,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <AtomUILanguage Include="$(MSBuildProjectDirectory)/Localization/SemanticPartPreviewLang/*.xlf">
+            <AtomUILanguageContractVersion>3</AtomUILanguageContractVersion>
+        </AtomUILanguage>
+    </ItemGroup>
+
+    <ItemGroup>
         <InternalsVisibleTo Include="AtomUI.Toolkits.GalleryBase.Tests" />
     </ItemGroup>
 

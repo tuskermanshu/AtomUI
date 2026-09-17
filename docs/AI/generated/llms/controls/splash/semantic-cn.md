@@ -4,14 +4,269 @@
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
+`Splash` 公开 `root`、`logo`、`title`、`subtitle`、`content`、`spin`、`progressBar`、`message`、`detail`、`footer`
+十个职责区域：
+
+| Part | Selector | ContractType | Cardinality | Customization | AtomUI 节点 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Splash` | 启动反馈控件根语义区域，承载 public API、状态和主题入口。 | `Logo`、`Title`、`Status`、`Progress` | `SplashToken` | stable |
-| `host` | `SplashWindow` | 承载独立桌面启动窗口和关闭动效。 | `MinimumShowDuration`、`CloseDelay`、`FadeOutDuration` | `WindowWidth`、`WindowMinHeight` | stable |
-| `brand` | `PART_LogoPresenter`、`PART_TitleBlock`、`PART_SubtitleBlock` | 展示品牌和应用身份。 | `Logo`、`LogoTemplate`、`Title`、`Subtitle` | `LogoSize`、`TitleFontSize` | template-stable |
-| `status` | `PART_MessageBlock`、`PART_DetailBlock` | 展示启动阶段、错误详情或补充说明。 | `Message`、`Detail`、`Status` | `MessageFontSize`、`DetailFontSize` | template-stable |
-| `progress` | `PART_ProgressBar`、`PART_Spin` | 展示确定或不确定进度。 | `Progress`、`IsIndeterminate` | `ProgressMarginTop`、`IndicatorSize` | template-stable |
-| `content` | `PART_ContentPresenter`、`PART_FooterPresenter` | 承载自定义内容和底部区域。 | `Content`、`ContentTemplate`、`Footer`、`FooterTemplate` | `ContentGap`、`FooterMarginTop` | template-stable |
+| `root` | 控件本身 | `Splash` | `Single` | `Root` | `Splash` owner |
+| `logo` | `.semantic-logo` | `ContentPresenter` | `Single` | `Selector` | `ContentPresenter#PART_LogoPresenter` |
+| `title` | `.semantic-title` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_TitleBlock` |
+| `subtitle` | `.semantic-subtitle` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_SubtitleBlock` |
+| `content` | `.semantic-content` | `ContentPresenter` | `Single` | `Selector` | `ContentPresenter#PART_ContentPresenter` |
+| `spin` | `.semantic-spin` | `Spin` | `Single` | `Selector` | `Spin#PART_Spin` |
+| `progressBar` | `.semantic-progress-bar` | `ProgressBar` | `Single` | `Selector` | `ProgressBar#PART_ProgressBar` |
+| `message` | `.semantic-message` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_MessageBlock` |
+| `detail` | `.semantic-detail` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_DetailBlock` |
+| `footer` | `.semantic-footer` | `ContentPresenter` | `Single` | `Selector` | `ContentPresenter#PART_FooterPresenter` |
+
+表中 `TextBlock` 均指 `Avalonia.Controls.TextBlock`，`Spin` / `ProgressBar` 指 `AtomUI.Desktop.Controls` 中的对应类型。
+`Splash` 是 `AtomUI.Desktop.Controls.Extras` 中**首个**采用 Semantic Part 的控件；`root` 是本包第一个隐式 descriptor。
+
+十个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`，与其余已改造控件一致。Splash 是独立
+控件，不存在派生控件家族、public 子 Control owner 或 item container，十个 Part 全部属于 `Splash` 自身。窗口宿主
+`SplashWindow` 不是 Semantic owner，理由见 [§6.1](#61-splashwindow-不发布语义部件)。
+
+### 1.1 准入依据（2026-09-16 用户指令）
+
+Splash 的纳入与既有三个追认项（`Expander`、`TabStrip`、`Menu`）依据不同，必须单独说明：
+
+- 上游设计体系当前稳定发布源码中**不存在**与 Splash 职责对应的公开 Semantic DOM owner：启动页是桌面应用启动反馈，
+  Web 组件体系没有承载“启动中但应用尚不可交互”这一职责的公开组件。原排除判定见
+  [全量改造设计 §2.4](../../../../superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md)，其正向触发条件是
+  “新稳定版出现职责直接对应的公开 owner”。该条件**并未发生**；纳入由用户直接指令撤销，判据是 AtomUI 需要让 Splash
+  支持 Semantic Part，而不是上游新增 owner。
+- 支持该决定的既有先例与 `GroupBox` 一致：`SplitButton` 的触发侧按键说明，上游没有对应键时，AtomUI 可以按自身模板
+  结构**显式能力补充**发布 Part，而不是因为“上游没有”就拒绝定制。Splash 的十个 Part 全部是这类按自身模板职责设计的
+  显式能力补充。
+- Part 命名参照 AtomUI 已改造的同类反馈控件：`logo` / `message` / `detail` 按 Splash 自身 API（`Logo`、`Message`、
+  `Detail`）命名，`title` / `subtitle` / `content` / `footer` 与 `Result`、`Empty`、`Alert`、`GroupBox` 的同职责键一致，
+  `spin` / `progressBar` 按真实承载控件命名。
+
+Splash 的 Part 名称、`ContractType` 与 cardinality 自本文件发布起构成公共主题契约。
+
+### 1.2 `Splash`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `root` |
+| Selector | Splash 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Splash` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `Splash` owner（可见表面由模板内的 `PART_RootLayout` / `PART_SurfaceLayout` 承载，见 §2.1） |
+| 职责 | Splash root 是启动页背景、圆角、内容内边距与窗口尺寸基线的统一 owner。 |
+| 相关 API | `Background`、`CornerRadius`、`Padding`、`Width`、`MinHeight`、`IsMotionEnabled`、`Status`、`Progress`、`IsIndeterminate` |
+| 相关 Token | SplashToken（`SurfaceBackground`、`SurfaceCornerRadius`、`ContentPadding`、`WindowWidth`、`WindowMinHeight`）、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `logo`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `logo` |
+| Selector | `.semantic-logo` |
+| SelectorRoute | `/template/ .semantic-logo` |
+| Style Type | `SplashLogoStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_LogoPresenter` |
+| 职责 | 统一表示品牌标识区域（`Logo` / `LogoTemplate`）的尺寸、对齐与外边距。 |
+| 相关 API | `Logo`、`LogoTemplate` |
+| 相关 Token | `LogoSize`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `SplashTitleStyle` |
+| ContractType | `TextBlock`（`Avalonia.Controls.TextBlock`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_TitleBlock` |
+| 职责 | 统一表示主标题文字的颜色、字号、字重、行高与对齐。 |
+| 相关 API | `Title` |
+| 相关 Token | SharedToken（`ColorTextHeading`）、`TitleFontSize`、`TitleLineHeight` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `subtitle`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `subtitle` |
+| Selector | `.semantic-subtitle` |
+| SelectorRoute | `/template/ .semantic-subtitle` |
+| Style Type | `SplashSubtitleStyle` |
+| ContractType | `TextBlock`（`Avalonia.Controls.TextBlock`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_SubtitleBlock` |
+| 职责 | 统一表示副标题文字的颜色、字号与对齐。 |
+| 相关 API | `Subtitle` |
+| 相关 Token | `SubtleForeground`、`SubtitleFontSize` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `SplashContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_ContentPresenter` |
+| 职责 | 统一表示扩展内容区域（`Content` / `ContentTemplate`）的内边距、背景、对齐与尺寸约束。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | `ContentGap`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `spin`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `spin` |
+| Selector | `.semantic-spin` |
+| SelectorRoute | `/template/ .semantic-spin` |
+| Style Type | `SplashSpinStyle` |
+| ContractType | `Spin` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `Spin#PART_Spin` |
+| 职责 | 统一表示不确定加载指示器的尺寸、颜色与对齐。 |
+| 相关 API | `IsIndeterminate`（经 `IsSpinVisible` 投影） |
+| 相关 Token | `IndicatorSize`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `progressBar`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `progressBar` |
+| Selector | `.semantic-progress-bar` |
+| SelectorRoute | `/template/ .semantic-progress-bar` |
+| Style Type | `SplashProgressBarStyle` |
+| ContractType | `ProgressBar`（`AtomUI.Desktop.Controls.ProgressBar`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ProgressBar#PART_ProgressBar` |
+| 职责 | 统一表示确定进度条的高度、颜色与宽度。 |
+| 相关 API | `Progress`、`IsIndeterminate`（经 `IsProgressBarVisible` 投影） |
+| 相关 Token | `ProgressBarHeight`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `message`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `message` |
+| Selector | `.semantic-message` |
+| SelectorRoute | `/template/ .semantic-message` |
+| Style Type | `SplashMessageStyle` |
+| ContractType | `TextBlock`（`Avalonia.Controls.TextBlock`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_MessageBlock` |
+| 职责 | 统一表示状态消息文字的颜色、字号与对齐；`:success` / `:error` 状态色经该节点呈现。 |
+| 相关 API | `Message`、`Detail`、`Status`、`SetMessage`、`SetStatus`、`SetError` |
+| 相关 Token | SharedToken（`ColorText`）、`MessageFontSize`、`SuccessColor`、`ErrorColor` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `detail`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `detail` |
+| Selector | `.semantic-detail` |
+| SelectorRoute | `/template/ .semantic-detail` |
+| Style Type | `SplashDetailStyle` |
+| ContractType | `TextBlock`（`Avalonia.Controls.TextBlock`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_DetailBlock` |
+| 职责 | 统一表示详细信息 / 错误详情文字的颜色、字号、换行与对齐。 |
+| 相关 API | `Detail`、`SetMessage`、`SetStatus`、`SetError` |
+| 相关 Token | `SubtleForeground`、`DetailFontSize` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `footer` |
+| Selector | `.semantic-footer` |
+| SelectorRoute | `/template/ .semantic-footer` |
+| Style Type | `SplashFooterStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_FooterPresenter` |
+| 职责 | 统一表示底部区域（`Footer` / `FooterTemplate`，版本信息、版权信息或启动失败重试入口）的内边距、背景与对齐。 |
+| 相关 API | `Footer`、`FooterTemplate` |
+| 相关 Token | `FooterMarginTop`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。
+
+四个文本位的 `ContractType` 取 `Avalonia.Controls.TextBlock` 基类，而不是模板节点的派生类型
+`AtomUI.Desktop.Controls.TextBlock`。派生类型同样满足该契约，取基类可以让后续把节点替换为普通 `TextBlock` 保持兼容；
+收窄到派生类型属于破坏性变更。同理，`spin` / `progressBar` 的 `ContractType` 取各自公开控件类型：即使后续以
+`CustomIndicator` 等方式提供更多节点，契约仍成立。
+
+九个非 root Part 全部是 `SplashTheme.axaml` 单一 `ControlTemplate` 内的静态节点，`TemplatedParent` 为 `Splash` owner
+本身，因此全部声明 `RuntimeCreated=false` 且不携带显式 `SelectorRoute`；生成器按
+[Semantic Part Generator §2.3](../../../../modules/generator/semantic-part-generator.md)把静态根模板 Part 的 route
+规范化为 `/template/ .<SelectorClass>`。`message` 与 `detail` 位于 progress 区之后、`footer` 之前，但都与其余节点处于
+同一 `StackPanel#PART_ContentLayout` 内，不跨越第二层模板边界；`spin` / `progressBar` 虽然自身是 `TemplatedControl`，
+marker 仍标注在 Splash 模板给出的这两个节点上（未进入它们各自的模板），因此单一 `/template/` 路由已经足够，不需要
+`.semantic-scope-*` 中间锚点，也不需要 `CrossNestedOwners`。Splash 没有任何由 C# 创建并注入 marker 的 Part，也不存在
+跨视觉根 Part。
+
+Splash 只有一个叶子主题资产（`src/AtomUI.Desktop.Controls.Extras/Splash/Themes/SplashTheme.axaml`），没有第二个
+`ControlTemplate` 变体、没有 Browser 变体、没有派生模板，也不存在参与校验的 `*Themes.axaml`；因此不存在 marker 覆盖
+缺口。`SplashWindowTheme.axaml` 是另一个 owner（`SplashWindow`）的主题，不参与 `Splash` 的 Part 校验。
 
 ## Abstract AXAML Structure
 

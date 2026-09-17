@@ -47,7 +47,10 @@ Button 的公共 API 是控件最重要的稳定契约。公共属性、事件�
 - `IsDanger`、`IsGhost`、`IsLoading`。
 - `SizeType`、`Icon`、`IconPlacement`、`IconWidth`、`IconHeight`。
 - `IsMotionEnabled`、`IsWaveSpiritEnabled`。
-- `CustomBackground`。
+
+Root 表面定制 API：
+
+- `Background` / `BorderBrush`（`TemplatedControl` 标准属性）：Button 表面定制的唯一通道，不设平行定制属性。模板 `Frame` 直接 `TemplateBinding` 这两个属性，用户本地值按 Avalonia 优先级高于主题 Style / StyleTrigger——定制期间 hover、pressed、disabled 引起的背景或边框变色保持定制值，语义与内联样式（本地值优先于状态类）一致；清除定制后恢复主题状态机。渐变、图片等非纯色表面同样通过 `Background` 表达。
 
 正交 API：
 
@@ -79,9 +82,10 @@ public ButtonVariant? Variant { get; set; }
 
 `ButtonColor` 不暴露 `Link`。`ButtonType.Link` 是兼容入口，内部映射到链接视觉。
 
-`CustomBackground` 表示 Button normal 状态的受控自定义背景覆层，主要用于渐变、图片或其他非纯色表面。它不是颜色语义，不参与 `Color + Variant` 的状态归一、文字色、边框色、阴影或 wave 颜色计算。`CustomBackground == null` 表示不启用自定义背景覆层。
-
-`SizeType` 使用可自定义尺寸模型，支持 `Large`、`Middle`、`Small` 和 `Custom`。`Large`、`Middle`、`Small` 是 Button 预设尺寸档，完全由 Token 和主题决定。`Custom` 表示用户希望基于 Button 现有属性进行实例级尺寸定制，而不是引入 Button 专属的 `CustomHeight`、`CustomPadding` 或尺寸对象。
+`SizeType` 使用可自定义尺寸模型，支持 `Large`、`Middle`、`Small` 和 `Custom`。`Large`、`Middle`、`Small` 是 Button
+预设尺寸档，主题通过对应 ControlHeight Token 设置 `MinHeight` 基线，并由内容、Padding 和其他布局属性决定是否向上
+扩展。`Custom` 不设置预设高度基线，表示用户希望基于 Button 现有属性进行实例级尺寸定制，而不是引入 Button 专属的
+`CustomHeight`、`CustomPadding` 或尺寸对象。
 
 `IconWidth` 与 `IconHeight` 是 Button 用户图标和 loading 图标共享的公共 Avalonia 尺寸入口。两个属性相互独立，支持非正方形图标；对应的公共属性字段为 `IconWidthProperty` 与 `IconHeightProperty`。Theme 根据 `SizeType` 提供默认值，用户设置在 Button 上的本地值具有更高优先级，并同时投影到 `PART_ButtonIcon` 与 `PART_LoadingIcon`。
 
@@ -103,33 +107,27 @@ Template part 与主题入口：
 | --- | --- |
 | `PART_WaveSpirit` | 承载点击 wave 反馈。 |
 | `ShadowsFrame` | 承载按钮阴影。 |
-| `Frame` | 承载主体背景、边框、圆角和尺寸基底。 |
-| `CustomBackgroundLayer` | 主题内部自定义背景覆层，不作为用户 template part。 |
+| `Frame` | 承载主体背景、边框、圆角和尺寸基底；`Background` / `BorderBrush` 直接 `TemplateBinding` owner 属性，是 root 定制的落点。 |
 | `PART_RootLayout` | 排列 loading icon、icon 和 content，并根据 `IconPlacement` 调整用户 icon 位置。 |
 | `PART_LoadingIcon` | 展示 loading 状态图标，宽高通过 `TemplateBinding` 跟随 `IconWidth`、`IconHeight`。 |
 | `PART_ButtonIcon` | 展示用户设置的 icon，位置由 `IconPlacement` 控制，宽高通过 `TemplateBinding` 跟随 `IconWidth`、`IconHeight`。 |
 | `PART_ContentPresenter` | 展示用户内容。 |
 
-LLMS 语义区域：
+Button 支持以下 Semantic Part：
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Button` | 控件根语义区域，承载 public API、命令、点击、状态归一和伪类。 | `ButtonType`、`Color`、`Variant`、`IsDanger`、`IsGhost`、`IsLoading`、`SizeType`、`Shape`、`Icon`、`IconPlacement`、`IconWidth`、`IconHeight` | ButtonToken、SharedToken | stable |
-| `wave` | `PART_WaveSpirit` | 点击 wave 反馈区域，跟随有效圆角和 wave 类型。 | `IsWaveSpiritEnabled`、`IsMotionEnabled` | SharedToken motion / wave 资源 | stable |
-| `shadow` | `ShadowsFrame` | 阴影绘制层，独立于主体背景和边框。 | effective state | `DefaultShadow`、`PrimaryShadow`、`DangerShadow` | stable |
-| `surface` | `Frame` | 主体背景、边框、圆角、尺寸和虚线边框绘制层。 | `ButtonType`、`Color`、`Variant`、`Shape`、`SizeType`、`CornerRadius`、`Padding` | default、primary、danger、text、link、padding、corner radius 相关 Token | stable |
-| `customBackground` | `CustomBackgroundLayer` | normal 状态自定义背景覆层，只服务 `CustomBackground` 视觉模型。 | `CustomBackground` | 不新增专属 Token | internal-stable |
-| `contentLayout` | `PART_RootLayout` | loading icon、用户 icon 和内容的排列区域。 | `IconPlacement`、`HorizontalContentAlignment`、`VerticalContentAlignment` | `IconMargin`、尺寸 Token | stable |
-| `loadingIcon` | `PART_LoadingIcon` | loading 状态图标区域。 | `IsLoading`、`IconWidth`、`IconHeight` | `IconSize`、`OnlyIconSize` 相关 Token | stable |
-| `icon` | `PART_ButtonIcon` | 用户 icon 区域，支持内容前后位置和 icon-only 场景。 | `Icon`、`IconPlacement`、`IconWidth`、`IconHeight` | `IconSize`、`IconMargin` | stable |
-| `content` | `PART_ContentPresenter` | 用户内容展示区域。 | `Content`、`ContentTemplate` | `ContentFontSize`、`ContentLineHeight`、`FontWeight` | stable |
+| Part | 公共入口 | 数量语义 | 职责摘要 |
+| --- | --- | --- | --- |
+| `root` | Button 本身 | `Single` | Button 动作、状态与根视觉样式的统一 owner。 |
+| `icon` | `.semantic-icon` | `Multiple` | 用户图标与 loading 图标的统一视觉职责。 |
+| `content` | `.semantic-content` | `Single` | 用户内容展示与排版区域。 |
 
-`CustomBackgroundLayer` 是主题内部实现细节，不作为用户可直接依赖的 template part。LLMS semantic 文档可以记录它的存在和边界，但应明确它只服务 `CustomBackground` 受控视觉模型。
+完整的 Selector、`ContractType`、存在条件、逐 Part 定制说明、状态矩阵和排除边界见
+[Button Semantic Part 契约](semantic-part.md)。`PART_WaveSpirit`、`ShadowsFrame`、`Frame` 和
+`PART_RootLayout` 属于 Button Composition Model，不是公开 Semantic Part。
 
 ## 事件与命令
 
 Button 的公共 API 是控件最重要的稳定契约。公共属性、事件和方法集中在 `Button.cs`，内部主题变量和实现细节不得替代公共 API。
-| `root` | `Button` | 控件根语义区域，承载 public API、命令、点击、状态归一和伪类。 | `ButtonType`、`Color`、`Variant`、`IsDanger`、`IsGhost`、`IsLoading`、`SizeType`、`Shape`、`Icon`、`IconPlacement`、`IconWidth`、`IconHeight` | ButtonToken、SharedToken | stable |
 
 ## 使用示例
 
@@ -139,7 +137,7 @@ Button 的公共 API 是控件最重要的稳定契约。公共属性、事件�
 
 ### 按钮类型
 
-来源：`controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml:43`
+来源：`controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml:66`
 
 SourceKey：`button-type`
 
@@ -155,7 +153,7 @@ SourceKey：`button-type`
 
 ### 按钮形状
 
-来源：`controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml:61`
+来源：`controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml:84`
 
 SourceKey：`button-shape`
 
@@ -185,7 +183,7 @@ SourceKey：`button-shape`
 
 ### 通栏按钮
 
-来源：`controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml:316`
+来源：`controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml:339`
 
 SourceKey：`button-block`
 
@@ -201,7 +199,7 @@ SourceKey：`button-block`
 
 ### 危险按钮
 
-来源：`controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml:334`
+来源：`controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml:357`
 
 SourceKey：`button-danger`
 
@@ -237,11 +235,11 @@ Button 的 effective state 由 C# 层归一，AXAML 主题只消费已经归一�
 - `EffectiveIsDanger`、`EffectiveIsGhost`、`EffectiveIsBordered`。
 - `EffectiveBorderThickness`、`EffectiveCornerRadius`。
 - `WaveSpiritType`。
-- icon-only、loading、custom background 可见性相关伪类。
+- icon-only、loading 相关伪类。
 
 ## 主题与 Design Token
 
-Button 模板应保持阴影层、主体绘制层、内容层、wave 层和自定义背景覆层的职责分离。可以移除无明确职责的包装层，但不得合并承担不同视觉职责的节点。
+Button 模板应保持阴影层、主体绘制层、内容层和 wave 层的职责分离。可以移除无明确职责的包装层，但不得合并承担不同视觉职责的节点。
 
 Button 主题采用分层变量模型，避免直接展开 `Color × Variant × State` 的组合样式。
 
@@ -254,9 +252,6 @@ Variant Selector
 
 State Selector
   将 Normal / PointerOver / Pressed / Disabled / Loading 状态应用到最终视觉属性
-
-Custom Background Selector
-  在受支持状态显示自定义背景覆层，在 hover / pressed / disabled / danger 状态隐藏覆层
 ```
 
 用于 AXAML `Setter`、selector、动态资源和主题切换的变量应定义为 internal `StyledProperty`。普通 CLR 属性不适合作为主题变量，`DirectProperty` 仅适用于不参与 Style 系统的内部运行时状态。
@@ -281,9 +276,14 @@ ButtonToken 不承载 `IsPressed`、`IsPointerOver`、`IsLoading`、`EffectiveCo
 
 Button 主题变量使用 Avalonia 属性和动态资源，不使用反射读取模板状态。Token 资源由 ButtonToken scope 提供，并跟随主题切换。
 
+三个 semantic marker 是 Button 默认实例固定承担的 class 存储成本。静态 class property 在模板初始化阶段执行一次
+`Classes.Set`，不创建 Binding 或持久 listener；Button 内置主题也不使用 `.semantic-*` 编写默认样式，因此默认路径
+不创建 Semantic Style class activator。应用声明 Semantic Style 后，Avalonia 会在 Button 模板的候选节点上保留 class
+listener；同一 Part 的 Setter 应合并在一个 Style 中，并在批量 Button 场景验证 listener 数量和 detach 释放。
+
 `IconWidth`、`IconHeight` 使用 Avalonia 属性优先级完成 Theme 默认值与 LocalValue 的覆盖，不增加订阅、运行时 part 遍历或状态变化时的视觉对象创建。两个模板 part 共享同一对属性，因此 loading 切换只改变可见性和默认状态映射，不引入尺寸同步副本。
 
-Custom background 覆层是现有模板内的一层视觉节点，启用时不应增加额外控件实例或重建模板。未设置 `CustomBackground` 时，覆层保持不可见，不应影响默认路径的命中测试、wave 或内容布局。
+Root 表面定制复用 `Frame` 的既有 `TemplateBinding`，不增加模板节点、控件实例、订阅或命中测试区域；未定制路径与默认渲染完全一致。
 
 Button 实现不得引入运行时反射、动态代码生成或非 AOT 友好的资源查找路径。
 
@@ -292,6 +292,8 @@ Button 实现不得引入运行时反射、动态代码生成或非 AOT 友好�
 主要源码：
 
 - `src/AtomUI.Desktop.Controls/Buttons/Button.cs`：Button public API、Avalonia 属性注册、effective state、伪类同步、CompactSpace / Form / Wave 接口实现。
+- `src/AtomUI.Desktop.Controls/GeneratedFiles/.../ButtonSemanticParts.g.cs`：生成的 Part 名称与 selector class 常量，仅用于构建检查、测试和 runtime-created 节点场景。
+- `src/AtomUI.Desktop.Controls/GeneratedFiles/.../GeneratedSemanticPartManifest.g.cs`：Button `root/icon/content` 静态 descriptor。
 - `src/AtomUI.Desktop.Controls/Buttons/ButtonToken.cs`：Button 控件 Token 定义与派生。
 - `src/AtomUI.Desktop.Controls/Buttons/Themes/ButtonTheme.axaml`：Button 跨平台模板、状态 selector 和主题变量映射。
 - `src/AtomUI.Desktop.Controls/Buttons/Themes/DropdownButtonBaseTheme.axaml`、`DropdownButtonTheme.axaml`：DropdownButton 对 Button 图标尺寸和状态语义的跨平台投影。
@@ -305,6 +307,7 @@ Button 实现不得引入运行时反射、动态代码生成或非 AOT 友好�
 
 - 源设计文档：`docs/controls/desktop/general/button/overview.md`
 - 实现文档：`docs/controls/desktop/general/button/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/general/button/semantic-part.md`
 - Token 文档：`docs/controls/desktop/general/button/token.md`
 - 变更记录：`docs/controls/desktop/general/button/changelog.md`
 - 语义结构：`./semantic-cn.md`

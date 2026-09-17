@@ -18,15 +18,15 @@
             <Setter Property="Padding" Value="{atom:MenuTokenResource ItemPaddingInline}" />
             <Setter Property="CornerRadius" Value="{atom:MenuTokenResource ItemBorderRadius}" />
             <Setter Property="Foreground" Value="{atom:MenuTokenResource ItemColor}" />
-            <Setter Property="CustomBackground" Value="{atom:MenuTokenResource ItemBg}" />
+            <Setter Property="Background" Value="{atom:MenuTokenResource ItemBg}" />
         </Style>
         <Style Selector="atom|Button.overflow-item:pointerover">
             <Setter Property="Foreground" Value="{atom:MenuTokenResource ItemHoverColor}" />
-            <Setter Property="CustomBackground" Value="{atom:MenuTokenResource ItemHoverBg}" />
+            <Setter Property="Background" Value="{atom:MenuTokenResource ItemHoverBg}" />
         </Style>
         <Style Selector="atom|Button.overflow-item.selected">
             <Setter Property="Foreground" Value="{atom:SharedTokenResource ColorPrimary}" />
-            <Setter Property="CustomBackground" Value="{atom:MenuTokenResource ItemHoverBg}" />
+            <Setter Property="Background" Value="{atom:MenuTokenResource ItemHoverBg}" />
         </Style>
         <Style Selector="atom|Button.overflow-item:disabled">
             <Setter Property="Foreground" Value="{atom:MenuTokenResource ItemDisabledColor}" />

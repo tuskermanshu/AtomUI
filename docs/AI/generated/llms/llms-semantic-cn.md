@@ -10,17 +10,72 @@ Source: ./controls/button/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Button` | 控件根语义区域，承载 public API、命令、点击、状态归一和伪类。 | `ButtonType`、`Color`、`Variant`、`IsDanger`、`IsGhost`、`IsLoading`、`SizeType`、`Shape`、`Icon`、`IconPlacement`、`IconWidth`、`IconHeight` | ButtonToken、SharedToken | stable |
-| `wave` | `PART_WaveSpirit` | 点击 wave 反馈区域，跟随有效圆角和 wave 类型。 | `IsWaveSpiritEnabled`、`IsMotionEnabled` | SharedToken motion / wave 资源 | stable |
-| `shadow` | `ShadowsFrame` | 阴影绘制层，独立于主体背景和边框。 | effective state | `DefaultShadow`、`PrimaryShadow`、`DangerShadow` | stable |
-| `surface` | `Frame` | 主体背景、边框、圆角、尺寸和虚线边框绘制层。 | `ButtonType`、`Color`、`Variant`、`Shape`、`SizeType`、`CornerRadius`、`Padding` | default、primary、danger、text、link、padding、corner radius 相关 Token | stable |
-| `customBackground` | `CustomBackgroundLayer` | normal 状态自定义背景覆层，只服务 `CustomBackground` 视觉模型。 | `CustomBackground` | 不新增专属 Token | internal-stable |
-| `contentLayout` | `PART_RootLayout` | loading icon、用户 icon 和内容的排列区域。 | `IconPlacement`、`HorizontalContentAlignment`、`VerticalContentAlignment` | `IconMargin`、尺寸 Token | stable |
-| `loadingIcon` | `PART_LoadingIcon` | loading 状态图标区域。 | `IsLoading`、`IconWidth`、`IconHeight` | `IconSize`、`OnlyIconSize` 相关 Token | stable |
-| `icon` | `PART_ButtonIcon` | 用户 icon 区域，支持内容前后位置和 icon-only 场景。 | `Icon`、`IconPlacement`、`IconWidth`、`IconHeight` | `IconSize`、`IconMargin` | stable |
-| `content` | `PART_ContentPresenter` | 用户内容展示区域。 | `Content`、`ContentTemplate` | `ContentFontSize`、`ContentLineHeight`、`FontWeight` | stable |
+Button 公开 `root`、`icon` 和 `content` 三个 Semantic Part。Part 名称表达长期稳定的产品职责，不等同于当前模板节点名称。
+
+### 1.1 `Button`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Button` |
+| Part | `root` |
+| Selector | Button 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Button` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Button owner |
+| 职责 | Button root 是动作、状态与根视觉样式的统一 owner。 |
+| 相关 API | 全部 Button public API |
+| 相关 Token | ButtonToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Button` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `ButtonIconStyle` |
+| ContractType | `Control` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 用户图标与 loading 图标区域 |
+| 职责 | 统一表示 Button 的用户图标和 loading 图标视觉职责。 |
+| 相关 API | `Icon`、`IsLoading`、`IconPlacement`、`IconWidth`、`IconHeight` |
+| 相关 Token | `IconSize*`、`OnlyIconSize*`、`IconMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Button` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `ButtonContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 内容展示区域 |
+| 职责 | 表示 Button 的用户内容展示与排版区域。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | `ContentFontSize`、`ContentLineHeight`、`FontWeight` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。
 
 ## Abstract AXAML Structure
 
@@ -31,7 +86,6 @@ Source: ./controls/button/semantic-cn.md
     <WaveSpiritDecorator Name="PART_WaveSpirit" />
     <Border Name="ShadowsFrame" />
     <DashedBorder Name="Frame" />
-    <Border Name="CustomBackgroundLayer" />
     <Border>
         <DockPanel Name="PART_RootLayout">
             <LoadingOutlined Name="PART_LoadingIcon" />
@@ -55,7 +109,6 @@ Button
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
         -> DashedBorder#Frame (template-stable)
-        -> Border#CustomBackgroundLayer (template-stable)
         -> Border (template-stable)
            -> DockPanel#PART_RootLayout (template-stable)
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
@@ -64,7 +117,6 @@ Button
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
-        -> Border#CustomBackgroundLayer (template-stable)
         -> DashedBorder#Frame (template-stable)
            -> DockPanel#PART_RootLayout (template-stable)
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
@@ -73,7 +125,6 @@ Button
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
-        -> Border#CustomBackgroundLayer (template-stable)
         -> DashedBorder#Frame (template-stable)
            -> DockPanel#PART_RootLayout (template-stable)
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
@@ -86,12 +137,11 @@ Button
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Button` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Button` | control theme | `ButtonTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `CustomBackground` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `ButtonTheme.axaml` | Button | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `CustomBackground` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Button` | control theme | `ButtonTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `EffectiveBorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `ButtonTheme.axaml` | Button | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `EffectiveBorderThickness` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_WaveSpirit` | template node (WaveSpiritDecorator) | `ButtonTheme.axaml` | Button | `EffectiveCornerRadius`, `IsMotionEnabled`, `IsWaveSpiritEnabled`, `WaveSpiritType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ShadowsFrame` | template node (Border) | `ButtonTheme.axaml` | Button | `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Frame` | template node (DashedBorder) | `ButtonTheme.axaml` | Button | `Background`, `BackgroundSizing`, `BorderBrush`, `EffectiveBorderThickness`, `EffectiveCornerRadius`, `Height` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `CustomBackgroundLayer` | template node (Border) | `ButtonTheme.axaml` | Button | `CustomBackground`, `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_RootLayout` | template node (DockPanel) | `ButtonTheme.axaml` | Button | `Content`, `ContentTemplate`, `Foreground`, `HorizontalContentAlignment`, `Icon`, `IconHeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_LoadingIcon` | template node (LoadingOutlined) | `ButtonTheme.axaml` | Button | `Foreground`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ButtonIcon` | template node (IconPresenter) | `ButtonTheme.axaml` | Button | `Foreground`, `Icon`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -103,8 +153,7 @@ Button
 | --- | --- |
 | `PART_WaveSpirit` | 承载点击 wave 反馈。 |
 | `ShadowsFrame` | 承载按钮阴影。 |
-| `Frame` | 承载主体背景、边框、圆角和尺寸基底。 |
-| `CustomBackgroundLayer` | 主题内部自定义背景覆层，不作为用户 template part。 |
+| `Frame` | 承载主体背景、边框、圆角和尺寸基底；`Background` / `BorderBrush` 直接 `TemplateBinding` owner 属性，是 root 定制的落点。 |
 | `PART_RootLayout` | 排列 loading icon、icon 和 content，并根据 `IconPlacement` 调整用户 icon 位置。 |
 | `PART_LoadingIcon` | 展示 loading 状态图标，宽高通过 `TemplateBinding` 跟随 `IconWidth`、`IconHeight`。 |
 | `PART_ButtonIcon` | 展示用户设置的 icon，位置由 `IconPlacement` 控制，宽高通过 `TemplateBinding` 跟随 `IconWidth`、`IconHeight`。 |
@@ -112,17 +161,7 @@ Button
 
 ## Pseudo Classes
 
-| `root` | `Button` | 控件根语义区域，承载 public API、命令、点击、状态归一和伪类。 | `ButtonType`、`Color`、`Variant`、`IsDanger`、`IsGhost`、`IsLoading`、`SizeType`、`Shape`、`Icon`、`IconPlacement`、`IconWidth`、`IconHeight` | ButtonToken、SharedToken | stable |
-| `wave` | `PART_WaveSpirit` | 点击 wave 反馈区域，跟随有效圆角和 wave 类型。 | `IsWaveSpiritEnabled`、`IsMotionEnabled` | SharedToken motion / wave 资源 | stable |
-| `shadow` | `ShadowsFrame` | 阴影绘制层，独立于主体背景和边框。 | effective state | `DefaultShadow`、`PrimaryShadow`、`DangerShadow` | stable |
-| `surface` | `Frame` | 主体背景、边框、圆角、尺寸和虚线边框绘制层。 | `ButtonType`、`Color`、`Variant`、`Shape`、`SizeType`、`CornerRadius`、`Padding` | default、primary、danger、text、link、padding、corner radius 相关 Token | stable |
-| `customBackground` | `CustomBackgroundLayer` | normal 状态自定义背景覆层，只服务 `CustomBackground` 视觉模型。 | `CustomBackground` | 不新增专属 Token | internal-stable |
-| `contentLayout` | `PART_RootLayout` | loading icon、用户 icon 和内容的排列区域。 | `IconPlacement`、`HorizontalContentAlignment`、`VerticalContentAlignment` | `IconMargin`、尺寸 Token | stable |
-| `loadingIcon` | `PART_LoadingIcon` | loading 状态图标区域。 | `IsLoading`、`IconWidth`、`IconHeight` | `IconSize`、`OnlyIconSize` 相关 Token | stable |
-| `icon` | `PART_ButtonIcon` | 用户 icon 区域，支持内容前后位置和 icon-only 场景。 | `Icon`、`IconPlacement`、`IconWidth`、`IconHeight` | `IconSize`、`IconMargin` | stable |
-| `content` | `PART_ContentPresenter` | 用户内容展示区域。 | `Content`、`ContentTemplate` | `ContentFontSize`、`ContentLineHeight`、`FontWeight` | stable |
-
-`CustomBackgroundLayer` 是主题内部实现细节，不作为用户可直接依赖的 template part。LLMS semantic 文档可以记录它的存在和边界，但应明确它只服务 `CustomBackground` 受控视觉模型。
+- icon-only、loading 相关伪类。
 
 ## State Flow
 
@@ -146,11 +185,11 @@ Button 的 effective state 由 C# 层归一，AXAML 主题只消费已经归一�
 - `EffectiveIsDanger`、`EffectiveIsGhost`、`EffectiveIsBordered`。
 - `EffectiveBorderThickness`、`EffectiveCornerRadius`。
 - `WaveSpiritType`。
-- icon-only、loading、custom background 可见性相关伪类。
+- icon-only、loading 相关伪类。
 
 ## Theme and Token Boundaries
 
-Button 模板应保持阴影层、主体绘制层、内容层、wave 层和自定义背景覆层的职责分离。可以移除无明确职责的包装层，但不得合并承担不同视觉职责的节点。
+Button 模板应保持阴影层、主体绘制层、内容层和 wave 层的职责分离。可以移除无明确职责的包装层，但不得合并承担不同视觉职责的节点。
 
 Button 主题采用分层变量模型，避免直接展开 `Color × Variant × State` 的组合样式。
 
@@ -163,9 +202,6 @@ Variant Selector
 
 State Selector
   将 Normal / PointerOver / Pressed / Disabled / Loading 状态应用到最终视觉属性
-
-Custom Background Selector
-  在受支持状态显示自定义背景覆层，在 hover / pressed / disabled / danger 状态隐藏覆层
 ```
 
 用于 AXAML `Setter`、selector、动态资源和主题切换的变量应定义为 internal `StyledProperty`。普通 CLR 属性不适合作为主题变量，`DirectProperty` 仅适用于不参与 Style 系统的内部运行时状态。
@@ -200,11 +236,19 @@ ButtonToken 不承载 `IsPressed`、`IsPointerOver`、`IsLoading`、`EffectiveCo
 - 用户在 Button 上设置的本地 `IconWidth`、`IconHeight` 必须覆盖 Theme 默认值，并同时作用于用户 icon 与 loading icon。
 - `IconPlacement` 默认值必须保持 `Start`；`IconPlacement=End` 只允许改变用户 icon 的内容侧位置和间距方向。
 - `Shape=Circle`、`Shape=Round` 的尺寸和圆角计算不变。
-- `SizeType=Large/Middle/Small` 的预设尺寸、字体、内边距、圆角和 icon 尺寸不变。
-- `SizeType=Custom` 未显式设置尺寸相关属性时必须按 `Middle` 默认值渲染；用户在 Button 上设置的本地 `Height`、`Padding`、`FontSize`、`CornerRadius`、`IconWidth`、`IconHeight` 等现有属性必须覆盖 Custom 默认值。
+- `SizeType=Large/Middle/Small` 使用对应 Token 提供 `MinHeight`、字体、内边距、圆角和 icon 尺寸基线；内容或合法
+  Semantic Part 布局 Setter 可以使最终高度超过该基线。
+- `SizeType=Custom` 未显式设置尺寸相关属性时复用 `Middle` 的字体、内边距、圆角和 icon 默认值，但不继承 Middle
+  的 `MinHeight`；用户设置的 `Height`、`MinHeight`、`Padding`、`FontSize`、`CornerRadius`、`IconWidth`、
+  `IconHeight` 等现有属性必须按 Avalonia 原生优先级生效。
 - CompactSpace 下的有效圆角、有效边框和 z-index 行为不变。
-- wave 播放条件和危险态 wave brush 不变。
-- `CustomBackground` 不改变 `WaveSpiritDecorator` 的 wave brush，wave 颜色仍由 `EffectiveColor + EffectiveVariant` 推导。
+- wave 播放条件不变；播放前必须从 Button 当前最终视觉属性解析 wave brush，依次检查有效实色
+  `BorderBrush` 和 `Background`，使 Theme 状态、Semantic root Style 与普通用户 Style 使用同一视觉事实源。
+- 透明、纯白或非实色的最终 Brush 不作为 wave 颜色；无有效颜色时清除 Button 写入的 wave brush，使
+  `WaveSpiritDecorator` 回到主题默认值。
+- root 表面定制语义保持不变：用户在 Button 上设置的本地 `Background` / `BorderBrush` 直接由模板 `Frame`
+  渲染并冻结该属性槽在 hover / pressed / disabled 的状态变色，清除后恢复主题状态机；不得重新引入平行
+  定制属性或模板内定制覆层。
 - 同一 Button 家族主题资产在 Native 与 Browser 支持宿主下保持同一 API 语义，不通过平台专用主题资产复制视觉。
 
 如果实现某项能力时无法保持这些不变量，应先停止实现，说明原因、影响范围、替代方案和迁移方式，并获得授权。
@@ -219,14 +263,23 @@ ButtonToken 不承载 `IsPressed`、`IsPointerOver`、`IsLoading`、`EffectiveCo
 - `Color + Variant` 优先级和旧 API 映射结果不变。
 - `ButtonType=Text` 保持 `Default + Text` 中性语义；`Primary + Text` 跟随当前主题 `ColorPrimary` 色阶。
 - Button 家族主题必须共享 C# 计算出的最终颜色变量，不得按平台或兼容 API 复制颜色矩阵。
-- `SizeType=Custom` 不引入 Button 专属 `Custom*` 尺寸属性；未设置本地尺寸属性时表现等同 `Middle`，设置本地属性时由 Avalonia 属性优先级自然覆盖。
+- `SizeType=Large/Middle/Small` 只通过 `MinHeight` 建立预设高度基线，不以主题 `Height` 封死自然测量。
+- `SizeType=Custom` 不引入 Button 专属 `Custom*` 尺寸属性，不设置预设 `MinHeight`；未设置本地尺寸属性时复用
+  `Middle` 的非高度指标，设置本地属性时由 Avalonia 属性优先级自然覆盖。
 - 主题不得以高于本地值的优先级写入 Custom 默认尺寸。
+- Circle/Round 的几何计算必须基于已经应用 Button Width/Height/Min/Max 约束的测量结果。
 - `IconWidthProperty`、`IconHeightProperty` 及其 CLR wrapper 是 Button 公共契约，属性变化必须参与 measure invalidation。
-- `PART_ButtonIcon`、`PART_LoadingIcon` 的 Width 和 Height 只能通过 `TemplateBinding IconWidth/IconHeight` 投影；外部样式不得深入模板覆盖尺寸。
+- `PART_ButtonIcon`、`PART_LoadingIcon` 的默认 Width 和 Height 通过 `TemplateBinding IconWidth/IconHeight` 投影；
+  外部局部覆盖只依赖 `.semantic-icon`，Setter 类型通过 `x:SetterTargetType="Control"` 提供，不得依赖类型前缀或
+  `PART_*` 名称。
+- 共享 Button ControlTheme 的每个 Button ControlTemplate 都必须具有两个 `.semantic-icon` marker 和一个
+  `.semantic-content` marker；AtomUI 模板使用静态 `Classes.semantic-*="True"`，Button root 不添加
+  `.semantic-root`。
 - 普通用户 icon 和非 loading 的 icon-only 用户 icon 保持 `IconSize*` 默认值；只有 icon-only loading 默认使用 `OnlyIconSize*`。
 - DropdownButton 继承同一图标尺寸属性与投影规则，`OpenIndicator` 继续由独立的 DropdownButton 主题尺寸控制；SplitButton 不纳入这一属性继承范围。
-- `CustomBackgroundLayer` 不成为用户可依赖 template part。
-- wave brush 不从 `CustomBackground`、模板背景或 hover 背景反推。
+- Root 表面定制不得重新引入平行定制属性或模板内定制覆层；`Background` / `BorderBrush` 的本地值语义（冻结该属性槽状态变色、清除恢复状态机）保持不变。
+- wave brush 不从内部模板节点反推；Button root 的最终 hover、pressed 或外部样式结果是
+  合法取色输入。
 - CompactSpace 圆角和边框折叠行为不变。
 - 同一 Button 家族主题资产必须在 Native 与 Browser 支持宿主下保持同一 API 语义；不得维护
   `Buttons/Themes/Browser/` 或 `BrowserButtonThemes.axaml` 形式的平台主题分叉。
@@ -239,17 +292,60 @@ Source: ./controls/float-button/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `FloatButton` | 控件根语义区域，承载 public API、状态归一、主题入口和 Gallery 可观察行为。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载用户内容、图标、文本或装饰性展示。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `command` | `真实 FloatButton` | 承载 `Command`、`CommandParameter`、`CanExecute`、点击和禁用语义；host 只做投影。 | `Command`、`CommandParameter`、`Href` | 见视觉与主题模型 | stable |
-| `state` | `状态区域` | 表达 hover、pressed、disabled、loading、selected 或控件专属状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `theme` | `主题区域` | 连接 ControlTheme、SharedToken、控件 Token 和资源键。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`FloatButton` 与 `BackTopFloatButton` 公开 `root`、`icon`、`content` 三个职责区域，与上游稳定语义保持同名；
+`FloatButtonGroup` 公开 `root`、`trigger`、`list` 三个职责区域。三个 Host 类型不是 Semantic owner：它们在
+Overlay Layer 中创建的真实控件才是 owner，Host 自身不声明任何 Part。
+
+### 1.1 `FloatButton`
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `FloatButton` | `Single` | `Root` | `false` | `false` |
+| `icon` | `.semantic-icon` | `IconPresenter` | `Single` | `Selector` | `false` | `false` |
+| `content` | `.semantic-content` | `ContentPresenter` | `Optional` | `Selector` | `false` | `false` |
+
+`icon` 在 Circle 与 Square 两套模板中都存在；`content` 只在 Square 模板中存在（Circle 模板只有图标），因此使用
+`Optional`。`root` 不声明 `.semantic-root` marker。
+
+### 1.2 `BackTopFloatButton`
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `BackTopFloatButton` | `Single` | `Root` | `false` | `false` |
+| `icon` | `.semantic-icon` | `IconPresenter` | `Single` | `Selector` | `false` | `false` |
+| `content` | `.semantic-content` | `ContentPresenter` | `Optional` | `Selector` | `false` | `false` |
+
+`BackTopFloatButton` 的模板结构与 `FloatButton` 一致（仅外层包一层 MotionActor），共享相同的 Part 名称与数量语义。
+上游体系的 BackTop 没有公开语义 API；AtomUI 按自身模板事实提供同等契约。
+
+### 1.3 `FloatButtonGroup`
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `FloatButtonGroup` | `Single` | `Selector` | `false` | `false` |
+| `trigger` | `.semantic-trigger` | `FloatButton` | `Optional` | `Selector` | `false` | `false` |
+| `list` | `.semantic-list` | `TemplatedControl` | `Single` | `Selector` | `false` | `false` |
+
+`trigger` 是 Click/Hover 触发模式模板中的主按钮；Default 模式模板没有 trigger，因此使用 `Optional`。`list` 是菜单项
+容器 `FloatButtonItemsControl`（internal 类型），在 Default 与触发模式模板中都存在；`ContractType` 取公开基类
+`TemplatedControl`，覆盖 Background、CornerRadius、Padding 等常用 Setter。
 
 ## Abstract AXAML Structure
 
-未定位到可生成抽象 AXAML 结构的 ControlTheme 模板。生成器不会根据 semantic parts 发明 AXAML 节点；请以 Template Parts、主题文件和源码索引为准。
+来源：`src/AtomUI.Desktop.Controls/FloatButton/Themes/FloatButtonTheme.axaml`
+
+```xml
+<Panel>
+    <Border Name="BackgroundFrame" />
+    <Border Name="Frame">
+        <StackPanel Name="RootLayout">
+            <IconPresenter Name="IconPresenter" />
+            <ContentPresenter />
+        </StackPanel>
+    </Border>
+    <Canvas Name="PART_BadgeLayout" />
+</Panel>
+```
 
 ## Composition Model
 
@@ -282,6 +378,18 @@ FloatButton
            -> FloatButtonSeparatorLayer (template-stable)
            -> StackPanel#PART_ItemsLayout (template-stable)
   -> FloatButton (control theme, FloatButtonTheme.axaml)
+     -> Panel (template-stable)
+        -> Border#BackgroundFrame (template-stable)
+        -> Border#Frame (template-stable)
+           -> StackPanel#RootLayout (template-stable)
+              -> IconPresenter#IconPresenter (internal-observable)
+              -> ContentPresenter (internal-observable)
+        -> Canvas#PART_BadgeLayout (template-stable)
+     -> Panel (template-stable)
+        -> Border#BackgroundFrame (template-stable)
+        -> Border#Frame (template-stable)
+           -> IconPresenter#IconPresenter (internal-observable)
+        -> Canvas#PART_BadgeLayout (template-stable)
 ```
 
 ### 协作节点
@@ -303,7 +411,14 @@ FloatButton
 | `ContentFrame` | template node (Border) | `FloatButtonItemsControlTheme.axaml` | FloatButtonItemsControl | `Background`, `BoxShadow`, `CornerRadius`, `Lines`, `Orientation` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Panel` | template node (Panel) | `FloatButtonItemsControlTheme.axaml` | FloatButtonItemsControl | `Lines`, `Orientation` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemsLayout` | template node (StackPanel) | `FloatButtonItemsControlTheme.axaml` | FloatButtonItemsControl | `Orientation` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `FloatButton` | control theme | `FloatButtonTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `FloatButton` | control theme | `FloatButtonTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `Content`, `ContentTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `FloatButtonTheme.axaml` | FloatButton | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `BackgroundFrame` | template node (Border) | `FloatButtonTheme.axaml` | FloatButton | `BoxShadow`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Frame` | template node (Border) | `FloatButtonTheme.axaml` | FloatButton | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `RootLayout` | template node (StackPanel) | `FloatButtonTheme.axaml` | FloatButton | `Content`, `ContentTemplate`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `IconPresenter` | template node (IconPresenter) | `FloatButtonTheme.axaml` | FloatButton | `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ContentPresenter` | template node (ContentPresenter) | `FloatButtonTheme.axaml` | FloatButton | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_BadgeLayout` | template node (Canvas) | `FloatButtonTheme.axaml` | FloatButton | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
@@ -540,19 +655,34 @@ Source: ./controls/separator/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Separator` | 控件根语义区域，承载 public API、状态归一、主题入口和 Gallery 可观察行为。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载用户内容、图标、文本或装饰性展示。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `state` | `状态区域` | 表达 hover、pressed、disabled、loading、selected 或控件专属状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `theme` | `主题区域` | 连接 ControlTheme、SharedToken、控件 Token 和资源键。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Separator 主控件公开 `root`、`rail` 与 `content` 三个职责区域，与上游稳定 Semantic DOM（`root` / `rail` /
+`content`）对齐。`rail` 对应连接线（背景条）区域，由模板中的 `SeparatorRail` 节点承载；`content` 对应带标题分隔线中的文本区域。
+
+`VerticalSeparator` 是 `Separator` 的便捷子类，仅覆盖 `Orientation` 默认值并通过 `StyleKeyOverride` 复用
+`SeparatorTheme`，不持有独立 descriptor，其 Semantic Part 契约与 `Separator` 完全一致。
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `Separator` | `Single` | `Root` | `false` | `false` |
+| `rail` | `.semantic-rail` | `SeparatorRail` | `Multiple` | `Selector` | `false` | `false` |
+| `content` | `.semantic-content` | `TextBlock` | `Single` | `Selector` | `false` | `false` |
+
+`root` 是控件自身，承载方向、尺寸、线型、标题位置等 public API、主题入口和状态归一，不声明 `.semantic-root`
+marker。`rail` 是模板中的连接线节点 `PART_RailStart` / `PART_RailEnd`，以 `Multiple` 基数表示带标题水平分隔线的
+左右两段；无标题水平分隔线只保留一段可见 rail，垂直分隔线只保留一段可见 rail，另一段被归零宽/高而不参与
+Semantic Part 命中。`content` 是模板文本节点 `PART_Title`，承载 `Title` 文本内容，对应公共 API
+`Title` / `TitleColor` / `TitlePosition` / `IsPlain`。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Separator/Themes/SeparatorTheme.axaml`
 
 ```xml
-<TextBlock Name="PART_Title" />
+<Panel>
+    <SeparatorRail Name="PART_RailStart" />
+    <TextBlock Name="PART_Title" />
+    <SeparatorRail Name="PART_RailEnd" />
+</Panel>
 ```
 
 ## Composition Model
@@ -564,7 +694,10 @@ Source: ./controls/separator/semantic-cn.md
 ```text
 Separator
   -> Separator (control theme, SeparatorTheme.axaml)
-     -> TextBlock#PART_Title (template-stable)
+     -> Panel (template-stable)
+        -> SeparatorRail#PART_RailStart (template-stable)
+        -> TextBlock#PART_Title (template-stable)
+        -> SeparatorRail#PART_RailEnd (template-stable)
 ```
 
 ### 协作节点
@@ -572,8 +705,11 @@ Separator
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Separator` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Separator` | control theme | `SeparatorTheme.axaml` | 用户代码 / 控件宿主 | `FontSize`, `Title`, `TitleColor` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Separator` | control theme | `SeparatorTheme.axaml` | 用户代码 / 控件宿主 | `FontSize`, `LineColor`, `LineWidth`, `Orientation`, `Title`, `TitleColor` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `SeparatorTheme.axaml` | Separator | `FontSize`, `LineColor`, `LineWidth`, `Orientation`, `Title`, `TitleColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_RailStart` | template node (SeparatorRail) | `SeparatorTheme.axaml` | Separator | `LineColor`, `LineWidth`, `Orientation`, `Variant` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Title` | template node (TextBlock) | `SeparatorTheme.axaml` | Separator | `FontSize`, `Title`, `TitleColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_RailEnd` | template node (SeparatorRail) | `SeparatorTheme.axaml` | Separator | `LineColor`, `LineWidth`, `Orientation`, `Variant` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
@@ -672,12 +808,181 @@ Source: ./controls/split-button/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `SplitButton` | 控件根语义区域，承载 public API、状态归一、主题入口和 Gallery 可观察行为。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载用户内容、图标、文本或装饰性展示。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `state` | `状态区域` | 表达 hover、pressed、disabled、loading、selected 或控件专属状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `theme` | `主题区域` | 连接 ControlTheme、SharedToken、控件 Token 和资源键。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+SplitButton 是唯一 Semantic owner，公开 7 个 Semantic Part。弹层侧 5 个部件语义对齐上游 Dropdown 的
+Semantic DOM（`root` / `itemTitle` / `item` / `itemContent` / `itemIcon`）：上游 Dropdown 语义部件全部位于弹层侧，
+`root` 是弹层根、`itemTitle` 是菜单分组标题、`item` / `itemIcon` / `itemContent` 是菜单项及菜单项内部槽位。AtomUI
+保留 `root` 作为 owner 自身的隐式 Part（由生成器统一注册），因此上游的弹层根 `root` 映射为 `popup.root`；
+`itemTitle` 对应上游的分组标题（`ant-menu-item-group-title`），由 `MenuItemGroup` 的标题 ContentPresenter 承载。
+
+触发侧 2 个部件（`primary` / `secondary`）是 AtomUI 的显式能力补充，上游没有对应部件：上游 deprecated
+`Dropdown.Button` 的两个触发 Button 由调用方自持（可自行加 class / 改样式），而 AtomUI SplitButton 的两个触发
+Button 是模板内部件，调用方只有 `Content` / `Icon` / `OpenIndicator` 内容级注入口，不发布则完全不可定制。这与
+DropdownButton 不同——DropdownButton 继承 Button，天然继承触发侧 `icon` / `content` 部件；SplitButton 是
+ContentControl，无此继承路径。声明位于 `SplitButton.SemanticParts.cs` partial 文件；`root` 为隐式 Part，不在该
+文件中显式声明。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `SplitButton` |
+| Part | `root` |
+| Selector | SplitButton 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `SplitButton` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | SplitButton owner |
+| 职责 | SplitButton root 是动作内容、弹层数据、命令与状态的组织边界。 |
+| 相关 API | 全部 SplitButton public API |
+| 相关 Token | SplitButtonToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `primary`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `SplitButton` |
+| Part | `primary` |
+| Selector | `.semantic-primary` |
+| SelectorRoute | `/template/ .semantic-primary` |
+| Style Type | `SplitButtonPrimaryStyle` |
+| ContractType | `Button` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | SplitButton 模板 `PART_PrimaryButton`（主命令按钮，静态 marker） |
+| 职责 | 触发侧主命令按钮区域，承载主动作内容、图标与状态视觉（AtomUI 补充部件，上游无对应）。 |
+| 相关 API | `Content`、`Icon`、`Command`、`IsPrimaryButtonType`、`IsDanger`、`SizeType` |
+| 相关 Token | ButtonToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `secondary`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `SplitButton` |
+| Part | `secondary` |
+| Selector | `.semantic-secondary` |
+| SelectorRoute | `/template/ .semantic-secondary` |
+| Style Type | `SplitButtonSecondaryStyle` |
+| ContractType | `Button` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | SplitButton 模板 `PART_SecondaryButton`（次级下拉触发按钮，静态 marker） |
+| 职责 | 触发侧次级下拉触发区域，承载 `OpenIndicator` 与弹层触发状态视觉（AtomUI 补充部件，上游无对应）。 |
+| 相关 API | `OpenIndicator`、`Flyout`、`TriggerType`、`Placement` |
+| 相关 Token | ButtonToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `SplitButton` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `>> .semantic-popup-root` |
+| Style Type | `SplitButtonPopupRootStyle` |
+| ContractType | `ArrowDecoratedBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuFlyoutPresenter.OnApplyTemplate` 定位到的弹层根视觉面 `ArrowDecoratedBox`（模板应用时注入 marker，其逻辑祖先链经 Popup `PlacementTarget` 回到 SplitButton） |
+| 职责 | 下拉菜单弹层的根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角由 `ArrowDecoratedBox` 渲染，对应上游的 `root`）。 |
+| 相关 API | `Flyout`、`MenuItem.Items`、`MenuItem.Header`、`MenuItem.Icon` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemTitle`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `SplitButton` |
+| Part | `itemTitle` |
+| Selector | `.semantic-item-title` |
+| SelectorRoute | `>> .semantic-item-title-group /template/ .semantic-item-title` |
+| Style Type | `SplitButtonItemTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuItemGroup` 模板 `GroupTitlePresenter`（`ContentPresenter`，`MenuItemGroup.OnApplyTemplate` 时注入 marker；分组容器本身带 `semantic-item-title-group` 中间标记类） |
+| 职责 | 菜单分组标题节点（对应上游的 `itemTitle`，即 `ant-menu-item-group-title`）。 |
+| 相关 API | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `SplitButton` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `>> .semantic-item` |
+| Style Type | `SplitButtonItemStyle` |
+| ContractType | `MenuItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuFlyoutPresenter.CreateContainerForItemOverride` / `PrepareContainerForItemOverride` 与 `MenuItem.CreateContainerForItemOverride` / `PrepareContainerForItemOverride` 容器路径生成的 `MenuItem`（顶层与任意嵌套层级的子菜单项，回收复用时 marker 保持不变） |
+| 职责 | 弹层中的单个菜单项容器，承载该项的状态、内容、图标与子菜单（对应上游的 `item`）。 |
+| 相关 API | `MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemIcon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `SplitButton` |
+| Part | `itemIcon` |
+| Selector | `.semantic-item-icon` |
+| SelectorRoute | `>> .semantic-item /template/ .semantic-item-icon` |
+| Style Type | `SplitButtonItemIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuItem` 模板 `ItemIconPresenter`（`IconPresenter`，`MenuItem.OnApplyTemplate` 时注入 marker） |
+| 职责 | 菜单项模板内的图标节点（对应上游的 `itemIcon`）。 |
+| 相关 API | `MenuItem.Icon` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `SplitButton` |
+| Part | `itemContent` |
+| Selector | `.semantic-item-content` |
+| SelectorRoute | `>> .semantic-item /template/ .semantic-item-content` |
+| Style Type | `SplitButtonItemContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuItem` 模板 `ItemTextPresenter`（`ContentPresenter`，`MenuItem.OnApplyTemplate` 时注入 marker） |
+| 职责 | 菜单项模板内的文本内容节点（对应上游的 `itemContent`）。 |
+| 相关 API | `MenuItem.Header`、`MenuItem.HeaderTemplate` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -719,7 +1024,7 @@ SplitButton
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
 | 内容与数据 | `Content`、`Icon` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `IsArrowVisible`、`IsDanger`、`IsMotionEnabled`、`IsPointAtCenter`、`IsPrimaryButtonType`、`IsWaveSpiritEnabled`、`ShouldUseOverlayPopup` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
+| 交互与状态 | `IsArrowVisible`、`IsDanger`、`IsMotionEnabled`、`IsPointAtCenter`、`IsPopupPinnedOpen`、`IsPrimaryButtonType`、`IsWaveSpiritEnabled`、`ShouldUseOverlayPopup` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
 | 视觉与布局 | `Placement`、`PlacementAnchor`、`PlacementGravity`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 弹层与窗口 | `Flyout`、`GutterToFlyout` | 控制 popup、flyout、dialog、window 或 overlay 宿主协作。 |
 | 动效与异步 | `MouseEnterDelay`、`MouseLeaveDelay` | 约束动效开关、异步加载、播放速度、超时和任务边界。 |
@@ -993,19 +1298,65 @@ Source: ./controls/masonry/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Masonry` | 布局控件根语义区域，承载布局 public API、尺寸和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `container` | `布局容器` | 组织子元素、间距、断点、对齐或分割状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `布局项` | 承载子内容、占位、跨度、排序或尺寸约束。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `theme` | `主题区域` | 连接 SharedToken、布局主题资源和 Gallery 可观察样式。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+### 2.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Masonry` |
+| Part | `root` |
+| Selector | Masonry 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Masonry` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| ThemePropertyName | 不适用 |
+| AtomUI 节点 | Masonry owner |
+| 职责 | 瀑布流布局根区域，承载列数、间距、响应式、root chrome、ItemsControl 输入和 item Selector 作用域。 |
+| 相关 API | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`ItemsPanel`、`ColumnCount`、`ColumnInfo`、`MinColumnWidth`、`MaxColumnCount`、`ColumnGap`、`RowGap`、`Gutter`、`Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`、`LayoutChanged` |
+| 相关 Token | 无专属 Token；间距和列宽是实例布局状态。 |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.2 `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Masonry` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `> .semantic-item` |
+| Style Type | `MasonryItemStyle` |
+| ContractType | `Control` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| ThemePropertyName | 不适用 |
+| AtomUI 节点 | 每个 item container：直接子元素或 generated `ContentPresenter`。 |
+| 职责 | 表示一个被 Masonry 测量、分配列并排列的条目容器。 |
+| 相关 API | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`Masonry.Column`、`Masonry.Span` |
+| 相关 Token | 无专属 Token；item 外观由 item 自身控件或模板负责。 |
+| 稳定性 | stable since 6.2.0 |
+
+`ContractType=Control` 是有意选择：Masonry 同时支持用户直接提供任意 `Control` 作为条目，以及 `ItemsSource` 场景下由
+Avalonia 生成 `ContentPresenter`。因此 `MasonryItemStyle` 只能稳定依赖 `Control` 共有属性，例如 `Margin`、`Opacity`、
+`Width`、`Height`、`MinHeight`、`MaxHeight`、`HorizontalAlignment`、`VerticalAlignment`、`RenderTransform`、
+`RenderTransformOrigin` 和 `IsVisible`。需要设置 `Background`、`BorderBrush`、`CornerRadius` 或 Card 专属属性时，应继续定制
+item 自身控件或 `ItemTemplate` 内部控件，而不是扩大 Masonry item 的 `ContractType`。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Masonry/Themes/MasonryTheme.axaml`
 
 ```xml
-<ItemsPresenter Name="PART_ItemsPresenter" />
+<PixelAlignedBorder Name="PART_RootBorder">
+    <Grid>
+        <ItemsPresenter Name="PART_ItemsPresenter" />
+        <Canvas Name="PART_MotionGhostLayer" />
+    </Grid>
+</PixelAlignedBorder>
 ```
 
 ## Composition Model
@@ -1017,7 +1368,10 @@ Source: ./controls/masonry/semantic-cn.md
 ```text
 Masonry
   -> Masonry (control theme, MasonryTheme.axaml)
-     -> ItemsPresenter#PART_ItemsPresenter (template-stable)
+     -> PixelAlignedBorder#PART_RootBorder (template-stable)
+        -> Grid (template-stable)
+           -> ItemsPresenter#PART_ItemsPresenter (template-stable)
+           -> Canvas#PART_MotionGhostLayer (template-stable)
 ```
 
 ### 协作节点
@@ -1025,8 +1379,10 @@ Masonry
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Masonry` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Masonry` | control theme | `MasonryTheme.axaml` | 用户代码 / 控件宿主 | `ItemsPanel` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Masonry` | control theme | `MasonryTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `ClipToBounds`, `CornerRadius`, `ItemsPanel` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_RootBorder` | template node (PixelAlignedBorder) | `MasonryTheme.axaml` | Masonry | `Background`, `BorderBrush`, `BorderThickness`, `ClipToBounds`, `CornerRadius`, `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `MasonryTheme.axaml` | Masonry | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_MotionGhostLayer` | template node (Canvas) | `MasonryTheme.axaml` | Masonry | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
@@ -1038,7 +1394,7 @@ Masonry
 
 ## State Flow
 
-Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互状态。它必须完整保留子元素自身的命中测试、焦点、键盘导航、拖拽、上下文菜单和动画行为。
+Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互状态。它必须完整保留子元素自身的命中测试、焦点、键盘导航、拖拽、上下文菜单和动画行为。Masonry 自身为 item 提供布局动效：新 item 入场淡入、既有 item 位置变化时滑动、移除的 item 在原位置淡出（时长来自 `motionDurationSlow` / `motionDurationFast` token，全局禁用动效时退化为瞬时；机制见 [Masonry 桌面版实现原理](implementation.md)），item 自身的交互动画不受影响，动效结束后 item 的样式基值自动接管。
 
 有效状态由响应式属性、兼容属性、可用宽度和子项 attached property 共同决定。状态归一发生在 C# 布局层，AXAML 不承担列数、间距或子项位置计算。
 
@@ -1056,29 +1412,32 @@ Masonry 本身没有 hover、pressed、disabled、loading 或 checked 等交互�
 
 ## Theme and Token Boundaries
 
-Masonry 的默认主题只装配 `ItemsPresenter` 与 internal `MasonryPanel`，并把 Masonry 布局属性传递给布局面板。Theme 不绘制子项外观，不通过 selector 计算列数和位置。
+Masonry 的默认主题装配 root chrome `PixelAlignedBorder`、`ItemsPresenter`、离场 ghost 层与 internal `MasonryPanel`，并把 Masonry 的布局属性与 root chrome 属性分别传递给对应层。Theme 不绘制子项外观，不通过 selector 计算列数和位置。Semantic Part marker 不写入主题静态节点；`.semantic-item` 由 Masonry 在 item container 准备阶段补齐。
 
 默认视觉树：
 
 ```text
 Masonry (ItemsControl, default ItemsPanel = MasonryPanel)
-└─ ItemsPresenter
-   └─ MasonryPanel (internal)
-      ├─ <子元素>
-      ├─ ContentPresenter → <子元素>
-      └─ ...
+└─ PixelAlignedBorder#PART_RootBorder
+   └─ Grid
+      ├─ ItemsPresenter
+      │  └─ MasonryPanel (internal)
+      │     ├─ <子元素>
+      │     ├─ ContentPresenter → <子元素>
+      │     └─ ...
+      └─ Canvas#PART_MotionGhostLayer (离场淡出托管，不参与命中测试)
 ```
 
 视觉树要求：
 
-- `Masonry` 和 `MasonryPanel` 节点只承担布局与容器装配职责。
+- `Masonry` 和 `MasonryPanel` 节点只承担布局与容器装配职责；root chrome 由 `PixelAlignedBorder` 承载。
 - 子项视觉结构完全由子项控件或 `ItemTemplate` 负责。
 - 不通过模板节点实现列、行、占位或测量辅助对象。
 - 不通过透明 Border 扩展命中区域。
 - 不通过不可见控件缓存测量结果。
 - 不为子项主动插入额外视觉包装层。
 
-Masonry 当前不定义专属 Token，不需要创建 `token.md`。Masonry 的间距和列宽属于实例布局状态，不应迁移为控件 Token。
+Masonry 当前不定义专属 Token，不需要创建 `token.md`。Masonry 的间距和列宽属于实例布局状态，不应迁移为控件 Token。root chrome 仅复用 `ItemsControl` 已有的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 与 `Padding`，不引入独立 token 边界。item 动效时长复用全局 motion token（`MotionDurationSlow` / `MotionDurationFast`），由 ControlTheme Setter 馈入 internal 属性，同样不属于 Masonry 专属 Token。
 
 Token 边界：
 
@@ -1089,7 +1448,7 @@ Token 边界：
 优化或扩展 Masonry 时必须保持以下不变量：
 
 - 不改变子元素 logical order、visual child order 和 ItemsControl 容器生成顺序。
-- 不修改子元素 `DataContext`、内容、样式类、主题或资源作用域。
+- 除了发布契约要求的 `.semantic-item` marker，不修改子元素 `DataContext`、内容、样式类、主题或资源作用域。
 - 不为子项主动插入额外视觉包装层。
 - 不要求用户为子项提供 key。
 - 不把 Masonry 变成 ScrollViewer、数据源管理器或卡片外观组件。
@@ -1112,8 +1471,10 @@ Token 边界：
 
 - `MasonryPanel` 保持 internal。
 - `MasonryPanel` 只读取直接 child 上的 `Masonry.Column` 和 `Masonry.Span`。
-- 直接子元素模式不额外包装子项。
-- `ItemsSource` 模式通过基类生成 `ContentPresenter`，Masonry 不重写容器生成。
+- 直接子元素模式不额外包装子项；`.semantic-item` marker 加在用户直接子 `Control` 上。
+- `ItemsSource` 模式通过基类生成 `ContentPresenter`，Masonry 不重写容器生成；`.semantic-item` marker 加在 generated container 上。
+- `MasonryItemStyle` 的 `ContractType` 保持 `Control`，不得收窄到 `ContentPresenter` 或任何具体 item 控件。
+- root chrome 由默认主题中的 `PixelAlignedBorder` 承载；`Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 和 `Padding` 仍然属于 Masonry 的 inherited root 属性，不要改成 item 属性。
 - 响应式断点变化只触发布局失效，不在断点回调中执行完整布局或派发事件。
 - Measure→Arrange 同一有效宽度必须复用已测量的布局结果；不得在正常布局周期中无条件重复执行第二次 `O(items × columns)` 计算。
 - 布局缓存不得跨越宽度、断点或下一次 Measure；Arrange 消费后必须释放缓存引用。
@@ -1124,6 +1485,10 @@ Token 边界：
 - `StableColumns` 不等待异步内容加载完成；调用方通过尺寸约束控制首次分配依据。
 - `Reflow` 每次布局计算都从当前高度状态执行 shortest-column 分配，不读取稳定列快照。
 - 替换 `ItemsPanel` 等价于替换布局引擎，Masonry-specific 布局语义不再由默认面板保证。
+- item 动效时长只来自 ControlTheme token Setter（`MotionDurationSlow` / `MotionDurationFast`）；动画优先级持有必须能释放回用户样式基值，释放 `SetValue` 预置必须 Dispose 返回句柄。
+- 新项只入场淡入不滑动；既有项位置变化只滑动不淡入；入场淡入激活中的项不做位置过渡；移除项由 ghost 层在原位置淡出且保留 marker。
+- ghost host 由控件创建，不参与命中测试；容器重加入必须在 `base.ChildrenChanged` 之前释放 ghost；`Masonry` detached 时清空全部 ghost。
+- RTL 镜像只作用于排列的视觉矩形与 ghost 托管位置，不改变逻辑顺序与布局算法。
 
 Source: ./controls/space/semantic-cn.md
 
@@ -1133,12 +1498,18 @@ Source: ./controls/space/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Space` | 布局控件根语义区域，承载布局 public API、尺寸和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `container` | `布局容器` | 组织子元素、间距、断点、对齐或分割状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `布局项` | 承载子内容、占位、跨度、排序或尺寸约束。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `theme` | `主题区域` | 连接 SharedToken、布局主题资源和 Gallery 可观察样式。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| Part | AtomUI 节点 | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `root` | `Space` owner | owner | `Space` | `Single` | `Root` | `false` | `false` |
+| `item` | 直接子项 | `> .semantic-item` | `Control` | `Multiple` | `Selector` | `false` | `true` |
+| `separator` | 直接分隔项 | `> .semantic-separator` | `Control` | `Multiple` | `Selector` | `false` | `true` |
+
+`root` 不声明 `.semantic-root` marker，也不生成独立 Style type。`item` 和 `separator` 都是运行时创建的语义标记：
+`item` 挂在 `Space.Children` 的每个直接子项上，`separator` 挂在由 `SplitTemplate` 构建并插入相邻子项之间的
+分隔控件上。`separator` 的数量始终等于 `Children.Count - 1`，当 `SplitTemplate` 为空时不创建任何分隔项。
+
+`Space` 没有独立的 `SpaceTheme.axaml`，因此内置主题不依赖静态 `.semantic-*` marker；语义契约完全由 runtime marker
+与生成的 `Style` 类型表达。
 
 ## Abstract AXAML Structure
 
@@ -1152,10 +1523,10 @@ Source: ./controls/space/semantic-cn.md
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `CompactSpaceItemPosition`、`Content`、`ContentTemplate`、`ItemHeight`、`ItemSpacing`、`ItemWidth`、`ItemsAlignment` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
+| 内容与数据 | `CompactSpaceItemPosition`、`Content`、`ContentTemplate`、`ItemHeight`、`ItemSpacing`、`ItemWidth`、`ItemsAlignment`、`SplitTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `PositionIndex` | 维护选择、展开、过滤、分页、分组或集合状态。 |
 | 交互与状态 | `IsUsedInCompactSpace`、`Status` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `CompactSpaceOrientation`、`LineSpacing`、`Orientation`、`SizeType`、`StyleVariant` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
+| 视觉与布局 | `Background`、`BorderBrush`、`BorderDashArray`、`BorderDashOffset`、`BorderThickness`、`CompactSpaceOrientation`、`CornerRadius`、`LineSpacing`、`Orientation`、`Padding`、`SizeType`、`StyleVariant` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 
 ## Pseudo Classes
 
@@ -1191,6 +1562,10 @@ Space 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的�
 | `CompactSpaceTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 
 Space 使用 `SpaceToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 collection/filter、visual option 运行时状态。
+
+`Space` 本体没有独立的 `SpaceTheme.axaml`：root frame 由控件自身在 `Render` 中绘制（复用 `BorderRenderHelper`），
+root 边框、背景、内边距与虚线由 `Space` 自有的 root frame 样式属性表达，定制边界见 [Space Semantic Part 契约](semantic-part.md)
+第 3 节。主题文件只覆盖 `CompactSpace` / `CompactSpaceAddOn` 的模板与状态视觉。
 
 主题维护规则：
 
@@ -1237,14 +1612,86 @@ Source: ./controls/splitter/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Splitter` | 控件根语义区域，承载 public API、Children、事件和 Token scope。 | `Orientation`、`IsLazy`、`HandleSize`、`Children` | `SplitBarHandleSize` | stable |
-| `frame` | `SplitterTheme.axaml` / `Border#Frame` | Splitter 整体背景、边框、圆角和裁剪入口。 | `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` | SharedToken / SplitterToken | stable |
-| `panel-host` | `PART_SplitterPanel` | 组织用户面板并生成 handle。 | attached panel properties | `SplitBarHandleSize` | stable |
-| `handle` | `SplitterHandle` | 相邻面板之间的交互边界。 | `HandleSize`、collapse API | `HandleLineColor`、`HandleLineHoverColor`、`HandleLineDragColor` | internal stable |
-| `drag-bar` | `SplitterDragBar` | 拖拽命中区和 grip 展示。 | `IsLazy`、`HandleSize` | `SplitTriggerSize`、`SplitBarDraggableSize`、`HandleLineThickness` | internal stable |
-| `collapse-actions` | collapse `IconButton` | 折叠和恢复相邻面板。 | `CollapsePreviousIcon`、`CollapseNextIcon`、`Splitter.Collapsible` | `HandleIconSize`、`HandleIconColor` | internal stable |
+### 2.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splitter` |
+| Part | `root` |
+| Selector | Splitter 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Splitter` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Splitter owner |
+| 职责 | 分割容器根：承载 `Children` 面板集合、`Orientation` 方向语义、附加面板属性 scope、resize 事件与 Token scope；作为全部 Part 的 owner-scoped Selector 作用域边界。对应上游 `.ant-splitter`。 |
+| 相关 API | `Orientation`、`IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius`、`Splitter.Size`、`Splitter.IsResizable`、`Splitter.IsCollapsed`、`Splitter.Collapsible`、`ResizeStarted` / `ResizeDelta` / `ResizeCompleted` |
+| 相关 Token | `SplitBarHandleSize`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.2 `panel`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splitter` |
+| Part | `panel` |
+| Selector | `.semantic-panel` |
+| SelectorRoute | `/template/ .semantic-scope-panel > .semantic-panel` |
+| Style Type | `SplitterPanelStyle` |
+| ContractType | `Control` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 用户提供的面板子控件（`SplitterPanel` 跟踪时添加运行时 marker） |
+| 职责 | 统一表示可调整尺寸的内容面板：面板背景、边框、裁剪与排版入口；面板尺寸与约束由附加属性驱动。对应上游 `.ant-splitter-panel`。 |
+| 相关 API | `Splitter.Size`、`Splitter.DefaultSize`、`Splitter.MinSize`、`Splitter.MaxSize`、`Splitter.IsResizable`、`Splitter.IsCollapsed`、`Splitter.Collapsible` |
+| 相关 Token | 无专属 Token（面板内容与外观属于用户内容容器） |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.3 `dragger`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splitter` |
+| Part | `dragger` |
+| Selector | `.semantic-dragger` |
+| SelectorRoute | `/template/ .semantic-scope-panel > .semantic-scope-handle /template/ .semantic-dragger` |
+| Style Type | `SplitterDraggerStyle` |
+| ContractType | `Thumb`（`AtomUI.Controls.Primitives.Thumb`） |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 internal `SplitterHandle` 模板中的 `SplitterDragBar#PART_DragBar` |
+| 职责 | 统一表示相邻面板之间的拖拽命中区：drag 输入入口、方向 cursor 与 grip 视觉宿主；命中区域尺寸由 handle 布局写入。对应上游 `.ant-splitter-bar`。 |
+| 相关 API | `IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius` |
+| 相关 Token | `SplitTriggerSize`、`SplitBarDraggableSize`、`HandleLineThickness`、`HandleLineColor`、`HandleLineHoverColor`、`HandleLineDragColor` |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.4 marker 放置与路由
+
+`root` 是隐式 Part，不声明 `.semantic-root` marker。非 root Part 使用两层 marker 表达路由：
+
+- 静态 marker 在主题中声明：
+  - `SplitterTheme.axaml` 在 `SplitterPanel#PART_SplitterPanel` 上声明 `Classes.semantic-scope-panel`。
+  - `SplitterHandleTheme.axaml` 在 `SplitterDragBar#PART_DragBar` 上声明 `Classes.semantic-dragger`。
+  - `SplitterDragBarTheme.axaml` 不声明任何 `.semantic-*` marker。
+- 运行时 marker 由 `SplitterPanel` 维护：
+  - `CreateHandle` 为每个新创建的 `SplitterHandle` 添加 `semantic-scope-handle` 类。
+  - `SyncTrackedPanels` 为新跟踪的用户面板添加 `semantic-panel` 类，并用 `_semanticPanelMarkersAdded`
+    记录「由 Splitter 添加」的实例集合；面板离开时只移除 Splitter 自己添加的 marker，用户预先声明的
+    `semantic-panel` 类保留。
+
+路由语义：
+
+- `panel` 从 owner 出发单跳进入 `PART_SplitterPanel`（scope class），再取直接子面板上的 `.semantic-panel`。
+- `dragger` 跨越两层模板：先从 owner 模板进入 scope panel，经 `.semantic-scope-handle` 定位每个动态 handle，
+  再进入 handle 自身模板命中 `PART_DragBar` 上的 `.semantic-dragger`。`CrossVisualRoot=false` 表示 handle
+  模板仍在同一视觉树内，不涉及 popup、overlay 或独立 visual root。
 
 ## Abstract AXAML Structure
 
@@ -1293,8 +1740,8 @@ Splitter
 | `PART_CollapseIconsHost` | template node (Canvas) | `SplitterHandleTheme.axaml` | SplitterHandle | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_CollapsePrevButton` | template node (IconButton) | `SplitterHandleTheme.axaml` | SplitterHandle | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_CollapseNextButton` | template node (IconButton) | `SplitterHandleTheme.axaml` | SplitterHandle | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Splitter` | control theme | `SplitterTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `CollapseNextIcon`, `CollapsePreviousIcon`, `CornerRadius` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Frame` | template node (PixelAlignedBorder) | `SplitterTheme.axaml` | Splitter | `Background`, `BorderBrush`, `BorderThickness`, `CollapseNextIcon`, `CollapsePreviousIcon`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Splitter` | control theme | `SplitterTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderDashArray`, `BorderDashOffset`, `BorderThickness`, `CollapseNextIcon` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Frame` | template node (PixelAlignedBorder) | `SplitterTheme.axaml` | Splitter | `Background`, `BorderBrush`, `BorderDashArray`, `BorderDashOffset`, `BorderThickness`, `CollapseNextIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_SplitterPanel` | template node (SplitterPanel) | `SplitterTheme.axaml` | Splitter | `CollapseNextIcon`, `CollapsePreviousIcon`, `HandleSize`, `IsLazy`, `LineCornerRadius`, `LineThickness` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
@@ -1399,8 +1846,15 @@ Splitter Token 只表达组件级视觉变量，包括分割线尺寸、拖拽�
 - `SplitterPanel` 作为尺寸与折叠状态 owner 的语义。
 - internal handle template part 的绑定关系和事件释放路径。
 - `DraggerDoubleClicked` 的释放时机、零基 handle index、第二次 drag start 抑制、禁用拖拽可用性和嵌套隔离。
+- Semantic Part 契约：`root` / `panel` / `dragger` 的名称、selector class、`SelectorRoute`、`ContractType` 与
+  cardinality（完整定义见 [Splitter Semantic Part 契约](semantic-part.md)）。
+- 主题静态 marker（`semantic-scope-panel` / `semantic-dragger`）与运行时 marker（`semantic-panel` /
+  `semantic-scope-handle`）的放置位置与回收路径。
 - Light/Dark、Browser/Desktop 和不同方向下的主题一致性。
 - API 契约摘要、Token 语义、ShowCase 示例和控件文档的一致性。
+- 根框架外观 API（`Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`BorderDashArray`、
+  `BorderDashOffset`）直接 TemplateBinding 到 `SplitterTheme` 的 `Frame`，不经过 `SplitterPanel` 或
+  internal handle 转发。
 
 新增分割线样式能力时必须遵守：
 
@@ -1418,13 +1872,29 @@ Source: ./controls/breadcrumb/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Breadcrumb` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| Part | AtomUI 节点 | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `root` | `Breadcrumb` owner | owner | `Breadcrumb` | `Single` | `Root` | `false` | `false` |
+| `item` | 条目容器 | `> .semantic-item` | `BreadcrumbItem` | `Multiple` | `Selector` | `false` | `true` |
+| `separator` | 条目容器之间的兄弟分隔元素 | `> .semantic-separator` | `ContentPresenter` | `Multiple` | `Selector` | `false` | `true` |
+
+`root` 不声明 `.semantic-root` marker，也不生成独立 Style type。`item` 和 `separator` 都是运行时创建的语义标记：
+`item` 由 `Breadcrumb` 在 `CreateContainerForItemOverride` 与 `PrepareContainerForItemOverride` 中通过生成的
+`BreadcrumbSemanticParts.ItemClass` 挂到每个 `BreadcrumbItem` 容器上；`separator` 由 `Breadcrumb` 在分隔符创建路径
+中通过 `BreadcrumbSemanticParts.SeparatorClass` 挂到每个运行时创建的兄弟分隔 `ContentPresenter` 上。分隔符是
+`Breadcrumb` 的逻辑子级（供 `> .semantic-separator` 路由匹配）、items panel 的视觉子级（参与布局），不进入 panel 的
+`Children` 集合，避免污染条目生成器基于面板位置的容器索引。`separator` 的标记数量为条目数量减一，每个分隔符尾随
+其前一条目，最后一条目没有分隔符。
+
+内置主题不依赖静态 `.semantic-*` marker：`BreadcrumbTheme.axaml` 与 `BreadcrumbItemTheme.axaml` 都不包含静态
+semantic class，语义契约完全由 runtime marker 与生成的 `Style` 类型表达。分隔符是运行时创建的兄弟节点，无法被
+`^ /template/` 主题 selector 覆盖，因此默认前景色与间距由 `Breadcrumb` 通过 `TokenResourceBinder` 控件 Token 绑定
+提供（`SeparatorColor` / `SeparatorMargin`），而不是模板字面值，从而允许应用 Semantic Style 覆盖该颜色。
+
+带导航能力的条目（`IsNavigateResponsive=True`）的链接前景色由主题 selector `^ /template/ ContentPresenter#Content`
+提供（绑定 `LinkColor` Token），直接落在内容呈现器上——对齐参考实现的链接锚点着色规则（`.ant-breadcrumb-item a`）。因此
+item 级 Semantic Style（如 `Foreground`）不会改变链接条目的文字颜色：链接条目始终使用 `LinkColor`，只有普通条目的
+文字颜色可被 item 样式定制。悬浮时的 `LinkHoverColor` 同样作用在内容呈现器上。
 
 ## Abstract AXAML Structure
 
@@ -1443,12 +1913,10 @@ Source: ./controls/breadcrumb/semantic-cn.md
 ```text
 Breadcrumb
   -> BreadcrumbItem (item container control theme, BreadcrumbItemTheme.axaml)
-     -> StackPanel#RootLayout (template-stable)
-        -> Border#ContentInfoFrame (template-stable)
-           -> StackPanel (template-stable)
-              -> IconPresenter#IconPresenter (internal-observable)
-              -> ContentPresenter#Content (internal-observable)
-        -> ContentPresenter#Separator (internal-observable)
+     -> Border#ContentInfoFrame (template-stable)
+        -> StackPanel (template-stable)
+           -> IconPresenter#IconPresenter (internal-observable)
+           -> ContentPresenter#Content (internal-observable)
   -> Breadcrumb (control theme, BreadcrumbTheme.axaml)
      -> ItemsPresenter (internal-observable)
 ```
@@ -1458,13 +1926,11 @@ Breadcrumb
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Breadcrumb` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `BreadcrumbItem` | item container control theme | `BreadcrumbItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `Icon`, `IsLast` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `RootLayout` | template node (StackPanel) | `BreadcrumbItemTheme.axaml` | BreadcrumbItem | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `Icon`, `IsLast` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `BreadcrumbItem` | item container control theme | `BreadcrumbItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `Icon`, `Padding` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `ContentInfoFrame` | template node (Border) | `BreadcrumbItemTheme.axaml` | BreadcrumbItem | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `Icon`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `StackPanel` | template node (StackPanel) | `BreadcrumbItemTheme.axaml` | BreadcrumbItem | `Content`, `ContentTemplate`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `IconPresenter` | template node (IconPresenter) | `BreadcrumbItemTheme.axaml` | BreadcrumbItem | `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `Content` | template node (ContentPresenter) | `BreadcrumbItemTheme.axaml` | BreadcrumbItem | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Separator` | template node (ContentPresenter) | `BreadcrumbItemTheme.axaml` | BreadcrumbItem | `IsLast`, `Separator`, `SeparatorTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `Breadcrumb` | control theme | `BreadcrumbTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `ItemsPresenter` | template node (ItemsPresenter) | `BreadcrumbTheme.axaml` | Breadcrumb | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 
@@ -1474,6 +1940,7 @@ Breadcrumb
 | --- | --- | --- |
 | 内容与数据 | `Icon`、`SeparatorTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 交互与状态 | `IsMotionEnabled` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
+| 视觉与布局 | `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding` | 表达 root frame 的边框、背景、圆角与内边距（继承自 `TemplatedControl`），配合 Semantic Part 根定制边界使用。 |
 | 其他稳定入口 | `NavigateContext`、`NavigateUri`、`Separator` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
 ## Pseudo Classes
@@ -1510,6 +1977,15 @@ Breadcrumb 的视觉模型由控件模板、ControlTheme、SharedToken 和必要
 | `BreadcrumbTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 
 Breadcrumb 使用 `BreadcrumbToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 motion 运行时状态。
+
+root frame 由 `Breadcrumb` 自身在 `Render` 中绘制（复用 `BorderRenderHelper`），边框、背景、圆角与内边距由继承自
+`TemplatedControl` 的 root frame 样式属性表达，定制边界见 [Breadcrumb Semantic Part 契约](semantic-part.md)第 3 节。
+分隔符是条目容器之间的兄弟元素（N-1 个、尾随其前一条目），由 `Breadcrumb` 运行时创建并交给 `BreadcrumbItemsPanel`
+交错布局；其默认前景色与间距经 `TokenResourceBinder` 绑定 `SeparatorColor` / `SeparatorMargin`，保持 Template 绑定
+优先级以便 Semantic Part 样式覆盖。带导航能力的条目（`IsNavigateResponsive=True`）的链接前景色绑定 `LinkColor`，
+作用在条目内容呈现器（`^ /template/ ContentPresenter#Content`）上，对齐参考实现的链接锚点着色规则
+（`.ant-breadcrumb-item a`），item 级 Semantic Part 样式不改变链接文字颜色。主题默认 `HorizontalAlignment=Stretch`，
+root 作为块级元素铺满可用宽度。
 
 主题维护规则：
 
@@ -1556,13 +2032,223 @@ Source: ./controls/button-spinner/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ButtonSpinner` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`ButtonSpinner` 公开 `root`、`content`、`innerLeftContent`、`innerRightContent`、`actions`、`increaseButton`、
+`decreaseButton` 七个职责区域（§1.1–1.7），全部为 `Single`。其中 `content`、`innerLeftContent`、`innerRightContent`
+位于帧主题、两个按钮位于手柄主题，因此这四个部件声明 `CrossNestedOwners`；`actions` 的 marker 仍在 ButtonSpinner
+自己的模板内，按宿主模板本地校验。
+
+ButtonSpinner 是 AtomUI 的带步进按钮输入基座，其公开语义区域对应上游 `InputNumber` 已公开并实际消费的
+`root` / `prefix` / `suffix` / `input` / `actions` 键：帧内主内容区映射 `input` 职责，帧内左、右内容槽映射
+`prefix` / `suffix` 职责，步进按钮区映射 `actions`。范围依据与准入记录见
+[改造设计](../../../superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md)。
+
+### 1.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `root` |
+| Selector | ButtonSpinner 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ButtonSpinner` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | ButtonSpinner owner |
+| 职责 | 承载尺寸档、variant、状态、步进开关和 owner-scoped Semantic Style 入口。 |
+| 相关 API | `SizeType`、`StyleVariant`、`Status`、`IsSpinEnabled`、`IsButtonSpinnerVisible`、`IsButtonSpinnerFloatable`、`ButtonSpinnerLocation`、`SpinnerHandleWidth`、`IsEnabled` |
+| 相关 Token | SharedToken、`ButtonSpinnerToken` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 ButtonSpinner 整体 `Opacity`、对齐和尺寸约束。
+
+**根边框定制：** 可见外框由共享输入帧绘制，其状态机拥有 `BorderBrush`。owner 的 `BorderBrush` 会以
+LocalValue 中继到帧节点生效（对齐上游 `styles.root.borderColor` 语义与共享 `AbstractTextInput` 行为），
+因此在 owner-scoped Style 里直接写根 `Setter Property="BorderBrush"` 即可定制外框颜色：
+
+```xml
+<Style Selector="atom|ButtonSpinner.semantic-object">
+    <Setter Property="BorderBrush" Value="#1677FF" />
+    <atom:ButtonSpinnerActionsStyle x:SetterTargetType="TemplatedControl">
+        <Setter Property="Background" Value="#F0F5FF" />
+    </atom:ButtonSpinnerActionsStyle>
+</Style>
+```
+
+定制期间该属性槽的 hover / focus 变色冻结（LocalValue 优先于帧状态机），focus 的 `BoxShadow` 光晕不受影响；
+置空（或不设置）后恢复帧状态机。中继带接管标记：仅当本控件实际写入过该槽位时才在置空时清除，因此
+`NumericUpDown` 这种「自身持有中继、内部 spinner 是其派生实现」的嵌套场景不会被外层清除。
+
+### 1.2 `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-scope-frame /template/ .semantic-content` |
+| Style Type | `ButtonSpinnerContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（锚点 `.semantic-scope-frame` 解析到 `ButtonSpinnerDecoratedBox` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 帧模板内的主内容 presenter（`PART_ContentPresenter`） |
+| 职责 | 承载 `Content` 与 `ContentTemplate` 的最终呈现，即 ButtonSpinner 的内容表面。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | 输入尺寸 padding、`FontSize` 继承 |
+| 稳定性 | stable since 6.2.0 |
+
+`content` 是 ButtonSpinner 自己的内容表面。ButtonSpinner 不拥有文本编辑面，因此不发布 `input` 部件；派生控件
+（如 `NumericUpDown`）自行在自己的 owner 上发布 `input`，其契约不通过 ButtonSpinner 继承。`Content=null` 时
+presenter 仍属于静态模板结构。适合定制 `Opacity`、`Margin`、`Padding`、`Foreground` 和对齐；内容子树由用户或
+派生控件拥有，不由 `content` 契约继续展开。
+
+### 1.3 `innerLeftContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `innerLeftContent` |
+| Selector | `.semantic-inner-left-content` |
+| SelectorRoute | `/template/ .semantic-scope-frame /template/ .semantic-inner-left-content` |
+| Style Type | `ButtonSpinnerInnerLeftContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（锚点 `.semantic-scope-frame` 解析到 `ButtonSpinnerDecoratedBox` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 帧模板内的内容左槽 presenter（`PART_ContentLeftAddOn`，internal `AddOnContentPresenter`） |
+| 职责 | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 |
+| 相关 API | `InnerLeftContent`、`InnerLeftContentTemplate` |
+| 相关 Token | `SpacingXXS`、输入尺寸 padding |
+| 稳定性 | stable since 6.2.0 |
+
+`innerLeftContent` 对应上游 `prefix` 职责，但**不使用 `semantic-prefix` class**：`NumericUpDown` 为其自有
+`prefix` 发布的 route 是宽松后代（`/template/ .semantic-scope-spinner >> .semantic-prefix`），而 ButtonSpinner 的
+帧节点位于 `NumericUpDownSpinner` 的子树内。若 ButtonSpinner 额外标记 `semantic-prefix`，该 route 会命中两个节点，
+破坏 `NumericUpDown` 已发布的 `Single` 契约与其现有测试（该测试用 `.Single()` 解析目标）。改用与 ButtonSpinner
+公开 API 同名的 `innerLeftContent` 可在不修改任何已发布契约的前提下保持唯一目标，且与仓库已有的
+`itemContent` / `listContent` 命名法一致。帧槽位在空内容时自折叠，因此该部件呈现的是「有内容时才可见的左槽」。
+
+### 1.4 `innerRightContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `innerRightContent` |
+| Selector | `.semantic-inner-right-content` |
+| SelectorRoute | `/template/ .semantic-scope-frame /template/ .semantic-inner-right-content` |
+| Style Type | `ButtonSpinnerInnerRightContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（锚点 `.semantic-scope-frame` 解析到 `ButtonSpinnerDecoratedBox` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 帧模板内的内容右槽 presenter（`PART_ContentRightAddOn`，internal `AddOnContentPresenter`） |
+| 职责 | 承载 `InnerRightContent` 与 `InnerRightContentTemplate` 的最终呈现。 |
+| 相关 API | `InnerRightContent`、`InnerRightContentTemplate` |
+| 相关 Token | `SpacingXXS`、输入尺寸 padding |
+| 稳定性 | stable since 6.2.0 |
+
+`innerRightContent` 对应上游 `suffix` 职责，命名理由同 §1.3。它与浮动手柄在 hover 时的 `ContentRightShift`
+位移共享同一布局链路：定制其 `Margin` / `Padding` 时要按 §7.1 审计与手柄占位的协调结果。
+
+### 1.5 `actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `actions` |
+| Selector | `.semantic-actions` |
+| SelectorRoute | `/template/ .semantic-scope-frame >> .semantic-actions` |
+| Style Type | `ButtonSpinnerActionsStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `false`（marker 在 owner 模板内） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 帧内 `SpinnerContent` 承载的步进手柄（internal `ButtonSpinnerHandle`，最低 public 类型 `TemplatedControl`） |
+| 职责 | 步进按钮区整体表面：手柄背景、分隔线与外框描边、圆角、内边距和悬浮/浮动呈现。 |
+| 相关 API | `IsButtonSpinnerVisible`、`IsButtonSpinnerFloatable`、`ButtonSpinnerLocation`、`SpinnerHandleWidth`、`IsSpinEnabled` |
+| 相关 Token | `ButtonSpinnerToken.HandleWidth`、`HandleBg`、`FilledHandleBg`、`HandleBorderColor`、`HandleActiveBg` |
+| 稳定性 | stable since 6.2.0 |
+
+`actions` 直接对应上游 `InputNumber` 的 `actions` 键——上游把上、下步进按钮包在同一个 `-actions` 容器内，AtomUI
+对应的容器就是 `ButtonSpinnerHandle`。手柄的背景与描边由该节点自身的 `Render` 绘制并在状态变化时重绘，因此它是
+步进区唯一稳定的对外表面。
+
+适合定制的属性只有该节点实际参与绘制的成员：`Background`（填充）、`BorderBrush`（分隔竖线、中线以及
+hover / pressed 颜色来源）、`CornerRadius`（填充外角）和 `Opacity`。**不适合定制：** 手柄描边宽度来自 internal
+`SpinnerBorderThickness`（由 `SharedToken.BorderThickness` 供给），`BorderThickness` 与 `Padding` 在该节点的渲染与
+模板中都没有参与，设置它们不会产生视觉变化，不属于本 Part 的稳定定制面。
+
+步进行为、`ValidSpinDirection`、键盘与滚轮路径仍由 `ButtonSpinner` 拥有，不通过 Semantic Style 改写。
+
+手柄在 `IsButtonSpinnerVisible=false`、或浮动模式下未悬浮、或控件 disabled 时保持存在但 `Opacity` 为 0；节点
+身份与数量不随这些状态变化，因此是 `Single` 而不是 `Optional`。
+
+### 1.6 `increaseButton`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `increaseButton` |
+| Selector | `.semantic-increase-button` |
+| SelectorRoute | `>> .semantic-actions /template/ .semantic-increase-button` |
+| Style Type | `ButtonSpinnerIncreaseButtonStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（以 `.semantic-actions` 为锚点解析到 `ButtonSpinnerHandle` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 手柄主题内的增加按钮（`IconButton#PART_IncreaseButton`） |
+| 职责 | 提供增加步进的交互入口表面。 |
+| 相关 API | `IsSpinEnabled`、`ValidSpinDirection`、`IsButtonSpinnerVisible` |
+| 相关 Token | `HandleIconSize`、`HandleHoverColor`、`ColorPrimaryActive`、`HandleActiveBg` |
+| 稳定性 | stable since 6.2.0 |
+
+`increaseButton` 的最低 public `ContractType` 是 `IconButton`。marker 位于 `ButtonSpinnerHandle` 自己的主题资产
+（嵌套控件的模板），因此按 [Semantic Part 系统设计 §3.3.1](../../../../architecture/systems/theming/semantic-parts.md)
+以 `.semantic-actions` 为锚点校验与解析。它适合定制 `IconBrush`、`IconWidth` / `IconHeight`、`Background`、
+`CornerRadius` 和 `Opacity`。增加按钮的启用状态由 `ValidSpinDirection` 与 `IsSpinEnabled` 推导（`SetButtonUsage`），
+不通过 Semantic Style 改写。
+
+### 1.7 `decreaseButton`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ButtonSpinner` |
+| Part | `decreaseButton` |
+| Selector | `.semantic-decrease-button` |
+| SelectorRoute | `>> .semantic-actions /template/ .semantic-decrease-button` |
+| Style Type | `ButtonSpinnerDecreaseButtonStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true`（以 `.semantic-actions` 为锚点解析到 `ButtonSpinnerHandle` 主题） |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 手柄主题内的减少按钮（`IconButton#PART_DecreaseButton`） |
+| 职责 | 提供减少步进的交互入口表面。 |
+| 相关 API | `IsSpinEnabled`、`ValidSpinDirection`、`IsButtonSpinnerVisible` |
+| 相关 Token | `HandleIconSize`、`HandleHoverColor`、`ColorPrimaryActive`、`HandleActiveBg` |
+| 稳定性 | stable since 6.2.0 |
+
+与 `increaseButton` 对称；两个按钮是独立职责，因此分别发布为两个 `Single` 部件，允许差异化定制而无需
+`Multiple` 语义。`ButtonSpinnerLocation` 只改变手柄相对内容的位置，不交换这两个按钮的身份。
+
+上游 `InputNumber` 只为整个 `actions` 容器公开一个键，没有为单个上、下按钮公开语义键；本控件额外发布这两个
+部件属于显式能力补充，理由与 `SplitButton` 的 `primary` / `secondary` 一致：它们的宿主是模板内部件，不发布则
+完全不可定制。
 
 ## Abstract AXAML Structure
 
@@ -1664,9 +2350,9 @@ ButtonSpinner 的视觉模型由控件模板、ControlTheme、SharedToken 和必
 
 | 主题文件 | 职责 |
 | --- | --- |
-| `ButtonSpinnerDecoratedBoxTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
-| `ButtonSpinnerHandleTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
-| `ButtonSpinnerTheme.axaml` | 定义局部操作入口、按钮或 handle 的状态视觉。 |
+| `ButtonSpinnerTheme.axaml` | owner 模板：帧宿主（`semantic-scope-frame` 锚点）与 `SpinnerContent` 内的步进手柄；持有 `SizeType` 圆角映射与 `SpinnerHandleWidth` 默认值。 |
+| `ButtonSpinnerDecoratedBoxTheme.axaml` | 帧模板（`BasedOn` 共享 `AddOnDecoratedBoxTheme`）：左右 addon 区、内容框、内容左/右槽与浮动手柄 presenter；`SizeType` padding 与 `MinHeight` 基线。 |
+| `ButtonSpinnerHandleTheme.axaml` | 步进手柄模板：增加/减少按钮、手柄自身的背景与分隔线描边绘制、variant 与 disabled 状态视觉。 |
 
 ButtonSpinner 使用 `ButtonSpinnerToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 motion、visual option 运行时状态。
 
@@ -1715,13 +2401,269 @@ Source: ./controls/combo-box/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ComboBox` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+ComboBox 是唯一 Semantic owner，公开 12 个 Semantic Part：隐式 `root` 加 11 个非 root 部件（`prefix`、`frame`、
+`content`、`placeholder`、`input`、`suffix`、`indicator`、`popup.root`、`popup.list`、`popup.listItem`、`popup.empty`）。
+11 个非 root 部件各生成一个 `ComboBox*Style` 类型，`root` 不生成。声明位于 `ComboBox.SemanticParts.cs` partial 文件。
+
+触发区部件的 marker 位于 `ComboBoxTheme.axaml` 宿主模板内：`prefix` / `suffix` 借用共享
+`AddOnDecoratedBoxTheme` 的 `.semantic-scope-prefix` / `.semantic-scope-suffix` scope 锚点路由到宿主模板
+投影给 decorated box 的内容节点（与 `Select` / `TreeSelect` / `Cascader` 同构）；`content` / `placeholder` /
+`input` 直接标注宿主模板节点。`indicator` 声明 `CrossNestedOwners=true`：其物理节点在 ComboBox 自有的
+internal `ComboBoxHandle` 模板内，经宿主模板的 `.semantic-scope-handle` 锚点跨入。弹层四部件位于 owner 自有的
+模板内 Popup：`popup.root` 标注在宿主模板 `PopupFrame` 静态节点上，`popup.list` / `popup.empty` 是
+`PopupFrame` 内的静态节点，`popup.listItem` 的 marker 在运行时容器创建路径注入。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `root` |
+| Selector | ComboBox 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ComboBox` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | ComboBox owner |
+| 职责 | ComboBox root 是数据源、选择、过滤、弹层与输入框状态的组织边界。 |
+| 相关 API | 全部 ComboBox public API |
+| 相关 Token | ComboBoxToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `ComboBoxPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中投影给 `AddOnDecoratedBox.ContentLeftAddOn` 的 `AddOnContentPresenter`（经 `$parent[atom:ComboBox]` 编译绑定呈现公共 API 值） |
+| 职责 | 内容框内联前缀区域，承载 `ContentLeftAddOn` 用户内容。 |
+| 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `frame`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `frame` |
+| Selector | `.semantic-frame` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-frame` |
+| Style Type | `ComboBoxFrameStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `true` |
+| AtomUI 节点 | 共享 `AddOnDecoratedBoxTheme.axaml` 中 `AddOnDecoratedBoxContentFrame`（`Name="PART_ContentFrame"`）；锚点 `.semantic-scope-input` 位于 ComboBox 宿主模板的 `AddOnDecoratedBox` 节点 |
+| 职责 | **输入框边框盒**——outlined / filled / underlined 变体的最内层边框盒，决定输入框的边框颜色、边框宽度、圆角与背景。这是应用最常需要的定制点（如把默认灰边框改成品牌色）。 |
+| 相关 API | `StyleVariant`、`SizeType`、`Status`、`FormStatus`；内部 `EffectiveStatus` 驱动状态色 |
+| 相关 Token | SharedToken（`ColorBorder`、`ColorPrimary`、`ColorError`、`ColorWarning`、`BorderRadius*`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `ComboBoxContentStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` decorated box 内容面板（`PlaceholderText`、`SelectedContentPresenter`、`PART_EditableTextBox` 的公共父节点） |
+| 职责 | 输入内容面板，承载占位符、非编辑态选中内容与编辑态输入框三个互斥/叠加节点。 |
+| 相关 API | `PlaceholderText`、`SelectionBoxItem`、`SelectionBoxItemTemplate`、`IsEditable` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `placeholder`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `placeholder` |
+| Selector | `.semantic-placeholder` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-placeholder` |
+| Style Type | `ComboBoxPlaceholderStyle` |
+| ContractType | `Avalonia.Controls.TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PlaceholderText`（`atom:TextBlock`，基类为 `Avalonia.Controls.TextBlock`） |
+| 职责 | 未选择任何项且非编辑态时显示的占位符文本。 |
+| 相关 API | `PlaceholderText` |
+| 相关 Token | SharedToken（节点以 `Opacity=0.3` 弱化，见定制边界） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-input` |
+| Style Type | `ComboBoxInputStyle` |
+| ContractType | `Avalonia.Controls.TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PART_EditableTextBox`（internal `ComboBoxTextBox : Avalonia.Controls.TextBox`） |
+| 职责 | `IsEditable=true` 时渲染的可编辑 / 过滤输入框；非编辑态节点仍存在但 `IsVisible=false`。 |
+| 相关 API | `IsEditable`、`Text`、`IsFilterEnabled`、`FilterValue` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `ComboBoxSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `ContentRightAddOn` 的 `StackPanel`（承载 `PART_ContentRightAddOnPresenter`、`PART_FormFeedBack`、`PART_ComboBoxHandle`） |
+| 职责 | 内容框右侧后缀区，承载用户后缀内容、Form 校验反馈与下拉指示器。 |
+| 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`FormFeedback` |
+| 相关 Token | SharedToken；`TextElement.Foreground` 默认取 `ColorTextQuaternary`（共享 `AddOnDecoratedBoxTheme` 提供，为本 Part 的下界） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `>> .semantic-scope-handle /template/ .semantic-indicator` |
+| Style Type | `ComboBoxIndicatorStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `true` |
+| AtomUI 节点 | `ComboBoxHandleTheme.axaml` 中 `PART_OpenIndicatorButton`（`atom:IconButton`，图标 `DownOutlined`）；锚点 `.semantic-scope-handle` 位于宿主模板的 `PART_ComboBoxHandle` |
+| 职责 | 下拉展开指示器（箭头按钮）；同时是鼠标点击展开/收起的触发入口。 |
+| 相关 API | `IsDropDownOpen`、`IsEnabled`、`IsMotionEnabled` |
+| 相关 Token | ComboBoxToken（`HandleHoverColor` 驱动 hover 态箭头色） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `ComboBoxPopupRootStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PART_Popup` 的直接子节点 `PopupFrame` |
+| 职责 | 弹层框体，承载候选列表与空态，决定弹层圆角、背景与内边距边界。 |
+| 相关 API | `MaxDropDownHeight`、`PopupContentPadding`（internal）、`EffectivePopupWidth`（internal） |
+| 相关 Token | SharedToken（`ColorBgElevated`）、PopupToken（`PopupCornerRadius`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.list`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `popup.list` |
+| Selector | `.semantic-popup-list` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list` |
+| Style Type | `ComboBoxPopupListStyle` |
+| ContractType | `Avalonia.Controls.ScrollViewer` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PopupFrame` 内的 `atom:ScrollViewer`（内部为 `PART_ItemsPresenter`） |
+| 职责 | 候选列表滚动区，`IsVisible` 与空态互斥，是候选项的排布与滚动边界。 |
+| 相关 API | `MaxDropDownHeight`、`ItemsPanel`、`ScrollViewer.IsLiteMode`、`ScrollViewer.AllowAutoHide` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.listItem`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `popup.listItem` |
+| Selector | `.semantic-popup-list-item` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list-item` |
+| Style Type | `ComboBoxPopupListItemStyle` |
+| ContractType | `ComboBoxItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | 运行时容器：`CreateContainerForItemOverride` / `PrepareContainerForItemOverride` 创建的 `ComboBoxItem` 实例本身（marker 不写在 `ComboBoxItemTheme.axaml` 模板内部节点上，理由见 §2） |
+| 职责 | 单个候选项容器，承载项内容、选中视觉、hover/active 候选视觉、禁用态与过滤隐藏。 |
+| 相关 API | `ItemsSource`、`ItemTemplate`、`SelectedItem`、`SelectedIndex`、`ItemHeight`（internal）、`OptionFontSize` |
+| 相关 Token | ComboBoxToken（`ItemColor`、`ItemBgColor`、`ItemHoverColor`、`ItemHoverBgColor`、`ItemSelectedColor`、`ItemSelectedBgColor`、`ItemPadding`、`ItemMargin`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.empty`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ComboBox` |
+| Part | `popup.empty` |
+| Selector | `.semantic-popup-empty` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-empty` |
+| Style Type | `ComboBoxPopupEmptyStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| CrossNestedOwners | `false` |
+| AtomUI 节点 | `ComboBoxTheme.axaml` 中 `PART_EmptyIndicator`（内含 `atom:Empty`） |
+| 职责 | 生效过滤模式下无匹配项时显示的弹层空态区；`IsVisible` 由 `IsEffectiveEmptyVisible` 驱动，与 `popup.list` 互斥。**仅在 `IsEditable=true` + `IsFilterEnabled=true` + 存在过滤值 + 无匹配项时可见**：未开启过滤时 `IsEffectiveEmptyVisible` 被强制为 `false`，此时弹层显示的是空的列表区而非空态区，空态节点仍存在但隐藏。 |
+| 相关 API | `IsEditable`、`IsFilterEnabled`、`Text` / `FilterValue`；`IsEffectiveEmptyVisible`（internal，由上述状态推导） |
+| 相关 Token | SharedToken（`Padding`） |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -1798,13 +2740,13 @@ ComboBox
 | `Panel` | template node (Panel) | `ComboBoxTextBoxTheme.axaml` | ComboBoxTextBox | `CaretBlinkInterval`, `CaretBrush`, `CaretIndex`, `HorizontalContentAlignment`, `LineHeight`, `PasswordChar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Placeholder` | template node (TextBlock) | `ComboBoxTextBoxTheme.axaml` | ComboBoxTextBox | `HorizontalContentAlignment`, `LineHeight`, `PlaceholderForeground`, `PlaceholderText`, `TextAlignment`, `TextWrapping` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_TextPresenter` | template node (InputTextPresenter) | `ComboBoxTextBoxTheme.axaml` | ComboBoxTextBox | `CaretBlinkInterval`, `CaretBrush`, `CaretIndex`, `HorizontalContentAlignment`, `LineHeight`, `PasswordChar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `ComboBox` | control theme | `ComboBoxTheme.axaml` | 用户代码 / 控件宿主 | `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `EffectivePopupWidth`, `FormStatus`, `IsDropDownOpen` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `ComboBoxTheme.axaml` | ComboBox | `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `EffectivePopupWidth`, `FormStatus`, `IsDropDownOpen` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (AddOnDecoratedBox) | `ComboBoxTheme.axaml` | ComboBox | `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `FormStatus`, `IsEditable`, `IsEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ComboBox` | control theme | `ComboBoxTheme.axaml` | 用户代码 / 控件宿主 | `DataValidationErrors`, `EffectivePopupWidth`, `FormStatus`, `IsEditable`, `IsEffectiveEmptyVisible`, `IsEnabled` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `ComboBoxTheme.axaml` | ComboBox | `DataValidationErrors`, `EffectivePopupWidth`, `FormStatus`, `IsEditable`, `IsEffectiveEmptyVisible`, `IsEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (AddOnDecoratedBox) | `ComboBoxTheme.axaml` | ComboBox | `DataValidationErrors`, `FormStatus`, `IsEditable`, `IsEnabled`, `IsKeyboardFocusWithin`, `IsMotionEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PlaceholderText` | template node (TextBlock) | `ComboBoxTheme.axaml` | ComboBox | `PlaceholderText`, `SelectingItemsControl` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SelectedContentPresenter` | template node (ContentPresenter) | `ComboBoxTheme.axaml` | ComboBox | `IsShowOverflowTip`, `OverflowTipDelay`, `OverflowTipPlacement`, `SelectionBoxItem`, `SelectionBoxItemTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_EditableTextBox` | template node (ComboBoxTextBox) | `ComboBoxTheme.axaml` | ComboBox | `IsEditable`, `PlaceholderForeground`, `PlaceholderText`, `Text` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Popup` | template node (Popup) | `ComboBoxTheme.axaml` | ComboBox | `EffectivePopupWidth`, `IsDropDownOpen`, `IsEffectiveEmptyVisible`, `IsMotionEnabled`, `ItemsPanel`, `MaxDropDownHeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Popup` | template node (Popup) | `ComboBoxTheme.axaml` | ComboBox | `EffectivePopupWidth`, `IsEffectiveEmptyVisible`, `IsMotionEnabled`, `ItemsPanel`, `MaxDropDownHeight`, `PopupContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PopupFrame` | template node (Border) | `ComboBoxTheme.axaml` | ComboBox | `EffectivePopupWidth`, `IsEffectiveEmptyVisible`, `IsMotionEnabled`, `ItemsPanel`, `MaxDropDownHeight`, `PopupContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `ComboBoxTheme.axaml` | ComboBox | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_EmptyIndicator` | template node (Border) | `ComboBoxTheme.axaml` | ComboBox | `IsEffectiveEmptyVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -1815,7 +2757,7 @@ ComboBox
 | --- | --- | --- |
 | 内容与数据 | `ContentLeftAddOn`、`ContentLeftAddOnTemplate`、`ContentRightAddOn`、`ContentRightAddOnTemplate`、`FilterValue`、`FilterValueSelector`、`LeftAddOnTemplate`、`OptionFontSize`、`RightAddOnTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `SelectedItem`、`SelectedIndex`、`DropDownDisplayPageSize`、`Filter`、`IsFilterEnabled` | 维护选择、展开、过滤、分页、分组或集合状态。 |
-| 交互与状态 | `IsAllowClear`、`IsMotionEnabled`、`ShouldUseOverlayPopup`、`Status`、`IsShowOverflowTip`、`OverflowTipDelay`、`OverflowTipPlacement` | 表达用户可观察状态、可用性、清除、加载、反馈和非编辑态选中内容溢出提示语义。Form 校验扩展状态进入内部 `FormStatus`，不覆盖显式 `Status`。 |
+| 交互与状态 | `IsAllowClear`、`IsMotionEnabled`、`ShouldUseOverlayPopup`、`IsPopupPinnedOpen`、`Status`、`IsShowOverflowTip`、`OverflowTipDelay`、`OverflowTipPlacement` | 表达用户可观察状态、可用性、清除、加载、反馈和非编辑态选中内容溢出提示语义。Form 校验扩展状态进入内部 `FormStatus`，不覆盖显式 `Status`。 |
 | 视觉与布局 | `SizeType`、`StyleVariant` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 其他稳定入口 | `LeftAddOn`、`RightAddOn` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -1893,6 +2835,9 @@ ComboBox Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
 - Template part 名称、ControlTheme key、伪类和资源 key。
+- Semantic Part 的 selector class、route、`ContractType`、cardinality 与 marker 归属；静态 marker 与运行时 marker 的
+  注入点必须与 [ComboBox Semantic Part 契约](semantic-part.md) 一致（含 `popup.listItem` 打在容器实例上、在两条容器路径
+  幂等注入的约束）。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
@@ -1905,16 +2850,148 @@ Source: ./controls/dropdown-button/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `DropdownButton` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `icon` | `PART_ButtonIcon` | 展示用户设置的动作图标。 | `Icon`、`IconWidth`、`IconHeight` | SharedToken `IconSize*` | stable |
-| `loadingIcon` | `PART_LoadingIcon` | 展示 loading 状态图标。 | `IsLoading`、`IconWidth`、`IconHeight` | SharedToken `IconSize*`、DropdownButton `OnlyIconSize*` | stable |
-| `indicator` | `PART_DropdownIndicator` | 展示独立的下拉方向指示器。 | `OpenIndicator`、`IsShowOpenIndicator` | DropdownButton indicator size / spacing resources | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+DropdownButton 是唯一 Semantic owner，公开 5 个 Semantic Part，语义对齐上游 Dropdown 的 Semantic DOM
+（`root` / `itemTitle` / `item` / `itemContent` / `itemIcon`）。上游 Dropdown 语义部件全部位于弹层侧——
+`root` 是弹层根、`itemTitle` 是菜单分组标题、`item` / `itemIcon` / `itemContent` 是菜单项及菜单项内部槽位，
+触发节点不是 Dropdown 的语义部件。AtomUI 保留 `root` 作为 owner 自身的隐式 Part（由生成器统一注册），因此
+上游的弹层根 `root` 映射为 `popup.root`；`itemTitle` 对应上游的分组标题（`ant-menu-item-group-title`），
+由 `MenuItemGroup` 的标题 ContentPresenter 承载。声明位于
+`DropdownButton.SemanticParts.cs` partial 文件；`root` 为隐式 Part，不在该文件中显式声明。
+
+五个弹层部件全部声明 `CrossVisualRoot=true` + `RuntimeCreated=true`，marker 在运行时注入：`popup.root` 由
+`MenuFlyoutPresenter.OnApplyTemplate` 创建弹层根视觉面 `ArrowDecoratedBox` 时注入（边框 / 背景 / 圆角由
+`ArrowDecoratedBox` 的 `PART_ContentDecorator` 渲染，`MenuFlyoutPresenter` 只是共享的菜单宿主容器）；`item` 由
+`MenuFlyoutPresenter` 与 `MenuItem`
+的容器创建路径（`CreateContainerForItemOverride` + `PrepareContainerForItemOverride`）注入，同时覆盖顶层菜单项
+与嵌套子菜单项；`itemIcon` / `itemContent` 由 `MenuItem.OnApplyTemplate` 注入到 `ItemIconPresenter` /
+`ItemTextPresenter` 模板节点（另声明 `CrossNestedOwners=true`）；`itemTitle` 由 `MenuItemGroup.OnApplyTemplate`
+注入到分组标题 `GroupTitlePresenter` 模板节点（分组容器本身带 `semantic-item-title-group` 中间标记类，
+另声明 `CrossNestedOwners=true`）。该形态沿用 FlyoutHost → FlyoutPresenter 的
+跨视觉根弹层先例，避免把 marker 静态写进被 SplitButton、DataGrid、TabControl、Transfer 等复用的共享
+MenuFlyout / MenuItem 控件。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DropdownButton` |
+| Part | `root` |
+| Selector | DropdownButton 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `DropdownButton` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | DropdownButton owner |
+| 职责 | DropdownButton root 是动作内容、菜单数据、弹层与状态的组织边界。 |
+| 相关 API | 全部 DropdownButton public API |
+| 相关 Token | DropdownButtonToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DropdownButton` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `>> .semantic-popup-root` |
+| Style Type | `DropdownButtonPopupRootStyle` |
+| ContractType | `ArrowDecoratedBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuFlyoutPresenter.OnApplyTemplate` 定位到的弹层根视觉面 `ArrowDecoratedBox`（模板应用时注入 marker，其逻辑祖先链经 Popup `PlacementTarget` 回到 DropdownButton） |
+| 职责 | 下拉菜单弹层的根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角由 `ArrowDecoratedBox` 渲染，对应上游的 `root`）。 |
+| 相关 API | `DropdownFlyout`、`Items`、`ItemTemplate`、`ItemContainerTheme` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemTitle`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DropdownButton` |
+| Part | `itemTitle` |
+| Selector | `.semantic-item-title` |
+| SelectorRoute | `>> .semantic-item-title-group /template/ .semantic-item-title` |
+| Style Type | `DropdownButtonItemTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuItemGroup` 模板 `GroupTitlePresenter`（`ContentPresenter`，`MenuItemGroup.OnApplyTemplate` 时注入 marker；分组容器本身带 `semantic-item-title-group` 中间标记类） |
+| 职责 | 菜单分组标题节点（对应上游的 `itemTitle`，即 `ant-menu-item-group-title`）。 |
+| 相关 API | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DropdownButton` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `>> .semantic-item` |
+| Style Type | `DropdownButtonItemStyle` |
+| ContractType | `MenuItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuFlyoutPresenter.CreateContainerForItemOverride` / `PrepareContainerForItemOverride` 与 `MenuItem.CreateContainerForItemOverride` / `PrepareContainerForItemOverride` 容器路径生成的 `MenuItem`（顶层与任意嵌套层级的子菜单项，回收复用时 marker 保持不变） |
+| 职责 | 弹层中的单个菜单项容器，承载该项的状态、内容、图标与子菜单（对应上游的 `item`）。 |
+| 相关 API | `Items`、`MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items`、`ItemTemplate` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemIcon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DropdownButton` |
+| Part | `itemIcon` |
+| Selector | `.semantic-item-icon` |
+| SelectorRoute | `>> .semantic-item /template/ .semantic-item-icon` |
+| Style Type | `DropdownButtonItemIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuItem` 模板 `ItemIconPresenter`（`IconPresenter`，`MenuItem.OnApplyTemplate` 时注入 marker） |
+| 职责 | 菜单项模板内的图标节点（对应上游的 `itemIcon`）。 |
+| 相关 API | `MenuItem.Icon` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DropdownButton` |
+| Part | `itemContent` |
+| Selector | `.semantic-item-content` |
+| SelectorRoute | `>> .semantic-item /template/ .semantic-item-content` |
+| Style Type | `DropdownButtonItemContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `MenuItem` 模板 `ItemTextPresenter`（`ContentPresenter`，`MenuItem.OnApplyTemplate` 时注入 marker） |
+| 职责 | 菜单项模板内的文本内容节点（对应上游的 `itemContent`）。 |
+| 相关 API | `MenuItem.Header`、`MenuItem.HeaderTemplate`、`ItemTemplate` |
+| 相关 Token | MenuToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -1925,7 +3002,6 @@ Source: ./controls/dropdown-button/semantic-cn.md
     <WaveSpiritDecorator Name="PART_WaveSpirit" />
     <Border Name="ShadowsFrame" />
     <DashedBorder Name="Frame" />
-    <Border Name="CustomBackgroundLayer" />
     <Border>
         <DockPanel Name="PART_RootLayout">
             <LoadingOutlined Name="PART_LoadingIcon" />
@@ -1949,7 +3025,6 @@ DropdownButton
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
         -> DashedBorder#Frame (template-stable)
-        -> Border#CustomBackgroundLayer (template-stable)
         -> Border (template-stable)
            -> DockPanel#PART_RootLayout (template-stable)
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
@@ -1958,7 +3033,6 @@ DropdownButton
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
-        -> Border#CustomBackgroundLayer (template-stable)
         -> DashedBorder#Frame (template-stable)
            -> DockPanel#PART_RootLayout (template-stable)
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
@@ -1967,7 +3041,6 @@ DropdownButton
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
-        -> Border#CustomBackgroundLayer (template-stable)
         -> DashedBorder#Frame (template-stable)
            -> DockPanel#PART_RootLayout (template-stable)
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
@@ -1978,7 +3051,6 @@ DropdownButton
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
         -> DashedBorder#Frame (template-stable)
-        -> Border#CustomBackgroundLayer (template-stable)
         -> Border (template-stable)
            -> DockPanel#PART_RootLayout (template-stable)
               -> IconPresenter#PART_DropdownIndicator (template-stable)
@@ -1992,22 +3064,20 @@ DropdownButton
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `DropdownButton` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `DropdownButton` | control theme | `DropdownButtonBaseTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `CustomBackground` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `CustomBackground` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `DropdownButton` | control theme | `DropdownButtonBaseTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `EffectiveBorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `EffectiveBorderThickness` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_WaveSpirit` | template node (WaveSpiritDecorator) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `EffectiveCornerRadius`, `IsMotionEnabled`, `IsWaveSpiritEnabled`, `WaveSpiritType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ShadowsFrame` | template node (Border) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Frame` | template node (DashedBorder) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Background`, `BackgroundSizing`, `BorderBrush`, `EffectiveBorderThickness`, `EffectiveCornerRadius`, `Height` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `CustomBackgroundLayer` | template node (Border) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `CustomBackground`, `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_RootLayout` | template node (DockPanel) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Content`, `ContentTemplate`, `Foreground`, `HorizontalContentAlignment`, `Icon`, `IconHeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_LoadingIcon` | template node (LoadingOutlined) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Foreground`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ButtonIcon` | template node (IconPresenter) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Foreground`, `Icon`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ContentPresenter` | template node (ContentPresenter) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `DropdownButton` | control theme | `DropdownButtonTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `CustomBackground` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `DropdownButtonTheme.axaml` | DropdownButton | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `CustomBackground` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `DropdownButton` | control theme | `DropdownButtonTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `EffectiveBorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `DropdownButtonTheme.axaml` | DropdownButton | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `EffectiveBorderThickness` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_WaveSpirit` | template node (WaveSpiritDecorator) | `DropdownButtonTheme.axaml` | DropdownButton | `EffectiveCornerRadius`, `IsMotionEnabled`, `IsWaveSpiritEnabled`, `WaveSpiritType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ShadowsFrame` | template node (Border) | `DropdownButtonTheme.axaml` | DropdownButton | `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Frame` | template node (DashedBorder) | `DropdownButtonTheme.axaml` | DropdownButton | `Background`, `BackgroundSizing`, `BorderBrush`, `EffectiveBorderThickness`, `EffectiveCornerRadius`, `Height` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `CustomBackgroundLayer` | template node (Border) | `DropdownButtonTheme.axaml` | DropdownButton | `CustomBackground`, `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_RootLayout` | template node (DockPanel) | `DropdownButtonTheme.axaml` | DropdownButton | `Content`, `ContentTemplate`, `Foreground`, `HorizontalContentAlignment`, `Icon`, `IconHeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_DropdownIndicator` | template node (IconPresenter) | `DropdownButtonTheme.axaml` | DropdownButton | `Foreground`, `IsShowOpenIndicator`, `OpenIndicator` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_LoadingIcon` | template node (LoadingOutlined) | `DropdownButtonTheme.axaml` | DropdownButton | `Foreground`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -2107,14 +3177,58 @@ Source: ./controls/menu/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Menu` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup-scroll-host` | `MenuPopupScrollHost` | 在弹层内容区域内根据 `IsScrollEnabled` 选择是否创建 `ScrollViewer`。 | `IsScrollEnabled`、`DisplayPageSize` | 不适用 | internal-observable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`Menu` descriptor 的 Part 集合（`root` 隐式，其余 11 个按路径排序）：
+
+| Part | SelectorClass | SelectorRoute | ContractType | Cardinality | CrossVisualRoot | CrossNestedOwners | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `root` | 不适用 | 不适用 | `Menu` | `Single` | `false` | `false` | `false` |
+| `item` | `.semantic-item` | `>> .semantic-item` | `MenuItem` | `Multiple` | `false` | `true` | `true` |
+| `itemContent` | `.semantic-item-content` | `>> .semantic-item /template/ .semantic-item-content` | `ContentPresenter` | `Multiple` | `false` | `true` | `true` |
+| `itemIcon` | `.semantic-item-icon` | `>> .semantic-item /template/ .semantic-item-icon` | `IconPresenter` | `Multiple` | `false` | `true` | `true` |
+| `itemTitle` | `.semantic-item-title` | `>> .semantic-scope-group /template/ .semantic-item-title` | `ContentPresenter` | `Multiple` | `false` | `true` | `true` |
+| `list` | `.semantic-list` | `>> .semantic-scope-group /template/ .semantic-list` | `ItemsPresenter` | `Multiple` | `false` | `true` | `true` |
+| `popup.root` | `.semantic-popup-root` | `>> .semantic-popup-root` | `Border` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.item` | `.semantic-sub-menu-item` | `>> .semantic-sub-menu-item` | `MenuItem` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.itemContent` | `.semantic-sub-menu-item-content` | `>> .semantic-sub-menu-item /template/ .semantic-sub-menu-item-content` | `ContentPresenter` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.itemIcon` | `.semantic-sub-menu-item-icon` | `>> .semantic-sub-menu-item /template/ .semantic-sub-menu-item-icon` | `IconPresenter` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.itemTitle` | `.semantic-sub-menu-item-title` | `>> .semantic-sub-menu-group /template/ .semantic-sub-menu-item-title` | `ContentPresenter` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.list` | `.semantic-sub-menu-list` | `>> .semantic-sub-menu-group /template/ .semantic-sub-menu-list` | `ItemsPresenter` | `Multiple` | `true` | `true` | `true` |
+
+生成 Style 类型（`AtomUI.Theme.Styling`）：
+
+```text
+item                  -> MenuItemStyle
+itemIcon              -> MenuItemIconStyle
+itemContent           -> MenuItemContentStyle
+itemTitle             -> MenuItemTitleStyle
+list                  -> MenuListStyle
+popup.root            -> MenuPopupRootStyle
+subMenu.item          -> MenuSubMenuItemStyle
+subMenu.itemIcon      -> MenuSubMenuItemIconStyle
+subMenu.itemContent   -> MenuSubMenuItemContentStyle
+subMenu.itemTitle     -> MenuSubMenuItemTitleStyle
+subMenu.list          -> MenuSubMenuListStyle
+```
+
+`root` 是隐式 Part：不声明 `.semantic-root` marker，不生成 Style，通过 owner 属性、owner-scoped Style 或替换
+ControlTheme 定制。
+
+### 2.1 Part 说明
+
+- `item` / `subMenu.item`：菜单项容器。一级与子菜单两级共用同一个 public 容器类型，靠互斥 marker 区分。一级项位于
+  菜单栏第一层与一级分组内部；子菜单项位于任意深度子菜单与其内部分组。
+- `itemIcon` / `subMenu.itemIcon`：菜单项图标区域。一级节点是 `TopLevelMenuItemTheme` 的
+  `IconPresenter#ItemIconPresenter`；子菜单节点是 `MenuItemTheme` 的 `IconPresenter#ItemIconPresenter`。两级模板都常驻该
+  节点，`Icon` 为 null 时只是隐藏，marker 不增删。
+- `itemContent` / `subMenu.itemContent`：菜单项文字内容区域。一级节点是 `TopLevelMenuItemTheme` 的
+  `ContentPresenter#HeaderPresenter`；子菜单节点是 `MenuItemTheme` 的 `ContentPresenter#ItemTextPresenter`。
+- `itemTitle` / `subMenu.itemTitle`：分组标题区域，节点是 `MenuItemGroupTheme` 的
+  `ContentPresenter#GroupTitlePresenter`。菜单栏一级项不渲染一级分组标题（上游 horizontal 语义），因此 `itemTitle` 在
+  顶层解析为 0；子菜单内分组提供 `subMenu.itemTitle`。
+- `list` / `subMenu.list`：分组列表区域，节点是 `MenuItemGroupTheme` 的 `ItemsPresenter#PART_ItemsPresenter`。与
+  `itemTitle` 同理，`list` 在顶层解析为 0。
+- `popup.root`：子菜单弹层框体。一级子菜单的弹层框体在 `TopLevelMenuItemTheme` 内，嵌套子菜单的弹层框体在
+  `MenuItemTheme` 内；两个模板的 `Border#PopupFrame` 都带该 marker，因此菜单栏子菜单与嵌套子菜单都覆盖。
 
 ## Abstract AXAML Structure
 
@@ -2143,6 +3257,10 @@ Menu
   -> TreeViewFlyoutPresenter (presenter control theme, TreeViewFlyoutPresenterTheme.axaml)
      -> ArrowDecoratedBox#{x:Static atom:AbstractArrowDecoratedBox.ArrowDecoratorPart} (template-stable)
         -> ItemsPresenter#ItemsPresenter (internal-observable)
+  -> MenuItemGroup (control theme, MenuItemGroupTheme.axaml)
+     -> StackPanel (template-stable)
+        -> ContentPresenter#GroupTitlePresenter (internal-observable)
+        -> ItemsPresenter#PART_ItemsPresenter (template-stable)
   -> MenuItem (item container control theme, MenuItemTheme.axaml)
      -> Panel (template-stable)
         -> Border#Frame (template-stable)
@@ -2169,7 +3287,9 @@ Menu
   -> MenuItem (item container control theme, TopLevelMenuItemTheme.axaml)
      -> Panel (template-stable)
         -> Border#Frame (template-stable)
-           -> ContentPresenter#HeaderPresenter (internal-observable)
+           -> Grid (template-stable)
+              -> IconPresenter#ItemIconPresenter (internal-observable)
+              -> ContentPresenter#HeaderPresenter (internal-observable)
         -> Popup#PART_Popup (template-stable)
            -> Border#PopupFrame (template-stable)
               -> MenuPopupScrollHost (internal-observable)
@@ -2190,6 +3310,10 @@ Menu
 | `TreeViewFlyoutPresenter` | presenter control theme | `TreeViewFlyoutPresenterTheme.axaml` | Menu | `ArrowPosition`, `Background`, `BackgroundSizing`, `CornerRadius`, `IsArrowVisible`, `ItemsPanel` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `{x:Static atom:AbstractArrowDecoratedBox.ArrowDecoratorPart}` | template node (ArrowDecoratedBox) | `TreeViewFlyoutPresenterTheme.axaml` | TreeViewFlyoutPresenter | `ArrowPosition`, `Background`, `BackgroundSizing`, `CornerRadius`, `IsArrowVisible`, `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ItemsPresenter` | template node (ItemsPresenter) | `TreeViewFlyoutPresenterTheme.axaml` | TreeViewFlyoutPresenter | `ItemsPanel` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `MenuItemGroup` | control theme | `MenuItemGroupTheme.axaml` | 用户代码 / 控件宿主 | `Header`, `HeaderTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `StackPanel` | template node (StackPanel) | `MenuItemGroupTheme.axaml` | MenuItemGroup | `Header`, `HeaderTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `GroupTitlePresenter` | template node (ContentPresenter) | `MenuItemGroupTheme.axaml` | MenuItemGroup | `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ItemsPresenter` | template node (ItemsPresenter) | `MenuItemGroupTheme.axaml` | MenuItemGroup | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `MenuItem` | item container control theme | `MenuItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `CornerRadius`, `Foreground`, `GroupName`, `Header`, `HeaderTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Panel` | template node (Panel) | `MenuItemTheme.axaml` | MenuItem | `Background`, `CornerRadius`, `Foreground`, `GroupName`, `Header`, `HeaderTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Frame` | template node (Border) | `MenuItemTheme.axaml` | MenuItem | `Background`, `CornerRadius`, `Foreground`, `GroupName`, `Header`, `HeaderTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -2200,7 +3324,7 @@ Menu
 | `ItemTextPresenter` | template node (ContentPresenter) | `MenuItemTheme.axaml` | MenuItem | `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `InputGestureText` | template node (TextBlock) | `MenuItemTheme.axaml` | MenuItem | `InputGesture` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `MenuIndicatorIcon` | template node (RightOutlined) | `MenuItemTheme.axaml` | MenuItem | `Foreground` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Popup` | template node (Popup) | `MenuItemTheme.axaml` | MenuItem | `IsMotionEnabled`, `IsScrollEnabled`, `IsSubMenuOpen`, `ItemsPanel`, `MaxPopupHeight`, `PopupPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Popup` | template node (Popup) | `MenuItemTheme.axaml` | MenuItem | `IsMotionEnabled`, `IsScrollEnabled`, `ItemsPanel`, `MaxPopupHeight`, `PopupPadding`, `ShouldUseOverlayPopup` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PopupFrame` | template node (Border) | `MenuItemTheme.axaml` | MenuItem | `IsMotionEnabled`, `IsScrollEnabled`, `ItemsPanel`, `MaxPopupHeight`, `PopupPadding`, `atom` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `MenuPopupScrollHost` | template node (MenuPopupScrollHost) | `MenuItemTheme.axaml` | MenuItem | `IsMotionEnabled`, `IsScrollEnabled`, `ItemsPanel`, `atom` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `MenuItemTheme.axaml` | MenuItem | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -2209,13 +3333,9 @@ Menu
 | `MenuSeparator` | control theme | `MenuSeparatorTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Menu` | control theme | `MenuTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Padding` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `MenuTheme.axaml` | Menu | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `MenuItem` | item container control theme | `TopLevelMenuItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `CornerRadius`, `Header`, `HeaderTemplate`, `IsMotionEnabled`, `IsScrollEnabled` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `TopLevelMenuItemTheme.axaml` | MenuItem | `Background`, `CornerRadius`, `Header`, `HeaderTemplate`, `IsMotionEnabled`, `IsScrollEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Frame` | template node (Border) | `TopLevelMenuItemTheme.axaml` | MenuItem | `Background`, `CornerRadius`, `Header`, `HeaderTemplate`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `HeaderPresenter` | template node (ContentPresenter) | `TopLevelMenuItemTheme.axaml` | MenuItem | `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_Popup` | template node (Popup) | `TopLevelMenuItemTheme.axaml` | MenuItem | `IsMotionEnabled`, `IsScrollEnabled`, `IsSubMenuOpen`, `ItemsPanel`, `MaxPopupHeight`, `PopupPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PopupFrame` | template node (Border) | `TopLevelMenuItemTheme.axaml` | MenuItem | `IsMotionEnabled`, `IsScrollEnabled`, `ItemsPanel`, `MaxPopupHeight`, `PopupPadding`, `atom` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `MenuPopupScrollHost` | template node (MenuPopupScrollHost) | `TopLevelMenuItemTheme.axaml` | MenuItem | `IsMotionEnabled`, `IsScrollEnabled`, `ItemsPanel`, `atom` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `MenuItem` | item container control theme | `TopLevelMenuItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `CornerRadius`, `Foreground`, `Header`, `HeaderTemplate`, `Icon` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `TopLevelMenuItemTheme.axaml` | MenuItem | `Background`, `CornerRadius`, `Foreground`, `Header`, `HeaderTemplate`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Frame` | template node (Border) | `TopLevelMenuItemTheme.axaml` | MenuItem | `Background`, `CornerRadius`, `Foreground`, `Header`, `HeaderTemplate`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
@@ -2318,7 +3438,11 @@ Menu Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆
 - `IsScrollEnabled` 默认值、继承传播、本地覆盖和 `MenuFlyout` 到 presenter 中继语义。
 - 滚动禁用时不创建 `ScrollViewer`，滚动开启时 `DisplayPageSize` 继续限制弹层最大高度。
 - 选择状态、Popup 状态与 hover intent 的职责分离。
+- `MenuItem.SyncSubMenuPopupOpenState` 的非重入性：`Popup.IsOpen` 的打开 / 关闭结果会回写 `IsSubMenuOpen`，写入
+  又触发同一同步方法。弹层无法保持打开时（放置目标跑出 `TopLevel` 可视矩形）该回写链曾无限递归直至栈溢出，因此同步
+  必须由 `_isSyncingSubMenuPopupState` 守卫；移除守卫会让可视区外的子菜单展开直接崩溃。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
+- plain Menu 的语义层级只在其自身子树内下发；共享容器在 ContextMenu / MenuFlyout / DropdownButton 弹层中的 marker 行为不变。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 
 Source: ./controls/nav-menu/semantic-cn.md
@@ -2329,13 +3453,56 @@ Source: ./controls/nav-menu/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `NavMenu` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`NavMenu` descriptor 的 Part 集合（`root` 隐式，其余 11 个按路径排序）：
+
+| Part | SelectorClass | SelectorRoute | ContractType | Cardinality | CrossVisualRoot | CrossNestedOwners | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `root` | 不适用 | 不适用 | `NavMenu` | `Single` | `false` | `false` | `false` |
+| `item` | `.semantic-item` | `>> .semantic-item` | `HeaderedSelectingItemsControl` | `Multiple` | `false` | `true` | `true` |
+| `itemContent` | `.semantic-item-content` | `>> .semantic-item /template/ .semantic-scope-header /template/ .semantic-item-content` | `ContentPresenter` | `Multiple` | `false` | `true` | `true` |
+| `itemIcon` | `.semantic-item-icon` | `>> .semantic-item /template/ .semantic-scope-header /template/ .semantic-item-icon` | `IconPresenter` | `Multiple` | `false` | `true` | `true` |
+| `itemTitle` | `.semantic-item-title` | `>> .semantic-scope-group /template/ .semantic-item-title` | `ContentPresenter` | `Multiple` | `false` | `true` | `true` |
+| `list` | `.semantic-list` | `>> .semantic-scope-group /template/ .semantic-list` | `ItemsPresenter` | `Multiple` | `false` | `true` | `true` |
+| `popup.root` | `.semantic-popup-root` | `>> .semantic-popup-root` | `Border` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.item` | `.semantic-sub-menu-item` | `>> .semantic-sub-menu-item` | `HeaderedSelectingItemsControl` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.itemContent` | `.semantic-sub-menu-item-content` | `>> .semantic-sub-menu-item /template/ .semantic-scope-header /template/ .semantic-sub-menu-item-content` | `ContentPresenter` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.itemIcon` | `.semantic-sub-menu-item-icon` | `>> .semantic-sub-menu-item /template/ .semantic-scope-header /template/ .semantic-sub-menu-item-icon` | `IconPresenter` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.itemTitle` | `.semantic-sub-menu-item-title` | `>> .semantic-sub-menu-group /template/ .semantic-sub-menu-item-title` | `ContentPresenter` | `Multiple` | `true` | `true` | `true` |
+| `subMenu.list` | `.semantic-sub-menu-list` | `>> .semantic-sub-menu-group /template/ .semantic-sub-menu-list` | `ItemsPresenter` | `Multiple` | `true` | `true` | `true` |
+
+生成 Style 类型（`AtomUI.Theme.Styling`）：
+
+```text
+item                  -> NavMenuItemStyle
+itemIcon              -> NavMenuItemIconStyle
+itemContent           -> NavMenuItemContentStyle
+itemTitle             -> NavMenuItemTitleStyle
+list                  -> NavMenuListStyle
+popup.root            -> NavMenuPopupRootStyle
+subMenu.item          -> NavMenuSubMenuItemStyle
+subMenu.itemIcon      -> NavMenuSubMenuItemIconStyle
+subMenu.itemContent   -> NavMenuSubMenuItemContentStyle
+subMenu.itemTitle     -> NavMenuSubMenuItemTitleStyle
+subMenu.list          -> NavMenuSubMenuListStyle
+```
+
+`root` 是隐式 Part：不声明 `.semantic-root` marker，不生成 Style，通过 owner 属性、owner-scoped Style 或替换
+ControlTheme 定制。
+
+### 2.1 Part 说明
+
+- `item` / `subMenu.item`：菜单项容器。一级与子菜单两级共用同一个 public 容器类型，靠互斥 marker 区分。承载 header
+  呈现、子菜单展开、选择路径、禁用、命令投影与 hover / pressed / keyboard-active 状态。一级项包含位于一级分组内部的
+  项；子菜单项包含位于子菜单内分组内部的项。
+- `itemIcon` / `subMenu.itemIcon`：菜单项图标区域，节点是 header 模板中的 `IconPresenter#ItemIconPresenter`。节点常驻，
+  `Icon` 为 null 时只是隐藏，marker 不增删。
+- `itemContent` / `subMenu.itemContent`：菜单项文字内容区域，节点是 header 模板中的 `ContentPresenter#ItemTextPresenter`。
+  inline collapsed 下 `VerticalNavMenuItemHeader` 用 `CollapsedTitlePresenter` 呈现首字符，该节点不属于本 Part。
+- `itemTitle` / `subMenu.itemTitle`：分组标题区域，节点是 `NavMenuGroupItem` 模板中的
+  `ContentPresenter#PART_HeaderPresenter`。上游 horizontal 模式不渲染一级分组标题，AtomUI 下节点存在但被主题隐藏。
+- `list` / `subMenu.list`：分组列表区域，节点是 `NavMenuGroupItem` 模板中的 `ItemsPresenter#PART_ItemsPresenter`。
+- `popup.root`：子菜单弹层框体，节点是 Horizontal / Vertical 模板中的 `NavMenuPopupFrame#PART_PopupFrame`。Inline 模式
+  在视觉树内展开，模板没有弹层节点，因此该模式的实例数为 0。
 
 ## Abstract AXAML Structure
 
@@ -2462,7 +3629,17 @@ NavMenu
 
 ## Pseudo Classes
 
-源文档未声明控件专属伪类。控件仍可能消费 Avalonia 标准状态，例如 `:pointerover`、`:pressed`、`:disabled` 和 focus 相关状态。
+伪类、事件或 Token；AtomUI 默认主题不消费 `.semantic-*`。
+
+上游基线为 6.6.3 稳定发布源码公开的 12 个 Semantic 键路径：一级 `root`、`item`、`itemIcon`、`itemContent`、
+`itemTitle`、`list`，子菜单 `subMenu.item`、`subMenu.itemIcon`、`subMenu.itemContent`、`subMenu.itemTitle`、
+`subMenu.list`，以及 `popup.root`。Part 名称逐字沿用这些键路径，不新增、不改名、不合并。
+
+NavMenu 家族只有 `NavMenu` 一个 public owner：`NavMenuItem`、`NavMenuGroupItem`、`NavMenuDividerItem` 都是 internal
+容器，不能持有 descriptor，也不能作为 `ContractType`（菜单项容器取其最近 public 基类 `HeaderedSelectingItemsControl`）。
+因此不能像 `TreeView` / `TreeViewItem` 那样按递归 owner 拆分，全部 12 个键声明在 `NavMenu` 上。
+
+关键边界：
 
 ## State Flow
 
@@ -2634,8 +3811,8 @@ NavMenuToken 不承载 `SelectedItem`、`IsSubMenuOpen`、`IsInSelectedPath`、`
 - selection coordinator 是选择状态的统一入口。
 - keyboard active/focus 状态不能替代 selection coordinator。
 - 激活事务由 interaction handler 基类唯一持有；按下只建立事务、置仅覆盖背景的 pointer-hold selected-background 视觉并按 mode 尝试移动真实焦点，不覆盖 keyboard-active owner、不写 selected 状态、不进入 selection coordinator、不执行命令、不触发路由事件、不切换 inline 展开状态。
-- 指针提交以“释放点命中待提交项视觉子树”为唯一合法性判据，不使用捕获期间的 `IsPointerOver`；取消路径（拖离释放、当前指针捕获丢失、节点移除或禁用、detach、非主按钮释放、新按下替代）零副作用，其他指针的 capture-lost 不得误取消。
-- 调用命令与触发 `NavMenuItemClick` 前必须先释放指针捕获并清理事务字段，防止用户回调重入时残留旧事务。
+- 指针提交以“释放点命中待提交项 Header 视觉子树”为唯一合法性判据，不使用捕获期间的 `IsPointerOver`；取消路径（拖离释放、当前指针捕获丢失、节点移除或禁用、detach、非主按钮释放、新按下替代）零副作用，其他指针的 capture-lost 不得误取消。
+- 调用命令与触发 `NavMenuItemClick` 前必须先清理事务字段，并仅在指针仍由该事务的 Header 捕获时释放捕获，防止用户回调重入时残留旧事务。
 - 叶子提交顺序固定：选中路径与 `IsSelected` 更新、`SelectedItem` 更新、`NavMenuNodeSelected`、节点 `Command`、`NavMenuItemClick`；同步重入替换选择时停止原提交尚未发生的事件与动作。父节点提交不修改 `SelectedItem`。
 - pointer-hold 与 keyboard-active 独立持有并分别投影到 header 的 `IsPointerHold` 与 `IsKeyboardActive`；前者只使用 selected 背景 Token 且不覆盖文字颜色，后者使用 active Token。pointer-hold 不写入 keyboard active、`IsSelected` / `IsInSelectedPath`，也不直接依赖捕获期间的原生 `:pointerover`。
 - 方向键移动不得触发点击或选中事件。
@@ -2672,25 +3849,32 @@ Source: ./controls/pagination/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Pagination` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、层级项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或内容区域` | 承载 flyout、dropdown、tab content、submenu 或候选内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `Pagination` / `SimplePagination` | `Single` | `Root` | `false` | `false` |
+| `item` | `.semantic-item` | `ContentControl` | `Multiple` | `Selector` | `false` | `Pagination`: `true`，`SimplePagination`: `false` |
+| `info`（仅 `SimplePagination`） | `.semantic-info` | `TextBlock` | `Single` | `Selector` | `false` | `false` |
+
+`root` 是控件自身，承载 `CurrentPage`、`PageSize`、`Total`、`SizeType`、`Align`、`IsShowTotalInfo`、
+`IsShowSizeChanger`、`IsShowQuickJumper` 等 public API、主题入口和状态归一，不声明 `.semantic-root` marker。
+
+`item` 的 marker 挂在 `PaginationNavItem`（internal 的 `ContentControl` 派生类型）实例上。`Pagination` 的
+`item` 是运行时创建的语义标记，由 `PaginationNavItem` 按 `PaginationItemType` 维护；`SimplePagination` 的
+`item` 是内置模板中的静态标记，声明在 `SimplePaginationTheme.axaml` 的上一页/下一页节点上。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Pagination/Themes/PaginationTheme.axaml`
 
 ```xml
-<StackPanel Name="PART_RootLayout">
-    <ContentPresenter Name="PART_TotalInfoPresenter" />
-    <PaginationNav Name="PART_Nav" />
-    <ContentPresenter Name="PART_SizeChangerPresenter" />
-    <ContentPresenter Name="PART_QuickJumperBarPresenter" />
-</StackPanel>
+<DashedBorder>
+    <StackPanel Name="PART_RootLayout">
+        <ContentPresenter Name="PART_TotalInfoPresenter" />
+        <PaginationNav Name="PART_Nav" />
+        <ContentPresenter Name="PART_SizeChangerPresenter" />
+        <ContentPresenter Name="PART_QuickJumperBarPresenter" />
+    </StackPanel>
+</DashedBorder>
 ```
 
 ## Composition Model
@@ -2710,11 +3894,12 @@ Pagination
      -> Border#PART_Frame (template-stable)
         -> ItemsPresenter (internal-observable)
   -> Pagination (control theme, PaginationTheme.axaml)
-     -> StackPanel#PART_RootLayout (template-stable)
-        -> ContentPresenter#PART_TotalInfoPresenter (template-stable)
-        -> PaginationNav#PART_Nav (template-stable)
-        -> ContentPresenter#PART_SizeChangerPresenter (template-stable)
-        -> ContentPresenter#PART_QuickJumperBarPresenter (template-stable)
+     -> DashedBorder (template-stable)
+        -> StackPanel#PART_RootLayout (template-stable)
+           -> ContentPresenter#PART_TotalInfoPresenter (template-stable)
+           -> PaginationNav#PART_Nav (template-stable)
+           -> ContentPresenter#PART_SizeChangerPresenter (template-stable)
+           -> ContentPresenter#PART_QuickJumperBarPresenter (template-stable)
   -> QuickJumperBar (control theme, QuickJumperBarTheme.axaml)
      -> StackPanel#PART_RootLayout (template-stable)
         -> ContentPresenter#PART_JumpToContentPresenter (template-stable)
@@ -2734,7 +3919,7 @@ Pagination
 | `PaginationNav` | control theme | `PaginationNavTheme.axaml` | Pagination | `CornerRadius`, `Padding` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_Frame` | template node (Border) | `PaginationNavTheme.axaml` | PaginationNav | `CornerRadius`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ItemsPresenter` | template node (ItemsPresenter) | `PaginationNavTheme.axaml` | PaginationNav | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Pagination` | control theme | `PaginationTheme.axaml` | 用户代码 / 控件宿主 | `IsEffectiveVisible`, `IsMotionEnabled`, `IsShowQuickJumper`, `IsShowSizeChanger`, `IsShowTotalInfo`, `QuickJumperBar` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Pagination` | control theme | `PaginationTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `BorderDashArray`, `BorderDashOffset`, `BorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `PART_RootLayout` | template node (StackPanel) | `PaginationTheme.axaml` | Pagination | `IsEffectiveVisible`, `IsMotionEnabled`, `IsShowQuickJumper`, `IsShowSizeChanger`, `IsShowTotalInfo`, `QuickJumperBar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_TotalInfoPresenter` | template node (ContentPresenter) | `PaginationTheme.axaml` | Pagination | `IsShowTotalInfo`, `TotalInfoText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Nav` | template node (PaginationNav) | `PaginationTheme.axaml` | Pagination | `IsMotionEnabled`, `SizeType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -2829,6 +4014,9 @@ Pagination Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
 - `CurrentPage` / `PageSize` 的默认 `TwoWay` binding metadata，以及内部写入不破坏外部 binding 的 `SetCurrentValue` 路径。
 - Template part 名称、ControlTheme key、伪类和资源 key。
+- Semantic Part descriptor、`semantic-scope-nav` 作用域标记、`semantic-item` / `semantic-info` marker 同步规则与
+  生成的 `PaginationItemStyle` / `SimplePaginationItemStyle` / `SimplePaginationInfoStyle` 类型。Ellipsis 单元格
+  无 `semantic-item` marker 属于上游语义对齐的稳定契约，不能通过主题或代码改动破坏。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
@@ -2841,25 +4029,37 @@ Source: ./controls/steps/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 稳定性 |
-| --- | --- | --- | --- |
-| `root` | `Steps` | Items、根展示输入和导航请求入口。 | public |
-| `items` | `PART_ItemsPresenter` | 承载 StepsPanel 和 item 容器。 | template-stable |
-| `item` | `StepsItem` | 单项状态、内容和交互语义。 | public |
-| `indicator` | `PART_Indicator` | 数字、状态图标、Dot、自定义 Icon、Progress 和 Wave 目标。 | template-stable |
-| `title` | `HeaderPresenter` | 标题。 | internal-observable |
-| `subtitle` | `SubHeaderPresenter` | 副标题。 | internal-observable |
-| `content` | `ContentPresenter` | 步骤详情。 | internal-observable |
-| `rail` | `Connector` | 当前 item 与下一个 item 的连接线。 | internal-observable |
-| `navigation-arrow` | `NavigationArrow` | Navigation 类型的步骤方向提示。 | internal-observable |
-| `navigation-active-indicator` | `NavigationActiveIndicator` | Navigation 当前项的水平底线或垂直右侧线。 | internal-observable |
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `Steps` | `Single` | `Root` | `false` | `false` |
+| `item` | `.semantic-item` | `StepsItem` | `Multiple` | `Selector` | `false` | `true` |
+| `itemWrapper` | `.semantic-item-wrapper` | `Border` | `Multiple` | `Selector` | `false` | `true` |
+| `itemIcon` | `.semantic-item-icon` | `TemplatedControl` | `Multiple` | `Selector` | `false` | `true` |
+| `itemTitle` | `.semantic-item-title` | `ContentPresenter` | `Multiple` | `Selector` | `false` | `true` |
+| `itemSubtitle` | `.semantic-item-subtitle` | `ContentPresenter` | `Multiple` | `Selector` | `false` | `true` |
+| `itemSection` | `.semantic-item-section` | `Panel` | `Multiple` | `Selector` | `false` | `true` |
+| `itemContent` | `.semantic-item-content` | `ContentPresenter` | `Multiple` | `Selector` | `false` | `true` |
+| `itemRail` | `.semantic-item-rail` | `DashedBorder` | `Multiple` | `Selector` | `false` | `true` |
+
+`root` 是控件自身，承载 `Current`、`Initial`、`Status`、`Percent`、`Type`、`Orientation`、
+`TitlePlacement`、`SizeType`、`IsItemClickable` 等 public API、主题入口和状态投影，不声明 `.semantic-root`
+marker。
+
+`item` 的 marker 挂在 `StepsItem` 实例上，是运行时创建的语义标记：`Steps` 在容器准备时对每个容器写入
+`semantic-item`。直接声明的 `StepsItem`、普通数据项生成的容器以及回收复用后重新准备的容器遵循同一规则。
+
+七个子 Part 是 item 模板内的静态标记，声明在 `StepsItemTheme.axaml` 的对应节点上。它们的
+`RuntimeCreated = true` 表示这些 Part 只随 item 容器的存在而存在：item 被创建时 marker 随模板出现，
+item 被移除时随模板销毁；`Steps` 自身不包含任何子 Part marker。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Steps/Themes/StepsTheme.axaml`
 
 ```xml
-<ItemsPresenter Name="PART_ItemsPresenter" />
+<DashedBorder>
+    <ItemsPresenter Name="PART_ItemsPresenter" />
+</DashedBorder>
 ```
 
 ## Composition Model
@@ -2883,15 +4083,17 @@ Steps
      -> StepsItemLayoutPanel (internal-observable)
         -> StepsPanelItemFrame#ItemWrapper (internal-observable)
         -> StepsItemIndicator#PART_Indicator (template-stable)
-        -> ContentPresenter#HeaderPresenter (internal-observable)
-        -> ContentPresenter#SubHeaderPresenter (internal-observable)
+        -> StepsItemSectionPanel#Section (internal-observable)
+           -> ContentPresenter#HeaderPresenter (internal-observable)
+           -> ContentPresenter#SubHeaderPresenter (internal-observable)
+           -> ContentPresenter#ContentPresenter (internal-observable)
         -> PixelAlignedBorder#Connector (template-stable)
-        -> ContentPresenter#ContentPresenter (internal-observable)
         -> StepsNavigationArrow#NavigationArrow (internal-observable)
         -> StepsPanelArrow#PanelArrow (internal-observable)
         -> PixelAlignedBorder#NavigationActiveIndicator (template-stable)
   -> Steps (control theme, StepsTheme.axaml)
-     -> ItemsPresenter#PART_ItemsPresenter (template-stable)
+     -> DashedBorder (template-stable)
+        -> ItemsPresenter#PART_ItemsPresenter (template-stable)
 ```
 
 ### 协作节点
@@ -2911,32 +4113,31 @@ Steps
 | `StepsItemLayoutPanel` | template node (StepsItemLayoutPanel) | `StepsItemTheme.axaml` | StepsItem | `Background`, `BorderBrush`, `BorderThickness`, `CanInvoke`, `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `ItemWrapper` | template node (StepsPanelItemFrame) | `StepsItemTheme.axaml` | StepsItem | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `IsFirst`, `PanelVariant` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_Indicator` | template node (StepsItemIndicator) | `StepsItemTheme.axaml` | StepsItem | `CanInvoke`, `EffectiveStatus`, `Icon`, `IsCurrent`, `IsMotionEnabled`, `IsProgressFrameReserved` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Section` | template node (StepsItemSectionPanel) | `StepsItemTheme.axaml` | StepsItem | `Content`, `ContentTemplate`, `Foreground`, `Header`, `HeaderTemplate`, `Orientation` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `HeaderPresenter` | template node (ContentPresenter) | `StepsItemTheme.axaml` | StepsItem | `Foreground`, `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `SubHeaderPresenter` | template node (ContentPresenter) | `StepsItemTheme.axaml` | StepsItem | `SubHeader`, `SubHeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Connector` | template node (PixelAlignedBorder) | `StepsItemTheme.axaml` | StepsItem | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ContentPresenter` | template node (ContentPresenter) | `StepsItemTheme.axaml` | StepsItem | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Connector` | template node (PixelAlignedBorder) | `StepsItemTheme.axaml` | StepsItem | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `NavigationArrow` | template node (StepsNavigationArrow) | `StepsItemTheme.axaml` | StepsItem | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PanelArrow` | template node (StepsPanelArrow) | `StepsItemTheme.axaml` | StepsItem | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `NavigationActiveIndicator` | template node (PixelAlignedBorder) | `StepsItemTheme.axaml` | StepsItem | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Steps` | control theme | `StepsTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Steps` | control theme | `StepsTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `BorderDashArray`, `BorderDashOffset`, `BorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `StepsTheme.axaml` | Steps | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
-| LLMS 内容 | 来源 | 说明 |
+| 布局模式 | item 份额 | 收缩下限 |
 | --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/steps/index-cn.md`。 |
-| 单控件语义文档 | `overview.md` + `implementation.md` + Themes 文件夹 | 生成 `controls/steps/semantic-cn.md`。 |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 overview 中维护第二份机械列表。 |
-| Design Token 表 | token.md 或 Token 类型 | Token 文档只解释语义边界。 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只使用稳定示例。 |
-| 源码索引 | `implementation.md` | 用于定位源码、主题和测试。 |
+| 水平 + 水平标题（`Default` 等） | 非末项 `1 1 auto`，末项 `0 1 auto` | `IconContainerSize` |
+| 水平 + 垂直标题（`Dot`、`OutlineDot`、`Inline`、`TitlePlacement=Vertical`） | 全部 item `1 1 0%` 等分 | `IconContainerSize` |
+| 水平 `Navigation` | 等分 | `IconContainerSize` |
+| 垂直 `Orientation` | 不参与横向份额 | 不适用 |
 
 ## Pseudo Classes
 
 Steps 不提供控件专属的完成态或选择态伪类。状态主题读取 `EffectiveStatus`、`IsCurrent`、`CanInvoke` 以及 Avalonia 标准 `:pointerover`、`:focus-visible`、`:disabled` 伪类。
 
-`title`、`subtitle` 和 `rail` 是 `StepsItem` 自身模板的内部语义节点。只有 `StepsItemTheme.axaml` 可以进入该模板并消费根控件投影的语义样式值；外部应用、Gallery 和 `StepsTheme.axaml` 不得依赖节点名称或通过 `/template/` selector 穿透 `StepsItem`。
+`itemWrapper`、`itemIcon`、`itemTitle`、`itemSubtitle`、`itemSection`、`itemContent` 和 `itemRail` 是 `StepsItem` 自身模板内的静态语义 marker，由 `StepsItemTheme.axaml` 声明；应用通过生成的子 Part Style 经 `> .semantic-item /template/ .semantic-item-x` 路由进入 item 模板，不得依赖节点名称以外的模板结构或手写 `/template/` selector。实例级 Header、SubHeader 和 Connector 覆盖由根控件三项 nullable 语义 API 投影，与 Semantic Part 定制互不取代。
 
 ## State Flow
 
@@ -3022,19 +4223,20 @@ Steps
     └── StepsPanel
         └── StepsItem
             └── StepsItemLayoutPanel
+                ├── StepsPanelItemFrame#ItemWrapper
                 ├── StepsItemIndicator#PART_Indicator
                 │   └── WaveSpiritDecorator#PART_WaveSpirit
-                ├── ContentPresenter#HeaderPresenter
-                ├── ContentPresenter#SubHeaderPresenter
+                ├── StepsItemSectionPanel#Section
+                │   ├── ContentPresenter#HeaderPresenter
+                │   ├── ContentPresenter#SubHeaderPresenter
+                │   └── ContentPresenter#ContentPresenter
                 ├── PixelAlignedBorder#Connector
-                ├── ContentPresenter#ContentPresenter
-                ├── StepsPanelItemFrame#ItemWrapper
                 ├── PathIcon#NavigationArrow
                 ├── StepsPanelArrow#PanelArrow
                 └── PixelAlignedBorder#NavigationActiveIndicator
 ```
 
-`StepsPanel` 负责 item 间的 flex/stack 布局；Panel 类型强制水平排列并将每个 item 等宽。`StepsItemLayoutPanel` 负责 item 内固定语义区域、Connector 线宽、Panel 外溢箭头和 Navigation active 线的排列。二者不创建状态。
+`StepsPanel` 负责 item 间的 flex/stack 布局；Panel 类型强制水平排列并将每个 item 等宽。`StepsItemLayoutPanel` 负责 item 内固定语义区域、Connector 线宽、Panel 外溢箭头和 Navigation active 线的排列，正文区域（标题、副标题、详情）的分组与对齐由 `StepsItemSectionPanel` 完成。这些面板不创建视觉、不计算状态。item 间的弹性压缩与文本换行契约见 [8.7 弹性压缩与文本换行模型](#87-弹性压缩与文本换行模型)。
 
 Panel 类型的几何规则：
 
@@ -3069,6 +4271,7 @@ Type == Dot             -> Vertical
 Type == OutlineDot      -> Vertical
 Type == Inline          -> Vertical
 Type == Navigation      -> Horizontal
+Type == Panel           -> Horizontal
 其他                    -> TitlePlacement
 ```
 
@@ -3099,9 +4302,11 @@ StepsToken 不承载：
 - Wave 只能由真实 pointer click 触发，不得监听 `Current` 或 `IsCurrent`。
 - `OutlineDot` 必须保持 Dot 布局、空心状态色边框和无 Wave 语义。
 - `PART_ItemsPresenter` 和 `PART_Indicator` 是稳定 template part。
-- 外部样式不得依赖 `HeaderPresenter`、`SubHeaderPresenter`、`Connector` 等内部节点，也不得通过 `/template/` selector 穿透 `StepsItem`；需要的实例级定制必须由 `Steps` 公开语义 API 表达。
+- 外部样式不得依赖 `HeaderPresenter`、`SubHeaderPresenter`、`Connector` 等内部节点名称，也不得手写 `/template/` selector 穿透 `StepsItem`；item 子节点的实例级定制必须通过生成的 Semantic Part Style 表达，Header、SubHeader 和 Connector 的实例级覆盖由 `Steps` 三项 nullable 语义 API 表达。
 - 三项 item 语义样式保持 nullable；`null` 必须恢复完整的状态和类型 Token 视觉。
 - 每个根、item 和 indicator 主题各保留一套语义模板。
+- 水平布局的 item 收缩与文本换行遵循 8.7 弹性模型的份额算法与 `IconContainerSize` 收缩下限。
+- 测量与排列必须共用同一份额算法，排列宽度等于测量宽度；任何布局路径不得以裁剪代替换行。
 
 维护不变量：
 
@@ -3119,7 +4324,12 @@ StepsToken 不承载：
 - 每个主题只维护一套语义模板。
 - 外部代码不得通过深层 selector 修改 StepsItem 内部节点；实例级 Header、SubHeader 和 Connector 定制由根控件三项 nullable 语义 API 进入。
 - 语义样式的 `null` 值必须完整回退 Token；容器清理和重新准备不得残留旧 owner 的显式值。
-- StepsPanel 和 StepsItemLayoutPanel 只负责布局。
+- Semantic Part descriptor、`semantic-item` 运行时 marker 与七个静态 `semantic-item-*` marker 的同步规则、`> .semantic-item /template/ .semantic-item-x` 容器边界路由形状以及生成的 Steps*Style 类型保持稳定；`itemIcon` 默认圆角只能由主题 style 优先级提供，代码不得再以 local value 写入。
+- StepsPanel、StepsItemLayoutPanel 和 StepsItemSectionPanel 只负责布局。
+- 水平布局的 item 收缩与文本换行遵循 overview.md 8.7 弹性模型的份额算法与 `IconContainerSize` 收缩下限；测量与排列必须共用同一份额算法，排列宽度等于测量宽度，任何布局路径不得以裁剪代替换行。
+- 水平标题 heading 行的同行/换行决策由测量与排列共用同一判定条件；Header 与 SubHeader 并排放不下时，SubHeader 必须换到 Header 下方独占一行并保持测量宽度，不得裁成剩余宽度。
+- 水平标题路径的 body 子项（Header / SubHeader / Content）必须按排列时的 body 可用宽度（item 宽度 − indicator − spacing）测量，不得按完整 item 宽度测量；否则份额落在文本自然宽度的邻近区间时会以裁剪代替换行。
+- 宽容器的既有伸展语义（非末 item 等额伸展、末 item 内容宽、单 item 内容宽）不得随压缩能力回归。
 - 容器清理必须释放 Owner，模板重套必须释放旧 part 引用。
 - Percent、Icon、Type 和 EffectiveStatus 运行时变化必须立即更新 Progress。
 
@@ -3131,21 +4341,39 @@ Source: ./controls/tab-control/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `TabControl` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、排序项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `reorder` | `拖动排序区域` | 承载拖动源、实时让位预览、自动滚动和集合顺序提交。 | `IsTabReorderEnabled`、`TabReordering`、`TabReordered` | 见视觉与主题模型 | stable |
-| `popup` | `PART_OverflowPopup` 与模板内容 | 承载默认 overflow menu 或 `OverflowPopupTemplate`，消费 `TabOverflowPopupContext`。 | `OverflowPopupTemplate` | 复用 Popup/Menu/Input 与 TabControl 既有 Token | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| Owner | Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `TabControl` | `root` | owner | `TabControl` | `Single` | `Root` | `false` | `false` |
+| `TabControl` | `header` | `.semantic-header` | `Border` | `Single` | `Selector` | `false` | `false` |
+| `TabControl` | `content` | `.semantic-content` | `ContentPresenter` | `Single` | `Selector` | `false` | `false` |
+| `TabControl` | `item` | `.semantic-item` | `TabItem` | `Multiple` | `Selector` | `false` | `true` |
+| `TabControl` | `indicator` | `.semantic-indicator` | `Border` | `Single` | `Selector` | `false` | `false` |
+| `CardTabControl` | `root` | owner | `CardTabControl` | `Single` | `Root` | `false` | `false` |
+| `CardTabControl` | `header` | `.semantic-header` | `Border` | `Single` | `Selector` | `false` | `false` |
+| `CardTabControl` | `add` | `.semantic-add` | `IconButton` | `Single` | `Selector` | `false` | `false` |
+| `CardTabControl` | `content` | `.semantic-content` | `ContentPresenter` | `Single` | `Selector` | `false` | `false` |
+| `CardTabControl` | `item` | `.semantic-item` | `TabItem` | `Multiple` | `Selector` | `false` | `true` |
+| `TabItem` | `root` | owner | `TabItem` | `Single` | `Root` | `false` | `false` |
+| `TabItem` | `close` | `.semantic-close` | `IconButton` | `Single` | `Selector` | `false` | `false` |
+| `TabItem` | `icon` | `.semantic-icon` | `IconPresenter` | `Single` | `Selector` | `false` | `false` |
+| `TabItem` | `label` | `.semantic-label` | `ContentPresenter` | `Single` | `Selector` | `false` | `false` |
+
+`root` 是各 owner 自身，承载选择、集合、关闭、排序等 public API、主题入口和状态归一，不声明 `.semantic-root` marker。
+
+`TabControl.item` 与 `CardTabControl.item` 的 marker 是运行时创建的语义标记，由 owner 在
+`CreateContainerForItemOverride` / `PrepareContainerForItemOverride` 中应用到生成的 `TabItem` 容器；直接以
+`TabItem` 实例加入 `Items` 的 item 同样在 prepare 阶段获得 marker。
+
+`TabItem` 的 `close` / `icon` / `label`、两个 Control 的 `content` 与 `header`、`TabControl` 的 `indicator`、
+`CardTabControl` 的 `add` 是内置模板中的静态 marker，通过 `Classes.semantic-*="True"` 声明，运行期间不随可见性、
+选中或禁用状态增删。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/TabControl/Themes/TabControlTheme.axaml`
 
 ```xml
-<Border Name="Frame">
+<PixelAlignedBorder Name="Frame">
     <DockPanel>
         <Panel Name="PART_AlignWrapper">
             <Border>
@@ -3161,7 +4389,7 @@ Source: ./controls/tab-control/semantic-cn.md
         </Panel>
         <ContentPresenter />
     </DockPanel>
-</Border>
+</PixelAlignedBorder>
 ```
 
 ## Composition Model
@@ -3187,7 +4415,7 @@ TabControl
               -> IconButton#PART_ItemCloseButton (template-stable)
         -> Rectangle#LineMask (template-stable)
   -> TabControl (control theme, TabControlTheme.axaml)
-     -> Border#Frame (template-stable)
+     -> PixelAlignedBorder#Frame (template-stable)
         -> DockPanel (template-stable)
            -> Panel#PART_AlignWrapper (template-stable)
               -> Border (template-stable)
@@ -3240,8 +4468,8 @@ TabControl
 | `ContentPresenter` | template node (ContentPresenter) | `CardTabItemTheme.axaml` | TabItem | `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_ItemCloseButton` | template node (IconButton) | `CardTabItemTheme.axaml` | TabItem | `CloseButtonOpacity`, `CloseIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `LineMask` | template node (Rectangle) | `CardTabItemTheme.axaml` | TabItem | `Background`, `LineMaskMargin` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `TabControl` | control theme | `TabControlTheme.axaml` | 用户代码 / 控件宿主 | `ContentPadding`, `EffectiveHeaderPadding`, `HeaderEndExtraContent`, `HeaderEndExtraContentTemplate`, `HeaderStartExtraContent`, `HeaderStartExtraContentTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Frame` | template node (Border) | `TabControlTheme.axaml` | TabControl | `ContentPadding`, `EffectiveHeaderPadding`, `HeaderEndExtraContent`, `HeaderEndExtraContentTemplate`, `HeaderStartExtraContent`, `HeaderStartExtraContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `TabControl` | control theme | `TabControlTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `BorderDashArray`, `BorderDashOffset`, `BorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Frame` | template node (PixelAlignedBorder) | `TabControlTheme.axaml` | TabControl | `Background`, `BackgroundSizing`, `BorderBrush`, `BorderDashArray`, `BorderDashOffset`, `BorderThickness` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DockPanel` | template node (DockPanel) | `TabControlTheme.axaml` | TabControl | `ContentPadding`, `EffectiveHeaderPadding`, `HeaderEndExtraContent`, `HeaderEndExtraContentTemplate`, `HeaderStartExtraContent`, `HeaderStartExtraContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_AlignWrapper` | template node (Panel) | `TabControlTheme.axaml` | TabControl | `EffectiveHeaderPadding`, `HeaderEndExtraContent`, `HeaderEndExtraContentTemplate`, `HeaderStartExtraContent`, `HeaderStartExtraContentTemplate`, `IsMotionEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HeaderLayout` | template node (DockPanel) | `TabControlTheme.axaml` | TabControl | `HeaderEndExtraContent`, `HeaderEndExtraContentTemplate`, `HeaderStartExtraContent`, `HeaderStartExtraContentTemplate`, `IsMotionEnabled`, `IsPopupPinnedOpen` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -3368,6 +4596,16 @@ TabControl Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
 - Template part 名称、ControlTheme key、伪类和资源 key。
+- Semantic Part descriptor、静态 `Classes.semantic-*="True"` marker、运行时 `semantic-item` marker 同步规则与生成的
+  `TabControlItemStyle` / `TabControlContentStyle` / `TabControlHeaderStyle` / `TabControlIndicatorStyle` /
+  `CardTabControlAddStyle` / `CardTabControlHeaderStyle` / `TabItemIconStyle` / `TabItemLabelStyle` /
+  `TabItemCloseStyle` 等 Style 类型。
+  选中指示墨条为 motion actor（尺寸与位移运行时维护）、header extra、overflow 菜单项与 Card `LineMask` 不携带
+  语义 marker 属于稳定契约，不能通过主题或代码改动破坏。
+- 模板根 `Frame`（`TabControlTheme` 与 `CardTabControlTheme` 均为 `PixelAlignedBorder`）对 `Background` /
+  `BackgroundSizing` / `BorderBrush` / `BorderThickness` / `CornerRadius` / `Padding` / `BorderDashArray` /
+  `BorderDashOffset` 的 TemplateBinding 属于稳定契约；标签条分隔线由 internal `SeparatorBorderBrush` /
+  `SeparatorBorderThickness` 承载主题 token，公开 `BorderBrush` / `BorderThickness` 默认保持 null/0。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - 拖动排序释放时必须修改逻辑集合顺序，拖动中允许用 `RenderTransform` 和临时 `ZIndex` 做实时视觉预览，但不能只调整 `Panel.Children`、`ZIndex` 或 transform 作为最终排序结果。
 - 选中项必须跟随同一个逻辑 item，不能跟随旧 index；重排后内容页、指示条、overflow 菜单和关闭状态必须从新顺序统一推导。
@@ -3393,14 +4631,26 @@ Source: ./controls/tab-strip/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `TabStrip` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载点击、键盘、打开关闭、跳转或提交入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `导航项区域` | 承载当前项、选中项、禁用项、排序项或分页项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `reorder` | `拖动排序区域` | 承载拖动源、实时让位预览、自动滚动和集合顺序提交。 | `IsTabReorderEnabled`、`TabReordering`、`TabReordered` | 见视觉与主题模型 | stable |
-| `popup` | `PART_OverflowPopup` 与模板内容 | 承载默认 overflow menu 或 `OverflowPopupTemplate`，消费 `TabOverflowPopupContext`。 | `OverflowPopupTemplate` | 复用 Popup/Menu/Input 与 TabControl 家族 Token | stable |
-| `motion` | `动效区域` | 表达打开关闭、选中指示、切换和过渡反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| Owner | Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `TabStrip` | `root` | owner | `TabStrip` | `Single` | `Root` | `false` | `false` |
+| `TabStrip` | `item` | `.semantic-item` | `TabStripItem` | `Multiple` | `Selector` | `false` | `true` |
+| `CardTabStrip` | `root` | owner | `CardTabStrip` | `Single` | `Root` | `false` | `false` |
+| `CardTabStrip` | `add` | `.semantic-add` | `IconButton` | `Single` | `Selector` | `false` | `false` |
+| `CardTabStrip` | `item` | `.semantic-item` | `TabStripItem` | `Multiple` | `Selector` | `false` | `true` |
+| `TabStripItem` | `root` | owner | `TabStripItem` | `Single` | `Root` | `false` | `false` |
+| `TabStripItem` | `close` | `.semantic-close` | `IconButton` | `Single` | `Selector` | `false` | `false` |
+| `TabStripItem` | `icon` | `.semantic-icon` | `IconPresenter` | `Single` | `Selector` | `false` | `false` |
+| `TabStripItem` | `label` | `.semantic-label` | `ContentPresenter` | `Single` | `Selector` | `false` | `false` |
+
+`root` 是各 owner 自身，承载选择、集合、关闭、排序等 public API、主题入口和状态归一，不声明 `.semantic-root` marker。
+
+`TabStrip.item` 与 `CardTabStrip.item` 的 marker 是运行时创建的语义标记，由 owner 在
+`CreateContainerForItemOverride` / `PrepareContainerForItemOverride` 中应用到生成的 `TabStripItem` 容器；直接以
+`TabStripItem` 实例加入 `Items` 的 item 同样在 prepare 阶段获得 marker。
+
+`TabStripItem` 的 `close` / `icon` / `label` 与 `CardTabStrip` 的 `add` 是内置模板中的静态 marker，通过
+`Classes.semantic-*="True"` 声明，运行期间不随可见性、选中或禁用状态增删。
 
 ## Abstract AXAML Structure
 
@@ -3594,6 +4844,10 @@ Token 边界：
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
 - Template part 名称、ControlTheme key、伪类和资源 key。
+- Semantic Part descriptor、静态 `Classes.semantic-*="True"` marker、运行时 `semantic-item` marker 同步规则与生成的
+  `TabStripItemStyle` / `CardTabStripAddStyle` / `CardTabStripItemStyle` / `TabStripItemIconStyle` /
+  `TabStripItemLabelStyle` / `TabStripItemCloseStyle` 等 Style 类型。选中指示墨条、header extra 与 overflow
+  菜单项不携带语义 marker 属于稳定契约，不能通过主题或代码改动破坏。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - 拖动排序释放时必须修改逻辑集合顺序，拖动中允许用 `RenderTransform` 和临时 `ZIndex` 做实时视觉预览，但不能只调整 `Panel.Children`、`ZIndex` 或 transform 作为最终排序结果。
 - 选中项必须跟随同一个逻辑 item，不能跟随旧 index；重排后指示条、overflow 菜单和关闭状态必须从新顺序统一推导。
@@ -3619,13 +4873,60 @@ Source: ./controls/auto-complete/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
+AutoComplete 家族有三个 public owner：`AutoComplete`、`AutoCompleteSearchEdit` 与 `AutoCompleteTextArea`。三者
+声明完全相同的 9 个语义键：`root`、`prefix`、`content`、`placeholder`、`input`、`clear`、`popup.root`、
+`popup.list`、`popup.listItem`（与上游 AutoComplete 的语义 DOM 对齐，`popup.*` 对应上游 `popup`
+分组的 `root` / `list` / `listItem`）。声明位于各 owner 同目录的 `*.SemanticParts.cs` partial 文件。
+
+前 6 个宿主部件位于输入框模板内，且全部声明 `CrossNestedOwners=true`：`AutoCompleteSearchEdit` /
+`AutoCompleteTextArea` 内嵌 `LineEdit` / `TextArea` 输入控件，宿主部件的 marker 由嵌套输入控件自身模板携带，
+路由通过 `.semantic-scope-input` / `.semantic-scope-input-frame` scope 锚点从 owner 穿透到嵌套控件模板
+（`/template/` 链不能直接跨越嵌套 owner，因此这些 Part 由生成 Style 借助 scope 路由命中）。弹层三部件
+（`popup.root` / `popup.list` / `popup.listItem`）位于 owner 自有的 Popup 模板内，不涉及嵌套 owner。
+
+各 Part 的 Selector、SelectorRoute、ContractType 以 `AutoComplete.SemanticParts.cs` 为准；下表为 owner
+`AutoComplete` 的声明（SearchEdit / TextArea 声明同键，route 差异见 §1.2）：
+
+### 1.1 部件表（`AutoComplete`）
+
+| Part | SelectorClass | SelectorRoute | ContractType | Cardinality | Since |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `AutoComplete` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | 不适用（owner 本身，无 marker） | 不适用 | `AutoComplete` | Single | 6.0 |
+| `prefix` | `.semantic-prefix` | `/template/ .semantic-scope-input >> .semantic-scope-input-frame /template/ .semantic-scope-prefix > .semantic-prefix` | `ContentPresenter` | Single | 6.0 |
+| `content` | `.semantic-content` | `/template/ .semantic-scope-input /template/ .semantic-content` | `Panel` | Single | 6.0 |
+| `placeholder` | `.semantic-placeholder` | `/template/ .semantic-scope-input /template/ .semantic-content > .semantic-placeholder` | `TextBlock` | Single | 6.0 |
+| `input` | `.semantic-input` | `/template/ .semantic-scope-input /template/ .semantic-input` | `TextPresenter` | Single | 6.0 |
+| `clear` | `.semantic-clear` | `/template/ .semantic-scope-input >> .semantic-scope-input-frame /template/ .semantic-scope-suffix > .semantic-suffix > .semantic-clear` | `Button` | Single | 6.0 |
+| `popup.root` | `.semantic-popup-root` | `/template/ .semantic-popup-root` | `Border` | Single | 6.0 |
+| `popup.list` | `.semantic-popup-list` | `/template/ .semantic-popup-root > .semantic-popup-list` | `CandidateList` | Single | 6.0 |
+| `popup.listItem` | `.semantic-popup-list-item` | `/template/ .semantic-popup-list >> .semantic-popup-list-item` | `CandidateListItem` | Multiple | 6.0 |
+
+`prefix`、`content`、`placeholder`、`input`、`clear` 均声明 `CrossNestedOwners=true`；`popup.listItem` 声明
+`RuntimeCreated=true`（候选条目运行时创建）。
+
+### 1.2 嵌套输入控件 owner 的 route 差异
+
+`AutoCompleteSearchEdit` 与 `AutoCompleteTextArea` 的声明与 §1.1 同键同 ContractType，仅两处 route 不同：
+
+- `AutoCompleteSearchEdit.prefix`：输入框 frame 由 SearchEdit 主题承担，route 为
+  `/template/ .semantic-scope-input >> .semantic-scope-input-frame /template/ .semantic-scope-prefix > .semantic-prefix`。
+- `AutoCompleteTextArea.input`：文本域的可编辑区域 marker 为 `.semantic-textarea`，SelectorRoute 为
+  `/template/ .semantic-scope-input /template/ .semantic-textarea`（SelectorClass 仍为 `semantic-input`，
+  Part 身份与生成 Style 类型保持 `input` 命名）。
+
+其余键（含 `clear`、`popup.*`）三个 owner 完全一致。
+
+### 1.3 职责说明
+
+- `root`：AutoComplete owner 本身，承载数据源、过滤、弹层与状态的组织边界，可定制 owner 级视觉属性。
+- `prefix`：输入框框架的前缀区域（`ContentLeftAddOn` 宿主）。
+- `content`：输入内容面板，承载文本呈现器与占位符。
+- `placeholder`：输入为空时显示的占位符文本。
+- `input`：可编辑输入区域的 `TextPresenter`。
+- `clear`：后缀区域的清除按钮，`IsAllowClear` 启用且有输入时可见（`ClearIcon` 可定制）。
+- `popup.root`：候选弹层根 `Border`，可定制弹层边框、背景与宽度。
+- `popup.list`：弹层内候选列表容器（`CandidateList`）。
+- `popup.listItem`：单个候选条目（`CandidateListItem`），每个选项运行时创建一个实例。
 
 ## Abstract AXAML Structure
 
@@ -3780,6 +5081,7 @@ AutoComplete Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
+- Semantic Part marker、selector class、route、`ContractType` 与 cardinality（见 [AutoComplete Semantic Part 契约](semantic-part.md)）；宿主部件 marker 由嵌套输入控件模板携带，跨 owner 回收路径不泄漏 marker。
 
 Source: ./controls/cascader/semantic-cn.md
 
@@ -3789,13 +5091,306 @@ Source: ./controls/cascader/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Cascader` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Cascader 是唯一 Semantic owner，公开 13 个 Semantic Part（与上游 Cascader 的 Semantic Part
+语义对齐：`item` / `itemContent` / `itemRemove` 对应上游多选标签的 `item` 分组，`popup.*` 对应上游
+`popup` 分组的 `root` / `list` / `listItem`）。声明位于 `Cascader.SemanticParts.cs` partial 文件。
+
+触发区部件的 marker 位于 `CascaderTheme.axaml` 宿主模板内：`prefix` / `suffix` 借用共享
+`AddOnDecoratedBoxTheme` 的 `.semantic-scope-prefix` / `.semantic-scope-suffix` scope 锚点路由到宿主模板
+投影给 decorated box 的内容节点（与 LineEdit 同构）；`content` / `placeholder` / `input` 直接标注宿主模板
+节点。`clear` / `item` / `itemContent` / `itemRemove` 声明 `CrossNestedOwners=true`：`clear` 的物理节点在
+共享 `SelectHandle` 自有模板内；多选标签的物理节点在共享标签机制内——`item` 的标记由
+`SelectTagAwareTextBox` 在标签容器创建时注入，`itemContent` / `itemRemove` 的标记位于共享 `TagTheme`
+模板（`SelectTag : Tag` 复用其模板），二者经 `item` 部件（RuntimeCreated，ContractType=`Tag`）承转主题链
+完成校验。弹层三部件位于 owner 自有的
+Popup 模板内：`popup.root` 标注在宿主模板节点上，`popup.list` 的根列与过滤列表 marker 位于
+`CascaderViewTheme.axaml`，`popup.list` 子级列与 `popup.listItem` 的 marker 在运行时容器创建路径注入。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `root` |
+| Selector | Cascader 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Cascader` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Cascader owner |
+| 职责 | Cascader root 是数据源、选择、过滤、弹层与状态的组织边界。 |
+| 相关 API | 全部 Cascader public API |
+| 相关 Token | CascaderToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+**根边框与背景定制：** 可见外框由共享 `AddOnDecoratedBox` 帧绘制，其状态机拥有 `BorderBrush` 与
+`Background`。owner 的 `BorderBrush` / `Background` 会以 LocalValue 中继到帧节点生效（对齐上游 root
+border/background 语义与输入族 `AbstractTextInput.RelayRootSurfaceBrush` 行为），因此在 owner-scoped Style
+里直接写根 `Setter Property="BorderBrush"` / `Property="Background"` 即可定制外框：
+
+```xml
+<Style Selector="atom|Cascader.semantic-root-border">
+    <Setter Property="BorderBrush" Value="#1677FF" />
+    <Setter Property="Background" Value="#F0F5FF" />
+</Style>
+```
+
+定制期间该属性槽的 hover / focus / open 变色冻结（LocalValue 优先于帧状态机），focus 的 `BoxShadow` 光晕不受
+影响；置空（或不设置）后恢复帧状态机。中继带接管标记：仅当本控件实际写入过该槽位时才在置空时清除，因此嵌套
+owner 不会被外层清除。
+
+
+#### `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `CascaderPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `CascaderTheme.axaml` 中投影给 `CascaderAddOnDecoratedBox.ContentLeftAddOn` 的 `AddOnContentPresenter`（经 `$parent[atom:Cascader]` 编译绑定呈现公共 API 值） |
+| 职责 | 选择框内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
+| 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `CascaderContentStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `CascaderTheme.axaml` 中 decorated box 内容面板 |
+| 职责 | 选择内容面板，承载占位符、单选结果文本、搜索输入与多选标签盒。 |
+| 相关 API | `PlaceholderText`、`SelectedOptionPath`、`EffectiveSelectedOptions` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `placeholder`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `placeholder` |
+| Selector | `.semantic-placeholder` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-placeholder` |
+| Style Type | `CascaderPlaceholderStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `CascaderTheme.axaml` 中 `PlaceholderText` |
+| 职责 | 未选择任何项时显示的占位符文本。 |
+| 相关 API | `PlaceholderText`、`PlaceholderForeground` |
+| 相关 Token | SharedToken（ColorTextPlaceholder） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-input` |
+| Style Type | `CascaderInputStyle` |
+| ContractType | `TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `CascaderTheme.axaml` 中 `PART_SingleFilterInput`（internal `SelectFilterTextBox`，公共契约承诺 Avalonia `TextBox`） |
+| 职责 | 过滤模式（`IsFilterEnabled`）下渲染的搜索输入框；非过滤态隐藏但模板节点存在。 |
+| 相关 API | `IsFilterEnabled`、`Filter`、`FilterValue` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `CascaderSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `CascaderTheme.axaml` 中 `ContentRightAddOn` StackPanel |
+| 职责 | 内容后缀区域，承载最大数量指示、用户 `ContentRightAddOn` 与选择 handle。 |
+| 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`MaxCount` |
+| 相关 Token | SharedToken `ColorTextQuaternary`（默认前景） |
+| 稳定性 | stable since 6.2.0 |
+
+suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（SelectHandle 内图标）与后缀内容跟随该颜色：
+在 `CascaderSuffixStyle` 上设置 `TextElement.Foreground` 即可同时定制箭头与后缀内容颜色（例如
+`#1890FF` 蓝色箭头，与上游语义样式示例一致）。清除按钮、表单校验反馈与最大数量指示各自维护颜色，
+不随该前景色变化。
+
+#### `clear`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `clear` |
+| Selector | `.semantic-clear` |
+| SelectorRoute | `>> .semantic-scope-handle /template/ .semantic-clear` |
+| Style Type | `CascaderClearStyle` |
+| ContractType | `Button` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `SelectHandleTheme.axaml` 中 `PART_ClearButton`（internal `InputClearIconButton`，公共契约承诺 Avalonia `Button`） |
+| 职责 | 后缀 handle 内的清除按钮，`IsAllowClear` 启用、非空选择且输入区 hover / pressed 时可见。 |
+| 相关 API | `IsAllowClear`、`Clear()` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item` |
+| Style Type | `CascaderItemStyle` |
+| ContractType | `Tag` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | internal `SelectTag` 实例（`SelectTagAwareTextBox` 创建标签容器时注入 marker），公共契约承诺 public `Tag` |
+| 职责 | 多选模式下选择器中的选中标签。 |
+| 相关 API | `IsMultiple`、`SelectedOptions`、`MaxTagCount`、`IsResponsiveTagMode` |
+| 相关 Token | SelectToken（MultipleItemBg、MultipleItemHeight*） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `itemContent` |
+| Selector | `.semantic-item-content` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item /template/ .semantic-item-content` |
+| Style Type | `CascaderItemContentStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TagTheme.axaml` 中 `TagTextLabel`（`SelectTag : Tag` 复用其模板） |
+| 职责 | 选中标签内的文本内容。 |
+| 相关 API | 无（随 tag 展示） |
+| 相关 Token | TagToken（TagLineHeight） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemRemove`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `itemRemove` |
+| Selector | `.semantic-item-remove` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item /template/ .semantic-item-remove` |
+| Style Type | `CascaderItemRemoveStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TagTheme.axaml` 中 `PART_CloseButton`（`IsClosable=false` 时隐藏但模板节点存在） |
+| 职责 | 选中标签内的移除按钮。 |
+| 相关 API | `IsClosable`（经标签机制） |
+| 相关 Token | SharedToken（IconSizeXS） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `CascaderPopupRootStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `CascaderTheme.axaml` 中 `PopupFrame` |
+| 职责 | 级联菜单弹层根 `Border`，可定制弹层边框、背景与宽度。 |
+| 相关 API | `MaxPopupHeight`、`EffectivePopupWidth`、`PopupContentPadding` |
+| 相关 Token | PopupTokenResource（PopupCornerRadius）、SharedToken（ColorBgElevated） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.list`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `popup.list` |
+| Selector | `.semantic-popup-list` |
+| SelectorRoute | `/template/ .semantic-popup-root > .semantic-scope-view /template/ .semantic-scope-frame >> .semantic-popup-list` |
+| Style Type | `CascaderPopupListStyle` |
+| ContractType | `Control` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | internal `CascaderViewLevelList`（根列为 `CascaderViewTheme.axaml` 静态节点，子级列运行时创建）与 `CascaderViewFilterList`（过滤替代实现），公共契约承诺 `Control` |
+| 职责 | 弹层内的一条级联菜单列；过滤模式下由过滤结果列表替代，同一时刻至多一类可见。 |
+| 相关 API | `ExpandTrigger`、`Filter` |
+| 相关 Token | CascaderToken（ControlItemWidth、MenuPadding） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.listItem`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Cascader` |
+| Part | `popup.listItem` |
+| Selector | `.semantic-popup-list-item` |
+| SelectorRoute | `/template/ .semantic-popup-root > .semantic-scope-view /template/ .semantic-scope-frame >> .semantic-popup-list-item` |
+| Style Type | `CascaderPopupListItemStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | public `CascaderViewItem`（层级列条目）与 internal `CascaderViewFilterListItem`（过滤结果条目），公共祖先承诺 `TemplatedControl` |
+| 职责 | 菜单列中的单个选项条目，均为运行时容器创建，虚拟化回收复用时 marker 保持。 |
+| 相关 API | `OptionTemplate`、`IsAllowSelectParent` |
+| 相关 Token | CascaderToken（OptionPadding、HeaderHeight、OptionSelectedBg） |
+| 稳定性 | stable since 6.2.0 |
+
+`ContractType` 不参与 selector 匹配，只约束 `x:SetterTargetType` 与兼容性下界；实现节点为 internal 类型时，
+公共契约承诺到最低 public 基类（`input`→`TextBox`、`item`→`Tag`、`popup.list`→`Control`、
+`popup.listItem`→`TemplatedControl`）。
 
 ## Abstract AXAML Structure
 
@@ -3872,9 +5467,9 @@ Cascader
 | --- | --- | --- | --- | --- | --- | --- |
 | `Cascader` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `CascaderAddOnDecoratedBox` | control theme | `CascaderAddOnDecoratedBoxTheme.axaml` | Cascader | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Cascader` | control theme | `CascaderTheme.axaml` | 用户代码 / 控件宿主 | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataLoader`, `DataValidationErrors` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `CascaderTheme.axaml` | Cascader | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataLoader`, `DataValidationErrors` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (CascaderAddOnDecoratedBox) | `CascaderTheme.axaml` | Cascader | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `EffectiveSelectedOptions` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Cascader` | control theme | `CascaderTheme.axaml` | 用户代码 / 控件宿主 | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataLoader`, `DataValidationErrors`, `DefaultSelectOptionPath`, `EffectivePopupWidth` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `CascaderTheme.axaml` | Cascader | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataLoader`, `DataValidationErrors`, `DefaultSelectOptionPath`, `EffectivePopupWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (CascaderAddOnDecoratedBox) | `CascaderTheme.axaml` | Cascader | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataValidationErrors`, `EffectiveSelectedOptions`, `FontFamily`, `FontSize` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PlaceholderText` | template node (TextBlock) | `CascaderTheme.axaml` | Cascader | `IsPlaceholderTextVisible`, `PlaceholderForeground`, `PlaceholderText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SingleSelectResultPresenter` | template node (TextBlock) | `CascaderTheme.axaml` | Cascader | `IsShowOverflowTip`, `OverflowTipDelay`, `OverflowTipPlacement`, `SelectedOptionPath` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_SingleFilterInput` | template node (SelectFilterTextBox) | `CascaderTheme.axaml` | Cascader | `FontFamily`, `FontSize`, `FontStyle`, `FontWeight`, `IsShowOverflowTip`, `OverflowTipDelay` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -4062,13 +5657,29 @@ Source: ./controls/check-box/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `CheckBox` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+CheckBox 主控件公开 `root`、`icon` 与 `label` 三个职责区域，与上游稳定 Semantic DOM
+（`root` / `icon` / `label`，均 since 6.2.0）对齐。`icon` 对应复选框指示框区域，由模板中的 `CheckBoxIndicator`
+节点承载；`label` 对应文本区域，由模板中的 `ContentPresenter` 节点承载。
+
+`CheckBoxGroup`、`CheckBoxItemsControl` 与 `CheckBoxIndicator` 均不持有独立 Semantic descriptor：上游 Checkbox.Group
+不提供 `classNames` / `styles` / Semantic API（只有单个 Checkbox 提供），且 `CheckBoxItemsControl` 与
+`CheckBoxIndicator` 是 internal 类型。因此本控件的 Semantic Part 只由 `CheckBox` owner 公开。
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `CheckBox` | `Single` | `Root` | `false` | `false` |
+| `icon` | `.semantic-icon` | `TemplatedControl` | `Single` | `Selector` | `false` | `false` |
+| `label` | `.semantic-label` | `ContentPresenter` | `Single` | `Selector` | `false` | `false` |
+
+`root` 是控件自身，承载 `IsChecked`、`IsThreeState`、`Content`、`IsEnabled`、动效与水波开关等 public API、主题入口和
+状态归一，不声明 `.semantic-root` marker。`icon` 是模板中的复选框指示框节点 `Indicator`，对应上游 `icon` 语义；其
+`ContractType` 为 `TemplatedControl` 而非 `CheckBoxIndicator`，因为 `CheckBoxIndicator` 是 internal 类型，不能作为
+公共 Setter 依赖的最低类型，而 `TemplatedControl` 完整覆盖上游 icon 语义所需的 `Background`、`BorderBrush`、
+`BorderThickness`、`CornerRadius`、`Width` / `Height` 等公共视觉属性。`label` 是模板文本节点
+`ContentPresenter`，承载 `Content` 文本内容。
+
+`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过 `x:SetterTargetType` 提供 AXAML 编译期类型
+上下文；它不参与 `.semantic-*` 的身份匹配。
 
 ## Abstract AXAML Structure
 
@@ -4224,13 +5835,121 @@ Source: ./controls/color-picker/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ColorPicker` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`ColorPicker` 与 `GradientColorPicker` 各自是唯一 Semantic owner，公开 5 个 Semantic Part（与上游
+ColorPicker 的官方语义 API 逐一对齐：`root` / `body` / `content` / `description` / `popup.root`）。
+声明分别位于 `ColorPicker.SemanticParts.cs` 与 `GradientColorPicker.SemanticParts.cs` partial 文件。
+
+触发区部件（`body` / `description`）与弹层根部件（`popup.root`）的 marker 均位于两个 owner 自有的
+`Themes/ColorPickerTheme.axaml`、`Themes/GradientColorPickerTheme.axaml` 宿主模板内；`content` 的
+marker 位于共享的 `Themes/ColorBlockTheme.axaml`（ColorBlock 自身模板内），因此 `content` 声明
+`CrossNestedOwners=true`——这与 Cascader 的 `clear` 部件（marker 在共享 `SelectHandle` 模板内）同构。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ColorPicker` / `GradientColorPicker` |
+| Part | `root` |
+| Selector | owner 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ColorPicker` / `GradientColorPicker` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | owner 根 |
+| 职责 | 触发器容器：边框、圆角、尺寸、状态与布局的组织边界。 |
+| 相关 API | `SizeType`、`Status`、`BorderBrush`、`TriggerPadding` 等 owner public API |
+| 相关 Token | ColorPickerToken、SharedToken（ColorBorder、BorderRadius*） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ColorPicker` / `GradientColorPicker` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `ColorPickerBodyStyle` / `GradientColorPickerBodyStyle` |
+| ContractType | `Control` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | owner 模板中的 `PART_ColorIndicator`（内部控件 `ColorBlock` 的模板实例节点；公共契约承诺 Avalonia `Control`） |
+| 职责 | 触发器内的色块容器，承载底色、空色斜线与棋盘格呈现。 |
+| 相关 API | `ColorBlockSize`、`ColorBlockBackground` |
+| 相关 Token | ColorPickerHandlerSize*、ColorBlockInnerShadows |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ColorPicker` / `GradientColorPicker` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-body /template/ .semantic-content` |
+| Style Type | `ColorPickerContentStyle` / `GradientColorPickerContentStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ColorBlockTheme.axaml` 中 `PART_ColorPreview`（`semantic-body` 节点自有模板内） |
+| 职责 | 色块颜色元素，呈现实际选择的颜色填充。 |
+| 相关 API | —（随 owner 的 `Value` 联动，不单独开放） |
+| 相关 Token | ColorBlockInnerShadows |
+| 稳定性 | stable since 6.2.0 |
+
+#### `description`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ColorPicker` / `GradientColorPicker` |
+| Part | `description` |
+| Selector | `.semantic-description` |
+| SelectorRoute | `/template/ .semantic-description` |
+| Style Type | `ColorPickerDescriptionStyle` / `GradientColorPickerDescriptionStyle` |
+| ContractType | `TextBlock`（GradientColorPicker：`Panel`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ColorPickerTheme.axaml` 中 `PART_ColorText`；`GradientColorPickerTheme.axaml` 中 `PART_ColorTextPanel`（WrapPanel，逐渐变 stop 的文本格） |
+| 职责 | 触发器文本区：单色模式显示格式化颜色文本；渐变模式显示逐 stop 文本格。 |
+| 相关 API | `IsTextVisible`、`ColorTextFormatter`（attached）、`Format` |
+| 相关 Token | TriggerTextMargin、SharedToken（FontSize*、ColorText） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ColorPicker` / `GradientColorPicker` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `ColorPickerPopupRootStyle` / `GradientColorPickerPopupRootStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | owner 模板 `PART_Popup` 直接子节点 `ColorPickerPopupRootFrame`（`Border` 子类，向内容层 `ArrowDecoratedBox` 转发 `IArrowAwareShadowMaskInfoProvider`），语义边框贴合弹层外沿（对齐上游 popup root） |
+| 职责 | 弹层根容器：承载弹层边框、背景类视觉的定制入口；弹层 View 本身由 `CreatePresenter()` 动态创建，不经此 Part 发布。 |
+| 相关 API | `IsPopupPinnedOpen`（6.0 公共化）、`Placement`、`IsArrowVisible` |
+| 相关 Token | ColorPickerInsetShadow、SharedToken（ColorBgElevated） |
+| 稳定性 | stable since 6.2.0 |
+
+### GradientColorPicker 差异
+
+`GradientColorPicker` 与 `ColorPicker` 共享同一套 5 部件语义契约，仅 `description` 的 `ContractType`
+不同：触发文本区是 `WrapPanel`（`PART_ColorTextPanel`，内含逐 stop 的文本格），公共契约放宽为
+`Panel`。其推荐 selector 为 `atom|GradientColorPicker /template/ Panel.semantic-description`。其余四
+部件的 selector、ContractType、Cardinality 与 `ColorPicker` 完全一致。
 
 ## Abstract AXAML Structure
 
@@ -4245,7 +5964,11 @@ Source: ./controls/color-picker/semantic-cn.md
         </StackPanel>
     </PixelAlignedBorder>
     <Popup Name="PART_Popup">
-        <ArrowDecoratedBox />
+        <ColorPickerPopupRootFrame>
+            <ArrowDecoratedBox>
+                <ContentPresenter />
+            </ArrowDecoratedBox>
+        </ColorPickerPopupRootFrame>
     </Popup>
 </Panel>
 ```
@@ -4286,6 +6009,7 @@ Public API / inherited command / item source / user input
 
 - Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
 - open/close、collection/filter、input/value、motion、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
+- `IsPickerOpen` 是 picker 的业务打开状态，`Popup.IsOpen` 是物理宿主状态；pinned 期间普通关闭不能改变业务状态，锚点隐藏、detach 或 TopLevel 失效仍可关闭物理宿主，并在有效性恢复后重新打开。
 - `Value`、trigger 色块、trigger 文本、picker presenter 和 Form 值必须由同一份 current value 派生；清空状态以 `Value=null` 为源头。
 - 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
 - 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
@@ -4361,13 +6085,298 @@ Source: ./controls/date-picker/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `DatePicker` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`DatePicker` 公开 12 个 Semantic Part，`RangeDatePicker` 公开 13 个 Semantic Part（后者多出范围双输入框的
+`secondaryInput`）。声明分别位于 `DatePicker.SemanticParts.cs` 与 `RangeDatePicker.SemanticParts.cs` partial 文件。
+
+触发区部件的 marker 分布：
+
+- 单值 `DatePicker` 的宿主模板是共享 `InfoPickerInputTheme.axaml`（`DatePickerTheme.axaml` 纯 `BasedOn` 继承，
+  无自有模板）；`RangeDatePicker` 的宿主模板是自有 `RangeDatePickerTheme.axaml`。两个宿主模板按同一模式标注
+  `semantic-scope-input`（AddOnDecoratedBox 节点）、`semantic-input`（`PART_InfoInputBox`）、`semantic-suffix`
+  （右侧内容 StackPanel）、`semantic-scope-handle`（PickerClearUpButton 节点）与 `semantic-popup-root`
+  （`PART_Popup` 内的 `ArrowDecoratedBox` / `DualMonthArrowDecoratedBox`）。
+- `prefix` 借用共享 `AddOnDecoratedBoxTheme` 的 `.semantic-scope-prefix` scope 锚点路由到宿主模板新增的
+  `AddOnContentPresenter` 投影节点（与 Select 家族同构；投影节点以
+  `CompiledBinding $parent[atom:InfoPickerInput].ContentLeftAddOn` 呈现公共 API 值）。
+- `clear` 的物理按钮在共享 `PickerClearUpButtonTheme.axaml` 模板内（`PART_ClearButton`），声明
+  `CrossNestedOwners=true`，生成器沿 PickerClearUpButton 主题链校验；该共享主题同时服务于未来 TimePicker
+  家族的同名 Part（inert marker，未声明契约的控件零影响）。
+- `secondaryInput` 仅 `RangeDatePicker` 声明，标注自有模板的 `PART_SecondaryInfoInputBox`。
+
+弹层部件的 marker 分布（弹层内容全部由 owner `CreatePickerPresenter` 在首次打开时运行时创建）：
+
+- `popup.container` / `popup.footer` 标注 presenter 主题模板节点：`popup.container` 在模板根 `DockPanel #RootLayout`，
+  `popup.footer` 在 `PixelAlignedBorder #ButtonsFrame`；三个带模板的 presenter 主题
+  （`DatePickerPresenterTheme.axaml`、`DualMonthRangeDatePickerPresenterTheme.axaml`、
+  `TimedRangeDatePickerPresenterTheme.axaml`）均标注。`RangeDatePickerPresenterTheme.axaml` 纯继承无模板。
+- `popup.header` / `popup.body` / `popup.content` 标注 `CalendarItemTheme.axaml`（单月：
+  `PART_HeaderFrame` / `PART_MonthViewLayout` / `PART_MonthView`）与 `DualMonthCalendarItemTheme.axaml`
+  （双月：同名节点加 `PART_SecondaryMonthView`）。
+- `popup.cell` 为运行时注入：`CalendarDayButton` 构造函数追加生成 selector class 常量（共享 CalendarView
+  基础设施，两个 owner 的常量值一致），覆盖月网格重建与容器回收。
+- `popup.*` 全部声明 `RuntimeCreated=true`（presenter 子树在运行时组装，生成器豁免宿主模板 marker 校验，
+  由控件行为测试兜底），其中 `popup.root` 为宿主模板静态节点、`RuntimeCreated=false`。
+
+### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `root` |
+| Selector | owner 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `DatePicker` / `RangeDatePicker` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | DatePicker / RangeDatePicker owner |
+| 职责 | owner 是日期值、格式化、弹层状态、Form 值与验证状态的组织边界；owner 级 `BorderBrush` 经控件中继为输入框边框颜色（root 级定制入口，未设置时恢复共享状态机）。 |
+| 相关 API | 全部 DatePicker / RangeDatePicker public API |
+| 相关 Token | DatePickerToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `DatePickerPrefixStyle` / `RangeDatePickerPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 宿主模板中承载 `ContentLeftAddOn` 的 `AddOnContentPresenter` 投影节点 |
+| 职责 | 输入区内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
+| 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-input` |
+| Style Type | `DatePickerInputStyle` / `RangeDatePickerInputStyle` |
+| ContractType | `TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 宿主模板的 `InfoPickerTextBox #PART_InfoInputBox`（起始端输入框） |
+| 职责 | 日期文本输入框，承载格式化显示值、占位符与只读/校验状态。 |
+| 相关 API | `Text`、`PlaceholderText`、`Format`、`IsReadOnly`、`PreferredInputWidth` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `secondaryInput`（仅 RangeDatePicker）
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `RangeDatePicker` |
+| Part | `secondaryInput` |
+| Selector | `.semantic-secondary-input` |
+| SelectorRoute | `/template/ .semantic-secondary-input` |
+| Style Type | `RangeDatePickerSecondaryInputStyle` |
+| ContractType | `TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `RangeDatePickerTheme.axaml` 的 `InfoPickerTextBox #PART_SecondaryInfoInputBox`（结束端输入框） |
+| 职责 | 范围选择的结束端日期文本输入框，与 `input` 共用格式与宽度基线。 |
+| 相关 API | `SecondaryText`、`SecondaryPlaceholderText` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `DatePickerSuffixStyle` / `RangeDatePickerSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 宿主模板中投影给 `ContentRightAddOn` 的水平 StackPanel（含清除按钮与 `PART_ContentRightAddOnPresenter`） |
+| 职责 | 输入区后缀区域，承载清除按钮、Form 反馈与用户后缀内容。 |
+| 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `clear`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `clear` |
+| Selector | `.semantic-clear` |
+| SelectorRoute | `>> .semantic-scope-handle /template/ .semantic-clear` |
+| Style Type | `DatePickerClearStyle` / `RangeDatePickerClearStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossNestedOwners | `true` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 共享 `PickerClearUpButtonTheme.axaml` 模板内的 `InputClearIconButton #PART_ClearButton` |
+| 职责 | 后缀区清除按钮，进入清除模式（hover / focus）时渲染。 |
+| 相关 API | `ShowClearButtonPredicate`（DatePicker）/ 范围清除行为（RangeDatePicker） |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `DatePickerPopupRootStyle` / `RangeDatePickerPopupRootStyle` |
+| ContractType | `ArrowDecoratedBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 单选：`InfoPickerInputTheme.axaml` 中 `PART_Popup` 的 `ArrowDecoratedBox`；范围：`RangeDatePickerTheme.axaml` 中的 `DualMonthArrowDecoratedBox` |
+| 职责 | 弹层内容根视觉盒子，承载背景、边框、阴影与浮动箭头；`BorderThickness` 定制为非零时盒子进入 `:bordered` 状态，内置主题自动隐藏浮动箭头（内置视觉不支持箭头与边框的融合呈现）。 |
+| 相关 API | `IsArrowVisible`（经 `IsArrowVisibleEffective`）、`ArrowPosition`、`IsMotionEnabled` |
+| 相关 Token | PopupToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.container`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `popup.container` |
+| Selector | `.semantic-popup-container` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-container` |
+| Style Type | `DatePickerPopupContainerStyle` / `RangeDatePickerPopupContainerStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | presenter 主题模板根 `DockPanel #RootLayout`（三个 presenter 主题模板均标注） |
+| 职责 | 日历面板内容容器，组织主体区与底部按钮区的布局。 |
+| 相关 API | 无（面板内容布局容器） |
+| 相关 Token | DatePickerToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `popup.header` |
+| Selector | `.semantic-popup-header` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-header` |
+| Style Type | `DatePickerPopupHeaderStyle` / `RangeDatePickerPopupHeaderStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `CalendarItemTheme.axaml` / `DualMonthCalendarItemTheme.axaml` 的 `PixelAlignedBorder #PART_HeaderFrame`（双月布局内含左右两月导航按钮组） |
+| 职责 | 日历年月导航头部，承载年月标题与前进/后退/翻年按钮。 |
+| 相关 API | 无（导航按钮交互由 CalendarView 内部承担） |
+| 相关 Token | DatePickerToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `popup.body` |
+| Selector | `.semantic-popup-body` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-body` |
+| Style Type | `DatePickerPopupBodyStyle` / `RangeDatePickerPopupBodyStyle` |
+| ContractType | `UniformGrid` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `CalendarItemTheme.axaml` 的 `UniformGrid #PART_MonthViewLayout`；双月为 `DualMonthCalendarItemTheme.axaml` 的同名节点（Columns=2，包住两张月表） |
+| 职责 | 日期面板表格容器，按月视图/年视图模式承载表格布局。 |
+| 相关 API | 无 |
+| 相关 Token | DatePickerToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `popup.content` |
+| Selector | `.semantic-popup-content` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-content` |
+| Style Type | `DatePickerPopupContentStyle` / `RangeDatePickerPopupContentStyle` |
+| ContractType | `Grid` |
+| Cardinality | `DatePicker`: `Single`；`RangeDatePicker`: `Multiple`（双月两张表，带时间单月一张） |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 单月：`CalendarItemTheme.axaml` 的 `Grid #PART_MonthView`；双月：`DualMonthCalendarItemTheme.axaml` 的 `PART_MonthView` 与 `PART_SecondaryMonthView` |
+| 职责 | 单个月份的 7×7 日期表格本体（含周序号列变体），承载日期格子与周头标题。 |
+| 相关 API | 无（随 `popup.body` 呈现） |
+| 相关 Token | DatePickerToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.cell`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `popup.cell` |
+| Selector | `.semantic-cell` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-cell` |
+| Style Type | `DatePickerPopupCellStyle` / `RangeDatePickerPopupCellStyle` |
+| ContractType | `Button` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 月网格运行时创建的 `CalendarDayButton`（`CalendarItem.PopulateMonthViewGrid` 与 `DualMonthCalendarItem.PopulateMonthViewsGrid` 创建路径，构造时注入 marker） |
+| 职责 | 日期格子按钮，承载可选日期、选中/范围/今天/禁用等状态视觉（伪类见 overview）。 |
+| 相关 API | 无（随 `popup.content` 呈现） |
+| 相关 Token | DatePickerToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DatePicker` / `RangeDatePicker` |
+| Part | `popup.footer` |
+| Selector | `.semantic-popup-footer` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-footer` |
+| Style Type | `DatePickerPopupFooterStyle` / `RangeDatePickerPopupFooterStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | presenter 主题模板的 `PixelAlignedBorder #ButtonsFrame`（内含 `PART_NowButton` / `PART_TodayButton` / `PART_ConfirmButton`） |
+| 职责 | 面板底部操作区，承载此刻/今天/确认按钮。 |
+| 相关 API | `IsNeedConfirm`、`IsShowNow` |
+| 相关 Token | DatePickerToken |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -4572,6 +6581,7 @@ DatePicker Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 - `MinDate` / `MaxDate` 的包含边界、PickerMode 归一化、越界受控值不回写以及可见 disabled cell 语义。
+- Semantic Part marker 的维护边界：共享 `InfoPickerInputTheme.axaml` 承载单选触发区静态 marker（`semantic-scope-input`、`semantic-prefix`、`semantic-input`、`semantic-suffix`、`semantic-scope-handle`、`semantic-popup-root`）；`RangeDatePickerTheme.axaml` 承载范围触发区同名 marker 与 `semantic-secondary-input`；共享 `PickerClearUpButtonTheme.axaml` 承载 `semantic-clear` marker（`clear` Part 声明 `CrossNestedOwners=true`，生成器沿 PickerClearUpButton 主题链校验）；`DatePickerPresenterTheme.axaml` / `DualMonthRangeDatePickerPresenterTheme.axaml` / `TimedRangeDatePickerPresenterTheme.axaml` 承载 `semantic-popup-container` / `semantic-popup-footer`；`CalendarItemTheme.axaml` / `DualMonthCalendarItemTheme.axaml` 承载 `semantic-popup-header` / `semantic-popup-body` / `semantic-popup-content`（双月含 secondary 月表）。运行时注入点：`CalendarDayButton` 构造函数追加 `popup.cell` 的生成 selector class 常量（CalendarView 为家族内共享基础设施，两个 owner 常量值一致）。marker 随实例创建一次，月网格 rebuild、弹层重开和容器回收路径不得增删；共享主题 marker 对 TimePicker / RangeTimePicker 保持 inert。
 
 Source: ./controls/form/semantic-cn.md
 
@@ -4581,13 +6591,182 @@ Source: ./controls/form/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Form` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Form 家族的 Semantic Part 契约由 `FormItem` 声明：`root`、`label`、`content`、`extra`、`help`、`helpItem` 六个职责区域
+（§1.1–1.6）。除 `helpItem` 外均为 `Single`，且来自 `FormItemTheme.axaml` 的唯一内置模板——
+`Layout`、`FormLayout`、`RequiredMark`、验证状态和 `IsHideItemLabel` 只改变布局排列、可见性或有效视觉值，
+不增删模板节点。`helpItem` 是运行时逐条创建的消息节点，数量随验证状态和 `Help` 变化（§1.6）。
+
+`Form` 容器自身不注册 descriptor。上游稳定发布基线（6.6.0）的 Form semantic API（`root`、`label`、`content`、`help`、
+`helpItem`、`extra`）中，form 级仅 `root` 落在表单根元素上；在 AtomUI 中对 Form owner 的整体定制通过
+Avalonia 原生 owner 样式（`atom|Form` 类型 selector、ControlTheme、实例 Styles）直接完成，不需要
+`.semantic-*` 契约。字段级语义（label、content、help、extra）全部由 `FormItem` 的模板节点承载。
+
+### 1.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FormItem` |
+| Part | `root` |
+| Selector | FormItem 本身 |
+| SelectorRoute | 不适用 |
+| ContractType | `FormItem` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | FormItem owner |
+| 职责 | 承载字段布局、验证状态、内容接入和 owner-scoped Semantic Style 入口。 |
+| 相关 API | `Layout`、`LabelAlign`、`ValidateStatus`、`ValidateResult`、`IsRequired`、`Content` |
+| 相关 Token | `FormToken`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 FormItem 整体 `Margin`、`Opacity`、对齐和
+尺寸约束；标签列与内容列的 Grid 几何由 `PART_BodyLayout` 布局算法拥有（见实现原理 §7.1），不通过 Semantic
+Style 改写。`FormActionsItem` 复用 FormItem 模板，`atom|FormItem` 类型 selector 同样命中它，不注册独立
+descriptor。
+
+### 1.2 `label`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FormItem` |
+| Part | `label` |
+| Selector | `.semantic-label` |
+| SelectorRoute | `/template/ .semantic-label` |
+| Style Type | `FormItemLabelStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_Label`（`PART_LabelContentLayout` 内的标签文本） |
+| 职责 | 承载 `LabelText` 的文本呈现，包含颜色、字号、对齐和换行。 |
+| 相关 API | `LabelText`、`LabelAlign`、`LabelWrapping`、`IsHideItemLabel` |
+| 相关 Token | `LabelColor`、`LabelFontSize` |
+| 稳定性 | stable since 6.2.0 |
+
+`label` 对齐上游 `classNames.label` 的文本语义：标记（冒号、必填星号、可选文案、tooltip 图标和自定义
+mark）拥有各自的 token 驱动样式，不属于 `label` Part。它适合定制 `Foreground`、`FontSize`、`TextAlignment`、
+`Opacity` 和 `Margin`；默认主题的 `LabelColor`、`LabelFontSize` 和 `LabelAlign` selector 可以被同优先级的用户
+Semantic Style 覆盖。
+
+布局边界：水平布局下 `PART_Label` 的 `MaxWidth` 通过 `TemplateBinding` 投影自 `LabelMaxWidth`（由
+`LayoutUpdated` 测量标签列宽后写入）。用户 Setter 覆盖 `Width` / `MaxWidth` 会中断该测量闭环，导致换行与
+裁剪行为退化；这两个属性槽不推荐定制，标签列宽度应通过 `LabelColInfo` API 控制。
+
+### 1.3 `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FormItem` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `FormItemContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#ContentPresenter`（`ContentFrame` 内主内容 presenter） |
+| 职责 | 承载 `Content` 输入控件的最终呈现位置。 |
+| 相关 API | `Content`、`IsValidateContentType`、`ChildrenSpacing` |
+| 相关 Token | `FormItemSpacing`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`content` 对齐上游 `classNames.content` 语义，是内容呈现区域，
+不等于用户 `Content` 子控件本身。适合定制 `Margin`、`Opacity`、`VerticalAlignment` 和 presenter 级排版属性；
+`Content` 创建的输入控件子树（LineEdit、Select 等自身的模板与 Semantic Part）不属于本 Part，继续由各自
+owner 契约拥有。
+
+布局边界：presenter 的 `MaxWidth` 投影自 `ContentPresenterMaxWidth`（`LayoutUpdated` 测量内容列宽后写入，
+`FormLayout=Inline` 时为正无穷）。用户 Setter 覆盖 `Width` / `MaxWidth` 会中断测量闭环；内容列宽度应通过
+`WrapperColInfo` API 控制。`ContentFrame` 的最小高度与标签列对齐，属于布局算法内部节点。
+
+### 1.4 `extra`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FormItem` |
+| Part | `extra` |
+| Selector | `.semantic-extra` |
+| SelectorRoute | `/template/ .semantic-extra` |
+| Style Type | `FormItemExtraStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#ExtraPresenter`（`PART_ContentLayout` 内 help 区域之后的 Extra presenter） |
+| 职责 | 承载 `Extra` 与 `ExtraTemplate` 的最终呈现。 |
+| 相关 API | `Extra`、`ExtraTemplate` |
+| 相关 Token | SharedToken `ColorTextDescription`、`ControlHeightSM` |
+| 稳定性 | stable since 6.2.0 |
+
+`extra` 对齐上游 `classNames.extra` 语义，是 `Extra` API 的呈现区域。呈现位置与上游一致：位于输入控件
+与 help 区域（`additional` 区）下方、与内容列对齐，不占用控件水平空间；默认主题使用说明文字色
+（`ColorTextDescription`）与 `ControlHeightSM` 最小高度。`ExtraTemplate` 创建的用户子树不属于本 Part。
+`Extra=null` 时 presenter 隐藏（`IsVisible` 绑定 `Extra` 非空），仍属于静态模板结构，marker 与 `Single`
+数量不变。
+
+### 1.5 `help`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FormItem` |
+| Part | `help` |
+| Selector | `.semantic-help` |
+| SelectorRoute | `/template/ .semantic-help` |
+| Style Type | `FormItemHelpStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `StackPanel#ExtraInfoLayout`（`PART_ContentLayout` 内消息区域） |
+| 职责 | 承载验证消息与 `Help` 文案的聚合展示区域。 |
+| 相关 API | `Help`、`ValidateStatus`、`ErrorMessageForeground`、`WarningMessageForeground` |
+| 相关 Token | `FormItemSpacing`、`ColorErrorText`、`ColorWarningText`、`ColorTextDescription` |
+| 稳定性 | stable since 6.2.0 |
+
+`help` 对齐上游 `classNames.help`（ErrorList 根节点）语义，覆盖同一段视觉职责：验证错误消息、警告
+消息和 `Help` 帮助文案共同居住在该区域，逐条内容以 `helpItem` 节点呈现（§1.6）。`HasErrorOrWarningMsg=False`
+时默认主题把该区域折叠为 `MaxHeight=0` 并由 `PART_ContentLayout` 的 `FormItemSpacing` 收紧间距；容器节点与
+marker 始终存在，数量语义为 `Single`。
+
+消息文本颜色由 `ValidateStatus` selector（`ColorErrorText` / `ColorWarningText` / `ColorTextDescription`）和
+`ErrorMessageForeground` / `WarningMessageForeground` API 拥有，`help` 容器 Setter 不改变消息着色。适合定制
+`Margin`、`Spacing`、`Opacity` 和对齐。
+
+### 1.6 `helpItem`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FormItem` |
+| Part | `helpItem` |
+| Selector | `.semantic-help-item` |
+| SelectorRoute | `/template/ .semantic-help > .semantic-help-item` |
+| Style Type | `FormItemHelpItemStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ExtraInfoLayout` 内逐条消息 `TextBlock`（运行时创建）与静态 `TextBlock#HelpText` |
+| 职责 | 承载单条验证错误、警告消息或 `Help` 帮助文案的文本呈现。 |
+| 相关 API | `Help`、`ValidateStatus`、`ErrorMessageForeground`、`WarningMessageForeground` |
+| 相关 Token | `ColorErrorText`、`ColorWarningText`、`ColorTextDescription` |
+| 稳定性 | stable since 6.2.0 |
+
+`helpItem` 对齐上游 `classNames.helpItem`（ErrorList 逐条消息项）语义。FormItem 在验证结果变化时以代码逐条
+创建消息 `TextBlock`，使用生成的 semantic class 常量添加 marker，并按"错误与警告消息在前、`Help` 文案在后"
+的顺序排列；静态 `HelpText` 节点同样携带 marker，是 `Help` 文案的固定实例。消息节点带显式
+`Foreground`（来自 `ErrorMessageForeground` / `WarningMessageForeground`），`HelpText` 着色由 `ValidateStatus`
+selector 拥有；Semantic Style 服从 Avalonia 原生优先级，可以按需覆盖。
+
+运行时边界：消息节点由验证结果应用的统一写入点创建、重建和清空，reset、detach 与新一轮验证不会遗留旧节点或
+旧 marker；节点是 `ExtraInfoLayout` 的直接子节点，不进入 logical tree，不持有验证状态。适合定制 `FontSize`、
+`Margin`、`Opacity` 和文本排版属性。
 
 ## Abstract AXAML Structure
 
@@ -4628,12 +6807,10 @@ Form
                  -> TextBlock#PART_Label (template-stable)
            -> StackPanel#PART_ContentLayout (template-stable)
               -> Border#ContentFrame (template-stable)
-                 -> DockPanel (template-stable)
-                    -> ContentPresenter#ExtraPresenter (internal-observable)
-                    -> ContentPresenter#ContentPresenter (internal-observable)
+                 -> ContentPresenter#ContentPresenter (internal-observable)
               -> StackPanel#ExtraInfoLayout (template-stable)
-                 -> TextBlock#PART_ErrorMsg (template-stable)
                  -> TextBlock#HelpText (template-stable)
+              -> ContentPresenter#ExtraPresenter (internal-observable)
   -> Form (control theme, FormTheme.axaml)
      -> Border#Frame (template-stable)
         -> ItemsPresenter#PART_ItemsPresenter (template-stable)
@@ -4664,16 +6841,14 @@ Form
 | `CustomOptionalMarkPresenter` | template node (ContentPresenter) | `FormItemTheme.axaml` | FormItem | `CustomOptionalMark`, `CustomOptionalMarkTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_DefaultRequireMark` | template node (TextBlock) | `FormItemTheme.axaml` | FormItem | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Label` | template node (TextBlock) | `FormItemTheme.axaml` | FormItem | `LabelMaxWidth`, `LabelText`, `LabelWrapping` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ContentLayout` | template node (StackPanel) | `FormItemTheme.axaml` | FormItem | `Content`, `ContentPresenterMaxWidth`, `ErrorMessageInlines`, `Extra`, `ExtraTemplate`, `Help` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `ContentFrame` | template node (Border) | `FormItemTheme.axaml` | FormItem | `Content`, `ContentPresenterMaxWidth`, `Extra`, `ExtraTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `DockPanel` | template node (DockPanel) | `FormItemTheme.axaml` | FormItem | `Content`, `ContentPresenterMaxWidth`, `Extra`, `ExtraTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `ExtraPresenter` | template node (ContentPresenter) | `FormItemTheme.axaml` | FormItem | `Extra`, `ExtraTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_ContentLayout` | template node (StackPanel) | `FormItemTheme.axaml` | FormItem | `Content`, `ContentPresenterMaxWidth`, `Extra`, `ExtraTemplate`, `Help` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ContentFrame` | template node (Border) | `FormItemTheme.axaml` | FormItem | `Content`, `ContentPresenterMaxWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ContentPresenter` | template node (ContentPresenter) | `FormItemTheme.axaml` | FormItem | `Content`, `ContentPresenterMaxWidth` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `ExtraInfoLayout` | template node (StackPanel) | `FormItemTheme.axaml` | FormItem | `ErrorMessageInlines`, `Help` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ErrorMsg` | template node (TextBlock) | `FormItemTheme.axaml` | FormItem | `ErrorMessageInlines` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ExtraInfoLayout` | template node (StackPanel) | `FormItemTheme.axaml` | FormItem | `Help` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HelpText` | template node (TextBlock) | `FormItemTheme.axaml` | FormItem | `Help` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Form` | control theme | `FormTheme.axaml` | 用户代码 / 控件宿主 | `CornerRadius`, `Padding` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Frame` | template node (Border) | `FormTheme.axaml` | Form | `CornerRadius`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ExtraPresenter` | template node (ContentPresenter) | `FormItemTheme.axaml` | FormItem | `Extra`, `ExtraTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Form` | control theme | `FormTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `CornerRadius`, `Padding` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Frame` | template node (Border) | `FormTheme.axaml` | Form | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `CornerRadius`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `FormTheme.axaml` | Form | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `FormValidateFeedback` | control theme | `FormValidateFeedbackTheme.axaml` | Form | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Content` | template node (ContentPresenter) | `FormValidateFeedbackTheme.axaml` | FormValidateFeedback | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
@@ -4684,7 +6859,7 @@ Form
 | --- | --- | --- |
 | `PART_BodyLayout` | `Grid` | FormItem 标签列和内容列布局。 |
 | `PART_LabelLayout` | `Panel` | 标签、必填标记、tooltip、可选标记和冒号承载。 |
-| `PART_ContentLayout` | `Panel` | 输入内容、Extra、错误消息和帮助文本承载。 |
+| `PART_ContentLayout` | `Panel` | 输入内容、错误消息/帮助文本与 Extra 承载。 |
 
 ## Pseudo Classes
 
@@ -4826,13 +7001,209 @@ Source: ./controls/line-edit/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `LineEdit` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`LineEdit` 公开 `root`、`prefix`、`input`、`suffix`、`clear`、`count` 六个职责区域（§1.1–1.6）；`SearchEdit`
+公开 `root`、`prefix`、`input`、`suffix`、`clear`、`button`（§1.7）；`TextArea` 公开 `root`、`textarea`、`clear`、
+`count`（§1.8）。每个 descriptor 只属于各自的 public owner；`TextBox` 与 internal `AddOnDecoratedBox` 不注册独立
+descriptor，也不能通过继承关系自动获得其他 owner 的 owner-scoped Semantic Style。
+
+### 1.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `LineEdit` |
+| Part | `root` |
+| Selector | LineEdit 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `LineEdit` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | LineEdit owner |
+| 职责 | 承载文本值、输入状态、尺寸、variant、验证状态和 owner-scoped Semantic Style 入口。 |
+| 相关 API | `Text`、`SizeType`、`StyleVariant`、`Status`、`IsEnabled`、`IsReadOnly`、`IsAllowClear`、`IsShowCount`、`Background`、`BorderBrush` |
+| 相关 Token | SharedToken、`LineEditToken` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 LineEdit 整体 `Background`、`BorderBrush`、
+`BorderThickness`、`Opacity`、对齐和尺寸约束；其中 `Background` / `BorderBrush` 由 `AbstractTextInput` 以 LocalValue
+中继到 `InputControlFrame` 生效——定制期间该属性槽的 hover / pressed / focus 变色冻结，focus 的 `BoxShadow` 光晕不受
+影响，置空后恢复 frame 状态机。variant、effective status、CompactSpace 与 native validation 的状态归一仍由
+`AbstractTextInput` 和 `InputControlFrame` 负责。
+
+### 1.2 `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `LineEdit` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input-frame /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `LineEditPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | internal `AddOnContentPresenter`（最低 public 类型为 `ContentPresenter`） |
+| 职责 | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 |
+| 相关 API | `InnerLeftContent`、`InnerLeftContentTemplate` |
+| 相关 Token | `SpacingXXS`、输入尺寸 padding |
+| 稳定性 | stable since 6.2.0 |
+
+`prefix` 是 LineEdit 模板中的稳定 presenter。internal `AddOnContentPresenter` 保留 template-only 场景的 child 创建与可见性
+语义，同时通过 public 基类 `ContentPresenter` 约束 Setter。`InnerLeftContent=null` 且 template 也为 null 时 presenter 仍属于
+静态模板结构；模板内容变化不改变 Part 身份。适合定制 `Opacity`、`Margin`、`Padding`、对齐和 presenter 级排版属性。
+`InnerLeftContentTemplate` 创建的用户子树不属于 LineEdit Semantic Part。
+
+### 1.3 `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `LineEdit` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-input` |
+| Style Type | `LineEditInputStyle` |
+| ContractType | `TextPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `InputTextPresenter#PART_TextPresenter` |
+| 职责 | 绘制当前文本、光标、选择范围和密码 reveal 结果。 |
+| 相关 API | `Text`、`CaretIndex`、`SelectionStart`、`SelectionEnd`、`PasswordChar`、`RevealPassword` |
+| 相关 Token | `FontSize`、`LineHeight`、选择色与 caret 资源 |
+| 稳定性 | stable since 6.2.0 |
+
+`input` 的最低 public `ContractType` 是 Avalonia `TextPresenter`，而不是 internal 实现细节。它适合定制 `Opacity`、
+`FontSize`、`FontWeight`、`FontStyle`、`TextAlignment` 和局部 Margin。文本 viewport、选择布局、caret 与密码显示仍属于文本输入
+内核，不通过 Semantic Style 改写其 ownership。
+
+### 1.4 `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `LineEdit` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-input-frame /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `LineEditSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 内部后缀布局 `StackPanel` |
+| 职责 | 组织 clear、reveal、Form feedback、内部右侧内容和 count 的横向布局。 |
+| 相关 API | `InnerRightContent`、`InnerRightContentTemplate`、`IsAllowClear`、`IsEnableRevealButton`、`IsShowCount` |
+| 相关 Token | `UniformlyPaddingXXS`、输入尺寸 padding |
+| 稳定性 | stable since 6.2.0 |
+
+`suffix` 是稳定的布局区域，不等于用户 `InnerRightContent` 本身。适合定制 `Spacing`、`Opacity`、`Margin`、对齐和布局方向；
+clear 与 count 仍拥有各自更窄的 Part。reveal、Form feedback 和用户右侧内容没有独立 Semantic Part，其内部结构也不由
+`suffix` 契约继续展开。
+
+### 1.5 `clear`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `LineEdit` |
+| Part | `clear` |
+| Selector | `.semantic-clear` |
+| SelectorRoute | `/template/ .semantic-scope-input-frame /template/ .semantic-scope-suffix > .semantic-suffix > .semantic-clear` |
+| Style Type | `LineEditClearStyle` |
+| ContractType | `Avalonia.Controls.Button` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `InputClearIconButton#PART_ClearButton` |
+| 职责 | 提供清除当前文本的操作入口。 |
+| 相关 API | `IsAllowClear`、`ClearIcon`、`IsReadOnly`、`Text` |
+| 相关 Token | clear 按钮主题与 SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`clear` 节点始终存在，`IsEffectiveShowClearButton` 只切换可见性。它适合定制 `Opacity`、`Margin`、`Padding`、`Cursor` 和
+Button 级交互属性；清除命令仍必须进入 `NotifyClearButtonClicked()` / `Clear()` 的统一行为，不通过样式替换文本状态源。
+
+### 1.6 `count`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `LineEdit` |
+| Part | `count` |
+| Selector | `.semantic-count` |
+| SelectorRoute | `/template/ .semantic-scope-input-frame /template/ .semantic-scope-suffix > .semantic-suffix > .semantic-count` |
+| Style Type | `LineEditCountStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#TextCountIndicator` |
+| 职责 | 展示当前文本长度与 `MaxLength` 的计数文案。 |
+| 相关 API | `IsShowCount`、`Text`、`MaxLength` |
+| 相关 Token | `ColorTextPlaceholder`、字体与行高资源 |
+| 稳定性 | stable since 6.2.0 |
+
+`count` 节点始终存在，`IsShowCount=false` 只切换可见性。它适合定制 `Foreground`、`FontSize`、`FontWeight`、`Opacity`、
+`Margin` 和对齐；计数格式和刷新时机由 `AbstractTextInput` 维护，不属于 Semantic Style。
+
+### 1.7 `SearchEdit`
+
+`SearchEdit` 注册独立 descriptor，Part 集合为 `root`、`prefix`、`input`、`suffix`、`clear`、`button`。`prefix`、
+`input`、`suffix`、`clear` 的 selector、route、`ContractType` 与 LineEdit 同名 Part 一致，只是 owner-scoped Style
+类型换为 `SearchEdit*` 前缀（如 `SearchEditInputStyle`，`SetterTargetType` 仍为最低 public 类型）。以下只列出差异字段：
+
+| 字段 | `button` |
+| --- | --- |
+| Owner | `SearchEdit` |
+| Part | `button` |
+| Selector | `.semantic-button` |
+| SelectorRoute | `/template/ .semantic-scope-input-frame /template/ .semantic-button` |
+| Style Type | `SearchEditButtonStyle` |
+| ContractType | `Button`（AtomUI） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | internal `SearchEditDecoratedBox` 模板内的 `atom:Button#PART_RightAddOn` |
+| 职责 | 承载搜索动作按钮的根视觉、文字与图标（loading 状态沿用按钮自身的 loading 呈现）。 |
+| 相关 API | `SearchButtonStyle`、`SearchButtonText`、`SearchButtonTheme`、`IsOperating` |
+| 稳定性 | stable since 6.2.0 |
+
+`button` 的 marker 由 `SearchEditDecoratedBox` 在模板应用后通过 C# 追加（RuntimeCreated 契约），因此主题资产内没有
+静态 `Classes.semantic-button` 声明。`SearchEdit` 不提供 `count` Part：其模板不包含计数指示器。`root` 不生成 Style；
+用户定制搜索按钮整体背景 / 边框时应作用在 `button` Part 而不是 `root`。
+
+### 1.8 `TextArea`
+
+`TextArea` 注册独立 descriptor，Part 集合为 `root`、`textarea`、`clear`、`count`。`clear`、`count` 的 selector、
+route、`ContractType` 与 LineEdit 同名 Part 一致（`TextArea*` Style 前缀）；`root` 由生成器隐式补齐。以下只列出
+差异字段：
+
+| 字段 | `textarea` |
+| --- | --- |
+| Owner | `TextArea` |
+| Part | `textarea` |
+| Selector | `.semantic-textarea` |
+| SelectorRoute | `/template/ .semantic-textarea` |
+| Style Type | `TextAreaTextareaStyle` |
+| ContractType | `TextPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `InputTextPresenter#PART_TextPresenter` |
+| 职责 | 承载多行文本的输入、光标、选择与换行展示。 |
+| 相关 API | `Text`、`Lines`、`MinLines`、`MaxLines`、`IsAutoSize`、`IsResizable` |
+| 稳定性 | stable since 6.2.0 |
+
+`TextArea` 的 `count` 位于 owner 模板底部（DockPanel 下缘），route 为默认 `/template/ .semantic-count`；`clear`
+位于右侧 addon 区，route 与 LineEdit 同形。`TextArea` 不提供 `prefix` / `suffix` Part；resize handle 与
+`Placeholder` 文本不属于 Semantic Part。
 
 ## Abstract AXAML Structure
 
@@ -4887,6 +7258,20 @@ LineEdit
                  -> ScrollViewer#PART_ScrollViewer (template-stable)
                     -> ContentPresenter#{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentPresenterPart} (internal-observable)
                  -> AddOnContentPresenter#{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentRightAddOnPart} (internal-observable)
+  -> AddOnDecoratedBox (control theme, AddOnDecoratedBoxTheme.axaml)
+     -> DockPanel#RootLayout (template-stable)
+        -> PixelAlignedBorder#{x:Static atom:AddOnDecoratedBoxThemeConstants.LeftAddOnPart} (template-stable)
+           -> AddOnContentPresenter#PART_LeftAddOnPresenter (template-stable)
+        -> PixelAlignedBorder#{x:Static atom:AddOnDecoratedBoxThemeConstants.RightAddOnPart} (template-stable)
+           -> AddOnContentPresenter#PART_RightAddOnPresenter (template-stable)
+        -> AddOnDecoratedBoxContentFrame#{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentFramePart} (internal-observable)
+           -> AdaptiveSpacingDockPanel#ContentLayout (template-stable)
+              -> AddOnContentPresenter#{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentLeftAddOnPart} (internal-observable)
+              -> AddOnContentPresenter#{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentRightAddOnPart} (internal-observable)
+              -> ContentPresenter#{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentPresenterPart} (internal-observable)
+  -> InputControlFrame (control theme, InputControlFrameTheme.axaml)
+     -> PixelAlignedBorder#InnerBoxDecorator (template-stable)
+        -> ContentPresenter#PART_ContentPresenter (template-stable)
 ```
 
 ### 协作节点
@@ -4924,6 +7309,11 @@ LineEdit
 | `PART_ScrollViewer` | template node (ScrollViewer) | `TextAreaDecoratedBoxTheme.axaml` | TextAreaDecoratedBox | `Content`, `ContentTemplate`, `HorizontalScrollBarVisibility`, `IsScrollChainingEnabled`, `ScrollerPadding`, `VerticalScrollBarVisibility` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentPresenterPart}` | template node (ContentPresenter) | `TextAreaDecoratedBoxTheme.axaml` | TextAreaDecoratedBox | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `{x:Static atom:AddOnDecoratedBoxThemeConstants.ContentRightAddOnPart}` | template node (AddOnContentPresenter) | `TextAreaDecoratedBoxTheme.axaml` | TextAreaDecoratedBox | `ContentRightAddOn`, `ContentRightAddOnTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `AddOnDecoratedBox` | control theme | `AddOnDecoratedBoxTheme.axaml` | LineEdit | `Background`, `BorderBrush`, `BoxShadow`, `Content`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `RootLayout` | template node (DockPanel) | `AddOnDecoratedBoxTheme.axaml` | AddOnDecoratedBox | `Background`, `BorderBrush`, `BoxShadow`, `Content`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `{x:Static atom:AddOnDecoratedBoxThemeConstants.LeftAddOnPart}` | template node (PixelAlignedBorder) | `AddOnDecoratedBoxTheme.axaml` | AddOnDecoratedBox | `LeftAddOn`, `LeftAddOnBorderThickness`, `LeftAddOnCornerRadius`, `LeftAddOnTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_LeftAddOnPresenter` | template node (AddOnContentPresenter) | `AddOnDecoratedBoxTheme.axaml` | AddOnDecoratedBox | `LeftAddOn`, `LeftAddOnTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `{x:Static atom:AddOnDecoratedBoxThemeConstants.RightAddOnPart}` | template node (PixelAlignedBorder) | `AddOnDecoratedBoxTheme.axaml` | AddOnDecoratedBox | `RightAddOn`, `RightAddOnBorderThickness`, `RightAddOnCornerRadius`, `RightAddOnTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
@@ -5055,10 +7445,14 @@ TextBox / LineEdit / TextArea Token 不承载文本值、placeholder、清除状
 - `InputControlFrame` 是所有输入表面状态 selector、边框、背景、focus shadow、error/warning、disabled 和 motion 的唯一 owner。
 - `AddOnDecoratedBox` 及其派生类型只承载 AddOn、内部内容和专用布局，不复制 frame 的状态计算或视觉 selector。
 - `StyleVariant`、`Status`、`SizeType`、Form 状态和 native validation 必须先由 `AbstractTextInput` 归一，再通过稳定绑定传给 frame。
+- 输入主题不在 owner 层携带 `Background` / `BorderBrush` 默认值，frame 主题是 rest 态取值的唯一来源；`TextBox` 模板不以 `TemplateBinding` 绑定这两个属性。owner 值是“用户是否定制 root 表面”的判定输入，恢复任何 owner 层默认都会使中继判定失效。
+- root `Background` / `BorderBrush` 中继语义保持不变：owner 有值 → frame 以 LocalValue 接管（定制期间该属性槽的交互态变色冻结），owner 置空 → frame `ClearValue` 恢复状态机；focus 反馈依赖 `BoxShadow` 独立属性槽，不随边框定制失效。
 - `SearchEdit.IsOperating=true` 时按钮和 Enter 键不重复触发 `SearchRequested`。
 - `TextArea.Lines` 必须遵守 `MinLines` / `MaxLines`，resize 不得突破行数边界。
 - Form feedback 订阅必须在 detach 时释放。
 - TextPresenter 的 margin、placeholder、selection、caret 和 disabled 文本色属于输入模板契约，不应在业务控件中用 magic width 补偿。
+- LineEdit 的 `root`、`prefix`、`input`、`suffix`、`clear`、`count` Part 名称、route、最低 public `ContractType` 与 `Single` 数量语义必须保持稳定。
+- `SearchEdit` 与 `TextArea` 拥有各自注册的 descriptor（见 Semantic Part 契约 1.7 / 1.8）；`TextBox` 不因继承或模板复用自动获得家族 descriptor，扩展其契约必须单独评审 public owner 边界。
 
 维护不变量：
 
@@ -5075,6 +7469,10 @@ TextBox / LineEdit / TextArea Token 不承载文本值、placeholder、清除状
 - 重新套用模板不能泄漏旧按钮 click、旧模板 binding、旧 preedit 或旧 viewport source；logical reattach 后当前模板交互与状态绑定必须保持有效，Form feedback 必须重新订阅。
 - TextPresenter margin 是输入模板视觉契约；文本有效宽度由输入控件在模板所有权边界内统一计算并发布，不在业务控件或消费 behavior 中加入隐藏补偿。
 - 输入控件不得向内部消费方暴露 `TextPresenter` / `ScrollViewer` 实例；模板结构变化只能影响输入控件自己的度量实现。
+- `.semantic-scope-input-frame`、`.semantic-scope-prefix`、`.semantic-scope-suffix` 只能服务 LineEdit 的显式 route，不得提升为公开 Part 或默认主题 selector。
+- clear、count、prefix、suffix 的可见性和内容变化不得增删 marker；五个 selector Part 在内置 LineEdit 模板中均保持 `Single`。
+- 四个输入主题（LineEdit / TextBox / SearchEdit / TextArea）不得在 owner 层恢复 `Background` / `BorderBrush` 默认值，`TextBox` 模板不得重新绑定这两个属性的 `TemplateBinding`；owner 属性值是中继判定“是否定制”的唯一输入。`EmbeddedTextBox` 这类需要压制 chrome 的内嵌派生在自身 ControlTheme 中显式设置 owner 值，经中继成为 frame LocalValue，不依赖模板绑定。
+- root `Background` / `BorderBrush` 中继不得改变共享状态机：未定制路径零 LocalValue 写入，rest / hover / pressed / focus / disabled 视觉与 `LineEditBorderRenderTests` 基线保持一致；定制路径冻结该属性槽的交互态变色，`ClearValue` 后必须完整恢复状态机。
 
 Source: ./controls/mentions/semantic-cn.md
 
@@ -5084,13 +7482,198 @@ Source: ./controls/mentions/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Mentions` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Mentions 是唯一 Semantic owner，公开 9 个 Semantic Part。声明位于 `Mentions.SemanticParts.cs` partial 文件。
+
+Mentions 的输入表面整体委托给内部 `MentionTextArea : TextArea`，因此 `prefix` / `content` / `placeholder` /
+`input` / `clear` 五个输入区部件复用 AutoCompleteTextArea 的跨嵌套 owner 路由：`MentionTextArea` 节点在宿主模板
+上标注 `.semantic-scope-input` 锚点，随后跨入共享 `TextAreaTheme` 与 `TextAreaDecoratedBoxTheme` 的模板边界命中
+真实 marker。`prefix` 的 marker 本体是宿主模板 `TextAreaTheme.axaml` 里投影给 `TextAreaDecoratedBox.ContentLeftAddOn`
+的 `AddOnContentPresenter`，其经共享 `TextAreaDecoratedBoxTheme` 的 `.semantic-scope-prefix` 锚点路由可达。弹层三部件
+与 AutoComplete 同构：`popup.root` 是宿主模板 `PopupFrame` 静态 Border，`popup.list` 是模板内 `CandidateList`
+静态节点，`popup.listItem` 的 marker 由 `CandidateList` 容器创建路径注入。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `root` |
+| Selector | Mentions 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Mentions` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Mentions owner |
+| 职责 | Mentions root 是文本值、触发符、候选数据、过滤、弹层与 Form 状态的组织边界。 |
+| 相关 API | 全部 Mentions public API |
+| 相关 Token | MentionsToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input >> .semantic-scope-input-frame /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `MentionsPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextAreaTheme.axaml` 中投影给 `TextAreaDecoratedBox.ContentLeftAddOn` 的 `AddOnContentPresenter` |
+| 职责 | 输入内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
+| 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-content` |
+| Style Type | `MentionsContentStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextAreaTheme.axaml` 中 `ContentLayout` 内容面板 |
+| 职责 | 输入内容面板，承载占位符和多行文本 presenter。 |
+| 相关 API | `Value`、`PlaceholderText`、`Lines`、`MinLines`、`MaxLines`、`IsAutoSize` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `placeholder`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `placeholder` |
+| Selector | `.semantic-placeholder` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-content > .semantic-placeholder` |
+| Style Type | `MentionsPlaceholderStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextAreaTheme.axaml` 中 `Placeholder` TextBlock |
+| 职责 | 空文本状态下的占位符文本。 |
+| 相关 API | `PlaceholderText`、`PlaceholderForeground`（经 TextArea） |
+| 相关 Token | SharedToken（ColorTextPlaceholder） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `input` |
+| Selector | `.semantic-textarea` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-textarea` |
+| Style Type | `MentionsInputStyle` |
+| ContractType | `TextPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextAreaTheme.axaml` 中 `InputTextPresenter`（`PART_TextPresenter`，internal，公共契约承诺 Avalonia `TextPresenter`） |
+| 职责 | 多行文本编辑 presenter，承载 `Value` 文本与 caret/selection 状态。 |
+| 相关 API | `Value`、`IsReadOnly`、`IsAutoFocus` |
+| 相关 Token | SharedToken（ColorText、SelectionBackground、CaretBrush） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `clear`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `clear` |
+| Selector | `.semantic-clear` |
+| SelectorRoute | `/template/ .semantic-scope-input >> .semantic-scope-input-frame /template/ .semantic-scope-suffix > .semantic-suffix > .semantic-clear` |
+| Style Type | `MentionsClearStyle` |
+| ContractType | `Button` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextAreaTheme.axaml` 中 `InputClearIconButton`（`PART_ClearButton`，internal，公共契约承诺 Avalonia `Button`） |
+| 职责 | 输入区后缀内的清除按钮，`IsAllowClear` 启用且内容非空时可见。 |
+| 相关 API | `IsAllowClear`、`ClearIcon` |
+| 相关 Token | SharedToken（IconSizeXS） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `MentionsPopupRootStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `MentionsTheme.axaml` 中 `PopupFrame`（`PART_Popup` 直接子节点） |
+| 职责 | 候选弹层根 `Border`，可定制弹层边框、背景、宽度与圆角。 |
+| 相关 API | `MaxPopupHeight`、`MinPopupWidth`、`PopupContentPadding` |
+| 相关 Token | PopupTokenResource（PopupCornerRadius）、SharedToken（ColorBgElevated） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.list`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `popup.list` |
+| Selector | `.semantic-popup-list` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list` |
+| Style Type | `MentionsPopupListStyle` |
+| ContractType | `CandidateList` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `MentionsTheme.axaml` 中 `PART_CandidateList`（public `CandidateList`） |
+| 职责 | 弹层内候选列表容器，承载过滤后的候选项。 |
+| 相关 API | `OptionsSource`、`Filter`、`FilterValueSelector`、`OptionTemplate` |
+| 相关 Token | MentionsToken（OptionHeight）、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.listItem`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Mentions` |
+| Part | `popup.listItem` |
+| Selector | `.semantic-popup-list-item` |
+| SelectorRoute | `/template/ .semantic-popup-list >> .semantic-popup-list-item` |
+| Style Type | `MentionsPopupListItemStyle` |
+| ContractType | `CandidateListItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | public `CandidateListItem`（`CandidateList.CreateContainerForItemOverride()` 注入 marker） |
+| 职责 | 候选列表中的单个选项条目，运行时容器创建，虚拟化回收复用时 marker 保持。 |
+| 相关 API | `OptionTemplate`、`DisplayCandidateCount` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`ContractType` 不参与 selector 匹配，只约束 `x:SetterTargetType` 与兼容性下界；实现节点为 internal 类型时，
+公共契约承诺到最低 public 基类（`input`→`TextPresenter`、`clear`→`Button`）。
 
 ## Abstract AXAML Structure
 
@@ -5269,6 +7852,7 @@ MentionsToken 不承载以下状态：
 - 候选提交必须使用 `MentionTextArea.InsertMentionOption()`，保留 undo/redo 和 selection 语义。
 - 重新套用模板不能泄漏旧 part 的事件订阅。
 - MentionsToken 只服务 popup 尺寸，不承载候选数据、过滤值、loading 或输入状态。
+- Semantic Part marker 的维护边界：`MentionsTheme.axaml` 承载 `semantic-scope-input`（`MentionTextArea` 节点）、`semantic-popup-root`（`PopupFrame` Border）、`semantic-popup-list`（`PART_CandidateList`）静态 marker；`prefix` / `content` / `placeholder` / `input` / `clear` 的 marker 位于共享 `TextAreaTheme.axaml` 与 `TextAreaDecoratedBoxTheme.axaml`（`CrossNestedOwners=true`，生成器沿 `MentionTextArea` → `TextArea` 主题链校验）；`popup.listItem` 的 marker 由共享 `CandidateList.CreateContainerForItemOverride()` 注入（`RuntimeCreated=true`）。marker 随容器实例创建一次，prepare/clear/recycle 路径不得增删。
 
 Source: ./controls/numeric-up-down/semantic-cn.md
 
@@ -5278,13 +7862,132 @@ Source: ./controls/numeric-up-down/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `NumericUpDown` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`NumericUpDown` 公开 `root`、`prefix`、`input`、`suffix`、`clear` 五个职责区域（§1.1–1.5）。每个 Part 均为
+`Single`，且在 `Mode=Input` 与 `Mode=Spinner` 两个内置模板变体中提供相同的 marker 与 route。internal
+`NumericUpDownSpinner`、`ButtonSpinnerDecoratedBox` 与 `EmbeddedTextBox` 不注册独立 descriptor，也不能通过模板
+复用自动获得其他 owner 的 owner-scoped Semantic Style。
+
+### 1.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NumericUpDown` |
+| Part | `root` |
+| Selector | NumericUpDown 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `NumericUpDown` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NumericUpDown owner |
+| 职责 | 承载数值、尺寸、variant、验证状态和 owner-scoped Semantic Style 入口。 |
+| 相关 API | `Value`、`FormatString`、`SizeType`、`StyleVariant`、`Status`、`IsEnabled`、`IsReadOnly`、`IsAllowClear`、`Increment`、`Maximum`、`Minimum` |
+| 相关 Token | SharedToken、`NumericUpDownToken`、`ButtonSpinnerToken` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 NumericUpDown 整体 `BorderBrush`、`Opacity`、对齐和
+尺寸约束；`BorderBrush` 会以 LocalValue 中继到输入 frame 生效（对齐 LineEdit 与上游 `styles.root.borderColor`
+语义）——定制期间该属性槽的 hover / focus 变色冻结，focus 的 `BoxShadow` 光晕不受影响，置空后恢复 frame 状态机。
+variant、effective status 与 CompactSpace 的状态归一仍由共享 frame 结构负责。
+
+### 1.2 `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NumericUpDown` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-spinner /template/ .semantic-scope-frame /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `NumericUpDownPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | internal `AddOnContentPresenter`（最低 public 类型为 `ContentPresenter`） |
+| 职责 | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 |
+| 相关 API | `InnerLeftContent`、`InnerLeftContentTemplate` |
+| 相关 Token | `SpacingXXS`、输入尺寸 padding |
+| 稳定性 | stable since 6.2.0 |
+
+`prefix` 是 NumericUpDown 模板中的稳定 presenter，通过 `ButtonSpinner.InnerLeftContent` 传递并由共享 frame 结构的
+content 前缀槽呈现，两个模板变体的呈现槽一致。`InnerLeftContent=null` 且 template 也为 null 时 presenter 仍属于
+静态模板结构；适合定制 `Opacity`、`Margin`、`Foreground` 和 presenter 级排版属性。
+`InnerLeftContentTemplate` 创建的用户子树不属于 NumericUpDown Semantic Part。
+
+### 1.3 `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NumericUpDown` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-input` |
+| Style Type | `NumericUpDownInputStyle` |
+| ContractType | `TextBox`（AtomUI public 控件） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | internal `EmbeddedTextBox#PART_TextBox`（最低 public 类型为 `TextBox`） |
+| 职责 | 承载数值文本的编辑表面，包含字体、文本对齐、光标与选择呈现。 |
+| 相关 API | `Text`、`PlaceholderText`、`IsReadOnly`、`IsStringMode`、`FormatString`、`IsKeyboardEnabled` |
+| 相关 Token | `FontSize`、文本与 caret 资源 |
+| 稳定性 | stable since 6.2.0 |
+
+`input` 的最低 public `ContractType` 是 AtomUI `TextBox`，而不是 internal `EmbeddedTextBox` 实现细节。与 LineEdit 的
+`input`（TextPresenter）不同，NumericUpDown 的文本编辑表面由内嵌 `TextBox` 承担，marker 位于 owner 模板内的
+`EmbeddedTextBox#PART_TextBox` 节点上，因此在 `Mode=Input` 与 `Mode=Spinner` 两个变体中使用同一条默认 route。
+它适合定制 `Foreground`、`FontSize`、`Opacity`、`TextAlignment` 等文本级属性；数值解析、字符串模式与键盘行为仍由
+`NumericUpDown` 拥有，不通过 Semantic Style 改写。
+
+### 1.4 `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NumericUpDown` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-spinner /template/ .semantic-scope-frame /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `NumericUpDownSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 内部后缀布局 `StackPanel` |
+| 职责 | 组织 clear 与 `InnerRightContent` 的横向布局。 |
+| 相关 API | `InnerRightContent`、`InnerRightContentTemplate`、`IsAllowClear` |
+| 相关 Token | `UniformlyPaddingXXS`、输入尺寸 padding |
+| 稳定性 | stable since 6.2.0 |
+
+`suffix` 是稳定的布局区域，不等于用户 `InnerRightContent` 本身。适合定制 `Spacing`、`Opacity`、`Margin` 和对齐；
+clear 与用户右侧内容仍各有边界，用户内容子树不由 `suffix` 契约继续展开。
+
+### 1.5 `clear`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NumericUpDown` |
+| Part | `clear` |
+| Selector | `.semantic-clear` |
+| SelectorRoute | `/template/ .semantic-clear` |
+| Style Type | `NumericUpDownClearStyle` |
+| ContractType | `Avalonia.Controls.Button` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `InputClearIconButton#PART_ClearButton`（输入段内右缘，位于内部 + / 浮动 handle 之前） |
+| 职责 | 提供清空当前数值的操作入口。 |
+| 相关 API | `IsAllowClear`、`ClearIcon`、`IsReadOnly`、`Text` |
+| 相关 Token | clear 按钮主题与 SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`clear` 节点始终存在于两个模板变体的输入段内（与 `input` 同级，紧贴输入文本右缘），`IsEffectiveShowClearButton` 只切换可见性。它适合定制 `Opacity`、`Margin`、`Cursor` 和
+Button 级交互属性；清除命令仍进入 `NotifyClearButtonClicked()` 的统一行为。
 
 ## Abstract AXAML Structure
 
@@ -5292,7 +7995,13 @@ Source: ./controls/numeric-up-down/semantic-cn.md
 
 ```xml
 <NumericUpDownSpinner Name="PART_Spinner">
-    <EmbeddedTextBox Name="PART_TextBox" />
+    <DockPanel>
+        <StackPanel Name="PART_SuffixGroup">
+            <InputClearIconButton Name="PART_ClearButton" />
+            <AddOnContentPresenter Name="PART_InnerRightContentPresenter" />
+        </StackPanel>
+        <EmbeddedTextBox Name="PART_TextBox" />
+    </DockPanel>
 </NumericUpDownSpinner>
 ```
 
@@ -5353,14 +8062,21 @@ NumericUpDown
            -> PixelAlignedBorder (template-stable)
               -> IconButton#PART_IncreaseButton (template-stable)
            -> DockPanel (template-stable)
-              -> AddOnContentPresenter (internal-observable)
-              -> AddOnContentPresenter (internal-observable)
+              -> ContentPresenter (internal-observable)
               -> ContentPresenter (internal-observable)
   -> NumericUpDown (control theme, NumericUpDownTheme.axaml)
      -> NumericUpDownSpinner#PART_Spinner (template-stable)
-        -> EmbeddedTextBox#PART_TextBox (template-stable)
+        -> DockPanel (template-stable)
+           -> StackPanel#PART_SuffixGroup (template-stable)
+              -> InputClearIconButton#PART_ClearButton (template-stable)
+              -> AddOnContentPresenter#PART_InnerRightContentPresenter (template-stable)
+           -> EmbeddedTextBox#PART_TextBox (template-stable)
      -> NumericUpDownSpinner#PART_Spinner (template-stable)
-        -> EmbeddedTextBox#PART_TextBox (template-stable)
+        -> DockPanel (template-stable)
+           -> StackPanel#PART_SuffixGroup (template-stable)
+              -> InputClearIconButton#PART_ClearButton (template-stable)
+              -> AddOnContentPresenter#PART_InnerRightContentPresenter (template-stable)
+           -> EmbeddedTextBox#PART_TextBox (template-stable)
 ```
 
 ### 协作节点
@@ -5553,10 +8269,9 @@ Source: ./controls/otp-line-edit/semantic-cn.md
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
 | `root` | `OtpLineEdit` | 控件根语义区域，承载 public API、文本值、验证状态和主题入口。 | `Text`、`Length`、`Status`、`SizeType` | `OtpLineEditToken`、SharedToken | stable |
-| `cell-list` | `PART_CellsHost` | 根据 `Length` 展示 cell 和 separator。 | `Length`、`Separator`、`SeparatorInterval` | `CellGap`、`CellWidth*` | template-stable |
+| `cellList` | `PART_CellsHost` | 根据 `Length` 展示 cell 和 separator。 | `Length`、`Separator` | `CellGap`、`CellWidth*` | template-stable |
 | `cell` | `OtpLineEditCell` | 展示单个字符、placeholder、mask、active/focus 和 error 状态。 | `Text`、`IsMasked`、`MaskChar` | `CellWidth`、LineEdit 输入字号 | internal-observable |
-| `action` | `PART_ClearButton` | 清空完整验证码文本。 | `IsAllowClear`、`Clear()` | 输入 action 主题资源 | template-stable |
-| `validation` | `PART_FormFeedBack` | 承载 Form feedback 和 native validation 投射。 | `Status`、`IFormItemAware` | SharedToken、Form Token | template-stable |
+| `separator` | 分隔符容器 Border | 展示 cell 之间的分隔符字形，由 `OtpSeparatorPresenter` 按墨迹盒自动居中。 | `Separator`、`SeparatorTemplate` | — | template-stable |
 
 ## Abstract AXAML Structure
 
@@ -5582,7 +8297,9 @@ Source: ./controls/otp-line-edit/semantic-cn.md
 OtpLineEdit
   -> OtpLineEditCell (control theme, OtpLineEditCellTheme.axaml)
      -> PixelAlignedBorder#PART_Frame (template-stable)
-        -> ContentPresenter (internal-observable)
+        -> Panel (template-stable)
+           -> ContentPresenter (internal-observable)
+           -> Rectangle#PART_Caret (template-stable)
   -> OtpLineEdit (control theme, OtpLineEditTheme.axaml)
      -> Grid#PART_RootPanel (template-stable)
         -> StackPanel (template-stable)
@@ -5603,7 +8320,9 @@ OtpLineEdit
 | `OtpLineEdit` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `OtpLineEditCell` | control theme | `OtpLineEditCellTheme.axaml` | OtpLineEdit | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_Frame` | template node (PixelAlignedBorder) | `OtpLineEditCellTheme.axaml` | OtpLineEditCell | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Panel` | template node (Panel) | `OtpLineEditCellTheme.axaml` | OtpLineEditCell | `Content`, `ContentTemplate`, `HorizontalContentAlignment`, `VerticalContentAlignment` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ContentPresenter` | template node (ContentPresenter) | `OtpLineEditCellTheme.axaml` | OtpLineEditCell | `Content`, `ContentTemplate`, `HorizontalContentAlignment`, `VerticalContentAlignment` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_Caret` | template node (Rectangle) | `OtpLineEditCellTheme.axaml` | OtpLineEditCell | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `OtpLineEdit` | control theme | `OtpLineEditTheme.axaml` | 用户代码 / 控件宿主 | `CellItems`, `ClearIcon`, `FormFeedback`, `IsEffectiveShowClearButton`, `IsFormFeedbackVisible`, `IsMotionEnabled` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `PART_RootPanel` | template node (Grid) | `OtpLineEditTheme.axaml` | OtpLineEdit | `CellItems`, `ClearIcon`, `FormFeedback`, `IsEffectiveShowClearButton`, `IsFormFeedbackVisible`, `IsMotionEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `StackPanel` | template node (StackPanel) | `OtpLineEditTheme.axaml` | OtpLineEdit | `CellItems`, `ClearIcon`, `FormFeedback`, `IsEffectiveShowClearButton`, `IsFormFeedbackVisible`, `IsMotionEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -5757,13 +8476,34 @@ Source: ./controls/radio-button/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `radio-root` | `RadioButton` | 承载普通单选内容、checked、disabled 和 Wave 状态。 | `Content`、`IsChecked` | RadioButtonToken | stable |
-| `radio-group` | `RadioButtonGroup` | 承载普通单选集合、CheckedItem 和排列方向。 | `CheckedItem`、`Orientation`、`ItemsSource` | SharedToken | stable |
-| `indicator` | `RadioIndicator` | 绘制普通单选圆环、圆点和状态动效。 | `IsChecked`、`IsEnabled` | RadioButtonToken | internal-observable |
-| `option-group` | `OptionButtonGroup` | 承载按钮式单选集合、Orientation、共享边框和选中边框。 | `Orientation`、`ButtonStyle`、`SelectedItem`、`SizeType` | OptionButtonToken + SharedToken | stable |
-| `option-item` | `OptionButton` | 承载按钮式选项内容、图标、checked 状态和有效圆角。 | `Content`、`Icon`、`IsChecked` | OptionButtonToken | stable |
+RadioButton 主控件公开 `root`、`icon` 与 `label` 三个职责区域，与上游稳定 Semantic DOM
+（`root` / `icon` / `label`，均 since 6.2.0）对齐。`icon` 对应单选指示圆环区域，由模板中的 `RadioIndicator`
+节点承载；`label` 对应文本区域，由模板中的 `ContentPresenter` 节点承载。
+
+`RadioButtonGroup`、`RadioIndicator` 与 `OptionButton` / `OptionButtonGroup` 均不持有独立 Semantic descriptor：
+
+- 上游 Radio.Group 不提供 `classNames` / `styles` / Semantic API（只有单个 Radio 提供），因此 `RadioButtonGroup` 的
+  集合容器 `ItemsPresenter` 不是 Semantic Part；Group 只负责创建并管理 `RadioButton` 容器，语义由每个 RadioButton
+  owner 各自公开。
+- `RadioIndicator` 是 internal 类型，不能作为公共 descriptor owner。
+- 上游 Radio.Button 的 props 只继承 `AbstractCheckboxProps`，没有自身的 `classNames` / `styles`；对应 AtomUI 的
+  `OptionButton` / `OptionButtonGroup` 因此不公开 Semantic Part。ConfigProvider 上下文透传不得作为准入证据。
+
+因此本控件的 Semantic Part 只由 `RadioButton` owner 公开。
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `RadioButton` | `Single` | `Root` | `false` | `false` |
+| `icon` | `.semantic-icon` | `TemplatedControl` | `Single` | `Selector` | `false` | `false` |
+| `label` | `.semantic-label` | `ContentPresenter` | `Single` | `Selector` | `false` | `false` |
+
+`root` 是控件自身，承载 `IsChecked`、`Content`、`IsEnabled`、动效与水波开关等 public API、主题入口和状态归一，
+不声明 `.semantic-root` marker。`icon` 是模板中的单选指示圆环节点 `Indicator`，对应上游 `icon` 语义；其
+`ContractType` 为 `TemplatedControl` 而非 `RadioIndicator`，因为 `RadioIndicator` 是 internal 类型，不能作为公共
+Setter 依赖的最低类型。`label` 是模板文本节点 `ContentPresenter`，承载 `Content` 文本内容。
+
+`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过 `x:SetterTargetType` 提供 AXAML 编译期类型
+上下文；它不参与 `.semantic-*` 的身份匹配。
 
 ## Abstract AXAML Structure
 
@@ -6062,11 +8802,12 @@ Source: ./controls/search-edit/semantic-cn.md
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `SearchEdit` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | `SearchEdit` | 根语义区域，承载搜索输入 public API、文本值、验证状态和主题入口。 | `Text`、`PlaceholderText`、`Status`、`SizeType`、`StyleVariant` | SearchEdit 无 Own Token，统一消费 SharedToken 与 `InputControlFrame` | stable |
+| `prefix` | `AddOnContentPresenter`（`Classes.semantic-prefix`） | 输入框内部前缀内容承载；路由经 `semantic-scope-prefix` 作用域锚点限定。 | `InnerLeftContentTemplate` | SharedToken 输入前缀视觉 | stable |
+| `input` | `InputTextPresenter#PART_TextPresenter`（`Classes.semantic-input`） | 文本显示、光标、选择、滚动与密码 reveal。 | `Text`、`SelectionStart`、`SelectionEnd`、`PasswordChar`（继承自 `AvaloniaTextBox`） | SharedToken 输入文本与光标视觉 | stable |
+| `suffix` | `StackPanel`（`Classes.semantic-suffix`） | 输入框内部后缀内容承载；路由经 `semantic-scope-suffix` 作用域锚点限定，清除入口位于其下。 | `InnerRightContentTemplate`、`IsAllowClear` | SharedToken 输入后缀视觉 | stable |
+| `clear` | `InputClearIconButton#PART_ClearButton`（`Classes.semantic-clear`） | 清除当前搜索文本的入口。 | `IsAllowClear`、`ClearIcon` | SharedToken 清除图标视觉 | stable |
+| `button` | public `Button#PART_RightAddOn`（`Classes.semantic-button`，运行时创建） | 搜索按钮：图标/文本、loading 状态与点击触发搜索请求。 | `SearchButtonStyle`、`SearchButtonText`、`IsOperating`、`SearchButtonTheme`、`SearchRequested` | SharedToken 按钮视觉 | stable |
 
 ## Abstract AXAML Structure
 
@@ -6294,13 +9035,306 @@ Source: ./controls/select/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Select` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Select 是唯一 Semantic owner，公开 13 个 Semantic Part（语义对齐：`item` / `itemContent` /
+`itemRemove` 对应上游多选标签的 `item` 分组，`popup.*` 对应上游 `popup` 分组的 `root` / `list` /
+`listItem`）。声明位于 `Select.SemanticParts.cs` partial 文件。
+
+触发区部件的 marker 位于 `SelectTheme.axaml` 宿主模板内：`prefix` / `suffix` 借用共享
+`AddOnDecoratedBoxTheme` 的 `.semantic-scope-prefix` / `.semantic-scope-suffix` scope 锚点路由到宿主模板
+投影给 decorated box 的内容节点（与 Cascader 同构）；`content` / `placeholder` / `input` 直接标注宿主模板
+节点。`input` 额外在多选/标签模式的运行时搜索框上注入同一 marker（`SelectResultOptionsBox` 创建搜索框时注入），
+使过滤输入在非单选态同样可被语义高亮与样式命中。`clear` / `item` / `itemContent` / `itemRemove` 声明 `CrossNestedOwners=true`：`clear` 的物理节点在
+共享 `SelectHandle` 自有模板内；多选标签的物理节点在共享标签机制内——`item` 的标记由
+`SelectResultOptionsBox` 在标签容器创建时注入，`itemContent` / `itemRemove` 的标记位于共享 `TagTheme`
+模板（`SelectTag : Tag` 复用其模板），二者经 `item` 部件（RuntimeCreated，ContractType=`Tag`）承转主题链
+完成校验。弹层三部件位于 owner 自有的 Popup 模板内：`popup.root` 标注在宿主模板的 `PopupFrame` 静态节点上，
+`popup.list` 与 `popup.listItem` 的 marker 在运行时容器创建路径注入。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `root` |
+| Selector | Select 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Select` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Select owner |
+| 职责 | Select root 是数据源、选择、过滤、弹层与状态的组织边界。 |
+| 相关 API | 全部 Select public API |
+| 相关 Token | SelectToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+**根边框与背景定制：** 可见外框由共享 `AddOnDecoratedBox` 帧绘制，其状态机拥有 `BorderBrush` 与
+`Background`。owner 的 `BorderBrush` / `Background` 会以 LocalValue 中继到帧节点生效（对齐上游 root
+border/background 语义与输入族 `AbstractTextInput.RelayRootSurfaceBrush` 行为），因此在 owner-scoped Style
+里直接写根 `Setter Property="BorderBrush"` / `Property="Background"` 即可定制外框：
+
+```xml
+<Style Selector="atom|Select.semantic-root-border">
+    <Setter Property="BorderBrush" Value="#1677FF" />
+    <Setter Property="Background" Value="#F0F5FF" />
+</Style>
+```
+
+定制期间该属性槽的 hover / focus / open 变色冻结（LocalValue 优先于帧状态机），focus 的 `BoxShadow` 光晕不受
+影响；置空（或不设置）后恢复帧状态机。中继带接管标记：仅当本控件实际写入过该槽位时才在置空时清除，因此嵌套
+owner 不会被外层清除。
+
+
+#### `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `SelectPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `SelectTheme.axaml` 中投影给 `SelectAddOnDecoratedBox.ContentLeftAddOn` 的 `AddOnContentPresenter`（经 `$parent[atom:Select]` 编译绑定呈现公共 API 值） |
+| 职责 | 选择框内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
+| 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `SelectContentStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `SelectTheme.axaml` 中 decorated box 内容面板 |
+| 职责 | 选择内容面板，承载占位符、单选结果文本、搜索输入与多选标签盒。 |
+| 相关 API | `PlaceholderText`、`SelectedOption`、`SelectedOptions` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `placeholder`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `placeholder` |
+| Selector | `.semantic-placeholder` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-placeholder` |
+| Style Type | `SelectPlaceholderStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `SelectTheme.axaml` 中 `PlaceholderText` |
+| 职责 | 未选择任何项时显示的占位符文本。 |
+| 相关 API | `PlaceholderText`、`PlaceholderForeground` |
+| 相关 Token | SharedToken（ColorTextPlaceholder） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-input` |
+| Style Type | `SelectInputStyle` |
+| ContractType | `TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 单选：`SelectTheme.axaml` 中 `PART_SingleFilterInput`；多选/标签：`SelectResultOptionsBox` 运行时创建的搜索 `SelectFilterTextBox`（两处均 internal，公共契约承诺 Avalonia `TextBox`） |
+| 职责 | 过滤模式（`IsFilterEnabled`）下渲染的搜索输入框；单选态为模板静态节点（非过滤态隐藏但节点存在），多选/标签态为标签盒内运行时搜索框。 |
+| 相关 API | `IsFilterEnabled`、`Filter`、`FilterValue` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `SelectSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `SelectTheme.axaml` 中 `ContentRightAddOn` StackPanel |
+| 职责 | 内容后缀区域，承载最大数量指示、用户 `ContentRightAddOn` 与选择 handle。 |
+| 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`MaxCount` |
+| 相关 Token | SharedToken `ColorTextQuaternary`（默认前景） |
+| 稳定性 | stable since 6.2.0 |
+
+suffix 区默认前景色为 `ColorTextQuaternary`，下拉指示箭头（SelectHandle 内图标）与后缀内容跟随该颜色：
+在 `SelectSuffixStyle` 上设置 `TextElement.Foreground` 即可同时定制箭头与后缀内容颜色（例如
+`#1890FF` 蓝色箭头，与上游语义样式示例一致）。清除按钮、表单校验反馈与最大数量指示各自维护颜色，
+不随该前景色变化。
+
+#### `clear`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `clear` |
+| Selector | `.semantic-clear` |
+| SelectorRoute | `>> .semantic-scope-handle /template/ .semantic-clear` |
+| Style Type | `SelectClearStyle` |
+| ContractType | `Button` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `SelectHandleTheme.axaml` 中 `PART_ClearButton`（internal `InputClearIconButton`，公共契约承诺 Avalonia `Button`） |
+| 职责 | 后缀 handle 内的清除按钮，`IsAllowClear` 启用、非空选择且输入区 hover / pressed 时可见。 |
+| 相关 API | `IsAllowClear`、`Clear()` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item` |
+| Style Type | `SelectItemStyle` |
+| ContractType | `Tag` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | internal `SelectTag` 实例（`SelectResultOptionsBox` 创建标签容器时注入 marker），公共契约承诺 public `Tag` |
+| 职责 | 多选模式下选择器中的选中标签。 |
+| 相关 API | `Mode=Multiple`、`SelectedOptions`、`MaxTagCount`、`IsResponsiveTagMode` |
+| 相关 Token | SelectToken（MultipleItemBg、MultipleItemHeight*） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `itemContent` |
+| Selector | `.semantic-item-content` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item /template/ .semantic-item-content` |
+| Style Type | `SelectItemContentStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TagTheme.axaml` 中 `TagTextLabel`（`SelectTag : Tag` 复用其模板） |
+| 职责 | 选中标签内的文本内容。 |
+| 相关 API | 无（随 tag 展示） |
+| 相关 Token | TagToken（TagLineHeight） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemRemove`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `itemRemove` |
+| Selector | `.semantic-item-remove` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item /template/ .semantic-item-remove` |
+| Style Type | `SelectItemRemoveStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TagTheme.axaml` 中 `PART_CloseButton`（`IsClosable=false` 时隐藏但模板节点存在） |
+| 职责 | 选中标签内的移除按钮。 |
+| 相关 API | `IsClosable`（经标签机制） |
+| 相关 Token | SharedToken（IconSizeXS） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `SelectPopupRootStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `SelectTheme.axaml` 中 `PopupFrame`（`PART_Popup` 直接子节点） |
+| 职责 | 候选弹层根 `Border`，可定制弹层边框、背景与宽度。 |
+| 相关 API | `MaxPopupHeight`、`EffectivePopupWidth`、`PopupContentPadding` |
+| 相关 Token | PopupTokenResource（PopupCornerRadius）、SharedToken（ColorBgElevated） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.list`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `popup.list` |
+| Selector | `.semantic-popup-list` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list` |
+| Style Type | `SelectPopupListStyle` |
+| ContractType | `Control` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | internal `SelectCandidateList`（`EnsurePopupContent` 创建并注入 marker），公共契约承诺 `Control` |
+| 职责 | 弹层内候选列表容器，承载过滤后的候选项。 |
+| 相关 API | `OptionsSource`、`Filter`、`IsGroupEnabled` |
+| 相关 Token | SelectToken（OptionPadding、OptionSelectedBg） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.listItem`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Select` |
+| Part | `popup.listItem` |
+| Selector | `.semantic-popup-list-item` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list-item` |
+| Style Type | `SelectPopupListItemStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | internal `SelectCandidateListItem`（`CreateContainerForItemOverride` 注入 marker），公共祖先承诺 `TemplatedControl` |
+| 职责 | 候选列表中的单个选项条目，运行时容器创建，虚拟化回收复用时 marker 保持。 |
+| 相关 API | `OptionTemplate`、`IsHideSelectedOptions` |
+| 相关 Token | SelectToken（OptionPadding、HeaderHeight、OptionSelectedBg） |
+| 稳定性 | stable since 6.2.0 |
+
+`ContractType` 不参与 selector 匹配，只约束 `x:SetterTargetType` 与兼容性下界；实现节点为 internal 类型时，
+公共契约承诺到最低 public 基类（`input`→`TextBox`、`item`→`Tag`、`popup.list`→`Control`、
+`popup.listItem`→`TemplatedControl`）。
 
 ## Abstract AXAML Structure
 
@@ -6315,7 +9349,9 @@ Source: ./controls/select/semantic-cn.md
             <SelectResultOptionsBox Name="SelectedOptionsBox" />
         </Panel>
     </SelectAddOnDecoratedBox>
-    <Popup Name="PART_Popup" />
+    <Popup Name="PART_Popup">
+        <Border Name="PopupFrame" />
+    </Popup>
 </Panel>
 ```
 
@@ -6357,6 +9393,7 @@ Select
               -> SelectFilterTextBox#PART_SingleFilterInput (template-stable)
               -> SelectResultOptionsBox#SelectedOptionsBox (internal-observable)
         -> Popup#PART_Popup (template-stable)
+           -> Border#PopupFrame (template-stable)
 ```
 
 ### 协作节点
@@ -6384,13 +9421,14 @@ Select
 | `PART_DefaultPanel` | template node (SelectWrapPanel) | `SelectTagAwareTextBoxTheme.axaml` | SelectTagAwareTextBox | `IsResponsiveTagMode` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_MaxCountAwarePanel` | template node (SelectMaxTagAwarePanel) | `SelectTagAwareTextBoxTheme.axaml` | SelectTagAwareTextBox | `IsResponsiveTagMode`, `MaxTagCount` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SelectTag` | control theme | `SelectTagTheme.axaml` | Select | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Select` | control theme | `SelectTheme.axaml` | 用户代码 / 控件宿主 | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `FontFamily` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `SelectTheme.axaml` | Select | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `FontFamily` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (SelectAddOnDecoratedBox) | `SelectTheme.axaml` | Select | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `FontFamily` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Select` | control theme | `SelectTheme.axaml` | 用户代码 / 控件宿主 | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataValidationErrors`, `EffectivePopupWidth`, `FontFamily`, `FontSize` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `SelectTheme.axaml` | Select | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataValidationErrors`, `EffectivePopupWidth`, `FontFamily`, `FontSize` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (SelectAddOnDecoratedBox) | `SelectTheme.axaml` | Select | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataValidationErrors`, `FontFamily`, `FontSize`, `FontStyle` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PlaceholderText` | template node (TextBlock) | `SelectTheme.axaml` | Select | `IsPlaceholderTextVisible`, `PlaceholderForeground`, `PlaceholderText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_SingleFilterInput` | template node (SelectFilterTextBox) | `SelectTheme.axaml` | Select | `FontFamily`, `FontSize`, `FontStyle`, `FontWeight`, `IsShowOverflowTip`, `OverflowTipDelay` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SelectedOptionsBox` | template node (SelectResultOptionsBox) | `SelectTheme.axaml` | Select | `Height`, `IsDropDownOpen`, `IsEffectiveFilterEnabled`, `IsResponsiveTagMode`, `IsShowOverflowTip`, `MaxTagCount` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_Popup` | template node (Popup) | `SelectTheme.axaml` | Select | `IsDropDownOpen`, `ShouldUseOverlayPopup` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Popup` | template node (Popup) | `SelectTheme.axaml` | Select | `EffectivePopupWidth`, `MaxPopupHeight`, `PopupContentPadding`, `ShouldUseOverlayPopup` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PopupFrame` | template node (Border) | `SelectTheme.axaml` | Select | `EffectivePopupWidth`, `MaxPopupHeight`, `PopupContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
@@ -6545,6 +9583,7 @@ SelectToken 不承载以下状态：
 - 多选搜索输入关闭弹层时只读并清空。
 - 弹层取消事件必须能阻止打开或关闭。
 - 重新套用模板和 detach 不能保留旧候选列表、旧 popup child、旧 template part 绑定或旧 TopLevel 订阅。
+- Semantic Part marker 的维护边界：`SelectTheme.axaml` 承载触发区静态 marker（`semantic-scope-input`、`semantic-prefix`、`semantic-suffix`、`semantic-scope-handle`、`semantic-content`、`semantic-placeholder`、`semantic-input`、`semantic-scope-tags`、`semantic-popup-root`）；共享 `SelectHandleTheme.axaml` 承载清除按钮的 `semantic-clear` marker（`clear` Part 声明 `CrossNestedOwners=true`，生成器沿 SelectHandle 主题链校验）；共享 `TagTheme.axaml` 承载 `itemContent` / `itemRemove` marker。运行时注入点：`SelectResultOptionsBox` 创建标签时追加 `SelectSemanticParts.ItemClass`；`Select.EnsurePopupContent` 创建候选列表时追加 `SelectSemanticParts.PopupListClass` 并显式 `SetTemplatedParent(this)`；`SelectCandidateList.CreateContainerForItemOverride()` 向容器追加 `SelectSemanticParts.PopupListItemClass`。marker 随容器实例创建一次，prepare/clear/recycle 路径不得增删。
 - `SelectToken` 不承载选项数据、过滤值、loading、选择集合、popup 打开状态或 Form 状态。
 
 Source: ./controls/slider/semantic-cn.md
@@ -6555,12 +9594,121 @@ Source: ./controls/slider/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Slider` | 数据录入控件根语义区域，承载公共值、状态归一、主题入口和 Gallery 可观察行为。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `track` | `SliderTrack` | 承载 rail、整体活动范围、相邻 segment、mark 和动态 handle 布局。 | `RangeValues`、`DisabledHandles`、`TrackBarBrush`、`TracksBrush` | SliderToken 的轨道、rail 和 mark Token | internal-observable |
-| `thumb` | `SliderThumb` 动态节点 | 表达单个 handle 的值索引、pointer、focus、pressed 和 disabled 视觉。 | `RangeValues`、`DisabledHandles`、`ValueFormatTemplate` | SliderToken 的 thumb、outline 和 disabled Token | internal-observable |
-| `validation` | Form 校验反馈 | 承载 Slider 的 Form 值变更和数据校验错误。 | `Value`、`RangeValues` | SharedToken / Form 主题资源 | stable |
+### 2.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Slider` |
+| Part | `root` |
+| Selector | Slider 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Slider` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Slider owner |
+| 职责 | 数值选择控件根：承载 `Minimum` / `Maximum` / `Value` / `RangeValues` 值状态、方向、轨道与 mark 配置、键盘与 pointer 交互会话、Tooltip 与 Form 集成；作为全部 Part 的 owner-scoped Selector 作用域边界。对应上游 `.ant-slider`。 |
+| 相关 API | `Orientation`、`IsDirectionReversed`、`IsSnapToTickEnabled`、`TickFrequency`、`IsRangeMode`、`RangeValues`、`DisabledHandles`、`IsDraggableTrack`、`TrackBarBrush`、`TracksBrush`、`Marks`、`IsIncluded`、`ValueFormatTemplate`、`IsMotionEnabled` |
+| 相关 Token | `SliderPaddingHorizontal`、`SliderPaddingVertical`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.2 `rail`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Slider` |
+| Part | `rail` |
+| Selector | `.semantic-rail` |
+| SelectorRoute | `/template/ .semantic-rail` |
+| Style Type | `SliderRailStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `SliderTrack` 内代码创建的 rail `Border` 元素（几何 = `GetRailRect`，胶囊圆角，背景 = `TrackGrooveBrush`） |
+| 职责 | 统一表示背景轨道区域：rail 画刷、胶囊圆角与过渡；对应上游 `.ant-slider-rail`。 |
+| 相关 API | `TrackGrooveBrush`（SliderTrack）、`IsEnabled`、`Orientation` |
+| 相关 Token | `RailBg`、`RailHoverBg`、`RailSize` |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.3 `tracks`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Slider` |
+| Part | `tracks` |
+| Selector | `.semantic-tracks` |
+| SelectorRoute | `/template/ .semantic-tracks` |
+| Style Type | `SliderTracksStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `SliderTrack` 内代码创建的整体活动范围 `Border` 元素（Range 模式首值→末值；单值模式 `Minimum → Value`；背景 = `TracksBrush`） |
+| 职责 | 统一表示整体活动范围容器：Range 模式覆盖首尾 handle 之间的整段跨度，单值模式覆盖最小到当前值的跨度；对应上游 `.ant-slider-tracks`。 |
+| 相关 API | `TracksBrush`、`IsRangeMode`、`IsIncluded`、`IsDraggableTrack` |
+| 相关 Token | 无专属 Token（默认画刷为 null） |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.4 `track`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Slider` |
+| Part | `track` |
+| Selector | `.semantic-track` |
+| SelectorRoute | `/template/ .semantic-track` |
+| Style Type | `SliderTrackStyle` |
+| ContractType | `Border` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `SliderTrack` 内代码创建的活动 segment `Border` 元素（单值模式 1 个：`Minimum → Value`；Range 模式每对相邻值 1 个；背景 = `TrackBarBrush`） |
+| 职责 | 统一表示相邻 handle 之间的活动轨道段：segment 画刷、胶囊圆角与过渡；对应上游 `.ant-slider-track`。 |
+| 相关 API | `TrackBarBrush`、`RangeValues`、`IsIncluded`、`IsDraggableTrack` |
+| 相关 Token | `TrackBg`、`TrackHoverBg`、`TrackBgDisabled`、`SliderTrackSize` |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.5 `handle`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Slider` |
+| Part | `handle` |
+| Selector | `.semantic-handle` |
+| SelectorRoute | `/template/ .semantic-handle` |
+| Style Type | `SliderHandleStyle` |
+| ContractType | `SliderThumb` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个动态 `SliderThumb` 节点 |
+| 职责 | 统一表示滑块控制点：圆点背景、边框、outline、hover / focus / pressed / disabled 视觉与 Tooltip 宿主；对应上游 `.ant-slider-handle`。 |
+| 相关 API | `SliderThumb.OutlineBrush`、`SliderThumb.OutlineThickness`、`SliderThumb.ThumbCircleSize`、`DisabledHandles`、`ValueFormatTemplate` |
+| 相关 Token | `ThumbSize`、`ThumbCircleSize`、`ThumbCircleSizeHover`、`ThumbCircleBorderColor`、`ThumbCircleBorderActiveColor`、`ThumbCircleBorderColorDisabled`、`ThumbCircleBorderThickness`、`ThumbCircleBorderThicknessHover`、`ThumbOutlineColor`、`ThumbOutlineThickness` |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.6 marker 放置与路由
+
+`root` 是隐式 Part，不声明 `.semantic-root` marker。非 root Part 全部 `RuntimeCreated=true`，marker 在节点创建时用
+生成常量一次性添加：
+
+- `rail`、`tracks` 元素在 `SliderTrack` attach 时创建一次，恒存在；`track` segment 元素随 `EffectiveRangeValues`
+  数量同步（单值 1 个、Range N-1 个），数量变化时增删节点。
+- `handle` marker 在 `SliderTrack.AddThumb` 时添加；thumb 数量随 handle 数量同步，回收 / 重建路径 marker 随实例。
+- 三个主题文件（`SliderTheme.axaml` / `SliderTrackTheme.axaml` / `SliderThumbTheme.axaml`）不声明任何静态
+  `.semantic-*` marker；所有 marker 均为运行时创建。
+- mark 点 / 标签（`SliderMarksElement`）不携带任何 semantic marker。
+
+路由：四个运行时 Part 的节点都由 `SliderTrack` 创建并设置外层 `Slider` 为 TemplatedParent（与既有
+`SliderThumb` 一致），因此从 `Slider` owner 出发均为单跳 `/template/ .semantic-*`。生成器对
+`RuntimeCreated=true` 的 Part 只要求显式 `SelectorRoute`，不按 owner 主题资产做静态校验。
 
 ## Abstract AXAML Structure
 
@@ -6683,10 +9831,12 @@ Slider 的默认视觉由三层主题组成：
 
 视觉模型：
 
-- `SliderTrack` 绘制 rail、`TracksBrush`、`TrackBarBrush`、mark 点和 mark 文本。
+- `SliderTrack` 管理 rail、整体活动范围、相邻 segment 与 mark 的**元素**节点并计算其几何：rail 元素（
+  `TrackGrooveBrush`）、tracks 元素（`TracksBrush`）、segment 元素（`TrackBarBrush`）按值比例排列，mark 点与文本
+  由 internal `SliderMarksElement` 自绘；四个区域元素化后与历史自绘几何一致，默认视觉不变。
 - `SliderThumb` 绘制圆点、边框和 focus / hover outline。
 - `TrackBarBrush` 只表达相邻 handle 之间的 segment。
-- `TracksBrush` 只表达首尾 handle 之间的整体范围。
+- `TracksBrush` 只表达整体活动范围（Range 模式首尾 handle 之间；单值模式 `Minimum → Value`）。
 - `IsIncluded=false` 时不绘制两种活动轨道和 mark 激活态。
 - disabled handle 使用对应 thumb disabled token，不改变其他 handle 的颜色。
 - 全部 handle disabled 时使用 Slider 整体 disabled 状态。
@@ -6726,16 +9876,18 @@ SliderToken 不承载：
 
 维护不变量：
 
-- Slider 是公共值、Form 状态和交互会话 owner；SliderTrack 是动态节点、布局、渲染和输入几何 owner。
+- Slider 是公共值、Form 状态和交互会话 owner；SliderTrack 是动态节点、元素、布局、渲染和输入几何 owner。
 - Range 模式唯一值源是 `RangeValues`，不建立固定 start / end handle 或并行 `HandleState` 模型。
 - `RangeValues` 必须经过有限性检查、范围裁剪和升序归一化，并保留重复值和 handle 数量。
 - 连续 pointer 拖动必须保留 `double` 精度；仅 `IsSnapToTickEnabled=true` 时按 tick 量化。
 - disabled handle 不可被 pointer 或 keyboard 修改，并作为相邻 handle 的移动边界。
 - 任意 disabled handle 存在时，整体活动范围不可拖动。
-- `TracksBrush` 只绘制整体活动范围；`TrackBarBrush` 只绘制相邻 handle segment。
-- `PART_Track` 是唯一固定 Slider Template Part；动态 thumb 不得重新变成固定命名部件。
-- 动态 thumb 必须继承外层 Slider 的模板状态，并实时同步 motion 状态。
-- 模板重建和 detach 必须释放事件、pointer capture、全局 input subscription 和拖动会话。
+- `TracksBrush` 只绘制整体活动范围（单值 `Minimum → Value`、Range 首尾值）；`TrackBarBrush` 只绘制相邻 handle segment。
+- `PART_Track` 是唯一固定 Slider Template Part；动态 thumb 与 segment 元素不得重新变成固定命名部件。
+- rail / tracks 元素每 Slider 恒一个，segment 元素数量只随值数量变化；`IsIncluded=false` 只切换 tracks / segment 可见性，不增删节点或 marker。
+- 动态 thumb 与元素必须继承外层 Slider 的模板状态，并实时同步 motion 状态。
+- rail / tracks / segment / mark 元素不可命中测试；pointer 与 mark 命中仍走 SliderTrack 几何计算路径。
+- 模板重建和 detach 必须释放事件、pointer capture、全局 input subscription、拖动会话与全部动态节点。
 
 Source: ./controls/time-picker/semantic-cn.md
 
@@ -6745,13 +9897,290 @@ Source: ./controls/time-picker/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `TimePicker` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`TimePicker` 公开 11 个 Semantic Part，`RangeTimePicker` 公开 12 个 Semantic Part（后者多出范围双输入框的
+`secondaryInput`）。声明分别位于 `TimePicker.SemanticParts.cs` 与 `RangeTimePicker.SemanticParts.cs` partial 文件。
+
+触发区部件的 marker 分布：
+
+- 单值 `TimePicker` 的宿主模板是共享 `InfoPickerInputTheme.axaml`（`TimePickerTheme.axaml` 纯 `BasedOn` 继承，
+  无自有模板）；`RangeTimePicker` 的宿主模板是自有 `RangeTimePickerTheme.axaml` 模板覆写（共享
+  `RangeInfoPickerInputTheme.axaml` 保持无 semantic 标注）。两个宿主模板按同一模式标注
+  `semantic-scope-input`（AddOnDecoratedBox 节点）、`semantic-input`（`PART_InfoInputBox`）、`semantic-suffix`
+  （右侧内容 StackPanel）、`semantic-scope-handle`（PickerClearUpButton 节点）与 `semantic-popup-root`
+  （`PART_Popup` 内的 `ArrowDecoratedBox`），Range 模板另标注 `semantic-secondary-input`
+  （`PART_SecondaryInfoInputBox`）。
+- `prefix` 借用共享 `AddOnDecoratedBoxTheme` 的 `.semantic-scope-prefix` scope 锚点路由到宿主模板
+  `AddOnContentPresenter` 投影节点（与 Select、DatePicker 家族同构；投影节点以
+  `CompiledBinding $parent[atom:InfoPickerInput].ContentLeftAddOn` 呈现公共 API 值）。
+- `clear` 的物理按钮在共享 `PickerClearUpButtonTheme.axaml` 模板内（`PART_ClearButton`），声明
+  `CrossNestedOwners=true`，生成器沿 PickerClearUpButton 主题链校验。
+- 范围 `RangeTimePicker` 与单值 `TimePicker` 共用同一弹层 presenter（`TimePickerPresenter`），弹层 marker
+  对两个 owner 同时成立。
+
+弹层部件的 marker 分布（弹层内容全部由 owner `CreatePickerPresenter` 在首次打开时运行时创建）：
+
+- `popup.container` / `popup.footer` 标注 presenter 主题模板节点：`popup.container` 为
+  `TimePickerPresenterTheme.axaml` 的 `DockPanel #PART_MainLayout`，`popup.footer` 为同模板的
+  `PixelAlignedBorder #PART_ButtonsFrame`。
+- `popup.content` / `popup.column` 标注 `TimeViewTheme.axaml` 模板节点：`popup.content` 为时间列布局容器
+  `Grid #PART_PickerContainer`，`popup.column` 为四个列宿主 Panel（`PART_HourHost` / `PART_MinuteHost` /
+  `PART_SecondHost` / `PART_PeriodHost`）。
+- `popup.item` 为运行时注入：`DateTimePickerPanel.CreateOrDestroyItems` 创建 `TimeViewCell` 时追加生成
+  selector class 常量，覆盖滚动复用与循环搬移路径。
+- `popup.*` 除 `popup.root` 外统一声明 `RuntimeCreated=true`（presenter 子树在运行时组装，生成器豁免宿主模板
+  marker 校验，由控件行为测试兜底），其中 `popup.root` 为宿主模板静态节点、`RuntimeCreated=false`。
+- **TimeView 子树类名避让**：`TimeView` 同时被 DatePicker 带时间弹层内嵌（`DatePickerPresenterTheme.axaml` 与
+  `TimedRangeDatePickerPresenterTheme.axaml`）。因此落在 TimeView 子树内的三个 marker 类名使用 `time-` 中缀
+  （`semantic-time-content` / `semantic-time-column` / `semantic-time-item`），避开 DatePicker 家族已声明的
+  `semantic-popup-content` / `semantic-popup-body` / `semantic-cell` 等类名，防止 DatePicker 弹层上下文中的
+  契约误命中（详见 §6 对照差异）。
+
+### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `root` |
+| Selector | owner 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `TimePicker` / `RangeTimePicker` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | TimePicker / RangeTimePicker owner |
+| 职责 | owner 是时间值、约束、弹层状态、Form 值与验证状态的组织边界。 |
+| 相关 API | 全部 TimePicker / RangeTimePicker public API |
+| 相关 Token | TimePickerToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `TimePickerPrefixStyle` / `RangeTimePickerPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 宿主模板中承载 `ContentLeftAddOn` 的 `AddOnContentPresenter` 投影节点 |
+| 职责 | 输入区内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
+| 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-input` |
+| Style Type | `TimePickerInputStyle` / `RangeTimePickerInputStyle` |
+| ContractType | `TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 宿主模板的 `InfoPickerTextBox #PART_InfoInputBox`（起始端输入框） |
+| 职责 | 时间文本输入框，承载格式化显示值、占位符与只读/校验状态。 |
+| 相关 API | `Text`、`PlaceholderText`、`IsReadOnly`、`PreferredInputWidth` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `secondaryInput`（仅 RangeTimePicker）
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `RangeTimePicker` |
+| Part | `secondaryInput` |
+| Selector | `.semantic-secondary-input` |
+| SelectorRoute | `/template/ .semantic-secondary-input` |
+| Style Type | `RangeTimePickerSecondaryInputStyle` |
+| ContractType | `TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `RangeTimePickerTheme.axaml` 的 `InfoPickerTextBox #PART_SecondaryInfoInputBox`（结束端输入框） |
+| 职责 | 范围选择的结束端时间文本输入框，与 `input` 共用格式与宽度基线。 |
+| 相关 API | `SecondaryText`、`SecondaryPlaceholderText` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `TimePickerSuffixStyle` / `RangeTimePickerSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 宿主模板中投影给 `ContentRightAddOn` 的水平 StackPanel（含清除按钮与 `PART_ContentRightAddOnPresenter`） |
+| 职责 | 输入区后缀区域，承载清除按钮、Form 反馈与用户后缀内容。 |
+| 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `clear`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `clear` |
+| Selector | `.semantic-clear` |
+| SelectorRoute | `>> .semantic-scope-handle /template/ .semantic-clear` |
+| Style Type | `TimePickerClearStyle` / `RangeTimePickerClearStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossNestedOwners | `true` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 共享 `PickerClearUpButtonTheme.axaml` 模板内的 `InputClearIconButton #PART_ClearButton` |
+| 职责 | 后缀区清除按钮，进入清除模式（hover / focus）时渲染。 |
+| 相关 API | `ShowClearButtonPredicate`、`Clear` / `Reset` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `TimePickerPopupRootStyle` / `RangeTimePickerPopupRootStyle` |
+| ContractType | `ArrowDecoratedBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 单选：`InfoPickerInputTheme.axaml` 中 `PART_Popup` 的 `ArrowDecoratedBox`；范围：`RangeTimePickerTheme.axaml` 中的 `ArrowDecoratedBox` |
+| 职责 | 弹层内容根视觉盒子，承载背景、边框、阴影与浮动箭头。 |
+| 相关 API | `IsArrowVisible`（经 `IsArrowVisibleEffective`）、`ArrowPosition`、`IsMotionEnabled` |
+| 相关 Token | PopupToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.container`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `popup.container` |
+| Selector | `.semantic-popup-container` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-container` |
+| Style Type | `TimePickerPopupContainerStyle` / `RangeTimePickerPopupContainerStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TimePickerPresenterTheme.axaml` 模板的 `DockPanel #PART_MainLayout` |
+| 职责 | 时间面板内容容器，组织时间区与底部按钮区的布局。 |
+| 相关 API | 无（面板内容布局容器） |
+| 相关 Token | TimePickerToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `popup.content` |
+| Selector | `.semantic-time-content` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-time-content` |
+| Style Type | `TimePickerPopupContentStyle` / `RangeTimePickerPopupContentStyle` |
+| ContractType | `Grid` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TimeViewTheme.axaml` 的 `Grid #PART_PickerContainer`（时/分/秒/时段四列布局容器） |
+| 职责 | 时间列布局容器，按 12/24 小时制组织全部时间列。 |
+| 相关 API | 无（随 `popup.container` 呈现） |
+| 相关 Token | TimePickerToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.column`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `popup.column` |
+| Selector | `.semantic-time-column` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-time-column` |
+| Style Type | `TimePickerPopupColumnStyle` / `RangeTimePickerPopupColumnStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TimeViewTheme.axaml` 的四个列宿主 Panel：`PART_HourHost` / `PART_MinuteHost` / `PART_SecondHost` / `PART_PeriodHost`（各列宽度 owner） |
+| 职责 | 单个时间列宿主，承载滚动视口与列宽基线（时/分/秒列宽 = `ItemWidth`，时段列宽 = `PeriodHostWidth`）。 |
+| 相关 API | 无（随 `popup.content` 呈现） |
+| 相关 Token | TimePickerToken（`ItemWidth`、`PeriodHostWidth`） |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `popup.item` |
+| Selector | `.semantic-time-item` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-time-item` |
+| Style Type | `TimePickerPopupItemStyle` / `RangeTimePickerPopupItemStyle` |
+| ContractType | `ListBoxItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `DateTimePickerPanel` 视口内运行时创建的 `TimeViewCell`（`CreateOrDestroyItems` 创建路径，创建时注入 marker） |
+| 职责 | 时间格子项，承载可选时间值与选中 / hover 状态视觉。 |
+| 相关 API | 无（随 `popup.column` 呈现） |
+| 相关 Token | TimePickerToken（`ItemHeight`） |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TimePicker` / `RangeTimePicker` |
+| Part | `popup.footer` |
+| Selector | `.semantic-popup-footer` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-footer` |
+| Style Type | `TimePickerPopupFooterStyle` / `RangeTimePickerPopupFooterStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TimePickerPresenterTheme.axaml` 的 `PixelAlignedBorder #PART_ButtonsFrame`（内含 `PART_NowButton` / `PART_ConfirmButton`） |
+| 职责 | 面板底部操作区，承载此刻 / 确认按钮。 |
+| 相关 API | `IsNeedConfirm`、`IsShowNow` |
+| 相关 Token | TimePickerToken |
+| 稳定性 | stable since 6.2.0 |
+
+`ContractType` 不参与 selector 匹配，只约束生成 Style 的 `x:SetterTargetType` 与模板校验的类型兼容；internal
+实现类型（`InfoPickerTextBox`、`TimePickerPresenter`、`TimeView`、`DateTimePickerPanel`）统一承诺到最低 public
+基类或公开包装类型（`TextBox`、`ContentPresenter`、`DockPanel`、`Grid`、`Panel`、`ListBoxItem`、
+`PixelAlignedBorder`——footer 物理节点是 `PixelAlignedBorder`，它继承 `DashedBorder` 而非 Avalonia `Border`，
+与 DatePicker 家族的 `popup.footer` 契约保持一致）。
 
 ## Abstract AXAML Structure
 
@@ -6928,6 +10357,7 @@ TimePicker Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
+- Semantic Part marker 的维护边界：共享 `InfoPickerInputTheme.axaml` 承载单选触发区静态 marker（`semantic-scope-input`、`semantic-prefix`、`semantic-input`、`semantic-suffix`、`semantic-scope-handle`、`semantic-popup-root`）；`RangeTimePickerTheme.axaml` 承载范围触发区同名 marker 与 `semantic-secondary-input`；共享 `PickerClearUpButtonTheme.axaml` 承载 `semantic-clear` marker（`clear` Part 声明 `CrossNestedOwners=true`，生成器沿 PickerClearUpButton 主题链校验）；`TimePickerPresenterTheme.axaml` 承载 `semantic-popup-container` / `semantic-popup-footer`；`TimeViewTheme.axaml` 承载 `semantic-time-content` / `semantic-time-column`（×4 列宿主）。运行时注入点：`DateTimePickerPanel.CreateOrDestroyItems` 创建 `TimeViewCell` 时追加 `popup.item` 的生成 selector class 常量。marker 随实例创建一次，滚动复用、循环搬移、`ClockIdentifier` 切换、弹层重开和容器回收路径不得增删；`TimeViewTheme` 的 `semantic-time-*` marker 对未声明该契约的 DatePicker 家族保持 inert，共享主题 marker 中的同名 Part 类（`semantic-popup-*`）在两个 picker 家族各自的弹层内互不嵌套。
 
 Source: ./controls/toggle-switch/semantic-cn.md
 
@@ -6937,13 +10367,88 @@ Source: ./controls/toggle-switch/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ToggleSwitch` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+ToggleSwitch 主控件公开 `root`、`content` 与 `indicator` 三个职责区域，与上游稳定 Semantic DOM
+（`root` / `content` / `indicator`）对齐。`indicator` 对应滑动把手区域，由模板中的 `SwitchKnob` 节点承载；`content`
+对应开关内部 on/off 内容区域，由模板中的两个 `ContentPresenter`（`PART_OnContentPresenter` 与
+`PART_OffContentPresenter`）承载。
+
+`AbstractToggleSwitch`、`SwitchKnob` 与 `WaveSpiritDecorator` 均不持有独立 Semantic descriptor：
+
+- 上游 Switch 只提供一个 owner 的 Semantic DOM（`root` / `content` / `indicator`），`AbstractToggleSwitch` 是跨平台共享
+  基类，不是对应用公开的独立 owner，因此不为它声明 descriptor。
+- `SwitchKnob` 是 internal 类型，不能作为公共 descriptor owner；其把手职责通过 `ToggleSwitch` 的 `indicator` Part 对外
+  公开，并以 `TemplatedControl` 作为最低 ContractType。
+- `WaveSpiritDecorator` 是 checked 变化时的视觉反馈 actor，不是用户可定制的公共区域，不公开 Part。
+
+因此本控件的 Semantic Part 只由 `ToggleSwitch` owner 公开。
+
+### 1.1 `ToggleSwitch`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ToggleSwitch` |
+| Part | `root` |
+| Selector | ToggleSwitch 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ToggleSwitch` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | ToggleSwitch owner |
+| 职责 | ToggleSwitch root 是开关值、状态、内容与根视觉样式的统一 owner。 |
+| 相关 API | `IsChecked`、`GrooveBackground`、`OnContent`、`OffContent`、`OnContentTemplate`、`OffContentTemplate`、`SizeType`、`IsLoading`、`IsMotionEnabled`、`IsWaveSpiritEnabled`、`TrackHeight`、`TrackMinWidth`、`TrackPadding`、`KnobSize` |
+| 相关 Token | ToggleSwitchToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ToggleSwitch` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `ToggleSwitchContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | On/Off 内容 `ContentPresenter` |
+| 职责 | 统一表示开关内部 checked / unchecked 内容区域的文本与视觉职责。 |
+| 相关 API | `OnContent`、`OffContent`、`OnContentTemplate`、`OffContentTemplate` |
+| 相关 Token | `ContentIconSize`、`ContentIconSizeSM`、`ExtraInfoFontSize`、`ExtraInfoFontSizeSM`、`InnerMinMargin`、`InnerMaxMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ToggleSwitch` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `/template/ .semantic-indicator` |
+| Style Type | `ToggleSwitchIndicatorStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 滑动把手 `SwitchKnob` |
+| 职责 | 统一表示开关的滑动把手视觉职责，含把手填充、阴影与 loading 指示。 |
+| 相关 API | `IsChecked`、`IsLoading` |
+| 相关 Token | `HandleBg`、`HandleShadow`、`HandleSize`、`HandleSizeSM`、`SwitchColor`、`OffStateLoadIndicatorColor` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`indicator` 的 `ContractType` 为
+`TemplatedControl` 而非 `SwitchKnob`，因为 `SwitchKnob` 是 internal 类型，不能作为公共 Setter 依赖的最低类型。
+`content` 的 `Cardinality` 为 `Multiple`：模板中始终存在 on 与 off 两个内容 `ContentPresenter`，二者是同一 content
+职责的两个替代节点，不随 `IsChecked` 增删。
 
 ## Abstract AXAML Structure
 
@@ -6955,8 +10460,8 @@ Source: ./controls/toggle-switch/semantic-cn.md
     <Canvas Name="PART_MainContainer">
         <ContentPresenter Name="PART_OnContentPresenter" />
         <ContentPresenter Name="PART_OffContentPresenter" />
-        <SwitchKnob Name="PART_SwitchKnob" />
     </Canvas>
+    <SwitchKnob Name="PART_SwitchKnob" />
 </Panel>
 ```
 
@@ -6974,7 +10479,7 @@ ToggleSwitch
         -> Canvas#PART_MainContainer (template-stable)
            -> ContentPresenter#PART_OnContentPresenter (template-stable)
            -> ContentPresenter#PART_OffContentPresenter (template-stable)
-           -> SwitchKnob#PART_SwitchKnob (template-stable)
+        -> SwitchKnob#PART_SwitchKnob (template-stable)
 ```
 
 ### 协作节点
@@ -6985,7 +10490,7 @@ ToggleSwitch
 | `ToggleSwitch` | control theme | `ToggleSwitchTheme.axaml` | 用户代码 / 控件宿主 | `IsChecked`, `IsMotionEnabled`, `IsWaveSpiritEnabled`, `OffContent`, `OffContentTemplate`, `OnContent` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Panel` | template node (Panel) | `ToggleSwitchTheme.axaml` | ToggleSwitch | `IsChecked`, `IsMotionEnabled`, `IsWaveSpiritEnabled`, `OffContent`, `OffContentTemplate`, `OnContent` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_WaveSpirit` | template node (WaveSpiritDecorator) | `ToggleSwitchTheme.axaml` | ToggleSwitch | `IsMotionEnabled`, `IsWaveSpiritEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_MainContainer` | template node (Canvas) | `ToggleSwitchTheme.axaml` | ToggleSwitch | `IsChecked`, `IsMotionEnabled`, `OffContent`, `OffContentTemplate`, `OnContent`, `OnContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_MainContainer` | template node (Canvas) | `ToggleSwitchTheme.axaml` | ToggleSwitch | `OffContent`, `OffContentTemplate`, `OnContent`, `OnContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_OnContentPresenter` | template node (ContentPresenter) | `ToggleSwitchTheme.axaml` | ToggleSwitch | `OnContent`, `OnContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_OffContentPresenter` | template node (ContentPresenter) | `ToggleSwitchTheme.axaml` | ToggleSwitch | `OffContent`, `OffContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_SwitchKnob` | template node (SwitchKnob) | `ToggleSwitchTheme.axaml` | ToggleSwitch | `IsChecked`, `IsMotionEnabled` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -7100,13 +10605,290 @@ Source: ./controls/transfer/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Transfer` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Transfer 家族有两个具体 public owner：`ListTransfer` 与 `TreeTransfer`。两者各自持有独立 ControlTheme 与模板，
+分区 Part 集合完全一致；条目 Part 仅 `ListTransfer` 发布 `itemIcon` / `itemContent` 及其限定变体（树侧条目区域
+由 `TreeViewItem` 家族契约覆盖）：`root`、`source.section`、`target.section`、`actions`、`header`、`title`、`body`、
+`list`、`footer`，以及方向限定变体 `source.header` / `target.header` / `source.title` / `target.title` /
+`source.body` / `target.body` / `source.list` / `target.list` / `source.footer` / `target.footer`（§1.1–1.9，
+命名与上游 `source.section` 等语义键逐字对齐，`.` 为层级分隔符）。抽象基类 `AbstractTransfer` 没有自己的 ControlTemplate，不声明任何 Part；internal
+`TransferItemDecorator`、`TransferSelectDropdown`、`TransferTreeViewItemHeader` 不注册独立 descriptor，也不能通过
+模板复用获得其他 owner 的 owner-scoped Semantic Style。
+
+条目级 Part（`item` / `itemIcon` / `itemContent` 及其 `source.*` / `target.*` 限定变体）由 Transfer owner
+直接发布（§1.10 / §1.11），使语义清单与样式用法都保持组件级单列表——嵌套视图与条目容器不再注册为独立
+Semantic owner：`TransferListView` 继承 `ListView` 的 `root` / `item` / `groupHeader` 家族契约，
+`TransferTreeView` 继承 `TreeView` 契约，条目容器的指示 / 内容区域由本节 Part 覆盖；`TransferTreeViewItem` 的条目区域由
+`TreeViewItem` 家族契约覆盖，`TransferRemoveItemButton` 的内部区域由 `IconButton` 家族契约与组合模型约束。Transfer
+owner 不穿透这些嵌套 owner 的模板（§5）。
+
+`source.section` / `target.section` / `actions` 是 owner 模板中的静态节点，`Single`；方向限定部件
+`source.*` / `target.*` 与对应未限定部件共享终端 marker，由路由中的方向锚点（`.semantic-source` /
+`.semantic-target`）或条目自锚点（`.semantic-source-item` / `.semantic-target-item`）区分实例；`header` / `title` / `body` / `list` /
+`footer` 位于 internal `TransferItemDecorator` 的共享模板内，由源面板和目标面板两个实例同时实例化，`Multiple`
+（数量恒为 2）。
+
+### 1.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `root` |
+| Selector | owner 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ListTransfer` / `TreeTransfer` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Transfer owner |
+| 职责 | 承载数据、选择状态、过滤、布局模式和 owner-scoped Semantic Style 入口。 |
+| 相关 API | `ItemsSource`、`TargetKeys`、`SelectedKeys`、`IsOneWay`、`IsStretchView`、`ListWidth`、`ListHeight`、`IsFilterEnabled`、`PageSize`、`Status`、`SizeType` |
+| 相关 Token | `ListTransferToken` / `TreeTransferToken`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是控件自身，不声明 `.semantic-root` marker。它适合定制 owner 级 `Foreground`、`Opacity` 与整体布局约束；
+源/目标面板与中间操作区的结构由各 Part 负责，不通过 root Setter 改写。
+
+### 1.2 `source.section`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `source.section` |
+| Selector | `.semantic-source` |
+| SelectorRoute | `/template/ .semantic-source` |
+| Style Type | `ListTransferSourceSectionStyle` / `TreeTransferSourceSectionStyle` |
+| ContractType | `TemplatedControl`（internal `TransferItemDecorator` 的最低 public 类型） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | internal `TransferItemDecorator#SourceDecoratorView`（源面板 section） |
+| 职责 | 源方向列表分区的外框，承载 header、过滤输入、列表宿主和 footer 的组织边界。 |
+| 相关 API | `SourceTitle`、`SourceTitleTemplate`、`SourceViewFooter`、`SourceViewFooterTemplate`、`ListWidth`、`ListHeight` |
+| 相关 Token | `ListTransferToken` / `TreeTransferToken` 的 `HeaderHeight`、`HeaderPadding`、SharedToken 边框圆角 |
+| 稳定性 | stable since 6.2.0 |
+
+`source` 对应内部源面板装饰器实例。`BorderBrush`、`BorderThickness`、`CornerRadius` 经模板投影到分区外框
+`Frame`；`Background` 同样投影到 `Frame`（默认为 null，即分区主体保持透明，header 保留自身背景 token）。面板宽度
+由 owner `ListWidth` / `IsStretchView` 决定，`Width` 类 Setter 会与模板投影值按 Avalonia 原生优先级竞争。section
+内部的 header / list / footer 区域由 §1.5–1.8 的共享 Part 表达，`source` 不展开其内部结构。
+
+### 1.3 `target.section`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `target.section` |
+| Selector | `.semantic-target` |
+| SelectorRoute | `/template/ .semantic-target` |
+| Style Type | `ListTransferTargetSectionStyle` / `TreeTransferTargetSectionStyle` |
+| ContractType | `TemplatedControl`（internal `TransferItemDecorator` 的最低 public 类型） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | internal `TransferItemDecorator#TargetDecoratorView`（目标面板 section） |
+| 职责 | 目标方向列表分区的外框，承载 header、过滤输入、列表宿主和 footer 的组织边界。 |
+| 相关 API | `TargetTitle`、`TargetTitleTemplate`、`TargetViewFooter`、`TargetViewFooterTemplate`、`IsOneWay`、`ListWidth`、`ListHeight` |
+| 相关 Token | 同 `source` |
+| 稳定性 | stable since 6.2.0 |
+
+`target` 与 `source` 结构、route 深度和可定制属性完全一致，仅方向不同；`IsOneWay=True` 时目标面板仍存在，只是
+条目选择与回移入口按 API 语义禁用或隐藏。方向差异化定制（如目标面板换背景）是 `source` / `target` 分区级 Part 的
+核心用途。
+
+### 1.4 `actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `actions` |
+| Selector | `.semantic-actions` |
+| SelectorRoute | `/template/ .semantic-actions` |
+| Style Type | `ListTransferActionsStyle` / `TreeTransferActionsStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 模板内 `StackPanel#ActionsLayout`（垂直布局容器） |
+| 职责 | 组织"移至目标 / 移回源"两个操作按钮的中间操作区。 |
+| 相关 API | `ToTargetTransferIcon`、`ToSourceTransferIcon`、`ToTargetButtonText`、`ToSourceButtonText`、`IsOneWay` |
+| 相关 Token | `SpacingXXS`（按钮间距）、`SpacingXS`（与面板间距） |
+| 稳定性 | stable since 6.2.0 |
+
+`actions` 是操作区容器，适合定制 `Spacing`、`Margin`、`Opacity` 与对齐。`IsOneWay=True` 时"移回源"按钮仅切换
+可见性，容器与 marker 不变。容器内的两个按钮是 public `Button` 实例，属于嵌套 Button 家族契约（§5），不通过
+`actions` Setter 改写按钮内部视觉。
+
+### 1.5 `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `/template/ .semantic-scope-section /template/ .semantic-header` |
+| Style Type | `ListTransferHeaderStyle` / `TreeTransferHeaderStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Multiple`（源、目标各一，恒为 2） |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TransferItemDecorator` 模板内 `PixelAlignedBorder#HeaderFrame` |
+| 职责 | 面板头部分区，承载全选指示、选择计数与标题的组织边界。 |
+| 相关 API | `IsShowSelectAllCheckbox`、`IsShowSelectDropdownMenu`、`SelectionsIcon`、`SourceTitle` / `TargetTitle` |
+| 相关 Token | `HeaderHeight`、`HeaderPadding`、`ColorSplit`、`ColorBgContainer` |
+| 稳定性 | stable since 6.2.0 |
+
+`header` 的高度由 `HeaderHeight` token 经模板投影（`ControlHeightLG` 派生的固定基线），`Height` 类 Setter 按原生
+优先级参与测量，但需与分区外框和 owner 布局协调（见 implementation.md 尺寸基线）。header 内部的全选
+`CheckBox`、internal 下拉指示按钮与选择计数 presenter 属于 header 组合结构，不单独发布（§5）。`.semantic-scope-section`
+是路由边界标记（源、目标两个装饰器实例同时携带），不进入公开 Part 表。五个分区 Part（`header` / `title` / `body` /
+`list` / `footer`）的标记节点都位于 `TransferItemDecorator` 自身的 ControlTheme 模板内，由装饰器实例化产生，
+描述符因此声明 `RuntimeCreated=true`（生成器据此跳过 owner 模板的静态 marker 计数，与 Collapse、Splitter 先例一致）。
+
+### 1.6 `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-scope-section /template/ .semantic-title` |
+| Style Type | `ListTransferTitleStyle` / `TreeTransferTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple`（源、目标各一，恒为 2） |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TransferItemDecorator` 模板内 `ContentPresenter#TitleContentPresenter` |
+| 职责 | 承载 `SourceTitle` / `TargetTitle` 及其模板的最终呈现。 |
+| 相关 API | `SourceTitle`、`SourceTitleTemplate`、`TargetTitle`、`TargetTitleTemplate` |
+| 相关 Token | `HeaderPadding`（右对齐留白） |
+| 稳定性 | stable since 6.2.0 |
+
+`title` presenter 始终存在于静态模板结构，`Title=null` 时仍保留节点身份；适合定制 `Foreground`、`Opacity`、
+`Margin` 与对齐。`SourceTitleTemplate` / `TargetTitleTemplate` 创建的用户子树不属于 Transfer Semantic Part。
+
+### 1.7 `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-scope-section /template/ .semantic-body` |
+| Style Type | `ListTransferBodyStyle` / `TreeTransferBodyStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Multiple`（源、目标各一，恒为 2） |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TransferItemDecorator` 模板内 `DockPanel#BodyLayout`（分区主体包裹节点） |
+| 职责 | 分区主体区域，承载过滤输入与列表宿主的组织边界。 |
+| 相关 API | `IsFilterEnabled`、`FilterPlaceholderText`、`ListHeight` |
+| 相关 Token | `MarginXS`（过滤输入外距）、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`body` 是 header 与 footer 之间的分区主体包裹节点，与上游 `body` 语义键对齐：过滤输入与视图宿主是它的直接子
+节点。`Background`、`Padding`、`Margin` 类 Setter 直接作用于主体区域，与 header 的背景 token 相互独立；过滤输入
+（LineEdit 家族契约）与列表宿主（`list` Part）各有边界，`body` Setter 不展开其内部结构。`IsFilterEnabled` 只切换
+过滤输入可见性，不改变 `body` 节点身份。
+
+### 1.8 `list`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `list` |
+| Selector | `.semantic-list` |
+| SelectorRoute | `/template/ .semantic-scope-section /template/ .semantic-list` |
+| Style Type | `ListTransferListStyle` / `TreeTransferListStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple`（源、目标各一，恒为 2） |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TransferItemDecorator` 模板内 `ContentPresenter#ContentPresenter`（视图宿主） |
+| 职责 | 承载源/目标视图控件（`TransferListView` / `TransferTreeView`）的宿主分区。 |
+| 相关 API | `ListHeight`、`SourceView` / `TargetView`、`PageSize`、`ItemTemplate` |
+| 相关 Token | `ListHeight`（宿主高度基线）、`BorderRadiusLG`（底部圆角） |
+| 稳定性 | stable since 6.2.0 |
+
+`list` 是 Transfer owner 拥有的视图宿主，不是嵌套视图控件本身：宿主的 `Height` 由 `ListHeight` 模板投影，
+`CornerRadius` 由 footer 存在性驱动（有 footer 时底部圆角归零）。条目、分组、分页等视图内部区域的定制属于嵌套
+owner 契约（§5）。`Height` 类 Setter 与 owner `ListHeight` API 按原生优先级竞争，需按 implementation.md 尺寸基线
+理解最终 Measure/Arrange 结果。
+
+### 1.9 `footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListTransfer` / `TreeTransfer` |
+| Part | `footer` |
+| Selector | `.semantic-footer` |
+| SelectorRoute | `/template/ .semantic-scope-section /template/ .semantic-footer` |
+| Style Type | `ListTransferFooterStyle` / `TreeTransferFooterStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Multiple`（源、目标各一，恒为 2；未设置 footer 内容时隐藏） |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TransferItemDecorator` 模板内 `PixelAlignedBorder#FooterFrame` |
+| 职责 | 面板底部分区，承载 `SourceViewFooter` / `TargetViewFooter` 及其模板的呈现边界。 |
+| 相关 API | `SourceViewFooter`、`SourceViewFooterTemplate`、`TargetViewFooter`、`TargetViewFooterTemplate` |
+| 相关 Token | `HeaderPadding`、`ColorSplit` |
+| 稳定性 | stable since 6.2.0 |
+
+`footer` 节点始终属于静态模板结构，可见性由对应方向 footer 内容驱动，未设置时隐藏但保留 marker 与对象身份；
+设置 footer 内容时分区 body 的底部圆角归零，由 footer 闭合外框。footer presenter 内的用户内容子树不属于 Transfer
+Semantic Part。
+
+### 1.10 条目 Part（`item` / `itemIcon` / `itemContent`）
+
+条目级 Part 由 Transfer owner 直接发布（不再以 `TransferListItem` / 嵌套视图为 owner），样式与语义清单保持
+组件级单列表，与上游 Transfer 的 `item` / `itemIcon` / `itemContent` 语义键对齐：
+
+| Part | Selector | SelectorRoute | Style Type | ContractType | Cardinality | AtomUI 节点 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `item` | `.semantic-item` | `>> .semantic-item` | `ListTransferItemStyle` / `TreeTransferItemStyle` | `TransferListItem` / `TransferTreeViewItem` | `Multiple` | 视图容器（`TransferListItem` / `TransferTreeViewItem`） |
+| `itemIcon` | `.semantic-item-icon` | `>> .semantic-item /template/ .semantic-item-icon` | `ListTransferItemIconStyle` | `CheckBox` | `Multiple` | `TransferListItem` 模板内 `CheckBox#SelectedIndicator` |
+| `itemContent` | `.semantic-item-content` | `>> .semantic-item /template/ .semantic-item-content` | `ListTransferItemContentStyle` | `ContentPresenter` | `Multiple` | `TransferListItem` 模板内 `ContentPresenter#ContentPresenter` |
+
+`itemIcon` / `itemContent` 仅 `ListTransfer` 发布（树侧条目模板无对应节点，指示 / 图标 / 标题区域由
+`TreeViewItem` 家族的 `itemIndicator` / `itemIcon` / `itemTitle` 契约覆盖）。`>>` 是路由的后代步进
+（从 owner 视觉子树任意深度命中），运行时以锚链匹配。容器由视图在创建 / prepare 路径建立 `.semantic-item`
+与方向条目 marker（§1.11），prepare、restore、recycle 不切换任何 marker。`itemIcon` 是条目选择指示
+CheckBox，`IsCheckable=false`（单向模式目标面板）时隐藏但保留节点身份，右缘的移除按钮与选择行为不属于
+Part；`itemContent` 承载 `ItemTemplate` 内容，其创建的用户子树不属于 Semantic Part。
+
+### 1.11 方向限定部件（`source.*` / `target.*`）
+
+每个分区内部件与条目件都有方向限定变体，命名与上游语义键逐字对齐（`.` 为层级分隔符）。限定部件与对应未限定
+部件**共享终端 marker**，由路由中的方向锚点区分实例，因此不新增任何模板 marker；`Since` 均为 `6.2.0`。
+
+**owner 级分区限定部件**（`ListTransfer` / `TreeTransfer`，`Single`，`RuntimeCreated=true`）：
+
+| Part | SelectorRoute | ContractType | AtomUI 节点 |
+| --- | --- | --- | --- |
+| `source.header` / `target.header` | `/template/ .semantic-source（或 target）/template/ .semantic-header` | `PixelAlignedBorder` | 装饰器模板内 `PixelAlignedBorder#HeaderFrame` |
+| `source.title` / `target.title` | 同链至 `.semantic-title` | `ContentPresenter` | `ContentPresenter#TitleContentPresenter` |
+| `source.body` / `target.body` | 同链至 `.semantic-body` | `DockPanel` | `DockPanel#BodyLayout` |
+| `source.list` / `target.list` | 同链至 `.semantic-list` | `ContentPresenter` | `ContentPresenter#ContentPresenter`（视图宿主） |
+| `source.footer` / `target.footer` | 同链至 `.semantic-footer` | `PixelAlignedBorder` | `PixelAlignedBorder#FooterFrame` |
+
+**条目限定部件**（`Multiple`，`RuntimeCreated=true`，由 Transfer owner 直接发布）：
+`source.item` / `target.item`（`>> .semantic-source-item` / `>> .semantic-target-item`）、
+`source.itemIcon` / `target.itemIcon`（`>> .semantic-source-item /template/ .semantic-item-icon` 等，仅
+`ListTransfer`）、`source.itemContent` / `target.itemContent`（同形，仅 `ListTransfer`）。方向条目类由视图在
+prepare 路径按自身 `ViewType` 一次性补挂（路 A：容器与视图绑定后不迁移、`ViewType` 不可变，marker 保持静态
+稳定），从而与未限定条目部件共享终端 marker。Style Type 依 Path 生成：
+`ListTransferSourceHeaderStyle` / `TreeTransferTargetListStyle` / `ListTransferSourceItemIconStyle` 等，
+全部直接挂在 Transfer 作用域下使用（如 `<atom:ListTransferSourceItemIconStyle>` 置于
+`<Style Selector="atom|ListTransfer.my-demo">` 内即可只命中源面板条目图标）。
 
 ## Abstract AXAML Structure
 
@@ -7129,10 +10911,11 @@ Transfer
                  -> TransferSelectDropdown#MenuIndicator (internal-observable)
                  -> ContentPresenter#SelectedInfo (internal-observable)
                  -> ContentPresenter#TitleContentPresenter (internal-observable)
-           -> LineEdit#FilterInput (template-stable)
            -> PixelAlignedBorder#FooterFrame (template-stable)
               -> ContentPresenter#FooterPresenter (internal-observable)
-           -> ContentPresenter#ContentPresenter (internal-observable)
+           -> DockPanel#BodyLayout (template-stable)
+              -> LineEdit#FilterInput (template-stable)
+              -> ContentPresenter#ContentPresenter (internal-observable)
   -> TransferListItem (item container control theme, TransferListItemTheme.axaml)
      -> Border#Frame (template-stable)
         -> DockPanel#ContentLayout (template-stable)
@@ -7169,8 +10952,8 @@ Transfer
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Transfer` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `TransferItemDecorator` | control theme | `TransferItemDecoratorTheme.axaml` | Transfer | `BodyCornerRadius`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Frame` | template node (PixelAlignedBorder) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `BodyCornerRadius`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `TransferItemDecorator` | control theme | `TransferItemDecoratorTheme.axaml` | Transfer | `Background`, `BodyCornerRadius`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Frame` | template node (PixelAlignedBorder) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `Background`, `BodyCornerRadius`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `RootLayout` | template node (DockPanel) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `BodyCornerRadius`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius`, `FilterPlaceholderText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HeaderFrame` | template node (PixelAlignedBorder) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `BorderThickness`, `CornerRadius`, `HeaderHeight`, `HeaderPadding`, `IsAllSelected`, `IsItemsSourceEmpty` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HeaderLayout` | template node (DockPanel) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `IsAllSelected`, `IsItemsSourceEmpty`, `IsMotionEnabled`, `IsOneWay`, `IsPaginationEnabled`, `IsShowSelectDropdownMenu` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -7178,9 +10961,10 @@ Transfer
 | `MenuIndicator` | template node (TransferSelectDropdown) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `IsAllSelected`, `IsItemsSourceEmpty`, `IsMotionEnabled`, `IsOneWay`, `IsPaginationEnabled`, `IsShowSelectDropdownMenu` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `SelectedInfo` | template node (ContentPresenter) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `SelectedMessage` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `TitleContentPresenter` | template node (ContentPresenter) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `Title`, `TitleTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `FilterInput` | template node (LineEdit) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `FilterPlaceholderText`, `IsFilterEnabled`, `ViewType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `FooterFrame` | template node (PixelAlignedBorder) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `BorderThickness`, `CornerRadius`, `Footer`, `FooterTemplate`, `HeaderPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `FooterPresenter` | template node (ContentPresenter) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `Footer`, `FooterTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `BodyLayout` | template node (DockPanel) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `BodyCornerRadius`, `Content`, `ContentTemplate`, `FilterPlaceholderText`, `IsFilterEnabled`, `ListHeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `FilterInput` | template node (LineEdit) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `FilterPlaceholderText`, `IsFilterEnabled`, `ViewType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ContentPresenter` | template node (ContentPresenter) | `TransferItemDecoratorTheme.axaml` | TransferItemDecorator | `BodyCornerRadius`, `Content`, `ContentTemplate`, `ListHeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `TransferListItem` | item container control theme | `TransferListItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `HorizontalContentAlignment`, `IsCheckable` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Frame` | template node (Border) | `TransferListItemTheme.axaml` | TransferListItem | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `HorizontalContentAlignment`, `IsCheckable` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -7203,7 +10987,6 @@ Transfer
 | `FilterHighlighter` | template node (TextBlock) | `TransferTreeViewItemHeaderTheme.axaml` | TransferTreeViewItemHeader | `FilterHighlightRuns` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `TransferTreeViewItem` | item container control theme | `TransferTreeViewItemTheme.axaml` | 用户代码 / 控件宿主 | `BorderThickness`, `FilterHighlightForeground`, `FilterHighlightWords`, `FilterStrategy`, `Focusable`, `GroupName` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `StackPanel` | template node (StackPanel) | `TransferTreeViewItemTheme.axaml` | TransferTreeViewItem | `BorderThickness`, `FilterHighlightForeground`, `FilterHighlightWords`, `FilterStrategy`, `Focusable`, `GroupName` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Header` | template node (TransferTreeViewItemHeader) | `TransferTreeViewItemTheme.axaml` | TransferTreeViewItem | `BorderThickness`, `FilterHighlightForeground`, `FilterHighlightWords`, `FilterStrategy`, `Focusable`, `GroupName` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 
 ## Template Parts
 
@@ -7297,6 +11080,7 @@ Transfer Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 - 对绑定集合的移动、移除和清空不能无条件替换集合实例；可写集合必须原地更新。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
+- Semantic Part marker、selector class、route、`ContractType` 与 cardinality（见 [Transfer Semantic Part 契约](semantic-part.md)）；嵌套视图容器创建 / 回收路径稳定携带继承 `.semantic-item` marker；marker 不随状态增删，默认主题不消费 `.semantic-*` selector。
 
 Source: ./controls/tree-select/semantic-cn.md
 
@@ -7306,13 +11090,306 @@ Source: ./controls/tree-select/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `TreeSelect` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+TreeSelect 是唯一 Semantic owner，公开 13 个 Semantic Part（语义对齐：`item` / `itemContent` /
+`itemRemove` 对应上游多选标签的 `item` 分组；`popup.*` 采用 AtomUI Select 家族的
+`root` / `list` / `listItem` 命名，对应上游 TreeSelect `popup` 分组的 `root` / `item` /
+`itemTitle` / `itemSwitcher`——弹层树节点的标题、切换器等内部槽位由 `TreeViewItem` 自身已声明的
+`itemTitle` / `itemSwitcher` / `itemIcon` / `itemIndicator` Semantic Part 承载，不经 TreeSelect 重复
+发布）。声明位于 `TreeSelect.SemanticParts.cs` partial 文件。
+
+触发区部件的 marker 位于 `TreeSelectTheme.axaml` 宿主模板内：`prefix` / `suffix` 借用共享
+`AddOnDecoratedBoxTheme` 的 `.semantic-scope-prefix` / `.semantic-scope-suffix` scope 锚点路由到宿主模板
+投影给 decorated box 的内容节点（与 Select / Cascader 同构）；`content` / `placeholder` / `input`
+直接标注宿主模板节点。`input` 额外在多选模式的运行时搜索框上注入同一 marker（共享
+`SelectTagAwareTextBox` 创建搜索框时注入，Cascader 复用同一 marker），使过滤输入在非单选态同样可被
+语义高亮与样式命中。`clear` / `item` / `itemContent` / `itemRemove` 声明 `CrossNestedOwners=true`：
+`clear` 的物理节点在共享 `SelectHandle` 自有模板内；多选标签的物理节点在共享标签机制内——`item`
+的标记由 `SelectTagAwareTextBox` 在标签容器创建时注入，`itemContent` / `itemRemove` 的标记位于共享
+`TagTheme` 模板（`SelectTag : Tag` 复用其模板），二者经 `item` 部件（RuntimeCreated，
+ContractType=`Tag`）承转主题链完成校验。弹层三部件位于 owner 自有的 Popup 模板内：`popup.root`
+标注在宿主模板的 `PopupFrame` 静态节点上，`popup.list`（候选树）与 `popup.listItem`（树节点容器）
+的 marker 在运行时容器创建路径注入。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `root` |
+| Selector | TreeSelect 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `TreeSelect` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | TreeSelect owner |
+| 职责 | TreeSelect root 是树数据源、选择/勾选、过滤、弹层与状态的组织边界。 |
+| 相关 API | 全部 TreeSelect public API |
+| 相关 Token | TreeSelectToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+**根边框与背景定制：** 可见外框由共享 `AddOnDecoratedBox` 帧绘制，其状态机拥有 `BorderBrush` 与
+`Background`。owner 的 `BorderBrush` / `Background` 会以 LocalValue 中继到帧节点生效（对齐上游 root
+border/background 语义与输入族 `AbstractTextInput.RelayRootSurfaceBrush` 行为），因此在 owner-scoped Style
+里直接写根 `Setter Property="BorderBrush"` / `Property="Background"` 即可定制外框：
+
+```xml
+<Style Selector="atom|TreeSelect.semantic-root-border">
+    <Setter Property="BorderBrush" Value="#1677FF" />
+    <Setter Property="Background" Value="#F0F5FF" />
+</Style>
+```
+
+定制期间该属性槽的 hover / focus / open 变色冻结（LocalValue 优先于帧状态机），focus 的 `BoxShadow` 光晕不受
+影响；置空（或不设置）后恢复帧状态机。中继带接管标记：仅当本控件实际写入过该槽位时才在置空时清除，因此嵌套
+owner 不会被外层清除。
+
+
+#### `prefix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `prefix` |
+| Selector | `.semantic-prefix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-prefix > .semantic-prefix` |
+| Style Type | `TreeSelectPrefixStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TreeSelectTheme.axaml` 中投影给 `TreeSelectAddOnDecoratedBox.ContentLeftAddOn` 的 `AddOnContentPresenter`（经 `$parent[atom:TreeSelect]` 编译绑定呈现公共 API 值） |
+| 职责 | 选择框内容前缀区域，承载 `ContentLeftAddOn` 用户内容，在内容框内联展示。 |
+| 相关 API | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `TreeSelectContentStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TreeSelectTheme.axaml` 中承载占位符、单选过滤框与多选标签容器的 Panel |
+| 职责 | 选择内容面板，组织占位符、过滤输入、选中结果与多选标签的布局。 |
+| 相关 API | `PlaceholderText`、`IsFilterEnabled`、`IsMultiple` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `placeholder`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `placeholder` |
+| Selector | `.semantic-placeholder` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-placeholder` |
+| Style Type | `TreeSelectPlaceholderStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TreeSelectTheme.axaml` 的 `PlaceholderText` TextBlock |
+| 职责 | 未选择任何项时显示的占位符文本。 |
+| 相关 API | `PlaceholderText`、`PlaceholderForeground` |
+| 相关 Token | SharedToken（ColorTextPlaceholder） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `input`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `input` |
+| Selector | `.semantic-input` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-input` |
+| Style Type | `TreeSelectInputStyle` |
+| ContractType | `TextBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 单选过滤输入 `PART_SingleFilterInput`；多选模式下同一 marker 由共享 `SelectTagAwareTextBox` 注入到运行时创建的行内搜索框 |
+| 职责 | 过滤模式的搜索输入框（单选态为模板节点，多选态为标签区运行时搜索框）。 |
+| 相关 API | `IsFilterEnabled`、`FilterValue` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `suffix`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `suffix` |
+| Selector | `.semantic-suffix` |
+| SelectorRoute | `/template/ .semantic-scope-input /template/ .semantic-scope-suffix > .semantic-suffix` |
+| Style Type | `TreeSelectSuffixStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TreeSelectTheme.axaml` 中投影给 `ContentRightAddOn` 的水平 StackPanel（含最大数量指示、自定义后缀与 SelectHandle） |
+| 职责 | 选择框后缀区域，承载最大数量指示、用户后缀内容与选择 handle。 |
+| 相关 API | `ContentRightAddOn`、`ContentRightAddOnTemplate`、`SuffixIcon`、`MaxCount` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `clear`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `clear` |
+| Selector | `.semantic-clear` |
+| SelectorRoute | `>> .semantic-scope-handle /template/ .semantic-clear` |
+| Style Type | `TreeSelectClearStyle` |
+| ContractType | `Button` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossNestedOwners | `true` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 共享 `SelectHandle` 模板内的清除按钮（`SelectHandleTheme.axaml`） |
+| 职责 | 后缀 handle 内的清除按钮，启用 `IsAllowClear` 时渲染。 |
+| 相关 API | `IsAllowClear` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item` |
+| Style Type | `TreeSelectItemStyle` |
+| ContractType | `Tag` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossNestedOwners | `true` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 多选标签容器（`SelectTagAwareTextBox` 创建 `SelectTag` 时注入 marker） |
+| 职责 | 多选模式下选择器中的选中标签。 |
+| 相关 API | `SelectedItems`、`IsMultiple`、`MaxTagCount` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `itemContent` |
+| Selector | `.semantic-item-content` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item /template/ .semantic-item-content` |
+| Style Type | `TreeSelectItemContentStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossNestedOwners | `true` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 共享 `TagTheme.axaml` 模板内的内容节点 |
+| 职责 | 选中标签内的文本内容。 |
+| 相关 API | 无（随 `item` 呈现） |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemRemove`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `itemRemove` |
+| Selector | `.semantic-item-remove` |
+| SelectorRoute | `>> .semantic-scope-tags >> .semantic-item /template/ .semantic-item-remove` |
+| Style Type | `TreeSelectItemRemoveStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossNestedOwners | `true` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 共享 `TagTheme.axaml` 模板内的移除按钮 |
+| 职责 | 选中标签内的移除按钮。 |
+| 相关 API | 无（随 `item` 呈现） |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| Style Type | `TreeSelectPopupRootStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TreeSelectTheme.axaml` 中 `PART_Popup` 的静态子节点 `PopupFrame` |
+| 职责 | 候选弹层的根边框节点，承载弹层内容根视觉。 |
+| 相关 API | `PopupContentPadding`、`MaxPopupHeight`、`EffectivePopupWidth` |
+| 相关 Token | PopupToken、TreeSelectToken（MinPopupWidth） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.list`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `popup.list` |
+| Selector | `.semantic-popup-list` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list` |
+| Style Type | `TreeSelectPopupListStyle` |
+| ContractType | `Control` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `EnsurePopupContent` 运行时创建的 `TreeSelectTreeView`（创建时注入 marker） |
+| 职责 | 弹层内的候选树容器，承载树形候选数据、展开与勾选状态。 |
+| 相关 API | `ItemsSource`、`TreeViewToggleType`、`IsDefaultExpandAll` |
+| 相关 Token | TreeSelectToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.listItem`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeSelect` |
+| Part | `popup.listItem` |
+| Selector | `.semantic-popup-list-item` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-list-item` |
+| Style Type | `TreeSelectPopupListItemStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TreeSelectTreeView` 容器创建路径生成的 `TreeViewSelectTreeViewItem`（构造时注入 marker，覆盖任意嵌套层级与回收） |
+| 职责 | 候选树中的单个树节点条目，运行时创建。 |
+| 相关 API | 无（随 `popup.list` 呈现） |
+| 相关 Token | TreeSelectToken、TreeViewToken |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -7327,7 +11404,9 @@ Source: ./controls/tree-select/semantic-cn.md
             <SelectTagAwareTextBox Name="SelectedItemsBox" />
         </Panel>
     </TreeSelectAddOnDecoratedBox>
-    <Popup Name="PART_Popup" />
+    <Popup Name="PART_Popup">
+        <Border Name="PopupFrame" />
+    </Popup>
 </Panel>
 ```
 
@@ -7348,6 +11427,7 @@ TreeSelect
               -> SelectFilterTextBox#PART_SingleFilterInput (template-stable)
               -> SelectTagAwareTextBox#SelectedItemsBox (template-stable)
         -> Popup#PART_Popup (template-stable)
+           -> Border#PopupFrame (template-stable)
   -> TreeViewSelectTreeViewItem (item container control theme, TreeSelectTreeViewItemTheme.axaml)
      -> StackPanel (template-stable)
         -> TreeViewItemHeader#Header (template-stable)
@@ -7361,13 +11441,14 @@ TreeSelect
 | --- | --- | --- | --- | --- | --- | --- |
 | `TreeSelect` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `TreeSelectAddOnDecoratedBox` | control theme | `TreeSelectAddOnDecoratedBoxTheme.axaml` | TreeSelect | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `TreeSelect` | control theme | `TreeSelectTheme.axaml` | 用户代码 / 控件宿主 | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `EffectiveSelectedItems` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `TreeSelectTheme.axaml` | TreeSelect | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `EffectiveSelectedItems` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (TreeSelectAddOnDecoratedBox) | `TreeSelectTheme.axaml` | TreeSelect | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `ContentLeftAddOn`, `ContentLeftAddOnTemplate`, `DataValidationErrors`, `EffectiveSelectedItems` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `TreeSelect` | control theme | `TreeSelectTheme.axaml` | 用户代码 / 控件宿主 | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataValidationErrors`, `EffectivePopupWidth`, `EffectiveSelectedItems`, `FontFamily` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `TreeSelectTheme.axaml` | TreeSelect | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataValidationErrors`, `EffectivePopupWidth`, `EffectiveSelectedItems`, `FontFamily` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `{x:Static atom:AddOnDecoratedBox.AddOnDecoratedBoxPart}` | template node (TreeSelectAddOnDecoratedBox) | `TreeSelectTheme.axaml` | TreeSelect | `CompactSpaceItemPosition`, `CompactSpaceOrientation`, `DataValidationErrors`, `EffectiveSelectedItems`, `FontFamily`, `FontSize` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PlaceholderText` | template node (TextBlock) | `TreeSelectTheme.axaml` | TreeSelect | `IsPlaceholderTextVisible`, `PlaceholderForeground`, `PlaceholderText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_SingleFilterInput` | template node (SelectFilterTextBox) | `TreeSelectTheme.axaml` | TreeSelect | `FontFamily`, `FontSize`, `FontStyle`, `FontWeight`, `IsShowOverflowTip`, `OverflowTipDelay` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SelectedItemsBox` | template node (SelectTagAwareTextBox) | `TreeSelectTheme.axaml` | TreeSelect | `EffectiveSelectedItems`, `Height`, `IsDropDownOpen`, `IsFilterEnabled`, `IsResponsiveTagMode`, `IsShowOverflowTip` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Popup` | template node (Popup) | `TreeSelectTheme.axaml` | TreeSelect | `IsDropDownOpen`, `PopupPlacement`, `ShouldUseOverlayPopup` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Popup` | template node (Popup) | `TreeSelectTheme.axaml` | TreeSelect | `EffectivePopupWidth`, `MaxPopupHeight`, `PopupContentPadding`, `PopupPlacement`, `ShouldUseOverlayPopup` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PopupFrame` | template node (Border) | `TreeSelectTheme.axaml` | TreeSelect | `EffectivePopupWidth`, `MaxPopupHeight`, `PopupContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `TreeViewSelectTreeViewItem` | item container control theme | `TreeSelectTreeViewItemTheme.axaml` | TreeSelect | `BorderThickness`, `FilterHighlightForeground`, `FilterHighlightWords`, `FilterStrategy`, `Focusable`, `GroupName` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `StackPanel` | template node (StackPanel) | `TreeSelectTreeViewItemTheme.axaml` | TreeViewSelectTreeViewItem | `BorderThickness`, `FilterHighlightForeground`, `FilterHighlightWords`, `FilterStrategy`, `Focusable`, `GroupName` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Header` | template node (TreeViewItemHeader) | `TreeSelectTreeViewItemTheme.axaml` | TreeViewSelectTreeViewItem | `BorderThickness`, `FilterHighlightForeground`, `FilterHighlightWords`, `FilterStrategy`, `Focusable`, `GroupName` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -7483,6 +11564,7 @@ TreeSelectToken 不承载以下状态：
 - `ShowCheckedStrategy` 只能派生展示集合，不能改写真实选择集合。
 - `ItemsSource` 替换时的选择保留必须继续使用节点路径 identity。
 - popup 内容清理必须断开事件、ItemsSource、TemplatedParent 和 popup child 引用。
+- Semantic Part marker 的维护边界：`TreeSelectTheme.axaml` 承载触发区静态 marker（`semantic-scope-input`、`semantic-prefix`、`semantic-suffix`、`semantic-scope-handle`、`semantic-content`、`semantic-placeholder`、`semantic-input`、`semantic-scope-tags`、`semantic-popup-root`）；共享 `SelectHandleTheme.axaml` 承载清除按钮的 `semantic-clear` marker（`clear` Part 声明 `CrossNestedOwners=true`，生成器沿 SelectHandle 主题链校验）；共享 `TagTheme.axaml` 承载 `itemContent` / `itemRemove` marker。运行时注入点：共享 `SelectTagAwareTextBox` 创建标签时追加 `TagItemClass`、创建搜索框时追加 `TagSearchInputClass`；`TreeSelect.EnsurePopupContent` 创建候选树时追加 `TreeSelectSemanticParts.PopupListClass` 并显式 `SetTemplatedParent(this)`；`TreeViewSelectTreeViewItem` 构造函数追加 `TreeSelectSemanticParts.PopupListItemClass`。marker 随容器实例创建一次，prepare/clear/recycle 路径不得增删；`PopupFrame` 以 `Popup.Child` 取回，不在控件中缓存字段。
 
 Source: ./controls/upload/semantic-cn.md
 
@@ -7492,15 +11574,56 @@ Source: ./controls/upload/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
+| Part | Selector | SelectorRoute | ContractType | Cardinality | RuntimeCreated |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Upload` | 上传状态协调器，拥有文件集合、用户输入范围、上传队列、Form 值投影和生命周期。 | `Files`、`IsMultipleEnabled`、`UploadTransport`、`FileValueMode` | `UploadToken`、SharedToken | stable |
-| `trigger` | `TriggerContent` / `UploadTrigger` | 承载文件或目录选择入口，只提交选择动作，不持有上传状态。 | `TriggerContent`、`SourceKind`、`SelectFilesAsync()`、`SelectDirectoriesAsync()` | Upload trigger 主题资源 | stable |
-| `drop-zone` | `UploadDropZone` | 协商拖动效果、取得 Drop 快照并创建统一输入批次。 | `IsOpenFileDialogOnClick`、`DirectoryDropMode`、`DragState` | Upload drop-zone 主题资源 | stable |
-| `drop-area` | `UploadDefaultDropArea` | 渲染默认拖动图标、标题、副标题和边框，不处理 DataTransfer。 | `DropIcon`、`Header`、`SubHeader` | Upload Token、SharedToken | stable |
-| `list` | `UploadList` | 渲染 `Files` 并拥有列表滚动边界，不创建第二份文件状态。 | `Files`、`ListType`、`ListMaxHeight`、`ListScrollBarVisibility` | Upload list 主题资源 | internal-observable |
-| `item` | `AbstractUploadListItem` 派生容器 | 投射单个 `UploadFileItem` 的状态、进度和操作入口。 | `UploadFileItem.Status`、`Progress`、`ErrorMessage`、`Result` | Upload item 主题资源 | internal-observable |
-| `validation` | `Upload` Form / validation 投影 | 按 `FileValueMode` 输出 Form 值，并把错误投射到 `DataValidationErrors`。 | `FileValueMode`、`IFormItemAware` | SharedToken、Form Token | stable |
+| `root` | owner | 不适用 | `Upload` | `Single` | `false` |
+| `list` | `.semantic-list` | `/template/ .semantic-list` | `ItemsControl` | `Single` | `false` |
+| `item` | `.semantic-item` | `/template/ .semantic-list > .semantic-item` | `TemplatedControl` | `Multiple` | `true` |
+
+三个 Part 的 `Customization` 分别为 `Root`、`Selector`、`Selector`，`CrossVisualRoot` 均为 `false`，`Since`
+均为 `6.0`。`root` 是隐式 Part，不声明 `.semantic-root` marker。
+
+### 1.1 `root`
+
+`root` 是 `Upload` owner 本身，承载 `Files`、`TriggerContent`、`ListType`、`IsShowUploadList`、输入管线、上传队列、
+Form 值投影和生命周期。每个 Upload 实例恰好一个 root，并作为 `list` 与 `item` 生成 Style 的 owner scope。
+
+root 定制直接使用 `Upload` 的 public 控件契约，例如尺寸、对齐、透明度、裁剪、Classes 和实例 Styles。当前内置模板
+不把 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 或 `Padding` 投影为独立根 frame，因此这些属性
+不构成 Upload root 的表面绘制保证。应用需要完整替换根表面时，应提供自己的 ControlTheme，并同时实现本文件定义的
+`list` 和 `item` marker 契约。
+
+### 1.2 `list`
+
+`list` 表示当前 `ListType` 使用的唯一文件列表：
+
+- Text 与 Picture 模式由 `UploadList` 实现。
+- PictureCard 与 PictureCircle 模式由 `UploadPictureShapeList` 实现。
+
+两种实现都是 internal 类型，因此公共 `ContractType` 使用最低稳定 public 类型 `ItemsControl`。应用可以稳定设置
+`Background`、`Padding`、`Margin`、尺寸、对齐、透明度等 `ItemsControl`/`TemplatedControl` 属性，不得依赖
+`UploadList`、`UploadPictureShapeList`、`PART_ItemsPresenter` 或内部 ScrollViewer 的具体类型与名称。
+
+每个内置 Upload 模板恰好实例化一个 list 节点。`IsShowUploadList=false` 只隐藏节点，不移除 marker，因此 cardinality
+仍为 `Single`。切换 `ListType` 会重新选择根 ControlTemplate，但新的模板继续提供相同 `semantic-list` 契约。
+
+### 1.3 `item`
+
+`item` 表示每个真实 `UploadFileItem` 对应的列表容器。Text、Picture、PictureCard 和 PictureCircle 分别使用
+`UploadTextListItem`、`UploadPictureListItem` 或 `UploadPictureShapeListItem`，这些实现均为 internal 的
+`TemplatedControl` 派生类型，因此公共 `ContractType` 为 `TemplatedControl`。
+
+item marker 在 `UploadList.CreateContainerForItemOverride` 创建容器时通过生成的 `UploadSemanticParts.ItemClass`
+一次性添加。Pending、Uploading、Success、Failed 和 Cancelled 只替换或切换容器内部模板，不替换 item owner，
+因此 marker、route 和应用 Semantic Style 在状态变化期间保持稳定。
+
+`item` 明确不包含以下节点：
+
+- PictureCard/PictureCircle 的 `UploadAppendContentItem` append trigger；它不进入 `Files`。
+- item 内部的缩略图、文件名、进度条、遮罩和操作按钮；这些节点尚未形成独立公共 Part。
+- 用户 `TriggerContent` 或 `ItemTemplate` 生成的子树。
+
+空文件集合允许零个 item；非空集合中每个真实文件恰好一个 marker，所以 cardinality 为 `Multiple`。
 
 ## Abstract AXAML Structure
 
@@ -7582,7 +11705,7 @@ Upload
 | 输入结果 | `InputBatchCompleted`、`UploadInputBatchCompletedEventArgs` | 每个输入批次在 UI 线程统一报告接受项、拒绝项以及 Completed、Cancelled 或 Failed 终态。 |
 | 文件内容 | `UploadFileInfo`、`IUploadFileSource` | Transport 通过可打开内容源读取文件，不假定本地路径可访问。 |
 | 上传队列 | `UploadTransport`、`AutoUpload`、`MaxConcurrentTasks`、`UploadQueue` | 上传调度与视觉控件解耦，生命周期由 `Upload` 统一释放。 |
-| 列表展示 | `UploadList`、`ListType`、`ListMaxHeight`、`ListScrollBarVisibility` | 列表内部滚动，触发区保持固定。 |
+| 列表展示 | `UploadList`、`ListType`、`ListMaxHeight`、`ListScrollBarVisibility` | 列表内部滚动，触发区保持固定；应用通过 `list` / `item` Semantic Part 定制稳定区域。 |
 | 触发入口 | `TriggerContent`、`UploadTrigger`、Picture append slot | 文件/目录触发器由用户布局组合，PictureCard/PictureCircle 通过显示源 append slot 呈现。 |
 | 状态反馈 | `SuccessAutoRemoveDelay`、`PendingText`、`FileValueMode` | 成功自动移除、待上传文案和 Form 值投影可配置。 |
 | 视觉与动效 | `IsMotionEnabled`、Upload Token | 只表达视觉状态，不保存业务任务状态。 |
@@ -7651,6 +11774,10 @@ Upload 的视觉模型由控件模板、ControlTheme、SharedToken 和控件 Tok
 - 可由 AXAML 表达的模板状态必须优先留在 AXAML。
 - Token 只表达视觉变量，不承载上传状态、队列状态或 Form 错误。
 
+公开 Semantic Part 为 `root`、`list` 与 `item`。`list` 在四种 `ListType` 下都表示唯一活动文件列表，`item`
+只表示真实 `UploadFileItem` 容器，不包含 PictureCard/PictureCircle 的 append trigger。完整 Selector、ContractType、
+状态矩阵和定制边界见 [Upload Semantic Part 契约](semantic-part.md)。
+
 Token 边界：
 
 Upload Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆角、阴影、图标尺寸和弹层边界。Token 不承载运行时选择、展开、加载、错误、上传任务、过滤条件或业务状态。
@@ -7670,6 +11797,7 @@ Upload Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - 不通过运行时反射扫描 public API、Token 或 Gallery 示例数据。
 - `UploadDropZone` 和 `UploadDefaultDropArea` 的 ControlTheme、模板视觉树、Token 映射、布局和默认渲染结果保持稳定。
 - `UploadDropZone` 的新增拖动状态伪类只提供自定义主题入口；AtomUI 默认主题不得据此改变 pointerover、disabled、motion、Light/Dark 或缩放后的视觉结果。
+- `root`、`list`、`item` 的 selector class、route、ContractType 和 cardinality 属于公共主题 API；所有内置模板变体必须实现相同契约。
 - 文档只描述稳定设计；历史变化记录在 `changelog.md`。
 
 维护不变量：
@@ -7686,6 +11814,7 @@ Upload Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - ownership transfer 必须由 typed batch operation 验证；不得重新引入 `ownsFileSources`、`queueAlreadyCancelled` 或通用 transfer callback。
 - 默认 DropZone/DropArea ControlTheme、模板视觉树、Token、布局和渲染结果不得因输入管线重构改变。
 - PictureCard/PictureCircle 的上传入口只能通过 `EffectivePictureItems` 中的 display append slot 呈现，确保与图片项处于同一 wrap flow。
+- `semantic-list` 必须存在于两套 Upload 根模板，`semantic-item` 只存在于真实文件容器；append slot 不属于 item cardinality。
 - `RemoveFileAsync`、外部集合变更、`Files` 替换、Form Set/Clear、`ResetAsync` 和 detach 必须以各自时序释放上传任务、source lease、auto-remove delay、集合订阅和 container 绑定。
 - `DataValidationErrors` 是 error 状态来源，Upload 不维护独立 error 机制。
 - AXAML-first binding 是默认选择；C# binding 必须说明 AXAML 不能表达的原因和释放 owner。
@@ -7821,13 +11950,157 @@ Source: ./controls/badge/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Badge` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+三个可实例化 owner 各自拥有独立 descriptor。同名 `indicator` 表达相近的产品职责，不表示 owner 共享运行时节点、状态或 Theme。
+
+### 1.1 `CountBadge`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CountBadge` |
+| Part | `root` |
+| Selector | CountBadge 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `CountBadge` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | CountBadge owner |
+| 职责 | CountBadge root 是数量、可见性、颜色、尺寸、定位和目标组合的状态 owner。 |
+| 相关 API | 全部 CountBadge public API |
+| 相关 Token | CountBadgeToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CountBadge` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `> .semantic-scope-indicator /template/ .semantic-indicator` |
+| Style Type | `CountBadgeIndicatorStyle` |
+| ContractType | `Control` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 完整数量徽标区域 |
+| 职责 | CountBadge indicator 表示完整数量徽标视觉。 |
+| 相关 API | `Count`、`OverflowCount`、`IsZeroVisible`、`BadgeColor`、`Size`、`Offset` |
+| 相关 Token | CountBadgeToken |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `DotBadge`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DotBadge` |
+| Part | `root` |
+| Selector | DotBadge 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `DotBadge` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | DotBadge owner |
+| 职责 | DotBadge root 是状态、文本、颜色、可见性、定位和目标组合的状态 owner。 |
+| 相关 API | 全部 DotBadge public API |
+| 相关 Token | DotBadgeToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DotBadge` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `> .semantic-scope-indicator /template/ .semantic-indicator` |
+| Style Type | `DotBadgeIndicatorStyle` |
+| ContractType | `Control` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 状态点区域 |
+| 职责 | DotBadge indicator 表示状态点视觉和统一动效边界，不包含独立模式的说明文本。 |
+| 相关 API | `Status`、`DotColor`、`Offset`、`BadgeIsVisible` |
+| 相关 Token | DotBadgeToken |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.3 `RibbonBadge`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `RibbonBadge` |
+| Part | `root` |
+| Selector | RibbonBadge 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `RibbonBadge` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | RibbonBadge owner |
+| 职责 | RibbonBadge root 是文本、颜色、位置、可见性和目标组合的状态 owner。 |
+| 相关 API | 全部 RibbonBadge public API |
+| 相关 Token | RibbonBadgeToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `RibbonBadge` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `> .semantic-indicator` |
+| Style Type | `RibbonBadgeIndicatorStyle` |
+| ContractType | `Control` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 完整 Ribbon 区域 |
+| 职责 | RibbonBadge indicator 表示完整 Ribbon 视觉、定位和绘制边界。 |
+| 相关 API | `RibbonColor`、`Placement`、`Offset`、`BadgeIsVisible` |
+| 相关 Token | RibbonBadgeToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `RibbonBadge` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `> .semantic-indicator /template/ .semantic-content` |
+| Style Type | `RibbonBadgeContentStyle` |
+| ContractType | `Avalonia.Controls.TextBlock` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | Ribbon 文本区域 |
+| 职责 | RibbonBadge content 表示 Ribbon 的文本展示与排版区域。 |
+| 相关 API | `Text` |
+| 相关 Token | RibbonBadgeToken、SharedToken typography |
+| 稳定性 | stable since 6.2.0 |
+
+所有 root 都是隐式 Part，不添加 `.semantic-root`。所有非 root Part 都由既有 runtime Adorner 生命周期创建，因此为
+`Optional + RuntimeCreated`。CountBadge 与 DotBadge 在 target mode 下把 indicator 显示在 Avalonia `AdornerLayer`，所以
+`CrossVisualRoot=true`；RibbonBadge 始终保持 owner inline visual tree。
 
 ## Abstract AXAML Structure
 
@@ -7882,58 +12155,58 @@ Badge
 
 ## Template Parts
 
-| 契约组 | 代表成员 | 维护含义 |
-| --- | --- | --- |
-| 内容与数据 | `Text` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 选择与集合 | `Count`、`IsAdornerMode`、`OverflowCount` | 维护选择、展开、过滤、分页、分组或集合状态。 |
-| 交互与状态 | `BadgeIsVisible`、`IsMotionEnabled`、`IsZeroVisible`、`Status` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `BadgeColor`、`BadgeDotColor`、`DotColor`、`Offset`、`Placement`、`RibbonColor`、`Size` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
-| 动效与异步 | `MotionDuration` | 约束动效开关、异步加载、播放速度、超时和任务边界。 |
-| 其他稳定入口 | `DecoratedTarget` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+源文档未声明稳定 Template Part。维护模板时应以源码和主题文件中的实际声明为准。
 
 ## Pseudo Classes
 
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | input/value、motion、visual option。 |
-| 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | Badge Token + ControlTheme。 |
+源文档未声明控件专属伪类。控件仍可能消费 Avalonia 标准状态，例如 `:pointerover`、`:pressed`、`:disabled` 和 focus 相关状态。
 
 ## State Flow
 
-Badge 的状态流按以下路径收敛：
+Badge 状态从 public owner 单向投影到运行时视觉：
 
 ```text
-Public API / inherited command / item source / user input
-  -> 控件实例状态
-  -> effective state / pseudo-class / template property
-  -> ControlTheme selector / presenter / renderer
-  -> Gallery 可观察行为
+Public API
+  -> owner visibility / mode / effective text and color
+  -> runtime Adorner properties
+  -> ControlTheme / Measure / Arrange / Render
 ```
 
-状态维护规则：
+主要状态规则：
 
-- Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
-- input/value、motion、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
-- 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
-- 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
+- `Count=0 && IsZeroVisible=false` 时，CountBadge 将徽标归一为隐藏；`Count > OverflowCount` 时显示 `<OverflowCount>+`。
+- DotBadge 有 `DecoratedTarget` 时只显示状态点；独立模式可以同时显示状态点和 `Text`。
+- RibbonBadge 隐藏时只移除 Ribbon 视觉，不隐藏 `DecoratedTarget`。
+- Count/Dot 启用退出动效时，indicator 可以在隐藏请求后短暂保留；动效完成后才从宿主移除。
+- Dot 在 standalone 与 target mode 间切换时会重建内部 Adorner，但公开 `indicator` 身份不变。
+- Semantic marker 不表达 visible、status、placement 或 motion phase；节点存在时 marker 保持不变。完整状态与 Part 数量矩阵见
+  [Badge Semantic Part 契约](semantic-part.md)。
 
 ## Theme and Token Boundaries
 
-Badge 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的控件 Token 共同构成。
+Badge owner 本身没有 ControlTemplate。三个 owner 在运行时创建内部视觉宿主，并把 public 属性单向投影给该宿主。
 
-| 主题文件 | 职责 |
+| Owner | 无 `DecoratedTarget` | 有 `DecoratedTarget` |
+| --- | --- | --- |
+| `CountBadge` | 数量视觉作为 owner 的普通视觉和逻辑子树。 | 目标作为 owner 子节点；数量视觉显示在 Avalonia `AdornerLayer`。 |
+| `DotBadge` | 状态点与可选文本作为 owner 的普通视觉和逻辑子树。 | 目标作为 owner 子节点；状态点显示在 Avalonia `AdornerLayer`。 |
+| `RibbonBadge` | Ribbon 视觉作为 owner 的普通视觉和逻辑子树。 | 目标与 Ribbon 都由 owner 在同一 inline visual tree 中排列，不进入原生 `AdornerLayer`。 |
+
+CountBadge 和 DotBadge 的跨 VisualRoot 模式只改变 indicator 的 visual parent。其 logical/style owner 仍必须是对应 Badge owner，使资源、实例 `Styles` 和 owner-scoped selector 保持可达。
+
+Badge 的默认视觉由三个内部 Token scope 与四个 ControlTheme 共同提供：
+
+| 资源 | 职责 |
 | --- | --- |
-| `CountBadgeAdornerTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
-| `DotBadgeAdornerTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
-| `DotBadgeIndicatorTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
-| `RibbonBadgeAdornerTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
+| `CountBadgeToken` | 数量徽标高度、字体、颜色、Padding、圆角和阴影。 |
+| `DotBadgeToken` | 状态点尺寸、颜色、阴影和独立文本间距。 |
+| `RibbonBadgeToken` | Ribbon 偏移、折角、文本 Padding 和行高。 |
+| `CountBadgeAdornerTheme.axaml` | 数量 indicator 的模板、尺寸变体和默认视觉。 |
+| `DotBadgeAdornerTheme.axaml` | 状态点、独立文本和 target mode 模板。 |
+| `DotBadgeIndicatorTheme.axaml` | 状态点绘制所需的默认属性。 |
+| `RibbonBadgeAdornerTheme.axaml` | Ribbon content 模板及绘制参数。 |
 
-Badge 使用 `BadgeToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 input/value、motion、visual option 运行时状态。
-
-主题维护规则：
-
-- 不删除或重命名已经稳定的 ControlTheme key、template part、伪类和资源 key。
-- 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
-- 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
-- Browser 或平台特化主题必须保持同一 API 的语义一致。
+Token 只表达组件视觉语义，不保存数量、状态、可见性、目标引用或 motion phase。AtomUI 内置主题不得使用 `.semantic-*` 实现默认视觉。
 
 Token 边界：
 
@@ -7945,25 +12218,30 @@ Badge Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 ## Customization Boundaries
 
-维护 Badge 时必须保持以下不变量：
-
-- 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
-- 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
-- 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
-- Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
-- 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
-- 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
-- 文档只描述当前稳定设计；历史变化记录在 `changelog.md`。
+- `CountBadge`、`DotBadge`、`RibbonBadge` 的 public API、默认值和 XAML content property 语义不变。
+- 三个 owner 分别拥有自己的 descriptor；内部 Adorner 不成为 descriptor owner。
+- `root` 不添加 `.semantic-root`；非 root Part 使用唯一 `.semantic-indicator` 或 `.semantic-content`。
+- Count/Dot 跨根 indicator 的 visual parent 可以是 `AdornerLayer`，logical/style owner 必须保持对应 Badge owner。
+- Ribbon target mode 保持 inline visual tree；隐藏 Ribbon 时必须保留目标内容。
+- `DecoratedTarget`、内部文本拆分、动效节点名称和绘制几何不得升级为隐式公共契约。
+- 删除、重命名 Part、修改 selector class、收窄 ContractType 或改变 cardinality 按公共主题破坏性变更处理。
+- Semantic Part 不引入运行时反射、VisualTree 全局扫描、额外常驻监听或默认路径视觉对象。
 
 维护不变量：
 
-维护 Badge 时不得破坏：
-
-- Public API、默认值、事件顺序和 Gallery 可观察行为。
-- Template part 名称、ControlTheme key、伪类和资源 key。
-- 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
-- Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
-- 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
+- descriptor owner 只能是 `CountBadge`、`DotBadge`、`RibbonBadge`，不能是 shared abstract base 或 internal Adorner。
+- Count/Dot 只有 `root/indicator`；Ribbon 只有 `root/indicator/content`。
+- Count/Dot `indicator` marker 位于所有适用 Adorner 模板的 `PART_MotionActor`；Ribbon indicator 位于 runtime Adorner，content 位于 `PART_LabelPart`。
+- 所有非 root Part 保持 `Optional + Selector + RuntimeCreated`；Count/Dot indicator 保持 `CrossVisualRoot=true`。
+- Badge public owner selector 使用 descriptor 的 direct-child/template route，不使用 logical descendant、类型前缀 class 或
+  internal 类型。Count/Dot runtime adorner 必须携带 `.semantic-scope-indicator`；Ribbon adorner 自身携带
+  `.semantic-indicator`。
+- Count/Dot target mode 的 visual parent 与 logical/style owner 必须分离，detach 时对称清理。
+- Dot standalone 与 target 两套模板必须实现同一个 indicator marker 契约。
+- Ribbon 背景与折角继续由 Render 绘制，不为了 Semantic Part 新增视觉节点。
+- marker 在节点生命周期内静态存在，不表达 visible、status、placement 或 motion phase。
+- `DecoratedTarget`、内部 Label、Count 文本拆分、折角和 motion actor identity 保持非公开。
+- 默认 Theme 不消费 semantic class；实现不引入反射、扫描、额外常驻监听或新的默认视觉对象。
 
 Source: ./controls/calendar/semantic-cn.md
 
@@ -7973,16 +12251,165 @@ Source: ./controls/calendar/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Calendar` / `LunarCalendar` | 桌面日历控件根语义区域，承载 public API、状态投影和主题入口。 | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate`、`CellTemplate`、`FullCellTemplate`、`HeaderTemplate` | `CalendarToken`、`LunarCalendarToken` | stable |
-| `header` | `PART_HeaderPresenter` / `CalendarHeader` | 年份、月份和模式切换区域。 | `Value`、`Mode`、`Fullscreen`、`ValidRange` | `YearControlWidth`、`MonthControlWidth` | stable |
-| `body` | `PART_BodyPresenter` / `PART_CalendarView` / `CalendarView` | 日期/月网格、周标题与 overlay 承载区域。 | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate` | `FullBg`、`FullPanelBg`、`MiniContentHeight`、`FullCellMinHeight` | stable |
-| `content` | `PART_CellHost` | 日期、月份和周序号容器区域。 | `Value`、`Mode`、`ShowWeek`、`ValidRange`、`DisabledDate` | `ItemActiveBg` | stable |
-| `item` | `CalendarViewCell` / `PART_Item` | 单个日期、月份或周序号单元。 | `CellTemplate`、`FullCellTemplate`、`Value`、`Mode`、`ShowWeek` | `ItemActiveBg` | stable |
-| `rangeBar` | `PART_RangeBarPanel` / `CalendarRangeBarPanel` | Fullscreen Month 日期网格上方的连续日期范围条 overlay。 | `RangeBars`、`CalendarRangeBar` | `RangeBarHeight` | stable |
-| `itemContent` | `PART_ItemContent` | CellTemplate / FullCellTemplate 的业务内容区域。 | `CellTemplate`、`FullCellTemplate`、`CalendarCellContext` | `ItemActiveBg` | stable |
-| `lunarContent` | `LunarCalendarViewCell` | 农历日期、节气、传统节日、节假日/调休标记和月份相交信息。 | `LunarCalendarCellContext`、`HolidayProvider`、四个显示开关 | LunarCalendar 增量 Token | stable |
+`Calendar` 主控件公开 `root`、`header`、`body`、`content`、`item` 与 `itemContent` 六个职责区域，与上游稳定 Semantic DOM
+对齐。上游基线为 6.6.0 稳定发布的 `CalendarSemanticType` 与 Semantic DOM 演示：
+
+- `root`、`header`、`body`、`content`、`item` 自上游 6.0.0 公开；
+- `itemContent` 自上游 6.4.0 公开（Semantic DOM 演示中 `itemContent` 的 version 为 `6.4.0`）。
+
+AtomUI 全部六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
+
+内部 `CalendarHeader`、`CalendarView`、`CalendarViewCell` 与 `LunarCalendarViewCell` 均不持有独立 Semantic descriptor：
+
+- 上游 Calendar 只提供一个 owner 的 Semantic DOM；这四个类型是 internal 模板协作类型，不是对应用公开的独立 owner。
+- `CalendarHeader` 的职责通过 `Calendar` 的 `header` Part 对外公开，并以 `TemplatedControl` 作为最低 ContractType。
+- `CalendarView` 的职责通过 `Calendar` 的 `body` 与 `content` Part 对外公开。
+- `CalendarViewCell` / `LunarCalendarViewCell` 是运行时生成的网格单元，职责通过 `item` 与 `itemContent` Part 对外公开。
+
+`LunarCalendar` 是 `Calendar` 的公开派生控件，按批次既有约定声明自己的 descriptor（与 `FloatButton` /
+`BackTopFloatButton` 一致）。它复用同一套 Part 名称、selector class 与 ContractType，marker 由继承的根模板与派生
+Cell 模板承载。
+
+### 1.1 `Calendar`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Calendar` |
+| Part | `root` |
+| Selector | Calendar 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Calendar` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Calendar owner |
+| 职责 | Calendar root 是日期值、显示模式、面板状态与根视觉样式的统一 owner。 |
+| 相关 API | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate`、`CellTemplate`、`FullCellTemplate`、`HeaderTemplate`、`RangeBars` |
+| 相关 Token | CalendarToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Calendar` |
+| Part | `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `/template/ .semantic-header` |
+| Style Type | `CalendarHeaderStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 默认 Header `CalendarHeader`（`PART_DefaultHeader`） |
+| 职责 | 统一表示年份选择、月份选择与 Month/Year 模式切换的 Header 区域布局与样式；年/月 Select 与模式切换组默认带白色容器背景（`ColorBgContainer`），选中态仅以主色边框/文字标识。 |
+| 相关 API | `Value`、`Mode`、`Fullscreen`、`ValidRange`、`HeaderTemplate` |
+| 相关 Token | `YearControlWidth`、`MonthControlWidth`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Calendar` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `CalendarBodyStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `DockPanel#PART_BodyPresenter` |
+| 职责 | 统一表示 Header 下方容纳日历网格与范围条 overlay 的主体区域的内边距、背景与布局。 |
+| 相关 API | `Fullscreen`、`Mode`、`ShowWeek`、`RangeBars` |
+| 相关 Token | `FullBg`、`FullPanelBg`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Calendar` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `CalendarContentStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 日历面板 `CalendarView`（`PART_CalendarView`） |
+| 职责 | 统一表示日历表格（周标题行 + 日期/月网格）区域的宽度、高度与表格级样式。面板默认自带 `FullPanelBg`（`ColorBgContainer`）背景，Fullscreen 模式面板背景为 `FullBg`；root 表面的背景定制只落在面板外圈，不渗入面板内部。 |
+| 相关 API | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate`、`CellTemplate`、`FullCellTemplate` |
+| 相关 Token | `FullPanelBg`、`MiniContentHeight`、`FullCellMinHeight`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Calendar` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-scope-body > .semantic-scope-cells > .semantic-item` |
+| Style Type | `CalendarItemStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 运行时生成的 `CalendarViewCell` 网格单元（含周序号 Cell） |
+| 职责 | 统一表示单个日期、月份或周序号单元的背景、边框、悬停与选中等交互样式。 |
+| 相关 API | `Value`、`Mode`、`ShowWeek`、`ValidRange`、`DisabledDate` |
+| 相关 Token | `ItemActiveBg`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Calendar` |
+| Part | `itemContent` |
+| Selector | `.semantic-item-content` |
+| SelectorRoute | `/template/ .semantic-content > .semantic-scope-body > .semantic-scope-cells > .semantic-item /template/ .semantic-item-content` |
+| Style Type | `CalendarItemContentStyle` |
+| ContractType | `ContentControl` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 Cell 模板中的 `ContentControl#PART_ItemContent` |
+| 职责 | 统一表示单元格内自定义内容区域（`CellTemplate` / `FullCellTemplate`）的高度、溢出与布局样式。 |
+| 相关 API | `CellTemplate`、`FullCellTemplate`、`CalendarCellContext` |
+| 相关 Token | `ItemActiveBg`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header`、`content`、`item` 的
+`ContractType` 为 `TemplatedControl` 而非 internal 的 `CalendarHeader` / `CalendarView` / `CalendarViewCell`，因为
+internal 类型不能作为公共 Setter 依赖的最低类型；`body` 的 `ContractType` 为 `DockPanel`，`itemContent` 为
+`ContentControl`，二者都是承载节点的公开具体类型。
+
+### 1.2 `LunarCalendar`
+
+`LunarCalendar` 声明与 `Calendar` 完全相同的六个 Part（`root`、`header`、`body`、`content`、`item`、`itemContent`），
+字段值与 §1.1 一致，仅 Owner 与生成 Style 类型名不同（`LunarCalendarHeaderStyle` 等）。节点映射差异：
+
+- `root` 为 `LunarCalendar` owner。
+- `header`、`body`、`content` 的 marker 继承自 `LunarCalendarControlTheme` BasedOn 的 `CalendarControlTheme` 模板，
+  节点与普通 Calendar 相同。
+- `item` 由 `LunarCalendarPresentationAdapter.CreateCell()` 创建的 `LunarCalendarViewCell` 承载；marker 从
+  `CalendarViewCell` 构造逻辑继承，不因农历适配而重复添加。
+- `itemContent` 位于 `LunarCalendarViewCellTheme` 自身重写的 Cell 模板中的 `ContentControl#PART_ItemContent`；
+  农历次级内容（`PART_SecondaryPresenter` 及内部 marker/文本）不属于 Semantic Part，见 [§6 定制边界](#6-定制边界)。
 
 ## Abstract AXAML Structure
 
@@ -8075,8 +12502,8 @@ Calendar
 | `PART_MonthSelect` | template node (ComboBox) | `CalendarHeaderTheme.axaml` | CalendarHeader | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ModeSwitch` | template node (OptionButtonGroup) | `CalendarHeaderTheme.axaml` | CalendarHeader | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `OptionButton` | template node (OptionButton) | `CalendarHeaderTheme.axaml` | CalendarHeader | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Calendar` | control theme | `CalendarTheme.axaml` | 用户代码 / 控件宿主 | `CellTemplate`, `DisabledDate`, `EffectiveFullCellMinHeight`, `EffectiveMiniContentHeight`, `EffectiveRangeBarTopOffset`, `FullCellTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `PART_Root` | template node (Border) | `CalendarTheme.axaml` | Calendar | `CellTemplate`, `DisabledDate`, `EffectiveFullCellMinHeight`, `EffectiveMiniContentHeight`, `EffectiveRangeBarTopOffset`, `FullCellTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Calendar` | control theme | `CalendarTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `CellTemplate`, `CornerRadius`, `DisabledDate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_Root` | template node (Border) | `CalendarTheme.axaml` | Calendar | `Background`, `BorderBrush`, `BorderThickness`, `CellTemplate`, `CornerRadius`, `DisabledDate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DockPanel` | template node (DockPanel) | `CalendarTheme.axaml` | Calendar | `CellTemplate`, `DisabledDate`, `EffectiveFullCellMinHeight`, `EffectiveMiniContentHeight`, `EffectiveRangeBarTopOffset`, `FullCellTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_HeaderPresenter` | template node (Panel) | `CalendarTheme.axaml` | Calendar | `Fullscreen`, `HeaderTemplate`, `Mode`, `ValidRange`, `Value` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_DefaultHeader` | template node (CalendarHeader) | `CalendarTheme.axaml` | Calendar | `Fullscreen`, `Mode`, `ValidRange`, `Value` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -8084,17 +12511,17 @@ Calendar
 | `PART_BodyPresenter` | template node (DockPanel) | `CalendarTheme.axaml` | Calendar | `CellTemplate`, `DisabledDate`, `EffectiveFullCellMinHeight`, `EffectiveMiniContentHeight`, `EffectiveRangeBarTopOffset`, `FullCellTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_CalendarView` | template node (CalendarView) | `CalendarTheme.axaml` | Calendar | `CellTemplate`, `DisabledDate`, `EffectiveFullCellMinHeight`, `EffectiveMiniContentHeight`, `FullCellTemplate`, `Fullscreen` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_RangeBarPanel` | template node (CalendarRangeBarPanel) | `CalendarTheme.axaml` | Calendar | `EffectiveRangeBarTopOffset`, `Fullscreen`, `Mode`, `RangeBars`, `ShowWeek`, `Value` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `CalendarViewCell` | control theme | `CalendarViewCellTheme.axaml` | Calendar | `DisplayText`, `FullCellMinHeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_Item` | template node (Border) | `CalendarViewCellTheme.axaml` | CalendarViewCell | `DisplayText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `CalendarViewCell` | control theme | `CalendarViewCellTheme.axaml` | Calendar | `Background`, `DisplayText`, `FullCellMinHeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_Item` | template node (Border) | `CalendarViewCellTheme.axaml` | CalendarViewCell | `Background`, `DisplayText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_CellInner` | template node (Border) | `CalendarViewCellTheme.axaml` | CalendarViewCell | `DisplayText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemContent` | template node (ContentControl) | `CalendarViewCellTheme.axaml` | CalendarViewCell | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Value` | template node (TextBlock) | `CalendarViewCellTheme.axaml` | CalendarViewCell | `DisplayText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `CalendarView` | control theme | `CalendarViewTheme.axaml` | Calendar | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_Body` | template node (DockPanel) | `CalendarViewTheme.axaml` | CalendarView | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `CalendarView` | control theme | `CalendarViewTheme.axaml` | Calendar | `Background` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_Body` | template node (DockPanel) | `CalendarViewTheme.axaml` | CalendarView | `Background` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_WeekHeader` | template node (Grid) | `CalendarViewTheme.axaml` | CalendarView | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_CellHost` | template node (Grid) | `CalendarViewTheme.axaml` | CalendarView | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `LunarCalendarViewCell` | control theme | `LunarCalendarViewCellTheme.axaml` | Calendar | `DisplayText`, `SecondaryText`, `ShowMarker`, `ShowSecondaryContent` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_Item` | template node (Border) | `LunarCalendarViewCellTheme.axaml` | LunarCalendarViewCell | `DisplayText`, `SecondaryText`, `ShowMarker`, `ShowSecondaryContent` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `LunarCalendarViewCell` | control theme | `LunarCalendarViewCellTheme.axaml` | Calendar | `Background`, `DisplayText`, `SecondaryText`, `ShowMarker`, `ShowSecondaryContent` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_Item` | template node (Border) | `LunarCalendarViewCellTheme.axaml` | LunarCalendarViewCell | `Background`, `DisplayText`, `SecondaryText`, `ShowMarker`, `ShowSecondaryContent` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_CellInner` | template node (Border) | `LunarCalendarViewCellTheme.axaml` | LunarCalendarViewCell | `DisplayText`, `SecondaryText`, `ShowMarker`, `ShowSecondaryContent` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemContent` | template node (ContentControl) | `LunarCalendarViewCellTheme.axaml` | LunarCalendarViewCell | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Value` | template node (TextBlock) | `LunarCalendarViewCellTheme.axaml` | LunarCalendarViewCell | `DisplayText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -8175,6 +12602,9 @@ LunarCalendar 使用独立 exact Control identity 和 `LunarCalendarToken`。它
 - Automation 的跨平台契约以 `CalendarView` 的 `Table` + `ISelectionProvider` 和 Cell 的 `ListItem` + `ISelectionItemProvider` 为准；Cell 的 `SelectionContainer` 返回 View provider，不宣称 Avalonia 当前未公开的跨平台 GridItem provider。
 - LunarCalendar 不改变 Calendar 的事件顺序、模板优先级、键盘拓扑、RangeBars 选择隔离或 Automation owner；普通 Calendar 的默认呈现 adapter 必须保持现有视觉和行为。
 - LunarCalendar 的算法支持范围只有在农历年数据、二十四节气数据和全范围验证同时扩展后才能调整；法定节假日政策数据始终由应用 Provider 负责。
+- Semantic Part 的六个区域（`root`、`header`、`body`、`content`、`item`、`itemContent`）、selector class、ContractType、cardinality 与 marker 放置属于主题兼容契约；删除、重命名、收窄类型或让内置模板缺少 marker 都是破坏性变更。
+- `item` 与 `itemContent` 的 marker 在 Cell 构造路径 / Cell 模板中一次性建立，任何状态切换、Bind/Unbind、容器回收、模板重应用与 detach 都不得增删 marker；默认主题不得消费 `.semantic-*` selector。
+- 运行时 marker 通过生成常量添加，不引入 VisualTree 搜索、反射或运行时 AXAML 解析，保持 NativeAOT 友好。
 
 维护不变量：
 
@@ -8188,6 +12618,7 @@ LunarCalendar 使用独立 exact Control identity 和 `LunarCalendarToken`。它
 - LunarCalendar 只扩展 Calendar 的呈现与公历日期投影，不引入第二份可写 Value、独立导航状态或另一套容器池。
 - 普通 Calendar 的默认 presentation adapter 必须保持现有容器类型、Header 文案、Automation、视觉和性能；农历专用状态只能进入 LunarCalendar adapter/Cell/theme。
 - 改动 ControlTheme、伪类、Token、Template part 或 Automation 时，必须同步 Gallery、测试和本目录文档。
+- Semantic Part 的 marker 放置（`CalendarTheme.axaml` 三个静态节点、Cell 构造路径的 `semantic-item`、两个 Cell 模板的 `semantic-item-content`）属于维护不变量：状态切换、Bind/Unbind、容器回收、模板重应用与 detach 不得增删 marker，普通 Calendar 与 LunarCalendar 的 marker 数量必须一致。
 
 Source: ./controls/card/semantic-cn.md
 
@@ -8197,21 +12628,262 @@ Source: ./controls/card/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Card` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`Card` 与 `CardMetaContent` 是两个独立 public owner。同名 `title` 表示相近的产品职责，不表示两个 owner 共享模板节点、
+状态或样式作用域。
+
+### 1.1 `Card`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Card` |
+| Part | `root` |
+| Selector | Card 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Card` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Card owner |
+| 职责 | Card root 是外观、尺寸、加载、悬停和内容组合的统一 owner。 |
+| 相关 API | 全部 Card public API |
+| 相关 Token | CardToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Card` |
+| Part | `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `/template/ .semantic-header` |
+| Style Type | `CardHeaderStyle` |
+| ContractType | `DashedBorder` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Header frame |
+| 职责 | 表示完整头部表面和标题、额外内容的共同布局边界。 |
+| 相关 API | `Header`、`HeaderTemplate`、`Extra`、`ExtraTemplate`、`SizeType`、`IsInnerMode` |
+| 相关 Token | Header、Extra、Border、Radius Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Card` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `CardTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Header title presenter |
+| 职责 | 表示 Card 标题的展示与排版区域。 |
+| 相关 API | `Header`、`HeaderTemplate` |
+| 相关 Token | Header typography Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `extra`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Card` |
+| Part | `extra` |
+| Selector | `.semantic-extra` |
+| SelectorRoute | `/template/ .semantic-extra` |
+| Style Type | `CardExtraStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Header extra presenter |
+| 职责 | 表示头部尾侧的辅助内容区域。 |
+| 相关 API | `Extra`、`ExtraTemplate` |
+| 相关 Token | `ExtraColor`、Header padding Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `cover`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Card` |
+| Part | `cover` |
+| Selector | `.semantic-cover` |
+| SelectorRoute | `/template/ .semantic-cover` |
+| Style Type | `CardCoverStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Cover frame |
+| 职责 | 表示封面内容的裁剪、圆角和布局边界。 |
+| 相关 API | `Cover`、`CoverTemplate` |
+| 相关 Token | Shared radius Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Card` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `CardBodyStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Body frame |
+| 职责 | 表示普通、Meta、Grid、Tabs 和 Loading 内容共享的主体表面。 |
+| 相关 API | `Content`、`ContentTemplate`、`IsLoading`、`SizeType` |
+| 相关 Token | Body padding Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Card` |
+| Part | `actions` |
+| Selector | `.semantic-actions` |
+| SelectorRoute | `/template/ .semantic-actions` |
+| Style Type | `CardActionsStyle` |
+| ContractType | `TemplatedControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Action panel owner |
+| 职责 | 表示底部操作组的完整表面、均分布局和分隔线边界。 |
+| 相关 API | `Actions`、`IsMotionEnabled` |
+| 相关 Token | Actions、Border、Radius Token |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `CardMetaContent`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CardMetaContent` |
+| Part | `root` |
+| Selector | CardMetaContent 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `CardMetaContent` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | CardMetaContent owner |
+| 职责 | Meta root 是头像、标题和描述组合的统一 owner。 |
+| 相关 API | `Avatar`、`Header`、`HeaderTemplate`、`Content`、`ContentTemplate` |
+| 相关 Token | Shared typography、spacing Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `section`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CardMetaContent` |
+| Part | `section` |
+| Selector | `.semantic-section` |
+| SelectorRoute | `/template/ .semantic-section` |
+| Style Type | `CardMetaContentSectionStyle` |
+| ContractType | `Control` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Meta detail section |
+| 职责 | 表示标题与描述共同占用的详情布局区域。 |
+| 相关 API | `Header`、`HeaderTemplate`、`Content`、`ContentTemplate` |
+| 相关 Token | Shared spacing Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `avatar`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CardMetaContent` |
+| Part | `avatar` |
+| Selector | `.semantic-avatar` |
+| SelectorRoute | `/template/ .semantic-avatar` |
+| Style Type | `CardMetaContentAvatarStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Avatar presenter |
+| 职责 | 表示 Meta 头像内容的展示与布局区域。 |
+| 相关 API | `Avatar` |
+| 相关 Token | Shared spacing Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CardMetaContent` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `CardMetaContentTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Meta title presenter |
+| 职责 | 表示 Meta 标题的展示与排版区域。 |
+| 相关 API | `Header`、`HeaderTemplate` |
+| 相关 Token | Shared heading typography Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `description`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CardMetaContent` |
+| Part | `description` |
+| Selector | `.semantic-description` |
+| SelectorRoute | `/template/ .semantic-description` |
+| Style Type | `CardMetaContentDescriptionStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Meta description presenter |
+| 职责 | 表示 Meta 描述内容的展示与排版区域。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | Shared description typography Token |
+| 稳定性 | stable since 6.2.0 |
+
+所有 root 都是隐式 Part，不添加 `.semantic-root`。`ContractType` 是 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Card/Themes/CardTheme.axaml`
 
 ```xml
-<Panel>
-    <PixelAlignedBorder Name="Frame" />
+<PixelAlignedBorder Name="Frame">
     <DockPanel>
         <PixelAlignedBorder Name="HeaderFrame">
             <DockPanel>
@@ -8227,7 +12899,7 @@ Source: ./controls/card/semantic-cn.md
             <Skeleton />
         </Border>
     </DockPanel>
-</Panel>
+</PixelAlignedBorder>
 ```
 
 ## Composition Model
@@ -8257,8 +12929,7 @@ Card
   -> CardTabsContent (control theme, CardTabsContentTheme.axaml)
      -> TabControl#PART_TabControl (template-stable)
   -> Card (control theme, CardTheme.axaml)
-     -> Panel (template-stable)
-        -> PixelAlignedBorder#Frame (template-stable)
+     -> PixelAlignedBorder#Frame (template-stable)
         -> DockPanel (template-stable)
            -> PixelAlignedBorder#HeaderFrame (template-stable)
               -> DockPanel (template-stable)
@@ -8294,8 +12965,7 @@ Card
 | `CardTabsContent` | control theme | `CardTabsContentTheme.axaml` | 用户代码 / 控件宿主 | `IsMotionEnabled`, `SizeType`, `TabBarExtraContent`, `TabBarExtraContentTemplate`, `TabItemTemplate`, `TabItemsSource` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `PART_TabControl` | template node (TabControl) | `CardTabsContentTheme.axaml` | CardTabsContent | `IsMotionEnabled`, `SizeType`, `TabBarExtraContent`, `TabBarExtraContentTemplate`, `TabItemTemplate`, `TabItemsSource` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Card` | control theme | `CardTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BoxShadow`, `Content`, `ContentTemplate`, `CornerRadius` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Panel` | template node (Panel) | `CardTheme.axaml` | Card | `Background`, `BorderBrush`, `BoxShadow`, `Content`, `ContentTemplate`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Frame` | template node (PixelAlignedBorder) | `CardTheme.axaml` | Card | `Background`, `BorderBrush`, `BoxShadow`, `EffectiveBorderThickness`, `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Frame` | template node (PixelAlignedBorder) | `CardTheme.axaml` | Card | `Background`, `BorderBrush`, `BoxShadow`, `Content`, `ContentTemplate`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DockPanel` | template node (DockPanel) | `CardTheme.axaml` | Card | `Content`, `ContentTemplate`, `CornerRadius`, `Cover`, `CoverTemplate`, `Extra` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HeaderFrame` | template node (PixelAlignedBorder) | `CardTheme.axaml` | Card | `Extra`, `ExtraTemplate`, `Header`, `HeaderBorderThickness`, `HeaderTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HeaderExtra` | template node (ContentPresenter) | `CardTheme.axaml` | Card | `Extra`, `ExtraTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
@@ -8383,6 +13053,19 @@ CardTheme / CardActionPanelTheme / CardGridItemTheme / CardTabsContentTheme / Ca
 
 根容器边框、圆角、背景和部分文字色来自 SharedToken。Header 高度、字体、padding、body padding、操作区背景、tabs margin、extra 色、卡片阴影、操作图标尺寸和 grid item 阴影来自 CardToken。
 
+### 5.1 Semantic Part 支持摘要
+
+Card 家族由两个独立 public owner 公开 Semantic Part：
+
+| Owner | Parts | 职责摘要 |
+| --- | --- | --- |
+| `Card` | `root`、`header`、`title`、`extra`、`cover`、`body`、`actions` | 覆盖 Card 根表面、头部、标题、辅助内容、封面、主体和底部操作组。 |
+| `CardMetaContent` | `root`、`section`、`avatar`、`title`、`description` | 覆盖 Meta 根区域、详情区、头像、标题和描述。 |
+
+`CardGridContent`、`CardGridItem`、`CardTabsContent` 和 `CardActionButton` 是公开组合类型，但不由 Card 家族推导独立
+Semantic Part descriptor。完整 Selector、ContractType、cardinality、状态矩阵和排除边界以
+[Card Semantic Part 契约](semantic-part.md)为准。
+
 Token 边界：
 
 CardToken 是 Card 的控件级 Token scope，描述卡片 Header、Body、Actions、Tabs、Extra、阴影、Grid item 和 action icon 的组件语义值。
@@ -8426,6 +13109,16 @@ CardToken 不承载以下状态：
 - `Actions`、`CardTabsContent.Items` 的 Reset 行为当前为 `NotSupportedException`，不能在结构整理中静默改变。
 - 初始 transition 禁用/加载后启用的顺序不能在未验证视觉影响时移除。
 - 空实现或薄实现的主题语义类型不能随意删除。
+- `Card` descriptor 必须只包含 `root/header/title/extra/cover/body/actions`，`CardMetaContent` descriptor 必须只包含
+  `root/section/avatar/title/description`。
+- Card 与 CardMetaContent 的同名 title marker 必须由 owner Selector 隔离，不能使用类型前缀编码 Part identity。
+- headerless、空 Cover、空 Actions、Loading 和 ContentType 切换只能改变内容或可见性，不能改变静态 Part cardinality。
+- 根 Frame 必须承载 Card 内部 DockPanel，使 Header 与 Actions 分隔线从外框内缘开始；不得恢复为同级覆盖绘制。
+- Borderless 的零边框必须保留为 Theme 默认值，不能在 C# 派生状态中阻止 owner-scoped root style 覆盖 `BorderThickness`。
+- Card actions marker 不能进入 internal CardActionPanel 的第二个模板边界；Grid、Tabs 和 action child 不得被 Card owner 穿透。
+- 默认 Card Themes 不得消费 `.semantic-*`，避免为未使用该能力的 Card 增加动态 selector 成本。
+- 布局型 Semantic Style 必须建立在一套完整的 `SizeType` 分支上；未覆盖属性继续使用该分支的 Token 基线，不得在示例中
+  局部拼接不同尺寸档位的 Header `MinHeight`、字体与 Padding。
 
 Source: ./controls/carousel/semantic-cn.md
 
@@ -8605,13 +13298,136 @@ Source: ./controls/collapse/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Collapse` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`Collapse` 主控件公开 `root`、`header`、`icon`、`title` 与 `body` 五个职责区域，与上游稳定 Semantic DOM 对齐。上游基线为
+6.6.0 稳定发布的 `CollapseSemanticType` 与 Semantic DOM 演示：
+
+- `header`、`body` 自上游 5.21.0 公开；
+- `root`、`icon`、`title` 自上游 6.0.0 公开。
+
+上游 Semantic DOM 以 `itemsAPI="items"` 组织：`header`、`icon`、`title`、`body` 按 item 出现（每个面板各一个），面板容器
+本身（`.ant-collapse-item`）不是 Semantic key。AtomUI 五个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since`
+统一为 `6.0`。
+
+`CollapseItem` 不持有独立 Semantic descriptor：
+
+- 上游 `Collapse` 只提供一个 owner 的 Semantic DOM；`Collapse.Panel` 没有独立公开 Semantic DOM Props。
+- `CollapseItem` 是 Collapse 的公开子控件与运行时容器，其职责通过 `Collapse` 的 `header`、`icon`、`title`、`body` Part
+  对外公开；容器本身与 item shell 边框不属于任何 Part。
+
+### 1.1 `Collapse`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Collapse` |
+| Part | `root` |
+| Selector | Collapse 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Collapse` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Collapse owner（表面投影到 `PART_Frame`） |
+| 职责 | Collapse root 是面板集合状态、视觉模式与根表面样式（背景、边框、圆角、内边距）的统一 owner。 |
+| 相关 API | `IsAccordion`、`IsBorderless`、`IsGhostStyle`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled`、`ItemHeaderPadding`、`ItemContentPadding`、`Items`、`SelectedItems` |
+| 相关 Token | CollapseToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Collapse` |
+| Part | `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `> .semantic-scope-item /template/ .semantic-header` |
+| Style Type | `CollapseHeaderStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `CollapseItem` 模板中的 `PixelAlignedBorder#PART_HeaderDecorator` |
+| 职责 | 统一表示每个面板头部的背景、内边距、字体/行高、光标与交互视觉；对应上游 `.ant-collapse-header` 的 flex 布局、内边距、颜色、行高、光标与过渡动画职责。 |
+| 相关 API | `SizeType`、`ItemHeaderPadding`、`TriggerType`、`IsGhostStyle`、`IsEnabled` |
+| 相关 Token | `HeaderBg`、`HeaderPadding`、`CollapseHeaderPaddingSM`、`CollapseHeaderPaddingLG`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Collapse` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `> .semantic-scope-item /template/ .semantic-icon` |
+| Style Type | `CollapseIconStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `CollapseItem` 模板中的 `IconButton#PART_ExpandButton` |
+| 职责 | 统一表示展开/收起箭头的大小、对齐、边距与动效视觉；对应上游 `.ant-collapse-expand-icon` 的字体大小、过渡动画与旋转变换职责。 |
+| 相关 API | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsSelected` |
+| 相关 Token | `IconSizeSM`、`LeftExpandButtonMargin*`、`RightExpandButtonMargin*`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Collapse` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `> .semantic-scope-item /template/ .semantic-title` |
+| Style Type | `CollapseTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `CollapseItem` 模板中的 `ContentPresenter#PART_HeaderPresenter` |
+| 职责 | 统一表示每个面板标题文字的布局、颜色、字体与对齐；对应上游 `.ant-collapse-title` 的 flex 自适应布局与边距职责。 |
+| 相关 API | `Header`、`HeaderTemplate` |
+| 相关 Token | `ColorTextHeading`、`ColorTextDisabled`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Collapse` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `> .semantic-scope-item /template/ .semantic-body` |
+| Style Type | `CollapseBodyStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `CollapseItem` 模板中的 `PixelAlignedBorder#PART_ContentFrame` |
+| 职责 | 统一表示每个面板内容区域的内边距、颜色、背景与内容顶部分隔线；对应上游 `.ant-collapse-body` 的内边距、颜色与背景职责。 |
+| 相关 API | `Content`、`ContentTemplate`、`ItemContentPadding`、`IsBorderless`、`IsGhostStyle` |
+| 相关 Token | `ContentPadding`、`ContentBg`、`HeaderBg`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header` 与 `body` 的承载节点是
+公开的 `PixelAlignedBorder`，`icon` 是公开的 `IconButton`，`title` 是公开的 `ContentPresenter`，均取节点真实 public 类型
+作为最低依赖类型。
+
+`header`、`icon`、`title`、`body` 的节点位于 `CollapseItem` 自己的模板内，而 `CollapseItem` 容器由 `Collapse` 的
+ItemsControl 生命周期运行时创建（`TemplatedParent` 为 null），因此这四个 Part 声明 `RuntimeCreated=true` 并显式携带
+SelectorRoute。Avalonia 的 `>` 步骤沿逻辑树（`LogicalParent`）行走，而 ItemsControl 生成的容器逻辑父级是 Collapse
+owner 本身（并非运行时 ItemsPanel），所以路由从 owner 出发经一步 `>` 直达 `.semantic-scope-item` 容器，再以
+`/template/` 进入容器模板到达 Part 节点。三个 scope marker（`.semantic-scope-items` / `.semantic-scope-panel` /
+`.semantic-scope-item`）中只有 `.semantic-scope-item` 参与路由，前两者标识 items host 链、不单独发布为 Part，详见
+[§3 Selector 用法](#3-selector-用法)。
 
 ## Abstract AXAML Structure
 
@@ -8652,17 +13468,17 @@ Collapse
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Collapse` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `CollapseItem` | item container control theme | `CollapseItemTheme.axaml` | 用户代码 / 控件宿主 | `AddOnContent`, `AddOnContentTemplate`, `Content`, `ContentBorderThickness`, `ContentTemplate`, `EffectiveContentPadding` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `PART_MainLayout` | template node (DockPanel) | `CollapseItemTheme.axaml` | CollapseItem | `AddOnContent`, `AddOnContentTemplate`, `Content`, `ContentBorderThickness`, `ContentTemplate`, `EffectiveContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_HeaderDecorator` | template node (PixelAlignedBorder) | `CollapseItemTheme.axaml` | CollapseItem | `AddOnContent`, `AddOnContentTemplate`, `EffectiveHeaderPadding`, `ExpandIcon`, `Header`, `HeaderTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `CollapseItem` | item container control theme | `CollapseItemTheme.axaml` | 用户代码 / 控件宿主 | `AddOnContent`, `AddOnContentTemplate`, `Content`, `ContentBorderThickness`, `ContentCornerRadius`, `ContentTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_MainLayout` | template node (DockPanel) | `CollapseItemTheme.axaml` | CollapseItem | `AddOnContent`, `AddOnContentTemplate`, `Content`, `ContentBorderThickness`, `ContentCornerRadius`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_HeaderDecorator` | template node (PixelAlignedBorder) | `CollapseItemTheme.axaml` | CollapseItem | `AddOnContent`, `AddOnContentTemplate`, `EffectiveHeaderPadding`, `ExpandIcon`, `Header`, `HeaderCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ExpandButton` | template node (IconButton) | `CollapseItemTheme.axaml` | CollapseItem | `ExpandIcon`, `IsEnabled`, `IsMotionEnabled`, `IsShowExpandIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_HeaderPresenter` | template node (ContentPresenter) | `CollapseItemTheme.axaml` | CollapseItem | `Header`, `HeaderTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_AddOnContentPresenter` | template node (ContentPresenter) | `CollapseItemTheme.axaml` | CollapseItem | `AddOnContent`, `AddOnContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ContentMotionActor` | template node (LayoutAwareMotionActor) | `CollapseItemTheme.axaml` | CollapseItem | `Content`, `ContentBorderThickness`, `ContentTemplate`, `EffectiveContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ContentFrame` | template node (PixelAlignedBorder) | `CollapseItemTheme.axaml` | CollapseItem | `Content`, `ContentBorderThickness`, `ContentTemplate`, `EffectiveContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentMotionActor` | template node (LayoutAwareMotionActor) | `CollapseItemTheme.axaml` | CollapseItem | `Content`, `ContentBorderThickness`, `ContentCornerRadius`, `ContentTemplate`, `EffectiveContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentFrame` | template node (PixelAlignedBorder) | `CollapseItemTheme.axaml` | CollapseItem | `Content`, `ContentBorderThickness`, `ContentCornerRadius`, `ContentTemplate`, `EffectiveContentPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ContentPresenter` | template node (ContentPresenter) | `CollapseItemTheme.axaml` | CollapseItem | `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Collapse` | control theme | `CollapseTheme.axaml` | 用户代码 / 控件宿主 | `BorderBrush`, `CornerRadius`, `EffectiveBorderThickness`, `ItemsPanel` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `PART_Frame` | template node (PixelAlignedBorder) | `CollapseTheme.axaml` | Collapse | `BorderBrush`, `CornerRadius`, `EffectiveBorderThickness`, `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Collapse` | control theme | `CollapseTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `CornerRadius`, `EffectiveBorderThickness`, `ItemsPanel`, `Padding` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_Frame` | template node (PixelAlignedBorder) | `CollapseTheme.axaml` | Collapse | `Background`, `BorderBrush`, `CornerRadius`, `EffectiveBorderThickness`, `ItemsPanel`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `CollapseTheme.axaml` | Collapse | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
@@ -8756,6 +13572,14 @@ Collapse Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
 - 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
 - 文档只描述当前稳定设计；历史变化记录在 `changelog.md`。
+- Semantic Part 的五个区域（`root`、`header`、`icon`、`title`、`body`）、selector class、ContractType、cardinality 与
+  marker 放置属于主题兼容契约；删除、重命名、收窄类型或让内置模板缺少 marker 都是破坏性变更。
+- `header`/`icon`/`title`/`body` 的 marker 静态声明于 `CollapseItemTheme.axaml`，scope marker 在默认 ItemsPanel 与容器
+  创建路径一次性建立；任何状态切换、容器回收、items 集合变化与模板重应用都不得增删 marker；默认主题不得消费
+  `.semantic-*` selector。
+- root 表面投影（`Background`/`BorderBrush`/`BorderThickness`/`CornerRadius`/`Padding` → `PART_Frame`）属于公共契约；
+  运行时 marker 通过静态 AXAML class 与既有创建路径添加，不引入 VisualTree 搜索、反射或运行时 AXAML 解析，保持
+  NativeAOT 友好。
 
 维护不变量：
 
@@ -8768,6 +13592,10 @@ Collapse Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 - 分隔线只由 item 位置、视觉模式和固定模板结构决定，不能依赖 selection 或 motion 时序。
 - 旧 template part、事件订阅和 content motion cancellation 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
+- Semantic Part 的 marker 放置（`CollapseTheme.axaml` 的 `semantic-scope-items` 静态节点、默认 ItemsPanel 的
+  `.semantic-scope-panel`、容器创建/prepare 路径的 `.semantic-scope-item`、`CollapseItemTheme.axaml` 的四个静态 Part
+  marker）属于维护不变量：状态切换、容器复用/回收、items
+  集合变化与模板重应用不得增删 marker，默认主题不得消费 `.semantic-*` selector，root 表面投影不得丢失。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 
 Source: ./controls/data-grid/semantic-cn.md
@@ -8778,13 +13606,20 @@ Source: ./controls/data-grid/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
+| Part | AtomUI 节点 | 职责 | 专用 Style | Marker 方式 | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `DataGrid` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | `DataGrid` 控件自身（生成器隐式合成） | 表格外层容器：背景、边框、圆角、内容裁剪等容器基础样式；直接对控件设置属性或 ControlTheme 定制。 | 无（root 定制即控件自身定制） | 无（隐式 root） | stable |
+| `section` | `FrameContentClip`（Border） | 内层包装容器：圆角裁剪、Spin 加载包裹等包装容器样式。 | `DataGridSectionStyle` | 静态模板 marker | stable |
+| `title` | `TitleFrame`（PixelAlignedBorder，含标题分隔线） | 表格标题容器：标题区域的布局、分隔线与背景样式。 | `DataGridTitleStyle` | 静态模板 marker | stable |
+| `content` | 主 `Grid`（表头区 + 行区 + 滚动条 + 四角块） | 表格内容区：内容区域的布局与滚动容器样式，不含 title/footer/pagination。 | `DataGridContentStyle` | 静态模板 marker | stable |
+| `header.wrapper` | `ColumnHeadersPresenterFrame`（Border，含普通与分组两个 presenter） | 表头容器：表头的布局与容器样式。 | `DataGridHeaderWrapperStyle` | 静态模板 marker | stable |
+| `header.cell` | `DataGridColumnHeader` 根（运行时创建，含冻结列） | 表头单元格：相对定位、内边距、文字换行、背景、文字颜色、字重等表头单元格样式。 | `DataGridHeaderCellStyle` | 代码注入（运行时创建） | stable |
+| `body.wrapper` | `RowsPresenter`（模板静态件） | 表体容器：表格主体的布局与容器样式。 | `DataGridBodyWrapperStyle` | 静态模板 marker | stable |
+| `body.row` | `DataGridRow` / `DataGridRowGroupHeader` 根（运行时创建，虚拟化回收） | 数据行：悬浮效果、选中状态、展开状态等交互行样式；分组头行同样属于表体行。 | `DataGridBodyRowStyle` | 代码注入（运行时创建） | stable |
+| `body.cell` | `DataGridCell` 根（运行时创建，slot 回收） | 数据单元格：相对定位、内边距、文字换行等数据单元格基础样式。 | `DataGridBodyCellStyle` | 代码注入（运行时创建） | stable |
+| `footer` | `Footer`（ContentPresenter） | 表格底部：背景色、文字颜色等 footer 样式。 | `DataGridFooterStyle` | 静态模板 marker | stable |
+| `pagination.root` | 模板内两处 `Pagination` 实例（顶部/底部槽位） | 分页宿主：表格分页区域的布局与间距样式。 | `DataGridPaginationRootStyle` | 静态模板 marker | stable |
+| `pagination.item` | 分页器生成的页码项（`ContentControl`） | 分页项：页码项尺寸、激活态与间距样式。 | `DataGridPaginationItemStyle` | 运行时 marker | stable |
 
 ## Abstract AXAML Structure
 
@@ -8962,28 +13797,152 @@ Source: ./controls/descriptions/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Descriptions` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Descriptions 只有一个 public descriptor owner：`Descriptions`。`DescriptionItem` 是非视觉数据对象，内部生成的
+`DescriptionDefaultItem`、`DescriptionBorderedItemLabel` 和 `DescriptionBorderedItemContent` 只实现视觉承载，不建立独立
+descriptor。
+
+### 1.1 `Descriptions`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Descriptions` |
+| Part | `root` |
+| Selector | Descriptions 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Descriptions` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Descriptions owner |
+| 职责 | Descriptions root 是数据、布局、尺寸、边框和响应式状态的统一 owner。 |
+| 相关 API | 全部 Descriptions public API |
+| 相关 Token | DescriptionsToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Descriptions` |
+| Part | `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `/template/ .semantic-header` |
+| Style Type | `DescriptionsHeaderStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `HeaderLayout` |
+| 职责 | 承载标题与辅助内容的完整头部布局区域。 |
+| 相关 API | `Header`、`HeaderTemplate`、`Extra`、`ExtraTemplate` |
+| 相关 Token | `HeaderMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Descriptions` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `DescriptionsTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `HeaderPresenter` |
+| 职责 | 展示 Header 内容及其模板结果。 |
+| 相关 API | `Header`、`HeaderTemplate` |
+| 相关 Token | `TitleColor`、SharedToken typography |
+| 稳定性 | stable since 6.2.0 |
+
+#### `extra`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Descriptions` |
+| Part | `extra` |
+| Selector | `.semantic-extra` |
+| SelectorRoute | `/template/ .semantic-extra` |
+| Style Type | `DescriptionsExtraStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ExtraPresenter` |
+| 职责 | 展示头部辅助内容及其模板结果。 |
+| 相关 API | `Extra`、`ExtraTemplate` |
+| 相关 Token | `ExtraColor`、SharedToken typography |
+| 稳定性 | stable since 6.2.0 |
+
+#### `label`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Descriptions` |
+| Part | `label` |
+| Selector | `.semantic-label` |
+| SelectorRoute | `/template/ .semantic-scope-items > .semantic-scope-item /template/ .semantic-label` |
+| Style Type | `DescriptionsLabelStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个已物化 DescriptionItem 的 label presenter |
+| 职责 | 展示描述项标签，并提供重复标签区域的统一局部样式入口。 |
+| 相关 API | `Items`、`ItemsSource`、`DescriptionItem.Label` |
+| 相关 Token | `LabelBg`、`LabelColor`、`ItemPadding*`、`ColonMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Descriptions` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-scope-items > .semantic-scope-item /template/ .semantic-content` |
+| Style Type | `DescriptionsContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个已物化 DescriptionItem 的 content presenter |
+| 职责 | 展示描述项内容，并提供重复内容区域的统一局部样式入口。 |
+| 相关 API | `Items`、`ItemsSource`、`DescriptionItem.Content` |
+| 相关 Token | `ContentColor`、`ItemPadding*`、SharedToken typography |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`header`、`title` 和 `extra` 是根 ControlTemplate 的静态节点；`label` 和
+`content` 随 `DescriptionItem` 生成视觉物化，并由内部 item control 的模板接入路径把生成的 selector class 添加到目标
+presenter，因此使用 `RuntimeCreated=true`。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Descriptions/Themes/DescriptionsTheme.axaml`
 
 ```xml
-<StackPanel>
-    <DockPanel Name="HeaderLayout">
-        <ContentPresenter Name="ExtraPresenter" />
-        <ContentPresenter Name="HeaderPresenter" />
-    </DockPanel>
-    <PixelAlignedBorder Name="ContentFrame">
-        <Grid Name="PART_GridLayout" />
-    </PixelAlignedBorder>
-</StackPanel>
+<PixelAlignedBorder Name="RootFrame">
+    <StackPanel>
+        <DockPanel Name="HeaderLayout">
+            <ContentPresenter Name="ExtraPresenter" />
+            <ContentPresenter Name="HeaderPresenter" />
+        </DockPanel>
+        <PixelAlignedBorder Name="ContentFrame">
+            <Grid Name="PART_GridLayout" />
+        </PixelAlignedBorder>
+    </StackPanel>
+</PixelAlignedBorder>
 ```
 
 ## Composition Model
@@ -9016,12 +13975,13 @@ Descriptions
            -> PixelAlignedBorder#Separator (template-stable)
            -> ContentPresenter#Content (internal-observable)
   -> Descriptions (control theme, DescriptionsTheme.axaml)
-     -> StackPanel (template-stable)
-        -> DockPanel#HeaderLayout (template-stable)
-           -> ContentPresenter#ExtraPresenter (internal-observable)
-           -> ContentPresenter#HeaderPresenter (internal-observable)
-        -> PixelAlignedBorder#ContentFrame (template-stable)
-           -> Grid#PART_GridLayout (template-stable)
+     -> PixelAlignedBorder#RootFrame (template-stable)
+        -> StackPanel (template-stable)
+           -> DockPanel#HeaderLayout (template-stable)
+              -> ContentPresenter#ExtraPresenter (internal-observable)
+              -> ContentPresenter#HeaderPresenter (internal-observable)
+           -> PixelAlignedBorder#ContentFrame (template-stable)
+              -> Grid#PART_GridLayout (template-stable)
 ```
 
 ### 协作节点
@@ -9029,10 +13989,10 @@ Descriptions
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Descriptions` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `DescriptionBorderedItemContent` | control theme | `DescriptionBorderedItemContentTheme.axaml` | Descriptions | `BorderBrush`, `Content`, `EffectiveBorderThickness`, `LineHeight`, `Padding` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `ContentPresenter` | template node (ContentPresenter) | `DescriptionBorderedItemContentTheme.axaml` | DescriptionBorderedItemContent | `Content`, `LineHeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `DescriptionBorderedItemLabel` | control theme | `DescriptionBorderedItemLabelTheme.axaml` | Descriptions | `Background`, `BorderBrush`, `Content`, `EffectiveBorderThickness`, `LineHeight`, `Padding` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `ContentPresenter` | template node (ContentPresenter) | `DescriptionBorderedItemLabelTheme.axaml` | DescriptionBorderedItemLabel | `Content`, `LineHeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `DescriptionBorderedItemContent` | control theme | `DescriptionBorderedItemContentTheme.axaml` | Descriptions | `BorderBrush`, `Content`, `EffectiveBorderThickness`, `FontFamily`, `FontSize`, `FontStyle` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ContentPresenter` | template node (ContentPresenter) | `DescriptionBorderedItemContentTheme.axaml` | DescriptionBorderedItemContent | `Content`, `FontFamily`, `FontSize`, `FontStyle`, `FontWeight`, `Foreground` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `DescriptionBorderedItemLabel` | control theme | `DescriptionBorderedItemLabelTheme.axaml` | Descriptions | `Background`, `BorderBrush`, `Content`, `EffectiveBorderThickness`, `FontFamily`, `FontSize` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ContentPresenter` | template node (ContentPresenter) | `DescriptionBorderedItemLabelTheme.axaml` | DescriptionBorderedItemLabel | `Background`, `Content`, `FontFamily`, `FontSize`, `FontStyle`, `FontWeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `DescriptionDefaultItem` | item container control theme | `DescriptionDefaultItemTheme.axaml` | Descriptions | `BorderBrush`, `Content`, `EffectiveBorderThickness`, `Header`, `IsColonVisible`, `LineHeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `DockPanel` | template node (DockPanel) | `DescriptionDefaultItemTheme.axaml` | DescriptionDefaultItem | `Content`, `Header`, `IsColonVisible`, `LineHeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Label` | template node (ContentPresenter) | `DescriptionDefaultItemTheme.axaml` | DescriptionDefaultItem | `Header`, `LineHeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
@@ -9040,7 +14000,8 @@ Descriptions
 | `Content` | template node (ContentPresenter) | `DescriptionDefaultItemTheme.axaml` | DescriptionDefaultItem | `Content`, `LineHeight` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `StackPanel` | template node (StackPanel) | `DescriptionDefaultItemTheme.axaml` | DescriptionDefaultItem | `Header`, `IsColonVisible`, `LineHeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Separator` | template node (PixelAlignedBorder) | `DescriptionDefaultItemTheme.axaml` | DescriptionDefaultItem | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Descriptions` | control theme | `DescriptionsTheme.axaml` | 用户代码 / 控件宿主 | `Extra`, `ExtraTemplate`, `Header`, `HeaderTemplate`, `IsHeaderLayoutVisible` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Descriptions` | control theme | `DescriptionsTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Extra`, `ExtraTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `RootFrame` | template node (PixelAlignedBorder) | `DescriptionsTheme.axaml` | Descriptions | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Extra`, `ExtraTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `StackPanel` | template node (StackPanel) | `DescriptionsTheme.axaml` | Descriptions | `Extra`, `ExtraTemplate`, `Header`, `HeaderTemplate`, `IsHeaderLayoutVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HeaderLayout` | template node (DockPanel) | `DescriptionsTheme.axaml` | Descriptions | `Extra`, `ExtraTemplate`, `Header`, `HeaderTemplate`, `IsHeaderLayoutVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ExtraPresenter` | template node (ContentPresenter) | `DescriptionsTheme.axaml` | Descriptions | `Extra`, `ExtraTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
@@ -9052,6 +14013,7 @@ Descriptions
 
 | Template Part | 类型 | 职责 |
 | --- | --- | --- |
+| `RootFrame` | `PixelAlignedBorder` | 将 root 的标准背景、边框、圆角和 Padding 投影到完整 Descriptions 表面。 |
 | `HeaderLayout` | `DockPanel` | Header/Extra 行容器，固定存在，通过 `IsHeaderLayoutVisible` 控制显示。 |
 | `ExtraPresenter` | `ContentPresenter` | Extra 内容和模板承载。 |
 | `HeaderPresenter` | `ContentPresenter` | Header 内容和模板承载。 |
@@ -9126,6 +14088,23 @@ DescriptionsTheme / DescriptionDefaultItemTheme / bordered cell themes
 
 根 `ContentFrame` 的边框、圆角、裁剪来自 SharedToken。label 背景、label/content/title/extra 颜色、Header margin、item padding 和冒号 margin 来自 DescriptionsToken。
 
+### 5.1 Semantic Part 支持摘要
+
+Descriptions 由唯一 public owner `Descriptions` 公开以下 Semantic Part：
+
+| Part | 公共入口 | 数量语义 | 职责摘要 |
+| --- | --- | --- | --- |
+| `root` | Descriptions 本身 | `Single` | 数据、布局、尺寸、边框和响应式状态的统一 owner。 |
+| `header` | `.semantic-header` | `Single` | Header 与 Extra 的完整头部布局区域。 |
+| `title` | `.semantic-title` | `Single` | Header 内容展示区域。 |
+| `extra` | `.semantic-extra` | `Single` | 头部辅助内容展示区域。 |
+| `label` | `.semantic-label` | `Multiple` | 每个已物化 item 的标签展示区域。 |
+| `content` | `.semantic-content` | `Multiple` | 每个已物化 item 的内容展示区域。 |
+
+`DescriptionItem` 是非视觉数据对象，不建立独立 descriptor。`label` 和 `content` 随生成视觉物化；空集合没有 item-scoped
+target，非空集合中二者数量均与当前已物化 `Items.Count` 相等。完整 Selector、`ContractType`、运行时创建边界、状态矩阵和
+排除区域见 [Descriptions Semantic Part 契约](semantic-part.md)。
+
 Token 边界：
 
 DescriptionsToken 是 Descriptions 的控件级 Token scope，描述描述列表的 label 背景、文本颜色、标题颜色、Header 间距、item padding、冒号间距、内容颜色和 Extra 颜色。
@@ -9152,7 +14131,13 @@ DescriptionsToken 不承载以下状态：
 - 普通水平和纵向非边框模式必须保持 `IsShowColon` 到冒号显示状态的绑定。
 - `HeaderLayout` 是固定模板节点，Header/Extra 为空时隐藏而不是销毁。
 - `PART_GridLayout`、`HeaderLayout`、`HeaderPresenter`、`ExtraPresenter`、`ContentFrame` 的名称和职责不能在未授权情况下改变。
+- `RootFrame` 必须投影 Descriptions owner 的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius` 和 `Padding`，并同时
+  包含 Header 与内容区；root Semantic Setter 不得被收窄为仅修改内容表格。
 - `SizeType` 默认值保持 `Large`。
+- Semantic Part descriptor 只包含 `root`、`header`、`title`、`extra`、`label` 和 `content`；内部 frame、grid、cell、冒号和 separator 不得提升为公共 Part。
+- `header`、`title`、`extra` 的静态 marker 必须在根模板中稳定存在；每个已物化 item 必须在所有布局组合下产生一个 `label` 和一个 `content` marker。
+- 四种布局中的 `label`、`content` target 必须统一为 `ContentPresenter`；水平 bordered cell 只负责边框几何，默认
+  Padding、Background、Foreground 和文本排版基线必须投影到 target presenter。
 - Token 名称和语义不擅自重命名或删除。
 - 媒体断点订阅必须在 detach 时释放。
 
@@ -9173,6 +14158,12 @@ DescriptionsToken 不承载以下状态：
 - `IsFilled` 和最后 item 必须填满当前行剩余列。
 - `IsShowColon` 必须能在生成视觉存在期间重复更新。
 - `HeaderLayout` 固定存在，通过 `IsHeaderLayoutVisible` 控制显示。
+- `RootFrame` 必须完整投影 owner 的标准表面属性并包住 Header 与内容区；默认属性值必须保持现有未定制布局和视觉不变。
+- descriptor 只公开 `root/header/title/extra/label/content`，不能把 frame、grid、cell、冒号或 separator 提升为 Part。
+- header/title/extra marker 必须由根模板静态提供；所有生成模式必须为每个 item 提供一个 label 和一个 content marker。
+- `DescriptionDefaultItem` 与水平 bordered cell 必须从 owner 绑定同一个 `SizeType`，不能依赖内部默认值。
+- 四种布局中的 label/content target 必须保持 `ContentPresenter`；水平 bordered cell 只负责边框几何，Padding、Background、
+  Foreground 和文本排版基线必须投影到 target presenter。
 - 内部 marker 类型 `DescriptionBorderedItemLabel` 和 `DescriptionBorderedItemContent` 不能作为“空类”随意删除；它们承担主题选择器边界。
 - `DescriptionItem` 不能升级成视觉控件，也不能永久持有 generated control、owner container 或 ShowCase。
 - 非视觉 `DescriptionItem` 承载动态资源前必须补 scoped resource host 和资源生命周期测试。
@@ -9185,23 +14176,103 @@ Source: ./controls/empty/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Empty` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Empty 公开 `root`、`image`、`description` 和 `footer` 四个 Semantic Part。该契约以 AtomUI 的 public API、静态
+ControlTemplate 和 Avalonia 样式优先级作为实现事实。
+
+### 1.1 `Empty`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Empty` |
+| Part | `root` |
+| Selector | Empty 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Empty` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Empty owner |
+| 职责 | 空状态的根布局、整体对齐、可见性和根视觉样式 owner。 |
+| 相关 API | `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`、`StrokeDashArray` 及标准布局属性 |
+| 相关 Token | EmptyToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `image`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Empty` |
+| Part | `image` |
+| Selector | `.semantic-image` |
+| SelectorRoute | `/template/ .semantic-image` |
+| Style Type | `EmptyImageStyle` |
+| ContractType | `Control` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `PART_SvgImage` 对应的 `Avalonia.Svg.Svg` |
+| 职责 | 展示内置 Default/Simple 图形或 `ImagePath`、`ImageSource` 指定的 SVG 图形。 |
+| 相关 API | `PresetImage`、`ImagePath`、`ImageSource`、`SizeType` |
+| 相关 Token | `EmptyImgHeight`、`EmptyImgHeightMD`、`EmptyImgHeightSM`、图形颜色资源 |
+| 稳定性 | stable since 6.2.0 |
+
+#### `description`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Empty` |
+| Part | `description` |
+| Selector | `.semantic-description` |
+| SelectorRoute | `/template/ .semantic-description` |
+| Style Type | `EmptyDescriptionStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 描述 `TextBlock` |
+| 职责 | 展示本地化默认描述或调用方提供的 `Description`。 |
+| 相关 API | `Description`、`IsDescriptionVisible`、`SizeType` |
+| 相关 Token | `DescriptionMargin`、`DescriptionMarginSM`、SharedToken 文本颜色 |
+| 稳定性 | stable since 6.2.0 |
+
+#### `footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Empty` |
+| Part | `footer` |
+| Selector | `.semantic-footer` |
+| SelectorRoute | `/template/ .semantic-footer` |
+| Style Type | `EmptyFooterStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Footer `ContentPresenter` |
+| 职责 | 承载创建、刷新、返回或其他空状态后续操作。 |
+| 相关 API | `Footer`、`FooterTemplate` |
+| 相关 Token | `FooterMargin`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Empty/Themes/EmptyTheme.axaml`
 
 ```xml
-<StackPanel>
-    <Svg Name="PART_SvgImage" />
-    <TextBlock Name="Description" />
-</StackPanel>
+<DashedBorder>
+    <StackPanel>
+        <Svg Name="PART_SvgImage" />
+        <TextBlock Name="Description" />
+        <ContentPresenter />
+    </StackPanel>
+</DashedBorder>
 ```
 
 ## Composition Model
@@ -9213,9 +14284,11 @@ Source: ./controls/empty/semantic-cn.md
 ```text
 Empty
   -> Empty (control theme, EmptyTheme.axaml)
-     -> StackPanel (template-stable)
-        -> Svg#PART_SvgImage (template-stable)
-        -> TextBlock#Description (template-stable)
+     -> DashedBorder (template-stable)
+        -> StackPanel (template-stable)
+           -> Svg#PART_SvgImage (template-stable)
+           -> TextBlock#Description (template-stable)
+           -> ContentPresenter (internal-observable)
 ```
 
 ### 协作节点
@@ -9223,22 +14296,33 @@ Empty
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Empty` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Empty` | control theme | `EmptyTheme.axaml` | 用户代码 / 控件宿主 | `Description` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `StackPanel` | template node (StackPanel) | `EmptyTheme.axaml` | Empty | `Description` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Empty` | control theme | `EmptyTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Description`, `Footer` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `StackPanel` | template node (StackPanel) | `EmptyTheme.axaml` | Empty | `Description`, `Footer`, `FooterTemplate`, `IsDescriptionVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_SvgImage` | template node (Svg) | `EmptyTheme.axaml` | Empty | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Description` | template node (TextBlock) | `EmptyTheme.axaml` | Empty | `Description` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Description` | template node (TextBlock) | `EmptyTheme.axaml` | Empty | `Description`, `IsDescriptionVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ContentPresenter` | template node (ContentPresenter) | `EmptyTheme.axaml` | Empty | `Footer`, `FooterTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 
 ## Template Parts
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `Description`、`ImagePath`、`ImageSource`、`IsDescriptionVisible`、`PresetImage` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 视觉与布局 | `SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
+| 内容与数据 | `Description`、`Footer`、`FooterTemplate`、`ImagePath`、`ImageSource`、`IsDescriptionVisible`、`PresetImage` | 定义空状态图片、描述和后续操作内容。 |
+| 视觉与布局 | `SizeType`、`StrokeDashArray` | `SizeType` 选择预设尺寸基线；`StrokeDashArray` 配置 root 边框的虚线节奏。 |
 
 ## Pseudo Classes
 
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | collection/filter、visual option。 |
-| 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | Empty Token + ControlTheme。 |
+Empty 的公共契约由 public/protected 类型成员、Avalonia 属性、事件、命令、template part、伪类、ControlTheme key 和资源 key 共同组成。维护时应先确认这些契约是否已经被源码、Gallery 示例或文档暴露。
+
+核心 public surface 按语义分组维护：
+
+| 契约组 | 代表成员 | 维护含义 |
+| --- | --- | --- |
+| 内容与数据 | `Description`、`Footer`、`FooterTemplate`、`ImagePath`、`ImageSource`、`IsDescriptionVisible`、`PresetImage` | 定义空状态图片、描述和后续操作内容。 |
+| 视觉与布局 | `SizeType`、`StrokeDashArray` | `SizeType` 选择预设尺寸基线；`StrokeDashArray` 配置 root 边框的虚线节奏。 |
+
+当前没有抽取到控件专属 public 事件；交互通知主要来自继承事件、命令或 Gallery 可观察状态。
+
+主要公开类型与枚举：
 
 ## State Flow
 
@@ -9254,10 +14338,11 @@ Public API / inherited command / item source / user input
 
 状态维护规则：
 
-- Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
-- collection/filter、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
-- 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
-- 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
+- `PresetImage`、`ImagePath`、`ImageSource` 三者互斥，并始终更新同一个 image 模板节点。
+- `IsDescriptionVisible` 直接控制 description 模板节点的可见性，不通过 C# 动态创建或删除 Visual。
+- `Footer=null` 时 footer Presenter 隐藏；非空时由 `FooterTemplate` 或 Avalonia DataTemplate 机制生成内容。
+- Large、Middle、Small 只改变 image 高度和描述间距，不改变 Semantic marker 数量。
+- 模板重套用时必须把 public API 对应状态回放到新的 part 和主题变量。
 
 ## Theme and Token Boundaries
 
@@ -9267,7 +14352,8 @@ Empty 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的�
 | --- | --- |
 | `EmptyTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 
-Empty 使用 `EmptyToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 collection/filter、visual option 运行时状态。
+Empty 使用 `EmptyToken` 作为控件 Token scope。Token 只表达图片高度、描述间距、Footer 间距和图形颜色等视觉语义，不承载
+实例内容或可见性状态。
 
 主题维护规则：
 
@@ -9288,7 +14374,7 @@ Empty Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 维护 Empty 时必须保持以下不变量：
 
-- 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
+- 除已经批准的 `Footer`、`FooterTemplate` 外，不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
@@ -9300,7 +14386,7 @@ Empty Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 维护 Empty 时不得破坏：
 
-- Public API、默认值、事件顺序和 Gallery 可观察行为。
+- Public API、默认值、事件顺序，以及新增 `Footer`/`FooterTemplate` 的内容语义。
 - Template part 名称、ControlTheme key、伪类和资源 key。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
@@ -9314,13 +14400,148 @@ Source: ./controls/expander/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Expander` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`Expander` 公开 `root`、`header`、`icon`、`title` 与 `body` 五个职责区域，与上游稳定 Semantic DOM 对齐。上游基线为
+6.6.0 稳定发布的 `CollapseSemanticType` 与 Semantic DOM 演示：
+
+- `header`、`body` 自上游 5.21.0 公开；
+- `root`、`icon`、`title` 自上游 6.0.0 公开。
+
+Expander 是单面板折叠容器，与上游 `Collapse` 的单个面板承担同一产品职责：Header 表达内容主题，展开图标表达折叠状态
+和方向，Content 承载可延迟阅读的内容。上游 `Collapse` 的 Semantic DOM 按 item 组织，而 AtomUI `Expander` 恰好是
+“一个面板”的独立 owner，因此两者按职责一一对应，不需要新的上游 owner。
+
+准入依据按[全量改造设计 §2.1](../../../../superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md)第 4 条
+“AtomUI 控件与该公开 owner 的产品职责直接对应”判定：上游 owner 数量不是必要条件，职责对应关系才是。Expander 直接消费
+上游 `Collapse` 已公开的五个语义键，Part 名称与 Collapse 保持同构。
+
+范围变更（2026-09-15）：Expander 的原排除判定经用户指令撤销。原判定以“上游只有 `Collapse` 一个 owner、`Collapse.Panel`
+没有独立 API”为由拒绝映射，但该理由检验的是 owner 数量而非职责对应关系，与 §2.1 第 4 条不符。Expander 以自身 public
+owner 独立通过准入 Gate，移入第二批计划执行（见
+[第二批任务清单](../../../../superpowers/plans/2026-08-12-semantic-part-batch-2-collections-containers.md)任务 16）。
+
+AtomUI 五个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
+
+Expander 不引入额外 owner：它是单面板控件，没有 item 容器或独立子控件 owner，五个 Part 全部属于 `Expander` 自身。
+
+### 1.1 `Expander`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `root` |
+| Selector | Expander 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Expander` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Expander owner（根边框投影到 `PART_Frame`） |
+| 职责 | Expander root 是单面板展开状态、展开方向、视觉模式与根边框样式的统一 owner。 |
+| 相关 API | `IsExpanded`、`ExpandDirection`、`IsBorderless`、`IsGhostStyle`、`BorderThickness`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled`、`HeaderPadding`、`ContentPadding`、`Header`、`Content`、`AddOnContent` |
+| 相关 Token | ExpanderToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `/template/ .semantic-header` |
+| Style Type | `ExpanderHeaderStyle` |
+| ContractType | `PixelAlignedBorder` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `PixelAlignedBorder#PART_HeaderDecorator` |
+| 职责 | 统一表示头部区域的背景、内边距、字体/行高与命中光标；对应上游 `.ant-collapse-header` 的内边距、颜色、行高、光标与过渡动画职责。 |
+| 相关 API | `SizeType`、`HeaderPadding`、`TriggerType`、`IsGhostStyle`、`IsEnabled`、`ExpandDirection` |
+| 相关 Token | `HeaderBg`、`HeaderPadding`、`HeaderPaddingSM`、`HeaderPaddingLG`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `ExpanderIconStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `IconButton#PART_ExpandButton` |
+| 职责 | 统一表示展开/收起箭头的大小、位置、边距与旋转视觉；对应上游 `.ant-collapse-expand-icon` 的字体大小、过渡动画与旋转变换职责。 |
+| 相关 API | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsExpanded`、`ExpandDirection`、`HeaderPadding`、`TriggerType`、`IsEnabled` |
+| 相关 Token | `IconSizeSM`、`LeftExpandButtonHMargin`、`RightExpandButtonHMargin`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `ExpanderTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_HeaderPresenter` |
+| 职责 | 统一表示标题文字的布局、颜色、字体与对齐；对应上游 `.ant-collapse-title` 的自适应布局与边距职责。 |
+| 相关 API | `Header`、`HeaderTemplate`、`SizeType`、`IsEnabled`、`HeaderPadding` |
+| 相关 Token | `ColorTextHeading`、`ColorTextDisabled`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Expander` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `ExpanderBodyStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_ContentPresenter` |
+| 职责 | 统一表示内容区域的内边距、背景与内容呈现；对应上游 `.ant-collapse-body` 的内边距、颜色与背景职责。 |
+| 相关 API | `Content`、`ContentTemplate`、`ContentPadding`、`SizeType`、`IsBorderless`、`IsGhostStyle` |
+| 相关 Token | `ContentPadding`、`ContentPaddingSM`、`ContentPaddingLG`、`ContentBg`、`HeaderBg`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header` 的承载节点是公开的
+`PixelAlignedBorder`，`icon` 是公开的 `IconButton`，`title` 与 `body` 是公开的 `ContentPresenter`，均取节点真实 public
+类型作为最低依赖类型。
+
+`header`、`icon`、`title`、`body` 全部是 `ExpanderTheme.axaml` 单一 `ControlTemplate` 内的静态节点，`TemplatedParent` 为
+Expander owner 本身，因此四个 Part 声明 `RuntimeCreated=false` 且不携带显式 `SelectorRoute`；生成器按
+[Semantic Part Generator §2.3](../../../../modules/generator/semantic-part-generator.md)把静态根模板 Part 的 route 规范化为
+`/template/ .<SelectorClass>`。`header` 位于 `LayoutTransformControl#PART_HeaderLayoutTransform` 内部，`body` 位于
+`LayoutAwareMotionActor#PART_ContentMotionActor` 内部，但两者都不跨越第二层模板边界，`TemplatedParent` 仍是 Expander
+owner，因此单一 `/template/` 路由已经足够，不需要为它们声明更宽的 logical descendant 路由。Expander 没有任何由 C# 创建
+并注入 marker 的 Part，也不存在跨视觉根 Part。
+
+`body` 的数量语义是 `Optional` 而不是 `Single`：折叠稳定态下 `PART_ContentMotionActor` 的 `IsVisible=false`，其内部
+`ContentPresenter` 只保留逻辑子级、不挂接视觉子级，因此 `body` 节点从视觉树中**完全缺席**（不是隐藏）；展开后才物化。
+`header` / `icon` / `title` 是模板常驻节点，折叠与展开都存在于视觉树，因此声明 `Single`。该结论由 Gate B 的 selector 命中
+测试实测得出，见 [§7 兼容性与验证](#7-兼容性与验证)。
 
 ## Abstract AXAML Structure
 
@@ -9390,7 +14611,7 @@ Expander
 
 | Template Part | 类型 | 职责 |
 | --- | --- | --- |
-| `PART_Frame` | `PixelAlignedBorder` | 根边框、裁剪和整体布局承载。 |
+| `PART_Frame` | `PixelAlignedBorder` | 根边框、矩形裁剪与圆角裁剪（`ClipToBounds` + `ClipContentToCornerRadius`）和整体布局承载。 |
 | `PART_MainLayout` | `DockPanel` | Header 与 Content 的 dock 布局。 |
 | `PART_HeaderLayoutTransform` | `LayoutTransformControl` | 横向展开方向下旋转 Header。 |
 | `PART_HeaderDecorator` | `PixelAlignedBorder` | Header 背景和 padding 承载，也是 Header 点击范围；不绘制 Header/Content 分隔线。 |
@@ -9544,6 +14765,16 @@ ExpanderToken 不承载以下状态：
 - 自定义 HeaderPadding 下的图标间距必须跟随 HeaderPadding 对应方向，不回退到默认 SizeType token。
 - `:custom-header-padding` 和 `:custom-content-padding` 的伪类语义不能混用。
 - Expander 不引入多面板或手风琴状态；这属于 Collapse 的职责。
+- Semantic Part 的 marker 放置（`ExpanderTheme.axaml` 的 `semantic-header`、`semantic-icon`、`semantic-title`、
+  `semantic-body` 四个静态 marker）属于维护不变量：除 `body` 的“首次呈现前缺席”这一呈现历史差异外，状态切换、方向切换、
+  尺寸档切换、自定义 padding 伪类、模板重应用和 detach 都不得增删 marker，默认主题不得消费 `.semantic-*` selector，
+  `header` 与 `body` 的单一 `/template/` 路由不得因模板结构调整而退化为宽泛 logical descendant。`body` 的
+  `Optional` cardinality 与 `PART_ContentMotionActor` 的 `IsVisible` 语义绑定：不得把 `semantic-body` 移到 actor 自身
+  （会失去 `Padding` / `Background` 的承载节点），也不得为规避 0/1 差异而改变 actor 的可见性模型。
+- 圆角裁剪：`PART_Frame` 的 `ClipContentToCornerRadius="True"` 属于维护不变量，不得移除。移除后 header/body 的不透明
+  背景会重新覆盖 `PART_Frame` 的圆角（默认外观因 `HeaderBg` alpha≈2% 而不易察觉，但任何不透明 Part 背景都会显形）。
+  也不要改用「给子节点各自设圆角」之外的方式绕过——若将来改为 Collapse 式的逐 corner 绑定，必须同步更新 §4.2 与
+  对应测试断言。
 
 Source: ./controls/group-box/semantic-cn.md
 
@@ -9553,13 +14784,156 @@ Source: ./controls/group-box/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
+`GroupBox` 公开 `root`、`header`、`icon`、`title`、`content` 五个职责区域：
+
+| Part | Selector | ContractType | Cardinality | Customization | AtomUI 节点 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `GroupBox` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | 控件本身 | `GroupBox` | `Single` | `Root` | `GroupBox` owner |
+| `header` | `.semantic-header` | `Border` | `Single` | `Selector` | `Border#PART_HeaderContent` |
+| `icon` | `.semantic-icon` | `IconPresenter` | `Single` | `Selector` | `IconPresenter#PART_HeaderIconPresenter` |
+| `title` | `.semantic-title` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_HeaderPresenter` |
+| `content` | `.semantic-content` | `ContentPresenter` | `Single` | `Selector` | `ContentPresenter#PART_ContentPresenter` |
+
+五个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`，与其余已改造控件一致。
+GroupBox 是独立控件，不存在派生控件家族、public 子 Control owner 或 item container，五个 Part 全部属于 `GroupBox` 自身。
+
+### 1.1 准入依据（2026-09-16 用户指令）
+
+GroupBox 的纳入与既有三个追认项（`Expander`、`TabStrip`、`Menu`）依据不同，必须单独说明：
+
+- 上游设计体系当前稳定发布源码中**不存在**与 GroupBox 职责对应的公开 Semantic DOM owner：其组件目录下没有 fieldset、
+  group 或 group-box 类组件，`GroupBox` 标识在组件源码中零命中。因此本次纳入不存在可映射的上游 owner。
+- 原排除判定见[全量改造设计 §2.4](../../../../superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md)，其正向
+  触发条件是“新稳定版出现职责直接对应的公开 owner”。该条件**并未发生**；纳入由用户直接指令撤销，判据是 AtomUI 需要
+  让 GroupBox 支持 Semantic Part，而不是上游新增 owner。因此沿用 §2.4 的三次撤销记录方式（日期化范围变更），而不是
+  声明一次新的上游 Gate 通过。
+- 支持该决定的既有先例是 `SplitButton` 的触发侧按键：上游没有对应键时，AtomUI 可以按自身模板结构**显式能力补充**发布
+  Part，而不是因为“上游没有”就拒绝定制。
+- 产品职责的最近参照是上游 `Card`：它公开 `root` / `header` / `title` / `body` / `extra` / `cover` / `actions` 分区键，是
+  “带标题的边框容器”这一职责的分区式参照。GroupBox 的 `header` / `title` 与之一一对应，`icon` / `content` 按 GroupBox
+  自身的 Header API 与 `ContentControl.Content` 命名。`Card` 的 owner 资格已由 AtomUI `Card` 持有，GroupBox **不借用**
+  Card 的准入资格。
+
+GroupBox 的 Part 名称、`ContractType` 与 cardinality 自本文件发布起构成公共主题契约。
+
+### 1.2 `GroupBox`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `GroupBox` |
+| Part | `root` |
+| Selector | GroupBox 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `GroupBox` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `GroupBox` owner（可见边框与背景由 owner `Render` 自绘，无模板节点承载） |
+| 职责 | GroupBox root 是分组边框、背景、圆角、内容内边距与标题位置的统一 owner。 |
+| 相关 API | `HeaderTitle`、`HeaderTitleColor`、`HeaderIcon`、`HeaderTitlePosition`、`HeaderFontSize`、`HeaderFontStyle`、`HeaderFontWeight`、`Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`、`Content`、`ContentTemplate` |
+| 相关 Token | GroupBoxToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `GroupBox` |
+| Part | `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `/template/ .semantic-header` |
+| Style Type | `GroupBoxHeaderStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `Border#PART_HeaderContent` |
+| 职责 | 统一表示 Header 内容区域（图标与标题的承载区域）的背景、内边距与水平对齐；该区域的 bounds 同时是边框缺口的几何来源。 |
+| 相关 API | `HeaderTitle`、`HeaderIcon`、`HeaderTitlePosition`、`HeaderFontSize`、`HeaderFontStyle`、`HeaderFontWeight` |
+| 相关 Token | `HeaderContentPadding`、`HeaderContainerMargin`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `GroupBox` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `GroupBoxIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `IconPresenter#PART_HeaderIconPresenter` |
+| 职责 | 统一表示 Header 图标的尺寸、颜色与间距。 |
+| 相关 API | `HeaderIcon` |
+| 相关 Token | `HeaderIconMargin`、`IconSizeLG`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `GroupBox` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `GroupBoxTitleStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_HeaderPresenter` |
+| 职责 | 统一表示标题文字的布局、颜色、字体与对齐。 |
+| 相关 API | `HeaderTitle`、`HeaderTitleColor`、`HeaderFontSize`、`HeaderFontStyle`、`HeaderFontWeight` |
+| 相关 Token | SharedToken（`ColorText`、`FontSize`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `GroupBox` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `GroupBoxContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_ContentPresenter` |
+| 职责 | 统一表示分组内容区域的内边距、背景与内容呈现。 |
+| 相关 API | `Content`、`ContentTemplate`、`Padding`、`Background` |
+| 相关 Token | `ContentPadding`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。`header` 的承载节点是公开的
+`Border`，`icon` 是公开的 `IconPresenter`，`content` 是公开的 `ContentPresenter`；`title` 的 `ContractType` 取
+`Avalonia.Controls.TextBlock` 而不是节点自身的派生类型 `AtomUI.Desktop.Controls.TextBlock`——派生类型同样满足该契约，
+取基类可以让后续把节点替换为普通 `TextBlock` 保持兼容；收窄到派生类型属于破坏性变更。
+
+`header`、`icon`、`title`、`content` 全部是 `GroupBoxTheme.axaml` 单一 `ControlTemplate` 内的静态节点，`TemplatedParent`
+为 GroupBox owner 本身，因此四个 Part 声明 `RuntimeCreated=false` 且不携带显式 `SelectorRoute`；生成器按
+[Semantic Part Generator §2.3](../../../../modules/generator/semantic-part-generator.md)把静态根模板 Part 的 route 规范化为
+`/template/ .<SelectorClass>`。`icon` 与 `title` 在模板中位于 `header` 节点内部（`Decorator`/`Border` → `StackPanel`），
+但都不跨越第二层模板边界，`TemplatedParent` 仍是 GroupBox owner，因此单一 `/template/` 路由已经足够，不需要为它们声明
+更宽的 logical descendant 路由。GroupBox 没有任何由 C# 创建并注入 marker 的 Part，也不存在跨视觉根 Part。
+
+GroupBox 只有一个叶子主题资产（`src/AtomUI.Desktop.Controls/GroupBox/Themes/GroupBoxTheme.axaml`），没有第二个
+`ControlTemplate` 变体、没有 Browser 变体、没有派生模板，也不存在用于聚合的 `*Themes.axaml` 参与校验；因此不存在
+marker 覆盖缺口。
 
 ## Abstract AXAML Structure
 
@@ -9569,12 +14943,12 @@ Source: ./controls/group-box/semantic-cn.md
 <Border Name="PART_Frame">
     <DockPanel>
         <Panel Name="PART_HeaderContainer">
-            <Decorator Name="PART_HeaderContent">
+            <Border Name="PART_HeaderContent">
                 <StackPanel>
                     <IconPresenter Name="PART_HeaderIconPresenter" />
                     <TextBlock Name="PART_HeaderPresenter" />
                 </StackPanel>
-            </Decorator>
+            </Border>
         </Panel>
         <ContentPresenter Name="PART_ContentPresenter" />
     </DockPanel>
@@ -9593,7 +14967,7 @@ GroupBox
      -> Border#PART_Frame (template-stable)
         -> DockPanel (template-stable)
            -> Panel#PART_HeaderContainer (template-stable)
-              -> Decorator#PART_HeaderContent (template-stable)
+              -> Border#PART_HeaderContent (template-stable)
                  -> StackPanel (template-stable)
                     -> IconPresenter#PART_HeaderIconPresenter (template-stable)
                     -> TextBlock#PART_HeaderPresenter (template-stable)
@@ -9609,7 +14983,7 @@ GroupBox
 | `PART_Frame` | template node (Border) | `GroupBoxTheme.axaml` | GroupBox | `Content`, `ContentTemplate`, `CornerRadius`, `HeaderFontSize`, `HeaderFontStyle`, `HeaderFontWeight` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DockPanel` | template node (DockPanel) | `GroupBoxTheme.axaml` | GroupBox | `Content`, `ContentTemplate`, `HeaderFontSize`, `HeaderFontStyle`, `HeaderFontWeight`, `HeaderIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_HeaderContainer` | template node (Panel) | `GroupBoxTheme.axaml` | GroupBox | `HeaderFontSize`, `HeaderFontStyle`, `HeaderFontWeight`, `HeaderIcon`, `HeaderTitle`, `HeaderTitleColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_HeaderContent` | template node (Decorator) | `GroupBoxTheme.axaml` | GroupBox | `HeaderFontSize`, `HeaderFontStyle`, `HeaderFontWeight`, `HeaderIcon`, `HeaderTitle`, `HeaderTitleColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_HeaderContent` | template node (Border) | `GroupBoxTheme.axaml` | GroupBox | `HeaderFontSize`, `HeaderFontStyle`, `HeaderFontWeight`, `HeaderIcon`, `HeaderTitle`, `HeaderTitleColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `StackPanel` | template node (StackPanel) | `GroupBoxTheme.axaml` | GroupBox | `HeaderFontSize`, `HeaderFontStyle`, `HeaderFontWeight`, `HeaderIcon`, `HeaderTitle`, `HeaderTitleColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_HeaderIconPresenter` | template node (IconPresenter) | `GroupBoxTheme.axaml` | GroupBox | `HeaderIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_HeaderPresenter` | template node (TextBlock) | `GroupBoxTheme.axaml` | GroupBox | `HeaderFontSize`, `HeaderFontStyle`, `HeaderFontWeight`, `HeaderTitle`, `HeaderTitleColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -9678,7 +15052,8 @@ GroupBox Token 不表达实例状态，也不负责 Header 缺口的运行时 bo
 - `HeaderTitle`、`HeaderTitleColor`、`HeaderIcon`、`HeaderTitlePosition`、`HeaderFontSize`、`HeaderFontStyle`、`HeaderFontWeight` 的 API 名称、类型和默认语义不变。
 - `GroupBoxTitlePosition.Left`、`Right`、`Center` 的名称和含义不变。
 - `PART_Frame`、`PART_HeaderContainer`、`PART_HeaderContent`、`PART_HeaderIconPresenter`、`PART_HeaderPresenter`、`PART_ContentPresenter` 的 template part 名称不变。
-- `Background="Transparent"` 时内容区保持透明，同时 Header 标题下方不应出现边框短线。
+- `PART_HeaderContent` 保持为 `Decorator` 的子类（当前为 `Border`，用于承载 Semantic Part `header` 的背景能力），缺口几何继续以它的实际 `Bounds` 为准。
+- `Background="Transparent"` 时内容区保持透明，同时 Header 标题下方不应出现边框短线；该契约在 Header 设置不透明背景时同样成立，缺口始终是几何排除而非背景遮挡。
 - 未设置显式高度时，GroupBox 的 `DesiredSize.Height` 必须包含 Header 通道、内容内边距和内容自身期望高度，避免内容多时被 Header 或边框区域挤压。
 - Header 图标为 `null` 时图标节点不可见，不保留额外图标占位宽度。
 - Header 内容位置改变只影响 Header 水平对齐，不改变内容区域布局语义。
@@ -9696,6 +15071,11 @@ GroupBox Token 不表达实例状态，也不负责 Header 缺口的运行时 bo
 - Header 图标隐藏时不保留额外图标占位。
 - GroupBox 不新增点击、折叠或选择行为。
 - Token 只表达布局和视觉默认值，不承载实例 bounds 或渲染缓存。
+- 四个 Semantic marker 只作为静态 `Classes.semantic-*="True"` 存在于 `GroupBoxTheme.axaml` 单一模板内，不由代码在运行时
+  增删，也不参与 `Render`、测量或失效条件。
+- `PART_HeaderContent` 保持 `Decorator` 兼容类型（当前 `Border`）与 `PART_HeaderContent` 名称，缺口继续以它的 `Bounds` 为准。
+- 可见分组边框与背景只由 `GroupBox.Render` 绘制；不得为 Semantic Part 在模板中新增承载 `Background` / `BorderBrush` 的
+  边框层来替代自绘几何。
 
 Source: ./controls/image-previewer/semantic-cn.md
 
@@ -9705,15 +15085,188 @@ Source: ./controls/image-previewer/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `AbstractImagePreviewer` | 归一 items、current、open state、宿主和加载策略 | `ItemsSource`、`CurrentIndex`、`IsOpen`、`PreloadCount` | SharedToken、ImagePreviewerToken | public |
-| `cover` | `ImagePreviewer` / `PART_CoverItemsControl` | 展示单封面或 group 缩略图及 loading/error 状态 | Cover size/state、`ItemsPanel` | Cover size、mask、radius Token | public/template-stable |
-| `host` | `ImagePreviewerDialog` / `ImagePreviewerOverlayHost` | 承载 Desktop window 或 Browser overlay | dialog、modal、topmost、title、motion API | Window、overlay、motion Token | internal-observable |
-| `viewer` | `ImageViewer` / `PART_ImageViewerScene` | 当前项导航、fit、拖拽、缩放和旋转 | interaction、scale、CurrentIndex | Viewer background、toolbar Token | internal-observable |
-| `renderer` | `PART_ImageRenderer` | 只渲染 entry 已持有的 `IImage` | current load state | 无独立加载 Token | template-stable |
-| `loading` | `PART_LoadingPresenter` | 呈现 Skeleton 或 Spin，不拥有请求 | LoadingContent/Template | Loading、Skeleton、Spin Token | template-stable |
-| `error` | `PART_ErrorPresenter` | 呈现最终失败内容，不改变状态机 | ErrorContent/Template | Error semantic Token | template-stable |
+ImagePreviewer 家族公开 8 个 Semantic Part，由两个 public owner 分别声明生成式 descriptor：`ImagePreviewer`（单封面入口）与
+`ImageGroupPreviewer`（多封面入口）。`root` 由生成器隐式加入，不要求 `.semantic-root`。除 `root` 外每个 Part 生成 public
+强类型 Semantic Style，命名规则为 `AtomUI.Theme.Styling.<Control><PartPath>Style`（如 `ImagePreviewerPopupRootStyle`），
+用户在外层普通 `Style` 中按 owner 作用域嵌套使用。
+
+8 个 Part 中 `root`/`image`/`cover` 对应 `.ant-image`/`.ant-image-img`/`.ant-image-cover`；`popup.root`/`popup.mask`/
+`popup.body`/`popup.footer`/`popup.actions` 对应 `.ant-image-preview` 及其内部 `mask`（半透明遮罩层）、`body`（居中图片区）、
+`footer`（底部操作区）、`actions`（footer 内操作按钮组）四个子节点。上游的右上角关闭按钮、左右切换按钮与页码指示不是语义
+部件，AtomUI 同样不将其公开为 Part。
+
+`popup.*` 属于独立宿主部件：预览宿主（native `ImagePreviewerDialog` 或 Browser `ImagePreviewerOverlayHost`）由
+`OpenDialog()` 运行时创建，并经 logical parent 挂入 owner，宿主 ThemeVariant 经 binding 中继。owner 作用域 Semantic Style
+只在 overlay 宿主（与 owner 同 TopLevel 的树内浮层，对齐上游 `.ant-image-preview`）保证命中；native `ImagePreviewerDialog`
+是独立 `Window`/TopLevel，Avalonia 样式级联不跨 TopLevel 边界，因此 owner 作用域 Semantic Style 不进入 dialog，dialog 内的
+预览视觉经 host 契约（owner 属性/Token 中继与 App 级 `ImageViewer` 主题）定制。`popup.*` 部件随宿主打开而存在、随关闭而销毁，
+因此统一声明 `CrossVisualRoot=true`、`CrossNestedOwners=true`、`RuntimeCreated=true`，路由以 `>>` 从 owner 直接定位 marker
+节点，不设中间 scope 锚点（overlay 宿主模板根与 viewer 在逻辑树上为兄弟，锚点式路由无法在双宿主间一致命中）。`popup.mask`
+仅 Overlay 宿主存在（`Optional`），承担上游浮层"压暗下层页面"的职能；native `ImagePreviewerDialog` 是独立窗口、无下层页面
+可压暗。关闭在 overlay 宿主由内嵌关闭按钮（`PART_CloseButton`，非语义部件）承担，native dialog 由 OS 标题栏按钮承担。Gallery Semantic Preview 中 `popup.*` 部件
+需示例显式提供宿主 Visual 根作为 `AdditionalRoots` 才能解析；但宿主（`ImagePreviewerDialog` 与 `ImagePreviewerOverlayHost`）
+均为 internal、`OpenDialog()` 不返回宿主、产品不暴露任何 Preview 专用 API，Gallery 示例无法取得该根，因此 `popup.*` 部件在
+Gallery 仅列出描述、不参与高亮；触发区部件（`root`/`image`/`cover`）在 owner 模板内正常解析。所有 marker 使用静态
+`Classes.semantic-*="True"` 声明，内置主题不使用 `.semantic-*` selector 实现默认视觉。
+
+### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Part | `root` |
+| Selector | 不适用（root 无 `.semantic-root`） |
+| SelectorRoute | 不适用 |
+| ContractType | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 控件根（隐式） |
+| 职责 | 单封面入口（`ImagePreviewer`）/ 多封面入口（`ImageGroupPreviewer`）与完整预览 owner |
+| 相关 API | `ItemsSource`、`CurrentIndex`、`IsOpen`；group 额外 `ItemsPanel` |
+| 相关 Token | SharedToken、ImagePreviewerToken |
+| 稳定性 | stable since 6.2.0 |
+
+### `image`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Part | `image` |
+| Selector | `.semantic-image` |
+| SelectorRoute | `ImagePreviewer`：`/template/ .semantic-scope-cover /template/ .semantic-image`；`ImageGroupPreviewer`：`/template/ .semantic-scope-items >> .semantic-image` |
+| ContractType | `Control` |
+| Cardinality | `ImagePreviewer`：`Single`；`ImageGroupPreviewer`：`Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `ImagePreviewer`：`false`；`ImageGroupPreviewer`：`true` |
+| AtomUI 节点 | `ImagePreviewerCover` 模板内 `ImagePreviewRenderer`（单封面静态 / 多封面 ItemsControl 项运行时物化） |
+| 职责 | 关闭态封面图片元素 / 各封面缩略图元素 |
+| 相关 API | `EffectiveCoverImage`、`CoverWidth`、`CoverHeight`；group `ItemsSource`、`ItemsPanel` |
+| 相关 Token | Cover 尺寸相关 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### `cover`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Part | `cover` |
+| Selector | `.semantic-cover` |
+| SelectorRoute | `ImagePreviewer`：`/template/ .semantic-scope-cover /template/ .semantic-cover`；`ImageGroupPreviewer`：`/template/ .semantic-scope-items >> .semantic-cover` |
+| ContractType | `Border` |
+| Cardinality | `ImagePreviewer`：`Single`；`ImageGroupPreviewer`：`Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `ImagePreviewer`：`false`；`ImageGroupPreviewer`：`true` |
+| AtomUI 节点 | `ImagePreviewerCover` 模板内 `#Mask`（单封面静态 / 多封面 ItemsControl 项运行时物化） |
+| 职责 | 封面悬浮提示层：遮罩 + 指示内容。遮罩经负 Margin 铺满整个 owner root（含 padding 环与边框），对齐上游 `genImageCoverStyle` 的 `position:absolute; inset:0` cover 几何 |
+| 相关 API | `IsShowCoverMask`、`CoverIndicatorContent(Template)`、owner `Padding` / `BorderThickness`（经中继参与遮罩几何） |
+| 相关 Token | `MaskBgColor`、mask 透明度与圆角 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `>> .semantic-popup-root` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | native dialog 内容根包裹 Panel（代码创建并注入 marker）；overlay 宿主模板根 Panel（静态 marker、纯容器，不带背景） |
+| 职责 | 预览容器根：承载遮罩层、内容区与关闭按钮的根层（对齐上游 `.ant-image-preview`）；窗口 chrome 不属于契约 |
+| 相关 API | `IsOpen`、`OpenDialog()`、`IsDialogModal`、`IsDialogTopmost` |
+| 相关 Token | Dialog 背景 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.mask`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Part | `popup.mask` |
+| Selector | `.semantic-popup-mask` |
+| SelectorRoute | `>> .semantic-popup-mask` |
+| ContractType | `Panel` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | Overlay 宿主模板根 Panel 内新增的全铺遮罩子元素（静态 marker；半透明黑背景，由原宿主根 Panel 背景迁移而来） |
+| 职责 | 预览遮罩层：全铺 `popup.root` 的半透明暗色背景，位于 `popup.body` 之下（对齐上游 `.ant-image-preview-mask`）；仅 Overlay 宿主存在 |
+| 相关 API | `IsOpen`（随 overlay 宿主打开出现；点击关闭行为当前未实现，见兼容性与验证） |
+| 相关 Token | 遮罩色使用共享 `ColorBgMask`，与上游 `.ant-image-preview-mask` 的 `colorBgMask` 语义一致 |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Part | `popup.body` |
+| Selector | `.semantic-popup-body` |
+| SelectorRoute | `>> .semantic-popup-body` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ImageViewer` 模板内 `PART_ImageViewerScene` Canvas |
+| 职责 | 预览内容区：居中承载图片渲染与指针交互（对齐上游 `.ant-image-preview-body`） |
+| 相关 API | 缩放、拖拽、旋转与 fit-to-window 交互 API |
+| 相关 Token | 无独立 Token（沿用 viewer 背景与交互 Token） |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Part | `popup.footer` |
+| Selector | `.semantic-popup-footer` |
+| SelectorRoute | `>> .semantic-popup-footer` |
+| ContractType | `Control` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ImageViewer` 模板内 `ImagePreviewFloatToolbar` 节点 |
+| 职责 | 预览页脚：底部居中操作区域，含页码指示与操作组（对齐上游 `.ant-image-preview-footer`） |
+| 相关 API | `CurrentIndex`、Count 与 scale/fit 状态投影 |
+| 相关 Token | `FloatToolbarPadding`、`NavButtonBgColor` |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ImagePreviewer` / `ImageGroupPreviewer` |
+| Part | `popup.actions` |
+| Selector | `.semantic-popup-actions` |
+| SelectorRoute | `>> .semantic-popup-footer /template/ .semantic-popup-actions` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ImagePreviewFloatToolbarTheme` 内 `#ActionFrame` |
+| 职责 | 预览操作组：footer 内的胶囊形操作按钮组（对齐上游 `.ant-image-preview-actions`） |
+| 相关 API | 缩放、翻转、旋转与 fit-to-window 命令 |
+| 相关 Token | `PreviewOperationSize`、`PreviewOperationColor` |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -9777,6 +15330,7 @@ ImagePreviewer
   -> ImagePreviewerDialog (control theme, ImagePreviewerDialogTheme.axaml)
   -> ImagePreviewerOverlayHost (control theme, ImagePreviewerOverlayHostTheme.axaml)
      -> Panel (template-stable)
+        -> Panel (template-stable)
         -> ContentPresenter (internal-observable)
         -> IconButton#PART_CloseButton (template-stable)
   -> ImagePreviewer (control theme, ImagePreviewerTheme.axaml)
@@ -9859,29 +15413,30 @@ ImagePreviewer
 | `PART_VerticalFlipButton` | template node (IconButton) | `ImagePreviewToolbarTheme.axaml` | ImagePreviewToolbar | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_RotateLeftButton` | template node (IconButton) | `ImagePreviewToolbarTheme.axaml` | ImagePreviewToolbar | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_RotateRightButton` | template node (IconButton) | `ImagePreviewToolbarTheme.axaml` | ImagePreviewToolbar | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `ImagePreviewerCover` | control theme | `ImagePreviewerCoverTheme.axaml` | ImagePreviewer | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ImagePreviewerCover` | control theme | `ImagePreviewerCoverTheme.axaml` | ImagePreviewer | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `ErrorContent` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `Panel` | template node (Panel) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `Content`, `ContentTemplate`, `ErrorContent`, `ErrorContentTemplate`, `HasError`, `ImageSource` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_LoadingPresenter` | template node (Border) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `LoadingContent`, `LoadingContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_LoadingPresenter` | template node (Border) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `LoadingContent`, `LoadingContentTemplate`, `OwnerCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_LoadingSkeleton` | template node (SkeletonImage) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `LoadingContent` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ContentPresenter` | template node (ContentPresenter) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `LoadingContent`, `LoadingContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_ErrorPresenter` | template node (Border) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `ErrorContent`, `ErrorContentTemplate`, `HasError` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ErrorPresenter` | template node (Border) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `ErrorContent`, `ErrorContentTemplate`, `HasError`, `OwnerCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DefaultErrorLayout` | template node (StackPanel) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `ErrorContent` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DefaultErrorIcon` | template node (PictureOutlined) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DefaultErrorText` | template node (TextBlock) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Mask` | template node (Border) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `Content`, `ContentTemplate`, `IsCoverMaskVisible`, `MaskOpacity` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Mask` | template node (Border) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `Content`, `ContentTemplate`, `IsCoverMaskVisible`, `MaskOpacity`, `OwnerCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `MaskContentPresenter` | template node (ContentPresenter) | `ImagePreviewerCoverTheme.axaml` | ImagePreviewerCover | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 
 ## Template Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `AbstractImagePreviewer` | 归一 items、current、open state、宿主和加载策略 | `ItemsSource`、`CurrentIndex`、`IsOpen`、`PreloadCount` | SharedToken、ImagePreviewerToken | public |
-| `cover` | `ImagePreviewer` / `PART_CoverItemsControl` | 展示单封面或 group 缩略图及 loading/error 状态 | Cover size/state、`ItemsPanel` | Cover size、mask、radius Token | public/template-stable |
-| `host` | `ImagePreviewerDialog` / `ImagePreviewerOverlayHost` | 承载 Desktop window 或 Browser overlay | dialog、modal、topmost、title、motion API | Window、overlay、motion Token | internal-observable |
-| `viewer` | `ImageViewer` / `PART_ImageViewerScene` | 当前项导航、fit、拖拽、缩放和旋转 | interaction、scale、CurrentIndex | Viewer background、toolbar Token | internal-observable |
-| `renderer` | `PART_ImageRenderer` | 只渲染 entry 已持有的 `IImage` | current load state | 无独立加载 Token | template-stable |
-| `loading` | `PART_LoadingPresenter` | 呈现 Skeleton 或 Spin，不拥有请求 | LoadingContent/Template | Loading、Skeleton、Spin Token | template-stable |
-| `error` | `PART_ErrorPresenter` | 呈现最终失败内容，不改变状态机 | ErrorContent/Template | Error semantic Token | template-stable |
+| Template Part | AtomUI 节点 | 职责 | 稳定性 |
+| --- | --- | --- | --- |
+| `PART_CoverItemsControl` | `ImageGroupPreviewerTheme` | group 封面集合 | template-stable |
+| `PART_ImageViewerScene` | `ImageViewerTheme` | 预览图片坐标空间 | template-stable |
+| `PART_ImageRenderer` | `ImageViewerTheme` | 只渲染 entry 已持有的 `IImage` | template-stable |
+| `PART_LoadingPresenter` | `ImagePreviewerCoverTheme` / `ImageViewerTheme` | 封面 Skeleton / viewer Spin 状态占位 | template-stable |
+| `PART_ErrorPresenter` | `ImagePreviewerCoverTheme` / `ImageViewerTheme` | 失败内容占位 | template-stable |
+| `PART_PreviousButton` / `PART_NextButton` | `ImageViewerTheme` | 上一张 / 下一张导航 | template-stable |
+| `PART_TitleLayout` / `PART_IconPresenter` | `ImagePreviewerTitleBarTheme` | dialog 标题与图标 | template-stable |
+| `PART_CloseButton` | `ImagePreviewerOverlayHostTheme` | overlay 关闭入口 | template-stable |
 
 ## Pseudo Classes
 
@@ -9889,6 +15444,14 @@ ImagePreviewer
 - 不允许同步 I/O、固定延迟、反射发现 reader/codec/serializer，或在 Previewer 内创建 `HttpClient`、cache 或 scheduler。
 - SourceSnapshot、encoded content 和 decoded content 的共享范围都受 CachePartition 限制；安全分区之间不共享命中或诊断。
 - borrowed `IImage` 始终由调用方拥有，任何 loader/cache/control 生命周期都不能 dispose 它。
+- Semantic Part：删除或重命名 Part、修改 SelectorRoute 命中范围、收窄 `ContractType` 都属于破坏性变更；`popup.*` 部件仅宿主
+  打开期间存在，关闭后不残留任何 marker 节点；内置主题不使用 `.semantic-*` selector 实现默认视觉；`.semantic-scope-*`
+  路由锚点不是公开 Part，不进入兼容承诺；native dialog 的窗口 chrome（标题栏、caption 按钮、窗口边框）不属于任何 Part；
+  宿主必须保持挂入 owner 的 logical parent 链，popup 部件的生成 Selector 依赖该链命中 overlay 宿主（与 owner 同 TopLevel）；
+  native dialog 是独立 TopLevel，owner 作用域样式不跨窗口级联，预览视觉经 host 契约定制。
+- 宿主分层与上游 DOM 对齐：overlay 宿主模板根 Panel 只承担 `popup.root` 容器职责、不带背景，遮罩背景必须由独立的
+  `popup.mask` 子元素承担；`popup.mask` 仅 Overlay 宿主存在（`Optional`），native dialog 不物化该部件。
+- 遮罩点击关闭（上游 `maskClosable=true` 默认）当前未在 overlay 宿主实现，关闭经 overlay 宿主内嵌关闭按钮（非语义部件）；Part 契约只承诺样式命中，
 
 ## State Flow
 
@@ -10068,6 +15631,7 @@ ImagePreviewer Token 只表达组件级视觉变量，例如尺寸、间距、�
 - 来源变化不依赖集合 Clear、控件重建或手工 cache clear 才能被识别。
 - Previewer 的 Add/Remove/Replace/Move/Reset/Clear、host close 和 detach 不能清除 Application cache。
 - 关闭 dialog/overlay 释放宿主 binding、订阅、logical parent 和全部 Full lease；detach 释放 Full/Thumbnail waiter 与 lease。
+- reattach：重新物化集合并按 IsOpen 选择当前加载策略。
 - TopLevel resize 或 render scaling 变化重新计算物理像素 bucket；相同 bucket 不重复读取，不同 bucket 异步升级。
 - source replacement、collection remove/reset、旧 generation 和已关闭 host 都不能回写当前 entry。
 - Full 与 Thumbnail 通道保持取消、状态、错误、进度、尺寸和 lease 隔离。
@@ -10076,6 +15640,15 @@ ImagePreviewer Token 只表达组件级视觉变量，例如尺寸、间距、�
 - 不允许同步 I/O、固定延迟、反射发现 reader/codec/serializer，或在 Previewer 内创建 `HttpClient`、cache 或 scheduler。
 - SourceSnapshot、encoded content 和 decoded content 的共享范围都受 CachePartition 限制；安全分区之间不共享命中或诊断。
 - borrowed `IImage` 始终由调用方拥有，任何 loader/cache/control 生命周期都不能 dispose 它。
+- Semantic Part：删除或重命名 Part、修改 SelectorRoute 命中范围、收窄 `ContractType` 都属于破坏性变更；`popup.*` 部件仅宿主
+  打开期间存在，关闭后不残留任何 marker 节点；内置主题不使用 `.semantic-*` selector 实现默认视觉；`.semantic-scope-*`
+  路由锚点不是公开 Part，不进入兼容承诺；native dialog 的窗口 chrome（标题栏、caption 按钮、窗口边框）不属于任何 Part；
+  宿主必须保持挂入 owner 的 logical parent 链，popup 部件的生成 Selector 依赖该链命中 overlay 宿主（与 owner 同 TopLevel）；
+  native dialog 是独立 TopLevel，owner 作用域样式不跨窗口级联，预览视觉经 host 契约定制。
+- 宿主分层与上游 DOM 对齐：overlay 宿主模板根 Panel 只承担 `popup.root` 容器职责、不带背景，遮罩背景必须由独立的
+  `popup.mask` 子元素承担；`popup.mask` 仅 Overlay 宿主存在（`Optional`），native dialog 不物化该部件。
+- 遮罩点击关闭（上游 `maskClosable=true` 默认）当前未在 overlay 宿主实现，关闭经 overlay 宿主内嵌关闭按钮（非语义部件）；Part 契约只承诺样式命中，
+  不承诺该行为，属行为对齐的既有差异。
 
 维护不变量：
 
@@ -10108,8 +15681,45 @@ ImagePreviewer Token 只表达组件级视觉变量，例如尺寸、间距、�
   “lease 已释放 + 显示仍持有旧图”的中间状态。
 - viewer 加载指示器只在无显示图时呈现（`:loading:not(:has-image)` 门控）；封面 mask 只由 `IsShowCoverMask` 决定，
   与加载/失败状态解耦；错误呈现仍绑定 `IsCurrentImageFailed`。
+- 封面 mask 铺满整个 owner root（含 padding 环与边框），对齐上游 `genImageCoverStyle` 的 `position:absolute; inset:0`
+  cover：`ImagePreviewerCover` 以 internal `OwnerPadding` / `OwnerBorderThickness` 中继 owner 几何（单封面经
+  `TemplateBinding`，组封面 DataTemplate 经 `RelativeSource AncestorType` 绑定），并把两者之和的负值写入
+  `OwnerMaskMargin`，owner 模板用 `{Binding OwnerMaskMargin, RelativeSource TemplatedParent}` 应用到 `#Mask` 的
+  `Margin`——这是运行时几何（宿主 padding 是用户属性），ControlTheme 无法静态表达，因此以代码计算 + 模板绑定兜底；
+  hover 遮罩压暗 padding 环是上游固有视觉（白色 padding 被压成约 178 灰），不得当作缺陷回退该几何。
+- 裁剪职责归 owner 根：`ImagePreviewerCover` 的 ControlTheme 不得声明 `ClipToBounds` Setter，且控件静态构造必须
+  `ClipToBoundsProperty.OverrideDefaultValue<ImagePreviewerCover>(false)`——Avalonia `TemplatedControl` 的类级默认值
+  是 `true`（合成层裁剪，同时约束 hit-test 与 effective viewport），会把负 Margin 铺出边界的遮罩裁回 cover 内区；
+  该裁剪不体现在 `Bounds` 上，布局断言不可见，必须以“遮罩矩形在所有 ClipToBounds 祖先坐标空间内完整包含”的
+  结构断言锁定。root 圆角对齐上游 `overflow:hidden + border-radius`：owner 模板的 `PixelAlignedBorder`
+  （用户可设 `ClipToBounds` + `CornerRadius`）负责 root 圆角裁剪，但遮罩以负 Margin 越过 owner padding、
+  不被 owner 圆角裁剪覆盖，因此 `#Mask` 与 cover 模板内 border/loading/error presenter 的圆角必须经
+  `OwnerCornerRadius` 中继直接跟随 owner `CornerRadius`（单封面 `TemplateBinding`，组封面
+  `RelativeSource AncestorType` 绑定），回归测试断言 `mask.CornerRadius` 与 owner 一致。
+- 封面图片圆角独立于 root 圆角：上游 `styles.image` 可为 image 元素单独设置 `borderRadius`（示例 4px，root 8px），
+  AtomUI 的 image part（`ImagePreviewRenderer`）以 `Border.CornerRadiusProperty.AddOwner` 暴露 `CornerRadius`，
+  并把 `RoundRectGeometryBuilder` 的 WinUI 关键点圆角几何（与 `DashedBorder.ClipContentToCornerRadius` 同算法）
+  设到子 `Image` 的 `Clip` 属性上——渲染管线在遍历每个 Visual 时应用其 `Clip`，Image 只渲染一次且带裁剪；
+  不得改为 `Render` override 中 `PushGeometryClip` 包着 `image.Render` 手绘——子 Image 是 VisualChild，渲染器在
+  父 `Render` 之后还会独立遍历 VisualChildren 再绘制一次无裁剪的 Image，覆盖手绘结果；该值不由内置主题默认设置
+  （对齐上游默认 image 无圆角），经生成 `ImagePreviewerImageStyle` 由用户 Semantic Style 定制，Setter 属性名必须写
+  限定名 `Property="Border.CornerRadius"`（直接写 `CornerRadius` 会经 internal 渲染器类型自身的字段解析，
+  XAML 编译期不做可见性检查，运行时抛 `FieldAccessException`），`x:SetterTargetType="atom:ImagePreviewRenderer"`
+  提供类型上下文；回归测试断言生成 Style 的 `CornerRadius` Setter 经 owner 作用域命中模板内 renderer
+  （`renderer.CornerRadius == 4`），并断言圆角落到子 `Image.Clip` 的圆角几何（外角点在几何外、直边内点在几何内、
+  零圆角清除 Clip、Clip 边界跟随子 Image 布局变化重建）。
 - renderer、loading presenter 和 error presenter 只消费状态，不发起 I/O 或拥有结果。
 - native dialog 与 Browser overlay 必须共享 item、current、navigation、loading 和关闭语义。
+- 两个 owner 的 Semantic descriptor 与所有内置主题的 marker 完整一致；模板变体无法提供部件时必须声明 `Optional`
+  （`popup.mask` 即 overlay 宿主限定部件）。
+- 内置主题不得用 `.semantic-*` selector 实现默认视觉；`.semantic-scope-*` 锚点不作为公开契约。
+- popup 部件的 SelectorRoute 不设中间 scope 锚点（overlay 宿主模板根与 viewer 在逻辑树上为兄弟，锚点式路由无法在双宿主间
+  一致命中），`popup.actions` 只允许以已发布的 `.semantic-popup-footer` 作为模板跨入锚点。
+- overlay 宿主模板根 Panel 只承担 `popup.root` 容器职责、不得直接涂背景；半透明遮罩背景必须由独立的 `popup.mask` 子元素
+  承担，与上游 `.ant-image-preview`（root）与 `.ant-image-preview-mask`（mask）的分层一致。
+- 宿主必须保持挂入 owner 的 logical parent 链与 ThemeVariant binding 中继；popup 部件生成 Selector 依赖该链命中 overlay
+  宿主子树（overlay 与 owner 同 TopLevel）。native dialog 是独立 Window/TopLevel，owner 作用域样式不跨其边界级联，dialog 内
+  预览视觉经 host 契约（owner 属性/Token 中继与 App 级 `ImageViewer` 主题）定制；破坏该链只破坏 overlay 宿主的 `popup.*` 命中。
 
 Source: ./controls/info-flyout/semantic-cn.md
 
@@ -10119,13 +15729,134 @@ Source: ./controls/info-flyout/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `InfoFlyout` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+InfoFlyout 的唯一 Semantic owner 是 `FlyoutHost`（`Flyout` 为 `PopupFlyoutBase`，非 Visual 控件，语义
+registry 按单一 `ControlType` 索引，不能作为 owner）。公开 5 个 Semantic Part：`root`（隐式）+ 4 个
+`popup.*`（`popup.root` / `popup.container` / `popup.content` / `popup.arrow`）。
+
+语义对齐上游 Popover 的语义 DOM（`_semantic.tsx`，槽位：root / container / title / content / arrow）。
+InfoFlyout 弹层没有标题节点，因此上游 `title` 槽位省略（后续引入标题节点时再补）。四个弹层槽位沿用
+AtomUI Select 家族的 `popup.` 前缀惯例，对应关系：
+
+| InfoFlyout Part | 上游 Popover 槽位 | AtomUI 节点 |
+| --- | --- | --- |
+| `root`（隐式） | 不适用（AtomUI 控件自身） | `FlyoutHost` owner |
+| `popup.root` | `root` | `FlyoutPresenter`（`ArrowDecoratedBox`） |
+| `popup.container` | `container` | `Border#PART_ContentDecorator` |
+| `popup.content` | `content` | `ContentPresenter#ContentPresenter` |
+| `popup.arrow` | `arrow` | `ArrowIndicator#PART_ArrowIndicator` |
+| （省略） | `title` | 无标题节点 |
+
+声明位于 `FlyoutHost.SemanticParts.cs` partial 文件。四个 `popup.*` 部件全部 `CrossVisualRoot=true`、
+`RuntimeCreated=true`：弹层根是 `Flyout.CreatePresenter()` 代码创建、跨视觉根的 Popup 子节点，不在
+owner 的 `FlyoutHostTheme` 模板内。marker 的注入策略如下：
+
+- `popup.root` 的 `semantic-popup-root` 标记在 `Flyout.CreatePresenter()` 创建 `FlyoutPresenter` 时注入。
+- `popup.container` / `popup.content` / `popup.arrow` 的标记在 `FlyoutPresenter.OnApplyTemplate` 中注入，
+  分别命中共享 `ArrowDecoratedBoxTheme` 的 `Border#PART_ContentDecorator`、`ContentPresenter#ContentPresenter`
+  与 `ArrowIndicator#PART_ArrowIndicator` 节点。这三个类 **不** 静态声明在 `ArrowDecoratedBoxTheme.axaml`
+  上：该主题被 DatePicker / TimePicker / Menu / TreeView / PopupConfirm 等众多 `ArrowDecoratedBox` 弹层共用，
+  静态追加会污染其它控件的语义标记，因此按 InfoFlyout 语义部件契约在代码路径注入（与 TreeSelect 的
+  `popup.list` / `popup.listItem` 等 RuntimeCreated 部件同构）。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FlyoutHost` |
+| Part | `root` |
+| Selector | FlyoutHost 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `FlyoutHost` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | FlyoutHost owner |
+| 职责 | InfoFlyout 触发宿主，是内容、触发方式、定位、动效与弹层打开状态的组织边界。 |
+| 相关 API | 全部 FlyoutHost public API |
+| 相关 Token | FlyoutHostToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FlyoutHost` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `>> .semantic-popup-root` |
+| Style Type | `FlyoutHostPopupRootStyle` |
+| ContractType | `FlyoutPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `Flyout.CreatePresenter()` 创建的 `FlyoutPresenter`（`ArrowDecoratedBox`） |
+| 职责 | 弹层根节点，承载弹层背景、边框、内边距与箭头，对应上游 Popover `root` 槽位。 |
+| 相关 API | `Flyout`、`FlyoutPresenterTheme`、`ShouldUseOverlayPopup` |
+| 相关 Token | FlyoutHostToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.container`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FlyoutHost` |
+| Part | `popup.container` |
+| Selector | `.semantic-popup-container` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-container` |
+| Style Type | `FlyoutHostPopupContainerStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ArrowDecoratedBoxTheme.axaml` 的 `Border#PART_ContentDecorator`（背景/边框/圆角/内边距，模板绑定自 presenter） |
+| 职责 | 弹层内容内层容器，承载背景、边框、圆角与内边距，对应上游 Popover `container` 槽位。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FlyoutHost` |
+| Part | `popup.content` |
+| Selector | `.semantic-popup-content` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-content` |
+| Style Type | `FlyoutHostPopupContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ArrowDecoratedBoxTheme.axaml` 的 `ContentPresenter#ContentPresenter` |
+| 职责 | 弹层用户内容呈现区域，对应上游 Popover `content` 槽位。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.arrow`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `FlyoutHost` |
+| Part | `popup.arrow` |
+| Selector | `.semantic-popup-arrow` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-arrow` |
+| Style Type | `FlyoutHostPopupArrowStyle` |
+| ContractType | `ArrowIndicator` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ArrowDecoratedBoxTheme.axaml` 的 `ArrowIndicator#PART_ArrowIndicator` |
+| 职责 | 指向锚点的浮动箭头，对应上游 Popover `arrow` 槽位。 |
+| 相关 API | `IsArrowVisible`、`ArrowPosition`、`ArrowSize` |
+| 相关 Token | ArrowDecoratedBoxToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -10173,7 +15904,7 @@ InfoFlyout
 | 选择与集合 | `DisplayPageSize` | 维护选择、展开、过滤、分页、分组或集合状态。 |
 | 交互与状态 | `IsArrowVisible`、`IsLightDismissEnabled`、`IsMotionEnabled`、`IsPointAtCenter`、`ShouldUseOverlayPopup` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
 | 视觉与布局 | `ArrowPosition`、`MarginToAnchor`、`OverlayHostShadow`、`Placement`、`PlacementAnchor`、`PlacementGravity`、`PopupRootShadow`、`RequestedPlacement`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
-| 弹层与窗口 | `Flyout`、`FlyoutPresenterTheme` | 控制 popup、flyout、dialog、window 或 overlay 宿主协作。 |
+| 弹层与窗口 | `Flyout`、`FlyoutPresenterTheme`、`IsPopupPinnedOpen` | 控制 popup、flyout、dialog、window 或 overlay 宿主协作。 |
 | 动效与异步 | `CloseMotion`、`MotionDuration`、`MouseEnterDelay`、`MouseLeaveDelay`、`OpenMotion` | 约束动效开关、异步加载、播放速度、超时和任务边界。 |
 | 其他稳定入口 | `AnchorTarget`、`Trigger`、`TriggerType` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -10239,6 +15970,7 @@ InfoFlyout Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
 - 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
+- 不破坏已发布的 Semantic Part 名称、selector class / route、ContractType 与数量语义（见 [Semantic Part 契约](semantic-part.md)）。
 - 文档只描述当前稳定设计；历史变化记录在 `changelog.md`。
 
 维护不变量：
@@ -10259,13 +15991,57 @@ Source: ./controls/list-box/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ListBox` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+ListBox 公开 `root` 与 `item` 两个职责区域，与上游稳定 Semantic DOM（`Listy` 组件的
+`classNames` / `styles` 均为 `{ root?, item?, groupHeader? }`）对齐。上游 `groupHeader` 不适用于 ListBox——ListBox
+是轻量选择列表，只有选择、过滤与 CandidateList 基座职责，没有分组功能，不虚构 Part。`root` 由生成器为带非 root
+Part 的 owner 隐式加入，不生成 Style；`item` 是运行时由 ListBox 创建的容器 Part。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListBox` |
+| Part | `root` |
+| Selector | ListBox 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ListBox` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | ListBox owner |
+| 职责 | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界；对应上游 `.ant-listy`。 |
+| 相关 API | `ItemsSource`、`ItemTemplate`、`SizeType`、`IsBorderless`、`IsSelectable`、`SelectionMode` |
+| 相关 Token | `ListBoxToken`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListBox` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `> .semantic-item` |
+| Style Type | `ListBoxItemStyle` |
+| ContractType | `ListBoxItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `ListBoxItem` 容器 |
+| 职责 | 条目元素，设置内间距、底部分割线与悬浮背景；对应上游 `.ant-listy-item`。 |
+| 相关 API | `SizeType`、`ItemHoverBg`、`ItemSelectedBg` |
+| 相关 Token | `ItemPaddingSM`、`ItemPadding`、`ItemPaddingLG`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 的 marker `.semantic-item` 在 `ListBoxItem` 创建路径
+一次性添加，`PrepareContainerForItemOverride` 幂等补齐（覆盖用户直接提供容器与 `CandidateListItem` 派生容器的
+路径）；`ListBoxItem` 只有一种身份，不存在切换。
+
+`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过 `x:SetterTargetType` 提供 AXAML 编译期类型
+上下文；它不参与 `.semantic-*` 的身份匹配。
 
 ## Abstract AXAML Structure
 
@@ -10292,12 +16068,14 @@ Source: ./controls/list-box/semantic-cn.md
 ```text
 ListBox
   -> ListBoxItem (item container control theme, ListBoxItemTheme.axaml)
-     -> Border#Frame (template-stable)
-        -> DockPanel (template-stable)
-           -> IconTemplatePresenter#SelectedIndicator (internal-observable)
-           -> Panel (template-stable)
-              -> ContentPresenter#ContentPresenter (internal-observable)
-              -> HighlightableTextBlock (template-stable)
+     -> Panel (template-stable)
+        -> PixelAlignedBorder#Frame (template-stable)
+           -> DockPanel (template-stable)
+              -> IconTemplatePresenter#SelectedIndicator (internal-observable)
+              -> Panel (template-stable)
+                 -> ContentPresenter#ContentPresenter (internal-observable)
+                 -> HighlightableTextBlock (template-stable)
+        -> PixelAlignedBorder#SplitLineFrame (template-stable)
   -> ListBox (control theme, ListBoxTheme.axaml)
      -> PixelAlignedBorder#Frame (template-stable)
         -> Panel (template-stable)
@@ -10313,12 +16091,13 @@ ListBox
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `ListBox` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `ListBoxItem` | item container control theme | `ListBoxItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `Content`, `ContentTemplate`, `ContentText`, `CornerRadius`, `FilterHighlightForeground` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Frame` | template node (Border) | `ListBoxItemTheme.axaml` | ListBoxItem | `Background`, `Content`, `ContentTemplate`, `ContentText`, `CornerRadius`, `FilterHighlightForeground` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ListBoxItem` | item container control theme | `ListBoxItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `Content`, `ContentTemplate`, `ContentText`, `CornerRadius` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `ListBoxItemTheme.axaml` | ListBoxItem | `Background`, `BorderBrush`, `Content`, `ContentTemplate`, `ContentText`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Frame` | template node (PixelAlignedBorder) | `ListBoxItemTheme.axaml` | ListBoxItem | `Background`, `Content`, `ContentTemplate`, `ContentText`, `CornerRadius`, `FilterHighlightForeground` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DockPanel` | template node (DockPanel) | `ListBoxItemTheme.axaml` | ListBoxItem | `Content`, `ContentTemplate`, `ContentText`, `FilterHighlightForeground`, `FilterHighlightStrategy`, `FilterHighlightWords` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SelectedIndicator` | template node (IconTemplatePresenter) | `ListBoxItemTheme.axaml` | ListBoxItem | `IsSelectedIndicatorVisible`, `SelectedIndicator` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Panel` | template node (Panel) | `ListBoxItemTheme.axaml` | ListBoxItem | `Content`, `ContentTemplate`, `ContentText`, `FilterHighlightForeground`, `FilterHighlightStrategy`, `FilterHighlightWords` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ContentPresenter` | template node (ContentPresenter) | `ListBoxItemTheme.axaml` | ListBoxItem | `Content`, `ContentTemplate`, `HorizontalContentAlignment`, `IsFiltering`, `VerticalContentAlignment` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `SplitLineFrame` | template node (PixelAlignedBorder) | `ListBoxItemTheme.axaml` | ListBoxItem | `BorderBrush`, `EffectiveBorderThickness`, `IsSplitLineEffectiveVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ListBox` | control theme | `ListBoxTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `CornerRadius`, `EffectiveBorderThickness`, `EmptyIndicator`, `EmptyIndicatorPadding` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Frame` | template node (PixelAlignedBorder) | `ListBoxTheme.axaml` | ListBox | `Background`, `BorderBrush`, `CornerRadius`, `EffectiveBorderThickness`, `EmptyIndicator`, `EmptyIndicatorPadding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Panel` | template node (Panel) | `ListBoxTheme.axaml` | ListBox | `EmptyIndicator`, `EmptyIndicatorPadding`, `EmptyIndicatorTemplate`, `IsDefaultEmptyIndicatorVisible`, `IsEffectiveEmptyVisible`, `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -10395,7 +16174,7 @@ ListBox 主题按 root 和 item 两层组织。
 
 ```text
 ListBoxTheme
-  Frame
+  Frame（ClipContentToCornerRadius=True）
   PART_ScrollViewer
   ItemsPresenter
   EmptyIndicator
@@ -10405,13 +16184,17 @@ ListBoxItemTheme
   SelectedIndicator
   ContentPresenter
   HighlightableTextBlock
+  SplitLineFrame
 ```
 
 视觉规则：
 
-- root 边框由 `BorderBrush`、`BorderThickness`、`CornerRadius` 和 `IsBorderless` 共同决定。
-- `SizeType` 控制 root 圆角、空状态 padding、条目最小高度和条目 padding。
-- 默认条目背景透明，hover 使用 `ItemHoverBg`，selected 使用 `ItemSelectedBg`。
+- root 外框由 `BorderBrush`、`BorderThickness`、`CornerRadius` 和 `IsBorderless` 共同决定。默认外框颜色是 `ColorSplit`，与条目分割线同色，表达“外框即列表闭合线”。
+- root `Frame` 开启 `ClipContentToCornerRadius`：内容被裁剪到外框圆角内边缘，条目 hover / selected 背景等溢出圆角内边缘的内容被裁剪，不在圆角口袋区溢出；外框环由 `Frame` 自身一次绘制（`ColorSplit`），无叠加节点。
+- `SizeType` 控制 root 圆角、空状态 padding、条目最小高度和条目 padding。条目表面保持直角，主题不设置条目圆角。
+- 条目直接贴合 root 外框内边缘：`ContentPadding` 与 `ItemMargin` 均为 `Thickness(0)`，条目之间不留垂直间距，列表紧凑感由条目高度与分割线表达。
+- 条目底部分割线默认是 1 DIP `ColorSplit` 底边线，由条目 `BorderThickness` / `BorderBrush` 驱动。最后一项的底部分割线被抑制，由 root 外框下边缘承担闭合线；`IsBorderless` 时保留（外框消失后由分割线承担闭合线）。
+- 默认条目背景透明，hover 使用 `ItemHoverBg`，selected 使用 `ItemSelectedBg`；hover / selected 背景延伸到外框内边缘，溢出圆角口袋区的部分由 `Frame` 的圆角内容裁剪约束。
 - disabled 内容使用 SharedToken disabled 文本色。
 - 选中指示器默认使用 默认 `CheckOutlined`，颜色使用 SharedToken 主色，尺寸使用 SharedToken icon size。
 - 空状态默认使用 `Empty` 的 simple preset image。
@@ -10445,6 +16228,13 @@ ListBoxToken 不承载 `SelectedItem`、`SelectedItems`、`IsSelected`、`IsFilt
 - 选中指示器、过滤高亮和空状态节点应留在 AXAML 静态模板中，通过 `IsVisible` 和状态属性控制，不作为普通性能优化迁移到 C# 动态创建。
 - 虚拟化容器回收时，容器本地值必须对称清理，避免旧 item 的 disabled、filter、indicator 或 content 状态泄漏到新 item。
 - 筛选命中数量和空状态契约不得只依赖当前已实现容器。
+- 语义区域边界：`ListBox` 只发布 `root` / `item` 两个 Part；`item` 的 marker 在容器创建与 prepare 路径一次性幂等
+  建立、不随状态切换，静态模板不增删 marker，默认主题不消费 `.semantic-*` selector；selection、filter 高亮与
+  empty 不属于 Part。
+- root 外框与条目分割线必须保持同一 `ColorSplit` 基线；root `Frame` 的 `ClipContentToCornerRadius` 圆角内容裁剪保证条目状态背景不溢出圆角内边缘。
+- 条目表面保持直角与贴边：不恢复条目圆角，不重新引入 `ContentPadding` / `ItemMargin` 垂直间距。
+- 最后一项分割线抑制规则由控件状态机决定：最后一项不显示底部分割线，由 root 外框下边缘闭合；`IsBorderless` 时
+  保留；集合追加与删除后必须重新同步所有已实现容器，Semantic Style 不能绕过该规则。
 - Token 只表达组件设计语义，不承载选择、过滤、空状态或虚拟化运行时状态。
 
 维护不变量：
@@ -10459,6 +16249,17 @@ ListBoxToken 不承载 `SelectedItem`、`SelectedItems`、`IsSelected`、`IsFilt
 - 选中指示器可见性只能由 `IsShowSelectedIndicator && IsSelected` 推导。
 - `ItemClicked` 派发顺序必须允许 CandidateList 在 public event 前执行 `NotifyListBoxItemClicked`。
 - `IsBorderless` 只影响边框厚度，不改变 root padding、corner radius 或 scroll behavior。
+- Semantic Part 边界：`ListBox` 只发布 `root` / `item` 两个 Part；`item` 的 marker 在容器创建与 prepare 路径一次性
+  幂等建立、不随状态切换，静态模板不增删 marker，默认主题不消费 `.semantic-*` selector；selection、filter 高亮与
+  empty 不属于 Part。
+- 分割线状态机：`IsSplitLineVisible` 只由 ListBox 按容器视图位置与 `IsBorderless` 计算，容器不得自行决定；集合变化
+  与 borderless 变化必须重新同步已实现容器；Semantic Style 不能绕过最后一项抑制。
+- 条目模板保持 `SplitLineFrame` 绑定 `EffectiveBorderThickness` / `IsSplitLineEffectiveVisible`，默认分割线为 1 DIP
+  `ColorSplit`；root 外框与分割线共享同一 `ColorSplit` 基线。
+- root 模板保持 `Frame` 开启 `ClipContentToCornerRadius`：内容被裁剪到外框圆角内边缘，条目状态背景不溢出圆角
+  口袋区；外框环由 `Frame` 自身一次绘制（`ColorSplit`，与分割线同色），不得再叠加任何覆盖节点。裁剪应用前必须通过
+  `SupportsGeometryClipHitTesting` 探测平台几何命中能力，无法正确判定圆角几何包含的平台降级为不应用裁剪。
+- 条目表面保持直角与贴边：不恢复条目圆角，`ContentPadding` / `ItemMargin` 保持 `Thickness(0)`。
 - Token 变更必须同步 `ListBoxTokenKind`、AXAML 引用和 token.md 语义说明。
 
 Source: ./controls/list-view/semantic-cn.md
@@ -10469,13 +16270,77 @@ Source: ./controls/list-view/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ListView` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+ListView 公开 `root`、`item` 与 `groupHeader` 三个职责区域，与上游稳定 Semantic DOM（`Listy` 组件的
+`classNames` / `styles` 均为 `{ root?, item?, groupHeader? }`）对齐。`root` 由生成器为带非 root Part 的 owner 隐式加入，
+不生成 Style；`item` 与 `groupHeader` 是运行时由 ListView 创建的容器 Part。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListView` |
+| Part | `root` |
+| Selector | ListView 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ListView` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | ListView owner |
+| 职责 | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界；对应上游 `.ant-listy`。 |
+| 相关 API | `ItemsSource`、`ItemTemplate`、`Height`、`SizeType`、`IsBorderless`、`IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` |
+| 相关 Token | `ListViewToken`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListView` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `> .semantic-item` |
+| Style Type | `ListViewItemStyle` |
+| ContractType | `ListViewItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个非分组 `ListViewItem` 容器 |
+| 职责 | 条目元素，设置内间距、底部分割线与悬浮背景；对应上游 `.ant-listy-item`。 |
+| 相关 API | `SizeType`、`ItemHoverBg`、`ItemSelectedBg`、`ItemClickMode` |
+| 相关 Token | `ItemPaddingSM`、`ItemPadding`、`ItemPaddingLG`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `groupHeader`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ListView` |
+| Part | `groupHeader` |
+| Selector | `.semantic-group-header` |
+| SelectorRoute | `> .semantic-group-header` |
+| Style Type | `ListViewGroupHeaderStyle` |
+| ContractType | `ListViewItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个分组标题容器（专用 `GroupHeaderItem`） |
+| 职责 | 分组标题元素，设置标题文字与背景；对应上游 `.ant-listy-group-header`。 |
+| 相关 API | `IsGroupEnabled`、`GroupPropertySelector`、`GroupItemTemplate` |
+| 相关 Token | `GroupHeaderColor`、`ColorBgContainer`、`ColorFillAlter`、`FontWeightStrong` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 与 `groupHeader` 的 marker 在容器创建路径一次性建立，
+`PrepareContainerForItemOverride` 按容器类型幂等补齐；容器角色由类型决定（分组标题使用专用 `GroupHeaderItem`），
+prepare、restore、recycle 与分组开关都不切换 marker。
+
+`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过 `x:SetterTargetType` 提供 AXAML 编译期类型
+上下文；它不参与 `.semantic-*` 的身份匹配。`groupHeader` 的 `ContractType` 是 `ListViewItem`（`GroupHeaderItem` 的
+public 基类），因为 `GroupHeaderItem` 是 internal 类型，不能作为公共 Setter 依赖的最低类型。
 
 ## Abstract AXAML Structure
 
@@ -10507,11 +16372,14 @@ Source: ./controls/list-view/semantic-cn.md
 
 ```text
 ListView
+  -> GroupHeaderItem (item container control theme, GroupHeaderItemTheme.axaml)
   -> ListViewItem (item container control theme, ListViewItemTheme.axaml)
-     -> Border#Frame (template-stable)
-        -> DockPanel (template-stable)
-           -> IconTemplatePresenter#SelectedIndicator (internal-observable)
-           -> ContentPresenter#ContentPresenter (internal-observable)
+     -> Panel (template-stable)
+        -> PixelAlignedBorder#Frame (template-stable)
+           -> DockPanel (template-stable)
+              -> IconTemplatePresenter#SelectedIndicator (internal-observable)
+              -> ContentPresenter#ContentPresenter (internal-observable)
+        -> PixelAlignedBorder#SplitLineFrame (template-stable)
   -> ListView (control theme, ListViewTheme.axaml)
      -> PixelAlignedBorder#Frame (template-stable)
         -> DockPanel (template-stable)
@@ -10530,11 +16398,14 @@ ListView
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `ListView` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `ListViewItem` | item container control theme | `ListViewItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `HorizontalContentAlignment`, `IsSelectedIndicatorVisible` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Frame` | template node (Border) | `ListViewItemTheme.axaml` | ListViewItem | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `HorizontalContentAlignment`, `IsSelectedIndicatorVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `GroupHeaderItem` | item container control theme | `GroupHeaderItemTheme.axaml` | ListView | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ListViewItem` | item container control theme | `ListViewItemTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `Content`, `ContentTemplate`, `CornerRadius`, `EffectiveBorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Panel` | template node (Panel) | `ListViewItemTheme.axaml` | ListViewItem | `Background`, `BorderBrush`, `Content`, `ContentTemplate`, `CornerRadius`, `EffectiveBorderThickness` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Frame` | template node (PixelAlignedBorder) | `ListViewItemTheme.axaml` | ListViewItem | `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `HorizontalContentAlignment`, `IsSelectedIndicatorVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DockPanel` | template node (DockPanel) | `ListViewItemTheme.axaml` | ListViewItem | `Content`, `ContentTemplate`, `HorizontalContentAlignment`, `IsSelectedIndicatorVisible`, `SelectedIndicator`, `VerticalContentAlignment` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SelectedIndicator` | template node (IconTemplatePresenter) | `ListViewItemTheme.axaml` | ListViewItem | `IsSelectedIndicatorVisible`, `SelectedIndicator` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `ContentPresenter` | template node (ContentPresenter) | `ListViewItemTheme.axaml` | ListViewItem | `Content`, `ContentTemplate`, `HorizontalContentAlignment`, `VerticalContentAlignment` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `SplitLineFrame` | template node (PixelAlignedBorder) | `ListViewItemTheme.axaml` | ListViewItem | `BorderBrush`, `EffectiveBorderThickness`, `IsSplitLineEffectiveVisible` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ListView` | control theme | `ListViewTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BottomPagination`, `CornerRadius`, `CustomOperatingIndicator`, `CustomOperatingIndicatorTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Frame` | template node (PixelAlignedBorder) | `ListViewTheme.axaml` | ListView | `Background`, `BorderBrush`, `BottomPagination`, `CornerRadius`, `CustomOperatingIndicator`, `CustomOperatingIndicatorTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DockPanel` | template node (DockPanel) | `ListViewTheme.axaml` | ListView | `BottomPagination`, `CustomOperatingIndicator`, `CustomOperatingIndicatorTemplate`, `EmptyIndicator`, `EmptyIndicatorPadding`, `EmptyIndicatorTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -10638,7 +16509,7 @@ ListView 主题按 root、分页、操作态、滚动内容、空状态和 item 
 
 ```text
 ListViewTheme
-  Frame
+  Frame（ClipContentToCornerRadius=True）
   TopPaginationPresenter
   BottomPaginationPresenter
   Spin
@@ -10650,15 +16521,19 @@ ListViewItemTheme
   Frame
     SelectedIndicator
     ContentPresenter
+  SplitLineFrame
 ```
 
 视觉规则：
 
-- root 边框由 `BorderBrush`、`BorderThickness`、`CornerRadius` 和 `IsBorderless` 共同决定。
-- `SizeType` 控制 root 圆角、空状态 padding、条目最小高度、条目 padding 和条目圆角。
-- 默认条目背景透明，hover 使用 `ItemHoverBg`，selected 使用 `ItemSelectedBg`。
-- 组标题使用 `GroupHeaderColor`，不应用普通条目的 hover / selected 状态背景。
-- selected indicator 默认使用 默认 `CheckOutlined`，颜色和尺寸来自 SharedToken。
+- root 外框由 `BorderBrush`、`BorderThickness`、`CornerRadius` 和 `IsBorderless` 共同决定。默认外框颜色是 `ColorSplit`，与条目分割线同色，表达“外框即列表闭合线”。
+- root `Frame` 开启 `ClipContentToCornerRadius`：内容被裁剪到外框圆角内边缘，条目 hover / selected 背景等溢出圆角内边缘的内容被裁剪，不在圆角口袋区溢出；外框环由 `Frame` 自身一次绘制（`ColorSplit`），无叠加节点。
+- `SizeType` 控制 root 圆角、空状态 padding、条目最小高度和条目 padding。条目表面保持直角，主题不设置条目圆角。
+- 条目直接贴合 root 外框内边缘：`ContentPadding` 与 `ItemMargin` 均为 `Thickness(0)`，条目之间不留垂直间距，列表紧凑感由条目高度与分割线表达。
+- 条目底部分割线默认是 1 DIP `ColorSplit` 底边线，由条目 `BorderThickness` / `BorderBrush` 驱动。无 `BottomPagination` 时最后一项的底部分割线被抑制，由 root 外框下边缘承担闭合线；配置 `BottomPagination` 时最后一项保留分割线（分隔条目区与分页器）；`IsBorderless` 时也保留（外框消失后由分割线承担闭合线）。
+- 默认条目背景透明，hover 使用 `ItemHoverBg`，selected 使用 `ItemSelectedBg`；hover / selected 背景延伸到外框内边缘，溢出圆角口袋区的部分由 `Frame` 的圆角内容裁剪约束。
+- 组标题使用 `GroupHeaderColor`，不应用普通条目的 hover / selected 状态背景，也不显示底部分割线。
+- selected indicator 默认使用 `CheckOutlined`，颜色和尺寸来自 SharedToken。
 - 空状态默认使用 `Empty` 的 simple preset image。
 - 分页器 margin 使用 ListViewToken 的 `PaginationMargin`。
 
@@ -10695,6 +16570,15 @@ ListViewToken 不承载 `ItemsSource`、`SelectedIndex`、`SelectedItem`、`Sele
 - `PART_ScrollViewer`、`ItemsPresenter`、`EmptyIndicator`、分页 presenter、`SelectedIndicator` 和 `ContentPresenter` 的职责不得被无兼容说明地改变。
 - 选中指示器、空状态和操作态节点应留在 AXAML 静态模板中，通过状态属性控制，不作为普通性能优化迁移到 C# 动态创建。
 - 虚拟化容器回收时，容器本地值必须对称保存、恢复和清理，避免 disabled、group item、selected indicator 或 content 状态串扰。
+- `ListView` 的 `root` / `item` / `groupHeader` Semantic Part 对齐上游 Listy 的 Semantic DOM：marker 放置、ContractType、
+  cardinality 与根表面投影属于主题兼容契约，状态切换、容器复用/回收与模板重应用不得增删 marker；`item` 与
+  `groupHeader` 的 marker 分别在 `ListViewItem` 与专用 `GroupHeaderItem` 容器构造时一次性建立，不随
+  `IsGroupItem` 状态切换。
+- root 外框与条目分割线必须保持同一 `ColorSplit` 基线；root `Frame` 的 `ClipContentToCornerRadius` 圆角内容裁剪保证条目状态背景不溢出圆角内边缘。
+- 条目表面保持直角与贴边：不恢复条目圆角，不重新引入 `ContentPadding` / `ItemMargin` 垂直间距。
+- 最后一项分割线抑制规则由控件状态机决定：无 `BottomPagination` 时最后一项不显示底部分割线，由 root 外框下边缘
+  闭合；`BottomPagination` 或 `IsBorderless` 时保留；集合追加、删除与分页配置变化后必须重新同步所有已实现容器，
+  Semantic Style 不能绕过该规则。
 - Token 只表达组件设计语义，不承载选择、过滤、分页、空状态或虚拟化运行时状态。
 
 维护不变量：
@@ -10720,6 +16604,17 @@ ListViewToken 不承载 `ItemsSource`、`SelectedIndex`、`SelectedItem`、`Sele
 - Reset 和 ItemsSource 替换只通过唯一非空 item key 恢复选择，不按 item equality 或旧索引回退。
 - 分页器替换时必须解除旧 `CurrentPageChanged` 和 relay binding。
 - Token 变更必须同步 `ListViewTokenKind`、AXAML 引用和 token.md 语义说明。
+- Semantic Part 边界：`ListView` 只发布 `root` / `item` / `groupHeader` 三个 Part；`item` 与 `groupHeader` 的 marker
+  分别在 `ListViewItem` 与专用 `GroupHeaderItem` 容器构造时一次性建立，不随 `IsGroupItem` 状态切换，静态模板不增删
+  marker，默认主题不消费 `.semantic-*` selector；selection、pagination、empty/loading 与条目 content 不属于 Part。
+- 分割线状态机：`IsSplitLineVisible` 只由 ListView 按容器视图位置与 `BottomPagination` / `IsBorderless` 计算，容器
+  不得自行决定；集合变化、分页器与 borderless 变化必须重新同步已实现容器；Semantic Style 不能绕过最后一项抑制。
+- 条目模板保持 `SplitLineFrame` 绑定 `EffectiveBorderThickness` / `IsSplitLineEffectiveVisible`，默认分割线为 1 DIP
+  `ColorSplit`；root 外框与分割线共享同一 `ColorSplit` 基线。
+- root 模板保持 `Frame` 开启 `ClipContentToCornerRadius`：内容被裁剪到外框圆角内边缘，条目状态背景不溢出圆角
+  口袋区；外框环由 `Frame` 自身一次绘制（`ColorSplit`，与分割线同色），不得再叠加任何覆盖节点。裁剪应用前必须通过
+  `SupportsGeometryClipHitTesting` 探测平台几何命中能力，无法正确判定圆角几何包含的平台降级为不应用裁剪。
+- 条目表面保持直角与贴边：不恢复条目圆角，`ContentPadding` / `ItemMargin` 保持 `Thickness(0)`。
 
 Source: ./controls/qr-code/semantic-cn.md
 
@@ -10729,13 +16624,49 @@ Source: ./controls/qr-code/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `QRCode` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+QRCode 公开 `root` 和 `cover` 两个 Semantic Part。二维码 bitmap、中心图标、刷新按钮和状态内容内部节点不属于公共 Part。
+
+### 1.1 `QRCode`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `QRCode` |
+| Part | `root` |
+| Selector | QRCode 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `QRCode` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | QRCode owner |
+| 职责 | 二维码方形根区域，承载背景、边框、圆角、Padding 和整体布局。 |
+| 相关 API | `Size`、`IsBordered` 及继承的 root 表面属性 |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `cover`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `QRCode` |
+| Part | `cover` |
+| Selector | `.semantic-cover` |
+| SelectorRoute | `/template/ .semantic-cover` |
+| Style Type | `QRCodeCoverStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 状态 overlay `Border` |
+| 职责 | 覆盖完整 root，承载 Loading、Expired、Scanned 状态背景与内容。 |
+| 相关 API | `Status`、三组状态内容 API、`RefreshRequested` |
+| 相关 Token | `QRCodeMaskBackgroundColor`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -10743,30 +16674,37 @@ Source: ./controls/qr-code/semantic-cn.md
 
 ```xml
 <PixelAlignedBorder Name="Frame">
-    <Panel>
-        <Panel>
-            <Image />
-            <Border Name="ImageFrame">
-                <Image />
-            </Border>
-        </Panel>
-        <Border Name="Mask" />
-        <Panel Name="LoadingLayout">
-            <Spin />
-            <ContentPresenter />
-        </Panel>
-        <Panel Name="ExpiredLayout">
-            <StackPanel>
-                <TextBlock />
-                <Button Name="PART_RefreshButton" />
-            </StackPanel>
-            <ContentPresenter />
-        </Panel>
-        <Panel Name="ScannedLayout">
-            <TextBlock />
-            <ContentPresenter />
-        </Panel>
-    </Panel>
+    <Grid>
+        <Border Name="ContentFrame">
+            <Viewbox Name="QRCodeSurfaceScaler">
+                <Grid>
+                    <Image />
+                    <Border Name="ImageFrame">
+                        <Image />
+                    </Border>
+                </Grid>
+            </Viewbox>
+        </Border>
+        <Border Name="Cover">
+            <Panel>
+                <Panel Name="LoadingLayout">
+                    <Spin />
+                    <ContentPresenter />
+                </Panel>
+                <Panel Name="ExpiredLayout">
+                    <StackPanel>
+                        <TextBlock />
+                        <Button Name="PART_RefreshButton" />
+                    </StackPanel>
+                    <ContentPresenter />
+                </Panel>
+                <Panel Name="ScannedLayout">
+                    <TextBlock />
+                    <ContentPresenter />
+                </Panel>
+            </Panel>
+        </Border>
+    </Grid>
 </PixelAlignedBorder>
 ```
 
@@ -10780,23 +16718,26 @@ Source: ./controls/qr-code/semantic-cn.md
 QRCode
   -> QRCode (control theme, QRCodeTheme.axaml)
      -> PixelAlignedBorder#Frame (template-stable)
-        -> Panel (template-stable)
-           -> Panel (template-stable)
-              -> Image (template-stable)
-              -> Border#ImageFrame (template-stable)
-                 -> Image (template-stable)
-           -> Border#Mask (template-stable)
-           -> Panel#LoadingLayout (template-stable)
-              -> Spin (template-stable)
-              -> ContentPresenter (internal-observable)
-           -> Panel#ExpiredLayout (template-stable)
-              -> StackPanel (template-stable)
-                 -> TextBlock (template-stable)
-                 -> Button#PART_RefreshButton (template-stable)
-              -> ContentPresenter (internal-observable)
-           -> Panel#ScannedLayout (template-stable)
-              -> TextBlock (template-stable)
-              -> ContentPresenter (internal-observable)
+        -> Grid (template-stable)
+           -> Border#ContentFrame (template-stable)
+              -> Viewbox#QRCodeSurfaceScaler (template-stable)
+                 -> Grid (template-stable)
+                    -> Image (template-stable)
+                    -> Border#ImageFrame (template-stable)
+                       -> Image (template-stable)
+           -> Border#Cover (template-stable)
+              -> Panel (template-stable)
+                 -> Panel#LoadingLayout (template-stable)
+                    -> Spin (template-stable)
+                    -> ContentPresenter (internal-observable)
+                 -> Panel#ExpiredLayout (template-stable)
+                    -> StackPanel (template-stable)
+                       -> TextBlock (template-stable)
+                       -> Button#PART_RefreshButton (template-stable)
+                    -> ContentPresenter (internal-observable)
+                 -> Panel#ScannedLayout (template-stable)
+                    -> TextBlock (template-stable)
+                    -> ContentPresenter (internal-observable)
 ```
 
 ### 协作节点
@@ -10806,9 +16747,11 @@ QRCode
 | `QRCode` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `QRCode` | control theme | `QRCodeTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `Bitmap`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `ExpiredContent` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Frame` | template node (PixelAlignedBorder) | `QRCodeTheme.axaml` | QRCode | `Background`, `Bitmap`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `ExpiredContent` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Panel` | template node (Panel) | `QRCodeTheme.axaml` | QRCode | `Bitmap`, `ExpiredContent`, `ExpiredContentTemplate`, `Icon`, `IconBgColor`, `IconSize` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ContentFrame` | template node (Border) | `QRCodeTheme.axaml` | QRCode | `Bitmap`, `Icon`, `IconBgColor`, `IconSize`, `Padding`, `Size` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `QRCodeSurfaceScaler` | template node (Viewbox) | `QRCodeTheme.axaml` | QRCode | `Bitmap`, `Icon`, `IconBgColor`, `IconSize`, `Size` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ImageFrame` | template node (Border) | `QRCodeTheme.axaml` | QRCode | `Icon`, `IconBgColor`, `IconSize` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Mask` | template node (Border) | `QRCodeTheme.axaml` | QRCode | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Cover` | template node (Border) | `QRCodeTheme.axaml` | QRCode | `ExpiredContent`, `ExpiredContentTemplate`, `LoadingContent`, `LoadingContentTemplate`, `ScannedContent`, `ScannedContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Panel` | template node (Panel) | `QRCodeTheme.axaml` | QRCode | `ExpiredContent`, `ExpiredContentTemplate`, `LoadingContent`, `LoadingContentTemplate`, `ScannedContent`, `ScannedContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `LoadingLayout` | template node (Panel) | `QRCodeTheme.axaml` | QRCode | `LoadingContent`, `LoadingContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ContentPresenter` | template node (ContentPresenter) | `QRCodeTheme.axaml` | QRCode | `LoadingContent`, `LoadingContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `ExpiredLayout` | template node (Panel) | `QRCodeTheme.axaml` | QRCode | `ExpiredContent`, `ExpiredContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -10821,14 +16764,24 @@ QRCode
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
 | 内容与数据 | `ExpiredContent`、`ExpiredContentTemplate`、`Icon`、`IconBgColor`、`IconSize`、`LoadingContent`、`LoadingContentTemplate`、`ScannedContent`、`ScannedContentTemplate`、`Value` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `IsBordered`、`Status` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `Color`、`Size` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
+| 交互与状态 | `IsBordered`、`Status`、`RefreshRequested` | 表达边框模式、状态遮罩和过期状态下的刷新请求。 |
+| 视觉与布局 | `Color`、`Size` 及继承的 root 表面属性 | `Size` 统一拥有二维码方形边长；颜色、背景、边框、圆角和 Padding 形成 root 视觉。 |
 | 其他稳定入口 | `EccLevel` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
 ## Pseudo Classes
 
-| 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | loading/async、input/value、visual option。 |
-| 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | QRCode Token + ControlTheme。 |
+QRCode 的公共契约由 public/protected 类型成员、Avalonia 属性、事件、命令、template part、伪类、ControlTheme key 和资源 key 共同组成。维护时应先确认这些契约是否已经被源码、Gallery 示例或文档暴露。
+
+核心 public surface 按语义分组维护：
+
+| 契约组 | 代表成员 | 维护含义 |
+| --- | --- | --- |
+| 内容与数据 | `ExpiredContent`、`ExpiredContentTemplate`、`Icon`、`IconBgColor`、`IconSize`、`LoadingContent`、`LoadingContentTemplate`、`ScannedContent`、`ScannedContentTemplate`、`Value` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
+| 交互与状态 | `IsBordered`、`Status`、`RefreshRequested` | 表达边框模式、状态遮罩和过期状态下的刷新请求。 |
+| 视觉与布局 | `Color`、`Size` 及继承的 root 表面属性 | `Size` 统一拥有二维码方形边长；颜色、背景、边框、圆角和 Padding 形成 root 视觉。 |
+| 其他稳定入口 | `EccLevel` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+
+`RefreshRequested` 是 QRCode 的控件专属 public 事件，由默认过期状态中的 `PART_RefreshButton` 触发。自定义
 
 ## State Flow
 
@@ -10844,10 +16797,11 @@ Public API / inherited command / item source / user input
 
 状态维护规则：
 
-- Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
-- loading/async、input/value、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
-- 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
-- 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
+- `Active` 隐藏 cover；`Loading`、`Expired`、`Scanned` 显示同一个 cover 节点，并在节点内部切换对应状态内容。
+- `Value`、`Color`、`EccLevel` 或 `Size` 变化时重新生成透明背景 bitmap，不替换 Semantic target；`Background` 只更新 root 表面。
+- `Icon` 只控制二维码中心图标内容，不增加 Semantic Part，也不改变 root/cover 数量。
+- 模板重套用时重新接入 `PART_RefreshButton`，先移除旧按钮订阅，再回放当前 public API 状态。
+- `Size` 是二维码外框与绘制源的统一边长；Semantic Style 不建立第二套 Width/Height 尺寸 owner。
 
 ## Theme and Token Boundaries
 
@@ -10857,7 +16811,8 @@ QRCode 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的�
 | --- | --- |
 | `QRCodeTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 
-QRCode 使用 `QRCodeToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 loading/async、input/value、visual option 运行时状态。
+QRCode 使用 `QRCodeToken` 作为控件 Token scope。Token 只表达文字色和 cover 背景色等视觉语义，不承载 `Status`、`Value` 或 bitmap
+运行时状态。
 
 主题维护规则：
 
@@ -10880,7 +16835,7 @@ QRCode Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 - 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
-- 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
+- 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级；Semantic 示例必须保持与对应公开上游示例一致。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
 - 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
@@ -10891,6 +16846,8 @@ QRCode Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 维护 QRCode 时不得破坏：
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
+- `root`、`cover` 的名称、selector、ContractType、cardinality 和静态 marker 身份。
+- `Size` 对外框与 bitmap 的统一方形尺寸 ownership。
 - Template part 名称、ControlTheme key、伪类和资源 key。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
@@ -10904,13 +16861,115 @@ Source: ./controls/segmented/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Segmented` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Segmented 主控件公开 `root`、`item`、`icon` 与 `label` 四个职责区域，与上游稳定 Semantic DOM 对齐。上游基线为
+6.6.0 稳定发布的 `SegmentedSemanticType`（`classNames` / `styles` 均为 `{ root?, icon?, label?, item? }`）：
+
+- `root` 消费于 `.ant-segmented` 根节点，`icon` 消费于 `.ant-segmented-item-icon`，由上游 `Segmented` 组件下发；
+- `item` 消费于 `.ant-segmented-item` 选项容器，`label` 消费于 `.ant-segmented-item-label`，由 rc-segmented 选项
+  渲染路径消费；
+- 上游选中滑块（MotionThumb）没有 Semantic key，AtomUI 同样不公开。
+
+AtomUI 四个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
+
+`SegmentedItem` 不持有独立 Semantic descriptor：
+
+- 上游 `Segmented` 只提供一个 owner 的 Semantic DOM；选项没有独立公开的 Semantic DOM Props。
+- `SegmentedItem` 是 Segmented 的运行时容器，其职责通过 `Segmented` 的 `item` Part 对外公开；item 模板内的图标与
+  文本节点通过 `icon`、`label` Part 以多跳 route 公开。
+- `AbstractSegmented` 与 `AbstractSegmentedItem` 是跨平台共享基类，不是对应用公开的独立 owner，不声明 descriptor。
+
+因此本控件的 Semantic Part 只由 `Segmented` owner 公开。
+
+### 1.1 `Segmented`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Segmented` |
+| Part | `root` |
+| Selector | Segmented 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Segmented` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Segmented owner（表面投影到 `Frame`） |
+| 职责 | Segmented root 是选项数据、选择状态、方向、形状与轨道表面样式的统一 owner。轨道背景由 owner `Render` 直接绘制，`Frame` 承载圆角、内边距与内容裁剪。 |
+| 相关 API | `ItemsSource`、`ItemTemplate`、`SelectedIndex`、`SelectedItem`、`SelectionChanged`、`SizeType`、`Orientation`、`Shape`、`IsExpanding`、`IsMotionEnabled` |
+| 相关 Token | `TrackBg`、`TrackPadding`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Segmented` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `> .semantic-item` |
+| Style Type | `SegmentedItemStyle` |
+| ContractType | `SegmentedItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `SegmentedItem` 容器 |
+| 职责 | 统一表示单个选项容器的背景、前景、圆角、内边距、最小高度、光标与选择 / 悬浮 / 按压 / 禁用视觉；对应上游 `.ant-segmented-item`。 |
+| 相关 API | `SegmentedItem.Icon`、`SegmentedItem.Content`、`SegmentedItem.IsSelected`、`SizeType`、`Shape`、`IsMotionEnabled` |
+| 相关 Token | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、`ItemHoverBg`、`ItemActiveBg`、`ItemSelectedBg`、`ItemMinHeightLG`、`ItemMinHeight`、`ItemMinHeightSM`、`SegmentedItemPadding`、`SegmentedItemPaddingSM` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Segmented` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-icon` |
+| Style Type | `SegmentedIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `SegmentedItem` 模板中的 `IconPresenter#IconPresenter` |
+| 职责 | 统一表示每个选项的图标区域：图标画刷状态色、图标尺寸与可见性；对应上游 `.ant-segmented-item-icon`。 |
+| 相关 API | `SegmentedItem.Icon`、`SizeType` |
+| 相关 Token | `ItemColor`、`ItemHoverColor`、`ItemSelectedColor`、SharedToken（`IconSizeLG` / `IconSize` / `IconSizeSM`、`ColorTextDisabled`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `label`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Segmented` |
+| Part | `label` |
+| Selector | `.semantic-label` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-label` |
+| Style Type | `SegmentedLabelStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `SegmentedItem` 模板中的 `ContentPresenter#Content` |
+| 职责 | 统一表示每个选项的文本区域：文本呈现、居中对齐、省略与图文间距；对应上游 `.ant-segmented-item-label`。 |
+| 相关 API | `SegmentedItem.Content`、`SegmentedItem.ContentTemplate` |
+| 相关 Token | `SegmentedItemContentMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不声明 `.semantic-root` marker。`item` 的 marker `.semantic-item` 在 `SegmentedItem` 创建路径
+一次性添加，`PrepareContainerForItemOverride` 幂等补齐（覆盖回收容器与用户直接提供容器的路径）。`icon`、`label`
+的 marker 声明在 `SegmentedItemTheme.axaml` 模板内的 `IconPresenter#IconPresenter` 与 `ContentPresenter#Content`
+节点上，随容器模板实例化而存在；由于它们只在运行时随 item 容器创建，descriptor 声明为 `RuntimeCreated`，route 以
+`> .semantic-item` 为作用域跳点，再经 `/template/` 进入 item 模板。
+
+`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过 `x:SetterTargetType` 提供 AXAML 编译期类型
+上下文；它不参与 `.semantic-*` 的身份匹配。
 
 ## Abstract AXAML Structure
 
@@ -11103,6 +17162,10 @@ SegmentedToken 不承载以下状态：
 - Round 必须覆盖所有 SizeType 圆角，但不能改变其他尺寸、颜色、状态或模板契约。
 - 根 render 绘制和 item 主题状态不能互相替代；轨道/滑块在根，item 状态在 item。
 - `Custom` 尺寸分支默认基线保持 Middle，除非获得 API/主题契约变更授权。
+- Semantic Part 边界：`Segmented` 只发布 `root` / `item` / `icon` / `label` 四个 Part；`item` 的 marker 在容器创建
+  与 prepare 路径一次性幂等建立，`icon` / `label` 的 marker 固定在 `SegmentedItemTheme.axaml` 模板节点上；
+  marker 不随选择、图文形态或集合重置增删，默认主题不消费 `.semantic-*` selector；选中滑块与
+  `SegmentedStackPanel` 不属于任何 Part。
 
 Source: ./controls/statistic/semantic-cn.md
 
@@ -11112,21 +17175,80 @@ Source: ./controls/statistic/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Statistic` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Statistic 公开 `root`、`header`、`title`、`content`、`value`、`prefix` 和 `suffix`。该契约只属于 `Statistic`；
+`AbstractStatistic`、`TimerStatistic` 和 `StatisticCountUp` 不继承或发布这组 descriptor。
+
+| Part | Selector | Style Type | ContractType | Cardinality | AtomUI 节点 | 稳定性 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | Statistic 本身 | 不适用 | `Statistic` | `Single` | owner | stable since 6.2.0 |
+| `header` | `.semantic-header` | `StatisticHeaderStyle` | `Border` | `Single` | `Border#HeaderLayout` | stable since 6.2.0 |
+| `title` | `.semantic-title` | `StatisticTitleStyle` | `ContentPresenter` | `Single` | `ContentPresenter#HeaderPresenter` | stable since 6.2.0 |
+| `content` | `.semantic-content` | `StatisticContentStyle` | `StackPanel` | `Single` | `StackPanel#ContentLayout` | stable since 6.2.0 |
+| `value` | `.semantic-value` | `StatisticValueStyle` | `ContentPresenter` | `Single` | 数值 `ContentPresenter` | stable since 6.2.0 |
+| `prefix` | `.semantic-prefix` | `StatisticPrefixStyle` | `ContentPresenter` | `Single` | 前缀 `ContentPresenter` | stable since 6.2.0 |
+| `suffix` | `.semantic-suffix` | `StatisticSuffixStyle` | `ContentPresenter` | `Single` | 后缀 `ContentPresenter` | stable since 6.2.0 |
+
+六个 selector Part 的 `SelectorRoute` 均为 `/template/ .semantic-<name>`，`Customization` 为 `Selector`，
+`CrossVisualRoot=false`，`RuntimeCreated=false`。root 的 `Customization` 为 `Root`，不生成 `.semantic-root` 或 Style Type。
 
 ## Abstract AXAML Structure
 
-未定位到可生成抽象 AXAML 结构的 ControlTheme 模板。生成器不会根据 semantic parts 发明 AXAML 节点；请以 Template Parts、主题文件和源码索引为准。
+来源：`src/AtomUI.Desktop.Controls/Statistic/Themes/StatisticTheme.axaml`
+
+```xml
+<DashedBorder Name="Frame">
+    <StackPanel Name="RootLayout">
+        <Border Name="HeaderLayout">
+            <ContentPresenter Name="HeaderPresenter" />
+        </Border>
+        <Skeleton>
+            <StackPanel Name="ContentLayout">
+                <ContentPresenter Name="ValuePrefixAddOn" />
+                <ContentPresenter Name="ContentPresenter" />
+                <ContentPresenter Name="ValueSuffixAddOn" />
+            </StackPanel>
+        </Skeleton>
+    </StackPanel>
+</DashedBorder>
+```
 
 ## Composition Model
 
-该控件主要由 public 控件和 ControlTheme 模板直接表达，没有额外运行时组合层。
+该章节由控件 `Themes/` 文件夹中的真实主题文件生成，用于说明 public 控件与内部协作对象之间的运行时结构。内部节点只用于理解和维护，不应指导用户代码直接依赖。
+
+### 控件角色图
+
+```text
+Statistic
+  -> StatisticCountUp (control theme, StatisticCountUpTheme.axaml)
+     -> TextBlock (template-stable)
+  -> Statistic (control theme, StatisticTheme.axaml)
+     -> DashedBorder#Frame (template-stable)
+        -> StackPanel#RootLayout (template-stable)
+           -> Border#HeaderLayout (template-stable)
+              -> ContentPresenter#HeaderPresenter (internal-observable)
+           -> Skeleton (template-stable)
+              -> StackPanel#ContentLayout (template-stable)
+                 -> ContentPresenter#ValuePrefixAddOn (internal-observable)
+                 -> ContentPresenter#ContentPresenter (internal-observable)
+                 -> ContentPresenter#ValueSuffixAddOn (internal-observable)
+```
+
+### 协作节点
+
+| 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Statistic` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `StatisticCountUp` | control theme | `StatisticCountUpTheme.axaml` | 用户代码 / 控件宿主 | `FormattedValue` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Statistic` | control theme | `StatisticTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Frame` | template node (DashedBorder) | `StatisticTheme.axaml` | Statistic | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `RootLayout` | template node (StackPanel) | `StatisticTheme.axaml` | Statistic | `Content`, `ContentTemplate`, `Header`, `HeaderTemplate`, `IsLoading`, `ValuePrefixAddOn` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `HeaderLayout` | template node (Border) | `StatisticTheme.axaml` | Statistic | `Header`, `HeaderTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `HeaderPresenter` | template node (ContentPresenter) | `StatisticTheme.axaml` | Statistic | `Header`, `HeaderTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ContentLayout` | template node (StackPanel) | `StatisticTheme.axaml` | Statistic | `Content`, `ContentTemplate`, `ValuePrefixAddOn`, `ValuePrefixAddOnTemplate`, `ValueSuffixAddOn`, `ValueSuffixAddOnTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ValuePrefixAddOn` | template node (ContentPresenter) | `StatisticTheme.axaml` | Statistic | `ValuePrefixAddOn`, `ValuePrefixAddOnTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ContentPresenter` | template node (ContentPresenter) | `StatisticTheme.axaml` | Statistic | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ValueSuffixAddOn` | template node (ContentPresenter) | `StatisticTheme.axaml` | Statistic | `ValueSuffixAddOn`, `ValueSuffixAddOnTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 
 ## Template Parts
 
@@ -11136,7 +17258,7 @@ Source: ./controls/statistic/semantic-cn.md
 | 选择与集合 | `GroupSeparator` | 维护选择、展开、过滤、分页、分组或集合状态。 |
 | 交互与状态 | `IsLoading` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
 | 动效与异步 | `RefreshDuration` | 约束动效开关、异步加载、播放速度、超时和任务边界。 |
-| 其他稳定入口 | `DecimalSeparator`、`Format`、`Precision` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+| 视觉与格式 | `DecimalSeparator`、`Format`、`GroupSeparator`、`Precision`、`StrokeDashArray` | 维护数值格式、root 虚线边框和用户 XAML 依赖。 |
 
 ## Pseudo Classes
 
@@ -11168,9 +17290,9 @@ Statistic 的视觉模型由控件模板、ControlTheme、SharedToken 和必要�
 
 | 主题文件 | 职责 |
 | --- | --- |
-| `AbstractStatisticTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
+| `AbstractStatisticTheme.axaml` | 提供 Statistic 家族共享的字体、颜色、图标和内容 selector 基线，不拥有 `Statistic` 的叶子模板。 |
 | `StatisticCountUpTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
-| `StatisticTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
+| `StatisticTheme.axaml` | 提供 `Statistic` 叶子模板、root 表面投影、静态 Semantic marker、间距和 loading 状态视觉。 |
 | `TimerStatisticTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
 
 Statistic 使用 `StatisticToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 loading/async、collection/filter、input/value、motion、visual option 运行时状态。
@@ -11178,6 +17300,7 @@ Statistic 使用 `StatisticToken` 作为控件 Token scope。Token 只表达组�
 主题维护规则：
 
 - 不删除或重命名已经稳定的 ControlTheme key、template part、伪类和资源 key。
+- 不删除或重命名 `root`、`header`、`title`、`content`、`value`、`prefix`、`suffix`，不改变 selector class、ContractType 或 cardinality。
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
@@ -11196,7 +17319,7 @@ Statistic Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 
 - 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
-- 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
+- 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级；Semantic 示例必须保持与对应公开上游 6.6.0 示例一致。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
 - 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
@@ -11207,6 +17330,8 @@ Statistic Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 维护 Statistic 时不得破坏：
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
+- `root`、`header`、`title`、`content`、`value`、`prefix`、`suffix` 的名称、selector、ContractType、cardinality 和静态 marker 身份。
+- `Statistic` 叶子模板与 `TimerStatistic` 独立模板的边界；不得把 Statistic 契约无意发布到 TimerStatistic 或 StatisticCountUp。
 - Template part 名称、ControlTheme key、伪类和资源 key。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
@@ -11220,13 +17345,167 @@ Source: ./controls/tag/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Tag` | 展示标签根区域，承载颜色、Variant、内容和关闭入口。 | `TagColor`、`Variant`、`Text`、`IsClosable` | TagToken | stable |
-| `checkable` | `CheckableTag` | 二态选择标签根区域，承载输入、内容、Icon 和选择视觉。 | `IsChecked`、`Content`、`Icon`、`IsEnabled` | TagToken + SharedToken | stable |
-| `group` | `CheckableTagGroup` | 选择组根区域，拥有 Options、模式、公开值和 Form 语义。 | `Options`、`IsMultiple`、`CheckedItem(s)` | SharedToken spacing | stable |
-| `item` | `CheckableTag container` | Group 内单个可交互选项，只消费 owner 投影的状态。 | `IsChecked`、`ContentTemplate` | TagToken + SharedToken | stable |
-| `content` | `ContentPresenter` | 承载 Tag 文本或 CheckableTag 的任意内容。 | `Text` 或 `Content` | typography/spacing | stable |
+Tag 家族由两个独立 owner 公开 Semantic Part，与上游稳定 Semantic DOM 对齐：
+
+- `Tag` 公开 `root`、`icon`、`content` 与 `close` 四个职责区域，对齐上游 `TagSemanticType`
+  （`classNames` / `styles` 均为 `{ root?, icon?, content?, close? }`）。上游 `root` 消费于 `.ant-tag` 根节点，
+  `icon` 消费于图标节点，`content` 消费于文本 span（仅当图标与文本并存时上游才为文本包 span），`close` 消费于
+  `.ant-tag-close-icon`。
+- `CheckableTagGroup` 公开 `root` 与 `item` 两个职责区域，对齐上游 `CheckableTagGroupSemanticType`
+  （`classNames` / `styles` 均为 `{ root?, item? }`）。上游 `root` 消费于 `.ant-tag-checkable-group` 根节点，
+  `item` 消费于每个 `.ant-tag-checkable-group-item` 选项容器。
+- 上游 `CheckableTag` 没有独立 Semantic DOM Props（不消费 `useMergeSemantic`），AtomUI 同样不为其声明
+  descriptor；其职责通过 `CheckableTagGroup` 的 `item` Part 对外公开。
+
+AtomUI 六个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
+
+以下类型不持有独立 Semantic descriptor：
+
+- `CheckableTag` 是 ToggleButton 派生的公开选项容器，上游无对应 Semantic DOM Props，容器职责由
+  `CheckableTagGroup` 的 `item` Part 表达（与 `SegmentedItem`、`ListBoxItem`、`CollapseItem` 同一决策）。
+- `AbstractTag`、`AbstractCheckableTag`、`AbstractCheckableTagGroup` 是跨平台共享基类，不是对应用公开的独立
+  owner。
+- `CheckableTagItemsControl` 是 internal 的 items host，承载 Group 的 SelectionModel 与容器生成；它不作为
+  公开 owner，只作为 `item` route 的中间作用域跳点。
+
+### 1.1 `Tag`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tag` |
+| Part | `root` |
+| Selector | Tag 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Tag` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Tag owner（表面投影到 `PixelAlignedBorder#Frame`） |
+| 职责 | Tag root 是颜色类别、Variant、内容与关闭入口的统一 owner；根表面（背景、边框、圆角、字体、内边距）投影到 `Frame`。 |
+| 相关 API | `TagColor`、`Variant`、`Text`、`Icon`、`CloseIcon`、`IsClosable`、`Closed` |
+| 相关 Token | `DefaultBg`、`DefaultColor`、`TagFontSize`、`TagPadding`、`SolidTextColor`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tag` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `TagIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Tag 模板中的 `IconPresenter#IconPresenter` |
+| 职责 | 统一表示 Tag 的前置图标区域：图标尺寸、画刷（随 root 前景）与可见性；对应上游 Tag 的 `icon` 语义键。 |
+| 相关 API | `Icon` |
+| 相关 Token | `TagIconSize` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tag` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `TagContentStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Tag 模板中的 `TextBlock#TagTextLabel` |
+| 职责 | 统一表示 Tag 的文本区域：文本呈现、行高、图文/文关内联间距；对应上游 Tag 的 `content` 语义键。 |
+| 相关 API | `Text` |
+| 相关 Token | `TagLineHeight`、`TagTextPaddingInline` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `close`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tag` |
+| Part | `close` |
+| Selector | `.semantic-close` |
+| SelectorRoute | `/template/ .semantic-close` |
+| Style Type | `TagCloseStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Tag 模板中的 `IconButton#PART_CloseButton` |
+| 职责 | 统一表示 Tag 的关闭入口：关闭图标尺寸、画刷（随 root 前景）与可见性；承载 `Closed` 事件触发；对应上游 `.ant-tag-close-icon`。 |
+| 相关 API | `CloseIcon`、`IsClosable`、`Closed` |
+| 相关 Token | `TagCloseIconSize`、SharedToken（`IconSizeXS`） |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `CheckableTagGroup`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CheckableTagGroup` |
+| Part | `root` |
+| Selector | CheckableTagGroup 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `CheckableTagGroup` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | CheckableTagGroup owner（模板直接承载 `PART_CheckableTagItems`） |
+| 职责 | CheckableTagGroup root 是 Options 数据、单选/多选模式、公开选择值与 Form 语义的统一 owner。 |
+| 相关 API | `Options`、`ItemTemplate`、`IsMultiple`、`CheckedItem`、`CheckedItems`、`DefaultCheckedItem`、`DefaultCheckedItems`、`ItemSpacing`、`LineSpacing`、`Orientation`、`IsMotionEnabled`、`CheckedChanged` |
+| 相关 Token | SharedToken（`SpacingXS`、`EnableMotion`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CheckableTagGroup` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `/template/ .semantic-scope-items > .semantic-item` |
+| Style Type | `CheckableTagGroupItemStyle` |
+| ContractType | `CheckableTag` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `CheckableTag` 容器 |
+| 职责 | 统一表示 Group 内单个可交互选项：背景/前景选择视觉、内边距、圆角、光标与 checked/hover/pressed/disabled 状态；对应上游 `.ant-tag-checkable-group-item`。 |
+| 相关 API | `CheckableTag.Content`、`CheckableTag.Icon`、`CheckableTag.IsChecked`、`IsMultiple` |
+| 相关 Token | `TagFontSize`、`TagLineHeight`、`TagPadding`、`TagIconSize`、SharedToken（`ColorPrimary*`、`ColorTextLightSolid`、`ColorFillSecondary`、`ColorTextDisabled`） |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不声明 `.semantic-root` marker。Tag 的 `icon`、`content`、`close` marker 声明在
+`TagTheme.axaml` 模板内的 `IconPresenter#IconPresenter`、`TextBlock#TagTextLabel` 与
+`IconButton#PART_CloseButton` 节点上，静态存在，随 owner 模板实例化；descriptor 声明 `RuntimeCreated=false`，
+由生成器按 owner 主题资产静态校验。
+
+`item` 是 `RuntimeCreated` Part：`.semantic-item` marker 在 `CheckableTag` 容器创建路径一次性添加，prepare
+幂等补齐；`.semantic-scope-items` 是 route 中间跳点（不是 Part），静态声明在 `CheckableTagGroupTheme.axaml`
+模板的 `CheckableTagItemsControl#PART_CheckableTagItems` 节点上。Group 不是 ItemsControl，选项容器
+`CheckableTag` 的逻辑父级是 internal 的 `CheckableTagItemsControl`，因此 route 必须先经 `/template/` 进入
+Group 模板命中 scope-items 跳点，再经 `>` 一步到达容器——与 `Descriptions` 的
+`/template/ .semantic-scope-items > .semantic-scope-item` 链同一模式。
+
+`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过 `x:SetterTargetType` 提供 AXAML 编译期
+类型上下文；它不参与 `.semantic-*` 的身份匹配。
 
 ## Abstract AXAML Structure
 
@@ -11389,6 +17668,10 @@ Tag Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆�
 - CheckableTag 不继承 TagColor、Variant、IsClosable、CloseIcon 或 Closed；其二态选择由 ToggleButton.IsChecked 唯一表达。
 - CheckableTagGroup 默认可取消单选；CheckedItem(s) 始终表达 option Value，internal wrapper 和 SelectionModel 不得泄漏。
 - PART_CheckableTagItems 重应用、Options/CheckedItems 替换和 detach 必须释放旧订阅，容器回收必须清除旧状态。
+- Semantic Part 边界：`Tag` 只发布 `root` / `icon` / `content` / `close`，`CheckableTagGroup` 只发布
+  `root` / `item`；Tag 三节点 marker 静态常驻、折叠节点 marker 不随数据状态增删；`item` 的 marker 在容器创建与
+  prepare 路径一次性幂等建立、不随 checked 切换、Options 集合变化或单选/多选模式转换增删，默认主题不消费
+  `.semantic-*` selector；颜色算法与 `FocusVisual` 不属于 Part。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
@@ -11401,13 +17684,273 @@ Source: ./controls/timeline/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Timeline` | 承载 Items、Orientation、Mode、IsReverse、Pending 和主题入口。 | `Orientation`、`Mode`、`IsReverse`、`Pending` | 见视觉与主题模型 | stable |
-| `item` | `TimelineItem` | 承载单项 Label、Content、Indicator，并接收视觉顺序派生状态。 | `Label`、`Content`、`IndicatorIcon`、`IndicatorColor` | 见视觉与主题模型 | stable |
-| `axis` | `TimelineIndicator` | 绘制垂直或水平轴线、节点和自定义图标。 | `Orientation`、`IndicatorIcon`、`IndicatorColor` | `IndicatorTailColor`、`IndicatorTailWidth`、`IndicatorSize` | internal-observable |
-| `label` | `TextBlock#Label` | 承载可选时间标签，并参与双侧布局。 | `Label`、`Mode`、`Orientation` | 间距类 Token / SharedToken | template-stable |
-| `content` | `ContentPresenter#ContentPresenter` | 承载事件内容并在水平等宽槽位内换行。 | `Content`、`ContentTemplate`、`Mode`、`Orientation` | 间距类 Token / SharedToken | template-stable |
+Timeline 以单一 owner `Timeline` 公开全部九个 Semantic Part，与上游稳定 Semantic DOM 一一对齐。上游
+`TimelineSemanticType` 是 `StepsSemanticType` 去掉 `itemSubtitle` 后的九个语义键（`classNames` / `styles` 均为
+`{ root?, item?, itemWrapper?, itemIcon?, itemSection?, itemHeader?, itemTitle?, itemContent?, itemRail? }`），
+Timeline 委托 `Steps`（`type="dot"`）渲染：`root` 消费于 `<ol>` 根节点，`item` 消费于每个 `<li>` 容器，
+`itemWrapper` 消费于容器内裹节点，`itemIcon` 消费于图标节点，`itemSection` 消费于包含 header 与 content 的
+区域容器，`itemHeader` 消费于包含 title 与 rail 的头部容器，`itemTitle` 消费于标题节点，`itemContent` 消费于
+内容节点，`itemRail` 消费于节点连接线元素。上游 DOM 嵌套为
+`ol > li > wrapper > [icon, section > [header > [title, rail], content]]`（rc-steps `Step.tsx`，
+npm `@rc-component/steps@1.2.2`，上游 6.4.5 依赖 `~1.2.2`）。
+
+AtomUI 原 item 模板是扁平结构，且连接线由 `TimelineIndicator.Render` 直接绘制。为支持全部九个 Part，本次
+改造把控件自身的视觉结构补齐为真实节点：
+
+```text
+Timeline (root)
+  └─ TimelineItem (item, .semantic-item)
+       └─ TimelineItemPanel#RootLayout (itemWrapper, .semantic-item-wrapper)
+            └─ TimelineSectionPanel#Section (itemSection, .semantic-item-section)
+                 ├─ StackPanel#Header (itemHeader, .semantic-item-header)
+                 │    └─ TextBlock#Label (itemTitle, .semantic-item-title)
+                 ├─ TimelineIndicator#Indicator (.semantic-indicator 跳点)
+                 │    ├─ Border#PART_Rail (itemRail, .semantic-item-rail)
+                 │    ├─ Border#PART_Dot (itemIcon, .semantic-item-icon，无 IndicatorIcon 时可见)
+                 │    └─ Border#PART_IconHost (itemIcon, .semantic-item-icon，有 IndicatorIcon 时可见)
+                 │         └─ IconPresenter#PART_IconPresenter（图标内容，非 Part）
+                 └─ ContentPresenter#ContentPresenter (itemContent, .semantic-item-content)
+```
+
+与上游 DOM 的两处结构差异（Part 名称、数量与样式语义不变）：
+
+- 上游 `rail` 元素 DOM 上位于 `header` 内（CSS absolute 定位到轴线）；AtomUI 的 rail 是
+  `TimelineIndicator` 模板内的真实 `Border` 元素，与圆点/图标同属轴线列。Avalonia Panel 只能排列自己的直接
+  子级，把 rail 放在 header 内无法由面板定位到轴线，因此 rail 归属轴线列是布局事实的忠实表达。
+- 上游 `icon` 是 `wrapper` 的直接子级；AtomUI 的图标宿主位于 `TimelineIndicator`（section 内）。该层级差异
+  不影响 Part 的寻址与样式语义。
+
+`itemIcon` 的双元素承载与上游对齐：上游 icon 元素在无自定义 icon 时本身就是圆点（dot 尺寸 + 边框即圆环），
+有自定义 icon 时是图标盒。AtomUI 对应地把 `.semantic-item-icon` 同时标记在 `Border#PART_Dot`（内置圆点，
+无 `IndicatorIcon` 时可见）与 `Border#PART_IconHost`（图标宿主，有 `IndicatorIcon` 时可见）两个互斥可见的
+Border 上，`itemIcon` 样式（如 `BorderBrush`）会作用到当前可见的那个 —— 与上游
+`styles.itemIcon.borderColor` 同时能改圆点环色与图标盒边框的行为一致。
+
+改造的视觉保真保证：圆点与连接线的绘制从 `TimelineIndicator.Render` 迁移为真实模板元素（`PART_Dot` 与
+`PART_Rail`），rail 覆盖整条轴线、由不透明圆点/图标宿主掩膜出与原先完全一致的线段缺口；几何公式与
+IsFirst/IsLast 裁剪边界逐项保留，默认主题下渲染结果像素级不变（见 2.5 节与
+[Timeline 桌面版实现原理](implementation.md)）。
+
+上游 Semantic DOM 文档还有第二个预览区块 "Timeline Items"（`items[].classNames` 逐项注入，
+`root` / `wrapper` / `icon` / `section` / `header` / `title` / `content` / `rail` 八个键）。它是每项数据上的
+classNames 注入机制，不是独立 owner；AtomUI Semantic Part 系统不提供逐项 classNames 注入 API，且 item 级
+Part 的 cardinality 已经是 `Multiple`（天然覆盖每一项）。Gallery Semantic Parts 页签用两个
+`SemanticPartPreview` 复刻上游的两个预览区块：`Timeline`（九卡，对应组件级 Part）与 `Timeline Items`
+（两 item 预览 + 九卡短描述，对应上游逐项视图的 item 级 Part 呈现）；hover 高亮均为 owner 作用域
+（覆盖预览内全部 item），逐项注入式高亮不适用。
+
+AtomUI 九个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`。
+
+以下类型不持有独立 Semantic descriptor：
+
+- `TimelineItem` 是公开 item 容器，上游 `TimelineSemanticType` 声明在 Timeline 组件上（`Timeline.Item` 只是
+  兼容入口，无独立 Semantic DOM Props），容器职责由 Timeline 的 `item` 等 Part 表达（与 `SegmentedItem`、
+  `ListBoxItem`、`CollapseItem` 同一决策）。
+- `AbstractTimeline`、`AbstractTimelineItem` 是跨平台共享基类，不是对应用公开的独立 owner。
+- `TimelineIndicator`、`TimelineItemPanel`、`TimelineSectionPanel`、`TimelineStackPanel` 是 internal 协作
+  类型；其中 `TimelineIndicator` 模板节点只作为 `itemIcon` / `itemRail` route 的中间跳点
+  （`.semantic-indicator`），不是 Part。
+
+### 1.1 `Timeline`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `root` |
+| Selector | Timeline 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Timeline` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | Timeline owner（表面投影到 `Border#Frame`） |
+| 职责 | Timeline root 是 Items、Orientation、Mode、IsReverse、Pending 与可见项视觉顺序的统一 owner；根表面（背景、边框、圆角、内边距）投影到 `Frame`。 |
+| 相关 API | `Items`、`ItemsSource`、`Orientation`、`Mode`、`IsReverse`、`Pending`、`PendingIcon` |
+| 相关 Token | SharedToken（`ColorBorder`、`ColorBgContainer`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `> .semantic-item` |
+| Style Type | `TimelineItemStyle` |
+| ContractType | `TimelineItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 `TimelineItem` 容器 |
+| 职责 | 统一表示时间轴单个节点容器：单项 Label、Content、Indicator 的承载入口与视觉顺序派生状态的接收方；对应上游 `<li>`。 |
+| 相关 API | `Label`、`Content`、`ContentTemplate`、`IndicatorIcon`、`IndicatorColor` |
+| 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`IndicatorStartModeMargin`、`IndicatorEndModeMargin`、`IndicatorMiddleModeMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemWrapper`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `itemWrapper` |
+| Selector | `.semantic-item-wrapper` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-item-wrapper` |
+| Style Type | `TimelineItemWrapperStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | TimelineItem 模板中的 `TimelineItemPanel#RootLayout` |
+| 职责 | 统一表示节点内容包装容器：把 section 铺满自身并承载 IndicatorSpacing 等包装级布局状态；对应上游 item wrapper 节点。 |
+| 相关 API | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） |
+| 相关 Token | SharedToken（`UniformlyPaddingXS`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemIcon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `itemIcon` |
+| Selector | `.semantic-item-icon` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-indicator /template/ .semantic-item-icon` |
+| Style Type | `TimelineItemIconStyle` |
+| ContractType | `Border` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | TimelineIndicator 模板中的 `Border#PART_Dot` 与 `Border#PART_IconHost`（互斥可见） |
+| 职责 | 统一表示节点图标区域：无 `IndicatorIcon` 时是内置圆点（`BorderBrush` 即圆环色），有 `IndicatorIcon` 时是图标宿主；对应上游 item icon 节点（上游同一元素两种形态）。 |
+| 相关 API | `IndicatorIcon`、`IndicatorColor` |
+| 相关 Token | `IndicatorSize`、`IndicatorDotSize`、`IndicatorDotBorderWidth`、SharedToken（`ColorPrimary`、`ColorBgContainer`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemSection`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `itemSection` |
+| Selector | `.semantic-item-section` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-item-section` |
+| Style Type | `TimelineItemSectionStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | TimelineItem 模板中的 `TimelineSectionPanel#Section` |
+| 职责 | 统一表示节点区域容器：承载 header、Indicator 与 content 的方向化 Measure/Arrange（Alternate 双侧、同侧紧凑与水平 Label 堆叠模型）；对应上游 item section 节点。 |
+| 相关 API | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） |
+| 相关 Token | SharedToken（`UniformlyPaddingXS`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemHeader`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `itemHeader` |
+| Selector | `.semantic-item-header` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-item-header` |
+| Style Type | `TimelineItemHeaderStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | TimelineItem 模板中的 `StackPanel#Header` |
+| 职责 | 统一表示节点头部容器：承载 title 文本与对齐方式；对应上游 item header 节点。 |
+| 相关 API | `Label`、`Mode`、`Orientation` |
+| 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemTitle`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `itemTitle` |
+| Selector | `.semantic-item-title` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-item-title` |
+| Style Type | `TimelineItemTitleStyle` |
+| ContractType | `TextBlock` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | header 内的 `TextBlock#Label` |
+| 职责 | 统一表示节点标题/时间标签区域：文本呈现、换行与下内边距；对应上游 item title 节点。 |
+| 相关 API | `Label`、`Mode`、`Orientation` |
+| 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `itemContent` |
+| Selector | `.semantic-item-content` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-item-content` |
+| Style Type | `TimelineItemContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | section 内的 `ContentPresenter#ContentPresenter` |
+| 职责 | 统一表示节点详细内容区域：`Content` / `ContentTemplate` 的呈现、受限宽度换行与下内边距；对应上游 item content 节点。 |
+| 相关 API | `Content`、`ContentTemplate`、`Mode`、`Orientation` |
+| 相关 Token | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`LastItemContentMinHeight` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemRail`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Timeline` |
+| Part | `itemRail` |
+| Selector | `.semantic-item-rail` |
+| SelectorRoute | `> .semantic-item /template/ .semantic-indicator /template/ .semantic-item-rail` |
+| Style Type | `TimelineItemRailStyle` |
+| ContractType | `Border` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | TimelineIndicator 模板中的 `Border#PART_Rail` |
+| 职责 | 统一表示节点连接线（轴线轨道）：承载 IsFirst/IsLast 裁剪后的轨道条，厚度与颜色来自 `IndicatorTailWidth` / `IndicatorTailColor`；对应上游 item rail 节点。 |
+| 相关 API | `IndicatorTailColor`、`IndicatorTailWidth`、`IndicatorColor` |
+| 相关 Token | `IndicatorTailWidth`、`IndicatorTailColor`、`IndicatorDotSize` |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不声明 `.semantic-root` marker。`itemWrapper`、`itemSection`、`itemHeader`、
+`itemTitle`、`itemContent` 的 marker 静态声明在 `TimelineItemTheme.axaml` 模板内；`itemIcon`、`itemRail` 的
+marker 声明在 `TimelineIndicatorTheme.axaml` 模板内。这八个 Part 都位于运行时生成的 `TimelineItem` 容器
+内部，descriptor 统一声明 `RuntimeCreated=true`，生成器不按 owner 主题资产做静态校验。
+
+`item` 是 `RuntimeCreated` Part：`.semantic-item` marker 在容器创建与 prepare 路径幂等添加，Pending item
+创建路径同样幂等补齐。Timeline 是 ItemsControl，`TimelineItem` 容器的逻辑父级就是 Timeline 本身（与
+`ListView` / `ListBox` 的 `> .semantic-item` 同一模式），因此 route 不需要先经 `/template/` 进入内部 items
+host，`>` 一步即可到达容器。
+
+`itemIcon` 与 `itemRail` 的 route 需要两次 `/template/` 跳点：先进入 TimelineItem 模板命中
+`TimelineIndicator#Indicator` 节点上的 `.semantic-indicator` 跳点（不是 Part），再进入 TimelineIndicator
+模板命中对应 marker。
+
+`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过 `x:SetterTargetType` 提供 AXAML 编译期
+类型上下文；它不参与 `.semantic-*` 的身份匹配。`itemWrapper` / `itemSection` 的真实节点
+`TimelineItemPanel` / `TimelineSectionPanel` 是 internal 类型，因此 ContractType 使用其最低公开基类
+`Panel`（与 Calendar 对 internal cell 使用 `TemplatedControl` 同一决策）。
 
 ## Abstract AXAML Structure
 
@@ -11430,12 +17973,18 @@ Source: ./controls/timeline/semantic-cn.md
 ```text
 Timeline
   -> TimelineIndicator (control theme, TimelineIndicatorTheme.axaml)
-     -> IconPresenter#PART_IconPresenter (template-stable)
+     -> Panel (template-stable)
+        -> Border#PART_Rail (template-stable)
+        -> Border#PART_Dot (template-stable)
+        -> Border#PART_IconHost (template-stable)
+           -> IconPresenter#PART_IconPresenter (template-stable)
   -> TimelineItem (item container control theme, TimelineItemTheme.axaml)
      -> TimelineItemPanel#RootLayout (template-stable)
-        -> TextBlock#Label (template-stable)
-        -> TimelineIndicator#Indicator (internal-observable)
-        -> ContentPresenter#ContentPresenter (internal-observable)
+        -> TimelineSectionPanel#Section (template-stable)
+           -> StackPanel#Header (template-stable)
+              -> TextBlock#Label (template-stable)
+           -> TimelineIndicator#Indicator (internal-observable)
+           -> ContentPresenter#ContentPresenter (internal-observable)
   -> Timeline (control theme, TimelineTheme.axaml)
      -> Border#Frame (template-stable)
         -> ScrollViewer#ScrollViewer (template-stable)
@@ -11447,15 +17996,21 @@ Timeline
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Timeline` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `TimelineIndicator` | control theme | `TimelineIndicatorTheme.axaml` | Timeline | `IndicatorColor`, `IndicatorIcon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `TimelineIndicator` | control theme | `TimelineIndicatorTheme.axaml` | Timeline | `IndicatorColor`, `IndicatorIcon`, `IndicatorTailColor` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Panel` | template node (Panel) | `TimelineIndicatorTheme.axaml` | TimelineIndicator | `IndicatorColor`, `IndicatorIcon`, `IndicatorTailColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Rail` | template node (Border) | `TimelineIndicatorTheme.axaml` | TimelineIndicator | `IndicatorTailColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Dot` | template node (Border) | `TimelineIndicatorTheme.axaml` | TimelineIndicator | `IndicatorColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_IconHost` | template node (Border) | `TimelineIndicatorTheme.axaml` | TimelineIndicator | `IndicatorIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_IconPresenter` | template node (IconPresenter) | `TimelineIndicatorTheme.axaml` | TimelineIndicator | `IndicatorIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `TimelineItem` | item container control theme | `TimelineItemTheme.axaml` | 用户代码 / 控件宿主 | `Content`, `ContentTemplate`, `IndicatorColor`, `IndicatorIcon`, `IsFirst`, `IsLabelLayout` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `RootLayout` | template node (TimelineItemPanel) | `TimelineItemTheme.axaml` | TimelineItem | `Content`, `ContentTemplate`, `IndicatorColor`, `IndicatorIcon`, `IsFirst`, `IsLabelLayout` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Section` | template node (TimelineSectionPanel) | `TimelineItemTheme.axaml` | TimelineItem | `Content`, `ContentTemplate`, `IndicatorColor`, `IndicatorIcon`, `IsFirst`, `IsLabelLayout` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Header` | template node (StackPanel) | `TimelineItemTheme.axaml` | TimelineItem | `Label` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Label` | template node (TextBlock) | `TimelineItemTheme.axaml` | TimelineItem | `Label` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Indicator` | template node (TimelineIndicator) | `TimelineItemTheme.axaml` | TimelineItem | `IndicatorColor`, `IndicatorIcon`, `IsFirst`, `IsLast`, `NextIsPending`, `Orientation` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `ContentPresenter` | template node (ContentPresenter) | `TimelineItemTheme.axaml` | TimelineItem | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Timeline` | control theme | `TimelineTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `CornerRadius`, `Padding`, `atom` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Frame` | template node (Border) | `TimelineTheme.axaml` | Timeline | `Background`, `BorderBrush`, `CornerRadius`, `Padding`, `atom` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Timeline` | control theme | `TimelineTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Padding`, `atom` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Frame` | template node (Border) | `TimelineTheme.axaml` | Timeline | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Padding`, `atom` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ScrollViewer` | template node (ScrollViewer) | `TimelineTheme.axaml` | Timeline | `atom` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ItemsPresenter` | template node (ItemsPresenter) | `TimelineTheme.axaml` | Timeline | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 
@@ -11467,7 +18022,8 @@ Timeline
 | 集合顺序 | `Items`、`ItemsSource`、`IsReverse` | 维护源顺序、最终视觉顺序和 Pending 项的相邻关系。 |
 | 方向与模式 | `Orientation`、`Mode` | 决定主轴方向以及内容位于轴线的 Start、End 或交替侧。 |
 | 内部派生状态 | `IsLabelLayout`、`IsOdd`、`IsFirst`、`IsLast`、`NextIsPending` | 由 Timeline 根据可见项视觉顺序单向投影到 Item 和模板。 |
-| 视觉与布局 | `IndicatorColor`、`IndicatorIcon` | 影响节点颜色、形状和轴线渲染。 |
+| 视觉与布局 | `IndicatorColor`、`IndicatorIcon`、`IndicatorTailColor`、`IndicatorTailWidth` | 影响节点颜色、形状和轴线渲染；连接线颜色与宽度由 Indicator 属性与 Token 定制。 |
+| Semantic Part | `root`、`item`、`itemWrapper`、`itemIcon`、`itemTitle`、`itemContent` | 单一 owner `Timeline` 公开的语义区域，见 [Timeline Semantic Part 契约](semantic-part.md)。 |
 | 其他稳定入口 | `Label`、`Pending` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
 ## Pseudo Classes
@@ -11495,8 +18051,8 @@ Orientation / Mode / IsReverse / Items / item visibility
 | --- | --- | --- | --- |
 | `Vertical` | `Start` | 轴线位于逻辑起始侧，Content 位于结束侧。 | Label 位于起始侧，Content 位于结束侧。 |
 | `Vertical` | `End` | Content 位于逻辑起始侧，轴线位于结束侧。 | Content 位于起始侧，Label 位于结束侧。 |
-| `Horizontal` | `Start` | 轴线在上，Content 在下。 | Label 在上，Content 在下。 |
-| `Horizontal` | `End` | Content 在上，轴线在下。 | Content 在上，Label 在下。 |
+| `Horizontal` | `Start` | 轴线在上，Content 在下。 | 轴线在上，Label 与 Content 依次在下并对轴线居中。 |
+| `Horizontal` | `End` | Content 在上，轴线在下。 | Label 与 Content 依次在上，轴线在下。 |
 | 任意方向 | `Alternate` | 第一可见项为 Start，后续按 End、Start 交替。 | 使用同一交替规则，并保持所有节点共用同一轴线。 |
 
 `FlowDirection` 只影响垂直 Timeline 的逻辑起始侧和结束侧；水平 Timeline 的 Start/End 分别映射到下方和上方。`IsReverse` 只反转主轴视觉顺序，不交换 Start/End。隐藏项不占用布局槽位，也不参与交替奇偶、首尾和 Pending 相邻关系计算。
@@ -11567,13 +18123,73 @@ Source: ./controls/tooltip/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Tooltip` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Tooltip 只有一个 public owner：`ToolTip`，公开 3 个语义键：`root`、`container`、`arrow`（与上游 Tooltip 的
+语义部件结构 `root` / `container` / `arrow` 对齐）。声明位于
+`src/AtomUI.Desktop.Controls/Tooltip/ToolTip.SemanticParts.cs` partial 文件。
+
+`container` 与 `arrow` 均声明 `CrossNestedOwners=true`：`ToolTip` 的控件模板把自己的内容直接交给共享原语
+`ArrowDecoratedBox#PART_ArrowDecorator`（带有 `.semantic-scope-arrow-decorated-box` scope 锚点），两个 marker 由
+`ArrowDecoratedBox` 自身模板携带。`/template/` 链不能直接跨越嵌套 owner 进入 `ArrowDecoratedBox` 模板，因此这两个
+Part 由生成 Style 借助 scope 路由从 `ToolTip` 穿透到共享模板命中，解析器同时被允许跨越嵌套 owner 边界。
+
+各 Part 的 Selector、SelectorRoute、ContractType 以 `ToolTip.SemanticParts.cs` 为准。
+
+### 1.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ToolTip` |
+| Part | `root` |
+| Selector | 不适用（owner 本身，无 marker） |
+| SelectorRoute | 不适用 |
+| ContractType | `ToolTip` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ToolTip` 控件本体 |
+| 职责 | 工具提示的根语义区域，承载内容、弹层打开状态与主题入口的组织边界 |
+| 相关 API | `Content`、`IsMotionEnabled` |
+| 相关 Token | `ToolTipToken` / SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `container`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ToolTip` |
+| Part | `container` |
+| Selector | `.semantic-container` |
+| SelectorRoute | `/template/ .semantic-scope-arrow-decorated-box /template/ .semantic-container` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `Border#PART_ContentDecorator`（共享 `ArrowDecoratedBox` 模板） |
+| 职责 | 内容盒，承载内边距、背景、圆角与文本样式，内部 `ContentPresenter` 展示用户内容 |
+| 相关 API | `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding`（模板绑定）、`Content` |
+| 相关 Token | `ToolTipToken.ToolTipBackground`、`ToolTipToken.ToolTipCornerRadius`、`ToolTipToken.ContentPadding` |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.3 `arrow`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ToolTip` |
+| Part | `arrow` |
+| Selector | `.semantic-arrow` |
+| SelectorRoute | `/template/ .semantic-scope-arrow-decorated-box /template/ .semantic-arrow` |
+| ContractType | `ArrowIndicator` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ArrowIndicator#PART_ArrowIndicator`（共享 `ArrowDecoratedBox` 模板） |
+| 职责 | 指向锚定控件的箭头指示器 |
+| 相关 API | `IsArrowVisible`、`ArrowSize`、`Background`（`FilledColor` 模板绑定） |
+| 相关 Token | `ArrowDecoratedBoxToken.ArrowStrokeColor`、`ArrowDecoratedBoxToken.ArrowStrokeThickness`、`ArrowDecoratedBoxToken.ArrowSize` |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -11661,6 +18277,7 @@ Tooltip Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 
 - 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
+- 不破坏 Semantic Part 契约：`root`/`container`/`arrow` 的 selector class、route、`ContractType` 与 cardinality 以 [Tooltip Semantic Part 契约](semantic-part.md) 为准。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
@@ -11675,6 +18292,9 @@ Tooltip Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
 - Template part 名称、ControlTheme key、伪类和资源 key。
+- Semantic Part 契约：descriptor 字段、selector class、route、`ContractType` 与 cardinality（见
+  [Tooltip Semantic Part 契约](semantic-part.md)）；marker 位于共享 `ArrowDecoratedBoxTheme.axaml`，结构性变更必须
+  同步评估 `ArrowDecoratedBox` 的家庭消费者。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
@@ -11690,13 +18310,302 @@ Source: ./controls/tour/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Tour` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+`Tour` 公开 13 个 Semantic Part：`root` 由生成器隐式加入，不要求 `.semantic-root`；其余 12 个为 `popup.*`
+弹层部件。除 `root` 外每个 Part 生成 public 强类型 Semantic Style，命名规则为
+`AtomUI.Theme.Styling.Tour<PartPathPascalCase>Style`（如 `TourPopupMaskStyle`），用户在外层普通 `Style`
+中按 owner 作用域嵌套使用。
+
+部件名单对齐上游 Tour 的语义部件结构（`_semantic.tsx`）：`root`、`mask`、`section`、`cover`、`close`（上游 6.4.0
+起）、`header`、`title`、`description`、`footer`、`actions`、`indicators`、`indicator`。上游 Tour 面板整体渲染在
+`getPopupContainer=false` 的内联容器中，部件名不带弹层前缀；AtomUI 的引导卡片承载在 `Popup` 的独立视觉根中，
+因此除 `root`（owner 本体）外统一以 `popup.` 前缀命名：上游 `mask` 对应 `popup.mask`，上游 `section` 对应
+`popup.section`，其余同理。上游 `panel` 包裹节点与箭头不是语义部件，AtomUI 同样不发布（箭头由共享
+`ArrowDecoratedBox` 的 `semantic-arrow` marker 承担，但不进入 Tour 契约）。
+
+全部 `popup.*` 部件声明 `CrossVisualRoot=true`：卡片内容在 `Popup` overlay 宿主中（与 owner 同 TopLevel，
+样式经逻辑树级联命中）；遮罩在 TopLevel `VisualLayerManager` 的共享 `TourLayer` 中，经逻辑父挂载归属当前打开的
+Tour。所有 marker 使用静态 `Classes.semantic-*="True"` 声明（`popup.mask` 与 `popup.indicator` 为运行时代码注入
+marker 类，无 TemplatedParent），内置主题不使用 `.semantic-*` selector 实现默认视觉。
+
+### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `root` |
+| Selector | 不适用（root 无 `.semantic-root`） |
+| SelectorRoute | 不适用 |
+| ContractType | `Tour` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `Tour` 控件根（隐式；服务型控件，静止态无视觉） |
+| 职责 | 引导流程 owner：承载步骤集合、受控开关状态与目标锚定 |
+| 相关 API | `IsOpen`、`CurrentIndex`、`Steps`、`StepsSource`、`ShowTour()` |
+| 相关 Token | 无独立 Token（流程状态不落 Token） |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `/template/ .semantic-popup-root` |
+| ContractType | `ArrowDecoratedBox` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TourTheme.axaml` 模板内 `PART_ArrowDecorator`（静态 marker） |
+| 职责 | 引导卡片容器根：承载卡片内容与方向箭头（对齐上游 `.ant-tour` 面板根的容器职责） |
+| 相关 API | `Placement`、`IsArrowVisible`、`StyleType` |
+| 相关 Token | `TourBorderRadius`、`ColorBgElevated` |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.mask`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.mask` |
+| Selector | `.semantic-popup-mask` |
+| SelectorRoute | `>> .semantic-popup-mask` |
+| ContractType | `Control` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | TopLevel `VisualLayerManager` 中的共享 `TourLayer`（internal；marker 类由 `Tour` 代码经生成常量 `TourSemanticParts.PopupMaskClass` 注入） |
+| 职责 | 遮罩层：覆盖目标区域以外的整屏、镂空高亮当前步骤目标并阻挡交互（对齐上游 mask 的全屏覆盖与指针事件语义） |
+| 相关 API | `IsShowMask`、`MaskColor`、`GapRadius`、`GapOffsetX/Y` |
+| 相关 Token | 遮罩色默认 `ColorBgMask`（经 `MaskColor` 中继） |
+| 稳定性 | stable since 6.2.0 |
+
+遮罩是跨根部件中的特殊形态：物理节点是 VLM 级共享单例（`TourLayer.GetTourLayer` 创建并 `AddLayer`），归属规则
+"谁打开谁拥有，关闭即释放"。`Tour.ShowTour()` 挂载时执行三步：`AddLayer`（VLM 内部把层逻辑挂到自身）→
+`SetParent(null)`（解除 VLM 归属）→ `SetParent(tourOwner)`（挂到当前 Tour）；`HideTour()` 与生命周期关闭在归属
+自己时执行 `SetParent(null)` 释放，下一个打开的 Tour 可重新挂载。owner 作用域 Semantic Style 经 `>>`（沿逻辑树
+匹配的 Descendant 选择器）跨视觉根命中遮罩；`Tour` 实现 `ISemanticPartCrossRootProvider`，在遮罩可见时经
+`GetCrossRoots()` 上报该层，挂载/释放触发 `CrossRootsChanged` 供语义高亮会话跟随刷新。
+
+`ContractType` 为 `Control`：`TourLayer` 是 internal 类型，不进入公共契约。遮罩颜色定制走 `MaskColor` API
+（含镂空几何的绘制由 `TourLayer.Render` 承担，样式通道只承诺 `Visual` 层属性如 `Opacity`、`IsHitTestVisible`）。
+
+### `popup.section`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.section` |
+| Selector | `.semantic-container`（共享 ArrowDecoratedBox marker） |
+| SelectorRoute | `/template/ .semantic-popup-root /template/ .semantic-container` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 共享 `ArrowDecoratedBoxTheme.axaml` 模板内 `PART_ContentDecorator` Border |
+| 职责 | 卡片主要内容区域：圆角、背景、边框与内边距（对齐上游 `.ant-tour` 内 `section` 的卡片样式职责） |
+| 相关 API | `StyleType`（Primary 经 popup.root 背景表达） |
+| 相关 Token | `TourBorderRadius`、`ColorBgElevated` |
+| 稳定性 | stable since 6.2.0 |
+
+marker 声明在共享 `ArrowDecoratedBoxTheme`（与 ToolTip、DatePicker 等共享容器复用同一 `semantic-container`
+marker），路由经 owner 模板的 `.semantic-popup-root` 锚点加第二段 `/template/` 进入嵌套模板；生成器按
+`CrossNestedOwners` 跨主题资产校验 marker 存在性。
+
+### `popup.cover`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.cover` |
+| Selector | `.semantic-popup-cover` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-cover` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TourStepTheme.axaml` 模板内 `CoverPresenter`（marker 静态声明，节点由 ItemsControl 按步骤物化） |
+| 职责 | 卡片封面区域：承载步骤封面图片等内容（对齐上游 `cover`） |
+| 相关 API | `TourStep.Cover`、`CoverTemplate` |
+| 相关 Token | 无独立 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.close`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.close` |
+| Selector | `.semantic-popup-close` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-close` |
+| ContractType | `Button`（Avalonia `Button` 契约，实际节点为 `DialogCaptionButton`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TourStepTheme.axaml` 模板内 `CloseButton`（`DialogCaptionButton`，marker 静态声明） |
+| 职责 | 关闭按钮：结束引导流程（对齐上游 `close`，上游自 6.4.0 发布） |
+| 相关 API | `CloseIcon` |
+| 相关 Token | `CloseBtnSize`、`IconSize` |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.header` |
+| Selector | `.semantic-popup-header` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-header` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TourStepTheme.axaml` 模板内 header 包裹 Border（组合标题与关闭按钮） |
+| 职责 | 卡片头部区域：组合标题与关闭按钮的头部容器（对齐上游 `header`） |
+| 相关 API | 无独立 API（内容经 `Title`/`CloseIcon` 进入） |
+| 相关 Token | 无独立 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.title` |
+| Selector | `.semantic-popup-title` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-title` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TourStepTheme.axaml` 模板内 `Title` ContentPresenter |
+| 职责 | 引导步骤标题文字（对齐上游 `title`） |
+| 相关 API | `TourStep.Title`、`TitleTemplate` |
+| 相关 Token | `HeaderColor`、`FontWeightStrong` |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.description`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.description` |
+| Selector | `.semantic-popup-description` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-description` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TourStepTheme.axaml` 模板内 `DescriptionPresenter` |
+| 职责 | 引导步骤描述文字（对齐上游 `description`） |
+| 相关 API | `TourStep.Description`、`DescriptionTemplate` |
+| 相关 Token | 无独立 Token（沿用文本 Token） |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.footer` |
+| Selector | `.semantic-popup-footer` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-footer` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TourStepsViewTheme.axaml` 模板内 `FooterFrame` Border |
+| 职责 | 卡片底部操作区域：组合指示器与操作按钮组（对齐上游 `footer`） |
+| 相关 API | 无独立 API（内容经 `Indicator`/`CustomActions` 进入） |
+| 相关 Token | 无独立 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.actions` |
+| Selector | `.semantic-popup-actions` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-actions` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TourStepsViewTheme.axaml` 模板内 `ActionsLayout` StackPanel |
+| 职责 | 操作按钮组容器：承载上一步/下一步/完成按钮（对齐上游 `actions`） |
+| 相关 API | `CustomActions`、步骤导航事件 |
+| 相关 Token | `PrimaryPrevBtnBg`、`PrimaryNextBtnHoverBg` |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.indicators`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.indicators` |
+| Selector | `.semantic-popup-indicators` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-indicators` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Optional` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `TourStepsViewTheme.axaml` 模板内 `IndicatorPresenter` ContentPresenter |
+| 职责 | 指示器组容器：承载当前 `Indicator` 实例（对齐上游 `indicators`） |
+| 相关 API | `Indicator` |
+| 相关 Token | 无独立 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### `popup.indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Tour` |
+| Part | `popup.indicator` |
+| Selector | `.semantic-popup-indicator` |
+| SelectorRoute | `/template/ .semantic-popup-root >> .semantic-popup-indicator` |
+| ContractType | `Ellipse` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| CrossNestedOwners | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `DefaultTourIndicator` 代码按 `StepCount` 物化的 `Ellipse` 圆点（marker 类与 `active` 状态类由代码注入） |
+| 职责 | 单个步骤指示器圆点，含激活态（对齐上游 `indicator`） |
+| 相关 API | `IndicatorSize`、`IndicatorColor`、`IndicatorActiveColor`、`ItemSpacing` |
+| 相关 Token | `IndicatorSize`、`ColorFill`、`ColorPrimary` |
+| 稳定性 | stable since 6.2.0 |
+
+圆点由 `DefaultTourIndicator` 代码物化并只挂 `semantic-popup-indicator` marker 类与 `active` 激活态类；
+视觉（尺寸/颜色/间距）全部由 `DefaultTourIndicatorTheme` 表达——圆点无 TemplatedParent，`/template/` 选择器链
+无法命中，主题样式声明在模板内 `DotsLayout` 元素作用域（`StackPanel.Styles`）沿逻辑树流到圆点，尺寸/颜色经
+`RelativeSource AncestorType` 绑定到指示器实例。激活态经 `.active` 类选择器表达。布局契约保持旧自绘版公式
+`N*size + (N+1)*spacing`（`MeasureOverride` 覆写承担，左右各留一份间距）。
+
+`TextTourIndicator` 不物化圆点，使用该指示器时 `popup.indicator` 实例数为 0（`Multiple` 允许 0..N）。
 
 ## Abstract AXAML Structure
 
@@ -11719,14 +18628,16 @@ Source: ./controls/tour/semantic-cn.md
 ```text
 Tour
   -> DefaultTourIndicator (control theme, DefaultTourIndicatorTheme.axaml)
+     -> StackPanel#DotsLayout (template-stable)
   -> TextTourIndicator (control theme, TextTourIndicatorTheme.axaml)
      -> TextBlock (template-stable)
   -> TourStep (control theme, TourStepTheme.axaml)
      -> Border#Frame (template-stable)
         -> DockPanel#RootLayout (template-stable)
-           -> DockPanel (template-stable)
-              -> DialogCaptionButton#CloseButton (template-stable)
-              -> ContentPresenter#Title (internal-observable)
+           -> Border (template-stable)
+              -> DockPanel (template-stable)
+                 -> DialogCaptionButton#CloseButton (template-stable)
+                 -> ContentPresenter#Title (internal-observable)
            -> StackPanel#ContentLayout (template-stable)
               -> ContentPresenter#CoverPresenter (internal-observable)
               -> ContentPresenter#DescriptionPresenter (internal-observable)
@@ -11754,7 +18665,8 @@ Tour
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Tour` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `DefaultTourIndicator` | control theme | `DefaultTourIndicatorTheme.axaml` | Tour | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `DefaultTourIndicator` | control theme | `DefaultTourIndicatorTheme.axaml` | Tour | `ItemSpacing` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `DotsLayout` | template node (StackPanel) | `DefaultTourIndicatorTheme.axaml` | DefaultTourIndicator | `ItemSpacing` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `TextTourIndicator` | control theme | `TextTourIndicatorTheme.axaml` | Tour | `IndicatorText` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `TourStep` | control theme | `TourStepTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `CloseIcon`, `Cover`, `CoverTemplate`, `Description`, `DescriptionTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Frame` | template node (Border) | `TourStepTheme.axaml` | TourStep | `Background`, `CloseIcon`, `Cover`, `CoverTemplate`, `Description`, `DescriptionTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -11789,7 +18701,7 @@ Tour
 | --- | --- | --- |
 | 内容与数据 | `CloseIcon`、`CoverTemplate`、`Description`、`DescriptionTemplate`、`ItemSpacing`、`ItemTemplate`、`Title`、`TitleTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `ActiveIndex`、`CurrentIndex`、`IndicatorActiveColor`、`StepCount` | 维护选择、展开、过滤、分页、分组或集合状态；`CurrentIndex` 默认双向绑定。 |
-| 交互与状态 | `IsArrowVisible`、`IsDisabledInteraction`、`IsMotionEnabled`、`IsOpen`、`IsPointAtCenter`、`IsScrollIntoView`、`IsShowMask` | 表达用户可观察状态、可用性、清除、加载或反馈语义；`IsOpen` 默认双向绑定。 |
+| 交互与状态 | `IsArrowVisible`、`IsDisabledInteraction`、`IsMotionEnabled`、`IsOpen`、`IsPointAtCenter`、`IsPopupPinnedOpen`、`IsScrollIntoView`、`IsShowMask` | 表达用户可观察状态、可用性、清除、加载或反馈语义；`IsOpen` 默认双向绑定；`IsPopupPinnedOpen` 钉住弹层常开（语义预览场景）。 |
 | 视觉与布局 | `Background`、`GapOffsetX`、`GapOffsetY`、`GapRadius`、`IndicatorColor`、`IndicatorSize`、`MaskColor`、`Placement`、`StyleType`、`TargetRegionCornerRadius` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 其他稳定入口 | `Cover`、`Indicator`、`Target`、`TargetRegion` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -11877,13 +18789,201 @@ Source: ./controls/tree-view/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `TreeView` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+### 2.1 `TreeView`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeView` |
+| Part | `root` |
+| Selector | TreeView 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `TreeView` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | TreeView owner |
+| 职责 | 树根是 Items、选择、勾选、展开、过滤、拖拽、异步加载、空状态、switcher 图标与动效配置的统一 owner；作为顶层 `item` Part 的 owner-scoped Selector 作用域边界。 |
+| 相关 API | `Items`、`ItemsSource`、`SelectionMode`、`SelectedItem`、`SelectedItems`、`ToggleType`、`IsCheckStrictly`、`IsDefaultExpandAll`、`DefaultSelectedPaths`、`DefaultCheckedPaths`、`DefaultExpandedPaths`、`IsDraggable`、`IsShowIcon`、`IsShowLine`、`IsShowLeafIcon`、`NodeHoverMode`、`Switcher*Icon`、`IsSwitcherRotation`、`IsSelectable`、`IsSelectOnRightClick`、`DataLoader`、`Filter`、`FilterStrategy`、`EmptyIndicator`、`IsMotionEnabled`、`OpenMotion`、`CloseMotion` |
+| 相关 Token | `TreeViewToken`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeView` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `> .semantic-item` |
+| Style Type | `TreeViewItemStyle` |
+| ContractType | `TreeViewItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个**顶层** `TreeViewItem` 容器 |
+| 职责 | 统一表示树中直接挂在 `TreeView` 根下的节点容器，覆盖 `TreeViewItem` 容器为公开 item 容器的顶层形态。 |
+| 相关 API | `Header`、`HeaderTemplate`、`Icon`、`IsChecked`、`IsLeaf`、`IsLoading`、`IsSelected`、`IsExpanded`、`IsEnabled`、`IsDragging`、`IsDragOver`、`NodeHoverMode`、`IsShowLine` |
+| 相关 Token | `TreeItemMargin`、`HeaderHeight`、SharedToken（`ColorBorder`） |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.2 `TreeViewItem`
+
+`TreeViewItem` 是递归 owner：其 `item` Part 覆盖下一层子节点容器，`itemSwitcher` / `itemIcon` / `itemTitle` 覆盖每个
+节点的内容区域。`TreeViewItem` 的 `root` 是节点容器本身（implicit Part，无 `.semantic-root` marker，不生成 Style）。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeViewItem` |
+| Part | `root` |
+| Selector | TreeViewItem 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用 |
+| ContractType | `TreeViewItem` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 每个 `TreeViewItem` 容器 |
+| 职责 | 单个树节点容器：承载节点级状态（selected / checked / expanded / disabled / loading / drag / filter）与树形连线渲染表面；作为子节点容器与节点内容 Part 的 owner-scoped Selector 作用域边界。 |
+| 相关 API | `Header`、`HeaderTemplate`、`Icon`、`IsChecked`、`IsLeaf`、`IsLoading`、`IsSelected`、`IsExpanded`、`IsEnabled`、`IsDragging`、`IsDragOver`、`NodeHoverMode`、`IsShowLine` |
+| 相关 Token | `TreeItemMargin`、`HeaderHeight`、SharedToken（`ColorBorder`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `item`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeViewItem` |
+| Part | `item` |
+| Selector | `.semantic-item` |
+| SelectorRoute | `> .semantic-item` |
+| Style Type | `TreeViewItemItemStyle` |
+| ContractType | `TreeViewItem` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个**子级** `TreeViewItem` 容器 |
+| 职责 | 递归表示当前节点容器生成的下一层子节点容器。与 `TreeView.item` 使用同一 `.semantic-item` 身份，共同保证任意深度的节点都可被 `atom|TreeViewItem` / `atom|TreeView` owner scope 命中。 |
+| 相关 API | 同 `TreeViewItem` root |
+| 相关 Token | `TreeItemMargin`、`HeaderHeight` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemSwitcher`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeViewItem` |
+| Part | `itemSwitcher` |
+| Selector | `.semantic-item-switcher` |
+| SelectorRoute | `/template/ .semantic-scope-header /template/ .semantic-item-switcher` |
+| Style Type | `TreeViewItemItemSwitcherStyle` |
+| ContractType | `ToggleButton` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 header 模板中的 `NodeSwitcherButton#PART_NodeSwitcherButton` |
+| 职责 | 统一表示节点展开/收起 switcher 区域：展开、收起、叶子与加载图标入口；对应上游 `.ant-tree-switcher` 节点。 |
+| 相关 API | `SwitcherExpandIcon`、`SwitcherCollapseIcon`、`SwitcherRotationIcon`、`SwitcherLoadingIcon`、`SwitcherLeafIcon`、`IsSwitcherRotation`、`IsLeaf`、`IsLoading`、`IsExpanded` |
+| 相关 Token | `HeaderHeight`、`NodeHoverBg`、`TreeNodeSwitcherMargin`、SharedToken（`IconSize`、`IconSizeXS`、`ColorTextSecondary`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemIndicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeViewItem` |
+| Part | `itemIndicator` |
+| Selector | `.semantic-item-indicator` |
+| SelectorRoute | `/template/ .semantic-scope-header /template/ .semantic-item-indicator` |
+| Style Type | `TreeViewItemItemIndicatorStyle` |
+| ContractType | `ToggleButton` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 header 模板中的 `CheckBox#ToggleCheckbox`（`ToggleType=CheckBox`）与 `RadioButton#ToggleRadio`（`ToggleType=Radio`） |
+| 职责 | 统一表示节点勾选指示区域：checkbox / radio 两个备选形态共用的单一 Part，承载勾选状态、radio 分组与禁用态；对应 AtomUI 的 `ToggleType` 勾选功能节点，非上游 Semantic DOM 键（AtomUI 扩展）。 |
+| 相关 API | `ToggleType`、`IsChecked`、`IsIndicatorEnabled`、`GroupName`、`IsEnabled` |
+| 相关 Token | SharedToken（`ColorBorder`、`ColorPrimary`、`ColorBorderSecondary`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemIcon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeViewItem` |
+| Part | `itemIcon` |
+| Selector | `.semantic-item-icon` |
+| SelectorRoute | `/template/ .semantic-scope-header /template/ .semantic-item-icon` |
+| Style Type | `TreeViewItemItemIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 header 模板中的 `IconPresenter#PART_IconPresenter` |
+| 职责 | 统一表示节点图标区域：`Icon` 内容的呈现、尺寸与边距；对应上游 `.ant-tree-iconEle` 节点。 |
+| 相关 API | `Icon`、`IsShowIcon`、`IsShowLeafIcon` |
+| 相关 Token | `TreeNodeIconMargin`、SharedToken（`IconSize`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `itemTitle`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `TreeViewItem` |
+| Part | `itemTitle` |
+| Selector | `.semantic-item-title` |
+| SelectorRoute | `/template/ .semantic-scope-header /template/ .semantic-item-title` |
+| Style Type | `TreeViewItemItemTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 每个 header 模板中的 `ContentPresenter#HeaderPresenter` |
+| 职责 | 统一表示节点标题文字区域：`Header` / `HeaderTemplate` 内容的呈现、颜色、字体与对齐；对应上游 `.ant-tree-title` 节点。 |
+| 相关 API | `Header`、`HeaderTemplate`、`Content`、`ContentTemplate` |
+| 相关 Token | SharedToken（`ColorText`、`ColorTextDisabled`） |
+| 稳定性 | stable since 6.2.0 |
+
+### 2.3 marker 放置与路由
+
+`root` 是隐式 Part，不声明 `.semantic-root` marker。非 root Part 的 marker 放置：
+
+- `TreeView.item` 与 `TreeViewItem.item` 的 marker `.semantic-item` 在 `TreeView` 与 `TreeViewItem` 的容器创建与
+  prepare 路径幂等添加，覆盖用户显式 `TreeViewItem`、`ItemsSource` 数据驱动容器与递归子节点容器三条来源。
+- `itemSwitcher`、`itemIndicator`、`itemIcon`、`itemTitle` 的 marker 静态声明在 `TreeViewItemHeaderTheme.axaml`（header
+  模板）。`itemIndicator` 是 checkbox / radio 两个备选节点共用：两个节点都携带 `.semantic-item-indicator` marker，
+  每个容器恒有两个 marker 实例，`ToggleType` 决定同一时刻最多一个可见。
+- `.semantic-scope-header` 静态声明在 `TreeViewItemTheme.axaml` 的 `TreeViewItemHeader#Header` 上，是 `TreeViewItem`
+  模板到 `TreeViewItemHeader` 模板之间的路由跳点，不发布为 Part。
+
+`TreeViewItem` owner 的五个运行时 Part（`item`、`itemSwitcher`、`itemIndicator`、`itemIcon`、`itemTitle`）都位于
+`TreeViewItem` 容器及其模板内部，descriptor 统一声明 `RuntimeCreated=true`，生成器不按 owner 主题资产做静态校验。
+
+- `item` 的 route `> .semantic-item` 经一步 `>` 直达子容器：子 `TreeViewItem` 容器的逻辑父级是当前 `TreeViewItem`
+  owner 本身。
+- `itemSwitcher` / `itemIndicator` / `itemIcon` / `itemTitle` 需要两次 `/template/` 跳点：先进入 `TreeViewItem` 模板
+  命中 `TreeViewItemHeader#Header` 上的 `.semantic-scope-header` 跳点，再进入 `TreeViewItemHeader` 模板命中对应
+  marker。
+
+`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过 `x:SetterTargetType` 提供 AXAML 编译期类型
+上下文；它不参与 `.semantic-*` 的身份匹配。`itemSwitcher` 的真实节点 `NodeSwitcherButton` 与 `itemIndicator` 的真实
+节点 `CheckBox#ToggleCheckbox` / `RadioButton#ToggleRadio` 都是 internal 或继承自公开基类的节点，因此二者 ContractType
+都使用其公开基类 `ToggleButton`（checkbox / radio 的 `AbstractCheckBox` / `AbstractRadioButton` 都继承自
+`ToggleButton`；与 Timeline 对 internal `TimelineIndicator` 节点使用公开 `Border`、Calendar 对 internal cell 使用
+`TemplatedControl` 同一决策）。`itemIcon` 的节点 `IconPresenter` 与 `itemTitle` 的节点 `ContentPresenter` 均为公开
+类型，直接取节点真实 public 类型作为最低依赖类型。
 
 ## Abstract AXAML Structure
 
@@ -12172,6 +19272,12 @@ TreeViewToken 不承载 `SelectedItem`、`SelectedItems`、`CheckedItems`、`IsE
 - `TreeItemNode` 保持轻量数据节点定位，不承载 Avalonia 属性系统。
 - `BindableTreeItemNode` 的 resource host attach、属性订阅和容器同步必须与容器生命周期成对释放。
 - 绑定型节点不能永久保存当前 `TreeViewItem`、header、template part 或 visual container。
+- Semantic Part 的 marker 放置（`TreeViewItemTheme.axaml` 的 `semantic-scope-header` 静态跳点、
+  `TreeViewItemHeaderTheme.axaml` 的四个静态 Part marker、容器创建/prepare 路径的 `.semantic-item`）属于维护不变量：
+  状态切换、容器复用/回收、items 集合变化与模板重应用不得增删 marker，默认主题不得消费 `.semantic-*` selector。
+- `TreeViewItemHeader` / `NodeSwitcherButton` 不得改为 public owner 或承载独立 Semantic descriptor；`itemSwitcher` 与
+  `itemIndicator` 的 `ContractType` 保持公开基类 `ToggleButton`，不把 internal `NodeSwitcherButton` /
+  `CheckBoxIndicator` 泄漏进公共契约。
 
 Source: ./controls/alert/semantic-cn.md
 
@@ -12181,13 +19287,20 @@ Source: ./controls/alert/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Alert` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Alert 只有一个 public descriptor owner：`Alert`。
+
+| Part | Selector | Style Type | ContractType | Cardinality | AtomUI 节点 | 稳定性 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | Alert 本身 | 不适用 | `Alert` | `Single` | owner | stable since 6.2.0 |
+| `icon` | `.semantic-icon` | `AlertIconStyle` | `Icon` | `Multiple` | 四个 `AlertType` 图标 | stable since 6.2.0 |
+| `section` | `.semantic-section` | `AlertSectionStyle` | `StackPanel` | `Single` | 消息与描述布局 | stable since 6.2.0 |
+| `title` | `.semantic-title` | `AlertTitleStyle` | `Control` | `Multiple` | `MessageLabel` 与 `MarqueeLabel` | stable since 6.2.0 |
+| `description` | `.semantic-description` | `AlertDescriptionStyle` | `Label` | `Single` | `DescriptionLabel` | stable since 6.2.0 |
+| `actions` | `.semantic-actions` | `AlertActionsStyle` | `ContentPresenter` | `Single` | `ExtraActionPresenter` | stable since 6.2.0 |
+| `close` | `.semantic-close` | `AlertCloseStyle` | `IconButton` | `Single` | `PART_CloseBtn` | stable since 6.2.0 |
+
+六个 selector Part 的 `SelectorRoute` 均为 `/template/ .semantic-<name>`，`Customization` 为 `Selector`，
+`CrossVisualRoot=false`，`RuntimeCreated=false`。root 的 `Customization` 为 `Root`，不生成 `.semantic-root` 或 Style Type。
 
 ## Abstract AXAML Structure
 
@@ -12260,9 +19373,9 @@ Alert
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `CloseIcon`、`Description`、`IsShowIcon` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `IsClosable`、`IsMessageMarqueeEnabled` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 其他稳定入口 | `ExtraAction`、`Message`、`Type` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+| 内容与数据 | `Message`、`Description`、`ExtraAction`、`CloseIcon` | 定义标题、详情、辅助操作和关闭图标内容。 |
+| 交互与状态 | `Type`、`IsShowIcon`、`IsClosable`、`IsMessageMarqueeEnabled` | 表达反馈类型、图标、关闭入口和标题呈现状态。 |
+| 视觉表面 | `StrokeDashArray` 与继承的 TemplatedControl 表面属性 | 支持 root Semantic Style 定制实线或虚线边框、背景、圆角与 padding。 |
 
 ## Pseudo Classes
 
@@ -12283,10 +19396,10 @@ Public API / inherited command / item source / user input
 
 状态维护规则：
 
-- Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
-- 基础交互和主题状态 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
-- 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
-- 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
+- `Type` 决定背景、边框和当前可见的状态图标。
+- `Description`、`ExtraAction`、`IsShowIcon`、`IsClosable` 与 `IsMessageMarqueeEnabled` 只切换静态模板节点状态，不改变 Semantic Part 数量。
+- `CloseRequest` 由当前模板的 close button 触发，业务层决定是否隐藏、移除或替换 Alert。
+- 模板重套用时必须解除旧 close button 订阅，并把 public API 对应状态投影到新模板。
 
 ## Theme and Token Boundaries
 
@@ -12294,13 +19407,14 @@ Alert 的视觉模型由控件模板、ControlTheme、SharedToken 和必要的�
 
 | 主题文件 | 职责 |
 | --- | --- |
-| `AlertTheme.axaml` | 提供控件模板、selector、资源绑定和状态视觉。 |
+| `AlertTheme.axaml` | 提供单一静态模板、状态 selector、Token 绑定和 Semantic marker。 |
 
 Alert 使用 `AlertToken` 作为控件 Token scope。Token 只表达组件视觉语义，不承载 基础交互和主题状态 运行时状态。
 
 主题维护规则：
 
 - 不删除或重命名已经稳定的 ControlTheme key、template part、伪类和资源 key。
+- 不删除或重命名 `root`、`icon`、`section`、`title`、`description`、`actions`、`close`，不改变 selector class、ContractType 或 cardinality。
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
@@ -12319,6 +19433,7 @@ Alert Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 - 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
+- 不破坏七个 Semantic Part 的名称、selector、ContractType、cardinality 和 marker 身份。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
@@ -12330,8 +19445,9 @@ Alert Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 维护 Alert 时不得破坏：
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
+- `root`、`icon`、`section`、`title`、`description`、`actions`、`close` 的名称、selector、ContractType、cardinality 和 marker 身份。
 - Template part 名称、ControlTheme key、伪类和资源 key。
-- 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
+- 旧 `PART_CloseBtn` 的 Click 订阅释放路径与新 part 的重新订阅顺序。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 
@@ -12343,13 +19459,154 @@ Source: ./controls/drawer/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Drawer` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Drawer 的语义 owner 是 `AtomUI.Desktop.Controls.Drawer` 本身（无模板的零尺寸标记控件）。全部非 root 部件位于运行时创建的 `DrawerContainer`（注入 `ScopeAwareAdornerLayer`，在 owner 可视子树之外、同一 TopLevel 之内），因此统一声明 `CrossVisualRoot=true` + `RuntimeCreated=true`；marker 静态声明在两个内部容器主题上（`DrawerContainerTheme.axaml`、`DrawerInfoContainerTheme.axaml`），运行时无需代码注入。
+
+与上游 Drawer 的语义 DOM（`_semantic.tsx`，10 个槽位）的映射：
+
+| 上游 Drawer 槽位 | AtomUI 部件 | 说明 |
+| --- | --- | --- |
+| `root` | `root`（隐式，owner 契约） | 上游 root 是 fixed 定位容器；AtomUI 遵循系统契约 root=owner 控件，上游 root 对应内部 `DrawerContainer` 基础设施，不作为部件暴露。内联语义预览中 owner 拉伸铺满舞台，root 高亮即整个内联容器，视觉语义对齐上游。 |
+| `mask` | `mask` | 一一对应；`IsShowMask=false` 时不呈现（Optional）。 |
+| `section` | `section` | 上游 v6 由 `content` 改名而来；AtomUI 由 `DrawerInfoContainer` 模板中的 `Frame` Border 承载（背景/阴影层）。 |
+| `header` | `header` | 一一对应（`InfoHeader` Grid）。 |
+| `title` | `title` | 一一对应（`HeaderText`）。 |
+| `extra` | `extra` | 一一对应（`ExtraContentPresenter`）。 |
+| `body` | `body` | 一一对应（`InfoContainer` presenter，`ContentPadding` 落点）。 |
+| `footer` | `footer` | 一一对应（`InfoFooter` presenter，仅设置 Footer 时可见）。 |
+| `close` | `close` | 一一对应（`PART_CloseButton` IconButton）。 |
+| `dragger` | 不暴露 | 上游 v6 的 resizable 拖拽手柄；AtomUI Drawer 暂无 resizable 能力，待能力落地后按上游补齐。 |
+| `wrapper` | 不暴露 | 上游动效包装容器，其语义预览清单同样不包含它；对应 AtomUI 的 `PART_InfoContainerMotionActor` 动效基础设施。 |
+
+部件明细：
+
+#### `mask`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Drawer` / `mask` |
+| Selector | `.semantic-mask` |
+| SelectorRoute | `>> .semantic-mask` |
+| Style Type | `AtomUI.Theme.Styling.DrawerMaskStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Optional（`IsShowMask=false` 时不呈现） |
+| CrossVisualRoot / RuntimeCreated | true / true |
+| AtomUI 节点 | `DrawerContainerTheme.axaml` 的 `PART_Mask`（静态 marker） |
+| 职责 | 遮罩层：绝对定位、层级、`ColorBgMask` 背景、指针事件命中 |
+| 相关 API | `IsShowMask`、`IsCloseOnMaskClick` |
+| 相关 Token | `ColorBgMask` |
+
+#### `section`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Drawer` / `section` |
+| Selector | `.semantic-section` |
+| SelectorRoute | `>> .semantic-section` |
+| Style Type | `AtomUI.Theme.Styling.DrawerSectionStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| CrossVisualRoot / RuntimeCreated | true / true |
+| AtomUI 节点 | `DrawerInfoContainerTheme.axaml` 的 `Frame`（静态 marker） |
+| 职责 | 抽屉面板容器：flex 布局、宽高、背景、按 Placement 的边缘阴影 |
+| 相关 API | `DialogSize`、`Placement`、`SizeType` |
+| 相关 Token | `ColorBgElevated`、`BoxShadowDrawer{Left,Right,Up,Down}` |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Drawer` / `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `>> .semantic-header` |
+| Style Type | `AtomUI.Theme.Styling.DrawerHeaderStyle` |
+| ContractType | `Avalonia.Controls.Grid` |
+| Cardinality | Single |
+| CrossVisualRoot / RuntimeCreated | true / true |
+| AtomUI 节点 | `DrawerInfoContainerTheme.axaml` 的 `InfoHeader`（静态 marker） |
+| 职责 | 头部区域：标题/关闭按钮/额外操作的排布、内边距 |
+| 相关 API | `Title`、`Extra`、`IsShowCloseButton` |
+| 相关 Token | `HeaderMargin` |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Drawer` / `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `>> .semantic-title` |
+| Style Type | `AtomUI.Theme.Styling.DrawerTitleStyle` |
+| ContractType | `AtomUI.Desktop.Controls.TextBlock` |
+| Cardinality | Single |
+| CrossVisualRoot / RuntimeCreated | true / true |
+| AtomUI 节点 | `DrawerInfoContainerTheme.axaml` 的 `HeaderText`（静态 marker） |
+| 职责 | 标题文字排版 |
+| 相关 API | `Title` |
+| 相关 Token | `FontSizeLG`、`FontHeightLG`、`FontWeightStrong` |
+
+#### `extra`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Drawer` / `extra` |
+| Selector | `.semantic-extra` |
+| SelectorRoute | `>> .semantic-extra` |
+| Style Type | `AtomUI.Theme.Styling.DrawerExtraStyle` |
+| ContractType | `Avalonia.Controls.Presenters.ContentPresenter` |
+| Cardinality | Single |
+| CrossVisualRoot / RuntimeCreated | true / true |
+| AtomUI 节点 | `DrawerInfoContainerTheme.axaml` 的 `ExtraContentPresenter`（静态 marker） |
+| 职责 | 头部尾缘的额外操作内容呈现 |
+| 相关 API | `Extra`、`ExtraTemplate` |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Drawer` / `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `>> .semantic-body` |
+| Style Type | `AtomUI.Theme.Styling.DrawerBodyStyle` |
+| ContractType | `Avalonia.Controls.Presenters.ContentPresenter` |
+| Cardinality | Single |
+| CrossVisualRoot / RuntimeCreated | true / true |
+| AtomUI 节点 | `DrawerInfoContainerTheme.axaml` 的 `InfoContainer`（静态 marker） |
+| 职责 | 主内容区：flex 占比、内边距、滚动 |
+| 相关 API | `Content`、`ContentTemplate`、`ContentPadding` |
+| 相关 Token | `ContentPadding` |
+
+#### `footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Drawer` / `footer` |
+| Selector | `.semantic-footer` |
+| SelectorRoute | `>> .semantic-footer` |
+| Style Type | `AtomUI.Theme.Styling.DrawerFooterStyle` |
+| ContractType | `Avalonia.Controls.Presenters.ContentPresenter` |
+| Cardinality | Single |
+| CrossVisualRoot / RuntimeCreated | true / true |
+| AtomUI 节点 | `DrawerInfoContainerTheme.axaml` 的 `InfoFooter`（静态 marker） |
+| 职责 | 底部操作区：上分隔线、内边距；仅设置 Footer 时可见 |
+| 相关 API | `Footer`、`FooterTemplate` |
+| 相关 Token | `FooterPadding` |
+
+#### `close`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Drawer` / `close` |
+| Selector | `.semantic-close` |
+| SelectorRoute | `>> .semantic-close` |
+| Style Type | `AtomUI.Theme.Styling.DrawerCloseStyle` |
+| ContractType | `AtomUI.Controls.IconButton` |
+| Cardinality | Single |
+| CrossVisualRoot / RuntimeCreated | true / true |
+| AtomUI 节点 | `DrawerInfoContainerTheme.axaml` 的 `PART_CloseButton`（静态 marker） |
+| 职责 | 关闭按钮：图标、hover/pressed 反馈；钉住预览时忽略其关闭请求 |
+| 相关 API | `IsShowCloseButton`、`IsPinnedOpen` |
+| 相关 Token | `CloseIconPadding`、`CloseIconMargin` |
+
+隐式 `root`：由生成器无条件加入，`StyleType=null`，定制走 owner 级普通 Style（见系统文档）。
 
 ## Abstract AXAML Structure
 
@@ -12412,7 +19669,7 @@ Drawer
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
 | 内容与数据 | `Content`、`ContentTemplate`、`ExtraTemplate`、`FooterTemplate`、`Title` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `IsCloseOnMaskClick`、`IsMotionEnabled`、`IsOpen`、`IsShowCloseButton`、`IsShowMask` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
+| 交互与状态 | `IsCloseOnMaskClick`、`IsMotionEnabled`、`IsOpen`、`IsPinnedOpen`、`IsShowCloseButton`、`IsShowMask` | 表达用户可观察状态、可用性、清除、加载或反馈语义；`IsPinnedOpen` 钉住常开（语义预览用），拦截遮罩点击与关闭按钮，不拦截外部 `IsOpen` 赋值。 |
 | 视觉与布局 | `DialogSize`、`Placement`、`PushOffsetPercent`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 其他稳定入口 | `Extra`、`Footer`、`OpenOn` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -12501,13 +19758,185 @@ Source: ./controls/message/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Message` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Message 由两个 public owner 组成，因此公开两个独立 descriptor：
+
+| Owner | 职责 |
+| --- | --- |
+| `MessageCard` | 单条消息卡片（上游 notice），承载 `root`、`wrapper`、`icon`、`title` 四个 Part。 |
+| `WindowMessageManager` | 服务型消息宿主（上游 message list），承载 `root`（= 上游 `list`）与 `listContent` 两个 Part。 |
+
+上游 `MessageSemanticType` 的 `classNames` / `styles` 均为
+`{ root?, wrapper?, icon?, title?, list?, listContent? }` 六个键（上游 6.6.3 稳定发布源码
+`message/interface.ts`，语义 demo `message/demo/_semantic.tsx`）。上游 DOM 嵌套为
+`list > listContent > root > wrapper > [icon, title]`；`root` 自 6.0.0 起公开，`wrapper`、`title`、`list`、
+`listContent` 自 6.4.0 起公开。
+
+AtomUI 把六个上游 Part 一一映射到两个 owner 的真实节点：
+
+```text
+WindowMessageManager (root，对应上游 list)
+  └─ Grid#PART_StackHost (按 Position 锚定，Margin 消费 manager.Padding)
+       ├─ Panel (零尺寸、不可命中的两层静态背板)
+       └─ FeedbackStackPresenter#PART_Items (listContent，公共契约 ItemsControl)
+            └─ ItemsPresenter / FeedbackStackPanel
+                 └─ MessageCard (root，对应上游 notice root)
+                      └─ MotionActor
+                           └─ Border#PART_Frame (root 表面投影)
+                                └─ DockPanel#PART_HeaderContainer (wrapper)
+                                     ├─ IconPresenter#PART_IconContent (icon)
+                                     └─ SelectableTextBlock#PART_Message (title)
+```
+
+上游 `root` 就是 message notice 本身，因此映射到 `MessageCard` owner；上游 `list` 是承载全部 notice 的定位容器，
+映射到 `WindowMessageManager` owner。两个 owner 各自拥有隐式 `root`，不额外声明 `.semantic-root` marker。
+
+结构与布局边界：
+
+- manager 的 `Position` 决定六种边缘对齐，`Padding` 决定队列与 manager 边缘的间隔。
+  宿主模式中 manager 铺满反馈层并通过 `TopLevelMarginBinder` 接收安全区外边距；内联模式中同样的定位作用于
+  调用方分配的布局范围。模板中的 `PART_StackHost` 按位置锚定并紧贴队列，`listContent` 填满该 host。
+- `listContent` 的公共类型为 `ItemsControl`；实际 presenter 和其内部 panel 管理堆叠、顺序与项间距。
+  这两个内部类型及其专属属性不是应用的样式契约。
+- 上游 `wrapper` 用 flex `gap: marginXS` + `align-items: center` 排列 icon 与 title；AtomUI `DockPanel` 无 `Spacing`，
+  等价的图标间距由 `IconPresenter` 的 `MessageIconMargin`（右外边距 `UniformlyMarginXS`）表达，视觉结果一致。
+
+两个 owner 的 descriptor `Since` 统一为 `6.2.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
+
+以下类型不持有独立 Semantic descriptor：
+
+- `Message`（`IMessage` 的实现）是服务调用的数据对象，不是 Control。
+- `IMessage` / `IMessageManager` 是服务契约接口。
+- `MessageCardPseudoClass`、`MessageType` 是状态与枚举类型。
+- `MessageCardToken` 是 Token scope；Semantic Part 不产生 Token identity。
+
+### 1.1 `MessageCard`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `MessageCard` |
+| Part | `root` |
+| Selector | MessageCard 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `MessageCard` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | MessageCard owner（表面投影到 `Border#PART_Frame`，动效由 `MotionActor` 承载） |
+| 职责 | 单条消息项根元素：承载 `Message`、`MessageType`、`Icon`、`IsClosing`、`IsClosed`、`IsMotionEnabled` 与进入/退出动效；根表面（背景、圆角、阴影、内边距）投影到模板中的 `Border#PART_Frame`。对应上游 notice root。 |
+| 相关 API | `Message`、`MessageType`、`Icon`、`IsClosing`、`IsClosed`、`IsMotionEnabled`、`Close()`、`MessageClosed` |
+| 相关 Token | `ContentBg`、`ContentPadding`、SharedToken（`BoxShadows`、`BorderRadiusLG`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `wrapper`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `MessageCard` |
+| Part | `wrapper` |
+| Selector | `.semantic-wrapper` |
+| SelectorRoute | `/template/ .semantic-wrapper` |
+| Style Type | `MessageCardWrapperStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | MessageCard 模板中的 `DockPanel#PART_HeaderContainer` |
+| 职责 | 图标与标题的包裹元素：决定 icon/title 的排列方向、对齐与图标间距。对应上游 notice wrapper。 |
+| 相关 API | `Icon`、`Message`（决定子节点可见性） |
+| 相关 Token | `MessageIconMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `MessageCard` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `MessageCardIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | MessageCard 模板中的 `IconPresenter#PART_IconContent` |
+| 职责 | 状态图标元素：尺寸、画刷与行高；`MessageType` 决定默认图标与状态色（Information/Loading = `ColorPrimary`，Success = `ColorSuccess`，Warning = `ColorWarning`，Error = `ColorError`）。对应上游 notice icon。 |
+| 相关 API | `Icon`、`MessageType` |
+| 相关 Token | `MessageIconSize`、SharedToken（`ColorPrimary`、`ColorSuccess`、`ColorWarning`、`ColorError`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `MessageCard` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `MessageCardTitleStyle` |
+| ContractType | `Avalonia.Controls.SelectableTextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | MessageCard 模板中的 `SelectableTextBlock#PART_Message`（Avalonia 类型，非 `atom:` 前缀） |
+| 职责 | 消息文本元素：文本颜色、字号、行高、换行与文本选择样式。对应上游 notice title（上游把 `content` 作为 notice title 渲染）。 |
+| 相关 API | `Message` |
+| 相关 Token | SharedToken（`FontSize`、`FontHeight`、`ColorText`、`SelectionBackground`、`SelectionForeground`） |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `WindowMessageManager`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `WindowMessageManager` |
+| Part | `root` |
+| Selector | WindowMessageManager 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `WindowMessageManager` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | WindowMessageManager owner（宿主层/full-screen 覆盖层；无宿主构造时为内联可放置实例） |
+| 职责 | 消息列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`，管理宿主层安装、消息队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度语义。 |
+| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`Padding`、`IsStackEnabled`、`StackThreshold`、`IsPauseOnHover`、`Show(IMessage)`、`DestroyAll()`、`Dispose()` |
+| 相关 Token | `MessageTopMargin`、SharedToken（`EnableMotion`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `listContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `WindowMessageManager` |
+| Part | `listContent` |
+| Selector | `.semantic-list-content` |
+| SelectorRoute | `/template/ .semantic-list-content` |
+| Style Type | `WindowMessageManagerListContentStyle` |
+| ContractType | `ItemsControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | WindowMessageManager 模板中的 `FeedbackStackPresenter#PART_Items` |
+| 职责 | 消息列表内容元素：notice 的排列方向、顺序与对齐；对应上游 `listContent` 的 notice 排列/间距语义。 |
+| 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
+| 相关 Token | SharedToken（`EnableMotion`） |
+| 稳定性 | stable since 6.2.0 |
+
+隐式 `root` 不声明 `.semantic-root` marker。`MessageCard` 的 `wrapper`、`icon`、`title` marker 静态声明在
+`MessageCardTheme.axaml` 模板内；`WindowMessageManager` 的 `listContent` marker 静态声明在
+`WindowMessageManagerTheme.axaml` 模板内。四个 marker 都在 owner 自身的 `ControlTheme` 资产中，因此两个 descriptor
+都不需要 `RuntimeCreated=true`，生成器按 owner 主题资产做静态校验。
 
 ## Abstract AXAML Structure
 
@@ -12537,9 +19966,9 @@ Message
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Message` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `MessageCard` | control theme | `MessageCardTheme.axaml` | 用户代码 / 控件宿主 | `Icon`, `Message` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (MotionActor) | `MessageCardTheme.axaml` | MessageCard | `Icon`, `Message` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_Frame` | template node (Border) | `MessageCardTheme.axaml` | MessageCard | `Icon`, `Message` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `MessageCard` | control theme | `MessageCardTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `CornerRadius`, `Icon` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (MotionActor) | `MessageCardTheme.axaml` | MessageCard | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `CornerRadius`, `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_Frame` | template node (Border) | `MessageCardTheme.axaml` | MessageCard | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `CornerRadius`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_HeaderContainer` | template node (DockPanel) | `MessageCardTheme.axaml` | MessageCard | `Icon`, `Message` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_IconContent` | template node (IconPresenter) | `MessageCardTheme.axaml` | MessageCard | `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Message` | template node (SelectableTextBlock) | `MessageCardTheme.axaml` | MessageCard | `Message` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -12598,6 +20027,10 @@ Message 使用 internal `MessageCardToken` 作为控件 Token scope。Token 只�
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
 
+列表的公开样式入口是 `WindowMessageManager.Padding` 与生成的 `WindowMessageManagerListContentStyle`。
+前者控制队列边缘间隔；后者以 `ItemsControl` 为公共目标，支持宽度、最小宽度与对齐等属性。
+项间距和卡片顺序由内部反馈栈管理，不能以 `Spacing` / `ReverseOrder` 作为 listContent 的公开 Setter。
+
 Token 边界：
 
 Message Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆角、阴影、图标尺寸和弹层边界。Token 不承载运行时选择、展开、加载、错误、上传任务、过滤条件或业务状态。
@@ -12641,13 +20074,218 @@ Source: ./controls/modal/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Dialog` / `MessageBox` | public 打开意图、内容、结果和事件入口。 | `IsOpen`, `OpenAsync`, `Result`, `BeforeCloseAsync` | `DialogToken` | stable |
-| `host` | Overlay presenter / native Window | 承载模态、placement、尺寸和宿主生命周期。 | `DialogHostType`, `IsModal`, `PlacementTarget` | SharedToken motion | internal-observable |
-| `surface` | `DialogSurface` | 共享标题、正文、Footer、按钮和 focus scope。 | `Content`, `StandardButtons`, `IsLoading` | `ContentBg`, padding/footer tokens | internal-observable |
-| `content` | Content / `MessageBoxContent` | 呈现任意 Dialog 内容或 MessageBox 语义内容。 | `Content`, `ContentTemplate`, `Style`, `Icon` | typography/color tokens | stable |
-| `motion` | Overlay `MotionActor` + `PART_SurfaceContentLayer` | Overlay 等待外层、前景内容和 mask 的关闭边界；Window 使用原生 Opened/Closed 边界。 | `IsMotionEnabled` | `MotionDurationMid` | internal-observable |
+Dialog 家族公开 8 个 Semantic Part，`root` 由生成器隐式加入（不要求 `.semantic-root`）。语义 owner 是 public 的
+`Dialog` 控件本身；`MessageBox : Dialog` 复用同一 `DialogSurface` 视觉树，因此单独声明同一组 Part（生成器按 public
+Control 生成 descriptor，不继承基类 descriptor，先例：`SimplePagination` 对 `Pagination`）。
+
+`Dialog` **没有 `ControlTemplate`**（`DialogTheme.axaml` 只定义默认属性与 `IsModal` 状态），全部视觉节点位于运行时
+创建并附加到 `DialogOverlayLayer` 或原生 `DialogWindow` 的 `DialogSurface` / `OverlayDialogPresenter` /
+`OverlayDialogHeader` 模板中。因此全部 Part 声明 `RuntimeCreated=true`、`CrossVisualRoot=true`、
+`CrossNestedOwners=true`，路由以 `>>` 从 owner 直接定位 marker 节点（先例：Drawer 的运行时容器部件）。
+
+与上游 Modal 语义 DOM（`_semantic.tsx`，9 个槽位）的映射：
+
+| 上游槽位 | 上游 since | AtomUI 部件 | 说明 |
+| --- | --- | --- | --- |
+| `root` | 6.0.0 | `root`（隐式，owner 契约） | 上游 `.ant-modal-root` 是最外层容器；AtomUI 遵循系统契约 root=owner 控件，上游 root 对应内部 `DialogOverlayLayer`/presenter 基础设施，不作为部件暴露。 |
+| `mask` | 5.13.0 | `mask` | 一一对应；`IsModal=false` 或 Window 宿主时不物化（Optional）。 |
+| `container` | 6.0.0 | `container` | 一一对应（`Border#Frame`：背景、圆角、`ClipToBounds`）。上游同一节点的 `boxShadow`/`padding` 在 AtomUI 分属其他节点，见 §5.1。 |
+| `wrapper` | 5.13.0 | `wrapper` | 角色对应：上游是动画/滚动包裹层，AtomUI 由 `PART_SurfaceMotionActor` 承担。几何差异见 §5.2。 |
+| `header` | 5.13.0 | `header` | 一一对应（`Border#HeaderFrame`：背景、内边距）。Overlay 恒存在；Window 宿主不物化（Optional，见 §2）。 |
+| `title` | 6.0.0 | `title` | 一一对应（`TextBlock#Title`）。Overlay 恒存在；随 header 在 Window 宿主不物化（Optional）。 |
+| `body` | 5.13.0 | `body` | 一一对应（`Border#ContentFrame`：正文内边距与内容承载）。 |
+| `footer` | 5.13.0 | `footer` | 一一对应（`Border#FooterFrame`：背景、内边距、外边距）。节点恒存在，`IsFooterVisible=false` 时仅隐藏（Single）。 |
+| `close` | 6.4.0 | `close` | 一一对应（`PART_CloseButton`）。Overlay 恒存在，`IsClosable=false` 仅隐藏；随 header 在 Window 宿主不物化（Optional）。 |
+
+Part 明细：
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `MessageBox` / `root` |
+| Selector | 不适用（root 无 `.semantic-root`） |
+| SelectorRoute | 不适用 |
+| Style Type | 不生成（`root` descriptor 的 `StyleType` 为 `null`） |
+| ContractType | owner 自身类型 |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot | 不适用（owner 本身） |
+| AtomUI 节点 | `Dialog` / `MessageBox` 实例（零尺寸状态持有控件，`DialogTheme.axaml` 未定义模板） |
+| 职责 | public 打开意图、内容、结果、按钮与事件入口 |
+| 相关 API | `IsOpen`、`OpenAsync`、`Content`、`Result`、`BeforeCloseAsync`、`DialogHostType` |
+| 相关 Token | `DialogToken`（背景、文字、间距、尺寸） |
+| Customization | Root |
+| Stability | stable |
+
+#### `mask`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `mask` |
+| Selector | `.semantic-mask` |
+| SelectorRoute | `>> .semantic-scope-mask /template/ .semantic-mask` |
+| Style Type | `AtomUI.Theme.Styling.DialogMaskStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogMaskTheme.axaml` 的 `Border#Frame`（静态 marker） |
+| 职责 | modal 遮罩：`ColorBgMask` 背景、`CornerRadius`、指针命中与 fade motion 的视觉承载体 |
+| 相关 API | `IsModal`、`IsMaskClosable` |
+| 相关 Token | `ColorBgMask`、`MotionDurationMid` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `wrapper`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `wrapper` |
+| Selector | `.semantic-wrapper` |
+| SelectorRoute | `>> .semantic-scope-presenter > .semantic-wrapper` |
+| Style Type | `AtomUI.Theme.Styling.DialogWrapperStyle` |
+| ContractType | `Avalonia.Controls.Control` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogPresenterTheme.axaml` 的 `MotionActor#PART_SurfaceMotionActor`（静态 marker） |
+| 职责 | Surface 动画/过渡包裹层；承载 opening/closing motion 的视觉宿主 |
+| 相关 API | `IsMotionEnabled` |
+| 相关 Token | `MotionDurationMid` |
+| Customization | Selector |
+| Stability | stable（几何语义见 §5.2） |
+
+#### `container`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `container` |
+| Selector | `.semantic-container` |
+| SelectorRoute | `>> .semantic-scope-frame-host > .semantic-container` |
+| Style Type | `AtomUI.Theme.Styling.DialogContainerStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#Frame`（静态 marker） |
+| 职责 | 对话主体框体：`ContentBg` 背景、`BorderRadiusLG` 圆角、子内容裁剪 |
+| 相关 API | `DialogHostType`（Overlay 圆角 / Window 方角） |
+| 相关 Token | `ContentBg`、`BorderRadiusLG` |
+| Customization | Selector |
+| Stability | stable（阴影归属见 §5.1） |
+
+#### `header`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `header` |
+| Selector | `.semantic-header` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-header` |
+| Style Type | `AtomUI.Theme.Styling.DialogHeaderStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `Border#HeaderFrame`（静态 marker） |
+| 职责 | 标题区框体：`HeaderBg` 背景与 `HeaderPadding` 内边距 |
+| 相关 API | `Title`、`TitleIcon`、`IsClosable`、`IsMaximizable`、`IsDragMovable` |
+| 相关 Token | `HeaderBg`、`HeaderPadding`、`HeaderMarginBottom` |
+| Customization | Selector |
+| Stability | stable（与上游 header 的几何差异见 §5.3） |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-title` |
+| Style Type | `AtomUI.Theme.Styling.DialogTitleStyle` |
+| ContractType | `Avalonia.Controls.TextBlock` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `TextBlock#Title`（静态 marker） |
+| 职责 | 标题文字排版与前景色 |
+| 相关 API | `Title` |
+| 相关 Token | `HeaderFontSize`、`FontWeightStrong`、`HeaderColor` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-body` |
+| Style Type | `AtomUI.Theme.Styling.DialogBodyStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#ContentFrame`（静态 marker） |
+| 职责 | 正文区域：`ContentPadding` 内边距、内容裁剪与 loading 骨架宿主边界 |
+| 相关 API | `Content`、`ContentTemplate`、`IsLoading` |
+| 相关 Token | `ContentPadding`、`LoadingIndicatorMargin` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `footer` |
+| Selector | `.semantic-footer` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-footer` |
+| Style Type | `AtomUI.Theme.Styling.DialogFooterStyle` |
+| ContractType | `Avalonia.Controls.Border` |
+| Cardinality | Single |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#FooterFrame`（静态 marker） |
+| 职责 | 底部操作区框体：`FooterBg` 背景、`FooterPadding` 内边距、`FooterMarginTop` 外边距；不承诺内部按钮布局 |
+| 相关 API | `IsFooterVisible`、`StandardButtons`、`CustomButtons` |
+| 相关 Token | `FooterBg`、`FooterPadding`、`FooterMarginTop` |
+| Customization | Selector |
+| Stability | stable |
+
+#### `close`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner / Part | `Dialog` / `close` |
+| Selector | `.semantic-close` |
+| SelectorRoute | `>> .semantic-scope-content-layer > .semantic-scope-header /template/ .semantic-close` |
+| Style Type | `AtomUI.Theme.Styling.DialogCloseStyle` |
+| ContractType | `Avalonia.Controls.Button` |
+| Cardinality | Optional |
+| RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
+| AtomUI 节点 | `OverlayDialogHeaderTheme.axaml` 的 `DialogCaptionButton#PART_CloseButton`（静态 marker） |
+| 职责 | 标题栏关闭入口的按钮视觉（前景、尺寸、hover/pressed 反馈） |
+| 相关 API | `IsClosable` |
+| 相关 Token | `CloseBtnSize`、`IconSize`、`HeaderColor` |
+| Customization | Selector |
+| Stability | stable（与上游绝对定位 close 的差异见 §5.4） |
+
+#### MessageBox
+
+`MessageBox` 是 `Dialog` 的语义专化，复用同一 `DialogSurface`/`OverlayDialogHeader` 模板，因此公开与 `Dialog`
+完全相同的 8 个 Part（节点、`SelectorClass`、`SelectorRoute`、`ContractType`、`Cardinality` 一致），但 descriptor 归属
+`MessageBox` 自身类型，生成 `MessageBox<Part>Style` 类型（如 `MessageBoxContainerStyle`）。`MessageBox` 的
+`MessageBoxContent`（图标 + 内容组合）属于 `body` 的内容，不是独立 Part。
+
+### 1.1 路由精度与 `.semantic-scope-*` 锚点
+
+Dialog body 内嵌 `Skeleton`（加载态常驻），用户内容还常包含 `Card`、`Tooltip`、`Spin` 等语义 owner，它们同样发布
+`semantic-header`/`semantic-title`/`semantic-body`/`semantic-footer`/`semantic-container` 等同名 `SelectorClass`。
+宽泛 `>>` descendant 会把这些嵌套部件一并命中（系统文档 §3.3 明确禁止公共 Selector 使用宽泛 descendant），
+因此本契约的全部路由都用 Dialog 自有的 `.semantic-scope-*` 锚点收窄：
+
+| 锚点 | 节点 | 作用 |
+| --- | --- | --- |
+| `semantic-scope-presenter` | `OverlayDialogPresenterTheme` 的模板根 `Panel` | 定位 presenter 模板，隔离嵌套 owner 的 `wrapper`。 |
+| `semantic-scope-mask` | `OverlayDialogMask#PART_DialogMask` | 定位遮罩控件，隔离嵌套 owner 的 `mask`。 |
+| `semantic-scope-frame-host` | `ShadowsAwareContainer#PART_ShadowHost` | 定位框体宿主，隔离嵌套 owner 的 `container`。 |
+| `semantic-scope-content-layer` | `DockPanel#PART_SurfaceContentLayer` | 定位 Header/正文/Footer 的直接父，隔离正文内的嵌套 owner。 |
+| `semantic-scope-header` | `OverlayDialogHeader#PART_Header` | 定位标题栏控件，隔离嵌套 owner 的 `header`/`title`/`close`。 |
+
+`.semantic-scope-*` 只用于路由，不进入 Part 表；隔离由「锚点唯一 + `>`/`/template/` 精确步骤」共同保证，
+不依赖任何“最近 Semantic owner”停止规则。回归测试
+`Generated_Semantic_Styles_Hit_Exactly_One_Node_Per_Part` 断言每个 Part 恰好命中一个节点，锁定该精度。
 
 ## Abstract AXAML Structure
 
@@ -12745,6 +20383,10 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - MessageBox 继续作为 Dialog 派生类，不增加平行 host/session/button cache 生命周期。
 - mask 外点关闭入口只由 `IsMaskClosable` 在 Overlay presenter 的 mask 输入路径统一门控；不引入第二条 mask 关闭路径，也不在 Session veto 层复制该判断。
 - 新增 binding、事件、资源 parent、motion source 或内容引用时，必须在同一个 owner 中增加释放点和回归测试。
+- Overlay presenter 的逻辑父必须指向 `Dialog`（加入 layer 前设置、teardown 后清空），否则 owner 作用域 Semantic Style
+  与 Gallery 语义预览均不可达；`Dialog.GetCrossRoots()` 只在 presenter 已附加时上报存活根，释放后不得保留引用。
+- Semantic Part marker 必须保持静态声明，不得按 `IsModal`/`IsLoading`/`DialogHostType` 等状态动态增删；`Optional` 语义
+  由节点是否存在（模板/开关）表达，不由 marker 增删表达。
 
 Source: ./controls/notification/semantic-cn.md
 
@@ -12754,13 +20396,297 @@ Source: ./controls/notification/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Notification` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Notification 由两个 public owner 组成，因此公开两个独立 descriptor：
+
+| Owner | 职责 |
+| --- | --- |
+| `NotificationCard` | 单条通知卡片（上游 notice），承载 `root`、`wrapper`、`icon`、`section`、`title`、`description`、`actions`、`close`、`progress` 九个 Part。 |
+| `WindowNotificationManager` | 服务型通知宿主（上游 notification list），承载 `root`（= 上游 `list`）与 `listContent` 两个 Part。 |
+
+上游 `NotificationSemanticType` 的 `classNames` / `styles` 为
+`{ list?, listContent?, wrapper?, root?, title?, description?, actions?, icon?, section?, close?, progress? }` 十一个键
+（上游 6.6.3 稳定发布源码 `notification/interface.ts`，语义 demo
+`notification/demo/_semantic.tsx`）。上游 DOM 嵌套为
+`list > listContent > root > [ wrapper > (icon, section > (title, description)), actions, close, progress ]`；
+`root`、`icon`、`title`、`description`、`actions` 自 6.0.0 起公开，`wrapper`、`section`、`close`、`progress`、
+`list`、`listContent` 自 6.4.0 起公开。
+
+AtomUI 把十一个上游 Part 一一映射到两个 owner 的真实节点：
+
+```text
+WindowNotificationManager (root，对应上游 list)
+  └─ FeedbackStackPresenter#PART_Items (listContent，公共契约 ItemsControl，Margin 消费 manager.Padding)
+       └─ ItemsPresenter / FeedbackStackPanel
+            └─ NotificationCard (root，对应上游 notice root)
+                 └─ MotionActor
+                      └─ Border#Frame (表面投影，Padding=0)
+                           └─ FeedbackStackTransitionSnapshotHost#PART_StackTransitionSnapshotHost
+                                └─ Grid#PART_Layout
+                                     ├─ Border#ContentBox (消费 card.Padding)
+                                     │    └─ StackPanel
+                                     │         ├─ DockPanel#Wrapper (wrapper)
+                                     │         │    ├─ IconPresenter#IconPresenter (icon)
+                                     │         │    └─ StackPanel#Section (section)
+                                     │         │         ├─ SelectableTextBlock#HeaderTitle (title)
+                                     │         │         └─ ContentPresenter#Content (description)
+                                     │         └─ ContentPresenter#ActionsContainer (actions)
+                                     ├─ IconButton#PART_CloseButton (close，右上角覆盖)
+                                     └─ NotificationProgressBar#ProgressBar (progress，运行时创建、跨列贴底)
+```
+
+上游 `root` 就是 notification notice 本身，因此映射到 `NotificationCard` owner；上游 `list` 是承载全部 notice 的
+定位容器，映射到 `WindowNotificationManager` owner。两个 owner 各自拥有隐式 `root`，不额外声明 `.semantic-root` marker。
+
+结构与布局边界：
+
+- manager 铺满宿主反馈层，安全区外边距由 `TopLevelMarginBinder` 提供；列表内边距由 owner `Padding` 提供，
+  投影到 presenter 的 `Margin`。`Position` 决定六种对齐，内联使用时定位作用于调用方分配的布局范围。
+- `listContent` 公共类型为 `ItemsControl`。实际 presenter 和 panel 管理可变高度卡片的堆叠、展开与项间距。
+- `Frame` 是 `MotionActor` 的直接内容，绘制背景、边框、阴影。card `Padding` 由内部 `ContentBox` 消费；
+  `Frame` 自身零内边距，使关闭按钮偏移从边框内侧计算，进度条能够贴底。
+- `close` 与内容在 Grid 第一行重叠，右上对齐；`progress` 运行时加入第二行并跨两列，以有限的卡片内容宽度测量。
+  两者均不嵌入 `wrapper` / `section` / `actions` 的正文流。快照 host 只拥有折叠过渡期间的内容快照，不公开 Part。
+- `wrapper` 使用 DockPanel，icon 的右外边距取 `NotificationIconMargin`，并与标题首行顶部对齐。
+  `section` 使用 StackPanel，其 `Spacing` 取 `NotificationSectionSpacing`。
+
+两个 owner 的 descriptor `Since` 统一为 `6.2.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
+
+以下类型不持有独立 Semantic descriptor：
+
+- `Notification`（`INotification` 的实现）是服务调用的数据对象，不是 Control。
+- `INotification` / `INotificationManager` 是服务契约接口。
+- `NotificationPseudoClass`、`NotificationPosition`、`NotificationType` 是状态与枚举类型。
+- `NotificationCardToken`、`NotificationProgressBar`、`NotificationProgressBarVisibleConverter` 与各 Motion 类型是
+  Token scope、内部进度绘制与动效实现；Semantic Part 不产生 Token identity。
+
+### 1.1 `NotificationCard`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `root` |
+| Selector | NotificationCard 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `NotificationCard` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard owner（表面投影到 `Border#Frame`，动效由 `MotionActor` 承载） |
+| 职责 | 通知项根元素：承载 `Title`、`Content`、`Icon`、`Actions`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled` 与进入/退出动效；根表面（背景、边框、圆角、阴影、内边距）投影到模板中的 `Border#Frame`。对应上游 notice root。 |
+| 相关 API | `Title`、`Content`、`Icon`、`Actions`、`ActionsTemplate`、`NotificationType`、`IsClosing`、`IsClosed`、`IsMotionEnabled`、`Close()`、`NotificationClosed` |
+| 相关 Token | `NotificationBg`、`NotificationPadding`、SharedToken（`BoxShadows`、`BorderRadiusLG`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `wrapper`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `wrapper` |
+| Selector | `.semantic-wrapper` |
+| SelectorRoute | `/template/ .semantic-wrapper` |
+| Style Type | `NotificationCardWrapperStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `DockPanel#Wrapper` |
+| 职责 | 图标与内容区域的包裹元素：决定 icon 与 section 的排列方向、对齐与图标间距。对应上游 notice wrapper（flex 行，`align-items: flex-start`）。 |
+| 相关 API | `Icon`、`Title`、`Content`（决定子节点可见性） |
+| 相关 Token | `NotificationIconMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `NotificationCardIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `IconPresenter#IconPresenter` |
+| 职责 | 状态图标元素：尺寸、画刷与行高；`NotificationType` 决定默认图标与状态色（Information = `ColorPrimary`，Success = `ColorSuccess`，Warning = `ColorWarning`，Error = `ColorError`）。对应上游 notice icon。 |
+| 相关 API | `Icon`、`NotificationType` |
+| 相关 Token | `NotificationIconSize`、`NotificationIconMargin`、SharedToken（`ColorPrimary`、`ColorSuccess`、`ColorWarning`、`ColorError`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `section`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `section` |
+| Selector | `.semantic-section` |
+| SelectorRoute | `/template/ .semantic-section` |
+| Style Type | `NotificationCardSectionStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `StackPanel#Section` |
+| 职责 | 包含标题与描述的内容区域元素：决定两者的纵向间距与对齐。对应上游 notice section（flex column，`gap: marginXS`）。 |
+| 相关 API | `Title`、`Content` |
+| 相关 Token | `NotificationSectionSpacing` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `NotificationCardTitleStyle` |
+| ContractType | `AtomUI.Desktop.Controls.SelectableTextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `atom:SelectableTextBlock#HeaderTitle`（AtomUI 类型，主题中带 `atom:` 前缀） |
+| 职责 | 标题元素：文本颜色、字号、行高与右侧留白（为关闭按钮预留）。对应上游 notice title。 |
+| 相关 API | `Title` |
+| 相关 Token | SharedToken（`FontSizeLG`、`FontHeightLG`、`ColorTextHeading`）、`NotificationTitlePadding` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `description`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `description` |
+| Selector | `.semantic-description` |
+| SelectorRoute | `/template/ .semantic-description` |
+| Style Type | `NotificationCardDescriptionStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `ContentPresenter#Content` |
+| 职责 | 描述元素：正文颜色、字号、行高与换行。对应上游 notice description（在标题下方，不与关闭按钮同排，因此不预留右侧空间）。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | SharedToken（`FontSize`、`FontHeight`、`ColorText`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `actions` |
+| Selector | `.semantic-actions` |
+| SelectorRoute | `/template/ .semantic-actions` |
+| Style Type | `NotificationCardActionsStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `ContentPresenter#ActionsContainer` |
+| 职责 | 操作组元素：位于 notice 右下角，承载调用方传入的操作内容；`Actions` 为空时节点隐藏。对应上游 notice actions。 |
+| 相关 API | `Actions`、`ActionsTemplate` |
+| 相关 Token | `NotificationActionsMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `close`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `close` |
+| Selector | `.semantic-close` |
+| SelectorRoute | `/template/ .semantic-close` |
+| Style Type | `NotificationCardCloseStyle` |
+| ContractType | `IconButton` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | NotificationCard 模板中的 `IconButton#PART_CloseButton` |
+| 职责 | 关闭按钮覆盖元素：位置（右上角）、尺寸、圆角、默认/悬停/按下颜色与聚焦样式。对应上游 notice close（absolute top-right）。 |
+| 相关 API | `Close()`、`NotificationClosed` |
+| 相关 Token | `NotificationCloseButtonSize`、`NotificationCloseButtonPadding`、`NotificationCloseButtonMargin`、SharedToken（`BorderRadiusSM`、`IconSizeSM`、`ColorIcon`、`ColorIconHover`、`ColorBgTextHover`、`ColorBgTextActive`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `progress`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `NotificationCard` |
+| Part | `progress` |
+| Selector | `.semantic-progress` |
+| SelectorRoute | `/template/ .semantic-progress` |
+| Style Type | `NotificationCardProgressStyle` |
+| ContractType | `Control` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `NotificationCard` 运行时创建的 `NotificationProgressBar#ProgressBar`（贴卡片底边，左右内缩 `BorderRadiusLG`） |
+| 职责 | 进度覆盖元素：展示自动关闭的剩余时间。对应上游 notice progress（absolute bottom）。 |
+| 相关 API | `IsShowProgress`、`Expiration` |
+| 相关 Token | `NotificationProgressHeight`、`NotificationProgressBg`、`NotificationProgressMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `WindowNotificationManager`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `WindowNotificationManager` |
+| Part | `root` |
+| Selector | WindowNotificationManager 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `WindowNotificationManager` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | WindowNotificationManager owner（宿主层/full-screen 覆盖层；无宿主构造时为内联可放置实例） |
+| 职责 | 通知列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`，管理宿主层安装、通知队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度与边缘内边距语义。 |
+| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`IsPauseOnHover`、`Padding`、`IsStackEnabled`、`StackThreshold`、`Show(INotification)`、`DestroyAll()`、`Dispose()` |
+| 相关 Token | `NotificationTopMargin`、`NotificationBottomMargin`、SharedToken（`EnableMotion`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `listContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `WindowNotificationManager` |
+| Part | `listContent` |
+| Selector | `.semantic-list-content` |
+| SelectorRoute | `/template/ .semantic-list-content` |
+| Style Type | `WindowNotificationManagerListContentStyle` |
+| ContractType | `ItemsControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | WindowNotificationManager 模板中的 `FeedbackStackPresenter#PART_Items` |
+| 职责 | 通知列表内容元素：notice 的排列方向、顺序、对齐与项间距；对应上游 `listContent` 的 notice 排列/间距语义。 |
+| 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
+| 相关 Token | SharedToken（`EnableMotion`、`UniformlyMargin`） |
+| 稳定性 | stable since 6.2.0 |
+
+隐式 `root` 不声明 `.semantic-root` marker。`NotificationCard` 的 `wrapper`、`icon`、`section`、`title`、
+`description`、`actions`、`close` marker 静态声明在 `NotificationCardTheme.axaml` 模板内；`progress` 由控件运行时
+创建并在创建路径注入 semantic class；`WindowNotificationManager` 的 `listContent` marker 静态声明在
+`WindowNotificationManagerTheme.axaml` 模板内。
 
 ## Abstract AXAML Structure
 
@@ -12779,11 +20705,15 @@ Notification
         -> Border#Frame (template-stable)
            -> FeedbackStackTransitionSnapshotHost#PART_StackTransitionSnapshotHost (template-stable)
               -> Grid#PART_Layout (template-stable)
-                 -> IconPresenter#IconPresenter (internal-observable)
-                 -> DockPanel#HeaderContainer (template-stable)
-                    -> IconButton#PART_CloseButton (template-stable)
-                    -> SelectableTextBlock#HeaderTitle (template-stable)
-                 -> ContentPresenter#Content (internal-observable)
+                 -> Border#ContentBox (template-stable)
+                    -> StackPanel (template-stable)
+                       -> DockPanel#Wrapper (template-stable)
+                          -> IconPresenter#IconPresenter (internal-observable)
+                          -> StackPanel#Section (template-stable)
+                             -> SelectableTextBlock#HeaderTitle (template-stable)
+                             -> ContentPresenter#Content (internal-observable)
+                       -> ContentPresenter#ActionsContainer (internal-observable)
+                 -> IconButton#PART_CloseButton (template-stable)
   -> NotificationProgressBar (control theme, NotificationProgressBarTheme.axaml)
   -> FeedbackStackPresenter (presenter control theme, FeedbackStackPresenterTheme.axaml)
      -> Border (template-stable)
@@ -12795,16 +20725,20 @@ Notification
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Notification` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `NotificationCard` | control theme | `NotificationCardTheme.axaml` | 用户代码 / 控件宿主 | `Content`, `ContentTemplate`, `Icon`, `Title` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (MotionActor) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `Frame` | template node (Border) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_StackTransitionSnapshotHost` | template node (FeedbackStackTransitionSnapshotHost) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Layout` | template node (Grid) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `NotificationCard` | control theme | `NotificationCardTheme.axaml` | 用户代码 / 控件宿主 | `Actions`, `ActionsTemplate`, `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (MotionActor) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `Frame` | template node (Border) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_StackTransitionSnapshotHost` | template node (FeedbackStackTransitionSnapshotHost) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Content`, `ContentTemplate`, `Icon`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_Layout` | template node (Grid) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Content`, `ContentTemplate`, `Icon`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `ContentBox` | template node (Border) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Content`, `ContentTemplate`, `Icon`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `StackPanel` | template node (StackPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate`, `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Wrapper` | template node (DockPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Icon`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `IconPresenter` | template node (IconPresenter) | `NotificationCardTheme.axaml` | NotificationCard | `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `HeaderContainer` | template node (DockPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_CloseButton` | template node (IconButton) | `NotificationCardTheme.axaml` | NotificationCard | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Section` | template node (StackPanel) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate`, `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `HeaderTitle` | template node (SelectableTextBlock) | `NotificationCardTheme.axaml` | NotificationCard | `Title` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Content` | template node (ContentPresenter) | `NotificationCardTheme.axaml` | NotificationCard | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `ActionsContainer` | template node (ContentPresenter) | `NotificationCardTheme.axaml` | NotificationCard | `Actions`, `ActionsTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_CloseButton` | template node (IconButton) | `NotificationCardTheme.axaml` | NotificationCard | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `NotificationProgressBar` | control theme | `NotificationProgressBarTheme.axaml` | Notification | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `FeedbackStackPresenter` | presenter control theme | `FeedbackStackPresenterTheme.axaml` | Notification | `ItemsPanel` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_ItemsPresenter` | template node (ItemsPresenter) | `FeedbackStackPresenterTheme.axaml` | FeedbackStackPresenter | `ItemsPanel` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -12862,6 +20796,10 @@ Notification 使用 internal `NotificationCardToken` 作为控件 Token scope。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
 
+列表的公开样式入口是 `WindowNotificationManager.Padding` 与生成的 `WindowNotificationManagerListContentStyle`。
+前者控制队列边缘间隔；后者以 `ItemsControl` 为公共目标，支持宽度、最小宽度与对齐等属性。
+项间距和卡片顺序由内部反馈栈管理，不能以 `Spacing` / `ReverseOrder` 作为 listContent 的公开 Setter。
+
 Token 边界：
 
 Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆角、阴影、图标尺寸和弹层边界。Token 不承载运行时选择、展开、加载、错误、上传任务、过滤条件或业务状态。
@@ -12903,13 +20841,220 @@ Source: ./controls/popup-confirm/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `PopupConfirm` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+PopupConfirm 的唯一 Semantic owner 是 `PopupConfirm`。`PopupConfirm` 继承 `FlyoutHost`，弹层由
+`PopupConfirmFlyout.CreatePresenter()` 在运行时创建、跨视觉根；internal 的 `PopupConfirmContainer`
+不作为 public Semantic owner，它只承载确认体节点。公开 9 个 Semantic Part：`root`（隐式）+
+8 个 `popup.*`。
+
+语义对齐上游 Popconfirm 的语义 DOM（槽位：`root` / `container` / `icon` / `title` / `content` / `arrow`）。映射关系中有一处刻意差异：上游 `content` 槽位（描述正文）在 AtomUI
+映射为 `popup.description`，因为 FlyoutHost 家族的 `popup.content` 已固定表示弹层框体的内容呈现面
+（`ContentPresenter#ContentPresenter`），不能再用作描述节点。上游并未把按钮行
+发布为语义 key，AtomUI 以 `popup.actions` 发布操作区，对齐 Alert `actions` 的稳定先例。
+
+| PopupConfirm Part | 上游 Popconfirm 槽位 | AtomUI 节点 |
+| --- | --- | --- |
+| `root`（隐式） | 不适用（AtomUI 控件自身） | `PopupConfirm` owner |
+| `popup.root` | `root` | `FlyoutPresenter`（`ArrowDecoratedBox`） |
+| `popup.container` | `container` | `Border#PART_ContentDecorator` |
+| `popup.content` | 不适用（Popover 家族框体内容面） | `ContentPresenter#ContentPresenter` |
+| `popup.arrow` | `arrow` | `ArrowIndicator#PART_ArrowIndicator` |
+| `popup.icon` | `icon` | `IconPresenter#PART_IconPresenter` |
+| `popup.title` | `title` | `TextBlock#PART_Title` |
+| `popup.description` | `content` | `ContentPresenter#PART_Content` |
+| `popup.actions` | 不适用（上游按钮行未发布为语义 key） | `StackPanel#PART_ButtonLayout` |
+
+声明位于 `PopupConfirm.SemanticParts.cs` partial 文件；`root` 为生成器隐式注册，不在该文件中显式声明。全部
+8 个 `popup.*` 部件声明 `CrossVisualRoot=true` + `RuntimeCreated=true`：承载节点由
+`PopupConfirmFlyout.CreatePresenter()` 在运行时创建，不在 `PopupConfirm` 自身 `PopupConfirmTheme.axaml`
+模板内，`SelectorRoute` 因此使用从 owner 逻辑祖先链经 `popup.root` 下钻的后代路由。marker 注入策略分两类：
+
+- 四个弹层框体件 `popup.root` / `popup.container` / `popup.content` / `popup.arrow` 复用 `FlyoutHost`
+  家族共享的代码注入路径：`Flyout.CreatePresenter()` 注入 `popup.root`，`FlyoutPresenter.OnApplyTemplate`
+  注入 `popup.container` / `popup.content` / `popup.arrow`。这三类 marker 不能静态声明在共享
+  `ArrowDecoratedBoxTheme.axaml` 上，否则会污染 DatePicker / TimePicker / Menu / TreeView 等其它
+  `ArrowDecoratedBox` 弹层。
+- 四个确认体件 `popup.icon` / `popup.title` / `popup.description` / `popup.actions` 的 marker 静态声明在
+  `PopupConfirmContainerTheme.axaml` 上；该主题只服务 PopupConfirm 内部容器，静态标记不会污染其它控件。
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `root` |
+| Selector | PopupConfirm 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `PopupConfirm` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | PopupConfirm owner |
+| 职责 | 触发宿主与确认状态的组织边界，承载 public API、确认/取消事件与主题入口。 |
+| 相关 API | 全部 PopupConfirm public API |
+| 相关 Token | PopupConfirmToken、FlyoutHostToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `popup.root` |
+| Selector | `.semantic-popup-root` |
+| SelectorRoute | `>> .semantic-popup-root` |
+| Style Type | `PopupConfirmPopupRootStyle` |
+| ContractType | `FlyoutPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `Flyout.CreatePresenter()` 创建的 `FlyoutPresenter`（`ArrowDecoratedBox`） |
+| 职责 | 弹层根节点，承载弹层背景、边框、内边距与箭头，对应上游 Popconfirm `root` 槽位。 |
+| 相关 API | `Flyout`、`ShouldUseOverlayPopup`、`IsArrowVisible` |
+| 相关 Token | FlyoutHostToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.container`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `popup.container` |
+| Selector | `.semantic-popup-container` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-container` |
+| Style Type | `PopupConfirmPopupContainerStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ArrowDecoratedBoxTheme.axaml` 的 `Border#PART_ContentDecorator`（背景/边框/圆角/内边距，模板绑定自 presenter） |
+| 职责 | 弹层内层容器，承载背景、边框、圆角与内边距，对应上游 Popconfirm `container` 槽位。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `popup.content` |
+| Selector | `.semantic-popup-content` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-content` |
+| Style Type | `PopupConfirmPopupContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ArrowDecoratedBoxTheme.axaml` 的 `ContentPresenter#ContentPresenter` |
+| 职责 | 弹层框体的内容呈现面，承载确认体容器；同为 FlyoutHost 家族的内容槽位，不对应上游 Popconfirm 单独语义 key。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.arrow`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `popup.arrow` |
+| Selector | `.semantic-popup-arrow` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-arrow` |
+| Style Type | `PopupConfirmPopupArrowStyle` |
+| ContractType | `ArrowIndicator` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `ArrowDecoratedBoxTheme.axaml` 的 `ArrowIndicator#PART_ArrowIndicator` |
+| 职责 | 指向锚点的浮动箭头，对应上游 Popconfirm `arrow` 槽位。 |
+| 相关 API | `IsArrowVisible`、`Placement` |
+| 相关 Token | ArrowDecoratedBoxToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `popup.icon` |
+| Selector | `.semantic-popup-icon` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-icon` |
+| Style Type | `PopupConfirmPopupIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `PopupConfirmContainerTheme.axaml` 的 `IconPresenter#PART_IconPresenter` |
+| 职责 | 确认状态图标，`ConfirmStatus` 通过 `IconBrush` 切换主题/警告/错误色，对应上游 Popconfirm `icon` 槽位。 |
+| 相关 API | `Icon`、`ConfirmStatus` |
+| 相关 Token | PopupConfirmToken、SharedToken（`IconSizeLG`、`ColorPrimary/ColorWarning/ColorError`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `popup.title` |
+| Selector | `.semantic-popup-title` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-title` |
+| Style Type | `PopupConfirmPopupTitleStyle` |
+| ContractType | `Avalonia.Controls.TextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `PopupConfirmContainerTheme.axaml` 的 `TextBlock#PART_Title` |
+| 职责 | 确认框标题，对应上游 Popconfirm `title` 槽位；标题文字由 `SharedToken ColorTextHeading` 与 `FontWeight=SemiBold` 承载。 |
+| 相关 API | `Title` |
+| 相关 Token | PopupConfirmToken（`TitleMargin`）、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.description`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `popup.description` |
+| Selector | `.semantic-popup-description` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-description` |
+| Style Type | `PopupConfirmPopupDescriptionStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `PopupConfirmContainerTheme.axaml` 的 `ContentPresenter#PART_Content` |
+| 职责 | 确认描述正文，对应上游 Popconfirm `content` 槽位（AtomUI 因 `popup.content` 已占用而改名为 `popup.description`）。 |
+| 相关 API | `ConfirmContent`、`ConfirmContentTemplate` |
+| 相关 Token | PopupConfirmToken（`ContentContainerMargin`）、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `popup.actions`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `PopupConfirm` |
+| Part | `popup.actions` |
+| Selector | `.semantic-popup-actions` |
+| SelectorRoute | `>> .semantic-popup-root >> .semantic-popup-actions` |
+| Style Type | `PopupConfirmPopupActionsStyle` |
+| ContractType | `StackPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `true` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | `PopupConfirmContainerTheme.axaml` 的 `StackPanel#PART_ButtonLayout` |
+| 职责 | 确认/取消操作区，承载 `PART_CancelButton` 与 `PART_OkButton`；对齐 Alert `actions` 先例，上游未把按钮行发布为语义 key。 |
+| 相关 API | `OkText`、`CancelText`、`OkButtonType`、`IsShowCancelButton` |
+| 相关 Token | PopupConfirmToken（`ButtonSpacing`、`ButtonContainerMargin`）、SharedToken |
+| 稳定性 | stable since 6.2.0 |
 
 ## Abstract AXAML Structure
 
@@ -13027,6 +21172,7 @@ PopupConfirm Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
 - 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
+- 不破坏已发布的 Semantic Part 名称、selector class / route、ContractType 与数量语义（见 [Semantic Part 契约](semantic-part.md)）。
 - 文档只描述当前稳定设计；历史变化记录在 `changelog.md`。
 
 维护不变量：
@@ -13038,6 +21184,7 @@ PopupConfirm Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
+- 已发布的 Semantic Part 名称、selector class / route、ContractType 和数量语义（见 [Semantic Part 契约](semantic-part.md)）。
 
 Source: ./controls/progress-bar/semantic-cn.md
 
@@ -13047,21 +21194,457 @@ Source: ./controls/progress-bar/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ProgressBar` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+四个 public 控件各自拥有独立 descriptor。Part 名称与上游 Progress Semantic DOM 保持一致：
+`root`、`body`、`rail`、`track`、`indicator`。官方 `steps` 模式明确不存在 rail，因此 `StepsProgressBar` 只声明
+`root`、`body`、`track`、`indicator`；不得为统一表面虚构一个始终不存在的 rail。其余同名 Part 表达一致的产品职责，
+不表示四个 owner 共享运行时节点、几何或状态。
+
+### 1.1 `ProgressBar`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ProgressBar` |
+| Part | `root` |
+| Selector | ProgressBar 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `ProgressBar` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 普通线形进度 owner |
+| 职责 | 承载进度范围、状态、尺寸、方向、文本位置和 Semantic Style 作用域。 |
+| 相关 API | 全部 `ProgressBar` public API |
+| 相关 Token | ProgressBarToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ProgressBar` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `ProgressBarBodyStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 线形进度主体布局 |
+| 职责 | 统一承载 rail、track、成功段和 indicator 的布局边界。 |
+| 相关 API | `Orientation`、`PercentPosition`、`IsProgressInfoVisible` |
+| 相关 Token | `LineExtraInfoMargin`、`LineProgressPadding` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `rail`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ProgressBar` |
+| Part | `rail` |
+| Selector | `.semantic-rail` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-rail` |
+| Style Type | `ProgressBarRailStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 未完成轨道盒视觉 |
+| 职责 | 表达线形进度的完整剩余轨道。 |
+| 相关 API | `TrailColor`、`StrokeLineCap`、`IndicatorThickness` |
+| 相关 Token | `RemainingColor` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `track`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ProgressBar` |
+| Part | `track` |
+| Selector | `.semantic-track` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-track` |
+| Style Type | `ProgressBarTrackStyle` |
+| ContractType | `Border` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 当前进度盒视觉 |
+| 职责 | 表达由 `Value` 计算出的线形已完成区域。 |
+| 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`IndicatorThickness` |
+| 相关 Token | `DefaultColor`、SharedToken 状态色 |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `ProgressBar` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-indicator` |
+| Style Type | `ProgressBarIndicatorStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 百分比或状态信息区域 |
+| 职责 | 统一承载格式化百分比、成功图标和异常图标的替代呈现。 |
+| 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`PercentPosition`、`Status`、完成图标 API |
+| 相关 Token | 文本、图标尺寸和状态色 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `StepsProgressBar`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `StepsProgressBar` |
+| Part | `root` |
+| Selector | StepsProgressBar 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `StepsProgressBar` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 步骤线形进度 owner |
+| 职责 | 承载进度范围、步骤数量、逐步画刷、尺寸、方向和 Semantic Style 作用域。 |
+| 相关 API | 全部 `StepsProgressBar` public API |
+| 相关 Token | ProgressBarToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `StepsProgressBar` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `StepsProgressBarBodyStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 步骤进度主体布局 |
+| 职责 | 统一承载步骤 track 和 indicator；steps 不创建 rail。 |
+| 相关 API | `Orientation`、`Steps`、`PercentPosition`、`IsProgressInfoVisible` |
+| 相关 Token | `LineExtraInfoMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `track`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `StepsProgressBar` |
+| Part | `track` |
+| Selector | `.semantic-track` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-track` |
+| Style Type | `StepsProgressBarTrackStyle` |
+| ContractType | `Rectangle` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `true` |
+| AtomUI 节点 | 全部步骤块 |
+| 职责 | 表达全部步骤单元；完成状态只决定每个 target 使用进度色还是 rail 色。 |
+| 相关 API | `Value`、`Steps`、`StepsStrokeBrush`、`StrokeBrush`、`TrailColor` |
+| 相关 Token | `DefaultColor`、`RemainingColor`、SharedToken 状态色 |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `StepsProgressBar` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-indicator` |
+| Style Type | `StepsProgressBarIndicatorStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 百分比或状态信息区域 |
+| 职责 | 统一承载步骤进度的百分比、成功图标和异常图标。 |
+| 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`PercentPosition`、`Status` |
+| 相关 Token | 文本、图标尺寸和状态色 Token |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.3 `CircleProgress`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CircleProgress` |
+| Part | `root` |
+| Selector | CircleProgress 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `CircleProgress` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 圆形进度 owner |
+| 职责 | 承载进度范围、圆形尺寸、分段状态和 Semantic Style 作用域。 |
+| 相关 API | 全部 `CircleProgress` public API |
+| 相关 Token | ProgressBarToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CircleProgress` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `CircleProgressBodyStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 圆形进度主体布局 |
+| 职责 | 统一承载圆形 rail、track、成功弧段和居中 indicator。 |
+| 相关 API | `SizeType`、`Width`、`Height`、`StepCount`、`StepGap` |
+| 相关 Token | 圆形尺寸与信息 Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `rail`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CircleProgress` |
+| Part | `rail` |
+| Selector | `.semantic-rail` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-rail` |
+| Style Type | `CircleProgressRailStyle` |
+| ContractType | `Shape` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 圆形未完成轨道几何 |
+| 职责 | 表达连续圆或分段圆的完整剩余轨道。 |
+| 相关 API | `TrailColor`、`IndicatorThickness`、`StepCount`、`StepGap` |
+| 相关 Token | `RemainingColor` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `track`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CircleProgress` |
+| Part | `track` |
+| Selector | `.semantic-track` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-track` |
+| Style Type | `CircleProgressTrackStyle` |
+| ContractType | `Shape` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 圆形当前进度几何 |
+| 职责 | 表达由 `Value` 计算出的连续或分段圆弧。 |
+| 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`IndicatorThickness`、`StepCount`、`StepGap` |
+| 相关 Token | `DefaultColor`、SharedToken 状态色 |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `CircleProgress` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-indicator` |
+| Style Type | `CircleProgressIndicatorStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 圆心信息区域 |
+| 职责 | 统一承载圆心百分比、成功图标和异常图标。 |
+| 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`Status`、完成图标 API |
+| 相关 Token | `CircleMinimumTextFontSize`、`CircleMinimumIconSize` |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.4 `DashboardProgress`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DashboardProgress` |
+| Part | `root` |
+| Selector | DashboardProgress 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `DashboardProgress` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 仪表盘进度 owner |
+| 职责 | 承载进度范围、缺口、尺寸、分段状态和 Semantic Style 作用域。 |
+| 相关 API | 全部 `DashboardProgress` public API |
+| 相关 Token | ProgressBarToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DashboardProgress` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `DashboardProgressBodyStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 仪表盘进度主体布局 |
+| 职责 | 统一承载仪表盘 rail、track、成功弧段和居中 indicator。 |
+| 相关 API | `SizeType`、`Width`、`Height`、`DashboardGapPosition`、`GapDegree` |
+| 相关 Token | 圆形尺寸与信息 Token |
+| 稳定性 | stable since 6.2.0 |
+
+#### `rail`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DashboardProgress` |
+| Part | `rail` |
+| Selector | `.semantic-rail` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-rail` |
+| Style Type | `DashboardProgressRailStyle` |
+| ContractType | `Shape` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 仪表盘未完成轨道几何 |
+| 职责 | 表达带指定缺口的连续或分段剩余轨道。 |
+| 相关 API | `TrailColor`、`IndicatorThickness`、`DashboardGapPosition`、`GapDegree`、`StepCount`、`StepGap` |
+| 相关 Token | `RemainingColor` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `track`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DashboardProgress` |
+| Part | `track` |
+| Selector | `.semantic-track` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-track` |
+| Style Type | `DashboardProgressTrackStyle` |
+| ContractType | `Shape` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 仪表盘当前进度几何 |
+| 职责 | 表达由 `Value` 计算出的带缺口连续或分段圆弧。 |
+| 相关 API | `Value`、`StrokeBrush`、`StrokeLineCap`、`DashboardGapPosition`、`GapDegree` |
+| 相关 Token | `DefaultColor`、SharedToken 状态色 |
+| 稳定性 | stable since 6.2.0 |
+
+#### `indicator`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `DashboardProgress` |
+| Part | `indicator` |
+| Selector | `.semantic-indicator` |
+| SelectorRoute | `/template/ .semantic-body > .semantic-indicator` |
+| Style Type | `DashboardProgressIndicatorStyle` |
+| ContractType | `Panel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 仪表盘中心信息区域 |
+| 职责 | 统一承载仪表盘百分比、成功图标和异常图标。 |
+| 相关 API | `IsProgressInfoVisible`、`ProgressTextFormat`、`Status`、完成图标 API |
+| 相关 Token | `CircleMinimumTextFontSize`、`CircleMinimumIconSize` |
+| 稳定性 | stable since 6.2.0 |
+
+所有 root 都是隐式 Part，不添加 `.semantic-root`。四个 owner 均不跨 VisualRoot，也不提供 Semantic Part Theme。
+`ProgressBar`、`CircleProgress` 和 `DashboardProgress` 的非 root Part 是静态模板 target；`StepsProgressBar` 只有 track
+按 `Steps` 创建、重用或清理 runtime Rectangle。
 
 ## Abstract AXAML Structure
 
-未定位到可生成抽象 AXAML 结构的 ControlTheme 模板。生成器不会根据 semantic parts 发明 AXAML 节点；请以 Template Parts、主题文件和源码索引为准。
+来源：`src/AtomUI.Desktop.Controls/ProgressBar/Themes/ProgressBarTheme.axaml`
+
+```xml
+<LineProgressPanel Name="PART_ProgressBody">
+    <Border Name="PART_ProgressRail" />
+    <Border Name="PART_ProgressTrack" />
+    <Border Name="PART_ProgressSuccess" />
+    <Canvas Name="PART_ProgressIndicator">
+        <LayoutTransformControl Name="PART_LayoutTransformControl">
+            <Label Name="PART_PercentageLabel" />
+        </LayoutTransformControl>
+        <IconPresenter Name="PART_ExceptionCompletedIconPresenter" />
+        <IconPresenter Name="PART_SuccessCompletedIconPresenter" />
+    </Canvas>
+</LineProgressPanel>
+```
 
 ## Composition Model
 
-该控件主要由 public 控件和 ControlTheme 模板直接表达，没有额外运行时组合层。
+该章节由控件 `Themes/` 文件夹中的真实主题文件生成，用于说明 public 控件与内部协作对象之间的运行时结构。内部节点只用于理解和维护，不应指导用户代码直接依赖。
+
+### 控件角色图
+
+```text
+ProgressBar
+  -> ProgressBar (control theme, ProgressBarTheme.axaml)
+     -> LineProgressPanel#PART_ProgressBody (template-stable)
+        -> Border#PART_ProgressRail (template-stable)
+        -> Border#PART_ProgressTrack (template-stable)
+        -> Border#PART_ProgressSuccess (template-stable)
+        -> Canvas#PART_ProgressIndicator (template-stable)
+           -> LayoutTransformControl#PART_LayoutTransformControl (template-stable)
+              -> Label#PART_PercentageLabel (template-stable)
+           -> IconPresenter#PART_ExceptionCompletedIconPresenter (template-stable)
+           -> IconPresenter#PART_SuccessCompletedIconPresenter (template-stable)
+```
+
+### 协作节点
+
+| 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `ProgressBar` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `ProgressBar` | control theme | `ProgressBarTheme.axaml` | 用户代码 / 控件宿主 | `ExceptionCompletedIcon`, `IsEnabled`, `IsProgressInfoVisible`, `PercentageLabelColor`, `SuccessCompletedIcon` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_ProgressBody` | template node (LineProgressPanel) | `ProgressBarTheme.axaml` | ProgressBar | `ExceptionCompletedIcon`, `IsEnabled`, `IsProgressInfoVisible`, `PercentageLabelColor`, `SuccessCompletedIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ProgressRail` | template node (Border) | `ProgressBarTheme.axaml` | ProgressBar | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ProgressTrack` | template node (Border) | `ProgressBarTheme.axaml` | ProgressBar | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ProgressSuccess` | template node (Border) | `ProgressBarTheme.axaml` | ProgressBar | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ProgressIndicator` | template node (Canvas) | `ProgressBarTheme.axaml` | ProgressBar | `ExceptionCompletedIcon`, `IsEnabled`, `IsProgressInfoVisible`, `PercentageLabelColor`, `SuccessCompletedIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_LayoutTransformControl` | template node (LayoutTransformControl) | `ProgressBarTheme.axaml` | ProgressBar | `IsEnabled`, `PercentageLabelColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_PercentageLabel` | template node (Label) | `ProgressBarTheme.axaml` | ProgressBar | `IsEnabled`, `PercentageLabelColor` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ExceptionCompletedIconPresenter` | template node (IconPresenter) | `ProgressBarTheme.axaml` | ProgressBar | `ExceptionCompletedIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_SuccessCompletedIconPresenter` | template node (IconPresenter) | `ProgressBarTheme.axaml` | ProgressBar | `SuccessCompletedIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 
@@ -13137,17 +21720,18 @@ ProgressBar 的默认视觉由抽象主题和具体控件主题组合：
 | `AbstractLineProgressTheme.axaml` | 线形模板、百分比 label、状态图标、线形尺寸和图标尺寸。 |
 | `ProgressBarTheme.axaml` | 普通线形控件主题、内嵌百分比伪类、垂直文本旋转、内嵌图标隐藏规则。 |
 | `StepsProgressBarTheme.axaml` | 步骤线形控件主题、方向对齐和百分比位置对应图标对齐。 |
-| `AbstractCircleProgressTheme.axaml` | 圆形模板、居中文本和居中状态图标。 |
-| `CircleProgressTheme.axaml` | 圆形进度具体主题入口。 |
-| `DashboardProgressTheme.axaml` | 仪表盘进度具体主题入口。 |
+| `AbstractCircleProgressTheme.axaml` | 圆形家族共享 Token、Shape stroke 和居中状态图标 selector，不拥有 concrete Template。 |
+| `CircleProgressTheme.axaml` | 圆形进度 leaf Theme 和 concrete Template，拥有静态 Semantic marker。 |
+| `DashboardProgressTheme.axaml` | 仪表盘进度 leaf Theme 和 concrete Template，拥有静态 Semantic marker。 |
 
-视觉绘制由控件直接渲染完成：
+进度视觉由模板中的真实 Semantic target 承载，owner 继续负责全部值、尺寸和角度计算：
 
-- 线形进度绘制 groove、已完成段和可选成功段。
-- 步骤进度绘制固定数量 chunk，再按 `Percentage` 绘制已完成 chunk。
-- 圆形进度绘制完整圆或分段圆弧。
-- 仪表盘进度绘制带缺口的圆弧或分段圆弧。
-- 状态图标和百分比文本通过模板 part 布局，不参与进度几何绘制。
+- 普通线形 rail/track 由静态 `Border` target 表达，可选成功段保持内部 `Border` 附加层；`LineProgressPanel`
+  是这些盒视觉和 indicator 的唯一布局所有者。
+- 步骤进度按 `Steps` 创建 track `Rectangle` target，并根据 `Percentage` 切换每个 target 的 active/remaining Brush；steps 不公开 rail。
+- 圆形进度用静态 Shape 承载完整圆或组合分段圆弧。
+- 仪表盘进度用静态 Shape 承载带缺口的连续或组合分段圆弧。
+- 状态图标和百分比文本统一位于 indicator Panel 内，不参与进度几何计算。
 
 ProgressBarToken 提供默认进度色、剩余轨道色、圆形文字和图标最小尺寸、线形文本间距、线形内部 padding 和线形图标尺寸。状态色主要来自 SharedToken。
 
@@ -13163,13 +21747,14 @@ ProgressBarToken 不承载以下状态：
 - `StrokeBrush`、`SuccessStrokeBrush`、`TrailColor` 等实例画刷覆盖。
 - `IndicatorThickness`、`ChunkWidth`、`ChunkHeight`、显式 `Width` / `Height` 等实例尺寸覆盖。
 
-这些状态分别由 public API、internal effective state、主题 selector 和直接绘制逻辑处理。
+这些状态分别由 public API、internal effective state、主题 selector 和模板几何布局逻辑处理。
 
 ## Customization Boundaries
 
 维护 ProgressBar 时必须保持以下不变量：
 
-- 不修改 `ProgressBar`、`StepsProgressBar`、`CircleProgress`、`DashboardProgress` 的 public API、默认值、Template Part、伪类和 Token 名称。
+- 不修改 `ProgressBar`、`StepsProgressBar`、`CircleProgress`、`DashboardProgress` 的既有 public API、默认值、Template Part、伪类和 Token 名称。
+- 不删除或重命名四个 owner 的 `root`、`body`、`rail`、`track`、`indicator`，也不改变 selector route、ContractType 或 cardinality。
 - `Value`、`Minimum`、`Maximum` 必须继续遵循 `RangeBase` 语义。
 - `Percentage` 和所有绘制位置必须以 `(value - Minimum) / (Maximum - Minimum)` 为基准。
 - `IsIndeterminate` 不得写入或重置 `Value`。
@@ -13200,6 +21785,10 @@ ProgressBarToken 不承载以下状态：
 - 圆形控件显式 `Width` / `Height` 和 stretch alignment 仍参与最终圆形尺寸计算。
 - `StepCount=0` 的圆形和仪表盘必须保持连续圆弧模式。
 - `StepsProgressBar.Steps` 最小值为 1，chunk 尺寸最小值为 1。
+- `ChunkWidth=NaN` 必须保持自动状态；运行期 SizeType 变化不能遗留首次 Large 计算值。
+- 四个 owner 已声明的 body/rail/track/indicator marker 必须与 descriptor route、ContractType 和 cardinality 一致。
+- rail/track marker 必须位于直接绘制最终视觉的可见 target：普通线形使用 `Border`，圆形和仪表盘使用 `Shape`；indicator marker 必须保持非零的实际信息 Bounds。
+- 成功阈值附加视觉、label、状态 IconPresenter 和几何实现类型不得提升为额外公开 Part。
 - 新增 binding、event handler 或 resource host 时必须定义释放位置。
 
 Source: ./controls/result/semantic-cn.md
@@ -13210,20 +21799,152 @@ Source: ./controls/result/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Result` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Result 的 Part 名称与公开 Result Semantic 结构保持一致：`root`、`icon`、`title`、`subTitle`、`extra`、`body`。
+普通反馈图标和 403/404/500 异常图是同一 `icon` 职责的静态替代实现，不拆分为状态专属 Part。
+
+### 1.1 `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Result` |
+| Part | `root` |
+| Selector | Result 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Result` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 结果页 owner |
+| 职责 | 承载整体结果布局、状态、表面属性和 Semantic Style 作用域。 |
+| 相关 API | 全部 Result public API，包含 `StrokeDashArray` 与继承的标准表面属性 |
+| 相关 Token | ResultToken、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Result` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `ResultIconStyle` |
+| ContractType | `Control` |
+| Cardinality | `Multiple` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 普通状态图标区域与异常状态图像 |
+| 职责 | 表达 Info、Success、Warning、Error 图标和 403、404、500 图像的替代呈现。 |
+| 相关 API | `Status`、`Icon` |
+| 相关 Token | `StatusIconSize`、`StatusImageMargin`、`ImageWidth`、`ImageHeight`、状态色 Token |
+| 稳定性 | stable since 6.2.0 |
+
+`icon` 同时标记 `PART_StatusIconPresenter` 和 `PART_ErrorCodeImage`。两个 target 始终存在，`Status` 只切换可见性；
+Semantic Style 必须适用于两个实现。它适合定制 Margin、Opacity、Width、Height 和对齐。普通 presenter 内由默认状态或 `Icon`
+提供的 Child、异常 SVG 的内部图元和 source 文本不属于公开 Part。
+
+### 1.3 `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Result` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `ResultTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 主结果标题 presenter |
+| 职责 | 展示 Header 内容并提供标题排版边界。 |
+| 相关 API | `Header`、`HeaderTemplate`、`HeaderFontSize` |
+| 相关 Token | `HeaderFontSize`、`HeaderMargin`、标题色与相对行高 Token |
+| 稳定性 | stable since 6.2.0 |
+
+`title` 始终存在，`Header=null` 时通过 `IsVisible=false` 隐藏。它适合定制 Foreground、FontSize、FontStyle、FontWeight、
+LineHeight、Margin、Padding、Opacity、换行和对齐；HeaderTemplate 创建的用户子树不属于 Result Semantic Part。
+
+### 1.4 `subTitle`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Result` |
+| Part | `subTitle` |
+| Selector | `.semantic-sub-title` |
+| SelectorRoute | `/template/ .semantic-sub-title` |
+| Style Type | `ResultSubTitleStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 结果副标题 presenter |
+| 职责 | 展示可选结果说明并提供副标题排版边界。 |
+| 相关 API | `SubHeader`、`SubHeaderTemplate`、`SubHeaderFontSize` |
+| 相关 Token | `SubHeaderFontSize`、描述色与相对行高 Token |
+| 稳定性 | stable since 6.2.0 |
+
+`subTitle` 始终存在，`SubHeader=null` 时隐藏。它适合定制 Foreground、FontSize、FontStyle、FontWeight、LineHeight、Margin、
+Padding、Opacity、换行和对齐；SubHeaderTemplate 创建的用户子树不属于 Result Semantic Part。
+
+### 1.5 `extra`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Result` |
+| Part | `extra` |
+| Selector | `.semantic-extra` |
+| SelectorRoute | `/template/ .semantic-extra` |
+| Style Type | `ResultExtraStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 操作与辅助内容 presenter |
+| 职责 | 承载 Extra 内容并提供操作区布局边界。 |
+| 相关 API | `Extra`、`ExtraTemplate` |
+| 相关 Token | `ExtraMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+`extra` presenter 始终存在，横向拉伸到 Result 内容区宽度，并在区域内部居中排列 Extra 内容；`Extra=null` 时保持空内容。
+它适合定制 Background、Padding、Margin、Opacity、对齐和 TextAlignment。调用方放入的 Button、Panel 或其他内容子树
+拥有自己的主题契约，Result 不继续匹配其内部节点。
+
+### 1.6 `body`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Result` |
+| Part | `body` |
+| Selector | `.semantic-body` |
+| SelectorRoute | `/template/ .semantic-body` |
+| Style Type | `ResultBodyStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | 详细结果内容 presenter |
+| 职责 | 承载 Content 并提供正文背景、内边距和外边距边界。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | `ContentMargin`、`ContentPadding`、`ColorFillAlter` |
+| 稳定性 | stable since 6.2.0 |
+
+`body` 始终存在，`Content=null` 时隐藏。它适合定制 Background、Padding、Margin、Opacity、对齐和 ClipToBounds；
+ContentTemplate 创建的用户子树不属于 Result Semantic Part。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Result/Themes/ResultTheme.axaml`
 
 ```xml
-<Border Name="Frame">
+<DashedBorder Name="Frame">
     <StackPanel Name="RootLayout">
         <ContentPresenter Name="PART_StatusIconPresenter" />
         <Svg Name="PART_ErrorCodeImage" />
@@ -13232,7 +21953,7 @@ Source: ./controls/result/semantic-cn.md
         <ContentPresenter Name="ExtraContent" />
         <ContentPresenter Name="Content" />
     </StackPanel>
-</Border>
+</DashedBorder>
 ```
 
 ## Composition Model
@@ -13244,7 +21965,7 @@ Source: ./controls/result/semantic-cn.md
 ```text
 Result
   -> Result (control theme, ResultTheme.axaml)
-     -> Border#Frame (template-stable)
+     -> DashedBorder#Frame (template-stable)
         -> StackPanel#RootLayout (template-stable)
            -> ContentPresenter#PART_StatusIconPresenter (template-stable)
            -> Svg#PART_ErrorCodeImage (template-stable)
@@ -13259,8 +21980,8 @@ Result
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Result` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Result` | control theme | `ResultTheme.axaml` | 用户代码 / 控件宿主 | `Content`, `ContentTemplate`, `Extra`, `ExtraTemplate`, `Header`, `HeaderFontSize` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `Frame` | template node (Border) | `ResultTheme.axaml` | Result | `Content`, `ContentTemplate`, `Extra`, `ExtraTemplate`, `Header`, `HeaderFontSize` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `Result` | control theme | `ResultTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Frame` | template node (DashedBorder) | `ResultTheme.axaml` | Result | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate`, `CornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `RootLayout` | template node (StackPanel) | `ResultTheme.axaml` | Result | `Content`, `ContentTemplate`, `Extra`, `ExtraTemplate`, `Header`, `HeaderFontSize` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_StatusIconPresenter` | template node (ContentPresenter) | `ResultTheme.axaml` | Result | `StatusIcon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ErrorCodeImage` | template node (Svg) | `ResultTheme.axaml` | Result | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -13273,9 +21994,10 @@ Result
 
 | 契约组 | 代表成员 | 维护含义 |
 | --- | --- | --- |
-| 内容与数据 | `ExtraTemplate`、`Header`、`HeaderFontSize`、`HeaderTemplate`、`Icon`、`SubHeader`、`SubHeaderFontSize`、`SubHeaderTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
-| 交互与状态 | `Status` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 其他稳定入口 | `Extra` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
+| 内容与数据 | `Header`、`HeaderTemplate`、`SubHeader`、`SubHeaderTemplate`、`Extra`、`ExtraTemplate`、`Content`、`ContentTemplate` | 定义标题、副标题、操作区域和正文内容入口。 |
+| 状态与图标 | `Status`、`Icon` | 选择普通反馈图标或 403/404/500 异常图，并允许普通状态使用自定义 `PathIcon`。 |
+| 排版 | `HeaderFontSize`、`SubHeaderFontSize` | 覆盖标题与副标题字号；行高仍由控件根据相对行高计算。 |
+| 根表面 | 继承的 `Background`、`BorderBrush`、`BorderThickness`、`CornerRadius`、`Padding` 与 `StrokeDashArray` | 由根 owner Style 控制 Result 的背景、边框、圆角、内边距和虚线节奏。 |
 
 ## Pseudo Classes
 
@@ -13296,10 +22018,10 @@ Public API / inherited command / item source / user input
 
 状态维护规则：
 
-- Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
-- visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
-- 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
-- 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
+- `Status` 是状态视觉的唯一 owner。Info、Success、Warning、Error 显示普通图标 presenter，403、404、500 显示异常 SVG。
+- `Icon` 只替换四种普通反馈状态的图标内容，不改变 `icon` Semantic Part 的 target 身份或数量。
+- `Header`、`SubHeader` 和 `Content` 的空值只改变对应 presenter 的可见性；`Extra` 为空时保留空 presenter。
+- 模板重套用时重新获取两个图标 template part，并把当前状态、图标尺寸、画刷和文本行高回放到新模板。
 
 ## Theme and Token Boundaries
 
@@ -13314,6 +22036,8 @@ Result 使用 `ResultToken` 作为控件 Token scope。Token 只表达组件视�
 主题维护规则：
 
 - 不删除或重命名已经稳定的 ControlTheme key、template part、伪类和资源 key。
+- 不删除或重命名 `root`、`icon`、`title`、`subTitle`、`extra`、`body`，不改变 selector class、ContractType 或 cardinality。
+- `DashedBorder#Frame` 必须继续投影 Result 的标准根表面属性；该内部 frame 不成为独立 Part。
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
@@ -13332,6 +22056,7 @@ Result Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 - 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
+- 不破坏六个 Semantic Part 的名称、selector、ContractType、cardinality 和 marker 身份。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
@@ -13343,9 +22068,10 @@ Result Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 维护 Result 时不得破坏：
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
+- `root`、`icon`、`title`、`subTitle`、`extra`、`body` 的名称、selector、ContractType、cardinality 和 marker 身份。
 - Template part 名称、ControlTheme key、伪类和资源 key。
-- 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
-- Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。
+- 旧 `PART_StatusIconPresenter` 的 PropertyChanged 订阅释放路径与新 presenter 的重新订阅顺序。
+- Light/Dark、Browser/Desktop 下的主题一致性，以及无 `SizeType` 的 Token 尺寸基线。
 - 控件文档、源码 public surface、Token 类型或生成数据与源码契约的一致性。
 
 Source: ./controls/skeleton/semantic-cn.md
@@ -13356,29 +22082,62 @@ Source: ./controls/skeleton/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Skeleton` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Skeleton 主控件公开 `root`、`header`、`section`、`avatar`、`title`、`paragraph` 六个职责区域；AtomUI Skeleton
+保持相同的语义名称。`SkeletonAvatar`、`SkeletonButton`、`SkeletonInput`、`SkeletonImage` 和 `SkeletonNode`
+是独立的公开子控件，各自公开 `root` 与 `content`。
+
+### 1.1 `Skeleton`
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `Skeleton` | `Single` | `Root` | `false` | `false` |
+| `header` | `.semantic-header` | `DockPanel` | `Single` | `Selector` | `false` | `false` |
+| `section` | `.semantic-section` | `StackPanel` | `Single` | `Selector` | `false` | `false` |
+| `avatar` | `.semantic-avatar` | `SkeletonAvatar` | `Single` | `Selector` | `false` | `false` |
+| `title` | `.semantic-title` | `SkeletonTitle` | `Single` | `Selector` | `false` | `false` |
+| `paragraph` | `.semantic-paragraph` | `SkeletonParagraph` | `Single` | `Selector` | `false` | `false` |
+
+`header` 只承载头像占位区域，作为根布局的左侧 cell；`section` 承载标题和段落，作为右侧、填充剩余宽度的 cell。
+`avatar`、`title` 和 `paragraph` 是主控件模板直接拥有的公开 Skeleton 子控件。`root` 不声明 `.semantic-root` marker。
+
+### 1.2 Skeleton 元素 owner
+
+| Owner | Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `SkeletonAvatar` | `root` | owner | `SkeletonAvatar` | `Single` | `Root` | `false` | `false` |
+| `SkeletonAvatar` | `content` | `.semantic-content` | `Border` | `Multiple` | `Selector` | `false` | `false` |
+| `SkeletonButton` | `root` | owner | `SkeletonButton` | `Single` | `Root` | `false` | `false` |
+| `SkeletonButton` | `content` | `.semantic-content` | `Border` | `Multiple` | `Selector` | `false` | `false` |
+| `SkeletonInput` | `root` | owner | `SkeletonInput` | `Single` | `Root` | `false` | `false` |
+| `SkeletonInput` | `content` | `.semantic-content` | `Border` | `Multiple` | `Selector` | `false` | `false` |
+| `SkeletonImage` | `root` | owner | `SkeletonImage` | `Single` | `Root` | `false` | `false` |
+| `SkeletonImage` | `content` | `.semantic-content` | `Border` | `Multiple` | `Selector` | `false` | `false` |
+| `SkeletonNode` | `root` | owner | `SkeletonNode` | `Single` | `Root` | `false` | `false` |
+| `SkeletonNode` | `content` | `.semantic-content` | `Border` | `Multiple` | `Selector` | `false` | `false` |
+
+`content` 使用 `Multiple` 是 AtomUI 模板实现的状态替代语义：普通状态的 `PART_ContentLayer` 与 active 状态的
+`PART_ActiveAnimationLayer` 是两个静态 marker target，同一时刻只有一个可见。Preview 只高亮当前可见 target；Semantic Style
+同时作用于两个替代层，保证状态切换后定制仍然存在。
 
 ## Abstract AXAML Structure
 
 来源：`src/AtomUI.Desktop.Controls/Skeleton/Themes/SkeletonTheme.axaml`
 
 ```xml
-<Panel>
-    <DockPanel>
-        <SkeletonAvatar Name="PART_Avatar" />
-        <StackPanel Name="PART_Content">
-            <SkeletonTitle Name="PART_Title" />
-            <SkeletonParagraph Name="PART_Paragraph" />
-        </StackPanel>
-    </DockPanel>
-    <ContentPresenter />
-</Panel>
+<Border Name="PART_RootLayout">
+    <Panel>
+        <Grid>
+            <DockPanel>
+                <SkeletonAvatar Name="PART_Avatar" />
+            </DockPanel>
+            <StackPanel Name="PART_Content">
+                <SkeletonTitle Name="PART_Title" />
+                <SkeletonParagraph Name="PART_Paragraph" />
+            </StackPanel>
+        </Grid>
+        <ContentPresenter />
+    </Panel>
+</Border>
 ```
 
 ## Composition Model
@@ -13390,30 +22149,43 @@ Source: ./controls/skeleton/semantic-cn.md
 ```text
 Skeleton
   -> SkeletonAvatar (control theme, SkeletonAvatarTheme.axaml)
+     -> Panel#PART_RootLayout (template-stable)
+        -> Border#PART_ActiveAnimationLayer (template-stable)
+        -> Border#PART_ContentLayer (template-stable)
   -> SkeletonButton (control theme, SkeletonButtonTheme.axaml)
+     -> Panel#PART_RootLayout (template-stable)
+        -> Border#PART_ActiveAnimationLayer (template-stable)
+        -> Border#PART_ContentLayer (template-stable)
   -> SkeletonElement (control theme, SkeletonElementTheme.axaml)
   -> SkeletonImage (control theme, SkeletonImageTheme.axaml)
      -> Panel#PART_RootLayout (template-stable)
-        -> Border#PART_ContentLayer (template-stable)
-        -> Border#PART_ActiveAnimationLayer (template-stable)
-        -> ImageFilled#Image (template-stable)
+        -> Panel#PART_ContentLayout (template-stable)
+           -> Border#PART_ContentLayer (template-stable)
+           -> Border#PART_ActiveAnimationLayer (template-stable)
+           -> ImageFilled#Image (template-stable)
   -> SkeletonInput (control theme, SkeletonInputTheme.axaml)
+     -> Panel#PART_RootLayout (template-stable)
+        -> Border#PART_ActiveAnimationLayer (template-stable)
+        -> Border#PART_ContentLayer (template-stable)
   -> SkeletonLine (control theme, SkeletonLineTheme.axaml)
   -> SkeletonNode (control theme, SkeletonNodeTheme.axaml)
      -> Panel#PART_RootLayout (template-stable)
-        -> Border#PART_ContentLayer (template-stable)
-        -> Border#PART_ActiveAnimationLayer (template-stable)
-        -> ContentPresenter#ContentPresenter (internal-observable)
+        -> Panel#PART_ContentLayout (template-stable)
+           -> Border#PART_ContentLayer (template-stable)
+           -> Border#PART_ActiveAnimationLayer (template-stable)
+           -> ContentPresenter#ContentPresenter (internal-observable)
   -> SkeletonParagraph (control theme, SkeletonParagraphTheme.axaml)
      -> StackPanel#PART_LineLayout (template-stable)
   -> Skeleton (control theme, SkeletonTheme.axaml)
-     -> Panel (template-stable)
-        -> DockPanel (template-stable)
-           -> SkeletonAvatar#PART_Avatar (template-stable)
-           -> StackPanel#PART_Content (template-stable)
-              -> SkeletonTitle#PART_Title (template-stable)
-              -> SkeletonParagraph#PART_Paragraph (template-stable)
-        -> ContentPresenter (internal-observable)
+     -> Border#PART_RootLayout (template-stable)
+        -> Panel (template-stable)
+           -> Grid (template-stable)
+              -> DockPanel (template-stable)
+                 -> SkeletonAvatar#PART_Avatar (template-stable)
+              -> StackPanel#PART_Content (template-stable)
+                 -> SkeletonTitle#PART_Title (template-stable)
+                 -> SkeletonParagraph#PART_Paragraph (template-stable)
+           -> ContentPresenter (internal-observable)
 ```
 
 ### 协作节点
@@ -13421,31 +22193,41 @@ Skeleton
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Skeleton` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `SkeletonAvatar` | control theme | `SkeletonAvatarTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `SkeletonButton` | control theme | `SkeletonButtonTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `SkeletonAvatar` | control theme | `SkeletonAvatarTheme.axaml` | 用户代码 / 控件宿主 | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_RootLayout` | template node (Panel) | `SkeletonAvatarTheme.axaml` | SkeletonAvatar | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ActiveAnimationLayer` | template node (Border) | `SkeletonAvatarTheme.axaml` | SkeletonAvatar | `AnimationLayerFill`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentLayer` | template node (Border) | `SkeletonAvatarTheme.axaml` | SkeletonAvatar | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `SkeletonButton` | control theme | `SkeletonButtonTheme.axaml` | 用户代码 / 控件宿主 | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_RootLayout` | template node (Panel) | `SkeletonButtonTheme.axaml` | SkeletonButton | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ActiveAnimationLayer` | template node (Border) | `SkeletonButtonTheme.axaml` | SkeletonButton | `AnimationLayerFill`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentLayer` | template node (Border) | `SkeletonButtonTheme.axaml` | SkeletonButton | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SkeletonElement` | control theme | `SkeletonElementTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `SkeletonImage` | control theme | `SkeletonImageTheme.axaml` | 用户代码 / 控件宿主 | `AnimationLayerFill`, `Background`, `CornerRadius`, `IsActive` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `PART_RootLayout` | template node (Panel) | `SkeletonImageTheme.axaml` | SkeletonImage | `AnimationLayerFill`, `Background`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ContentLayer` | template node (Border) | `SkeletonImageTheme.axaml` | SkeletonImage | `Background`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ActiveAnimationLayer` | template node (Border) | `SkeletonImageTheme.axaml` | SkeletonImage | `AnimationLayerFill`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `SkeletonImage` | control theme | `SkeletonImageTheme.axaml` | 用户代码 / 控件宿主 | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_RootLayout` | template node (Panel) | `SkeletonImageTheme.axaml` | SkeletonImage | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentLayout` | template node (Panel) | `SkeletonImageTheme.axaml` | SkeletonImage | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentLayer` | template node (Border) | `SkeletonImageTheme.axaml` | SkeletonImage | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ActiveAnimationLayer` | template node (Border) | `SkeletonImageTheme.axaml` | SkeletonImage | `AnimationLayerFill`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Image` | template node (ImageFilled) | `SkeletonImageTheme.axaml` | SkeletonImage | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `SkeletonInput` | control theme | `SkeletonInputTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `SkeletonInput` | control theme | `SkeletonInputTheme.axaml` | 用户代码 / 控件宿主 | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_RootLayout` | template node (Panel) | `SkeletonInputTheme.axaml` | SkeletonInput | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ActiveAnimationLayer` | template node (Border) | `SkeletonInputTheme.axaml` | SkeletonInput | `AnimationLayerFill`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentLayer` | template node (Border) | `SkeletonInputTheme.axaml` | SkeletonInput | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Height`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `SkeletonLine` | control theme | `SkeletonLineTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `SkeletonNode` | control theme | `SkeletonNodeTheme.axaml` | 用户代码 / 控件宿主 | `AnimationLayerFill`, `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `IsActive` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `PART_RootLayout` | template node (Panel) | `SkeletonNodeTheme.axaml` | SkeletonNode | `AnimationLayerFill`, `Background`, `Content`, `ContentTemplate`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ContentLayer` | template node (Border) | `SkeletonNodeTheme.axaml` | SkeletonNode | `Background`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_ActiveAnimationLayer` | template node (Border) | `SkeletonNodeTheme.axaml` | SkeletonNode | `AnimationLayerFill`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `SkeletonNode` | control theme | `SkeletonNodeTheme.axaml` | 用户代码 / 控件宿主 | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_RootLayout` | template node (Panel) | `SkeletonNodeTheme.axaml` | SkeletonNode | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentLayout` | template node (Panel) | `SkeletonNodeTheme.axaml` | SkeletonNode | `AnimationLayerFill`, `Background`, `BorderBrush`, `BorderThickness`, `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ContentLayer` | template node (Border) | `SkeletonNodeTheme.axaml` | SkeletonNode | `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_ActiveAnimationLayer` | template node (Border) | `SkeletonNodeTheme.axaml` | SkeletonNode | `AnimationLayerFill`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `IsActive` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ContentPresenter` | template node (ContentPresenter) | `SkeletonNodeTheme.axaml` | SkeletonNode | `Content`, `ContentTemplate` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `SkeletonParagraph` | control theme | `SkeletonParagraphTheme.axaml` | 用户代码 / 控件宿主 | 主题状态 / visual state | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `PART_LineLayout` | template node (StackPanel) | `SkeletonParagraphTheme.axaml` | SkeletonParagraph | 主题状态 / visual state | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `Skeleton` | control theme | `SkeletonTheme.axaml` | 用户代码 / 控件宿主 | `AvatarShape`, `AvatarSize`, `AvatarSizeType`, `Content`, `ContentTemplate`, `HorizontalContentAlignment` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `Skeleton` | control theme | `SkeletonTheme.axaml` | 用户代码 / 控件宿主 | `AvatarShape`, `AvatarSize`, `AvatarSizeType`, `Background`, `BorderBrush`, `BorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `PART_RootLayout` | template node (Border) | `SkeletonTheme.axaml` | Skeleton | `AvatarShape`, `AvatarSize`, `AvatarSizeType`, `Background`, `BorderBrush`, `BorderThickness` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `Panel` | template node (Panel) | `SkeletonTheme.axaml` | Skeleton | `AvatarShape`, `AvatarSize`, `AvatarSizeType`, `Content`, `ContentTemplate`, `HorizontalContentAlignment` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `DockPanel` | template node (DockPanel) | `SkeletonTheme.axaml` | Skeleton | `AvatarShape`, `AvatarSize`, `AvatarSizeType`, `IsActive`, `IsContentVisible`, `IsRound` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `DockPanel` | template node (DockPanel) | `SkeletonTheme.axaml` | Skeleton | `AvatarShape`, `AvatarSize`, `AvatarSizeType`, `IsActive`, `IsShowAvatar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Avatar` | template node (SkeletonAvatar) | `SkeletonTheme.axaml` | Skeleton | `AvatarShape`, `AvatarSize`, `AvatarSizeType`, `IsActive`, `IsShowAvatar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Content` | template node (StackPanel) | `SkeletonTheme.axaml` | Skeleton | `IsActive`, `IsRound`, `IsShowParagraph`, `IsShowTitle`, `ParagraphLastLineWidth`, `ParagraphLineWidths` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Title` | template node (SkeletonTitle) | `SkeletonTheme.axaml` | Skeleton | `IsActive`, `IsRound`, `IsShowTitle`, `TitleWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_Paragraph` | template node (SkeletonParagraph) | `SkeletonTheme.axaml` | Skeleton | `IsActive`, `IsRound`, `IsShowParagraph`, `ParagraphLastLineWidth`, `ParagraphLineWidths`, `ParagraphRows` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `ContentPresenter` | template node (ContentPresenter) | `SkeletonTheme.axaml` | Skeleton | `Content`, `ContentTemplate`, `HorizontalContentAlignment`, `IsContentVisible`, `VerticalContentAlignment` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 
 ## Template Parts
 
@@ -13545,13 +22327,38 @@ Source: ./controls/spin/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Spin` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Spin 主控件公开 `root`、`container`、`mask`、`section`、`indicator`、`description` 六个职责区域，与上游稳定语义
+保持同名。`mask` 是 AtomUI 扩展区域，承载嵌套模式的遮罩背景层职责：上游体系的遮罩语义已折叠进全屏模式的根区域，
+AtomUI 没有全屏模式，遮罩层是嵌套模式下独立的真实节点。`SpinIndicator` 是独立的公开子控件，
+公开 `root` 与 `content`。
+
+### 1.1 `Spin`
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `Spin` | `Single` | `Root` | `false` | `false` |
+| `container` | `.semantic-container` | `ContentPresenter` | `Single` | `Selector` | `false` | `false` |
+| `mask` | `.semantic-mask` | `Border` | `Single` | `Selector` | `false` | `false` |
+| `section` | `.semantic-section` | `StackPanel` | `Single` | `Selector` | `false` | `false` |
+| `indicator` | `.semantic-indicator` | `SpinIndicator` | `Single` | `Selector` | `false` | `false` |
+| `description` | `.semantic-description` | `TextBlock` | `Single` | `Selector` | `false` | `false` |
+
+`container` 承载用户内容的 `ContentPresenter`，spinning 时承担透明度或高斯模糊反馈；`mask` 是遮罩背景层，只在
+`IsMaskBackgroundEnabled` 时呈现 `ColorBgMask`；`section` 是加载区域，承载 `indicator` 与 `description` 并居中；
+`indicator` 是主控件模板直接拥有的公开 `SpinIndicator` 子控件，其尺寸分支、动效时长和圆点填充
+（`DotBgBrush`）均可经 Semantic Style 定制；`description` 是提示文本节点，对应公共 API
+`Tip` / `IsTipVisible`。`root` 不声明 `.semantic-root` marker。
+
+### 1.2 `SpinIndicator`
+
+| Part | Selector | ContractType | Cardinality | Customization | CrossVisualRoot | RuntimeCreated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `root` | owner | `SpinIndicator` | `Single` | `Root` | `false` | `false` |
+| `content` | `.semantic-content` | `Control` | `Multiple` | `Selector` | `false` | `false` |
+
+`content` 使用 `Multiple` 是 AtomUI 模板实现的状态替代语义：内置四点指示器 `SpinIndicatorDotPanel` 与自定义指示器
+`PART_CustomIndicatorPresenter` 是两个静态 marker target，由 `IsCustomIndicator` 决定同一时刻只有一个可见。
+Preview 只高亮当前可见 target；Semantic Style 同时作用于两个替代实现，保证切换自定义指示器后定制仍然存在。
 
 ## Abstract AXAML Structure
 
@@ -13620,7 +22427,7 @@ Spin
 | --- | --- | --- |
 | 内容与数据 | `CustomIndicatorTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 交互与状态 | `IsMaskBackgroundEnabled`、`IsMaskBlurEnabled`、`IsMotionEnabled`、`IsSpinning`、`IsTipVisible` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
-| 视觉与布局 | `DotSize`、`IndicatorSize`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
+| 视觉与布局 | `DotBgBrush`、`DotSize`、`IndicatorSize`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 动效与异步 | `MotionDuration`、`MotionEasingCurve` | 约束动效开关、异步加载、播放速度、超时和任务边界。 |
 | 其他稳定入口 | `CustomIndicator`、`Tip` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -13704,14 +22511,269 @@ Source: ./controls/splash/semantic-cn.md
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
+`Splash` 公开 `root`、`logo`、`title`、`subtitle`、`content`、`spin`、`progressBar`、`message`、`detail`、`footer`
+十个职责区域：
+
+| Part | Selector | ContractType | Cardinality | Customization | AtomUI 节点 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `Splash` | 启动反馈控件根语义区域，承载 public API、状态和主题入口。 | `Logo`、`Title`、`Status`、`Progress` | `SplashToken` | stable |
-| `host` | `SplashWindow` | 承载独立桌面启动窗口和关闭动效。 | `MinimumShowDuration`、`CloseDelay`、`FadeOutDuration` | `WindowWidth`、`WindowMinHeight` | stable |
-| `brand` | `PART_LogoPresenter`、`PART_TitleBlock`、`PART_SubtitleBlock` | 展示品牌和应用身份。 | `Logo`、`LogoTemplate`、`Title`、`Subtitle` | `LogoSize`、`TitleFontSize` | template-stable |
-| `status` | `PART_MessageBlock`、`PART_DetailBlock` | 展示启动阶段、错误详情或补充说明。 | `Message`、`Detail`、`Status` | `MessageFontSize`、`DetailFontSize` | template-stable |
-| `progress` | `PART_ProgressBar`、`PART_Spin` | 展示确定或不确定进度。 | `Progress`、`IsIndeterminate` | `ProgressMarginTop`、`IndicatorSize` | template-stable |
-| `content` | `PART_ContentPresenter`、`PART_FooterPresenter` | 承载自定义内容和底部区域。 | `Content`、`ContentTemplate`、`Footer`、`FooterTemplate` | `ContentGap`、`FooterMarginTop` | template-stable |
+| `root` | 控件本身 | `Splash` | `Single` | `Root` | `Splash` owner |
+| `logo` | `.semantic-logo` | `ContentPresenter` | `Single` | `Selector` | `ContentPresenter#PART_LogoPresenter` |
+| `title` | `.semantic-title` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_TitleBlock` |
+| `subtitle` | `.semantic-subtitle` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_SubtitleBlock` |
+| `content` | `.semantic-content` | `ContentPresenter` | `Single` | `Selector` | `ContentPresenter#PART_ContentPresenter` |
+| `spin` | `.semantic-spin` | `Spin` | `Single` | `Selector` | `Spin#PART_Spin` |
+| `progressBar` | `.semantic-progress-bar` | `ProgressBar` | `Single` | `Selector` | `ProgressBar#PART_ProgressBar` |
+| `message` | `.semantic-message` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_MessageBlock` |
+| `detail` | `.semantic-detail` | `TextBlock` | `Single` | `Selector` | `TextBlock#PART_DetailBlock` |
+| `footer` | `.semantic-footer` | `ContentPresenter` | `Single` | `Selector` | `ContentPresenter#PART_FooterPresenter` |
+
+表中 `TextBlock` 均指 `Avalonia.Controls.TextBlock`，`Spin` / `ProgressBar` 指 `AtomUI.Desktop.Controls` 中的对应类型。
+`Splash` 是 `AtomUI.Desktop.Controls.Extras` 中**首个**采用 Semantic Part 的控件；`root` 是本包第一个隐式 descriptor。
+
+十个 Part 随本次 Semantic Part 改造同时公开，descriptor 的 `Since` 统一为 `6.2.0`，与其余已改造控件一致。Splash 是独立
+控件，不存在派生控件家族、public 子 Control owner 或 item container，十个 Part 全部属于 `Splash` 自身。窗口宿主
+`SplashWindow` 不是 Semantic owner，理由见 [§6.1](#61-splashwindow-不发布语义部件)。
+
+### 1.1 准入依据（2026-09-16 用户指令）
+
+Splash 的纳入与既有三个追认项（`Expander`、`TabStrip`、`Menu`）依据不同，必须单独说明：
+
+- 上游设计体系当前稳定发布源码中**不存在**与 Splash 职责对应的公开 Semantic DOM owner：启动页是桌面应用启动反馈，
+  Web 组件体系没有承载“启动中但应用尚不可交互”这一职责的公开组件。原排除判定见
+  [全量改造设计 §2.4](../../../../superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md)，其正向触发条件是
+  “新稳定版出现职责直接对应的公开 owner”。该条件**并未发生**；纳入由用户直接指令撤销，判据是 AtomUI 需要让 Splash
+  支持 Semantic Part，而不是上游新增 owner。
+- 支持该决定的既有先例与 `GroupBox` 一致：`SplitButton` 的触发侧按键说明，上游没有对应键时，AtomUI 可以按自身模板
+  结构**显式能力补充**发布 Part，而不是因为“上游没有”就拒绝定制。Splash 的十个 Part 全部是这类按自身模板职责设计的
+  显式能力补充。
+- Part 命名参照 AtomUI 已改造的同类反馈控件：`logo` / `message` / `detail` 按 Splash 自身 API（`Logo`、`Message`、
+  `Detail`）命名，`title` / `subtitle` / `content` / `footer` 与 `Result`、`Empty`、`Alert`、`GroupBox` 的同职责键一致，
+  `spin` / `progressBar` 按真实承载控件命名。
+
+Splash 的 Part 名称、`ContractType` 与 cardinality 自本文件发布起构成公共主题契约。
+
+### 1.2 `Splash`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `root` |
+| Selector | Splash 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `Splash` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `Splash` owner（可见表面由模板内的 `PART_RootLayout` / `PART_SurfaceLayout` 承载，见 §2.1） |
+| 职责 | Splash root 是启动页背景、圆角、内容内边距与窗口尺寸基线的统一 owner。 |
+| 相关 API | `Background`、`CornerRadius`、`Padding`、`Width`、`MinHeight`、`IsMotionEnabled`、`Status`、`Progress`、`IsIndeterminate` |
+| 相关 Token | SplashToken（`SurfaceBackground`、`SurfaceCornerRadius`、`ContentPadding`、`WindowWidth`、`WindowMinHeight`）、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `logo`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `logo` |
+| Selector | `.semantic-logo` |
+| SelectorRoute | `/template/ .semantic-logo` |
+| Style Type | `SplashLogoStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_LogoPresenter` |
+| 职责 | 统一表示品牌标识区域（`Logo` / `LogoTemplate`）的尺寸、对齐与外边距。 |
+| 相关 API | `Logo`、`LogoTemplate` |
+| 相关 Token | `LogoSize`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `SplashTitleStyle` |
+| ContractType | `TextBlock`（`Avalonia.Controls.TextBlock`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_TitleBlock` |
+| 职责 | 统一表示主标题文字的颜色、字号、字重、行高与对齐。 |
+| 相关 API | `Title` |
+| 相关 Token | SharedToken（`ColorTextHeading`）、`TitleFontSize`、`TitleLineHeight` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `subtitle`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `subtitle` |
+| Selector | `.semantic-subtitle` |
+| SelectorRoute | `/template/ .semantic-subtitle` |
+| Style Type | `SplashSubtitleStyle` |
+| ContractType | `TextBlock`（`Avalonia.Controls.TextBlock`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_SubtitleBlock` |
+| 职责 | 统一表示副标题文字的颜色、字号与对齐。 |
+| 相关 API | `Subtitle` |
+| 相关 Token | `SubtleForeground`、`SubtitleFontSize` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `content`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `content` |
+| Selector | `.semantic-content` |
+| SelectorRoute | `/template/ .semantic-content` |
+| Style Type | `SplashContentStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_ContentPresenter` |
+| 职责 | 统一表示扩展内容区域（`Content` / `ContentTemplate`）的内边距、背景、对齐与尺寸约束。 |
+| 相关 API | `Content`、`ContentTemplate` |
+| 相关 Token | `ContentGap`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `spin`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `spin` |
+| Selector | `.semantic-spin` |
+| SelectorRoute | `/template/ .semantic-spin` |
+| Style Type | `SplashSpinStyle` |
+| ContractType | `Spin` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `Spin#PART_Spin` |
+| 职责 | 统一表示不确定加载指示器的尺寸、颜色与对齐。 |
+| 相关 API | `IsIndeterminate`（经 `IsSpinVisible` 投影） |
+| 相关 Token | `IndicatorSize`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `progressBar`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `progressBar` |
+| Selector | `.semantic-progress-bar` |
+| SelectorRoute | `/template/ .semantic-progress-bar` |
+| Style Type | `SplashProgressBarStyle` |
+| ContractType | `ProgressBar`（`AtomUI.Desktop.Controls.ProgressBar`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ProgressBar#PART_ProgressBar` |
+| 职责 | 统一表示确定进度条的高度、颜色与宽度。 |
+| 相关 API | `Progress`、`IsIndeterminate`（经 `IsProgressBarVisible` 投影） |
+| 相关 Token | `ProgressBarHeight`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+#### `message`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `message` |
+| Selector | `.semantic-message` |
+| SelectorRoute | `/template/ .semantic-message` |
+| Style Type | `SplashMessageStyle` |
+| ContractType | `TextBlock`（`Avalonia.Controls.TextBlock`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_MessageBlock` |
+| 职责 | 统一表示状态消息文字的颜色、字号与对齐；`:success` / `:error` 状态色经该节点呈现。 |
+| 相关 API | `Message`、`Detail`、`Status`、`SetMessage`、`SetStatus`、`SetError` |
+| 相关 Token | SharedToken（`ColorText`）、`MessageFontSize`、`SuccessColor`、`ErrorColor` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `detail`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `detail` |
+| Selector | `.semantic-detail` |
+| SelectorRoute | `/template/ .semantic-detail` |
+| Style Type | `SplashDetailStyle` |
+| ContractType | `TextBlock`（`Avalonia.Controls.TextBlock`） |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `TextBlock#PART_DetailBlock` |
+| 职责 | 统一表示详细信息 / 错误详情文字的颜色、字号、换行与对齐。 |
+| 相关 API | `Detail`、`SetMessage`、`SetStatus`、`SetError` |
+| 相关 Token | `SubtleForeground`、`DetailFontSize` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `footer`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `Splash` |
+| Part | `footer` |
+| Selector | `.semantic-footer` |
+| SelectorRoute | `/template/ .semantic-footer` |
+| Style Type | `SplashFooterStyle` |
+| ContractType | `ContentPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | `ContentPresenter#PART_FooterPresenter` |
+| 职责 | 统一表示底部区域（`Footer` / `FooterTemplate`，版本信息、版权信息或启动失败重试入口）的内边距、背景与对齐。 |
+| 相关 API | `Footer`、`FooterTemplate` |
+| 相关 Token | `FooterMarginTop`、SharedToken |
+| 稳定性 | stable since 6.2.0 |
+
+`root` 是隐式 Part，不添加 `.semantic-root`。`ContractType` 只定义 Setter 可以稳定依赖的最低 public 类型，并通过
+`x:SetterTargetType` 提供 AXAML 编译期类型上下文；它不参与 `.semantic-*` 的身份匹配。
+
+四个文本位的 `ContractType` 取 `Avalonia.Controls.TextBlock` 基类，而不是模板节点的派生类型
+`AtomUI.Desktop.Controls.TextBlock`。派生类型同样满足该契约，取基类可以让后续把节点替换为普通 `TextBlock` 保持兼容；
+收窄到派生类型属于破坏性变更。同理，`spin` / `progressBar` 的 `ContractType` 取各自公开控件类型：即使后续以
+`CustomIndicator` 等方式提供更多节点，契约仍成立。
+
+九个非 root Part 全部是 `SplashTheme.axaml` 单一 `ControlTemplate` 内的静态节点，`TemplatedParent` 为 `Splash` owner
+本身，因此全部声明 `RuntimeCreated=false` 且不携带显式 `SelectorRoute`；生成器按
+[Semantic Part Generator §2.3](../../../../modules/generator/semantic-part-generator.md)把静态根模板 Part 的 route
+规范化为 `/template/ .<SelectorClass>`。`message` 与 `detail` 位于 progress 区之后、`footer` 之前，但都与其余节点处于
+同一 `StackPanel#PART_ContentLayout` 内，不跨越第二层模板边界；`spin` / `progressBar` 虽然自身是 `TemplatedControl`，
+marker 仍标注在 Splash 模板给出的这两个节点上（未进入它们各自的模板），因此单一 `/template/` 路由已经足够，不需要
+`.semantic-scope-*` 中间锚点，也不需要 `CrossNestedOwners`。Splash 没有任何由 C# 创建并注入 marker 的 Part，也不存在
+跨视觉根 Part。
+
+Splash 只有一个叶子主题资产（`src/AtomUI.Desktop.Controls.Extras/Splash/Themes/SplashTheme.axaml`），没有第二个
+`ControlTemplate` 变体、没有 Browser 变体、没有派生模板，也不存在参与校验的 `*Themes.axaml`；因此不存在 marker 覆盖
+缺口。`SplashWindowTheme.axaml` 是另一个 owner（`SplashWindow`）的主题，不参与 `Splash` 的 Part 校验。
 
 ## Abstract AXAML Structure
 
@@ -14939,3 +24001,4 @@ Token 边界：
 - 业务 open state coercion 不得通过 suppression flag 发布瞬态 false；lifecycle close scope 是唯一允许 pinned 业务状态变为 false 的路径。
 - Popup 必须以共享 `MotionExecutionState` 表达关闭动效阶段；`Pending`、`Playing` 和 `Completing` 单向收敛，重复
   close 不得创建并行关闭动效，`Closed` 必须回到 `Idle`。
+- Popup 开启动画必须覆盖 `Opened` 与 motion actor ready 的两种先后顺序；物理 `IsOpen=true` 但 actor 仍透明不是有效打开终态。

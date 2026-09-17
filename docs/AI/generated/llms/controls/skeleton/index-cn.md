@@ -82,37 +82,37 @@ Skeleton 的公共契约由 public/protected 类型成员、Avalonia 属性、�
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Skeleton/Views/SkeletonShowCase.axaml:37`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Skeleton/Views/SkeletonShowCase.axaml:112`
 
 Gallery key：`ExamplesContent` / item `0`
 
 ```axaml
-<atom:Skeleton IsLoading="True"/>
+<atom:Skeleton IsLoading="True" />
 ```
 
 ### 复杂组合
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Skeleton/Views/SkeletonShowCase.axaml:49`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Skeleton/Views/SkeletonShowCase.axaml:124`
 
 Gallery key：`ExamplesContent` / item `1`
 
 ```axaml
-<atom:Skeleton IsShowAvatar="True" ParagraphRows="4" IsLoading="True"/>
+<atom:Skeleton IsShowAvatar="True" ParagraphRows="4" IsLoading="True" />
 ```
 
 ### 动态效果
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Skeleton/Views/SkeletonShowCase.axaml:61`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Skeleton/Views/SkeletonShowCase.axaml:136`
 
 Gallery key：`ExamplesContent` / item `2`
 
 ```axaml
-<atom:Skeleton IsActive="True" IsLoading="True"/>
+<atom:Skeleton IsActive="True" IsLoading="True" />
 ```
 
 ### 包含子组件
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Skeleton/Views/SkeletonShowCase.axaml:147`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Skeleton/Views/SkeletonShowCase.axaml:243`
 
 Gallery key：`ExamplesContent` / item `4`
 
@@ -120,12 +120,16 @@ Gallery key：`ExamplesContent` / item `4`
 <StackPanel Orientation="Vertical" Spacing="10">
     <atom:Skeleton IsLoading="{Binding SkeletonLoading}">
         <StackPanel Orientation="Vertical" Spacing="20">
-            <atom:TextBlock FontWeight="Bold" Text="AtomUI，一套设计语言" />
-            <atom:TextBlock TextWrapping="Wrap" Text="我们提供一系列设计原则、实用模式和高质量设计资源（Sketch 和 Axure），帮助人们高效而优雅地创建产品原型。" />
+            <atom:TextBlock FontWeight="Bold"
+                            Text="AtomUI，一套设计语言" />
+            <atom:TextBlock TextWrapping="Wrap"
+                            Text="我们提供一系列设计原则、实用模式和高质量设计资源（Sketch 和 Axure），帮助人们高效而优雅地创建产品原型。" />
         </StackPanel>
     </atom:Skeleton>
-    <atom:Button IsEnabled="{Binding SkeletonLoading, Converter={x:Static BoolConverters.Not}}"
-                 Click="HandleLoadingButtonClicked" Content="显示骨架屏" />
+    <atom:Button
+        IsEnabled="{Binding SkeletonLoading, Converter={x:Static BoolConverters.Not}}"
+        Click="HandleLoadingButtonClicked"
+        Content="显示骨架屏" />
 </StackPanel>
 ```
 
@@ -187,6 +191,7 @@ Skeleton Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 资源和 AOT 约束：
 
 - 不通过运行时反射扫描 public API、Token 或 Gallery 示例数据。
+- 不通过 VisualTree 扫描维护 Semantic Part；Gallery Preview 使用生成 descriptor 和 owner-scoped marker 解析。
 - 不把可静态声明的模板结构迁移到 C# 动态创建。
 - 异步加载、上传、弹层和窗口生命周期必须能取消或释放。
 - 缓存对象必须与控件、窗口、弹层或数据 owner 生命周期一致。
@@ -215,6 +220,12 @@ Skeleton Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 - `src/AtomUI.Desktop.Controls/Skeleton/SkeletonParagraph.cs`
 - `src/AtomUI.Desktop.Controls/Skeleton/SkeletonTitle.cs`
 - `src/AtomUI.Desktop.Controls/Skeleton/SkeletonToken.cs`
+- `src/AtomUI.Desktop.Controls/Skeleton/Skeleton.SemanticParts.cs`
+- `src/AtomUI.Desktop.Controls/Skeleton/SkeletonAvatar.SemanticParts.cs`
+- `src/AtomUI.Desktop.Controls/Skeleton/SkeletonButton.SemanticParts.cs`
+- `src/AtomUI.Desktop.Controls/Skeleton/SkeletonInput.SemanticParts.cs`
+- `src/AtomUI.Desktop.Controls/Skeleton/SkeletonImage.SemanticParts.cs`
+- `src/AtomUI.Desktop.Controls/Skeleton/SkeletonNode.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/Skeleton/Themes/AbstractSkeletonTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Skeleton/Themes/AbstractSkeletonTheme.cs`
 - `src/AtomUI.Desktop.Controls/Skeleton/Themes/SkeletonAvatarTheme.axaml`
@@ -235,11 +246,15 @@ Skeleton Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 - Theme 文件负责静态视觉结构、template part、selector 和资源绑定。
 - Token 文件只提供组件视觉变量，不保存实例状态。
 - Gallery 文件只展示用法和示例，不作为运行时逻辑 owner。
+- Semantic descriptor 由各 public owner 的 `[SemanticPart]` 声明生成；模板只使用静态 `Classes.semantic-*="True"` marker。
+- `SkeletonAvatar`、`SkeletonButton` 和 `SkeletonInput` 的 typed theme 保留现有 BasedOn 样式，并提供等价显式叶子模板，
+  使生成器能够验证静态 marker，而不引入运行时发现路径。
 
 ## 相关文档
 
 - 源设计文档：`docs/controls/desktop/feedback/skeleton/overview.md`
 - 实现文档：`docs/controls/desktop/feedback/skeleton/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/feedback/skeleton/semantic-part.md`
 - Token 文档：`docs/controls/desktop/feedback/skeleton/token.md`
 - 变更记录：`docs/controls/desktop/feedback/skeleton/changelog.md`
 - 语义结构：`./semantic-cn.md`

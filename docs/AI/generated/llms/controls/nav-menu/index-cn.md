@@ -105,21 +105,23 @@ NavMenu 的公共 API 分为控件 API、节点 API 和事件 API。
 | `NavMenuItemClick` | `NavMenuItemClickEventArgs` | 菜单项点击事件，事件参数暴露 `INavMenuItem` 作为只读交互上下文。 |
 | `NavMenuNodeSelected` | `NavMenuNodeSelectedEventArgs` | 叶子节点选中事件，事件参数暴露 `INavMenuNode`。 |
 
-`DefaultSelectedPath` 和 `DefaultOpenPaths` 是默认值入口，不是持续受控展开状态。运行期受控选择应使用 `SelectedItem`。
+`DefaultSelectedPath` 和 `DefaultOpenPaths` 是默认值入口，不是持续受控展开状态。运行期受控选择应使用 `SelectedItem`。默认选中路径排队后若发生显式选择，旧请求必须失效，不能覆盖用户最新选择。
+
+节点 `HeaderTemplate` 与 `ItemKey` 在容器实现后继续响应属性通知。节点模板为 `null` 时使用当前 owner 的 `ItemTemplate`；设置节点模板后优先使用节点值，清空后恢复当前 owner 模板。自定义节点通过 `INotifyPropertyChanged` 通知这些变化；不可通知的节点在容器准备或重新挂载时读取当前值。
 
 `NavMenuNode.Entries` 是内置节点子结构的唯一真源。`Children` 保持既有类型和节点语义：枚举时递归穿过同一语义层级内的 `NavMenuGroup`，但不进入子节点自身的后代；`Add` 把节点追加为直接 entry，`Insert`、替换和删除写回节点当前所在的实际 entry owner，`Clear` 清空当前节点的整个 `Entries`。`INavMenuNode.Entries` 使用 `IEnumerable<INavMenuEntry>`，利用 `IEnumerable<T>` 协变在接口默认实现中直接返回既有 `IEnumerable<INavMenuNode> Children`，不创建适配集合；`NavMenuNode` 通过显式接口实现把其可写 `Entries` 投影为该读取契约。因此既有纯节点自定义实现保持源码兼容，并继续由原 `Children` 集合通知驱动容器更新。
 
 根 `NavMenu.Items`、根 `ItemsSource`、`NavMenuNode.Entries` 和 `NavMenuGroup.Entries` 使用同一 entry 类型边界：集合中的每一项必须是 `INavMenuNode`、`NavMenuGroup` 或 `NavMenuDivider`；`null`、普通业务对象、内部生成容器和仅实现 marker 的其他类型都不是合法数据项。直接 `Items` 变更与 `ItemsSource` 的初始装载、替换以及 Add、Replace、Reset 通知必须进入同一验证入口；发现非法项时立即抛出包含来源和索引信息的 `InvalidOperationException`，不能静默跳过、按普通内容呈现或等到容器绑定阶段再产生类型错误。
 
-内置 `NavMenuNode` 和 `NavMenuGroup` 是有状态结构 entry，同一实例在整个 entry 树中只能拥有一个直接结构 owner，不能在同一集合重复，也不能同时挂到两个节点、分组或根 `NavMenu`。从原 owner Remove、Replace、Clear 或移除根 source 后，该实例可以重新挂载。结构 owner 使用弱引用，外部长期持有 node/group 不会反向保留已经不可达的根菜单。`NavMenuDivider` 不保存选择、展开、父级、资源或容器状态，因此同一 divider 实例允许在多个位置复用。
+内置 `NavMenuNode` 和 `NavMenuGroup` 是有状态结构 entry，同一实例在整个 entry 树中只能拥有一个直接结构 owner，不能在同一集合重复，也不能同时挂到两个节点、分组或根 `NavMenu`。从原 owner Remove、Replace、Clear 或移除根 source 后，该实例可以重新挂载。结构 owner 使用弱引用；资源宿主 attachment 与 node/group 到容器的属性订阅随根菜单 visual detach 释放，重新挂载时按当前数据恢复。因此外部长期持有 node/group 不会反向保留已卸载且不可达的根菜单。普通子菜单关闭不结束根菜单的资源作用域。`NavMenuDivider` 不保存选择、展开、父级、资源或容器状态，因此同一 divider 实例允许在多个位置复用。
 
 自定义 `INavMenuNode` 实例自身保持既有兼容契约，不强制登记内置 structural owner；但其 `Entries` / `Children` 中出现的内置 `NavMenuNode` 或 `NavMenuGroup` 仍必须参加完整引用唯一性检查。每个内置 `NavMenuNode` / `NavMenuGroup` entry owner 和根 `NavMenu` 都协调自己的结构 scope：遍历直接 entry，并递归穿过 custom node；遇到内置 node/group 后由该内置 entry 自己的协调器接管后代。custom node 下的内置后代继承最近的内置 entry owner，只有根级 custom node 的内置后代才由根菜单作为结构 owner。所有 scope 组合后覆盖完整 entry 图，因此离线构造的树也不能通过 custom wrapper 绕过唯一性，同时纯 built-in 深树不会形成祖先对后代集合的重复订阅。协调器只弱订阅当前 scope 内可通知的 custom entry source；custom node 增删内置后代时立即重新协调，在加入时拒绝指回当前 built-in owner 或任意 built-in 祖先的动态环，并在移除后释放 owner。不可通知的自定义 enumerable 按每次所属集合或可通知 custom 祖先变化时取得的当前快照校验。
 
-`NavMenuNode.Entries` 和 `NavMenuGroup.Entries` 是控件拥有的可写集合，单项 Add、Insert、Replace 以及批量初始化先完成类型、循环、直接 owner 和批次重复校验，失败时不产生部分写入。成功写入先同步完整 structural ownership，再调用自定义节点的 parent callback 或分组语义父级投影，最后发送集合通知；因此可重入回调和观察者都不能抢占已经属于本次写入的 entry 或内置后代。批量初始化一次提交完整批次，并只发送单次 Add 通知。根 direct `Items` 与任意外部 `ItemsSource` 都通过 post-mutation 的 `ItemsView.CollectionChanged` 到达控件；根 `NavMenu` 对完整 entry 图做校验并确定性抛错，但不通过重入 Remove/Replace 回滚或篡改数据源。Move 和 Remove 仍执行正常的 owner、父级、容器和生命周期协调。
+`NavMenuNode.Entries` 和 `NavMenuGroup.Entries` 是控件拥有的可写集合，单项 Add、Insert、Replace 以及批量初始化先完成类型、循环、直接 owner 和批次重复校验，失败时不产生部分写入。成功写入先同步完整 structural ownership，再调用自定义节点的 parent callback 或分组语义父级投影，最后发送集合通知；因此可重入回调和观察者都不能抢占已经属于本次写入的 entry 或内置后代。Replace 先提交新旧成员与结构所有权，再执行父关系投影；投影和通知期间拒绝重入修改同一集合。已提交 Replace 遇到回调异常时，继续完成其他父关系投影（包括嵌套分组）和后续通知，再向调用者传播异常。批量初始化一次提交完整批次，并只发送单次 Add 通知。根 direct `Items` 与任意外部 `ItemsSource` 都通过 post-mutation 的 `ItemsView.CollectionChanged` 到达控件；根 `NavMenu` 对完整 entry 图做校验并确定性抛错，但不通过重入 Remove/Replace 回滚或篡改数据源。Move 和 Remove 仍执行正常的 owner、父级、容器和生命周期协调。
 
 `IsInlineCollapsed` 是唯一折叠状态源。NavMenu 不增加语义相反的 `Expanded` / `IsExpanded` 属性；调用方需要正向展开状态时，通过双向 binding converter 映射 `IsInlineCollapsed`，避免两个公共状态互相写回。
 
-节点命令遵守 Avalonia 命令语义：`NavMenuNode` / `INavMenuNode` 只保存 `Command` 和 `CommandParameter`，实际执行、`CanExecute` 评估和 `CanExecuteChanged` 生命周期由生成出的 `NavMenuItem` 容器负责。`INavMenuNode` 为两个成员提供 `null` 默认实现，使既有自定义节点实现无需声明命令也能继续工作。`CommandParameter=null` 表示显式空参数，控件不能自动替换为 `ItemKey`；需要使用业务 key 时，应显式把 `ItemKey` 绑定或赋值给 `CommandParameter`。容器按 UI 周期合并连续的 `CanExecuteChanged` 通知：持续的 `false` 仍进入 disabled，同一同步执行周期内的 `false -> true` 瞬时变化只投影最终状态，避免多个共享命令节点触发无业务意义的禁用颜色闪动。
+节点命令遵守 Avalonia 命令语义：`NavMenuNode` / `INavMenuNode` 只保存 `Command` 和 `CommandParameter`，实际执行、`CanExecute` 评估和 `CanExecuteChanged` 生命周期由生成出的 `NavMenuItem` 容器负责。`INavMenuNode` 为两个成员提供 `null` 默认实现，使既有自定义节点实现无需声明命令也能继续工作。`CommandParameter=null` 表示显式空参数，控件不能自动替换为 `ItemKey`；需要使用业务 key 时，应显式把 `ItemKey` 绑定或赋值给 `CommandParameter`。命令只由实际激活项执行，子项 Click 冒泡不能执行祖先命令。子菜单重新打开时刷新当前已生成的语义子项（穿透分组）的 `CanExecute`，使关闭期间的命令状态变化在重新打开时生效。容器按 UI 周期合并连续的 `CanExecuteChanged` 通知：持续的 `false` 仍进入 disabled，同一同步执行周期内的 `false -> true` 瞬时变化只投影最终状态，避免多个共享命令节点触发无业务意义的禁用颜色闪动。
 
 `IsInlineCollapsed` 只对 `Mode=Inline` 生效。`Mode=Vertical` 或 `Mode=Horizontal` 时设置该属性不应改变当前模式的 popup、布局或键盘语义。`InlineCollapsedWidth` 参与布局测量，默认通过 theme setter 取得 `NavMenuToken.InlineCollapsedWidth`；collapsed 状态下由控件内部对 `Width` / `MinWidth` 做有效值 coercion，本地设置的属性值应按 Avalonia 属性优先级覆盖 token 默认值，展开后原始 `Width` 或绑定必须恢复。
 
@@ -141,6 +143,41 @@ NavMenu 的公共 API 分为控件 API、节点 API 和事件 API。
 | `ChildItemsPresenter` | `ItemsPresenter` | `Inline` 模式下的子菜单内容承载。 |
 | `PART_ActiveIndicator` | `Rectangle` | `Horizontal` 顶层 light style 下的活动指示条。 |
 
+### 3.1 Semantic Part 契约摘要
+
+NavMenu 家族对应用公开基于 Selector 的 Semantic Part 契约，完整定义见
+[NavMenu Semantic Part 契约](semantic-part.md)。Part 只描述与实现结构无关的稳定视觉职责，不替代 StyledProperty、
+伪类、事件或 Token；AtomUI 默认主题不消费 `.semantic-*`。
+
+上游基线为 6.6.3 稳定发布源码公开的 12 个 Semantic 键路径：一级 `root`、`item`、`itemIcon`、`itemContent`、
+`itemTitle`、`list`，子菜单 `subMenu.item`、`subMenu.itemIcon`、`subMenu.itemContent`、`subMenu.itemTitle`、
+`subMenu.list`，以及 `popup.root`。Part 名称逐字沿用这些键路径，不新增、不改名、不合并。
+
+NavMenu 家族只有 `NavMenu` 一个 public owner：`NavMenuItem`、`NavMenuGroupItem`、`NavMenuDividerItem` 都是 internal
+容器，不能持有 descriptor，也不能作为 `ContractType`（菜单项容器取其最近 public 基类 `HeaderedSelectingItemsControl`）。
+因此不能像 `TreeView` / `TreeViewItem` 那样按递归 owner 拆分，全部 12 个键声明在 `NavMenu` 上。
+
+关键边界：
+
+- `root` 是隐式 Part，不声明 `.semantic-root` marker，也不生成 Style；通过 owner 属性、owner-scoped Style 或替换
+  ControlTheme 定制。
+- 层级靠**互斥 marker**区分，不靠 DOM class：一级菜单项容器 `.semantic-item`、子菜单容器 `.semantic-sub-menu-item`；
+  一级分组容器 `.semantic-scope-group`、子菜单内分组 `.semantic-sub-menu-group`。协调器在 prepare 时先移除另一层级的
+  类再补齐当前层级，保证容器转移与回收复用不残留。
+- 全部非 root Part 的 route 以 `>>` 开头并按生成器语法声明 `CrossNestedOwners`：容器是运行时生成物，不在 `NavMenu`
+  模板内，无法用 `/template/` 到达；`popup.root` 的节点还位于 `Popup.Child` 属性值子树，因此同时声明
+  `CrossVisualRoot`。
+- `popup.root` 的 `Cardinality` 为 `Multiple`；Inline 模式在视觉树内展开，模板没有弹层节点，该模式实例数为 0。
+- `NavMenuGroupItem`、`NavMenuDividerItem` 与三个 `*NavMenuItemHeader` 不持有 descriptor；分组标题与分组列表归
+  `NavMenu` owner，分隔线在上游没有 semantic 键。
+- 根 Header / Footer、`PART_HorizontalLine`、`PART_ActiveIndicator`、inline collapsed 首字符节点与 inline 子菜单内容容器
+  不开放为 Part。
+- 用户入口是生成的强类型 Semantic Style（如 `NavMenuItemStyle`、`NavMenuSubMenuItemStyle`、`NavMenuPopupRootStyle`），
+  在 AXAML 中作为 `atom|NavMenu` owner-scoped 普通 Style 的嵌套样式声明，并显式给出 `x:SetterTargetType`。
+
+Part 的 Selector、ContractType、cardinality、marker 放置、数量语义、尺寸基线、定制边界与验证矩阵以
+[NavMenu Semantic Part 契约](semantic-part.md) 为准。
+
 ## 事件与命令
 
 NavMenu 的公共 API 分为控件 API、节点 API 和事件 API。
@@ -150,7 +187,8 @@ NavMenu 的公共 API 分为控件 API、节点 API 和事件 API。
 | 事件 | 参数 | 语义 |
 | `NavMenuItemClick` | `NavMenuItemClickEventArgs` | 菜单项点击事件，事件参数暴露 `INavMenuItem` 作为只读交互上下文。 |
 | `NavMenuNodeSelected` | `NavMenuNodeSelectedEventArgs` | 叶子节点选中事件，事件参数暴露 `INavMenuNode`。 |
-节点命令遵守 Avalonia 命令语义：`NavMenuNode` / `INavMenuNode` 只保存 `Command` 和 `CommandParameter`，实际执行、`CanExecute` 评估和 `CanExecuteChanged` 生命周期由生成出的 `NavMenuItem` 容器负责。`INavMenuNode` 为两个成员提供 `null` 默认实现，使既有自定义节点实现无需声明命令也能继续工作。`CommandParameter=null` 表示显式空参数，控件不能自动替换为 `ItemKey`；需要使用业务 key 时，应显式把 `ItemKey` 绑定或赋值给 `CommandParameter`。容器按 UI 周期合并连续的 `CanExecuteChanged` 通知：持续的 `false` 仍进入 disabled，同一同步执行周期内的 `false -> true` 瞬时变化只投影最终状态，避免多个共享命令节点触发无业务意义的禁用颜色闪动。
+节点命令遵守 Avalonia 命令语义：`NavMenuNode` / `INavMenuNode` 只保存 `Command` 和 `CommandParameter`，实际执行、`CanExecute` 评估和 `CanExecuteChanged` 生命周期由生成出的 `NavMenuItem` 容器负责。`INavMenuNode` 为两个成员提供 `null` 默认实现，使既有自定义节点实现无需声明命令也能继续工作。`CommandParameter=null` 表示显式空参数，控件不能自动替换为 `ItemKey`；需要使用业务 key 时，应显式把 `ItemKey` 绑定或赋值给 `CommandParameter`。命令只由实际激活项执行，子项 Click 冒泡不能执行祖先命令。子菜单重新打开时刷新当前已生成的语义子项（穿透分组）的 `CanExecute`，使关闭期间的命令状态变化在重新打开时生效。容器按 UI 周期合并连续的 `CanExecuteChanged` 通知：持续的 `false` 仍进入 disabled，同一同步执行周期内的 `false -> true` 瞬时变化只投影最终状态，避免多个共享命令节点触发无业务意义的禁用颜色闪动。
+伪类、事件或 Token；AtomUI 默认主题不消费 `.semantic-*`。
 
 ## 使用示例
 
@@ -325,6 +363,7 @@ inline collapsed cache 不得持有 `NavMenuItem`、header、popup 或 template 
 
 - 源设计文档：`docs/controls/desktop/navigation/nav-menu/overview.md`
 - 实现文档：`docs/controls/desktop/navigation/nav-menu/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/navigation/nav-menu/semantic-part.md`
 - Token 文档：`docs/controls/desktop/navigation/nav-menu/token.md`
 - 变更记录：`docs/controls/desktop/navigation/nav-menu/changelog.md`
 - 语义结构：`./semantic-cn.md`

@@ -235,20 +235,23 @@ internal static partial class Program
         Expect(explicitItem.EffectiveContentPadding == new Thickness(4),
             "Collapse should not override an item-level ContentPadding local value.",
             failures);
-        Expect(normalItem.HeaderBorderThickness == new Thickness(0, 0, 0, 1),
-            $"Collapsed non-last CollapseItem should keep a header bottom separator, actual {DescribeThickness(normalItem.HeaderBorderThickness)}.",
+        // CollapseItem 边框 API 演进：旧 HeaderBorderThickness 由 ItemBorderThickness 取代
+        // （分隔线移到包裹整个 item 的 shell 边框，不再区分展开/收起状态）；
+        // ContentBorderThickness 恒为顶部单边分隔线 (0, line, 0, 0)。
+        Expect(normalItem.ItemBorderThickness == new Thickness(0, 0, 0, 1),
+            $"Collapsed non-last CollapseItem should keep an item shell bottom separator, actual {DescribeThickness(normalItem.ItemBorderThickness)}.",
             failures);
-        Expect(normalItem.ContentBorderThickness == new Thickness(0),
-            $"Collapsed CollapseItem should not keep a content border, actual {DescribeThickness(normalItem.ContentBorderThickness)}.",
+        Expect(normalItem.ContentBorderThickness == new Thickness(0, 1, 0, 0),
+            $"Collapsed CollapseItem should keep the constant content top separator (content frame is hidden while collapsed), actual {DescribeThickness(normalItem.ContentBorderThickness)}.",
             failures);
-        Expect(explicitItem.HeaderBorderThickness == new Thickness(0),
-            $"Expanded non-last CollapseItem should not draw the header/content separator on the header, actual {DescribeThickness(explicitItem.HeaderBorderThickness)}.",
+        Expect(explicitItem.ItemBorderThickness == new Thickness(0, 0, 0, 1),
+            $"Expanded non-last CollapseItem should keep the item shell bottom separator, actual {DescribeThickness(explicitItem.ItemBorderThickness)}.",
             failures);
-        Expect(explicitItem.ContentBorderThickness == new Thickness(0, 1, 0, 1),
-            $"Expanded non-last CollapseItem should use content top and bottom borders, actual {DescribeThickness(explicitItem.ContentBorderThickness)}.",
+        Expect(explicitItem.ContentBorderThickness == new Thickness(0, 1, 0, 0),
+            $"Expanded non-last CollapseItem should use the content top separator, actual {DescribeThickness(explicitItem.ContentBorderThickness)}.",
             failures);
-        Expect(lastItem.HeaderBorderThickness == new Thickness(0),
-            $"Expanded last CollapseItem should not keep a header bottom border, actual {DescribeThickness(lastItem.HeaderBorderThickness)}.",
+        Expect(lastItem.ItemBorderThickness == new Thickness(0),
+            $"Expanded last CollapseItem should not keep an item shell border, actual {DescribeThickness(lastItem.ItemBorderThickness)}.",
             failures);
         Expect(lastItem.ContentBorderThickness == new Thickness(0, 1, 0, 0),
             $"Expanded last CollapseItem should keep only the content top separator, actual {DescribeThickness(lastItem.ContentBorderThickness)}.",

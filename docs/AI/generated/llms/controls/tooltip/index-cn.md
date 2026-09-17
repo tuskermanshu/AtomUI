@@ -83,7 +83,7 @@ Tooltip 的公共契约由 public/protected 类型成员、Avalonia 属性、事
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/Tooltip/Views/TooltipShowCase.axaml:36`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/Tooltip/Views/TooltipShowCase.axaml:63`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -97,7 +97,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 弹出位置
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/Tooltip/Views/TooltipShowCase.axaml:51`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/Tooltip/Views/TooltipShowCase.axaml:79`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -166,6 +166,44 @@ Gallery key：`ExamplesContent` / item `1`
     </atom:Button>
 
 </Grid>
+```
+
+### 自定义语义结构的样式
+
+来源：`controlgallery/AtomUIGallery/ShowCases/DataDisplay/Tooltip/Views/TooltipShowCase.axaml:360`
+
+SourceKey：`tooltip-semantic-part`
+
+```axaml
+<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="20">
+    <StackPanel.Styles>
+        <Style Selector="atom|ToolTip.semantic-styles-demo">
+            <atom:ToolTipContainerStyle x:SetterTargetType="Border">
+                <Setter Property="Padding" Value="10" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="BoxShadow" Value="inset 0 0 8 #cccccc" />
+            </atom:ToolTipContainerStyle>
+        </Style>
+        <Style Selector="atom|ToolTip.semantic-styles-filled-demo">
+            <atom:ToolTipContainerStyle x:SetterTargetType="Border">
+                <Setter Property="Background" Value="#CC35477D" />
+                <Setter Property="TextElement.Foreground" Value="#FFFFFF" />
+                <Setter Property="Padding" Value="12" />
+                <Setter Property="CornerRadius" Value="4" />
+            </atom:ToolTipContainerStyle>
+        </Style>
+    </StackPanel.Styles>
+    <atom:Button Content="Object Style" atom:ToolTip.IsArrowVisible="False">
+        <atom:ToolTip.Tip>
+            <atom:ToolTip Classes="semantic-styles-demo" Content="Object text" />
+        </atom:ToolTip.Tip>
+    </atom:Button>
+    <atom:Button ButtonType="Primary" Content="Function Style" atom:ToolTip.IsArrowVisible="False">
+        <atom:ToolTip.Tip>
+            <atom:ToolTip Classes="semantic-styles-filled-demo" Content="Function text" />
+        </atom:ToolTip.Tip>
+    </atom:Button>
+</StackPanel>
 ```
 
 ## 状态模型
@@ -247,10 +285,12 @@ Tooltip Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 
 - `src/AtomUI.Desktop.Controls/Tooltip/Themes/ToolTipTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Tooltip/ToolTip.cs`
+- `src/AtomUI.Desktop.Controls/Tooltip/ToolTip.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/Tooltip/ToolTipPseudoClass.cs`
 - `src/AtomUI.Desktop.Controls/Tooltip/ToolTipToken.cs`
 - `src/AtomUI.Desktop.Controls/Tooltip/OverflowTip.cs`
 - `src/AtomUI.Desktop.Controls/Tooltip/ToolTipService.cs`
+- `src/AtomUI.Desktop.Controls/Primitives/ArrowDecoratedBox/Themes/ArrowDecoratedBoxTheme.axaml`（共享 `container`/`arrow` marker 宿主）
 
 职责边界：
 
@@ -263,6 +303,7 @@ Tooltip Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 
 - 源设计文档：`docs/controls/desktop/data-display/tooltip/overview.md`
 - 实现文档：`docs/controls/desktop/data-display/tooltip/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/data-display/tooltip/semantic-part.md`
 - Token 文档：`docs/controls/desktop/data-display/tooltip/token.md`
 - 变更记录：`docs/controls/desktop/data-display/tooltip/changelog.md`
 - 语义结构：`./semantic-cn.md`

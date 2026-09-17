@@ -498,6 +498,7 @@
     "resources/**"
   ],
   "tooling": [
+    "scripts/run-full-regression.sh",
     "scripts/verification/affected/**",
     "scripts/verification/tests/**",
     "scripts/verification/test.py",

@@ -30,6 +30,12 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl, ITabOv
     public static readonly StyledProperty<Dock> TabStripPlacementProperty =
         AvaloniaProperty.Register<BaseTabControl, Dock>(nameof(TabStripPlacement), defaultValue: Dock.Top);
     
+    public static readonly StyledProperty<IReadOnlyList<double>?> BorderDashArrayProperty =
+        AvaloniaProperty.Register<BaseTabControl, IReadOnlyList<double>?>(nameof(BorderDashArray));
+
+    public static readonly StyledProperty<double> BorderDashOffsetProperty =
+        AvaloniaProperty.Register<BaseTabControl, double>(nameof(BorderDashOffset));
+
     public static readonly StyledProperty<HorizontalAlignment> HorizontalContentAlignmentProperty =
         ContentControl.HorizontalContentAlignmentProperty.AddOwner<BaseTabControl>();
     
@@ -141,6 +147,18 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl, ITabOv
         set => SetValue(TabStripPlacementProperty, value);
     }
     
+    public IReadOnlyList<double>? BorderDashArray
+    {
+        get => GetValue(BorderDashArrayProperty);
+        set => SetValue(BorderDashArrayProperty, value);
+    }
+
+    public double BorderDashOffset
+    {
+        get => GetValue(BorderDashOffsetProperty);
+        set => SetValue(BorderDashOffsetProperty, value);
+    }
+
     public HorizontalAlignment HorizontalContentAlignment
     {
         get => GetValue(HorizontalContentAlignmentProperty);
@@ -276,6 +294,24 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl, ITabOv
 
     #region 内部属性实现
     
+    internal static readonly StyledProperty<IBrush?> SeparatorBorderBrushProperty =
+        AvaloniaProperty.Register<BaseTabControl, IBrush?>(nameof(SeparatorBorderBrush));
+
+    internal static readonly StyledProperty<Thickness> SeparatorBorderThicknessProperty =
+        AvaloniaProperty.Register<BaseTabControl, Thickness>(nameof(SeparatorBorderThickness));
+
+    internal IBrush? SeparatorBorderBrush
+    {
+        get => GetValue(SeparatorBorderBrushProperty);
+        set => SetValue(SeparatorBorderBrushProperty, value);
+    }
+
+    internal Thickness SeparatorBorderThickness
+    {
+        get => GetValue(SeparatorBorderThicknessProperty);
+        set => SetValue(SeparatorBorderThicknessProperty, value);
+    }
+
     internal static readonly DirectProperty<BaseTabControl, Thickness> TabStripMarginProperty =
         AvaloniaProperty.RegisterDirect<BaseTabControl, Thickness>(nameof(TabStripMargin),
             o => o.TabStripMargin,
@@ -359,7 +395,7 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl, ITabOv
         SelectionModeProperty.OverrideDefaultValue<BaseTabControl>(SelectionMode.AlwaysSelected);
         AutoScrollToSelectedItemProperty.OverrideDefaultValue<BaseTabControl>(false);
         ItemsPanelProperty.OverrideDefaultValue<BaseTabControl>(DefaultPanel);
-        AffectsRender<BaseTabControl>(BorderBrushProperty, BorderThicknessProperty, UseLayoutRoundingProperty);
+        AffectsRender<BaseTabControl>(SeparatorBorderBrushProperty, SeparatorBorderThicknessProperty, UseLayoutRoundingProperty);
         AffectsMeasure<BaseTabControl>(TabStripMarginProperty, TabAndContentGutterProperty, TabStripPlacementProperty);
         SelectedItemProperty.Changed.AddClassHandler<BaseTabControl>((x, e) => x.UpdateSelectedContent());
     }
@@ -932,7 +968,7 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl, ITabOv
         {
             var offset          = _alignWrapper.TranslatePoint(new Point(0, 0), this) ?? default;
             var size            = _alignWrapper.Bounds.Size;
-            var borderThickness = BorderUtils.BuildRenderScaleAwareThickness(this, BorderThickness.Left);
+            var borderThickness = BorderUtils.BuildRenderScaleAwareThickness(this, SeparatorBorderThickness.Left);
             var offsetDelta     = borderThickness / 2;
             if (TabStripPlacement == Dock.Top)
             {
@@ -965,7 +1001,7 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl, ITabOv
         if (Items.Count > 0)
         {
             SetupTabStripBorderPoints();
-            var borderThickness = BorderThickness.Left;
+            var borderThickness = SeparatorBorderThickness.Left;
             using var optionState = context.PushRenderOptions(new RenderOptions
             {
                 EdgeMode = EdgeMode.Aliased
@@ -977,12 +1013,12 @@ public class BaseTabControl : SelectingItemsControl, IMotionAwareControl, ITabOv
     private Pen GetTabStripBorderPen(double borderThickness)
     {
         if (_tabStripBorderPen is null ||
-            !ReferenceEquals(_tabStripBorderPenBrush, BorderBrush) ||
+            !ReferenceEquals(_tabStripBorderPenBrush, SeparatorBorderBrush) ||
             !double.Equals(_tabStripBorderPenThickness, borderThickness))
         {
-            _tabStripBorderPenBrush     = BorderBrush;
+            _tabStripBorderPenBrush     = SeparatorBorderBrush;
             _tabStripBorderPenThickness = borderThickness;
-            _tabStripBorderPen          = new Pen(BorderBrush, borderThickness);
+            _tabStripBorderPen          = new Pen(SeparatorBorderBrush, borderThickness);
         }
 
         return _tabStripBorderPen!;

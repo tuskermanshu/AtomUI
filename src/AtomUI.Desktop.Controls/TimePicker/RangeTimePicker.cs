@@ -1,6 +1,7 @@
 ﻿using AtomUI.Controls.Utils;
 using AtomUI.Desktop.Controls.Primitives;
 using AtomUI.Icons.AntDesign;
+using AtomUI.Utils;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -11,7 +12,7 @@ using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
 
-public class RangeTimePicker : RangeInfoPickerInput
+public partial class RangeTimePicker : RangeInfoPickerInput
 {
     #region 公共属性定义
 
@@ -128,7 +129,7 @@ public class RangeTimePicker : RangeInfoPickerInput
         get => _preferredWidth;
         set
         {
-            if (_preferredWidth == value)
+            if (MathUtils.AreClose(_preferredWidth, value))
             {
                 return;
             }

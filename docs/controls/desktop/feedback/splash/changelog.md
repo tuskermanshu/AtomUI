@@ -2,6 +2,25 @@
 
 本文档记录 Splash 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-16
+
+- Semantic Part
+  - Publish ten Semantic Parts: implicit `root` plus `logo`, `title`, `subtitle`, `content`, `spin`, `progressBar`, `message`, `detail` and `footer`; all `Single` / `Selector` / `RuntimeCreated=false` / `CrossVisualRoot=false` / `Since=6.2.0`.
+  - Add `Splash.SemanticParts.cs` with the `[SemanticPart]` declarations and the nine `Classes.semantic-*="True"` static markers in `SplashTheme.axaml`; no existing theme selector changed, so default visuals and Token consumers are unaffected.
+  - Keep the progress area as two parts instead of one shared `Multiple` part, because `Spin` and `ProgressBar` are different controls with different tokens and mutually exclusive visibility; merging them would widen `ContractType` to `TemplatedControl` and drop the `x:SetterTargetType` context.
+  - Exclude `PART_RootLayout`, `PART_SurfaceLayout`, `PART_ContentLayout` and `PART_ProgressLayout`: the surface properties are already projected from owner `Background` / `CornerRadius` / `Padding` via `TemplateBinding`, and the two remaining nodes are pure layout wrappers whose spacing comes from tokens.
+  - Do not publish `SplashWindow` as a semantic owner: the window shell is already public API, the surface shadow and host corner radius are token semantics owned by `SplashWindow.Resources` or a dedicated subclass, and `ShadowsAwareContainer` is internal.
+  - Splash is the first control in `AtomUI.Desktop.Controls.Extras` to adopt Semantic Parts, so this package now emits its first semantic descriptor, generated `Splash*Style` types and the `AtomUI.Theme.Styling` XML namespace mapping.
+- Gallery
+  - Move the dedicated window splash visual from `/template/` + `PART_*` selectors to the generated Semantic Part styles (`SplashTitleStyle`, `SplashSubtitleStyle`, `SplashDetailStyle`, `SplashMessageStyle`), removing the template penetration that the documented boundary forbids.
+  - Add a Semantic Parts preview tab covering all ten parts. Because `spin` and `progressBar` are mutually exclusive in visibility and the preview skips invisible targets, the stage hosts two instances pinned to the determinate and indeterminate states.
+  - Fix the preview stage layout for those two instances: they must sit in two equal grid columns so the composition can never wrap to a second row. The single-preview tab clamps its content height to the page viewport remainder, so any stacked composition pushes the second instance past `PART_PreviewContentHost` and the clipped part silently disappears (on a real display it looked like a stray white strip under the preview card).
+  - Add a "Custom Semantic Part styling" example item that styles the parts through generated styles in AXAML, with no code-behind fallback.
+  - Make the example logo templates fill the `logo` presenter instead of carrying their own fixed size: the part style sizes the presenter, so a fixed-size template graphic (48 inside a 36 presenter) overflowed it and the setter had no visible effect. Documented the coordination rule in `semantic-part.md` §2.2 and asserted the visible logo bounds, not just the presenter's `Width`/`Height`.
+- Docs
+  - Add `semantic-part.md` with the full per-part contract, selector usage, state matrix, sizing baseline audit and customization boundaries.
+  - Align the `overview.md` semantic region table with the descriptor: the former coarse `brand` / `status` / `progress` grouping could not support per-part customization because it merged nodes with different tokens.
+
 ## 2026-08-03
 
 - Theme

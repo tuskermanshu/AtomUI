@@ -347,21 +347,21 @@ ItemSpacing="12"
 LineSpacing="12">
 <atom:Button ButtonType="Primary"
 Content="{gallery:ButtonShowCaseLangResource P2ContentGradient}">
-<atom:Button.CustomBackground>
+<atom:Button.Background>
 <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
 <GradientStop Color="#6253E1" Offset="0" />
 <GradientStop Color="#04BEFE" Offset="1" />
 </LinearGradientBrush>
-</atom:Button.CustomBackground>
+</atom:Button.Background>
 </atom:Button>
 <atom:Button ButtonType="Primary"
 Content="{gallery:ButtonShowCaseLangResource P2ContentWarmGradient}">
-<atom:Button.CustomBackground>
+<atom:Button.Background>
 <LinearGradientBrush StartPoint="0%,100%" EndPoint="100%,0%">
 <GradientStop Color="#FF7A45" Offset="0" />
 <GradientStop Color="#FFD666" Offset="1" />
 </LinearGradientBrush>
-</atom:Button.CustomBackground>
+</atom:Button.Background>
 </atom:Button>
 </WrapPanel>
 </gallery:ShowCaseItem>
@@ -428,4 +428,48 @@ Text="{gallery:ButtonShowCaseLangResource P2ColorCyan}" />
 <atom:Button Grid.Row="5" Grid.Column="5" Color="Cyan" Variant="Text" Content="{gallery:ButtonShowCaseLangResource P2ContentText}" />
 <atom:Button Grid.Row="5" Grid.Column="6" Color="Cyan" Variant="Link" Content="{gallery:ButtonShowCaseLangResource P2ContentLink}" />
 </Grid>
+</gallery:ShowCaseItem>
+<gallery:ShowCaseItem
+SourceKey="button-semantic-part"
+Title="{gallery:ButtonShowCaseLangResource SemanticPartStyleTitle}"
+Description="{gallery:ButtonShowCaseLangResource SemanticPartStyleDescription}"
+Span="Full"
+BadgeText="v6.1.3">
+<StackPanel Orientation="Horizontal"
+HorizontalAlignment="Left"
+Spacing="8">
+<StackPanel.Styles>
+<Style Selector="atom|Button.semantic-part-demo">
+<Setter Property="Margin" Value="0" />
+<Setter Property="Padding" Value="16,8" />
+<Setter Property="BorderBrush"
+Value="{atom:SharedTokenResource ColorBorder}" />
+<Setter Property="CornerRadius"
+Value="{atom:SharedTokenResource BorderRadius}" />
+<atom:ButtonContentStyle x:SetterTargetType="ContentPresenter">
+<Setter Property="Foreground"
+Value="{atom:SharedTokenResource ColorText}" />
+</atom:ButtonContentStyle>
+</Style>
+<Style Selector="atom|Button.semantic-part-demo.semantic-object">
+<Setter Property="Effect">
+<DropShadowEffect OffsetX="0"
+OffsetY="1"
+BlurRadius="2"
+Color="#0D000000" />
+</Setter>
+</Style>
+<Style Selector="atom|Button.semantic-part-demo[ButtonType=Primary]">
+<Setter Property="Background" Value="#171717" />
+<atom:ButtonContentStyle x:SetterTargetType="ContentPresenter">
+<Setter Property="Foreground" Value="#FFFFFF" />
+</atom:ButtonContentStyle>
+</Style>
+</StackPanel.Styles>
+<atom:Button Classes="semantic-part-demo semantic-object"
+Content="{gallery:ButtonShowCaseLangResource P2ContentSemanticObject}" />
+<atom:Button Classes="semantic-part-demo"
+ButtonType="Primary"
+Content="{gallery:ButtonShowCaseLangResource P2ContentSemanticFunction}" />
+</StackPanel>
 </gallery:ShowCaseItem>

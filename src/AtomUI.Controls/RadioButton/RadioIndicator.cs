@@ -24,17 +24,8 @@ internal class RadioIndicator : TemplatedControl
     public static readonly StyledProperty<double> PaddingInlineProperty =
         AvaloniaProperty.Register<RadioIndicator, double>(nameof(PaddingInline));
 
-    public static readonly StyledProperty<IBrush?> RadioBorderBrushProperty =
-        AvaloniaProperty.Register<RadioIndicator, IBrush?>(nameof(RadioBorderBrush));
-
     public static readonly StyledProperty<IBrush?> RadioInnerBackgroundProperty =
         AvaloniaProperty.Register<RadioIndicator, IBrush?>(nameof(RadioInnerBackground));
-
-    public static readonly StyledProperty<IBrush?> RadioBackgroundProperty =
-        AvaloniaProperty.Register<RadioIndicator, IBrush?>(nameof(RadioBackground));
-
-    public static readonly StyledProperty<Thickness> RadioBorderThicknessProperty =
-        AvaloniaProperty.Register<RadioIndicator, Thickness>(nameof(RadioBorderThickness));
 
     public static readonly StyledProperty<double> RadioDotEffectSizeProperty =
         AvaloniaProperty.Register<RadioIndicator, double>(nameof(RadioDotEffectSize));
@@ -65,28 +56,10 @@ internal class RadioIndicator : TemplatedControl
         set => SetValue(PaddingInlineProperty, value);
     }
 
-    public IBrush? RadioBorderBrush
-    {
-        get => GetValue(RadioBorderBrushProperty);
-        set => SetValue(RadioBorderBrushProperty, value);
-    }
-
     public IBrush? RadioInnerBackground
     {
         get => GetValue(RadioInnerBackgroundProperty);
         set => SetValue(RadioInnerBackgroundProperty, value);
-    }
-
-    public IBrush? RadioBackground
-    {
-        get => GetValue(RadioBackgroundProperty);
-        set => SetValue(RadioBackgroundProperty, value);
-    }
-
-    public Thickness RadioBorderThickness
-    {
-        get => GetValue(RadioBorderThicknessProperty);
-        set => SetValue(RadioBorderThicknessProperty, value);
     }
 
     public double RadioDotEffectSize
@@ -138,10 +111,11 @@ internal class RadioIndicator : TemplatedControl
     {
         AffectsRender<RadioIndicator>(
             IsCheckedProperty,
-            RadioBorderBrushProperty,
+            BackgroundProperty,
+            BorderBrushProperty,
+            BorderThicknessProperty,
+            CornerRadiusProperty,
             RadioInnerBackgroundProperty,
-            RadioBackgroundProperty,
-            RadioBorderThicknessProperty,
             RadioDotEffectSizeProperty,
             UseLayoutRoundingProperty);
     }
@@ -168,7 +142,7 @@ internal class RadioIndicator : TemplatedControl
                 !PseudoClasses.Contains(StdPseudoClass.Disabled) &&
                 PseudoClasses.Contains(StdPseudoClass.Checked))
             {
-                _waveSpiritDecorator?.Play();
+                Dispatcher.Post(PlayWaveSpirit);
             }
         }
 
@@ -187,6 +161,26 @@ internal class RadioIndicator : TemplatedControl
     {
         PseudoClasses.Set(StdPseudoClass.Checked, IsChecked.HasValue && IsChecked.Value);
         PseudoClasses.Set(StdPseudoClass.UnChecked, (IsChecked.HasValue && !IsChecked.Value) || !IsChecked.HasValue);
+    }
+
+    private void PlayWaveSpirit()
+    {
+        if (_waveSpiritDecorator is null)
+        {
+            return;
+        }
+
+        var waveBrush = WaveSpiritDecorator.ResolveWaveSpiritBrush(BorderBrush, Background);
+        if (waveBrush is not null)
+        {
+            _waveSpiritDecorator.WaveBrush = waveBrush;
+        }
+        else
+        {
+            _waveSpiritDecorator.ClearValue(WaveSpiritDecorator.WaveBrushProperty);
+        }
+
+        _waveSpiritDecorator.Play();
     }
 
     private double CalculateDotSize(bool isEnabled, bool isChecked)
@@ -213,11 +207,15 @@ internal class RadioIndicator : TemplatedControl
 
     public sealed override void Render(DrawingContext context)
     {
-        var radioBorderThickness = BorderUtils.BuildRenderScaleAwareThickness(this, RadioBorderThickness);
-        var penWidth             = radioBorderThickness.Top;
-        PenUtils.TryModifyOrCreate(ref _cachedPen, RadioBorderBrush, penWidth);
-        var targetRect = new Rect(0, 0, Bounds.Width, Bounds.Height);
-        context.DrawEllipse(RadioBackground, _cachedPen, targetRect.Deflate(penWidth / 2));
+        var borderThickness = BorderUtils.BuildRenderScaleAwareThickness(this, BorderThickness);
+        var penWidth        = borderThickness.Top;
+        PenUtils.TryModifyOrCreate(ref _cachedPen, BorderBrush, penWidth);
+        var targetRect  = new Rect(0, 0, Bounds.Width, Bounds.Height);
+        var borderRect  = targetRect.Deflate(penWidth / 2);
+        var roundedRect = IsSet(CornerRadiusProperty)
+            ? new RoundedRect(borderRect, CornerRadius)
+            : new RoundedRect(borderRect, Math.Min(borderRect.Width, borderRect.Height) / 2);
+        context.DrawRectangle(Background, _cachedPen, roundedRect);
         if (IsChecked.HasValue && IsChecked.Value)
         {
             var dotDiameter = RadioDotEffectSize / 2;

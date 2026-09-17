@@ -43,7 +43,7 @@ public class GalleryCatalogCoverageTests
             .OrderBy(static type => type.FullName, StringComparer.Ordinal)
             .ToArray();
 
-        catalogTypes.Length.ShouldBe(93);
+        catalogTypes.Length.ShouldBe(94);
         var memberOrderBaseline = LoadCatalogMemberOrderBaseline();
         memberOrderBaseline.Keys.ShouldBe(
             catalogTypes.Select(static type => type.FullName!),
@@ -68,7 +68,7 @@ public class GalleryCatalogCoverageTests
                       type.Name == "en_US" || type.Name == "zh_CN" || type.Name == "zh_TW");
 
         var files = LoadLanguageFiles(catalogTypes);
-        files.Length.ShouldBe(359);
+        files.Length.ShouldBe(363);
         files.GroupBy(static file => file.CatalogType)
              .ShouldAllBe(static group => group.Count() == 3 || group.Count() == 4);
         AssertXliffContracts(catalogTypes, files);
@@ -119,8 +119,10 @@ public class GalleryCatalogCoverageTests
                               .OrderBy(static path => path, StringComparer.Ordinal)
                               .ToArray();
 
-        sourceFiles.Length.ShouldBe(80);
-        sourceFiles.Sum(CountUnits).ShouldBe(4028);
+        sourceFiles.Length.ShouldBe(81);
+        // 4749（feature/semantic 基线）+ 14（ComboBox Semantic 示例）+ 18（Splash Semantic 示例）
+        // + 8（release/6.0 TabControl/TabStrip 溢出搜索示例）= 4789。
+        sourceFiles.Sum(CountUnits).ShouldBe(4789);
         foreach (var sourcePath in sourceFiles)
         {
             var targetPath = Path.Combine(

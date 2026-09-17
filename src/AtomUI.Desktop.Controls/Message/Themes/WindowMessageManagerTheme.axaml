@@ -4,9 +4,15 @@
     xmlns:atom="https://atomui.net"
     x:ClassModifier="internal">
     <ControlTheme x:Key="{x:Type atom:WindowMessageManager}" TargetType="atom:WindowMessageManager">
+        <Setter Property="Padding" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid Name="PART_StackHost" ClipToBounds="False">
+                <!-- release/6.0 堆叠结构：StackHost 按方位锚定并紧贴可见队列（hover 命中区与队列范围一致），
+                     presenter 拉满 StackHost，卡片间距由 FeedbackStackPanel 的 ExpandedGap 管理；
+                     semantic-list-content 标记 listContent 部件。 -->
+                <Grid Name="PART_StackHost"
+                      Margin="{TemplateBinding Padding}"
+                      ClipToBounds="False">
                     <!-- Backplates stay arranged while transparent and never contribute to the host extent. -->
                     <Panel Classes="message-backplates"
                           Width="0" Height="0"
@@ -24,7 +30,8 @@
                                 Width="{Binding FirstBackplateWidth, ElementName=PART_Items}"
                                 Margin="{Binding FirstBackplateMargin, ElementName=PART_Items}" />
                     </Panel>
-                    <atom:FeedbackStackPresenter Name="PART_Items" />
+                    <atom:FeedbackStackPresenter Name="PART_Items"
+                                          Classes.semantic-list-content="True" />
                 </Grid>
             </ControlTemplate>
         </Setter>
@@ -79,32 +86,26 @@
         </Style>
 
         <Style Selector="^[Position=TopLeft] /template/ Grid#PART_StackHost">
-            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Top" />
         </Style>
         <Style Selector="^[Position=TopCenter] /template/ Grid#PART_StackHost">
-            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Top" />
         </Style>
         <Style Selector="^[Position=TopRight] /template/ Grid#PART_StackHost">
-            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Top" />
         </Style>
         <Style Selector="^[Position=BottomLeft] /template/ Grid#PART_StackHost">
-            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
         </Style>
         <Style Selector="^[Position=BottomCenter] /template/ Grid#PART_StackHost">
-            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
         </Style>
         <Style Selector="^[Position=BottomRight] /template/ Grid#PART_StackHost">
-            <Setter Property="Margin" Value="{atom:MessageCardTokenResource MessageTopMargin}" />
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
         </Style>

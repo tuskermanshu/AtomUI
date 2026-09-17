@@ -4,13 +4,185 @@
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Message` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+Message 由两个 public owner 组成，因此公开两个独立 descriptor：
+
+| Owner | 职责 |
+| --- | --- |
+| `MessageCard` | 单条消息卡片（上游 notice），承载 `root`、`wrapper`、`icon`、`title` 四个 Part。 |
+| `WindowMessageManager` | 服务型消息宿主（上游 message list），承载 `root`（= 上游 `list`）与 `listContent` 两个 Part。 |
+
+上游 `MessageSemanticType` 的 `classNames` / `styles` 均为
+`{ root?, wrapper?, icon?, title?, list?, listContent? }` 六个键（上游 6.6.3 稳定发布源码
+`message/interface.ts`，语义 demo `message/demo/_semantic.tsx`）。上游 DOM 嵌套为
+`list > listContent > root > wrapper > [icon, title]`；`root` 自 6.0.0 起公开，`wrapper`、`title`、`list`、
+`listContent` 自 6.4.0 起公开。
+
+AtomUI 把六个上游 Part 一一映射到两个 owner 的真实节点：
+
+```text
+WindowMessageManager (root，对应上游 list)
+  └─ Grid#PART_StackHost (按 Position 锚定，Margin 消费 manager.Padding)
+       ├─ Panel (零尺寸、不可命中的两层静态背板)
+       └─ FeedbackStackPresenter#PART_Items (listContent，公共契约 ItemsControl)
+            └─ ItemsPresenter / FeedbackStackPanel
+                 └─ MessageCard (root，对应上游 notice root)
+                      └─ MotionActor
+                           └─ Border#PART_Frame (root 表面投影)
+                                └─ DockPanel#PART_HeaderContainer (wrapper)
+                                     ├─ IconPresenter#PART_IconContent (icon)
+                                     └─ SelectableTextBlock#PART_Message (title)
+```
+
+上游 `root` 就是 message notice 本身，因此映射到 `MessageCard` owner；上游 `list` 是承载全部 notice 的定位容器，
+映射到 `WindowMessageManager` owner。两个 owner 各自拥有隐式 `root`，不额外声明 `.semantic-root` marker。
+
+结构与布局边界：
+
+- manager 的 `Position` 决定六种边缘对齐，`Padding` 决定队列与 manager 边缘的间隔。
+  宿主模式中 manager 铺满反馈层并通过 `TopLevelMarginBinder` 接收安全区外边距；内联模式中同样的定位作用于
+  调用方分配的布局范围。模板中的 `PART_StackHost` 按位置锚定并紧贴队列，`listContent` 填满该 host。
+- `listContent` 的公共类型为 `ItemsControl`；实际 presenter 和其内部 panel 管理堆叠、顺序与项间距。
+  这两个内部类型及其专属属性不是应用的样式契约。
+- 上游 `wrapper` 用 flex `gap: marginXS` + `align-items: center` 排列 icon 与 title；AtomUI `DockPanel` 无 `Spacing`，
+  等价的图标间距由 `IconPresenter` 的 `MessageIconMargin`（右外边距 `UniformlyMarginXS`）表达，视觉结果一致。
+
+两个 owner 的 descriptor `Since` 统一为 `6.2.0`（AtomUI Semantic Part 首版约定，不逐 Part 记录上游小版本）。
+
+以下类型不持有独立 Semantic descriptor：
+
+- `Message`（`IMessage` 的实现）是服务调用的数据对象，不是 Control。
+- `IMessage` / `IMessageManager` 是服务契约接口。
+- `MessageCardPseudoClass`、`MessageType` 是状态与枚举类型。
+- `MessageCardToken` 是 Token scope；Semantic Part 不产生 Token identity。
+
+### 1.1 `MessageCard`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `MessageCard` |
+| Part | `root` |
+| Selector | MessageCard 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `MessageCard` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | MessageCard owner（表面投影到 `Border#PART_Frame`，动效由 `MotionActor` 承载） |
+| 职责 | 单条消息项根元素：承载 `Message`、`MessageType`、`Icon`、`IsClosing`、`IsClosed`、`IsMotionEnabled` 与进入/退出动效；根表面（背景、圆角、阴影、内边距）投影到模板中的 `Border#PART_Frame`。对应上游 notice root。 |
+| 相关 API | `Message`、`MessageType`、`Icon`、`IsClosing`、`IsClosed`、`IsMotionEnabled`、`Close()`、`MessageClosed` |
+| 相关 Token | `ContentBg`、`ContentPadding`、SharedToken（`BoxShadows`、`BorderRadiusLG`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `wrapper`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `MessageCard` |
+| Part | `wrapper` |
+| Selector | `.semantic-wrapper` |
+| SelectorRoute | `/template/ .semantic-wrapper` |
+| Style Type | `MessageCardWrapperStyle` |
+| ContractType | `DockPanel` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | MessageCard 模板中的 `DockPanel#PART_HeaderContainer` |
+| 职责 | 图标与标题的包裹元素：决定 icon/title 的排列方向、对齐与图标间距。对应上游 notice wrapper。 |
+| 相关 API | `Icon`、`Message`（决定子节点可见性） |
+| 相关 Token | `MessageIconMargin` |
+| 稳定性 | stable since 6.2.0 |
+
+#### `icon`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `MessageCard` |
+| Part | `icon` |
+| Selector | `.semantic-icon` |
+| SelectorRoute | `/template/ .semantic-icon` |
+| Style Type | `MessageCardIconStyle` |
+| ContractType | `IconPresenter` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | MessageCard 模板中的 `IconPresenter#PART_IconContent` |
+| 职责 | 状态图标元素：尺寸、画刷与行高；`MessageType` 决定默认图标与状态色（Information/Loading = `ColorPrimary`，Success = `ColorSuccess`，Warning = `ColorWarning`，Error = `ColorError`）。对应上游 notice icon。 |
+| 相关 API | `Icon`、`MessageType` |
+| 相关 Token | `MessageIconSize`、SharedToken（`ColorPrimary`、`ColorSuccess`、`ColorWarning`、`ColorError`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `title`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `MessageCard` |
+| Part | `title` |
+| Selector | `.semantic-title` |
+| SelectorRoute | `/template/ .semantic-title` |
+| Style Type | `MessageCardTitleStyle` |
+| ContractType | `Avalonia.Controls.SelectableTextBlock` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | MessageCard 模板中的 `SelectableTextBlock#PART_Message`（Avalonia 类型，非 `atom:` 前缀） |
+| 职责 | 消息文本元素：文本颜色、字号、行高、换行与文本选择样式。对应上游 notice title（上游把 `content` 作为 notice title 渲染）。 |
+| 相关 API | `Message` |
+| 相关 Token | SharedToken（`FontSize`、`FontHeight`、`ColorText`、`SelectionBackground`、`SelectionForeground`） |
+| 稳定性 | stable since 6.2.0 |
+
+### 1.2 `WindowMessageManager`
+
+#### `root`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `WindowMessageManager` |
+| Part | `root` |
+| Selector | WindowMessageManager 本身 |
+| SelectorRoute | 不适用 |
+| Style Type | 不适用（root 不生成 Style） |
+| ContractType | `WindowMessageManager` |
+| Cardinality | `Single` |
+| Customization | `Root` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | WindowMessageManager owner（宿主层/full-screen 覆盖层；无宿主构造时为内联可放置实例） |
+| 职责 | 消息列表根元素：承载 `Position`、`MaxItems`、`IsMotionEnabled`，管理宿主层安装、消息队列、超时关闭与宿主 detach；对应上游 `list` 的定位/层级/宽度语义。 |
+| 相关 API | `Position`、`MaxItems`、`IsMotionEnabled`、`Padding`、`IsStackEnabled`、`StackThreshold`、`IsPauseOnHover`、`Show(IMessage)`、`DestroyAll()`、`Dispose()` |
+| 相关 Token | `MessageTopMargin`、SharedToken（`EnableMotion`） |
+| 稳定性 | stable since 6.2.0 |
+
+#### `listContent`
+
+| 字段 | 值 |
+| --- | --- |
+| Owner | `WindowMessageManager` |
+| Part | `listContent` |
+| Selector | `.semantic-list-content` |
+| SelectorRoute | `/template/ .semantic-list-content` |
+| Style Type | `WindowMessageManagerListContentStyle` |
+| ContractType | `ItemsControl` |
+| Cardinality | `Single` |
+| Customization | `Selector` |
+| CrossVisualRoot | `false` |
+| RuntimeCreated | `false` |
+| AtomUI 节点 | WindowMessageManager 模板中的 `FeedbackStackPresenter#PART_Items` |
+| 职责 | 消息列表内容元素：notice 的排列方向、顺序与对齐；对应上游 `listContent` 的 notice 排列/间距语义。 |
+| 相关 API | `Position`、`MaxItems`、`IsStackEnabled`、`StackThreshold` |
+| 相关 Token | SharedToken（`EnableMotion`） |
+| 稳定性 | stable since 6.2.0 |
+
+隐式 `root` 不声明 `.semantic-root` marker。`MessageCard` 的 `wrapper`、`icon`、`title` marker 静态声明在
+`MessageCardTheme.axaml` 模板内；`WindowMessageManager` 的 `listContent` marker 静态声明在
+`WindowMessageManagerTheme.axaml` 模板内。四个 marker 都在 owner 自身的 `ControlTheme` 资产中，因此两个 descriptor
+都不需要 `RuntimeCreated=true`，生成器按 owner 主题资产做静态校验。
 
 ## Abstract AXAML Structure
 
@@ -40,9 +212,9 @@ Message
 | 节点 | 类型 | 来源 | 生命周期 owner | 影响的 public API | 稳定性 | Agent 使用边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `Message` | public control | `源文档 + public API` | 用户代码 / 控件宿主 | public API | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `MessageCard` | control theme | `MessageCardTheme.axaml` | 用户代码 / 控件宿主 | `Icon`, `Message` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (MotionActor) | `MessageCardTheme.axaml` | MessageCard | `Icon`, `Message` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
-| `PART_Frame` | template node (Border) | `MessageCardTheme.axaml` | MessageCard | `Icon`, `Message` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `MessageCard` | control theme | `MessageCardTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `CornerRadius`, `Icon` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
+| `{x:Static atom:BaseMotionActor.MotionActorPart}` | template node (MotionActor) | `MessageCardTheme.axaml` | MessageCard | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `CornerRadius`, `Icon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `PART_Frame` | template node (Border) | `MessageCardTheme.axaml` | MessageCard | `Background`, `BorderBrush`, `BorderThickness`, `BoxShadow`, `CornerRadius`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_HeaderContainer` | template node (DockPanel) | `MessageCardTheme.axaml` | MessageCard | `Icon`, `Message` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_IconContent` | template node (IconPresenter) | `MessageCardTheme.axaml` | MessageCard | `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Message` | template node (SelectableTextBlock) | `MessageCardTheme.axaml` | MessageCard | `Message` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -100,6 +272,10 @@ Message 使用 internal `MessageCardToken` 作为控件 Token scope。Token 只�
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
+
+列表的公开样式入口是 `WindowMessageManager.Padding` 与生成的 `WindowMessageManagerListContentStyle`。
+前者控制队列边缘间隔；后者以 `ItemsControl` 为公共目标，支持宽度、最小宽度与对齐等属性。
+项间距和卡片顺序由内部反馈栈管理，不能以 `Spacing` / `ReverseOrder` 作为 listContent 的公开 Setter。
 
 Token 边界：
 

@@ -1,8 +1,10 @@
 using AtomUI.Controls.Commons;
+using AtomUI.Theme;
+using Avalonia.Controls;
 
 namespace AtomUI.Desktop.Controls;
 
-public class DotBadge : AbstractDotBadge
+public partial class DotBadge : AbstractDotBadge
 {
     public DotBadge()
     {
@@ -13,6 +15,7 @@ public class DotBadge : AbstractDotBadge
         if (_dotBadgeAdorner is null)
         {
             _dotBadgeAdorner = new DotBadgeAdorner();
+            _dotBadgeAdorner.Classes.Add("semantic-scope-indicator");
             SetupTokenBindings();
             NotifyDecoratedTargetChanged();
             if (DotColor is not null)

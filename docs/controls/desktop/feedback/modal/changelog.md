@@ -2,6 +2,55 @@
 
 本文档记录 Modal 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-13
+
+- Fix
+  - Window 宿主 owner 实例级 Semantic Style 此前在真机上零生效（container 白底、正文/按钮样式不命中）。
+    根因一：Avalonia `TopLevel` 把样式宿主父级固定为 Application（`IStyleHost.StylingParent => _globalStyles`），
+    且窗口模板应用时 `ContentPresenter` 无条件改写 surface 继承父，窗口模板之后才挂载的内容文字与
+    footer 按钮永远走不到 owner 样式链——此前控件级回归只验证了模板期节点的 Tag 命中，掩盖了时序差异。
+    `DialogWindow` 现按 `PopupRoot` 既有范式覆写 `IStyleHost.StylingParent => Parent`（owner 未生根时退回
+    `Application`，保证脱离页面树直接构造 presenter 的场景 ControlTheme 仍可达）。
+  - 根因二：`DialogSurfaceTheme` 把 `container`（`Border#Frame`）的 `Background`/`CornerRadius` 写成模板
+    局部值，局部值优先级压过任何 Style setter，`DialogContainerStyle` 永远无法覆盖；现迁入 ControlTheme
+    嵌套样式，`CornerRadius` 经 `TemplatedParent` 绑定保持对 Surface 运行时变更（Overlay 最大化归零）的跟随。
+  - Gallery「自定义语义结构的样式」的样式化窗口 Dialog 漏配 `StandardButtons`（默认 `NoButton`，footer
+    无按钮），按钮级语义样式无目标可命中；现补 `Cancel,Ok`。
+- Tests
+  - 新增 `Window_Host_Owner_Instance_Styles_Restyle_Container_Content_And_Footer_Buttons`：以真实属性值
+    （container 背景色、正文前景/字重、footer 按钮背景）锁定 Window 宿主三条修复，红→绿。
+  - Gallery 页测试锁定样式化窗口 Dialog 必须显式声明 `StandardButtons="Cancel,Ok"`。
+  - Gallery 文案修正：语义样式卡内引导句误用上游静态 API 文案（"Content of the modal/模态框内容"），
+    现改为专用的 `SemanticStylesHint`；三个触发按钮改为语义化专用文案（打开样式化 Dialog /
+    打开样式化 MessageBox / 打开样式化窗口 Dialog），不再复用泛化的 `P2ContentOpenModal`；
+    清理孤儿键 `P2ContentOpenMessageBox`。语义预览对话框标题从机制名（"Semantic Part preview/
+    语义部件预览"）换绑为上游语义 demo 的 `P2TitleBasicModal`（Basic Modal）。
+
+## 2026-09-11
+
+- Semantic Parts
+  - Publish the Modal family Semantic Part contract: `Dialog` and `MessageBox` each expose implicit `root` plus `mask`, `wrapper`, `container`, `header`, `title`, `body`, `footer` and `close`, mapped to the upstream Ant Design `Modal` semantic DOM (`components/modal/demo/_semantic.tsx`, 9 slots).
+  - Declare every non-root Part as `RuntimeCreated`/`CrossVisualRoot`/`CrossNestedOwners` (`Dialog` has no `ControlTemplate`; nodes live in the `DialogSurface`/`OverlayDialogPresenter`/`OverlayDialogHeader`/`OverlayDialogMask` templates) and mark them with static `Classes.semantic-*="True"`.
+  - Route every Part through Dialog-owned `.semantic-scope-*` anchors instead of a broad `>>`: the body permanently hosts a `Skeleton` and user content commonly contains `Card`/`Tooltip`/`Spin`, which publish same-named `semantic-header`/`semantic-title`/`semantic-body`/`semantic-footer`/`semantic-container` classes that a broad descendant would also hit.
+  - Cardinality correction (evidence-based): `mask`/`wrapper` were already `Optional`; diagnostics on the Window host proved `WindowDialogPresenter` unconditionally hides the surface header (`IsHeaderVisible=false`, native caption owns the title bar), so the hidden header template is never applied and `header`/`title`/`close` marker nodes do not exist there — all three are now `Optional` per the system design rule for host variants. `footer` stays `Single` (materialized in both hosts).
+- API
+  - Add `Dialog.OverlayScope` (default `null`, Overlay host only): when set, the overlay host is injected into that element's scope so the mask, surface sizing and centering are bounded by the scope instead of the owning `TopLevel`, matching upstream Ant Design's inline/`setContainer` modal semantics. The default keeps the existing TopLevel host resolution unchanged.
+  - Add `Dialog.IsPinnedOpen` (default `false`, Overlay host only). While true, user-initiated close requests (header close button, mask outside-press, Escape, footer buttons) are ignored; external `IsOpen=false` still closes. This replaces the earlier plan of an example-side `BeforeCloseAsync` veto, which AXAML cannot express.
+- Behavior
+  - `OverlayDialogPresenter` sets the `Dialog` owner as its logical parent so owner-scoped generated Semantic Styles can reach the presenter subtree; the parent is only set while the owner is attached to a logical tree, and the visual parent remains `DialogOverlayLayer`.
+  - `Dialog` implements `ISemanticPartCrossRootProvider` and reports the live Overlay presenter as its cross root. The Window host now reports too: `GetCrossRoots()` returns the native `DialogWindow` once visible, and `WindowDialogPresenter` raises `CrossRootsChanged` on show, `Opened` and teardown, so the Gallery semantic preview can resolve and highlight parts inside that window (adorners land in the host window's own adorner layer).
+  - Evidence-based correction: owner-instance Semantic Styles DO reach the Window host through the logical-parent chain (`DialogWindow` is parented to `Dialog`), proven by the `Window_Host_Owner_Scoped_Semantic_Styles_Cascade_Via_Logical_Parent` regression; the earlier "Overlay-only style cascade" claim was overly conservative. Static resources still flow through `DialogResourceBridge`.
+- Docs
+  - Add `semantic-part.md`; replace the previous non-contract `root`/`host`/`surface`/`content`/`motion` overview summary with the real Part table; document the `.semantic-scope-*` route anchors, host boundaries and `IsPinnedOpen` semantics.
+- Gallery
+  - Add a MessageBox Semantic Part styling demo inside the "Custom Semantic Part styling" example (generated `MessageBox<Part>Style` classes with an explicit owner selector, triggered by an `Open MessageBox` button next to the Dialog one), and switch every Modal example trigger from `ToggleSwitch` to `Button` (MessageBox host selection is now two buttons).
+  - Stack a second `SemanticPartPreview` for MessageBox under the Dialog preview in the Semantic Parts tab; both previews use the stage-scoped inline modal pattern (`OverlayScope`), and the stage owners are explicitly sized to the stage so the `root` part can highlight (the Dialog theme defaults to a zero-size owner and the resolver skips zero-size targets).
+  - The styled Window-host demo now demonstrates region-internal element styling through one-level nested styles on the owner style: content text (magenta bold `atom:TextBlock`) and footer buttons (green capsule `atom|Button` — `DialogButton`'s StyleKey is AtomUI `Button`, so `atom|DialogButton` never matches); nested styles must sit directly under the outer owner style (nesting inside a generated part style does not activate).
+  - Add `ModalSemanticPartHighlightTests`: hovering each of the 9 part cards in both stage previews yields exactly one highlight adorner; a third preview demonstrates the native Window host (modeless so the Gallery stays interactive, opened on demand via buttons — not auto-opened), where `root` highlights the stage owner, `container`/`body`/`footer` highlight inside the native window via the reported cross root, and the five non-materialized parts produce no highlight; a mask press does not close the pinned previews; switching back to Examples clears all highlights. A second button opens a styled Window-host Dialog (container/body/footer customizations); it lives outside `PreviewContent` because the preview resolves all same-type owner instances inside its content.
+- Validation
+  - Add `DialogSemanticPartTests`: descriptor contract, static marker lists, runtime markers, logical-parent invariant, cross-root reporting, exact single-node style hits, pin gating, modeless/hidden-node `Optional` semantics and MessageBox parity. Desktop Controls 3732/3732; LLMS generate/verify 79 controls / 161 files.
+  - Gallery Semantic Parts tab and NativeAOT publish are still pending.
+
 ## 2026-08-21
 
 - API

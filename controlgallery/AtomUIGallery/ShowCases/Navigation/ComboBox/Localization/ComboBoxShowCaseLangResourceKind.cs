@@ -43,5 +43,19 @@ public enum ComboBoxShowCaseLangResourceKind
     P2ContentPoemLine1,
     P2ContentPoemLine2,
     P2ContentPoemLine3,
-    P2ContentPoemLine4
+    P2ContentPoemLine4,
+    StyleClassTitle,
+    StyleClassDescription,
+    SemanticRootDescription,
+    SemanticPrefixDescription,
+    SemanticFrameDescription,
+    SemanticContentDescription,
+    SemanticPlaceholderDescription,
+    SemanticInputDescription,
+    SemanticSuffixDescription,
+    SemanticIndicatorDescription,
+    SemanticPopupRootDescription,
+    SemanticPopupListDescription,
+    SemanticPopupListItemDescription,
+    SemanticPopupEmptyDescription
 }

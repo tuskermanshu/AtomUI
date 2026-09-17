@@ -10,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Input.TextInput;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.Threading;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 
@@ -185,6 +186,7 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
     #region 动画相关字段
 
     private MotionExecutionState _closeMotionState;
+    private bool _hasRaisedOpened;
     private bool _isLogicallyAttachedAtOpen;
     private CancellationTokenSource? _motionCts;
     private PopupMotionActor? _motionActor;
@@ -199,6 +201,7 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
     private int _lifecycleCloseDepth;
     private int _pinnedOpenGeneration;
     private bool _isPinnedOpenSuspended;
+    private bool _isPinnedOpenReconcileRetried;
     private readonly List<Visual> _pinnedOpenTargetStateSubscriptions = [];
     private Control? _pinnedOpenTrackingTarget;
     private Control? _placementTransformTrackingTarget;
@@ -221,6 +224,7 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
 
     private void HandlePopupOpened(object? sender, EventArgs e)
     {
+        _hasRaisedOpened = true;
         _isPinnedOpenSuspended = false;
         _isLogicallyAttachedAtOpen = ((ILogical)this).IsAttachedToLogicalTree;
         _openTopLevel = ResolvePlacementTarget() is { } target
@@ -229,17 +233,22 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
         _closeMotionState = MotionExecutionState.Idle;
         AttachWheelGuard();
         UpdatePlacementTransformTracker();
+        StartOpenMotion();
+    }
+
+    private void StartOpenMotion()
+    {
         CancelMotion();
-        if (_motionActor is null)
+        if (_motionActor is not { } motionActor)
         {
             return;
         }
 
-        _motionActor.MotionTransform           = null;
-        _motionActor.MotionTransformOperations = null;
+        motionActor.MotionTransform           = null;
+        motionActor.MotionTransformOperations = null;
         if (!IsMotionEnabled || OpenMotion is null)
         {
-            _motionActor.Opacity = 1.0d;
+            motionActor.Opacity = 1.0d;
             return;
         }
 
@@ -247,12 +256,14 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
 
         var motion = OpenMotion;
         motion.Duration      = MotionDuration;
-        _motionActor.Opacity = 0.0d;
-        Dispatcher.InvokeAsync(() => PlayMotionAsync(motion, _motionActor, _motionCts.Token));
+        motionActor.Opacity = 0.0d;
+        var cancellationToken = _motionCts.Token;
+        Dispatcher.InvokeAsync(() => PlayMotionAsync(motion, motionActor, cancellationToken));
     }
 
     private void HandlePopupClosed(object? sender, EventArgs e)
     {
+        _hasRaisedOpened = false;
         CancelMotion();
         _closeMotionState             = MotionExecutionState.Idle;
         _isLogicallyAttachedAtOpen    = false;
@@ -450,6 +461,14 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
     internal void NotifyMotionActorReady(PopupMotionActor actor)
     {
         _motionActor = actor;
+        // A lazily created popup host can apply its template after Popup.Opened.
+        // PopupMotionActor pre-hides itself during attach, so it must enter the
+        // same opening path here or the first popup remains physically open but
+        // visually transparent until it is reopened.
+        if (_hasRaisedOpened && IsOpen && _closeMotionState == MotionExecutionState.Idle)
+        {
+            StartOpenMotion();
+        }
     }
 
     #region 自定义定位逻辑
@@ -847,13 +866,31 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
 
         if (HasValidPinnedOpenTarget())
         {
+            _isPinnedOpenReconcileRetried = false;
             _isPinnedOpenSuspended = false;
             QueuePinnedOpen();
+            return;
         }
-        else
+
+        // IsVisible 恢复的同帧里放置目标尚未重新布局（TransformToVisual 未就绪 / 尺寸为零），
+        // 立即判无效会错过这次恢复信号——之后不再有属性变化触发 reconcile，弹层就再也打不开。
+        // 无法呈现时延后一帧重试一次，重试仍无效才按目标失效关闭。
+        if (!_isPinnedOpenReconcileRetried)
         {
-            CloseForLifecycle();
+            _isPinnedOpenReconcileRetried = true;
+            var generation = _pinnedOpenGeneration;
+            Dispatcher.Post(() =>
+            {
+                if (generation == _pinnedOpenGeneration)
+                {
+                    ReconcilePinnedOpenTargetState();
+                }
+            }, DispatcherPriority.Loaded);
+            return;
         }
+
+        _isPinnedOpenReconcileRetried = false;
+        CloseForLifecycle();
     }
 
     private bool HasValidPinnedOpenTarget()

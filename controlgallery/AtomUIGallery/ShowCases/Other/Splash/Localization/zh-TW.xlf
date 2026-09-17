@@ -163,6 +163,42 @@
         <target state="translated">工作區已就緒</target>
       </segment>
     </unit>
+    <unit id="P2SemanticContentTag">
+      <segment>
+        <source>core</source>
+        <target state="translated">核心</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticDetailProgress">
+      <segment>
+        <source>68%</source>
+        <target state="translated">68%</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticFooter">
+      <segment>
+        <source>v6</source>
+        <target state="translated">v6</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticMessageLoading">
+      <segment>
+        <source>Loading</source>
+        <target state="translated">載入中</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticMessageModules">
+      <segment>
+        <source>Modules</source>
+        <target state="translated">模組</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticSubtitle">
+      <segment>
+        <source>Boot</source>
+        <target state="translated">啟動</target>
+      </segment>
+    </unit>
     <unit id="P2SubtitleDesktopBoot">
       <segment>
         <source>Desktop boot sequence</source>
@@ -257,6 +293,78 @@
       <segment>
         <source>Examples</source>
         <target state="translated">範例</target>
+      </segment>
+    </unit>
+    <unit id="SemanticContentDescription">
+      <segment>
+        <source>Content element hosting custom startup content with its padding and alignment</source>
+        <target state="translated">內容元素，承載自訂啟動內容及其內距與對齊方式</target>
+      </segment>
+    </unit>
+    <unit id="SemanticDetailDescription">
+      <segment>
+        <source>Detail text element with font size, color and wrapping</source>
+        <target state="translated">詳情文字元素，包含字號、顏色與換行等樣式</target>
+      </segment>
+    </unit>
+    <unit id="SemanticFooterDescription">
+      <segment>
+        <source>Footer element hosting version info, copyright info or retry actions for a failed startup</source>
+        <target state="translated">底部元素，承載版本資訊、版權資訊或啟動失敗時的重試操作入口</target>
+      </segment>
+    </unit>
+    <unit id="SemanticLogoDescription">
+      <segment>
+        <source>Logo element carrying the brand mark with its size and alignment</source>
+        <target state="translated">品牌標識元素，包含標識尺寸與對齊方式</target>
+      </segment>
+    </unit>
+    <unit id="SemanticMessageDescription">
+      <segment>
+        <source>Status message text element, including the success and error state colors</source>
+        <target state="translated">狀態訊息文字元素，包含成功與失敗狀態的顏色</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPartStyleDescription">
+      <segment>
+        <source>Use owner-scoped selectors and generated Semantic Part styles to customize the published parts of Splash.</source>
+        <target state="translated">使用 owner 作用域選擇器與生成的語意部件 Style 自訂 Splash 已發布的語意部件。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPartStyleTitle">
+      <segment>
+        <source>Custom Semantic Part styling</source>
+        <target state="translated">自訂語義結構的樣式</target>
+      </segment>
+    </unit>
+    <unit id="SemanticProgressBarDescription">
+      <segment>
+        <source>Determinate progress element with its height and color</source>
+        <target state="translated">確定進度元素，包含進度條高度與顏色</target>
+      </segment>
+    </unit>
+    <unit id="SemanticRootDescription">
+      <segment>
+        <source>Root element with background, corner radius, padding and window sizing that control the overall startup surface</source>
+        <target state="translated">根元素，包含啟動頁背景、圓角、內距和視窗尺寸等控制整體外觀的樣式</target>
+      </segment>
+    </unit>
+    <unit id="SemanticSpinDescription">
+      <segment>
+        <source>Loading indicator element for the indeterminate state with its size and color</source>
+        <target state="translated">不確定載入指示器元素，包含指示器尺寸與顏色</target>
+      </segment>
+    </unit>
+    <unit id="SemanticSubtitleDescription">
+      <segment>
+        <source>Subtitle text element with its font size and color</source>
+        <target state="translated">副標題文字元素，包含字號與顏色</target>
+      </segment>
+    </unit>
+    <unit id="SemanticTitleDescription">
+      <segment>
+        <source>Title text element with its font size, weight, line height and color</source>
+        <target state="translated">主標題文字元素，包含字號、字重、行高與顏色</target>
       </segment>
     </unit>
     <unit id="StatusDescription">

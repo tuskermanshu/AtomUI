@@ -36,10 +36,10 @@ Modal 不承担通知队列、轻量 Tooltip、Popup 菜单或业务级导航服
 | --- | --- | --- |
 | 内容 | `Title`, `TitleIcon`, `Content`, `ContentTemplate`, `DataContext` | 定义标题和任意内容对象或模板。 |
 | 打开状态 | `IsOpen`, `OpenAsync(...)` | `IsOpen` 是默认 TwoWay 的声明式意图；`OpenAsync` 表示一次完整 Session。 |
-| 展示方式 | `DialogHostType`, `IsModal`, `PlacementTarget`, startup anchor/offset | 选择 Overlay/Window、交互模态和初始位置。直接实例化与静态 API 的水平、垂直 startup anchor 默认均为 `Center`；显式 `Custom` 时由对应 offset 决定位置。 |
+| 展示方式 | `DialogHostType`, `IsModal`, `PlacementTarget`, `OverlayScope`, startup anchor/offset | 选择 Overlay/Window、交互模态、初始位置与 overlay 宿主作用域。直接实例化与静态 API 的水平、垂直 startup anchor 默认均为 `Center`；显式 `Custom` 时由对应 offset 决定位置。`OverlayScope` 默认 `null` 表示宿主解析到 owning TopLevel；指定后 mask 与正文尺寸限定在该作用域内（对齐上游内联模态语义），仅 Overlay 宿主有效。 |
 | 尺寸与窗口能力 | `HostWidth/Height/Min/Max`, `IsResizable`, `IsClosable`, `IsMaskClosable`, `IsDragMovable`, `IsMaximizable`, `IsMinimizable`, `IsTopmost` | 同一组 Surface 正文尺寸请求映射到 Overlay 或原生 Window。`NaN` 表示初始自然尺寸；有效最小尺寸还必须满足 Dialog 的结构性下限。`IsClosable` 控制标题栏关闭入口，`IsMaskClosable` 控制 Overlay modal mask 外点关闭入口，两者正交且默认都为 `true`。 |
 | 操作 | `StandardButtons`, `CustomButtons`, `DefaultStandardButton`, `EscapeStandardButton`, `ButtonsConfigure` | 生成标准按钮、加入自定义按钮并配置当前有效按钮序列。 |
-| 状态与策略 | `IsLoading`, `IsConfirmLoading`, `IsFooterVisible`, `IsMotionEnabled`, `BeforeCloseAsync` | 控制加载、确认按钮 loading、Footer、motion 和关闭前校验。 |
+| 状态与策略 | `IsLoading`, `IsConfirmLoading`, `IsFooterVisible`, `IsMotionEnabled`, `IsPinnedOpen`, `BeforeCloseAsync` | 控制加载、确认按钮 loading、Footer、motion、预览钉住和关闭前校验。 |
 | 结果 | `Result`, `Accept()`, `Reject()`, `Done(...)` | 所有关闭来源归一为结果与 `DialogCloseReason`。 |
 
 静态入口只有异步形式：
@@ -92,6 +92,8 @@ Dialog 公开 `Opened`、`Closing`、`Accepted`、`Rejected`、`Finished`、`Clo
 
 当前没有 Modal 专属 pseudo class。
 
+上表是**模板部件**（`PART_*`）清单，与公共 Semantic Part 是两套契约。`Dialog` 没有 `ControlTemplate`，全部视觉节点位于运行时创建的 `DialogSurface`/`OverlayDialogPresenter`/`OverlayDialogHeader` 模板中，因此公开的 `container`/`header`/`title`/`body`/`footer`/`close`/`mask`/`wrapper` 全部声明 `RuntimeCreated`，并与上表的 `PART_*` 名称并存、职责不同。完整契约见 [Modal / Dialog Semantic Part 契约](semantic-part.md)。
+
 ## 事件与命令
 
 ### 3.2 关闭事件
@@ -105,14 +107,15 @@ Dialog 公开 `Opened`、`Closing`、`Accepted`、`Rejected`、`Finished`、`Clo
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:35`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:264`
 
 Gallery key：`ExamplesContent` / item `0`
 
 ```axaml
 <StackPanel Orientation="Horizontal" Spacing="10" Loaded="HandleDialogExampleLoaded">
     <Panel>
-        <atom:Button ButtonType="Primary" Name="BasicOpenModalButton" Content="打开浮层模态框" />
+        <atom:Button ButtonType="Primary" Name="BasicOpenModalButton"
+                     Content="打开浮层模态框" />
         <atom:Dialog Name="BasicDialog"
                      IsOpen="{Binding IsBasicModalOpened, Mode=TwoWay}"
                      Title="基础模态框"
@@ -134,7 +137,8 @@ Gallery key：`ExamplesContent` / item `0`
         </atom:Dialog>
     </Panel>
     <Panel>
-        <atom:Button ButtonType="Primary" Name="BasicWindowOpenModalButton" Content="打开窗口模态框" />
+        <atom:Button ButtonType="Primary" Name="BasicWindowOpenModalButton"
+                     Content="打开窗口模态框" />
         <atom:Dialog Name="BasicWindowDialog"
                      IsOpen="{Binding IsBasicWindowModalOpened, Mode=TwoWay}"
                      Title="基础窗口模态框"
@@ -163,14 +167,15 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 异步关闭
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:94`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:325`
 
 Gallery key：`ExamplesContent` / item `1`
 
 ```axaml
 <StackPanel Orientation="Horizontal" Spacing="10" Loaded="HandleDialogExampleLoaded">
     <Panel>
-        <atom:Button ButtonType="Primary" Name="AsyncDialogOpenModalButton" Content="打开带异步逻辑的模态框" />
+        <atom:Button ButtonType="Primary" Name="AsyncDialogOpenModalButton"
+                     Content="打开带异步逻辑的模态框" />
         <atom:Dialog Name="AsyncDialog"
                      IsOpen="{Binding IsAsyncDialogOpened, Mode=TwoWay}"
                      Title="异步关闭模态框"
@@ -185,7 +190,8 @@ Gallery key：`ExamplesContent` / item `1`
                      ButtonClicked="HandleAsyncDialogButtonClicked"
                      HostMinWidth="400">
             <StackPanel>
-                <TextBlock Text="模态框内容" />
+                <TextBlock
+                    Text="模态框内容" />
             </StackPanel>
         </atom:Dialog>
     </Panel>
@@ -194,14 +200,15 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 加载状态
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:219`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:474`
 
 Gallery key：`ExamplesContent` / item `3`
 
 ```axaml
 <StackPanel Orientation="Horizontal" Spacing="10" Loaded="HandleDialogExampleLoaded">
     <Panel>
-        <atom:Button ButtonType="Primary" Name="LoadingDialogOpenModalButton" Content="打开模态框" />
+        <atom:Button ButtonType="Primary" Name="LoadingDialogOpenModalButton"
+                     Content="打开模态框" />
         <atom:Dialog Name="LoadingDialog"
                      IsOpen="{Binding IsLoadingMsgBoxOpened, Mode=TwoWay}"
                      Title="加载中模态框"
@@ -229,14 +236,15 @@ Gallery key：`ExamplesContent` / item `3`
 
 ### 自定义页脚按钮
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:255`
+来源：`controlgallery/AtomUIGallery/ShowCases/Feedback/Modal/Views/ModalShowCase.axaml:511`
 
 Gallery key：`ExamplesContent` / item `4`
 
 ```axaml
 <StackPanel Orientation="Horizontal" Spacing="10" Loaded="HandleDialogExampleLoaded">
     <Panel>
-        <atom:Button ButtonType="Primary" Name="CustomFooterDialogOpenButton" Content="打开模态框" />
+        <atom:Button ButtonType="Primary" Name="CustomFooterDialogOpenButton"
+                     Content="打开模态框" />
         <atom:Dialog Name="CustomFooterDialog"
                      IsOpen="{Binding IsCustomFooterDialogOpened, Mode=TwoWay}"
                      Title="标题"
@@ -248,7 +256,8 @@ Gallery key：`ExamplesContent` / item `4`
                      DefaultStandardButton="Ok"
                      HostMinWidth="400">
             <atom:Dialog.CustomButtons>
-                <atom:DialogButton Role="ActionRole" Content="自定义按钮" />
+                <atom:DialogButton Role="ActionRole"
+                                   Content="自定义按钮" />
             </atom:Dialog.CustomButtons>
             <StackPanel Spacing="5">
                 <TextBlock Text="一些内容..." />
@@ -261,7 +270,8 @@ Gallery key：`ExamplesContent` / item `4`
     </Panel>
 
     <Panel>
-        <atom:Button ButtonType="Primary" Name="CustomFooterMsgBoxOpenButton" Content="打开模态框" />
+        <atom:Button ButtonType="Primary" Name="CustomFooterMsgBoxOpenButton"
+                     Content="打开模态框" />
         <atom:MessageBox Name="CustomFooterMsgBox"
                          IsOpen="{Binding IsCustomFooterMsgBoxOpened, Mode=TwoWay}"
                          Title="确认"
@@ -269,7 +279,8 @@ Gallery key：`ExamplesContent` / item `4`
                          Style="Confirm"
                          HostMinWidth="400">
             <atom:MessageBox.CustomButtons>
-                <atom:DialogButton Role="ActionRole" Content="自定义按钮" />
+                <atom:DialogButton Role="ActionRole"
+                                   Content="自定义按钮" />
             </atom:MessageBox.CustomButtons>
             <StackPanel Spacing="5">
                 <TextBlock Text="一些文本 ..." />
@@ -320,6 +331,9 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - Overlay presenter 在 Dialog 已附加时以 Dialog 为 inheritance parent，否则以 placement target 为 parent。
 - Window 保留 DialogSurface 到 Window `ContentPresenter` 的正常 styling parent 链，避免在未附加树中提前实例化的嵌套控件失去 ControlTheme。Dialog/owner 资源由 presenter-owned `DialogResourceBridge` 转发到 Window resources；bridge 对称转发 `ResourcesChanged`，并在 `DisposeAsync` 中移除和退订。
 - runtime binding 只用于动态 presenter/Surface/按钮关系，并由 owning presenter、Surface 或 ButtonBox 对称释放。
+- Semantic Part marker 使用静态 `Classes.semantic-*="True"`，在模板初始化时执行一次 `Classes.Set`，不建立 Binding 或
+  持久 listener；内置主题不消费 `.semantic-*` selector，descriptor 与生成 Style 全部来自编译期生成数据，不引入运行时
+  反射、程序集扫描或 VisualTree 搜索。
 - Presenter 为 Surface 复用单一 `MatrixTransform` 作为位置 owner。拖动 `PointerMoved` 只更新 Matrix translation 并同步不触发布局的 `Dialog.OffsetX/Y`；位置先按 DPI 取整，再二次 clamp 到 body owner bounds，避免取整重新越界。
 - drawn decorations 反射兼容边界只读取 frame/titlebar 几何；Modal 不反射发现业务 host，也不新增 trimming root。实现不使用反射修改 TemplatedParent，不扫描程序集发现 Dialog API，不使用同步 DispatcherFrame。
 - Session、Presenter、Surface 和 Content 的关闭回收由 Overlay/Window WeakReference 测试覆盖。
@@ -330,17 +344,19 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 | 路径 | 职责 |
 | --- | --- |
 | `Dialog.cs` | public 属性、事件、内容、按钮和内部协作入口。 |
+| `Dialog.SemanticParts.cs` | `Dialog` 的 Semantic Part 声明：`root` 之外的 8 个部件 metadata，不含模板节点、marker 或 Setter。 |
 | `Dialog.Lifecycle.cs` | `IsOpen` reconcile、`OpenAsync`、事件通知和 presenter 选择。 |
 | `Dialog.StaticAPI.cs` | 静态 modeless/modal 异步创建入口。 |
 | `DialogSession.cs` | 单次展示状态机、关闭仲裁、取消、结果、焦点和 teardown。 |
 | `IDialogPresenter.cs` | Overlay/Window 共用的最小异步协议。 |
 | `DialogSurface.cs` | 标题、内容、Footer、按钮和 Overlay resize 的共享表面；负责 `PART_SurfaceContentLayer` 的 template part 生命周期。 |
 | `ButtonBox/DialogButtonBox.cs` | 标准按钮生成、唯一有效按钮序列和自定义集合同步。 |
-| `OverlayHost/DialogOverlayLayer.cs` | 解析 owning TopLevel 的 Avalonia `OverlayLayer` 或局部 scope fallback，并管理 owner scope 内的 presenter stack。 |
+| `OverlayHost/DialogOverlayLayer.cs` | 解析 owning TopLevel 的 Avalonia `OverlayLayer`、`OverlayScope` 指定的作用域或局部 scope fallback，并管理 owner scope 内的 presenter stack。 |
 | `OverlayHost/OverlayDialogPresenter.cs` | 同时拥有 mask、Surface、placement、drag/resize 和 Overlay close motion choreography。 |
 | `WindowHost/WindowDialogPresenter.cs` | 原生 Window 属性映射、modal owner、尺寸、位置和生命周期。 |
 | `WindowHost/DialogWindow.cs` | 原生 caption close 仲裁和显式尺寸应用。 |
 | `MessageBox/MessageBox.cs` | Dialog 派生的消息语义、静态 API 和按钮配置。 |
+| `MessageBox/MessageBox.SemanticParts.cs` | `MessageBox` 复用同一组 Semantic Part 的独立 descriptor 声明（生成器不继承基类 descriptor）。 |
 | `MessageBox/MessageBoxContent.cs` | MessageBox 的图标与内容组合。 |
 | `Dialog/Themes` / `MessageBox/Themes` | 共享 Surface、Overlay presenter 和 MessageBox AXAML 结构。 |
 | `src/AtomUI.Core/MotionScene/AbstractMotion.cs` | 共享 Motion 的 transition completion boundary；等待全部 transition 或安全超时后才报告完成。 |
@@ -351,6 +367,7 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 - 源设计文档：`docs/controls/desktop/feedback/modal/overview.md`
 - 实现文档：`docs/controls/desktop/feedback/modal/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/feedback/modal/semantic-part.md`
 - Token 文档：`docs/controls/desktop/feedback/modal/token.md`
 - 变更记录：`docs/controls/desktop/feedback/modal/changelog.md`
 - 语义结构：`./semantic-cn.md`

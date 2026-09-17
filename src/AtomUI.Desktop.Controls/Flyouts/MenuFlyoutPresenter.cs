@@ -1,4 +1,5 @@
 using AtomUI.Controls;
+using AtomUI.Generated.AtomUIDesktopControls;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Platform;
@@ -101,6 +102,19 @@ public class MenuFlyoutPresenter : MenuBase,
     internal static readonly StyledProperty<double> ItemHeightProperty =
         AvaloniaProperty.Register<MenuFlyoutPresenter, double>(nameof(ItemHeight));
 
+    // 钉住语义由宿主 Flyout 下发到 Presenter，只用于区分「可恢复的生命周期关闭」与
+    // 「用户主动收起」：前者必须保留声明式子菜单状态，重开后由 MenuItem 的延迟同步恢复。
+    // 注意不要下发给 MenuItem 容器——pinned 的子菜单弹层会被关闭拦截，模板重绑后以
+    // 空壳形式滞留在 overlay 层（只剩圆角白底与阴影的空白弹层）。
+    internal static readonly StyledProperty<bool> IsPopupPinnedOpenProperty =
+        Popup.IsPopupPinnedOpenProperty.AddOwner<MenuFlyoutPresenter>();
+
+    internal bool IsPopupPinnedOpen
+    {
+        get => GetValue(IsPopupPinnedOpenProperty);
+        set => SetValue(IsPopupPinnedOpenProperty, value);
+    }
+
     internal static readonly StyledProperty<double> MaxPopupHeightProperty =
         AvaloniaProperty.Register<MenuFlyoutPresenter, double>(nameof(MaxPopupHeight));
 
@@ -171,12 +185,19 @@ public class MenuFlyoutPresenter : MenuBase,
             return new MenuSeparator();
         }
 
-        return new MenuItem();
+        if (item is MenuItemGroupData)
+        {
+            return new MenuItemGroup();
+        }
+
+        var menuItem = new MenuItem();
+        menuItem.Classes.Add(DropdownButtonSemanticParts.ItemClass);
+        return menuItem;
     }
 
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey)
     {
-        if (item is MenuItem or MenuSeparator)
+        if (item is MenuItem or MenuSeparator or MenuItemGroup)
         {
             recycleKey = null;
             return false;
@@ -190,6 +211,8 @@ public class MenuFlyoutPresenter : MenuBase,
     {
         if (container is MenuItem menuItem)
         {
+            menuItem.Classes.Add(DropdownButtonSemanticParts.ItemClass);
+
             if (item != null && item is not Visual)
             {
                 if (!menuItem.IsSet(MenuItem.HeaderProperty))
@@ -231,12 +254,17 @@ public class MenuFlyoutPresenter : MenuBase,
             menuItem[!MenuItem.SizeTypeProperty]              = this[!SizeTypeProperty];
             menuItem[!MenuItem.DisplayPageSizeProperty]       = this[!DisplayPageSizeProperty];
             menuItem[!MenuItem.ShouldUseOverlayPopupProperty] = this[!ShouldUseOverlayPopupProperty];
+            menuItem[!MenuItem.IsPopupPinnedOpenProperty]      = this[!IsPopupPinnedOpenProperty];
 
             PrepareMenuItem(menuItem, item, index);
         }
         else if (container is MenuSeparator menuSeparator)
         {
             menuSeparator.Orientation = Orientation.Horizontal;
+        }
+        else if (container is MenuItemGroup)
+        {
+            // 分组标题与子项的样式由 MenuItemGroup 自身的模板与容器逻辑处理。
         }
         else
         {
@@ -270,12 +298,26 @@ public class MenuFlyoutPresenter : MenuBase,
         base.OnApplyTemplate(e);
         _arrowDecoratedBox =
             e.NameScope.Find<ArrowDecoratedBox>(AbstractArrowDecoratedBox.ArrowDecoratorPart);
+        // popup.root 语义部件指向弹层根视觉面（ArrowDecoratedBox），而非共享的
+        // MenuFlyoutPresenter 容器：边框 / 背景 / 圆角由 ArrowDecoratedBox 的
+        // PART_ContentDecorator 渲染。标记类无法在共享 ArrowDecoratedBox 主题上静态声明
+        // （会污染其他 ArrowDecoratedBox 弹层），因此按 DropdownButton 语义部件契约在
+        // 模板应用时运行时注入。
+        _arrowDecoratedBox?.Classes.Add(DropdownButtonSemanticParts.PopupRootClass);
         ConfigureMaxPopupHeight();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+        // 钉住弹层的关闭来自放置目标生命周期失效（页签切走 / 滚出视口），属于可恢复的临时
+        // 关闭而非用户收起菜单：此时保留声明式子菜单状态，菜单树重新附着后由 MenuItem 的
+        // 延迟同步恢复子菜单呈现。清理只针对普通关闭，避免把声明式展开状态一并抹掉。
+        if (IsPopupPinnedOpen)
+        {
+            return;
+        }
+
         foreach (var i in LogicalChildren)
         {
             if (i is MenuItem menuItem)

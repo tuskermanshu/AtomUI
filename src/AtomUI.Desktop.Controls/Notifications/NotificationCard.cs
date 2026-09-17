@@ -1,4 +1,5 @@
 ﻿using AtomUI.Controls;
+using AtomUI.Generated.AtomUIDesktopControls;
 using AtomUI.Icons.AntDesign;
 using AtomUI.MotionScene;
 using AtomUI.Reflection;
@@ -7,16 +8,18 @@ using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
 
 [PseudoClasses(StdPseudoClass.Error, StdPseudoClass.Information, StdPseudoClass.Success, StdPseudoClass.Warning)]
-public class NotificationCard : ContentControl,
+public partial class NotificationCard : ContentControl,
                                 IMotionAwareControl,
                                 IFeedbackStackItem,
                                 IFeedbackStackTransitionSnapshotItem
@@ -48,6 +51,24 @@ public class NotificationCard : ContentControl,
 
     public static readonly StyledProperty<PathIcon?> IconProperty =
         AvaloniaProperty.Register<NotificationCard, PathIcon?>(nameof(Icon));
+
+    /// <summary>
+    /// 操作组内容，显示在通知卡片描述下方的操作区。
+    /// </summary>
+    public static readonly StyledProperty<object?> ActionsProperty =
+        AvaloniaProperty.Register<NotificationCard, object?>(nameof(Actions));
+
+    /// <summary>
+    /// 操作组内容的数据模板，用于自定义操作区呈现。
+    /// </summary>
+    public static readonly StyledProperty<IDataTemplate?> ActionsTemplateProperty =
+        AvaloniaProperty.Register<NotificationCard, IDataTemplate?>(nameof(ActionsTemplate));
+
+    /// <summary>
+    /// 卡片表面阴影。root 外观由 owner 属性投影到模板表面 Border，便于 owner-scoped Semantic Style 定制。
+    /// </summary>
+    public static readonly StyledProperty<BoxShadows> BoxShadowProperty =
+        Border.BoxShadowProperty.AddOwner<NotificationCard>();
     
     public static readonly StyledProperty<TimeSpan?> ExpirationProperty =
         AvaloniaProperty.Register<NotificationCard, TimeSpan?>(nameof(Expiration));
@@ -86,6 +107,33 @@ public class NotificationCard : ContentControl,
     {
         get => GetValue(IconProperty);
         set => SetValue(IconProperty, value);
+    }
+
+    /// <summary>
+    /// 操作组内容。非空时模板中的 actions 区域可见。
+    /// </summary>
+    public object? Actions
+    {
+        get => GetValue(ActionsProperty);
+        set => SetValue(ActionsProperty, value);
+    }
+
+    /// <summary>
+    /// 操作组内容模板。
+    /// </summary>
+    public IDataTemplate? ActionsTemplate
+    {
+        get => GetValue(ActionsTemplateProperty);
+        set => SetValue(ActionsTemplateProperty, value);
+    }
+
+    /// <summary>
+    /// 卡片表面阴影，投影到模板表面 Border。
+    /// </summary>
+    public BoxShadows BoxShadow
+    {
+        get => GetValue(BoxShadowProperty);
+        set => SetValue(BoxShadowProperty, value);
     }
     
     /// <summary>
@@ -170,6 +218,16 @@ public class NotificationCard : ContentControl,
     public NotificationCard(WindowNotificationManager manager)
     {
         _notificationManager = manager;
+        _motionCoordinator = new FeedbackCardMotionCoordinator(CompleteCloseMotion);
+    }
+
+    /// <summary>
+    /// Initializes a standalone notification card that is not hosted by a
+    /// <see cref="WindowNotificationManager" />. Hover-pause feedback is a manager
+    /// capability and does not apply to standalone cards.
+    /// </summary>
+    public NotificationCard()
+    {
         _motionCoordinator = new FeedbackCardMotionCoordinator(CompleteCloseMotion);
     }
     
@@ -464,7 +522,10 @@ public class NotificationCard : ContentControl,
             {
                 Name = "ProgressBar"
             };
+            // progress 是覆盖在卡片底部的运行时 Part：显式注入 semantic class，随进度条一同创建与释放。
+            _progressBar.Classes.Add(NotificationCardSemanticParts.ProgressClass);
             _progressBar.SetTemplatedParent(this);
+            // 列 0 是 Auto，未跨列时会以无限宽测量并令 Measure 返回非法尺寸；跨双列对齐卡片内容行。
             Grid.SetRow(_progressBar, 1);
             Grid.SetColumn(_progressBar, 0);
             Grid.SetColumnSpan(_progressBar, 2);

@@ -14,6 +14,7 @@
 - `src/AtomUI.Desktop.Controls/Message/IMessageManager.cs`
 - `src/AtomUI.Desktop.Controls/Message/Message.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageCard.cs`
+- `src/AtomUI.Desktop.Controls/Message/MessageCard.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageCardPseudoClass.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageCardToken.cs`
 - `src/AtomUI.Desktop.Controls/Message/MessageType.cs`
@@ -26,6 +27,7 @@
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotion.cs`
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/FeedbackCardMotionCoordinator.cs`
 - `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack/IFeedbackStackItem.cs`
+- `src/AtomUI.Desktop.Controls/Message/WindowMessageManager.SemanticParts.cs`
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`
 
 职责边界：
@@ -93,6 +95,10 @@ Duration 变化不重启同一 actor，新值从下一次 motion 生效；Comple
 - 构造阶段只注册必要状态，不依赖 template part。
 - 模板应用时获取 part、建立事件订阅和绑定，并先释放旧 part 订阅。
 - manager 的卡片 collection 在模板之外创建并保持稳定；新 `PART_Items` 只重新绑定该 collection，旧 presenter 立即解绑。
+- manager 首次 attach 前允许 `Show`，卡片进入稳定集合，有限时长登记保持暂停。detach 时先暂停 scheduler，
+  并在视觉树级联完成后确认是否仍离树：持续离树关闭当时卡片，同轮重新入树的 host 迁移保留队列。
+- `Dispose` 解绑 presenter 的集合与 hover 事件、释放 scheduler 和每张 card 的 owner/回调，再移除宿主层及安全区订阅。
+  模板重套用仅更换 presenter，不重新创建卡片。
 - Gallery 页面分别惰性创建普通示例 manager 与 Stack 示例 manager；页面 detach 时两者都必须 `Dispose()` 并清空引用。
 - 控件卸载、弹层关闭、窗口关闭、集合替换或 container recycle 时释放事件订阅和资源宿主。
 - DynamicResource、TokenResourceBinder 或 C# binding 必须有明确 owner 和释放点。
@@ -214,3 +220,64 @@ Message 的交互事件应从输入源收敛到控件级语义事件：
 - DataGrid 相关变更运行 `tests/AtomUI.Desktop.Controls.DataGrid.Tests`。
 - Gallery 示例或源码片段变更运行 `tests/AtomUIGallery.Tests`。
 - AOT、生成器或动态数据路径变更按 Gallery NativeAOT 发布流程验证。
+
+## 11. Semantic Part 接入
+
+Message 公开两个 owner 的 Semantic Part：`MessageCard`（notice）与 `WindowMessageManager`（list）。声明集中在与
+owner 同目录的 `MessageCard.SemanticParts.cs` 与 `WindowMessageManager.SemanticParts.cs`，owner 本体保持 partial。
+公共契约与逐 Part 说明见 [Message Semantic Part 契约](semantic-part.md)。
+
+### 11.1 Descriptor 与 marker
+
+| Owner | Part | SelectorClass | SelectorRoute | ContractType | 声明位置 |
+| --- | --- | --- | --- | --- | --- |
+| `MessageCard` | `wrapper` | `semantic-wrapper` | `/template/ .semantic-wrapper` | `DockPanel` | `MessageCardTheme.axaml` 内 `DockPanel#PART_HeaderContainer` |
+| `MessageCard` | `icon` | `semantic-icon` | `/template/ .semantic-icon` | `IconPresenter`（`AtomUI.Controls.IconPresenter`） | `MessageCardTheme.axaml` 内 `IconPresenter#PART_IconContent` |
+| `MessageCard` | `title` | `semantic-title` | `/template/ .semantic-title` | `Avalonia.Controls.SelectableTextBlock` | `MessageCardTheme.axaml` 内 `SelectableTextBlock#PART_Message` |
+| `WindowMessageManager` | `listContent` | `semantic-list-content` | `/template/ .semantic-list-content` | `ItemsControl` | `WindowMessageManagerTheme.axaml` 内 `FeedbackStackPresenter#PART_Items` |
+
+`root` 由生成器隐式加入 descriptor，不要求 `.semantic-root` marker。四个非 root Part 都是 owner 自身
+`ControlTheme` 的静态模板节点，因此显式声明 `RuntimeCreated=false`，生成器按 owner 主题资产（derived/本体
+Theme.axaml）做 marker 数量与 `ContractType` 兼容性静态校验，无需跨模板豁免。
+
+marker 使用模板静态 class 属性语法书写，值是静态 `True`：
+
+```xml
+<DockPanel Name="PART_HeaderContainer" Classes.semantic-wrapper="True" LastChildFill="True">
+```
+
+`title` 的节点类型必须与 `ContractType` 精确一致：主题中无前缀的 `SelectableTextBlock` 解析为
+`Avalonia.Controls.SelectableTextBlock`；AtomUI 的 `atom:SelectableTextBlock` 是另一类型，二者不可混用，否则
+生成器 `ATOMUIGEN033` 类型不兼容校验会拒绝该 Part。
+
+### 11.2 运行时创建路径
+
+Message 没有任何运行时创建的 Part：
+
+- `MessageCard` 由 `WindowMessageManager.Show` 以 `new MessageCard { ... }` 创建，但其模板由自身
+  `ControlTheme` 实例化，三个卡片级 marker 都随模板静态就位，root 为隐式 owner。
+- `WindowMessageManager` 有两个 public 构造：`WindowMessageManager(TopLevel? host)` 与无参 `WindowMessageManager()`。
+  传入 host 时经 `InstallFromTopLevel` 挂到 TopLevel 反馈层并投影安全区外边距；传 `null` 或使用无参构造时控件不安装
+  到任何层，作为普通可放置控件由调用方放进自己的视觉树（上游把 list 改为内联容器的等价物），两种路径都在模板应用后
+  取得 `PART_Items`；`listContent` marker 静态声明在 manager 模板内。
+
+卡片实例本身不携带任何 semantic class；`Show(IMessage, string[]? classes)` 的 `classes` 参数只追加用户业务 class，不参与
+Semantic Part 身份。因此卡片增删、`MaxItems` 清理与超时/手动关闭只影响实例数量，不改变 marker 结构。
+
+### 11.3 生命周期与布局
+
+- MessageCard 模板重套用时重新取得 actor，旧执行取消、旧模板节点释放；marker 随新模板重建。
+- manager 的稳定卡片集合与 scheduler 不依赖 presenter 实例。持续 detach 的延后关闭和 `Dispose` 的最终清理
+  遵循第 5 节生命周期规则；同轮 host 迁移不清空集合。
+- `wrapper` 是 DockPanel，icon 停靠左侧、title 填充，间距来自 `MessageIconMargin`。
+- `listContent` 实际为 `FeedbackStackPresenter`，公共 `ContractType` 为 `ItemsControl`。其内部 panel 维护项间距和
+  堆叠布局；应用通过生成 Style 定制尺寸、对齐，不能访问内部间距 API。
+- `Grid#PART_StackHost.Margin` 绑定 owner `Padding`，默认取 `MessageTopMargin`。六种 Position 在模板应用和属性
+  修改时更新，StackHost 按方位紧贴队列，两个静态背板不增加 host 的 extent 或 hover 命中范围。
+
+### 11.4 性能与 AOT
+
+- 四个 marker 在模板初始化时各执行一次 `Classes.Set`，不建立 Binding 或持久订阅。
+- 默认主题不消费 `.semantic-*`；未声明用户 Semantic Style 时不创建独立 selector activator。
+- descriptor、`StyleType`、Part 常量与 XML namespace 映射全部由生成器静态产生，不引入反射、程序集扫描或运行时
+  AXAML 解析。

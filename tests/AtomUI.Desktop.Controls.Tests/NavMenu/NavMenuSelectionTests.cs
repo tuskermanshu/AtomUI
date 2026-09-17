@@ -19,6 +19,296 @@ public class NavMenuSelectionTests
         AvaloniaTestApp.EnsureInitialized();
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Explicit_Loaded_Selection_Wins_Over_Queued_Default(bool queueExplicitSelection)
+    {
+        var first = new NavMenuNode { Header = "First", ItemKey = "first" };
+        var second = new NavMenuNode { Header = "Second", ItemKey = "second" };
+        var menu = new AtomUI.Desktop.Controls.NavMenu
+        {
+            Mode = NavMenuMode.Inline,
+            IsMotionEnabled = false,
+            DefaultSelectedPath = new TreeNodePath("first")
+        };
+        menu.Items.Add(first);
+        menu.Items.Add(second);
+        var selectedNodes = new List<INavMenuNode>();
+        menu.NavMenuNodeSelected += (_, args) => selectedNodes.Add(args.NavMenuNode);
+        menu.Loaded += (_, _) =>
+        {
+            if (queueExplicitSelection)
+            {
+                Dispatcher.UIThread.Post(() => menu.SelectedItem = second, DispatcherPriority.Loaded);
+            }
+            else
+            {
+                menu.SelectedItem = second;
+            }
+        };
+        var window = new Avalonia.Controls.Window { Width = 320, Height = 240, Content = menu };
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            menu.SelectedItem.ShouldBeSameAs(second);
+            selectedNodes.ShouldBe([second]);
+            menu.ContainerFromItem(first).ShouldBeOfType<NavMenuItem>().IsSelected.ShouldBeFalse();
+            menu.ContainerFromItem(second).ShouldBeOfType<NavMenuItem>().IsSelected.ShouldBeTrue();
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [Theory]
+    [InlineData("clear", false)]
+    [InlineData("root", false)]
+    [InlineData("sibling", false)]
+    [InlineData("branch", false)]
+    [InlineData("clear", true)]
+    [InlineData("root", true)]
+    [InlineData("branch", true)]
+    public void Removing_Selected_Entry_Reconciles_The_Previously_Applied_Ancestor_Path(
+        string nextSelection, bool removeParentBranch)
+    {
+        var first = new NavMenuNode { Header = "First", ItemKey = "first" };
+        var sibling = new NavMenuNode { Header = "Sibling", ItemKey = "sibling" };
+        var parent = new NavMenuNode { Header = "Parent", ItemKey = "parent" };
+        parent.Children.Add(first);
+        parent.Children.Add(sibling);
+        var otherLeaf = new NavMenuNode { Header = "Other leaf", ItemKey = "other-leaf" };
+        var otherBranch = new NavMenuNode { Header = "Other branch", ItemKey = "other-branch" };
+        otherBranch.Children.Add(otherLeaf);
+        var ancestor = new NavMenuNode { Header = "Ancestor", ItemKey = "ancestor" };
+        ancestor.Children.Add(parent);
+        ancestor.Children.Add(otherBranch);
+        var rootLeaf = new NavMenuNode { Header = "Root leaf", ItemKey = "root-leaf" };
+        var menu = new AtomUI.Desktop.Controls.NavMenu { Mode = NavMenuMode.Inline, IsMotionEnabled = false };
+        menu.Items.Add(ancestor);
+        menu.Items.Add(rootLeaf);
+        var window = new Avalonia.Controls.Window { Width = 360, Height = 480, Content = menu };
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            menu.SelectedItem = first;
+            Dispatcher.UIThread.RunJobs();
+            var ancestorItem = menu.ContainerFromItem(ancestor).ShouldBeOfType<NavMenuItem>();
+            var parentItem = ancestorItem.ContainerFromItem(parent).ShouldBeOfType<NavMenuItem>();
+            var firstItem = parentItem.ContainerFromItem(first).ShouldBeOfType<NavMenuItem>();
+            ancestorItem.IsInSelectedPath.ShouldBeTrue();
+            parentItem.IsInSelectedPath.ShouldBeTrue();
+            firstItem.IsSelected.ShouldBeTrue();
+
+            if (removeParentBranch)
+            {
+                ancestor.Children.Remove(parent);
+            }
+            else
+            {
+                parent.Children.Remove(first);
+            }
+            Dispatcher.UIThread.RunJobs();
+            // Removal does not rewrite the public selection request.
+            menu.SelectedItem.ShouldBeSameAs(first);
+            INavMenuNode? nextNode = nextSelection switch
+            {
+                "root" => rootLeaf,
+                "sibling" => sibling,
+                "branch" => otherLeaf,
+                _ => null
+            };
+            menu.SelectedItem = nextNode;
+            Dispatcher.UIThread.RunJobs();
+
+            menu.SelectedItem.ShouldBeSameAs(nextNode);
+            firstItem.IsSelected.ShouldBeFalse();
+            ancestorItem.IsInSelectedPath.ShouldBe(nextSelection is "sibling" or "branch");
+            parentItem.IsInSelectedPath.ShouldBe(nextSelection == "sibling");
+            GetItemHeader(ancestorItem).IsInSelectedPath.ShouldBe(nextSelection is "sibling" or "branch");
+            if (nextNode is not null)
+            {
+                menu.FindRealizedMenuItem(nextNode).ShouldNotBeNull().IsSelected.ShouldBeTrue();
+            }
+            if (nextSelection == "branch")
+            {
+                ancestorItem.ContainerFromItem(otherBranch).ShouldBeOfType<NavMenuItem>()
+                    .IsInSelectedPath.ShouldBeTrue();
+            }
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Clearing_Selected_Path_Tolerates_Synchronous_Container_Recycle_Or_Selection(bool selectAnotherItem)
+    {
+        var leaf = new NavMenuNode { Header = "Leaf", ItemKey = "leaf" };
+        var branch = new NavMenuNode { Header = "Branch", ItemKey = "branch" };
+        branch.Children.Add(leaf);
+        var parent = new NavMenuNode { Header = "Parent", ItemKey = "parent" };
+        parent.Children.Add(branch);
+        var other = new NavMenuNode { Header = "Other", ItemKey = "other" };
+        var menu = new AtomUI.Desktop.Controls.NavMenu { Mode = NavMenuMode.Inline, IsMotionEnabled = false };
+        menu.Items.Add(parent);
+        menu.Items.Add(other);
+        var window = new Avalonia.Controls.Window { Width = 360, Height = 400, Content = menu };
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            menu.SelectedItem = leaf;
+            Dispatcher.UIThread.RunJobs();
+            var parentItem = menu.ContainerFromItem(parent).ShouldBeOfType<NavMenuItem>();
+            var branchItem = parentItem.ContainerFromItem(branch).ShouldBeOfType<NavMenuItem>();
+            var leafItem = branchItem.ContainerFromItem(leaf).ShouldBeOfType<NavMenuItem>();
+            var otherItem = menu.ContainerFromItem(other).ShouldBeOfType<NavMenuItem>();
+            parentItem.PropertyChanged += (_, args) =>
+            {
+                if (args.Property == NavMenuItem.IsInSelectedPathProperty && args.NewValue is false)
+                {
+                    if (selectAnotherItem)
+                    {
+                        menu.SelectNavMenuItem(otherItem);
+                    }
+                    else
+                    {
+                        parent.Children.Remove(branch);
+                    }
+                }
+            };
+
+            Should.NotThrow(() => menu.SelectedItem = null);
+            Dispatcher.UIThread.RunJobs();
+
+            parentItem.IsInSelectedPath.ShouldBeFalse();
+            branchItem.IsInSelectedPath.ShouldBeFalse();
+            leafItem.IsSelected.ShouldBeFalse();
+            menu.SelectedItem.ShouldBeSameAs(selectAnotherItem ? other : null);
+            otherItem.IsSelected.ShouldBe(selectAnotherItem);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [Fact]
+    public void Selection_Event_Can_Remove_The_Selected_Leaf_And_Select_Another_Branch()
+    {
+        var leaf = new NavMenuNode { Header = "Leaf", ItemKey = "leaf" };
+        var sibling = new NavMenuNode { Header = "Sibling", ItemKey = "sibling" };
+        var parent = new NavMenuNode { Header = "Parent", ItemKey = "parent" };
+        parent.Children.Add(leaf);
+        parent.Children.Add(sibling);
+        var other = new NavMenuNode { Header = "Other", ItemKey = "other" };
+        var menu = new AtomUI.Desktop.Controls.NavMenu { Mode = NavMenuMode.Inline, IsMotionEnabled = false };
+        menu.Items.Add(parent);
+        menu.Items.Add(other);
+        var selectedNodes = new List<INavMenuNode>();
+        menu.NavMenuNodeSelected += (_, args) =>
+        {
+            selectedNodes.Add(args.NavMenuNode);
+            if (ReferenceEquals(args.NavMenuNode, leaf))
+            {
+                parent.Children.Remove(leaf);
+                menu.SelectedItem = other;
+            }
+        };
+        var window = new Avalonia.Controls.Window { Width = 360, Height = 400, Content = menu };
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            menu.SelectedItem = leaf;
+            Dispatcher.UIThread.RunJobs();
+
+            selectedNodes.ShouldBe([leaf, other]);
+            menu.SelectedItem.ShouldBeSameAs(other);
+            menu.ContainerFromItem(parent).ShouldBeOfType<NavMenuItem>().IsInSelectedPath.ShouldBeFalse();
+            menu.ContainerFromItem(other).ShouldBeOfType<NavMenuItem>().IsSelected.ShouldBeTrue();
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Recreated_Or_Reattached_Selection_Path_Is_Cleared_After_Selected_Leaf_Removal(bool rebuildContainers)
+    {
+        var leaf = new NavMenuNode { Header = "Leaf", ItemKey = "leaf" };
+        var sibling = new NavMenuNode { Header = "Sibling", ItemKey = "sibling" };
+        var parent = new NavMenuNode { Header = "Parent", ItemKey = "parent" };
+        parent.Children.Add(leaf);
+        parent.Children.Add(sibling);
+        var menu = new AtomUI.Desktop.Controls.NavMenu { Mode = NavMenuMode.Inline, IsMotionEnabled = false };
+        menu.Items.Add(parent);
+        var content = CreatePopupOverlayHost(menu);
+        var window = new Avalonia.Controls.Window { Width = 360, Height = 400, Content = content };
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            menu.SelectedItem = leaf;
+            Dispatcher.UIThread.RunJobs();
+            var originalParent = menu.ContainerFromItem(parent).ShouldBeOfType<NavMenuItem>();
+            originalParent.IsInSelectedPath.ShouldBeTrue();
+
+            if (rebuildContainers)
+            {
+                menu.Mode = NavMenuMode.Horizontal;
+                Dispatcher.UIThread.RunJobs();
+                window.UpdateLayout();
+                menu.Mode = NavMenuMode.Inline;
+            }
+            else
+            {
+                window.Content = null;
+                Dispatcher.UIThread.RunJobs();
+                window.Content = content;
+            }
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+            var currentParent = menu.ContainerFromItem(parent).ShouldBeOfType<NavMenuItem>();
+            currentParent.IsInSelectedPath.ShouldBeTrue();
+            menu.SelectedItem.ShouldBeSameAs(leaf);
+            currentParent.Open();
+            Dispatcher.UIThread.RunJobs();
+            currentParent.ContainerFromItem(leaf).ShouldBeOfType<NavMenuItem>().IsSelected.ShouldBeTrue();
+
+            parent.Children.Remove(leaf);
+            Dispatcher.UIThread.RunJobs();
+            menu.SelectedItem = null;
+            Dispatcher.UIThread.RunJobs();
+            currentParent.IsInSelectedPath.ShouldBeFalse();
+            originalParent.IsInSelectedPath.ShouldBeFalse();
+
+            parent.Children.Add(leaf);
+            Dispatcher.UIThread.RunJobs();
+            menu.SelectedItem = leaf;
+            Dispatcher.UIThread.RunJobs();
+            currentParent.IsInSelectedPath.ShouldBeTrue();
+            currentParent.ContainerFromItem(leaf).ShouldBeOfType<NavMenuItem>().IsSelected.ShouldBeTrue();
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     [Fact]
     public void NavMenu_Ignores_Stale_Async_SelectedItem_Replay()
     {

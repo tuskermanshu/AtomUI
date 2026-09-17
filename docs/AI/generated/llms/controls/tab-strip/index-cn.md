@@ -75,7 +75,7 @@ TabStrip 的公共契约由 public/protected 类型成员、Avalonia 属性、�
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip/Views/TabStripShowCase.axaml:37`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip/Views/TabStripShowCase.axaml:122`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -91,7 +91,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 通过 ItemSource 生成 TabStripItem
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip/Views/TabStripShowCase.axaml:54`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip/Views/TabStripShowCase.axaml:139`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -109,7 +109,7 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 禁用标签
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip/Views/TabStripShowCase.axaml:163`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip/Views/TabStripShowCase.axaml:248`
 
 Gallery key：`ExamplesContent` / item `4`
 
@@ -131,7 +131,7 @@ Gallery key：`ExamplesContent` / item `4`
 
 ### 居中显示
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip/Views/TabStripShowCase.axaml:186`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/TabStrip/Views/TabStripShowCase.axaml:271`
 
 Gallery key：`ExamplesContent` / item `5`
 
@@ -243,8 +243,11 @@ Token 来源：
 
 - `src/AtomUI.Desktop.Controls/TabControl/TabStrip/BaseTabStrip.cs`
 - `src/AtomUI.Desktop.Controls/TabControl/TabStrip/CardTabStrip.cs`
+- `src/AtomUI.Desktop.Controls/TabControl/TabStrip/CardTabStrip.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/TabControl/TabStrip/TabStrip.cs`
+- `src/AtomUI.Desktop.Controls/TabControl/TabStrip/TabStrip.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/TabControl/TabStrip/TabStripItem.cs`
+- `src/AtomUI.Desktop.Controls/TabControl/TabStrip/TabStripItem.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/TabControl/TabScrollViewer.cs`：四控件共用的 internal sealed 滚动、溢出、Popup 与会话 owner。
 - `src/AtomUI.Desktop.Controls/TabControl/TabOverflowPopupContext.cs`：public context、不可变 item projection 与内部 weak action bridge。
 - `src/AtomUI.Desktop.Controls/TabControl/TabOverflowMenu.cs`：默认菜单及其 internal item container；不承载 owner-specific 分支。
@@ -266,5 +269,6 @@ Token 来源：
 
 - 源设计文档：`docs/controls/desktop/navigation/tab-strip/overview.md`
 - 实现文档：`docs/controls/desktop/navigation/tab-strip/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/navigation/tab-strip/semantic-part.md`
 - 变更记录：`docs/controls/desktop/navigation/tab-strip/changelog.md`
 - 语义结构：`./semantic-cn.md`

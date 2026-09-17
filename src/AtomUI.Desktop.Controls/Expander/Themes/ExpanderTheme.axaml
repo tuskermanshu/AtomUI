@@ -6,18 +6,27 @@
     <ControlTheme x:Key="{x:Type atom:Expander}" TargetType="atom:Expander">
         <Setter Property="Template">
             <ControlTemplate>
+                <!-- ClipContentToCornerRadius 是必需的，不是可选优化：PART_Frame 自己画圆角，
+                     但 header/body 是它的子节点且各自带背景。ClipToBounds 只做矩形裁剪，不做圆角裁剪，
+                     所以不开启时子节点的不透明背景会平铺到方形边界、覆盖掉圆角，视觉上圆角失效。
+                     默认主题的 HeaderBg 是 alpha≈2% 的 ColorFillAlter，缺陷几乎不可见；一旦用户通过
+                     Semantic Part 或 IsGhostStyle 设置不透明背景就会显形。开启后由本节点统一把
+                     整棵子树裁到圆角内框，与展开状态、ExpandDirection 无关。 -->
                 <atom:PixelAlignedBorder Name="PART_Frame"
                                          ClipToBounds="True"
+                                         ClipContentToCornerRadius="True"
                                          BorderThickness="{TemplateBinding EffectiveBorderThickness}">
                     <DockPanel Name="PART_MainLayout"
                                LastChildFill="True">
                         <LayoutTransformControl Name="PART_HeaderLayoutTransform">
                             <atom:PixelAlignedBorder Name="PART_HeaderDecorator"
+                                                     Classes.semantic-header="True"
                                                      Padding="{TemplateBinding HeaderPadding}">
                                 <Grid Name="PART_HeaderLayout"
                                       ColumnDefinitions="Auto, *, Auto, Auto">
                                     <atom:IconButton
                                         Name="PART_ExpandButton"
+                                        Classes.semantic-icon="True"
                                         Grid.Column="0"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
@@ -26,6 +35,7 @@
                                         IsVisible="{TemplateBinding IsShowExpandIcon}"
                                         IsEnabled="{TemplateBinding IsEnabled}" />
                                     <ContentPresenter Name="PART_HeaderPresenter"
+                                                      Classes.semantic-title="True"
                                                       HorizontalAlignment="Stretch"
                                                       VerticalAlignment="Center"
                                                       HorizontalContentAlignment="Left"
@@ -54,6 +64,7 @@
                                 BorderBrush="{atom:SharedTokenResource ColorBorder}"
                                 BorderThickness="{TemplateBinding ContentBorderThickness}">
                                 <ContentPresenter Name="PART_ContentPresenter"
+                                                  Classes.semantic-body="True"
                                                   Content="{TemplateBinding Content, Converter={StaticResource StringToTextBlockConverter}}"
                                                   ContentTemplate="{TemplateBinding ContentTemplate}"
                                                   Padding="{TemplateBinding ContentPadding}" />

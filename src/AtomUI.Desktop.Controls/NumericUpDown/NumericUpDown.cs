@@ -4,16 +4,19 @@ using AtomUI.Controls;
 using AtomUI.Controls.Commons;
 using AtomUI.Data;
 using AtomUI.Icons.AntDesign;
+using AtomUI.Media;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Metadata;
+using Avalonia.Media;
 
 namespace AtomUI.Desktop.Controls;
 
@@ -25,7 +28,7 @@ public enum NumericUpDownMode
     Spinner
 }
 
-public class NumericUpDown : AvaloniaNumericUpDown, 
+public partial class NumericUpDown : AvaloniaNumericUpDown,
                              IMotionAwareControl,
                              ICompactSpaceAware,
                              IFormItemAware,
@@ -437,8 +440,40 @@ public class NumericUpDown : AvaloniaNumericUpDown,
         ClearButtonPart = e.NameScope.Find<IconButton>("PART_ClearButton");
         TextBoxPart     = e.NameScope.Find<TextBox>("PART_TextBox");
         ConfigureEffectiveShowClearButton();
-        _buttonSpinner = e.NameScope.Find<ButtonSpinner>("PART_Spinner");
+        if (e.NameScope.Find<ButtonSpinner>("PART_Spinner") is { } buttonSpinner)
+        {
+            _buttonSpinner = buttonSpinner;
+            // The frame node lives inside the spinner's own template; apply it now so the
+            // border relay below can reach the decorated box instead of silently no-oping.
+            buttonSpinner.ApplyTemplate();
+        }
+        RelayFrameBorderBrush();
         SetupTemplatePartBindings(e);
+    }
+
+    /// <summary>
+    /// Relays the owner's root border brush onto the input frame as a local value so
+    /// application-level customization wins over the frame state machine, mirroring antd
+    /// inline styles.root semantics and the shared AbstractTextInput behavior. An unset
+    /// owner value restores the state machine.
+    /// </summary>
+    private void RelayFrameBorderBrush()
+    {
+        var decoratedBox = _buttonSpinner?.DecoratedBox;
+        if (decoratedBox is null)
+        {
+            return;
+        }
+
+        var value = GetValue(BorderBrushProperty);
+        if (value is null || ReferenceEquals(value, AvaloniaProperty.UnsetValue))
+        {
+            decoratedBox.ClearValue(BorderBrushProperty);
+        }
+        else
+        {
+            decoratedBox.SetValue(BorderBrushProperty, value, BindingPriority.LocalValue);
+        }
     }
 
     private void HandleClearButtonClicked(object? sender, RoutedEventArgs args)
@@ -453,27 +488,57 @@ public class NumericUpDown : AvaloniaNumericUpDown,
 
         if (e.NameScope.Find<InputClearIconButton>("PART_ClearButton") is { } clearButton)
         {
-            _templatePartBindings.Add(BindUtils.RelayBind(this, ClearIconProperty, clearButton,
-                AbstractIconButton.IconProperty));
-            _templatePartBindings.Add(BindUtils.RelayBind(this, IsMotionEnabledProperty, clearButton,
-                AbstractIconButton.IsMotionEnabledProperty));
+            // Only the visibility relay stays in code: IsEffectiveShowClearButton is an internal
+            // direct property, invisible to compiled template bindings. Icon and IsMotionEnabled
+            // are template-bound in the ControlTheme.
             _templatePartBindings.Add(BindUtils.RelayBind(this, IsEffectiveShowClearButtonProperty, clearButton,
                 Visual.IsVisibleProperty));
         }
 
-        if (e.NameScope.Find<ContentPresenter>("PART_InnerRightContentPresenter") is { } innerRightContent)
+        if (e.NameScope.Find<ContentPresenter>("PART_InnerLeftContentPresenter") is { } innerLeftContent)
         {
-            _templatePartBindings.Add(BindUtils.RelayBind(this, InnerRightContentProperty, innerRightContent,
+            // The presenter lives in a ButtonSpinner.InnerLeftContent property-element subtree, where
+            // TemplatedParent never propagates, so template bindings stay dead there; relay in code.
+            _templatePartBindings.Add(BindUtils.RelayBind(this, InnerLeftContentProperty, innerLeftContent,
                 ContentPresenter.ContentProperty));
-            _templatePartBindings.Add(BindUtils.RelayBind(this, InnerRightContentTemplateProperty,
-                innerRightContent, ContentPresenter.ContentTemplateProperty));
+            _templatePartBindings.Add(BindUtils.RelayBind(this, InnerLeftContentTemplateProperty,
+                innerLeftContent, ContentPresenter.ContentTemplateProperty));
         }
 
-        if (e.NameScope.Find<TextBox>("PART_TextBox") is { } textBox)
+        // InnerRightContent / InnerRightContentTemplate and the text box IsCustomFontSize are
+        // template-bound in the ControlTheme (the parts sit in direct template content where
+        // TemplatedParent propagates), so no code relay is needed for them.
+
+        // The suffix group renders inside the spinner content segment, outside the decorated box's
+        // ContentRightAddOn slot, so the floating-handle shift no longer reaches it through the
+        // template. The transform and its transition are declared in the ControlTheme; only the
+        // hover trigger stays in code because the hover state is an internal property on the
+        // decorated box that selectors cannot reach back across the spinner Content boundary,
+        // and the target offset is derived from runtime padding. Do not re-mirror the animated
+        // ContentRightShift frame by frame here: a per-frame relay fights the render clock and
+        // shows up as a one-frame jump when the pointer re-enters quickly.
+        if (e.NameScope.Find<StackPanel>("PART_SuffixGroup") is { } suffixGroup &&
+            _buttonSpinner?.DecoratedBox is { } decoratedBox)
         {
-            _templatePartBindings.Add(BindUtils.RelayBind(this, IsCustomFontSizeProperty, textBox,
-                TextBox.IsCustomFontSizeProperty));
+            _templatePartBindings.Add(decoratedBox.GetPropertyChangedObservable(
+                    ButtonSpinnerDecoratedBox.IsSpinnerContentHoverProperty)
+                .Subscribe(_ => SyncSuffixGroupShift(suffixGroup, decoratedBox)));
+            SyncSuffixGroupShift(suffixGroup, decoratedBox);
         }
+    }
+
+    private static void SyncSuffixGroupShift(StackPanel suffixGroup,
+                                             ButtonSpinnerDecoratedBox decoratedBox)
+    {
+        var target = decoratedBox.IsHandleFloatable &&
+                     decoratedBox.IsSpinnerContentHover &&
+                     decoratedBox.ButtonSpinnerLocation == Desktop.Controls.ButtonSpinnerLocation.Right
+            ? -decoratedBox.EffectiveContentPadding.Right * 1.5
+            : 0d;
+        // Replacing the RenderTransform value (not mutating a transform property) is what arms the
+        // ControlTheme TransformOperationsTransition.
+        suffixGroup.RenderTransform = TransformParser.Parse(
+            FormattableString.Invariant($"translateX({target}px)"));
     }
     
     protected virtual void NotifyClearButtonClicked()
@@ -484,6 +549,11 @@ public class NumericUpDown : AvaloniaNumericUpDown,
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+        if (change.Property == BorderBrushProperty)
+        {
+            RelayFrameBorderBrush();
+        }
+
         if (change.Property == IsReadOnlyProperty ||
             change.Property == TextProperty ||
             change.Property == IsAllowClearProperty)

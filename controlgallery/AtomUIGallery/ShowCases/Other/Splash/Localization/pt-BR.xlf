@@ -163,6 +163,42 @@
         <target state="translated">Workspace ready</target>
       </segment>
     </unit>
+    <unit id="P2SemanticContentTag">
+      <segment>
+        <source>core</source>
+        <target state="translated">core</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticDetailProgress">
+      <segment>
+        <source>68%</source>
+        <target state="translated">68%</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticFooter">
+      <segment>
+        <source>v6</source>
+        <target state="translated">v6</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticMessageLoading">
+      <segment>
+        <source>Loading</source>
+        <target state="translated">Carregando</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticMessageModules">
+      <segment>
+        <source>Modules</source>
+        <target state="translated">Módulos</target>
+      </segment>
+    </unit>
+    <unit id="P2SemanticSubtitle">
+      <segment>
+        <source>Boot</source>
+        <target state="translated">Boot</target>
+      </segment>
+    </unit>
     <unit id="P2SubtitleDesktopBoot">
       <segment>
         <source>Desktop boot sequence</source>
@@ -257,6 +293,78 @@
       <segment>
         <source>Examples</source>
         <target state="translated">Exemplos</target>
+      </segment>
+    </unit>
+    <unit id="SemanticContentDescription">
+      <segment>
+        <source>Content element hosting custom startup content with its padding and alignment</source>
+        <target state="translated">Content element com padding e alignment para o custom startup content</target>
+      </segment>
+    </unit>
+    <unit id="SemanticDetailDescription">
+      <segment>
+        <source>Detail text element with font size, color and wrapping</source>
+        <target state="translated">Detail text element com font size, color e wrapping</target>
+      </segment>
+    </unit>
+    <unit id="SemanticFooterDescription">
+      <segment>
+        <source>Footer element hosting version info, copyright info or retry actions for a failed startup</source>
+        <target state="translated">Footer element com version info, copyright info ou retry actions para um failed startup</target>
+      </segment>
+    </unit>
+    <unit id="SemanticLogoDescription">
+      <segment>
+        <source>Logo element carrying the brand mark with its size and alignment</source>
+        <target state="translated">Logo element com brand mark size e alignment</target>
+      </segment>
+    </unit>
+    <unit id="SemanticMessageDescription">
+      <segment>
+        <source>Status message text element, including the success and error state colors</source>
+        <target state="translated">Status message text element, incluindo as success e error state colors</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPartStyleDescription">
+      <segment>
+        <source>Use owner-scoped selectors and generated Semantic Part styles to customize the published parts of Splash.</source>
+        <target state="translated">Use owner-scoped selectors e generated Semantic Part styles para customize os published parts do Splash.</target>
+      </segment>
+    </unit>
+    <unit id="SemanticPartStyleTitle">
+      <segment>
+        <source>Custom Semantic Part styling</source>
+        <target state="translated">Estilo personalizado de Semantic Part</target>
+      </segment>
+    </unit>
+    <unit id="SemanticProgressBarDescription">
+      <segment>
+        <source>Determinate progress element with its height and color</source>
+        <target state="translated">Determinate progress element com height e color</target>
+      </segment>
+    </unit>
+    <unit id="SemanticRootDescription">
+      <segment>
+        <source>Root element with background, corner radius, padding and window sizing that control the overall startup surface</source>
+        <target state="translated">Root element com background, corner radius, padding e window sizing that control o overall startup surface</target>
+      </segment>
+    </unit>
+    <unit id="SemanticSpinDescription">
+      <segment>
+        <source>Loading indicator element for the indeterminate state with its size and color</source>
+        <target state="translated">Loading indicator element para o indeterminate state com size e color</target>
+      </segment>
+    </unit>
+    <unit id="SemanticSubtitleDescription">
+      <segment>
+        <source>Subtitle text element with its font size and color</source>
+        <target state="translated">Subtitle text element com font size e color</target>
+      </segment>
+    </unit>
+    <unit id="SemanticTitleDescription">
+      <segment>
+        <source>Title text element with its font size, weight, line height and color</source>
+        <target state="translated">Title text element com font size, weight, line height e color</target>
       </segment>
     </unit>
     <unit id="StatusDescription">

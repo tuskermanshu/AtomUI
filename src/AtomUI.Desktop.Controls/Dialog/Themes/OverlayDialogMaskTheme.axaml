@@ -7,6 +7,7 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Name="Frame"
+                        Classes.semantic-mask="True"
                         Background="{TemplateBinding Background}"
                         CornerRadius="{TemplateBinding CornerRadius}"/>
             </ControlTemplate>

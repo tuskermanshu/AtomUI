@@ -65,11 +65,35 @@ Menu 的公共契约由 public/protected 类型成员、Avalonia 属性、事件
 
 控件专属或内部伪类包括 `MenuItemPseudoClass.TopLevel`、`TopLevel=:toplevel`。这些伪类属于主题 selector 可观察契约，不能在未同步主题和 Gallery 的情况下重命名或删除。
 
+### 3.1 Semantic Part 契约摘要
+
+Menu 家族对应用公开基于 Selector 的 Semantic Part 契约，完整定义见 [Menu Semantic Part 契约](semantic-part.md)。Part 只描述
+与实现结构无关的稳定视觉职责，不替代 StyledProperty、伪类、事件或 Token；AtomUI 默认主题不消费 `.semantic-*`。
+
+上游基线为 6.6.3 稳定发布源码公开的 12 个 Semantic 键路径，与 NavMenu 逐字相同：一级 `root`、`item`、`itemIcon`、
+`itemContent`、`itemTitle`、`list`，子菜单 `subMenu.item`、`subMenu.itemIcon`、`subMenu.itemContent`、
+`subMenu.itemTitle`、`subMenu.list`，以及 `popup.root`。Part 名称逐字沿用这些键路径，不新增、不改名、不合并。
+
+关键边界：
+
+- `Menu` 是 plain Menu 语义的唯一 owner；`MenuItem`、`MenuItemGroup`、`MenuSeparator` 虽是 public 类型，但被
+  ContextMenu / MenuFlyout / DropdownButton 弹层复用，因此不持有 descriptor。
+- 层级靠**互斥 marker**区分：一级容器 `.semantic-item` / 分组 `.semantic-scope-group`，子菜单容器
+  `.semantic-sub-menu-item` / 分组 `.semantic-sub-menu-group`。层级只在 plain Menu 子树内由 `Menu` / `MenuItem` /
+  `MenuItemGroup` 下发，复用方保持既有 `.semantic-item` 行为不变。
+- 全部非 root Part 的 route 以 `>>` 开头并按生成器语法声明 `CrossNestedOwners`：容器是运行时生成物；`popup.root` 与
+  全部 `subMenu.*` 位于 `Popup.Child` 属性值子树，因此同时声明 `CrossVisualRoot`。
+- `itemTitle` / `list` 是分组标题与分组列表。`Menu` 是菜单栏（horizontal 语义），一级 `itemTitle` / `list` 恒为 0 实例
+  （与上游 horizontal 一致）；子菜单内分组提供 `subMenu.itemTitle` / `subMenu.list`。
+- 用户入口是生成的强类型 Semantic Style（如 `MenuItemStyle`、`MenuSubMenuItemStyle`、`MenuPopupRootStyle`），在 AXAML 中
+  作为 `atom|Menu` owner-scoped 普通 Style 的嵌套样式声明，并显式给出 `x:SetterTargetType`。
+
 ## 事件与命令
 
 Menu 的公共契约由 public/protected 类型成员、Avalonia 属性、事件、命令、template part、伪类、ControlTheme key 和资源 key 共同组成。维护时应先确认这些契约是否已经被源码、Gallery 示例或文档暴露。
 稳定事件包括 `IsCheckStateChanged`。事件触发顺序属于兼容契约，不能因内部状态重排而改变。
 - 类型：`ContextMenu`、`DefaultMenuInteractionHandler`、`FlyoutMenuItemClickedEventArgs`、`Menu`、`MenuFlyout`、`MenuFlyoutPresenter`、`MenuItem`、`MenuItemData`、`MenuSeparator`、`MenuSeparatorData`、`ToggleItemsLayoutVisibleConverter`。
+与实现结构无关的稳定视觉职责，不替代 StyledProperty、伪类、事件或 Token；AtomUI 默认主题不消费 `.semantic-*`。
 
 ## 使用示例
 
@@ -79,7 +103,7 @@ Menu 的公共契约由 public/protected 类型成员、Avalonia 属性、事件
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/Menu/Views/MenuShowCase.axaml:37`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/Menu/Views/MenuShowCase.axaml:237`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -101,7 +125,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### 可滚动菜单
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/Menu/Views/MenuShowCase.axaml:122`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/Menu/Views/MenuShowCase.axaml:322`
 
 Gallery key：`ExamplesContent` / item `3`
 
@@ -133,7 +157,7 @@ Gallery key：`ExamplesContent` / item `3`
 
 ### 通过 ItemsSource 生成 MenuItem
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/Menu/Views/MenuShowCase.axaml:155`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/Menu/Views/MenuShowCase.axaml:355`
 
 Gallery key：`ExamplesContent` / item `4`
 
@@ -151,7 +175,7 @@ Gallery key：`ExamplesContent` / item `4`
 
 ### 通过 ItemsSource 生成内联 NavMenu
 
-来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/Menu/Views/MenuShowCase.axaml:174`
+来源：`controlgallery/AtomUIGallery/ShowCases/Navigation/Menu/Views/MenuShowCase.axaml:374`
 
 Gallery key：`ExamplesContent` / item `5`
 
@@ -261,7 +285,10 @@ Menu Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆
 - `src/AtomUI.Desktop.Controls/Menu/Converters/ToggleItemsLayoutVisibleConverter.cs`
 - `src/AtomUI.Desktop.Controls/Menu/DefaultMenuInteractionHandler.cs`
 - `src/AtomUI.Desktop.Controls/Menu/Menu.cs`
+- `src/AtomUI.Desktop.Controls/Menu/Menu.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItem.cs`
+- `src/AtomUI.Desktop.Controls/Menu/MenuItemGroup.cs`
+- `src/AtomUI.Desktop.Controls/Menu/MenuSemanticLevel.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemData.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemPseudoClass.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuPopupScrollHost.cs`
@@ -271,6 +298,7 @@ Menu Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆
 - `src/AtomUI.Desktop.Controls/Menu/Themes/ContextMenuTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/MenuItemTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/MenuItemTheme.cs`
+- `src/AtomUI.Desktop.Controls/Menu/Themes/MenuItemGroupTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/MenuSeparatorTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/MenuTheme.axaml`
 - `src/AtomUI.Desktop.Controls/Menu/Themes/TopLevelMenuItemTheme.axaml`
@@ -286,6 +314,7 @@ Menu Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆
 
 - 源设计文档：`docs/controls/desktop/navigation/menu/overview.md`
 - 实现文档：`docs/controls/desktop/navigation/menu/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/navigation/menu/semantic-part.md`
 - Token 文档：`docs/controls/desktop/navigation/menu/token.md`
 - 变更记录：`docs/controls/desktop/navigation/menu/changelog.md`
 - 语义结构：`./semantic-cn.md`

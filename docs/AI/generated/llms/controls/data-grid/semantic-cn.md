@@ -4,13 +4,20 @@
 
 ## Semantic Parts
 
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
+| Part | AtomUI 节点 | 职责 | 专用 Style | Marker 方式 | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `DataGrid` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `条目或容器区域` | 承载集合项、单元格、标签、时间节点、卡片或展示单元。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `header` | `标题或头部区域` | 承载标题、字段名、列头、操作入口或摘要信息。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载主体内容、媒体、文本、空状态、加载状态或详情区域。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效或浮层区域` | 表达展开收起、轮播、tooltip、tour、预览或虚拟化反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | `DataGrid` 控件自身（生成器隐式合成） | 表格外层容器：背景、边框、圆角、内容裁剪等容器基础样式；直接对控件设置属性或 ControlTheme 定制。 | 无（root 定制即控件自身定制） | 无（隐式 root） | stable |
+| `section` | `FrameContentClip`（Border） | 内层包装容器：圆角裁剪、Spin 加载包裹等包装容器样式。 | `DataGridSectionStyle` | 静态模板 marker | stable |
+| `title` | `TitleFrame`（PixelAlignedBorder，含标题分隔线） | 表格标题容器：标题区域的布局、分隔线与背景样式。 | `DataGridTitleStyle` | 静态模板 marker | stable |
+| `content` | 主 `Grid`（表头区 + 行区 + 滚动条 + 四角块） | 表格内容区：内容区域的布局与滚动容器样式，不含 title/footer/pagination。 | `DataGridContentStyle` | 静态模板 marker | stable |
+| `header.wrapper` | `ColumnHeadersPresenterFrame`（Border，含普通与分组两个 presenter） | 表头容器：表头的布局与容器样式。 | `DataGridHeaderWrapperStyle` | 静态模板 marker | stable |
+| `header.cell` | `DataGridColumnHeader` 根（运行时创建，含冻结列） | 表头单元格：相对定位、内边距、文字换行、背景、文字颜色、字重等表头单元格样式。 | `DataGridHeaderCellStyle` | 代码注入（运行时创建） | stable |
+| `body.wrapper` | `RowsPresenter`（模板静态件） | 表体容器：表格主体的布局与容器样式。 | `DataGridBodyWrapperStyle` | 静态模板 marker | stable |
+| `body.row` | `DataGridRow` / `DataGridRowGroupHeader` 根（运行时创建，虚拟化回收） | 数据行：悬浮效果、选中状态、展开状态等交互行样式；分组头行同样属于表体行。 | `DataGridBodyRowStyle` | 代码注入（运行时创建） | stable |
+| `body.cell` | `DataGridCell` 根（运行时创建，slot 回收） | 数据单元格：相对定位、内边距、文字换行等数据单元格基础样式。 | `DataGridBodyCellStyle` | 代码注入（运行时创建） | stable |
+| `footer` | `Footer`（ContentPresenter） | 表格底部：背景色、文字颜色等 footer 样式。 | `DataGridFooterStyle` | 静态模板 marker | stable |
+| `pagination.root` | 模板内两处 `Pagination` 实例（顶部/底部槽位） | 分页宿主：表格分页区域的布局与间距样式。 | `DataGridPaginationRootStyle` | 静态模板 marker | stable |
+| `pagination.item` | 分页器生成的页码项（`ContentControl`） | 分页项：页码项尺寸、激活态与间距样式。 | `DataGridPaginationItemStyle` | 运行时 marker | stable |
 
 ## Abstract AXAML Structure
 

@@ -35,6 +35,19 @@
 - 加延时、重试或强制刷新来掩盖状态同步问题。
 - 用 `UnconditionalSuppressMessage` 或条件编译隐藏 AOT/trim warning，但没有改变运行时动态行为。
 
+### UI 输入与滚动 Bug
+
+调查 hover、pointer、hit testing、滚轮、滚动、裁剪或覆盖层问题时，必须遵循以下纪律：
+
+- 把用户指出的鼠标位置、截图和视频作为一手证据。只有局部区域响应时，优先调查几何范围、裁剪、覆盖层和命中边界，不要先假设是事件处理逻辑错误。
+- 修改前先锁定完整 UX 契约，包括控件尺寸、可见滚动条、嵌套滚动、滚动链、布局和交互。未经用户明确允许，不得通过降低或删除这些行为来规避问题。
+- 必须保留原始触发条件复现。不得删除高度限制、溢出、嵌套滚动、标题、内容或其他触发因素，只为了让症状消失。
+- 修改事件代码前，检查完整输入几何链：visual/logical ancestors、Bounds、transform、viewport、extent、offset、clip chain、ZIndex、overlay、`IsHitTestVisible`，以及指针位置实际命中的 Visual。
+- 使用单变量 A/B 证明因果关系。裁剪、布局、标题、高度约束和事件路由一次只改变一个因素。
+- 回归测试必须保留原始复现条件，并且能在修复前失败。UI 测试同时断言视觉与交互契约，例如滚动条可见性、viewport 范围、行左/中/右位置的 hover、内层滚动，以及到达边界后的外层滚动链。
+- 测试通过不等于产品体验正确。必须对照用户要求检查最终渲染结果；原有正确设计没有保留时，不得声称问题已经修复。
+- 优先提交最小根因修复。通过删除触发条件或牺牲预期体验让 bug 消失的方案只能标记为 workaround，未经用户明确同意不得作为正式修复。
+
 ## 临时复现 Demo
 
 用户要求“跑起来看看”、复现 Issue、做最小可视化 Demo 或修复后复核 Demo 时，默认把 Demo 当作临时取证工具，
@@ -158,9 +171,46 @@ Gallery 改动时注意：
 - 抽象只在能消除实际重复、降低共享复杂度或匹配既有模式时引入。
 - 生成文件不要手改；改 generator 或输入源，并验证输出。
 
+### 命名约定
+
+C# 命名约定的唯一事实来源是仓库根目录的 [.editorconfig](../../../.editorconfig)（`dotnet_naming_rule` 机器规则，IDE 与
+`dotnet format style` 均可执行）。核心约定：
+
+- 局部变量、模式匹配命名变量（`is Type name`）、`out var` 命名使用 camelCase。
+- 方法参数使用 camelCase。
+- 私有实例字段使用 `_camelCase`；私有静态可变字段使用 `s_camelCase`；私有 `static readonly` 与 `const` 字段使用 PascalCase。
+- 公共/受保护/内部成员与类型使用 PascalCase；接口以 `I` 为前缀。
+
+提交前可用 `dotnet format style --verify-no-changes` 检查命名违规（默认报告 warning 级以上，`--severity info`
+可查看全部）。存量违规随触及文件逐步清理，不做一次性全仓重命名。
+
 ## 控件研发标准
 
 控件 C# 实现、AXAML 主题、API 和主题契约变更必须遵循 [AtomUI 控件研发标准规范](../development/control-development-guidelines.md)。优化代码和修复 bug 时，如果涉及控件既有 API、主题契约或可观察行为变化，必须先获得用户明确授权。
+
+## 语义部件复用
+
+为控件新增或改造 Semantic Part 前，必须先读 [Semantic Part 系统设计](../../architecture/systems/theming/semantic-parts.md)
+的相关章节，并复用既有底层机制，禁止重新发明等价轮子：
+
+- Gallery 示例、文档示例与测试的样式定制必须用生成的专用 Semantic Part Style 类在 AXAML 声明式应用（见该文档
+  5.4）；禁止在 code-behind 获取目标节点后直接设置属性。生成 Style 未命中目标节点属于 route/拓扑契约缺陷，先修
+  `SelectorRoute` 并补命中回归，不写“无法命中”限制、不做代码回退。
+- 目标在内嵌控件自己的模板内（宿主把功能区整体委托给内嵌控件）→ `CrossNestedOwners=true` + `>>` 或二次
+  `/template/` 路由（见该文档 3.3.1），生成器自动切换为跨主题资产校验。
+- 目标在模板 Popup 独立可视根内 → `CrossVisualRoot=true` + `popup.root` / `popup.list` / `popup.listItem` 三级键
+  （见该文档 9.1）。
+- 目标在独立宿主弹层内（Flyout / FlyoutHost 代码创建的 presenter，经 Popup `PlacementTarget` 挂在 owner 逻辑树）→
+  `CrossVisualRoot=true` + `RuntimeCreated=true` + 以 `>>` 开头的 `SelectorRoute`（见该文档 9.2；先例 InfoFlyout 的
+  `popup.root` 等四个部件）。
+- 运行时创建的列表容器 → 容器创建时注入 semantic class（见该文档 8.3；先例 `ListBox`、`CandidateList`），
+  marker 不得放在 item 的 ControlTheme 模板内部。
+- Gallery 语义预览钉住弹层 → `IsDropDownOpen` + `IsPopupPinnedOpen`；light-dismiss 遮罩抑制由产品控件在弹层打开前
+  完成（见 [Semantic Part Gallery Preview](../../gallery/authoring/semantic-part-preview.md) 第 10 节），预览基础设施
+  不干预 Popup 行为。
+- Popup 首次物化 → 分别验证请求、业务 open、物理 `Popup.IsOpen` 和视觉 actor 状态，并覆盖 `Opened` 与 actor-ready
+  的两种顺序；不得用永久关闭 motion 掩盖时序问题。案例与全局审计见
+  [Semantic Part Popup 首次打开生命周期竞态案例](../case-studies/semantic-part-popup-first-open-lifecycle-case-study.md)。
 
 ## Changelog 与发布
 

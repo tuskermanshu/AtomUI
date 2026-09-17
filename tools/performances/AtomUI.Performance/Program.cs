@@ -446,9 +446,15 @@ internal static partial class Program
 
     private static void SetupAvalonia()
     {
+        // OnLastWindowClose (the default) lets the first verification-window dispose begin
+        // application shutdown; from Avalonia 12.1.2 the dispatcher then silently drops all
+        // later posts, which kills multi-window verifications like the DataGrid range suite.
         AppBuilder.Configure<PerfApplication>()
                   .UseHeadless(new AvaloniaHeadlessPlatformOptions())
-                  .SetupWithLifetime(new ClassicDesktopStyleApplicationLifetime());
+                  .SetupWithLifetime(new ClassicDesktopStyleApplicationLifetime
+                  {
+                      ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown
+                  });
     }
 
     private static IReadOnlyList<PerfScenario> CreateScenarios(string suite)

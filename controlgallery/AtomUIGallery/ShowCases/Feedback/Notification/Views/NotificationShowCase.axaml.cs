@@ -1,12 +1,16 @@
+using AtomUI;
 using AtomUI.Controls;
 using AtomUI.Controls.Commons;
 using AtomUI.Desktop.Controls;
 using AtomUI.Icons.AntDesign;
+using AtomUI.Toolkits.GalleryBase.Controls;
 using AtomUIGallery.Localization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AtomUINumericUpDown = AtomUI.Desktop.Controls.NumericUpDown;
+using Avalonia.Styling;
+using Avalonia.VisualTree;
 
 namespace AtomUIGallery.ShowCases.Notification;
 
@@ -26,6 +30,7 @@ public partial class NotificationShowCase : GalleryReactiveUserControl<Notificat
     private bool _isStackEnabled = true;
     private int _stackThreshold = 3;
     private int _stackNotificationIndex;
+    private WindowNotificationManager? _semanticStylesOwner;
 
     public NotificationShowCase()
     {
@@ -296,6 +301,119 @@ public partial class NotificationShowCase : GalleryReactiveUserControl<Notificat
             StackThreshold = _stackThreshold
         };
         return _stackManager;
+    }
+
+    // 操作组示例：卡片内右下角放两个按钮，分别关闭本条与全部通知。
+    private void ShowActionsNotification(object? sender, RoutedEventArgs e)
+    {
+        var manager = GetBasicManager();
+        if (manager is null)
+        {
+            return;
+        }
+
+        var actions = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Spacing     = 8
+        };
+        actions.Children.Add(CreateActionButton(
+            Lang(NotificationShowCaseLangResourceKind.P2ContentDestroyAll, "Destroy All"),
+            button => CloseHostNotifications(button)));
+        actions.Children.Add(CreateActionButton(
+            Lang(NotificationShowCaseLangResourceKind.P2ContentConfirm, "Confirm"),
+            button => button.GetVisualAncestors().OfType<NotificationCard>().FirstOrDefault()?.Close()));
+
+        manager.Show(new AtomUINotification(
+            title: Lang(NotificationShowCaseLangResourceKind.P2NotificationTitle, "Notification Title"),
+            content: Lang(NotificationShowCaseLangResourceKind.P2NotificationActionsContent,
+                "A function will be called after the notification is closed (automatically after the \"duration\" time or manually)."),
+            expiration: TimeSpan.Zero,
+            actions: actions));
+    }
+
+    private static AtomUIButton CreateActionButton(string content, Action<AtomUIButton> onClick)
+    {
+        var button = new AtomUIButton
+        {
+            Content  = content,
+            ButtonType = ButtonType.Link,
+            SizeType   = CustomizableSizeType.Small
+        };
+        button.Click += (sender, _) =>
+        {
+            if (sender is AtomUIButton source)
+            {
+                onClick(source);
+            }
+        };
+        return button;
+    }
+
+    private static void CloseHostNotifications(AtomUIButton button)
+    {
+        var host = button.GetVisualAncestors().OfType<WindowNotificationManager>().FirstOrDefault();
+        if (host is null)
+        {
+            return;
+        }
+
+        foreach (var card in host.GetVisualDescendants().OfType<NotificationCard>().ToArray())
+        {
+            card.Close();
+        }
+    }
+
+    // 样式定制示例：默认分支为浅绿卡片，error 分支整卡转红。
+    // 反馈层弹在页面视觉树之外，页面内声明的 Style 命中不到卡片，因此样式资源挂到 manager 自身
+    //（卡片是 manager 的视觉后代，按 owner 作用域命中），class 随通知内容传入。
+    private void HandleShowDefaultStyleNotification(object? sender, RoutedEventArgs e)
+    {
+        // 默认分支按 Information 类型展示。
+        ShowStyledNotification(NotificationType.Information, "semantic-default-style-demo");
+    }
+
+    private void HandleShowErrorStyleNotification(object? sender, RoutedEventArgs e)
+    {
+        ShowStyledNotification(NotificationType.Error, "semantic-error-style-demo");
+    }
+
+    private void ShowStyledNotification(NotificationType type, string styleClass)
+    {
+        var manager = GetBasicManager();
+        if (manager is null)
+        {
+            return;
+        }
+
+        ApplySemanticStyleStyles(manager);
+        manager.Show(
+            new AtomUINotification(
+                type: type,
+                title: Lang(NotificationShowCaseLangResourceKind.P2NotificationTitle, "Notification Title"),
+                content: Lang(NotificationShowCaseLangResourceKind.P2NotificationDescription,
+                    "This is a notification description."),
+                expiration: TimeSpan.FromSeconds(3)),
+            [styleClass]);
+    }
+
+    // 语义样式以页面 AXAML 的 Styles 资源声明（仍是生成的专用 Style 类），这里挂到 manager 自身。
+    // 样式声明在本页 UserControl.Resources 中，必须从本页的资源宿主查找；从 Application.Current 查找
+    // 会命中不到页面级资源，样式将静默失效。挂载是唯一的代码步骤，不做任何部件属性改写。
+    private void ApplySemanticStyleStyles(WindowNotificationManager manager)
+    {
+        // 以 manager 实例去重：同一 manager 只挂一次，页面 detach 后重建的新 manager 会重新挂载。
+        if (ReferenceEquals(_semanticStylesOwner, manager))
+        {
+            return;
+        }
+
+        if (Resources.TryGetResource("NotificationSemanticStyleStyles", null, out var styles) &&
+            styles is Styles semanticStyles)
+        {
+            manager.Styles.Add(semanticStyles);
+            _semanticStylesOwner = manager;
+        }
     }
 
     private static string Lang(NotificationShowCaseLangResourceKind resourceKind, string fallback)

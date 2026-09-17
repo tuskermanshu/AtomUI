@@ -41,8 +41,8 @@ SearchEdit 专项 API：
 
 | API | 类型 | 语义 |
 | --- | --- | --- |
-| `SearchButtonStyle` | `SearchEditButtonStyle` | 搜索按钮样式，支持 `Default` 和 `Primary`。 |
-| `SearchButtonText` | `string` | 搜索按钮显示文本；未设置时按钮以搜索图标为主要视觉。 |
+| `SearchButtonStyle` | `SearchButtonType` | 搜索按钮样式，支持 `Default` 和 `Primary`。 |
+| `SearchButtonText` | `object?` | 搜索按钮显示文本；未设置时按钮以搜索图标为主要视觉。 |
 | `IsOperating` | `bool` | 搜索进行中状态；为 `true` 时显示按钮 loading 并阻止重复触发搜索请求。 |
 | `IsSearchOnEnterEnabled` | `bool` | 是否允许未处理的 Enter `KeyUp` 触发搜索请求，默认值为 `true`。 |
 | `SearchButtonTheme` | `ControlTheme?` | 搜索按钮 Semantic Part Theme；`TargetType` 必须兼容 public `Button`。 |
@@ -57,7 +57,7 @@ SearchEdit 专项 API：
 | `StyleVariant` | 输入表面样式。 |
 | `Status` | 显式输入反馈状态；最终视觉由 `InputControlFrame.EffectiveStatus` 计算，native validation error 以 `DataValidationErrors` 为唯一真源。 |
 | `IsAllowClear` / `ClearIcon` | 搜索文本清除入口。 |
-| `InnerLeftContent` / `InnerRightContent` | 输入框内部前后缀内容。 |
+| `InnerLeftContentTemplate` / `InnerRightContentTemplate` | 输入框内部前后缀内容模板。 |
 | `LeftAddOn` / `LeftAddOnTemplate` | 输入框左侧外部附加内容。 |
 | `IsMotionEnabled` | 内部按钮和输入壳体动效开关。 |
 

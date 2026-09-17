@@ -4,6 +4,8 @@
 
 该控件的 Popup 钉住打开属于共享弹层契约，详见 [Popup 钉住打开设计](../../other/popup/popup-pinned-open-design.md)。本控件的语义 owner 为 `PopupConfirm`（继承 `FlyoutHost` 的 internal 入口），其 internal `IsPopupPinnedOpen` 只供测试和内部诊断使用；设置为 true 时保持 Flyout open state，并 relay 到 `PopupConfirmFlyout` 及其 Popup，设置为 false 时只解除关闭拦截。控件卸载、锚点失效、TopLevel 改变和模板重建仍按共享生命周期规则清理。
 
+PopupConfirm 公开 9 个 Semantic Part（`root`、`popup.root`、`popup.container`、`popup.content`、`popup.arrow`、`popup.icon`、`popup.title`、`popup.description`、`popup.actions`），与上游 Popconfirm 的 Semantic Part 语义对齐（上游 `content` 描述槽位映射为 `popup.description`，上游未发布的按钮区以 `popup.actions` 发布）；完整 Part 表、存在条件、Selector 用法与定制边界见 [PopupConfirm Semantic Part 契约](semantic-part.md)。
+
 ## 1. 控件定位
 
 | 项 | 值 |
@@ -132,6 +134,7 @@ PopupConfirm 与同分类控件共享尺寸、状态、Token、Gallery 展示和
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
 - 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
+- 不破坏已发布的 Semantic Part 名称、selector class / route、ContractType 与数量语义（见 [Semantic Part 契约](semantic-part.md)）。
 - 文档只描述当前稳定设计；历史变化记录在 `changelog.md`。
 
 ## 8. 专项模型
@@ -143,6 +146,7 @@ PopupConfirm 与同分类控件共享尺寸、状态、Token、Gallery 展示和
 关联文档：
 
 - [PopupConfirm 桌面版实现原理](implementation.md)
+- [PopupConfirm Semantic Part 契约](semantic-part.md)
 - [PopupConfirm Token 设计](token.md)
 - [PopupConfirm Changelog](changelog.md)
 
@@ -150,11 +154,15 @@ LLMS 语义区域：
 
 | Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
 | --- | --- | --- | --- | --- | --- |
-| `root` | `PopupConfirm` | 反馈控件根语义区域，承载 public API、反馈状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `host` | `宿主或弹层区域` | 承载 overlay、popup、portal、message host、drawer 或 modal 容器。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `surface` | `反馈表面` | 承载背景、边框、阴影、尺寸、placement 和视觉状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `content` | `内容区域` | 承载标题、正文、图标、进度、结果、操作或关闭入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `motion` | `动效区域` | 表达进入退出、loading、progress、skeleton 或水印刷新反馈。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
+| `root` | `PopupConfirm` | 触发宿主与确认状态的组织边界。 | 全部 public API | PopupConfirmToken、FlyoutHostToken、SharedToken | stable |
+| `popup.root` | `FlyoutPresenter` | 弹层根视觉面，承载背景、边框、内边距与箭头。 | `Flyout`、`ShouldUseOverlayPopup`、`IsArrowVisible` | FlyoutHostToken、SharedToken | stable |
+| `popup.container` | `Border#PART_ContentDecorator` | 弹层内层容器，承载背景、边框、圆角与内边距。 | `Content`、`ContentTemplate` | SharedToken | stable |
+| `popup.content` | `ContentPresenter#ContentPresenter` | 弹层框体内容呈现面，承载确认体容器。 | `Content`、`ContentTemplate` | SharedToken | stable |
+| `popup.arrow` | `ArrowIndicator#PART_ArrowIndicator` | 指向锚点的浮动箭头。 | `IsArrowVisible`、`Placement` | ArrowDecoratedBoxToken、SharedToken | stable |
+| `popup.icon` | `IconPresenter#PART_IconPresenter` | 确认状态图标，按 `ConfirmStatus` 切换颜色。 | `Icon`、`ConfirmStatus` | PopupConfirmToken、SharedToken | stable |
+| `popup.title` | `TextBlock#PART_Title` | 确认框标题。 | `Title` | PopupConfirmToken、SharedToken | stable |
+| `popup.description` | `ContentPresenter#PART_Content` | 确认描述正文。 | `ConfirmContent`、`ConfirmContentTemplate` | PopupConfirmToken、SharedToken | stable |
+| `popup.actions` | `StackPanel#PART_ButtonLayout` | 确认/取消操作区。 | `OkText`、`CancelText`、`OkButtonType`、`IsShowCancelButton` | PopupConfirmToken、SharedToken | stable |
 
 LLMS 导出来源：
 

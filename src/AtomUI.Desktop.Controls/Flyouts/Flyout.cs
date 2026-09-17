@@ -3,6 +3,7 @@ using System.Reactive.Disposables;
 using AtomUI.Controls;
 using AtomUI.Data;
 using AtomUI.Desktop.Controls.DesignTokens;
+using AtomUI.Generated.AtomUIDesktopControls;
 using AtomUI.MotionScene;
 using AtomUI.Theme.Resources;
 using Avalonia;
@@ -307,9 +308,9 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
         popup[!PopupControl.IsPointAtCenterProperty]        = this[!IsPointAtCenterProperty];
         popup[!PopupControl.IsPopupPinnedOpenProperty]      = this[!IsPopupPinnedOpenProperty];
         popup[!PopupControl.ShouldUseOverlayLayerProperty]  = this[!ShouldUseOverlayPopupProperty];
-        popup[!AvaloniaPopup.IsLightDismissEnabledProperty] = this[!IsLightDismissEnabledProperty];
         this[!IsPopupHorizontalFlippedProperty]             = popup[!PopupControl.IsHorizontalFlippedProperty];
         this[!IsPopupVerticalFlippedProperty]               = popup[!PopupControl.IsVerticalFlippedProperty];
+        ApplyPopupPinnedOpenSettings(popup);
 
         popup.Opened += HandlePopupOpened;
         popup.Opened += this.OnPopupOpened;
@@ -414,6 +415,7 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
         if (Popup is PopupControl popup)
         {
             popup.SetCurrentValue(PopupControl.IsPopupPinnedOpenProperty, IsPopupPinnedOpen);
+            ApplyPopupPinnedOpenSettings(popup);
         }
         return base.ShowAtCore(placementTarget, showAtPointer);
     }
@@ -427,6 +429,7 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
     protected override Control CreatePresenter()
     {
         var presenter = new FlyoutPresenter();
+        presenter.Classes.Add(FlyoutHostSemanticParts.PopupRootClass);
         presenter[!FlyoutPresenter.ContentProperty]         = this[!ContentProperty];
         presenter[!FlyoutPresenter.IsMotionEnabledProperty] = this[!IsMotionEnabledProperty];
         presenter[!FlyoutPresenter.IsArrowVisibleProperty]     = this[!IsArrowVisibleEffectiveProperty];
@@ -443,6 +446,13 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
             !change.GetNewValue<bool>())
         {
             CancelPendingPinnedOpen();
+        }
+
+        if ((change.Property == IsPopupPinnedOpenProperty ||
+             change.Property == IsLightDismissEnabledProperty) &&
+            Popup is PopupControl popup)
+        {
+            ApplyPopupPinnedOpenSettings(popup);
         }
 
         if (change.Property == IsArrowVisibleProperty ||
@@ -467,6 +477,13 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
             SetCurrentValue(PlacementProperty, PlacementMode.Custom);
             ConfigurePointerPlacementOffsets();
         }
+    }
+
+    private void ApplyPopupPinnedOpenSettings(PopupControl popup)
+    {
+        popup.SetCurrentValue(
+            AvaloniaPopup.IsLightDismissEnabledProperty,
+            IsLightDismissEnabled && !IsPopupPinnedOpen);
     }
 
     protected void ConfigureShowArrowEffective()

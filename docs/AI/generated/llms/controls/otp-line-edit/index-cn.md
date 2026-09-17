@@ -65,7 +65,6 @@ OtpLineEdit 的公共 API 以文本值、长度、输入约束、显示辅助和
 | `StyleVariant` | 输入表面样式，复用 `InputControlStyleVariant`。 |
 | `Status` | 显式输入反馈状态；最终视觉由 `InputControlFrame.EffectiveStatus` 计算，native validation error 以 `DataValidationErrors` 为唯一真源。 |
 | `Separator` | 分隔符内容，仅参与视觉展示，不进入 `Text`。 |
-| `SeparatorInterval` | 分隔符间隔，例如 `3` 表示 `123-456`。 |
 | `SeparatorTemplate` | 分隔符内容模板。 |
 
 事件与方法：
@@ -110,7 +109,7 @@ OtpLineEdit 的公共 API 以文本值、长度、输入约束、显示辅助和
 
 ### OTP 双向绑定
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml:182`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml:354`
 
 SourceKey：`line-edit-otp-two-way`
 
@@ -132,7 +131,7 @@ SourceKey：`line-edit-otp-two-way`
 
 ### OTP 表单验证
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml:207`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml:379`
 
 SourceKey：`line-edit-otp-form`
 
@@ -160,7 +159,7 @@ SourceKey：`line-edit-otp-form`
 
 ### 一次性密码框
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml:239`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml:411`
 
 SourceKey：`line-edit-otp-ant-design`
 
@@ -208,16 +207,14 @@ SourceKey：`line-edit-otp-ant-design`
         <atom:TextBlock Text="With custom separator"
                         FontSize="16"
                         FontWeight="SemiBold" />
-        <atom:OtpLineEdit Separator="/"
-                          SeparatorInterval="1" />
+        <atom:OtpLineEdit Separator="/" />
     </StackPanel>
 
     <StackPanel Orientation="Vertical" Spacing="14">
         <atom:TextBlock Text="With custom function separator"
                         FontSize="16"
                         FontWeight="SemiBold" />
-        <atom:OtpLineEdit Separator="—"
-                          SeparatorInterval="1">
+        <atom:OtpLineEdit Separator="—">
             <atom:OtpLineEdit.SeparatorTemplate>
                 <DataTemplate x:DataType="atom:OtpLineEditSeparatorContext">
                     <TextBlock Text="{Binding Content}"
@@ -226,6 +223,93 @@ SourceKey：`line-edit-otp-ant-design`
             </atom:OtpLineEdit.SeparatorTemplate>
         </atom:OtpLineEdit>
     </StackPanel>
+</StackPanel>
+```
+
+### 自定义语义结构的样式
+
+来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml:853`
+
+SourceKey：`line-edit-semantic-part`
+
+```axaml
+<StackPanel Orientation="Vertical" HorizontalAlignment="Left" Spacing="24">
+    <StackPanel.Styles>
+        <Style Selector="atom|LineEdit.style-class-base">
+            <Setter Property="Width" Value="320" />
+        </Style>
+        <Style Selector="atom|LineEdit.style-class-object">
+            <Setter Property="Width" Value="320" />
+            <Setter Property="BorderBrush" Value="#D9D9D9" />
+        </Style>
+        <Style Selector="atom|LineEdit.style-class-object:focus-within">
+            <Setter Property="BorderBrush" Value="#A9A9A9" />
+        </Style>
+        <Style Selector="atom|LineEdit.style-class-fn">
+            <Setter Property="BorderBrush" Value="#696FC7" />
+        </Style>
+        <Style Selector="atom|TextArea.style-class-textarea">
+            <Setter Property="Width" Value="320" />
+            <Setter Property="BorderBrush" Value="#BDE3C3" />
+            <atom:TextAreaCountStyle x:SetterTargetType="TextBlock">
+                <Setter Property="Foreground" Value="#BDE3C3" />
+            </atom:TextAreaCountStyle>
+        </Style>
+        <Style Selector="atom|LineEdit.style-class-password">
+            <Setter Property="BorderBrush" Value="#F5D3C4" />
+        </Style>
+        <Style Selector="atom|OtpLineEdit.style-class-otp">
+            <Setter Property="CellWidth" Value="32" />
+            <Setter Property="CellBorderBrush" Value="#6E8CFB" />
+        </Style>
+        <Style Selector="atom|SearchEdit.style-class-search">
+            <Setter Property="Width" Value="320" />
+            <Setter Property="Foreground" Value="#4DA8DA" />
+            <Setter Property="BorderBrush" Value="#4DA8DA" />
+            <Setter Property="CaretBrush" Value="#4DA8DA" />
+            <atom:SearchEditInputStyle x:SetterTargetType="TextPresenter">
+                <Setter Property="TextElement.Foreground" Value="#4DA8DA" />
+            </atom:SearchEditInputStyle>
+            <atom:SearchEditButtonStyle x:SetterTargetType="atom:Button">
+                <Setter Property="Foreground" Value="#4DA8DA" />
+                <Setter Property="BorderBrush" Value="#4DA8DA" />
+            </atom:SearchEditButtonStyle>
+        </Style>
+    </StackPanel.Styles>
+
+    <atom:LineEdit
+        Classes="style-class-base style-class-object"
+        PlaceholderText="Object" />
+
+    <atom:LineEdit
+        Classes="style-class-base style-class-fn"
+        PlaceholderText="Function"
+        SizeType="Middle" />
+
+    <atom:TextArea
+        Classes="style-class-textarea"
+        Text="TextArea"
+        IsShowCount="True"
+        MaxLength="100"
+        IsResizable="False" />
+
+    <atom:LineEdit
+        Classes="style-class-base style-class-password"
+        Text="Password"
+        RevealPassword="False"
+        PasswordChar="•"
+        IsEnableRevealButton="True"
+        SizeType="Middle" />
+
+    <atom:OtpLineEdit
+        Classes="style-class-otp"
+        Length="6"
+        Separator="*" />
+
+    <atom:SearchEdit
+        Classes="style-class-search"
+        PlaceholderText="Search"
+        SizeType="Large" />
 </StackPanel>
 ```
 
@@ -337,6 +421,7 @@ AOT 边界：
 主要源码：
 
 - `src/AtomUI.Desktop.Controls/OtpLineEdit/OtpLineEdit.cs`：公共 API、Avalonia 属性注册、事件、Form 接口、状态入口和模板生命周期。
+- `src/AtomUI.Desktop.Controls/OtpLineEdit/OtpLineEdit.SemanticParts.cs`：Semantic Part descriptor 声明（`root`、`cellList`、`cell`、`separator`），cell 与 separator 为 `Multiple` + RuntimeCreated。
 - `src/AtomUI.Desktop.Controls/OtpLineEdit/OtpLineEditCell.cs`：内部 cell 控件，承载单字符显示、placeholder、active、mask 和事件回调。
 - `src/AtomUI.Desktop.Controls/OtpLineEdit/OtpLineEditSeparatorContext.cs`：separator 模板上下文，提供前后 cell index 和 display index。
 - `src/AtomUI.Desktop.Controls/OtpLineEdit/OtpLineEditToken.cs`：cell 宽度和 cell 间距 Token。

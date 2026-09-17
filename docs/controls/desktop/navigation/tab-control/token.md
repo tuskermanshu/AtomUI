@@ -16,7 +16,7 @@ Token 按控件语义分类维护：
 
 | 分类 | 语义 | 代表 Token |
 | --- | --- | --- |
-| 尺寸与密度 | 控件高度、宽度、图标尺寸、内容最小尺寸。 | `CardSize`、`TitleFontSize`、`TitleFontSizeLG`、`TitleFontSizeSM` |
+| 尺寸与密度 | 控件高度、宽度、图标尺寸、内容最小尺寸。 | `CardSize`、`TitleFontSize`、`TitleFontSizeLG`、`TitleFontSizeSM`、`InkBarThickness` |
 | 间距与布局 | padding、margin、gap、offset、popup content padding。 | `CardPadding`、`CardPaddingSM`、`CardPaddingLG`、`HorizontalMargin`、`HorizontalItemMargin`、`HorizontalItemPadding` |
 | 颜色与状态视觉 | 文本、背景、边框、hover、selected、active、disabled 视觉。 | `CardBg`、`InkBarColor`、`ItemColor`、`ItemHoverColor`、`ItemSelectedColor` |
 | 结构与装饰 | 圆角、阴影、指示器、弹层和装饰线相关变量。 | `MenuIndicatorPaddingHorizontal`、`MenuIndicatorPaddingVertical`、`MenuEdgeThickness`、`BoxShadowTabsOverflowLeft`、`BoxShadowTabsOverflowRight`、`BoxShadowTabsOverflowTop`、`BoxShadowTabsOverflowBottom` |
@@ -37,6 +37,7 @@ TabControl 的控件专项模型通过 Theme 消费 Token：
 - `MenuEdgeThickness` 表达 start/end overflow shadow 载体在主轴上的厚度，默认派生自 `EffectiveGlobalToken.ControlHeight`。载体位于 viewport 外侧，此值不占用页签宽度，也不决定阴影向内容区渐淡的深度。
 - 四个 `BoxShadowTabsOverflow*` Token 使用普通外阴影并对齐 Ant Design Tabs 的方向参数：left 为 `(offsetX: 10, blur: 8, spread: -8)`，right 为 `(-10, 0, 8, -8)`，top 为 `(0, 10, 8, -8)`，bottom 为 `(0, -10, 8, -8)`，颜色统一为 8% 黑色。`Top` / `Bottom` placement 消费 left/right，`Left` / `Right` placement 消费 top/bottom；Theme 将透明载体放在 viewport 外侧，内侧面贴合溢出边界，并裁剪交叉轴及更多按钮方向的输出；这些参数保持逻辑 DIP；专用 edge renderer 仅在 Skia 绘制时补偿 offset 的变换顺序。必须连同载体几何、1×/2× 实际暗化强度验证，不能只断言属性值。
 - edge indicator 的当前可见性、滚动 offset 和 placement 是控件实例状态，不得写入 Token；Token 只保存方向性装饰值。
+- `InkBarThickness` 表达选中指示墨条的厚度，默认从 SharedToken 的 `LineWidthBold` 派生；按实例定制时通过控件 `Resources` 覆盖 `TabControlTokenKind.InkBarThickness`，与 `InkBarColor` 的定制方式一致。
 
 ## 4. 控件家族影响
 

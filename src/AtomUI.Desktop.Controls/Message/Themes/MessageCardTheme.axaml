@@ -8,14 +8,23 @@
             <ControlTemplate>
                 <atom:MotionActor Name="{x:Static atom:BaseMotionActor.MotionActorPart}"
                                          ClipToBounds="False">
-                    <Border Name="PART_Frame">
+                    <Border Name="PART_Frame"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            BoxShadow="{TemplateBinding BoxShadow}"
+                            Padding="{TemplateBinding Padding}">
                         <DockPanel Name="PART_HeaderContainer"
+                                   Classes.semantic-wrapper="True"
                                    LastChildFill="True">
                             <atom:IconPresenter Name="PART_IconContent"
+                                                Classes.semantic-icon="True"
                                                 DockPanel.Dock="Left"
                                                 IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"
                                                 Icon="{TemplateBinding Icon}" />
                             <SelectableTextBlock Name="PART_Message"
+                                                 Classes.semantic-title="True"
                                                  Text="{TemplateBinding Message}" />
                         </DockPanel>
                     </Border>
@@ -84,12 +93,18 @@
             <Setter Property="Transitions" Value="{x:Null}" />
         </Style>
 
+        <!--
+            root 表面默认值放在 owner 级：PART_Frame 通过 TemplateBinding 取用，因此 ControlTheme
+            只提供默认视觉，用户经 owner-scoped Semantic Style 覆盖时能真正投影到卡片外框。
+            BorderBrush / BorderThickness 不设默认值（保持 null / 0），与透传前的默认外观一致。
+        -->
+        <Setter Property="Background" Value="{atom:MessageCardTokenResource ContentBg}" />
+        <Setter Property="Padding" Value="{atom:MessageCardTokenResource ContentPadding}" />
+        <Setter Property="CornerRadius" Value="{atom:SharedTokenResource BorderRadiusLG}" />
+        <Setter Property="BoxShadow" Value="{atom:SharedTokenResource BoxShadows}" />
+
         <Style Selector="^ /template/ Border#PART_Frame">
             <Setter Property="Margin" Value="0" />
-            <Setter Property="Padding" Value="{atom:MessageCardTokenResource ContentPadding}" />
-            <Setter Property="BoxShadow" Value="{atom:SharedTokenResource BoxShadows}" />
-            <Setter Property="Background" Value="{atom:MessageCardTokenResource ContentBg}" />
-            <Setter Property="CornerRadius" Value="{atom:SharedTokenResource BorderRadiusLG}" />
         </Style>
 
         <Style Selector="^[IsClosed=True]">

@@ -134,7 +134,7 @@ Mentions 的公共 API 由文本值、触发符、候选数据、过滤、弹层
 
 ### 基础用法
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/Mentions/Views/MentionsShowCase.axaml:36`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/Mentions/Views/MentionsShowCase.axaml:86`
 
 Gallery key：`ExamplesContent` / item `0`
 
@@ -144,7 +144,7 @@ Gallery key：`ExamplesContent` / item `0`
 
 ### Value 绑定
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/Mentions/Views/MentionsShowCase.axaml:51`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/Mentions/Views/MentionsShowCase.axaml:101`
 
 Gallery key：`ExamplesContent` / item `1`
 
@@ -173,7 +173,7 @@ Gallery key：`ExamplesContent` / item `1`
 
 ### 变体
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/Mentions/Views/MentionsShowCase.axaml:116`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/Mentions/Views/MentionsShowCase.axaml:166`
 
 Gallery key：`ExamplesContent` / item `3`
 
@@ -188,7 +188,7 @@ Gallery key：`ExamplesContent` / item `3`
 
 ### 异步加载
 
-来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/Mentions/Views/MentionsShowCase.axaml:132`
+来源：`controlgallery/AtomUIGallery/ShowCases/DataEntry/Mentions/Views/MentionsShowCase.axaml:182`
 
 Gallery key：`ExamplesContent` / item `4`
 
@@ -305,6 +305,7 @@ AOT 边界：
 主要源码：
 
 - `src/AtomUI.Desktop.Controls/Mentions/Mentions.cs`：public API、状态流、候选加载、过滤、弹层生命周期、键盘处理和 Form 接口。
+- `src/AtomUI.Desktop.Controls/Mentions/Mentions.SemanticParts.cs`：Mentions 的 9 个 Semantic Part 声明（见 [Mentions Semantic Part 契约](semantic-part.md)）。
 - `src/AtomUI.Desktop.Controls/Mentions/MentionTextArea.cs`：内部 TextArea，负责触发符扫描、过滤值同步和候选插入。
 - `src/AtomUI.Desktop.Controls/Mentions/MentionOption.cs`：候选项接口和默认 record。
 - `src/AtomUI.Desktop.Controls/Mentions/DataLoad/IMentionOptionsAsyncLoader.cs`：异步候选加载接口。
@@ -319,6 +320,7 @@ AOT 边界：
 
 - 源设计文档：`docs/controls/desktop/data-entry/mentions/overview.md`
 - 实现文档：`docs/controls/desktop/data-entry/mentions/implementation.md`
+- Semantic Part 文档：`docs/controls/desktop/data-entry/mentions/semantic-part.md`
 - Token 文档：`docs/controls/desktop/data-entry/mentions/token.md`
 - 变更记录：`docs/controls/desktop/data-entry/mentions/changelog.md`
 - 语义结构：`./semantic-cn.md`

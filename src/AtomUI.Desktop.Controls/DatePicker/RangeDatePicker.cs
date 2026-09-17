@@ -1,6 +1,7 @@
 ﻿using AtomUI.Desktop.Controls.CalendarView;
 using AtomUI.Desktop.Controls.Primitives;
 using AtomUI.Icons.AntDesign;
+using AtomUI.Utils;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -12,7 +13,7 @@ using AtomUI.Desktop.Controls.CalendarView.Infrastructure;
 
 namespace AtomUI.Desktop.Controls;
 
-public class RangeDatePicker : RangeInfoPickerInput
+public partial class RangeDatePicker : RangeInfoPickerInput
 {
     #region 公共属性定义
     
@@ -159,7 +160,7 @@ public class RangeDatePicker : RangeInfoPickerInput
         get => _preferredWidth;
         set
         {
-            if (_preferredWidth == value)
+            if (MathUtils.AreClose(_preferredWidth, value))
             {
                 return;
             }
@@ -490,29 +491,26 @@ public class RangeDatePicker : RangeInfoPickerInput
     
     private void CalculatePreferredWidth()
     {
-        if (!double.IsNaN(Width) || HorizontalAlignment == HorizontalAlignment.Stretch)
-        {
-            PreferredInputWidth = double.NaN;
-            PreferredWidth      = 0;
-        }
-        else
-        {
-            var formatInfo = DatePickerFormattingHelper.CreateFormatInfo(ClockIdentifier, AmText, PmText);
-            var preferredInputWidth = DatePickerFormattingHelper.CalculateBoundedRangePreferredInputWidth(
-                Format,
-                PickerMode,
-                IsShowTime,
-                ClockIdentifier,
-                FontSize,
-                FontFamily,
-                FontStyle,
-                FontWeight,
-                MinWidth,
-                MaxWidth,
-                formatInfo);
-            PreferredInputWidth = preferredInputWidth;
-            PreferredWidth      = preferredInputWidth;
-        }
+        // 输入框预留宽度始终按内容基线计算：placeholder 与选中值共用同一宽度基线，
+        // 避免显式 Width / Stretch 场景下输入区宽度随文本内容跳变；控件总宽在显式
+        // Width / Stretch 时仍交给外部布局决定（PreferredWidth 置 0 关闭总宽放大）。
+        var formatInfo = DatePickerFormattingHelper.CreateFormatInfo(ClockIdentifier, AmText, PmText);
+        var preferredInputWidth = DatePickerFormattingHelper.CalculateBoundedRangePreferredInputWidth(
+            Format,
+            PickerMode,
+            IsShowTime,
+            ClockIdentifier,
+            FontSize,
+            FontFamily,
+            FontStyle,
+            FontWeight,
+            MinWidth,
+            MaxWidth,
+            formatInfo);
+        PreferredInputWidth = preferredInputWidth;
+        PreferredWidth      = (!double.IsNaN(Width) || HorizontalAlignment == HorizontalAlignment.Stretch)
+            ? 0
+            : preferredInputWidth;
     }
     
     protected override void NotifyRangeActivatedPartChanged()

@@ -16,6 +16,7 @@ internal sealed class ThemeAssetInfo
         IReadOnlyList<string> directoryCandidates,
         IReadOnlyList<ThemeAssetTargetTypeReference> targetTypes,
         IReadOnlyList<ThemeAssetElementTypeReference> elementTypes,
+        IReadOnlyList<ThemeAssetSemanticThemeInfo> semanticThemes,
         IReadOnlyList<string> controlTokenFamilies,
         bool isResourceDictionary,
         string? controlThemeClassName,
@@ -30,6 +31,7 @@ internal sealed class ThemeAssetInfo
         DirectoryCandidates = directoryCandidates;
         TargetTypes = targetTypes;
         ElementTypes = elementTypes;
+        SemanticThemes = semanticThemes;
         ControlTokenFamilies = controlTokenFamilies;
         IsResourceDictionary = isResourceDictionary;
         ControlThemeClassName = controlThemeClassName;
@@ -45,6 +47,7 @@ internal sealed class ThemeAssetInfo
     internal IReadOnlyList<string> DirectoryCandidates { get; }
     internal IReadOnlyList<ThemeAssetTargetTypeReference> TargetTypes { get; }
     internal IReadOnlyList<ThemeAssetElementTypeReference> ElementTypes { get; }
+    internal IReadOnlyList<ThemeAssetSemanticThemeInfo> SemanticThemes { get; }
     internal IReadOnlyList<string> ControlTokenFamilies { get; }
     internal bool IsResourceDictionary { get; }
     internal string? ControlThemeClassName { get; }
@@ -69,6 +72,8 @@ internal sealed class ThemeAssetInfo
         var fileName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
         var targetTypes = new List<ThemeAssetTargetTypeReference>();
         var elementTypes = new HashSet<ThemeAssetElementTypeReference>();
+        IReadOnlyList<ThemeAssetSemanticThemeInfo> semanticThemes =
+            Array.Empty<ThemeAssetSemanticThemeInfo>();
         var controlTokenFamilies = new HashSet<string>(StringComparer.Ordinal);
         var isResourceDictionary = false;
         string? controlThemeClassName = null;
@@ -92,6 +97,10 @@ internal sealed class ThemeAssetInfo
                         .FirstOrDefault(static attribute =>
                             string.Equals(attribute.Name.LocalName, "TargetType", StringComparison.Ordinal))
                         ?.Value);
+            }
+            if (root is not null)
+            {
+                semanticThemes = SemanticThemeAssetParser.Parse(root);
             }
             foreach (var element in document.Descendants())
             {
@@ -135,11 +144,13 @@ internal sealed class ThemeAssetInfo
             elementTypes.OrderBy(static reference => reference.NamespaceUri, StringComparer.Ordinal)
                         .ThenBy(static reference => reference.LocalName, StringComparer.Ordinal)
                         .ToArray(),
+            semanticThemes,
             controlTokenFamilies.OrderBy(static family => family, StringComparer.Ordinal).ToArray(),
             isResourceDictionary,
             controlThemeClassName,
             controlThemeTargetTypeName);
     }
+
 
     internal static bool IsAggregatePath(string path)
     {
@@ -356,6 +367,7 @@ internal sealed class ThemeAssetElementTypeReference : IEquatable<ThemeAssetElem
     }
 }
 
+
 internal sealed class ThemeAssetTargetTypeReference
 {
     private ThemeAssetTargetTypeReference(
@@ -371,17 +383,36 @@ internal sealed class ThemeAssetTargetTypeReference
 
     internal static ThemeAssetTargetTypeReference Create(XElement element, string value)
     {
-        var namespaces = element.AncestorsAndSelf()
-                                .Reverse()
-                                .SelectMany(static current => current.Attributes().Where(static attribute =>
-                                    attribute.IsNamespaceDeclaration))
-                                .ToDictionary(
-                                    static attribute => attribute.Name.LocalName == "xmlns"
-                                        ? string.Empty
-                                        : attribute.Name.LocalName,
-                                    static attribute => attribute.Value,
-                                    StringComparer.Ordinal);
+        return new ThemeAssetTargetTypeReference(value, CollectNamespaces(element));
+    }
+
+    internal static ThemeAssetTargetTypeReference CreateFromElement(XElement element, XElement namespaceContext)
+    {
+        var namespaces = CollectNamespaces(namespaceContext);
+        var elementNamespace = element.Name.NamespaceName;
+        var prefix = namespaces.FirstOrDefault(pair =>
+            pair.Value == elementNamespace && pair.Key.Length > 0).Key;
+        var value = prefix is null
+            ? element.Name.LocalName
+            : $"{prefix}:{element.Name.LocalName}";
         return new ThemeAssetTargetTypeReference(value, namespaces);
+    }
+
+    private static Dictionary<string, string> CollectNamespaces(XElement element)
+    {
+        var namespaces = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var current in element.AncestorsAndSelf().Reverse())
+        {
+            foreach (var attribute in current.Attributes().Where(static attribute =>
+                         attribute.IsNamespaceDeclaration))
+            {
+                var prefix = attribute.Name.LocalName == "xmlns"
+                    ? string.Empty
+                    : attribute.Name.LocalName;
+                namespaces[prefix] = attribute.Value;
+            }
+        }
+        return namespaces;
     }
 }
 

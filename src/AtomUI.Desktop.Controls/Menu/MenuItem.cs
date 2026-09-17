@@ -1,6 +1,6 @@
 using AtomUI.Animations;
 using AtomUI.Controls;
-using AtomUI.Data;
+using AtomUI.Generated.AtomUIDesktopControls;
 using AtomUI.Reflection;
 using Avalonia;
 using Avalonia.Controls;
@@ -62,6 +62,7 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
     public EntityKey? ItemKey { get; set; }
 
     private Popup? _popup;
+    private bool _isSyncingSubMenuPopupState;
     private bool _isUsingDetachedTitleBarPopupPlacement;
     private IDisposable? _detachedTitleBarPopupPlacementTracker;
 
@@ -147,7 +148,6 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
 
     internal bool IsPointerOverSubMenu => _popup?.IsPointerOverPopup ?? false;
 
-    private IDisposable? _popupPinnedOpenBinding;
 
     #endregion
 
@@ -166,6 +166,7 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
     {
         if (change.Property == IsSubMenuOpenProperty)
         {
+            SyncSubMenuPopupOpenState();
             if (change.GetNewValue<bool>())
             {
                 ConfigureDetachedTitleBarPopupPlacement();
@@ -206,8 +207,19 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         {
             ConfigureMaxPopupHeight();
         }
+        else if (change.Property == IsPopupPinnedOpenProperty || change.Property == ItemCountProperty)
+        {
+            UpdateSubMenuPopupPinnedOpen();
+            if (change.Property == IsPopupPinnedOpenProperty &&
+                change.GetNewValue<bool>() &&
+                HasSubMenu &&
+                !IsSubMenuOpen)
+            {
+                SetCurrentValue(IsSubMenuOpenProperty, true);
+            }
+        }
         else if (((change.Property == IsPopupPinnedOpenProperty && change.GetNewValue<bool>()) ||
-                  (change.Property == IsSubMenuOpenProperty && !change.GetNewValue<bool>() && IsPopupPinnedOpen)) &&
+                  (change.Property == IsSubMenuOpenProperty && !change.GetNewValue<bool>() && IsPopupPinnedOpen && CanReboundSubMenuOpen)) &&
                  HasSubMenu &&
                  !IsSubMenuOpen)
         {
@@ -215,10 +227,20 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         }
     }
 
+    // 钉住回弹（关闭 → 立即置回 true）只在菜单树确实可见时允许。宿主弹层做生命周期关闭
+    //（页签切走 / 滚出视口）期间 placement target 已失效，此刻回弹会把子菜单弹层拉起成一个
+    // 无法正常呈现的空壳，滞留在 overlay 层（只剩圆角白底与阴影）。不可见时不回弹，
+    // 展开状态由宿主重开后的重新附着延迟同步恢复。
+    private bool CanReboundSubMenuOpen => IsEffectivelyVisible;
+
     private void UpdatePseudoClasses()
     {
         PseudoClasses.Set(MenuItemPseudoClass.TopLevel, IsTopLevel);
     }
+
+    // 由 owner 在容器 prepare 时下发。None 表示该 MenuItem 不属于 plain Menu 语义作用域（MenuFlyout /
+    // ContextMenu / DropdownButton 弹层创建并复用同一容器类型），此时保持既有 .semantic-item marker。
+    internal MenuSemanticLevel SemanticLevel { get; set; }
 
     protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
     {
@@ -227,12 +249,19 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
             return new MenuSeparator();
         }
 
-        return new MenuItem();
+        if (item is MenuItemGroupData)
+        {
+            return new MenuItemGroup();
+        }
+
+        var menuItem = new MenuItem();
+        menuItem.Classes.Add(DropdownButtonSemanticParts.ItemClass);
+        return menuItem;
     }
 
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey)
     {
-        if (item is MenuItem or MenuSeparator)
+        if (item is MenuItem or MenuSeparator or MenuItemGroup)
         {
             recycleKey = null;
             return false;
@@ -247,6 +276,14 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         base.PrepareContainerForItemOverride(container, item, index);
         if (container is MenuItem menuItem)
         {
+            var childLevel = ResolveChildSemanticLevel();
+            menuItem.Classes.Add(DropdownButtonSemanticParts.ItemClass);
+            if (childLevel != MenuSemanticLevel.None)
+            {
+                menuItem.SemanticLevel = childLevel;
+                MenuSemanticLevelScope.ApplyItemLevel(menuItem, childLevel);
+            }
+
             if (item != null && item is not Visual)
             {
                 if (!menuItem.IsSet(HeaderProperty))
@@ -287,11 +324,23 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
             menuItem[!SizeTypeProperty]              = this[!SizeTypeProperty];
             menuItem[!IsMotionEnabledProperty]       = this[!IsMotionEnabledProperty];
             menuItem[!ShouldUseOverlayPopupProperty] = this[!ShouldUseOverlayPopupProperty];
+            // 钉住语义沿容器层级递归下发：子菜单项的子菜单同样要在宿主生命周期关闭期间保留状态。
+            menuItem[!IsPopupPinnedOpenProperty]     = this[!IsPopupPinnedOpenProperty];
             PrepareMenuItem(menuItem, item, index);
         }
         else if (container is MenuSeparator menuSeparator)
         {
             menuSeparator.Orientation = Orientation.Horizontal;
+        }
+        else if (container is MenuItemGroup menuItemGroup)
+        {
+            // 分组标题与子项的样式由 MenuItemGroup 自身的模板与容器逻辑处理。
+            var childLevel = ResolveChildSemanticLevel();
+            if (childLevel != MenuSemanticLevel.None)
+            {
+                menuItemGroup.SemanticLevel = childLevel;
+                MenuSemanticLevelScope.ApplyGroupLevel(menuItemGroup, childLevel);
+            }
         }
         else if (container is not MenuSeparator)
         {
@@ -304,24 +353,136 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
     {
     }
 
+    // 自身层级决定子容器层级：plain Menu 顶层项的子项属于子菜单层，子菜单项的子项仍在子菜单层。
+    // None 表示不在 plain Menu 语义作用域内，子容器保持复用方既有的 marker 行为。
+    private MenuSemanticLevel ResolveChildSemanticLevel()
+    {
+        return SemanticLevel == MenuSemanticLevel.None
+            ? MenuSemanticLevel.None
+            : MenuSemanticLevel.SubMenu;
+    }
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         ClearDetachedTitleBarPopupPlacement();
-        _popupPinnedOpenBinding?.Dispose();
-        _popupPinnedOpenBinding = null;
+        if (_popup is not null)
+        {
+            _popup.Opened -= HandleSubMenuPopupOpened;
+            _popup.Closed -= HandleSubMenuPopupClosed;
+        }
+
         base.OnApplyTemplate(e);
+        // icon / content 的层级 marker 由模板静态声明（同 NavMenu），不在这里按 Name 动态注入。
         _popup = e.NameScope.Find<Popup>("PART_Popup");
         if (_popup != null)
         {
-            _popupPinnedOpenBinding = BindUtils.RelayBind(
-                this,
-                IsPopupPinnedOpenProperty,
-                _popup,
-                Popup.IsPopupPinnedOpenProperty);
+            _popup.Opened += HandleSubMenuPopupOpened;
+            _popup.Closed += HandleSubMenuPopupClosed;
+            UpdateSubMenuPopupPinnedOpen();
+            if (IsSubMenuOpen)
+            {
+                DeferSubMenuPopupOpen(_popup);
+            }
         }
         ConfigureDetachedTitleBarPopupPlacement();
         UpdatePseudoClasses();
         ConfigureMaxPopupHeight();
+    }
+
+    // 钉住语义按菜单树下发（宿主 Flyout → Presenter → 各级 MenuItem），但只允许作用在
+    // 真正承载子菜单的弹层上：pinned 弹层会自行强制打开，叶子项的 PART_Popup 若被置为
+    // pinned，会打开成一个没有内容的空白弹层并遗留在 overlay 层（只剩圆角白底与阴影）。
+    private void UpdateSubMenuPopupPinnedOpen()
+    {
+        if (_popup is null)
+        {
+            return;
+        }
+
+        _popup.IsPopupPinnedOpen = IsPopupPinnedOpen && HasSubMenu;
+    }
+
+    private void SyncSubMenuPopupOpenState()
+    {
+        // 模板尚未应用时（声明式 IsSubMenuOpen="True"）由 OnApplyTemplate 延迟同步：
+        // 子菜单弹层不能在模板应用 / 父弹层的强制布局期间同步 Open()。
+        if (_popup is null)
+        {
+            return;
+        }
+
+        // 业务打开状态与弹层呈现之间是双向传播：这里写 Popup.IsOpen 会同步派发 Opened / Closed，
+        // 事件处理器又会把 IsSubMenuOpen 写回并回到本方法。弹层无法呈现时（放置目标跑出 TopLevel
+        // 可视矩形，例如菜单在长页面折叠线以下）该写回不会收敛，会形成无界同步递归直到栈溢出。
+        // 正在驱动弹层时不再回写驱动：弹层已经处于目标状态，重入同步没有语义。
+        if (_isSyncingSubMenuPopupState)
+        {
+            return;
+        }
+
+        _isSyncingSubMenuPopupState = true;
+        try
+        {
+            // 宿主弹层已关闭（页签切走 / 滚出触发的生命周期关闭后，钉住回弹把 IsSubMenuOpen
+            // 重新置 true）时不写子弹层的打开状态：此刻打开会把子弹层悬挂成只剩卡片阴影的
+            // 空白孤儿弹层。IsSubMenuOpen 的状态值已保留，宿主重开、菜单树重新附着后由
+            // OnAttachedToVisualTree 的延迟同步恢复呈现。仅当菜单树确实挂在弹层宿主下
+            //（MenuFlyout 场景）才拦截；plain Menu 没有弹层宿主，不受影响。
+            if (IsSubMenuOpen &&
+                this.FindLogicalAncestorOfType<Popup>() is { IsOpen: false })
+            {
+                return;
+            }
+
+            _popup.IsOpen = IsSubMenuOpen;
+        }
+        finally
+        {
+            _isSyncingSubMenuPopupState = false;
+        }
+    }
+
+    private void DeferSubMenuPopupOpen(Popup popup)
+    {
+        // 声明式打开（IsSubMenuOpen="True"，对应上游 defaultOpenKeys）在模板应用时物化。
+        // 此刻通常处于父弹层 OverlayPopupHost.Show 的强制布局 / 模板应用期间，
+        // 同步 Open() 会在 PopupOverlayLayer.MeasureOverride 枚举 Children 时修改集合
+        // （Collection was modified），因此延迟到下一个调度帧再打开。
+        Dispatcher.Post(() =>
+        {
+            if (ReferenceEquals(popup, _popup) && IsSubMenuOpen && !popup.IsOpen)
+            {
+                popup.IsOpen = true;
+            }
+        });
+    }
+
+    private void HandleSubMenuPopupOpened(object? sender, EventArgs e)
+    {
+        if (!IsSubMenuOpen)
+        {
+            SetCurrentValue(IsSubMenuOpenProperty, true);
+        }
+    }
+
+    private void HandleSubMenuPopupClosed(object? sender, EventArgs e)
+    {
+        if (IsSubMenuOpen)
+        {
+            SetCurrentValue(IsSubMenuOpenProperty, false);
+        }
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        // 钉住弹层的宿主生命周期关闭 / 重开会把菜单树整体从视觉树摘下再挂回；
+        // IsSubMenuOpen 的属性值在钉住期间被保留（见 IsPopupPinnedOpen 回弹），但子弹层
+        // 的打开状态不会随属性值自动恢复，重新附着时补一次延迟同步。
+        if (IsSubMenuOpen && _popup is { IsOpen: false })
+        {
+            DeferSubMenuPopupOpen(_popup);
+        }
     }
 
     protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)

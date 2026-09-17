@@ -154,6 +154,102 @@ public class ExpanderBehaviorTests
         }
     }
 
+    /// <summary>
+    /// 回归：<c>PART_Frame</c> 自己画圆角，而 header/body 是它的子节点且各自带背景。
+    /// <c>ClipToBounds</c> 只做矩形裁剪、不做圆角裁剪，所以模板必须开启
+    /// <c>ClipContentToCornerRadius</c>，否则子节点的不透明背景会平铺到方形边界、
+    /// 把圆角覆盖掉（默认主题的 HeaderBg alpha≈2%，缺陷几乎不可见；
+    /// 一旦用户通过 Semantic Part 或 <c>IsGhostStyle</c> 设不透明背景就显形）。
+    /// <para>
+    /// 这里只能断言模板契约与几何前置条件：headless 平台的几何包含性无法表示圆角图形，
+    /// <c>DashedBorder.UpdateClip</c> 会按设计降级为不应用（见
+    /// <c>DashedBorderClipContentTests.Clip_Is_Not_Applied_When_The_Platform_Cannot_Hit_Test_The_Rounded_Figure</c>），
+    /// 因此 <c>Child.Clip</c> 在测试宿主里始终为 null，无法直接观测。真实 Skia 后端会走裁剪路径。
+    /// </para>
+    /// </summary>
+    [Theory]
+    [InlineData(false, false, false)]
+    [InlineData(true, false, false)]
+    [InlineData(false, true, false)]
+    [InlineData(false, false, true)]
+    [InlineData(true, false, true)]
+    public void Frame_Enables_Content_Clip_To_Corner_Radius(
+        bool isExpanded,
+        bool isGhostStyle,
+        bool isBorderless)
+    {
+        var expander = new AtomUIExpander
+        {
+            Header          = "Header",
+            Content         = "Content",
+            IsExpanded      = isExpanded,
+            IsGhostStyle    = isGhostStyle,
+            IsBorderless    = isBorderless,
+            IsMotionEnabled = false
+        };
+
+        var window = ShowInWindow(expander);
+        try
+        {
+            var frame = FindVisualByName<PixelAlignedBorder>(expander, "PART_Frame");
+            frame.ShouldNotBeNull();
+
+            frame!.ClipContentToCornerRadius.ShouldBeTrue(
+                "PART_Frame must clip its content to the rounded corner; without it the header " +
+                "background squares off the top corners");
+            frame.ClipToBounds.ShouldBeTrue();
+            frame.CornerRadius.TopLeft.ShouldBeGreaterThan(0);
+
+            // header 的左上角必须落在 frame 的圆角方形区域内，否则这条裁剪就没有存在意义
+            // （说明圆角位置没有内容覆盖）。二者一起构成"不开启就会露出方角"的证据。
+            var headerOrigin = GetHeaderDecorator(expander).TranslatePoint(new Point(), frame);
+            headerOrigin.ShouldNotBeNull();
+            headerOrigin!.Value.X.ShouldBeLessThan(frame.CornerRadius.TopLeft);
+            headerOrigin.Value.Y.ShouldBeLessThan(frame.CornerRadius.TopLeft);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    /// <summary>
+    /// frame 的圆角与边框宽度由主题 Style 在模板实例化之后写入，而不是 owner 属性投影。
+    /// 裁剪必须在这些值落地后重算，因此这里验证它们在运行期确实已生效且非退化。
+    /// </summary>
+    [Fact]
+    public void Frame_Corner_Radius_Comes_From_The_Theme_And_Stays_Non_Degenerate()
+    {
+        var expander = new AtomUIExpander
+        {
+            Header          = "Header",
+            Content         = "Content",
+            IsExpanded      = true,
+            IsMotionEnabled = false
+        };
+
+        var window = ShowInWindow(expander);
+        try
+        {
+            var frame = FindVisualByName<PixelAlignedBorder>(expander, "PART_Frame");
+            frame.ShouldNotBeNull();
+
+            // ExpanderBorderRadius = BorderRadiusLG（见 ExpanderToken.CalculateTokenValues）。
+            var expectedRadius = GetThemeResource<CornerRadius>(SharedTokenKind.BorderRadiusLG);
+            frame!.CornerRadius.ShouldBe(expectedRadius);
+            expectedRadius.TopLeft.ShouldBeGreaterThan(0);
+
+            // 圆角是 Style 写入的，运行期改动必须能反映到节点上（裁剪跟随该属性重算）。
+            frame.CornerRadius = new CornerRadius(16);
+            Dispatcher.UIThread.RunJobs();
+            frame.CornerRadius.TopLeft.ShouldBe(16);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     [Theory]
     [InlineData(ExpandDirection.Down, 0, 1, 0, 0)]
     [InlineData(ExpandDirection.Up, 0, 0, 0, 1)]

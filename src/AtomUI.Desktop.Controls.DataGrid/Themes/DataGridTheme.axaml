@@ -13,6 +13,7 @@
                                      CornerRadius="{TemplateBinding FrameCornerRadius}"
                                      ClipToBounds="True">
                 <Border Name="FrameContentClip"
+                        Classes.semantic-section="True"
                         CornerRadius="{TemplateBinding FrameCornerRadius}"
                         ClipToBounds="True">
                     <atom:Spin IsSpinning="{TemplateBinding EffectiveIsOperating}"
@@ -24,6 +25,7 @@
                                VerticalAlignment="{TemplateBinding VerticalAlignment}">
                         <DockPanel LastChildFill="True">
                         <atom:Pagination DockPanel.Dock="Top"
+                                         Classes.semantic-pagination-root="True"
                                          Name="{x:Static atom:DataGridThemeConstants.TopPaginationPart}"
                                          Align="{TemplateBinding TopPaginationAlign}"
                                          IsHideOnSinglePage="{TemplateBinding IsHideOnSinglePage}"
@@ -32,6 +34,7 @@
                                          IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
                                          IsVisible="{TemplateBinding EffectivePaginationVisibility, Converter={x:Static atom:DataGridTheme.TopPaginationVisibilityConvertor}}" />
                         <atom:PixelAlignedBorder Name="TitleFrame"
+                                                 Classes.semantic-title="True"
                                                  DockPanel.Dock="Top"
                                                  BorderThickness="{TemplateBinding BorderThickness, Converter={x:Static atom:DataGridTheme.TitleSeparatorThicknessConverter}}"
                                                  IsVisible="{TemplateBinding Title, Converter={x:Static ObjectConverters.IsNotNull}}">
@@ -40,6 +43,7 @@
                                               ContentTemplate="{TemplateBinding TitleTemplate}" />
                         </atom:PixelAlignedBorder>
                         <atom:Pagination DockPanel.Dock="Bottom"
+                                         Classes.semantic-pagination-root="True"
                                          Name="{x:Static atom:DataGridThemeConstants.BottomPaginationPart}"
                                          Align="{TemplateBinding BottomPaginationAlign}"
                                          IsHideOnSinglePage="{TemplateBinding IsHideOnSinglePage}"
@@ -48,12 +52,14 @@
                                          IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
                                          IsVisible="{TemplateBinding EffectivePaginationVisibility, Converter={x:Static atom:DataGridTheme.BottomPaginationVisibilityConvertor}}" />
                         <ContentPresenter Name="Footer"
+                                          Classes.semantic-footer="True"
                                           Content="{TemplateBinding Footer}"
                                           ContentTemplate="{TemplateBinding FooterTemplate}"
                                           IsVisible="{TemplateBinding Footer, Converter={x:Static ObjectConverters.IsNotNull}}"
                                           DockPanel.Dock="Bottom" />
 
                         <Grid
+                            Classes.semantic-content="True"
                             RowDefinitions="Auto, *, Auto, Auto"
                             ColumnDefinitions="Auto, *, Auto"
                             ClipToBounds="True">
@@ -64,6 +70,7 @@
                                 Grid.Column="0" />
 
                             <Border Name="ColumnHeadersPresenterFrame"
+                                    Classes.semantic-header-wrapper="True"
                                     Grid.Row="0"
                                     Grid.Column="1"
                                     Grid.ColumnSpan="2"
@@ -90,6 +97,7 @@
 
                             <atom:DataGridRowsPresenter
                                 Name="{x:Static atom:DataGridThemeConstants.RowsPresenterPart}"
+                                Classes.semantic-body-wrapper="True"
                                 Grid.Row="1"
                                 Grid.Column="0"
                                 Grid.RowSpan="1"

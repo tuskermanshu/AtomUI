@@ -156,13 +156,28 @@ internal sealed class OverlayDialogPresenter : ContentControl,
 
         ((ISetInheritanceParent)this).SetParent(
             ((ILogical)_dialog).IsAttachedToLogicalTree ? _dialog : _placementTarget);
-        _dialogLayer = DialogOverlayLayer.GetOrCreate(_placementTarget);
-        _ownerWindow = TopLevel.GetTopLevel(_placementTarget) as Window;
+        _dialogLayer = DialogOverlayLayer.GetOrCreate(_placementTarget, _dialog.OverlayScope);
+        // 显式 OverlayScope 时宿主没有 Window frame 契约：不解析 owning Window，因此不参与 frame 内缩、
+        // 也不申请 drawn chrome 抑制。未显式指定时保持既有行为（owner window 仍按 placement target 的 TopLevel 解析，
+        // 与宿主 layer 的解析结果无关）。
+        _ownerWindow = _dialog.OverlayScope is null
+            ? TopLevel.GetTopLevel(_placementTarget) as Window
+            : null;
         _ownerIsWayland = OperatingSystem.IsLinux() &&
                           _ownerWindow is { } ownerWindow &&
                           AbstractLinuxWindowChromeManager.IsWayland(ownerWindow);
         UpdateDrawnChromeOverlaySuppression();
+        // 语义部件契约：owner 已附加到逻辑树时，把 presenter 逻辑挂到 Dialog 下，owner 作用域生成的 Semantic
+        // Style 才能沿逻辑祖先链命中 presenter 子树；必须在 layer.Children.Add 之前设置（Panel 不会覆盖已显式
+        // 设置的逻辑父，先例：DrawerContainer.AttachToLayer）。owner 未附加时保持 layer 所有权：此时 owner
+        // 作用域样式本就无法激活，也避免改变 presenter 的 Parent 语义。该条件与上面的 inheritance parent 一致。
+        if (((ILogical)_dialog).IsAttachedToLogicalTree)
+        {
+            ((ISetLogicalParent)this).SetParent(_dialog);
+        }
+
         _dialogLayer.Add(this);
+        _dialog.NotifyCrossRootsChanged();
         AttachOwnerGeometryBindings();
         UpdateLayerBounds(_dialogLayer.AvailableSize);
         ApplyTemplate();
@@ -387,6 +402,13 @@ internal sealed class OverlayDialogPresenter : ContentControl,
 
         dialogLayer.Remove(this);
         _dialogLayer = null;
+        // 只清除本 presenter 自己建立的 owner 逻辑父，避免误清 layer 建立的所有权。
+        if (ReferenceEquals(((ILogical)this).LogicalParent, _dialog))
+        {
+            ((ISetLogicalParent)this).SetParent(null);
+        }
+
+        _dialog.NotifyCrossRootsChanged();
     }
 
     private void UpdateDrawnChromeOverlaySuppression()
@@ -803,6 +825,12 @@ internal sealed class OverlayDialogPresenter : ContentControl,
 
     private void HandleSurfaceCloseRequested(object? sender, DialogSurfaceCloseRequestedEventArgs e)
     {
+        // 钉住常开只拦截用户发起的关闭入口；外部 IsOpen 关闭走 presenter.CloseAsync，不经过这里。
+        if (_dialog.IsPinnedOpen)
+        {
+            return;
+        }
+
         CloseRequested?.Invoke(this,
             new DialogPresenterCloseRequestedEventArgs(e.Reason, e.Result, e.SourceButton));
     }
@@ -815,6 +843,12 @@ internal sealed class OverlayDialogPresenter : ContentControl,
 
     private void HandleHostCloseRequested(object? sender, EventArgs e)
     {
+        // 钉住常开同时覆盖遮罩外点（HandleMaskPointerPressed 复用本处理器）与宿主关闭请求。
+        if (_dialog.IsPinnedOpen)
+        {
+            return;
+        }
+
         CloseRequested?.Invoke(this,
             new DialogPresenterCloseRequestedEventArgs(
                 DialogCloseReason.HostCloseRequest,
