@@ -2,6 +2,14 @@
 
 本文档记录 Popup 控件级 API、Theme、Token、实现结构和设计契约变化，不替代仓库根目录 `CHANGELOG.md`。
 
+## 2026-09-17
+
+- Design
+  - Document `IArrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox()` as a nullable contract: providers may transiently or permanently lack the arrow part, and consumers must degrade to arrowless behavior instead of assuming a non-null result (issue #477).
+- Implementation
+  - `ShadowsAwareContainer` degrades to `IsArrowVisible=false` and default corner radius when the provider cannot supply the arrow part, subscribes the provider's `TemplateApplied` while degraded, and re-probes on the next template application so arrow relay bindings are established once the part becomes available.
+  - `Popup.ApplyCustomPlacement` treats an unavailable arrow part like a hidden arrow, reusing the existing shadow-thickness compensation path instead of dereferencing the part.
+
 ## 2026-08-25
 
 - Design

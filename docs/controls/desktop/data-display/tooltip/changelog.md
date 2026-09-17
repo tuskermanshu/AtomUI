@@ -2,6 +2,15 @@
 
 本文档记录 Tooltip 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-17
+
+- Implementation
+  - Make `IArrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox()` nullable and degrade every ToolTip provider method to arrowless fallbacks when the template has not been applied or the theme does not provide `PART_ArrowDecorator`, removing the `Debug.Assert`-masked contract violation that crashed popup shadow configuration and custom placement with a `NullReferenceException` (issue #477).
+  - Keep `DeferSetupArrowDecoratedBox` subscribed while the applied template still lacks the arrow part, so arrow setup completes once a later template application provides the part.
+  - Mirror the same null tolerance in `MenuFlyoutPresenter`, matching its already null-safe `GetMask*` methods.
+- Tests
+  - Add `ToolTipArrowDecoratedBoxContractTests` covering unstyled-provider degradation, opening with a template missing `PART_ArrowDecorator`, arrow-binding recovery when a later template provides the part, and the default-theme arrow wiring.
+
 ## 2026-09-16
 
 - Implementation

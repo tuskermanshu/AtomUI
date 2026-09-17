@@ -625,14 +625,24 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
                 {
                     Child.Measure(Size.Infinity);
                     Child.Arrange(new Rect(Child.DesiredSize));
-                    arrowIndicatorLayoutBounds = provider.GetArrowDecoratedBox().ArrowIndicatorLayoutBounds;
-
-                    if (IsPointAtCenter)
+                    var arrowDecoratedBox = provider.GetArrowDecoratedBox();
+                    if (arrowDecoratedBox is not null)
                     {
-                        var delta = PopupUtils.CalculatePointAtCenterDelta(
-                            target, provider.GetArrowDecoratedBox(), requestedPlacement, anchor, gravity);
-                        hOffset += delta.X;
-                        vOffset += delta.Y;
+                        arrowIndicatorLayoutBounds = arrowDecoratedBox.ArrowIndicatorLayoutBounds;
+
+                        if (IsPointAtCenter)
+                        {
+                            var delta = PopupUtils.CalculatePointAtCenterDelta(
+                                target, arrowDecoratedBox, requestedPlacement, anchor, gravity);
+                            hOffset += delta.X;
+                            vOffset += delta.Y;
+                        }
+                    }
+                    else
+                    {
+                        // 箭头部件不可用（模板未就绪或主题未提供），与箭头隐藏同等对待：
+                        // 位置公式按无箭头计算，再由 arrowHiddenButCapable 做阴影厚度补偿
+                        arrowHiddenButCapable = true;
                     }
                 }
                 else if (PopupUtils.CanEnabledArrow(requestedPlacement))

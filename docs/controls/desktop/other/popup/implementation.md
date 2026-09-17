@@ -100,6 +100,11 @@ logical attach 时，`ShadowsAwareContainer` 创建一个 `CompositeDisposable`�
 ContentPresenter Child observable 在 Child/Presenter 替换时重新配置圆角和 arrow geometry，detach 时释放。frame renderer
 设置 logical parent 并随 container 生命周期存在。
 
+`IArrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox()` 是可空契约：提供方模板尚未应用或当前主题未提供
+`PART_ArrowDecorator` 时返回 `null`。container 探测到 `null` 时按无箭头降级（`IsArrowVisible=false`、圆角归零），
+并在降级期间订阅提供方的 `TemplateApplied`，下一次模板应用时重新探测，部件就绪即恢复箭头 relay binding；订阅随
+`surface bindings` 统一释放。custom placement 同样把部件不可用按箭头隐藏处理，复用阴影厚度补偿路径。
+
 Popup 实例拥有 open/close motion cancellation token 和本次关闭执行状态；Core 的 `MotionExecutionState` 只定义
 `Idle -> Pending -> Playing -> Completing` 阶段语义，不拥有任何控件实例或任务。Popup 同一时刻最多调度一次关闭动效，
 快速重开把 Pending/Playing 收敛回 Idle，Completing 只允许 Avalonia 执行一次最终 close。`Closed` 统一取消并释放 token、

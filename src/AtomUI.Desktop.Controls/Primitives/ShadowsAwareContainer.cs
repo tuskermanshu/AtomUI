@@ -340,19 +340,34 @@ internal class ShadowsAwareContainer : Decorator
         if (child is IArrowAwareShadowMaskInfoProvider arrowAwareShadowMaskInfoProvider)
         {
             var arrowDecoratedBox = arrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox();
-            _surfaceBindings.Add(BindUtils.RelayBind(
-                arrowDecoratedBox, ArrowDecoratedBox.CornerRadiusProperty, this, CornerRadiusProperty));
-            _surfaceBindings.Add(BindUtils.RelayBind(
-                arrowDecoratedBox, ArrowDecoratedBox.ArrowSizeProperty, this, ArrowSizeProperty));
-            _surfaceBindings.Add(BindUtils.RelayBind(
-                arrowDecoratedBox,
-                ArrowDecoratedBox.ArrowIndicatorLayoutBoundsProperty,
-                this,
-                ArrowIndicatorLayoutBoundsProperty));
-            _surfaceBindings.Add(BindUtils.RelayBind(
-                arrowDecoratedBox, ArrowDecoratedBox.ArrowDirectionProperty, this, ArrowDirectionProperty));
-            _surfaceBindings.Add(BindUtils.RelayBind(
-                arrowDecoratedBox, ArrowDecoratedBox.IsArrowVisibleProperty, this, IsArrowVisibleProperty));
+            if (arrowDecoratedBox is not null)
+            {
+                _surfaceBindings.Add(BindUtils.RelayBind(
+                    arrowDecoratedBox, ArrowDecoratedBox.CornerRadiusProperty, this, CornerRadiusProperty));
+                _surfaceBindings.Add(BindUtils.RelayBind(
+                    arrowDecoratedBox, ArrowDecoratedBox.ArrowSizeProperty, this, ArrowSizeProperty));
+                _surfaceBindings.Add(BindUtils.RelayBind(
+                    arrowDecoratedBox,
+                    ArrowDecoratedBox.ArrowIndicatorLayoutBoundsProperty,
+                    this,
+                    ArrowIndicatorLayoutBoundsProperty));
+                _surfaceBindings.Add(BindUtils.RelayBind(
+                    arrowDecoratedBox, ArrowDecoratedBox.ArrowDirectionProperty, this, ArrowDirectionProperty));
+                _surfaceBindings.Add(BindUtils.RelayBind(
+                    arrowDecoratedBox, ArrowDecoratedBox.IsArrowVisibleProperty, this, IsArrowVisibleProperty));
+            }
+            else
+            {
+                // 箭头部件尚未就绪（模板未应用或主题未提供 PART_ArrowDecorator）：先按无箭头降级；
+                // 模板后续（重新）应用时重新探测，部件就绪即恢复箭头绑定
+                SetCurrentValue(IsArrowVisibleProperty, false);
+                SetCurrentValue(CornerRadiusProperty, default);
+                if (child is TemplatedControl templatedChild)
+                {
+                    templatedChild.TemplateApplied += HandleSurfaceTemplateApplied;
+                    _surfaceBindings.Add(Disposable.Create(() => templatedChild.TemplateApplied -= HandleSurfaceTemplateApplied));
+                }
+            }
         }
         else if (child is Border bordered)
         {
@@ -371,6 +386,11 @@ internal class ShadowsAwareContainer : Decorator
             SetCurrentValue(IsArrowVisibleProperty, false);
             SetCurrentValue(CornerRadiusProperty, default);
         }
+    }
+
+    private void HandleSurfaceTemplateApplied(object? sender, TemplateAppliedEventArgs e)
+    {
+        ConfigureContentSurface();
     }
 
     private sealed class PopupFrameRenderer : Control

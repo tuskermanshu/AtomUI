@@ -111,7 +111,9 @@ attached properties + target text/font
 
 稳定 template part 接入点：
 
-- `PART_ArrowDecorator`：稳定模板协作入口，重命名前必须同步主题和实现。
+- `PART_ArrowDecorator`：稳定模板协作入口，重命名前必须同步主题和实现。主题未提供该部件时控件按无箭头降级：
+  弹层阴影容器关闭箭头预留，custom placement 复用箭头隐藏补偿；部件在后续模板应用中出现时，箭头设置与弹层绑定
+  自动补齐。
 - `PART_ContentPresenter`：展示用户内容、文本、图标或模板化数据。
 
 ## 6. 交互与事件处理

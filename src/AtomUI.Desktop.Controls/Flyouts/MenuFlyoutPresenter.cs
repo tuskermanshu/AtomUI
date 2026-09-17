@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using AtomUI.Controls;
 using Avalonia;
 using Avalonia.Controls;
@@ -315,37 +314,35 @@ public class MenuFlyoutPresenter : MenuBase,
 
     ArrowPosition IArrowAwareShadowMaskInfoProvider.GetArrowPosition()
     {
-        Debug.Assert(_arrowDecoratedBox != null);
-        return _arrowDecoratedBox.ArrowPosition;
+        return _arrowDecoratedBox?.ArrowPosition ?? default;
     }
 
     bool IArrowAwareShadowMaskInfoProvider.IsArrowVisible()
     {
-        Debug.Assert(_arrowDecoratedBox != null);
-        return _arrowDecoratedBox.IsArrowVisible;
+        // 箭头部件不可用时按无箭头报告，弹层据此降级阴影与定位
+        return _arrowDecoratedBox?.IsArrowVisible ?? false;
     }
 
     void IArrowAwareShadowMaskInfoProvider.SetArrowOpacity(double opacity)
     {
-        Debug.Assert(_arrowDecoratedBox != null);
-        _arrowDecoratedBox.ArrowOpacity = opacity;
+        if (_arrowDecoratedBox is not null)
+        {
+            _arrowDecoratedBox.ArrowOpacity = opacity;
+        }
     }
 
     Rect IArrowAwareShadowMaskInfoProvider.GetArrowIndicatorBounds()
     {
-        Debug.Assert(_arrowDecoratedBox != null);
-        return _arrowDecoratedBox.ArrowIndicatorBounds;
+        return _arrowDecoratedBox?.ArrowIndicatorBounds ?? default;
     }
 
     Rect IArrowAwareShadowMaskInfoProvider.GetArrowIndicatorLayoutBounds()
     {
-        Debug.Assert(_arrowDecoratedBox != null);
-        return _arrowDecoratedBox.ArrowIndicatorLayoutBounds;
+        return _arrowDecoratedBox?.ArrowIndicatorLayoutBounds ?? default;
     }
 
-    AbstractArrowDecoratedBox IArrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox()
+    AbstractArrowDecoratedBox? IArrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox()
     {
-        Debug.Assert(_arrowDecoratedBox != null);
         return _arrowDecoratedBox;
     }
 

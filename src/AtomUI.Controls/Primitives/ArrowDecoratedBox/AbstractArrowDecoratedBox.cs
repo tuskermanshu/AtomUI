@@ -516,7 +516,7 @@ public abstract class AbstractArrowDecoratedBox : ContentControl,
         return ArrowIndicatorLayoutBounds;
     }
 
-    AbstractArrowDecoratedBox IArrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox()
+    AbstractArrowDecoratedBox? IArrowAwareShadowMaskInfoProvider.GetArrowDecoratedBox()
     {
         return this;
     }
