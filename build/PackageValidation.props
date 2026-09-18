@@ -29,7 +29,7 @@
         build/PackageValidationSuppressions/<ProjectName>.xml. Generate one with the MSBuild
         property ApiCompatGenerateSuppressionFile=true, then review it before committing.
     -->
-    <PropertyGroup Condition="'$(AtomUIPackageValidationBaselineVersion)' != '' and Exists('$(MSBuildThisFileDirectory)PackageValidationSuppressions/$(MSBuildProjectName).xml')">
-        <ApiCompatSuppressionFile>$(MSBuildThisFileDirectory)PackageValidationSuppressions/$(MSBuildProjectName).xml</ApiCompatSuppressionFile>
-    </PropertyGroup>
+    <ItemGroup Condition="'$(AtomUIPackageValidationBaselineVersion)' != '' and Exists('$(MSBuildThisFileDirectory)PackageValidationSuppressions/$(MSBuildProjectName).xml')">
+        <ApiCompatSuppressionFile Include="$(MSBuildThisFileDirectory)PackageValidationSuppressions/$(MSBuildProjectName).xml" />
+    </ItemGroup>
 </Project>

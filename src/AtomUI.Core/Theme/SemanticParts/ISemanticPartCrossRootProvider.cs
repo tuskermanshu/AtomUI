@@ -1,6 +1,6 @@
 using Avalonia;
 
-namespace AtomUI.Theme.SemanticParts;
+namespace AtomUI.Theme;
 
 /// <summary>
 /// 声明控件把语义部件活体承载在 owner 视觉树之外的宿主中（如独立预览窗口）。

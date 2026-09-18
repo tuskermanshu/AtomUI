@@ -6,6 +6,38 @@ AtomUI 的重要变更记录在此文件中。
 
 英文版本见 [CHANGELOG.md](CHANGELOG.md)。
 
+## 6.2.0
+
+`2026-09-18`
+
+- 破坏性变更
+  - SearchEdit：将公共 `SearchEditButtonStyle` 枚举重命名为 `SearchButtonType`。`SearchButtonStyle` 名称和枚举值保持不变，请更新 C# 与 XAML 中的枚举类型引用。详见[6.2.0 API 变更示例](docs/releases/6.2.0-api-changes.zh-CN.md)。
+  - OtpLineEdit：移除 `SeparatorInterval`。设置 `Separator` 后会在每个相邻 cell 之间显示分隔符；自定义内容使用 `SeparatorTemplate`，整体间距使用 `OtpLineEditToken.CellGap`。详见迁移指南。
+  - Button：移除 `CustomBackground`，改用标准 `Background` 和 `BorderBrush` 属性。详见迁移指南。
+  - ProgressBar：移除受保护的 `AbstractGeneralProgressBar.DrawIndicatorBar` 辅助方法；自定义派生控件需要自行实现绘制或使用模板/Semantic Part 样式。
+  - Separator：移除 `AbstractSeparator.DashStyle` 和 `DotStyle`；需要标准虚线定义时使用 `SeparatorRail.DashStyle` 和 `SeparatorRail.DotStyle`。
+  - Theme manager：增加 `IThemeManager.SemanticParts` 语义部件 registry 属性。自定义实现必须增加该属性，内置 `ThemeManager` 无需改动。详见迁移指南。
+  - Notification：移除旧的八参数构造函数以及 `CardExpiredPollingInterval` / `CleanupPollingInterval` 属性；生命周期调度器现在是唯一的过期协调器。
+  - Notification 管理器：新增 `IMessageManager.DestroyAll()` 和 `INotificationManager.DestroyAll()`；自定义实现需要增加这些方法。
+  - Transfer：将受保护的 `BuildSourcePanelSource` 和 `BuildTargetPanelSource` 返回类型改为 `IReadOnlyList<IItemKey>?`；自定义派生控件需要更新重写方法和调用方。
+  - Notification Token：移除 `NotificationMarginBottom`、`NotificationContentMargin` 和 `HeaderMargin`；生成的 Token 枚举值按当前源码声明生成。
+- Semantic Part 与 Gallery
+  - 为输入、导航、数据展示、反馈和布局控件族增加生成式 Semantic Part 契约和专用样式入口。
+  - 为 Popup、Dialog、Drawer、Tour 和 ImagePreviewer 增加跨视觉根高亮与 Gallery 预览，修复 owner 作用域样式和本地化目录一致性。
+  - 增加 ComboBox、Splash、GroupBox、Expander、DataGrid、Menu、TabControl、TabStrip、NumericUpDown 等控件的语义示例。
+  - 修复 sticky tab 提升更新与模板销毁竞态导致访问已释放视觉部件的问题。
+- Popup、Dialog 与 Theme
+  - 修复 Dialog、Drawer、PopupConfirm、Menu 和 Picker 控件的钉住遮罩所有权、跨窗口弹层路由、语义作用域跟踪和根表面定制。
+  - 修复主题源码命名空间漂移，将 Semantic Part 预览契约统一放在公共 `AtomUI.Theme` 命名空间。
+- 异步、动效与缓存
+  - 防止异步展开/搜索加载的并发重复生产，正确区分显式取消，并修复有界主题缓存的完成发布竞态。
+  - 改进反馈堆叠、Masonry 动效、Segmented 选中滑块过渡以及不可见控件的任务关停行为。
+- 本地化、构建与 AOT
+  - 让生成的设计 Token 枚举与当前源码声明保持一致；新增或重命名 Token 属性属于 v6.2.0 API 表面变更。
+  - 恢复 canonical XLIFF 单元排序并补齐 Gallery 葡萄牙语（巴西）目录覆盖。
+  - 增加以上一 NuGet 版本为基线的 API 与包布局发布门禁，并使用 content-addressed 仓库构建任务工具集避免过期 MSBuild 程序集。
+  - 保持 linked registration、trimming 和 NativeAOT Gallery 验证路径与扩展后的语义控件表面一致。
+
 ## 6.1.9
 
 `2026-09-11`

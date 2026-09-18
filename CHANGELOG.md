@@ -4,6 +4,38 @@ All notable changes to AtomUI are documented in this file.
 
 `AtomUI` follows Semantic Versioning 2.0.0.
 
+## 6.2.0
+
+`2026-09-18`
+
+- Breaking Changes
+  - SearchEdit: rename the public `SearchEditButtonStyle` enum to `SearchButtonType`. `SearchButtonStyle` keeps its name and values; update the enum type in C# and XAML integrations. See [6.2.0 API change examples](docs/releases/6.2.0-api-changes.md).
+  - OtpLineEdit: remove `SeparatorInterval`. `Separator` now renders between every adjacent cell; use `SeparatorTemplate` and `OtpLineEditToken.CellGap` for customization. See the migration guide.
+  - Button: remove `CustomBackground` and use the standard `Background` and `BorderBrush` properties. See the migration guide.
+  - ProgressBar: remove the protected `AbstractGeneralProgressBar.DrawIndicatorBar` helper; custom derived controls must own their drawing path or use template/Semantic Part styling.
+  - Separator: remove `AbstractSeparator.DashStyle` and `DotStyle`; use `SeparatorRail.DashStyle` and `SeparatorRail.DotStyle` for standard dash definitions.
+  - Theme manager: add `IThemeManager.SemanticParts` for the Semantic Part registry. Custom implementations must add the property; the built-in `ThemeManager` needs no change. See the migration guide.
+  - Notification: remove the legacy eight-parameter constructor and the `CardExpiredPollingInterval` / `CleanupPollingInterval` properties; the lifetime scheduler is now the only expiration coordinator.
+  - Notification managers: add `IMessageManager.DestroyAll()` and `INotificationManager.DestroyAll()`; custom implementations must add these methods.
+  - Transfer: change the protected `BuildSourcePanelSource` and `BuildTargetPanelSource` return types to `IReadOnlyList<IItemKey>?`; custom derived controls must update overrides and callers.
+  - Notification tokens: remove `NotificationMarginBottom`, `NotificationContentMargin`, and `HeaderMargin`; generated token enum values follow the current declarations.
+- Semantic Parts and Gallery
+  - Add generated Semantic Part contracts and dedicated style entry points across the control families, including input, navigation, data display, feedback and layout controls.
+  - Add Gallery previews and cross-visual-root highlighting for popups, dialogs, drawers, tours and image previews, with owner-scoped styling and corrected localization catalogs.
+  - Add semantic examples for ComboBox, Splash, GroupBox, Expander, DataGrid, Menu, TabControl, TabStrip, NumericUpDown and related controls.
+  - Fix a queued sticky-tab elevation update racing template teardown and dereferencing released visual parts.
+- Popup, Dialog and Theme
+  - Fix pinned overlay ownership, cross-window popup routing, semantic scope tracking and root surface customization across Dialog, Drawer, PopupConfirm, Menu and picker controls.
+  - Fix theme source namespace drift and keep Semantic Part preview contracts in the public `AtomUI.Theme` namespace.
+- Async, Motion and Caching
+  - Prevent duplicate concurrent async expand/search loads, classify explicit cancellation correctly, and close completion-publication races in the bounded theme cache.
+  - Improve feedback stacking, masonry motion, segmented selection transitions and hidden-control shutdown behavior.
+- Localization, Build and AOT
+  - Align generated design-token enums with the current source declarations; adding or renaming token properties is part of the v6.2.0 API surface.
+  - Restore canonical XLIFF ordering and Portuguese (Brazil) catalog coverage across the Gallery.
+  - Add release API and package-layout validation against the previous NuGet release and use content-addressed repository task tooling to avoid stale MSBuild assemblies.
+  - Keep linked registration, trimming and NativeAOT Gallery validation paths aligned with the expanded semantic control surface.
+
 ## 6.1.9
 
 `2026-09-11`

@@ -233,11 +233,11 @@ function Compare-Layout {
 
 $allowList = Read-AllowList -Path $AllowListPath
 $usedAllowListEntries = @{}
-foreach ($baselineVersion in $allowList.Keys) {
-    foreach ($packageId in $allowList[$baselineVersion].Keys) {
-        $key = "$baselineVersion|$packageId"
+foreach ($allowListBaselineVersion in $allowList.Keys) {
+    foreach ($packageId in $allowList[$allowListBaselineVersion].Keys) {
+        $key = "$allowListBaselineVersion|$packageId"
         $usedAllowListEntries[$key] = @{}
-        for ($index = 0; $index -lt @($allowList[$baselineVersion][$packageId]['allowed']).Count; $index++) {
+        for ($index = 0; $index -lt @($allowList[$allowListBaselineVersion][$packageId]['allowed']).Count; $index++) {
             $usedAllowListEntries[$key][$index] = $false
         }
     }
@@ -291,12 +291,12 @@ foreach ($pair in $pairs) {
 $unusedEntries = @()
 foreach ($key in $usedAllowListEntries.Keys) {
     $separator = $key.IndexOf('|', [StringComparison]::Ordinal)
-    $baselineVersion = $key.Substring(0, $separator)
+    $allowListBaselineVersion = $key.Substring(0, $separator)
     $packageId = $key.Substring($separator + 1)
-    if (-not $comparedBaselineVersions.ContainsKey($baselineVersion)) { continue }
+    if (-not $comparedBaselineVersions.ContainsKey($allowListBaselineVersion)) { continue }
     for ($index = 0; $index -lt $usedAllowListEntries[$key].Count; $index++) {
         if (-not $usedAllowListEntries[$key][$index]) {
-            $unusedEntries += "$baselineVersion / $packageId -> $(@($allowList[$baselineVersion][$packageId]['allowed'])[$index])"
+            $unusedEntries += "$allowListBaselineVersion / $packageId -> $(@($allowList[$allowListBaselineVersion][$packageId]['allowed'])[$index])"
         }
     }
 }

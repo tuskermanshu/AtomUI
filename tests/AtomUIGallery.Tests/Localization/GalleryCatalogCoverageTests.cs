@@ -120,9 +120,9 @@ public class GalleryCatalogCoverageTests
                               .ToArray();
 
         sourceFiles.Length.ShouldBe(81);
-        // 4749（feature/semantic 基线）+ 14（ComboBox Semantic 示例）+ 18（Splash Semantic 示例）
-        // + 8（release/6.0 TabControl/TabStrip 溢出搜索示例）= 4789。
-        sourceFiles.Sum(CountUnits).ShouldBe(4789);
+        // 4748（feature/semantic 基线）+ 14（ComboBox Semantic 示例）+ 18（Splash Semantic 示例）
+        // + 8（release/6.0 TabControl/TabStrip 溢出搜索示例）= 4788。
+        sourceFiles.Sum(CountUnits).ShouldBe(4788);
         foreach (var sourcePath in sourceFiles)
         {
             var targetPath = Path.Combine(

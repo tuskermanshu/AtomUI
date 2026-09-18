@@ -211,6 +211,18 @@
         <target state="translated">Superior</target>
       </segment>
     </unit>
+    <unit id="P2PlaceholderSearchTabs">
+      <segment>
+        <source>Search tabs...</source>
+        <target state="translated">Pesquisar abas...</target>
+      </segment>
+    </unit>
+    <unit id="P2TextNoMatchingTabs">
+      <segment>
+        <source>No matching tabs</source>
+        <target state="translated">Nenhuma aba correspondente</target>
+      </segment>
+    </unit>
     <unit id="P2TextTabContent">
       <segment>
         <source>Tab Content</source>
@@ -397,6 +409,18 @@
         <target state="translated">Itens de ItemSource datasource</target>
       </segment>
     </unit>
+    <unit id="TabStripOverflowPopupSearchDescription">
+      <segment>
+        <source>Customize the overflow popup with search and keyboard navigation.</source>
+        <target state="translated">Personalize o popup de excedentes com pesquisa e navegação pelo teclado.</target>
+      </segment>
+    </unit>
+    <unit id="TabStripOverflowPopupSearchTitle">
+      <segment>
+        <source>Custom Popup Search</source>
+        <target state="translated">Pesquisa personalizada no popup</target>
+      </segment>
+    </unit>
     <unit id="TabStripPositionDescription">
       <segment>
         <source>Tab's position: left, right, top or bottom. Will auto switch to top in mobile.</source>
@@ -455,30 +479,6 @@
       <segment>
         <source>Slide</source>
         <target state="translated">Slide</target>
-      </segment>
-    </unit>
-    <unit id="TabStripOverflowPopupSearchTitle">
-      <segment>
-        <source>Custom Popup Search</source>
-        <target state="translated">Pesquisa personalizada no popup</target>
-      </segment>
-    </unit>
-    <unit id="TabStripOverflowPopupSearchDescription">
-      <segment>
-        <source>Customize the overflow popup with search and keyboard navigation.</source>
-        <target state="translated">Personalize o popup de excedentes com pesquisa e navegação pelo teclado.</target>
-      </segment>
-    </unit>
-    <unit id="P2PlaceholderSearchTabs">
-      <segment>
-        <source>Search tabs...</source>
-        <target state="translated">Pesquisar abas...</target>
-      </segment>
-    </unit>
-    <unit id="P2TextNoMatchingTabs">
-      <segment>
-        <source>No matching tabs</source>
-        <target state="translated">Nenhuma aba correspondente</target>
       </segment>
     </unit>
   </file>

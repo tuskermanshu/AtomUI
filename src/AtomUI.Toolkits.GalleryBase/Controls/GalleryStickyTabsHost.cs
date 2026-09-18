@@ -342,14 +342,23 @@ public class GalleryStickyTabsHost : TemplatedControl
             return;
         }
 
-        _stickyElevationLayer = ResolveStickyElevationLayer();
-        if (_stickyElevationLayer is null)
+        var stickyPanel = _stickyPanel;
+        var stickyHost  = _inlineStickyContentHost;
+        if (stickyPanel is null || stickyHost is null)
         {
             return;
         }
 
-        var stickyHost    = _inlineStickyContentHost;
-        var stickyIndex   = _stickyPanel.StickyIndex;
+        var elevationLayer = ResolveStickyElevationLayer();
+        if (elevationLayer is null ||
+            !ReferenceEquals(_stickyPanel, stickyPanel) ||
+            !ReferenceEquals(_inlineStickyContentHost, stickyHost) ||
+            !stickyPanel.IsStickyPinned)
+        {
+            return;
+        }
+
+        var stickyIndex   = stickyPanel.StickyIndex;
         var desiredHeight = stickyHost.DesiredSize.Height;
 
         _stickySlotPlaceholder = new Border
@@ -358,8 +367,8 @@ public class GalleryStickyTabsHost : TemplatedControl
             Focusable        = false,
             IsHitTestVisible = false
         };
-        _stickyPanel.Children.Insert(stickyIndex + 1, _stickySlotPlaceholder);
-        _stickyPanel.Children.Remove(stickyHost);
+        stickyPanel.Children.Insert(stickyIndex + 1, _stickySlotPlaceholder);
+        stickyPanel.Children.Remove(stickyHost);
         _stickySlotBoundsSubscription = _stickySlotPlaceholder.GetObservable(BoundsProperty)
                                               .Subscribe(_ =>
                                               {
@@ -373,7 +382,8 @@ public class GalleryStickyTabsHost : TemplatedControl
         _elevatedDataContextApplied = true;
 
         stickyHost.ZIndex = StickyElevationZIndex;
-        _stickyElevationLayer.Children.Add(stickyHost);
+        _stickyElevationLayer = elevationLayer;
+        elevationLayer.Children.Add(stickyHost);
     }
 
     private void DemoteStickyContent()

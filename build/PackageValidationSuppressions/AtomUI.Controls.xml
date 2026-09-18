@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Intentional v6.2.0 breaking API changes: removed protected ProgressBar drawing helper and AbstractSeparator dash-style accessors. -->
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:AtomUI.Controls.Commons.AbstractGeneralProgressBar.DrawIndicatorBar(Avalonia.Media.DrawingContext,System.Double,Avalonia.Media.IBrush)</Target>
+    <Left>lib/net10.0/AtomUI.Controls.dll</Left>
+    <Right>lib/net10.0/AtomUI.Controls.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:AtomUI.Controls.Commons.AbstractSeparator.get_DashStyle</Target>
+    <Left>lib/net10.0/AtomUI.Controls.dll</Left>
+    <Right>lib/net10.0/AtomUI.Controls.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:AtomUI.Controls.Commons.AbstractSeparator.get_DotStyle</Target>
+    <Left>lib/net10.0/AtomUI.Controls.dll</Left>
+    <Right>lib/net10.0/AtomUI.Controls.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:AtomUI.Controls.Commons.AbstractGeneralProgressBar.DrawIndicatorBar(Avalonia.Media.DrawingContext,System.Double,Avalonia.Media.IBrush)</Target>
+    <Left>lib/net8.0/AtomUI.Controls.dll</Left>
+    <Right>lib/net8.0/AtomUI.Controls.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:AtomUI.Controls.Commons.AbstractSeparator.get_DashStyle</Target>
+    <Left>lib/net8.0/AtomUI.Controls.dll</Left>
+    <Right>lib/net8.0/AtomUI.Controls.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:AtomUI.Controls.Commons.AbstractSeparator.get_DotStyle</Target>
+    <Left>lib/net8.0/AtomUI.Controls.dll</Left>
+    <Right>lib/net8.0/AtomUI.Controls.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+</Suppressions>

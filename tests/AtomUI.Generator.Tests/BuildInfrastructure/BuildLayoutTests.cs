@@ -29,6 +29,11 @@ public sealed class BuildLayoutTests
         "Versions.props"
     ];
 
+    private static readonly string[] s_expectedBuildDirectories =
+    [
+        "PackageValidationSuppressions"
+    ];
+
     private static readonly string[] s_expectedNuGetBuildAssets =
     [
         "AtomUI.Generator.props",
@@ -475,12 +480,17 @@ public sealed class BuildLayoutTests
     public void Build_Root_Is_A_Flat_Explicit_MSBuild_Surface()
     {
         var buildRoot = Path.Combine(GetRepositoryRoot(), "build");
-        Directory.EnumerateDirectories(buildRoot).ShouldBeEmpty();
+        Directory.EnumerateDirectories(buildRoot)
+                 .Select(Path.GetFileName)
+                 .ShouldBe(s_expectedBuildDirectories, ignoreOrder: true);
         Directory.EnumerateFiles(buildRoot)
                  .Select(Path.GetFileName)
                  .ShouldBe(s_expectedBuildFiles, ignoreOrder: true);
         Directory.EnumerateFiles(buildRoot)
                  .All(file => Path.GetExtension(file) is ".props" or ".targets" or ".cs")
+                 .ShouldBeTrue();
+        Directory.EnumerateFiles(Path.Combine(buildRoot, "PackageValidationSuppressions"))
+                 .All(file => Path.GetExtension(file) == ".xml")
                  .ShouldBeTrue();
     }
 

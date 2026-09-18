@@ -170,6 +170,37 @@ public class BoundedThemeCacheTests
     }
 
     [Fact]
+    public async Task Concurrent_Equivalent_Requests_share_one_oversized_production()
+    {
+        var cache = CreateCache(entryLimit: 4, bytesLimit: 10);
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var attempts = 0;
+
+        var tasks = Enumerable.Range(0, 32)
+                              .Select(_ => GetOrCreateAsync(cache,
+                                  new CollisionKey("Oversized"),
+                                  async _ =>
+                                  {
+                                      Interlocked.Increment(ref attempts);
+                                      started.TrySetResult();
+                                      await release.Task;
+                                      return new CacheValue(1, 11);
+                                  }).AsTask())
+                              .ToArray();
+
+        await started.Task;
+        attempts.ShouldBe(1);
+        release.SetResult();
+        var values = await Task.WhenAll(tasks);
+
+        values.ShouldAllBe(value => ReferenceEquals(value, values[0]));
+        attempts.ShouldBe(1);
+        cache.InFlightCount.ShouldBe(0);
+        cache.Count.ShouldBe(0);
+    }
+
+    [Fact]
     public async Task Caller_Cancellation_Only_Cancels_That_Waiter_Not_The_Shared_Production()
     {
         var cache = CreateCache(entryLimit: 4, bytesLimit: 100);

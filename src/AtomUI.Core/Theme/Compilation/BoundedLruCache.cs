@@ -115,32 +115,33 @@ internal sealed class BoundedLruCache<TKey, TValue>
 
             lock (_gate)
             {
-                _inFlight.Remove(key);
                 if (retainedBytes <= _retainedBytesLimit)
                 {
                     Add(key, value, retainedBytes);
                 }
+                // Publish completion before releasing the in-flight slot. This keeps
+                // oversized values and failed productions joinable through the
+                // completion boundary instead of opening a duplicate-production
+                // window between Remove and TrySetResult/TrySetException.
+                completion.TrySetResult(value);
+                _inFlight.Remove(key);
             }
-
-            completion.TrySetResult(value);
         }
         catch (OperationCanceledException exception)
         {
-            RemoveInFlight(key);
-            completion.TrySetCanceled(exception.CancellationToken);
+            lock (_gate)
+            {
+                completion.TrySetCanceled(exception.CancellationToken);
+                _inFlight.Remove(key);
+            }
         }
         catch (Exception exception)
         {
-            RemoveInFlight(key);
-            completion.TrySetException(exception);
-        }
-    }
-
-    private void RemoveInFlight(TKey key)
-    {
-        lock (_gate)
-        {
-            _inFlight.Remove(key);
+            lock (_gate)
+            {
+                completion.TrySetException(exception);
+                _inFlight.Remove(key);
+            }
         }
     }
 

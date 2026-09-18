@@ -1,5 +1,5 @@
 using AtomUI.Theme.Schema;
-using AtomUI.Theme.SemanticParts;
+using AtomUI.Theme;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;

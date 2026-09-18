@@ -13,6 +13,7 @@
     <ItemGroup>
         <AtomUILanguage Include="$(MSBuildProjectDirectory)/Localization/SemanticPartPreviewLang/*.xlf">
             <AtomUILanguageContractVersion>3</AtomUILanguageContractVersion>
+            <AtomUILanguagePackagePath>Localization/SemanticPartPreviewLang/%(Filename)%(Extension)</AtomUILanguagePackagePath>
         </AtomUILanguage>
     </ItemGroup>
 

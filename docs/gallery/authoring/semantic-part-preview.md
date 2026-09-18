@@ -345,7 +345,7 @@ Children 删除 Visual 不能作为完整生命周期契约。
 `RestHidden=true` 的部件静止态透明/隐藏是设计语义（如 ImagePreviewer `cover` 的悬停遮罩）。语义预览激活这类部件时，
 除描边外还要把目标本体显现出来，让用户看到部件的真实视觉：
 
-- 高亮会话对每个解析出的目标设置 `AtomUI.Theme.SemanticParts.SemanticPartPreviewState.IsPreviewTarget=true`
+- 高亮会话对每个解析出的目标设置 `AtomUI.Theme.SemanticPartPreviewState.IsPreviewTarget=true`
   （会话释放与刷新时置回 `false`）。该附加属性是预览状态契约，位于 AtomUI.Core——写入方（GalleryBase 会话）与
   读取方（控件 ControlTheme）分属不同程序集，依赖方向要求契约下沉；伪类是 `protected`，外部无法设置。
 - 控件 ControlTheme 以属性条件选择器响应并自行决定显现方式。cover 遮罩的显现是把遮罩 Border 的 `Opacity` 提到 1
@@ -384,7 +384,7 @@ Modal、Message、Notification 等由服务创建且不再能从 owner Popup 到
 ### 10.1 独立窗口宿主（ISemanticPartCrossRootProvider）
 
 控件把部件活体承载在独立 TopLevel（如 ImagePreviewer 的 native 预览对话框窗口）时，模板内不存在 `Popup` 对象，
-Popup 订阅路径无从发现宿主。此类控件实现 `AtomUI.Theme.SemanticParts.ISemanticPartCrossRootProvider`：
+Popup 订阅路径无从发现宿主。此类控件实现 `AtomUI.Theme.ISemanticPartCrossRootProvider`：
 
 ```csharp
 public interface ISemanticPartCrossRootProvider

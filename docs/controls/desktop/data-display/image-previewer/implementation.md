@@ -163,7 +163,7 @@ native dialog 侧 `popup.root` 的 marker 由宿主创建路径用生成的 `Ima
 Panel 迁移到新增的全铺 `popup.mask` 子元素，根 Panel 仅保留容器职责。两个宿主通过各自的路径提供同一 `popup.root` 契约，
 `popup.mask` 只存在于 overlay 宿主，因此声明为 `Optional`。
 
-控件实现 `AtomUI.Theme.SemanticParts.ISemanticPartCrossRootProvider`（`CrossRootsChanged` + `GetCrossRoots()`），
+控件实现 `AtomUI.Theme.ISemanticPartCrossRootProvider`（`CrossRootsChanged` + `GetCrossRoots()`），
 把存活宿主（native dialog 窗口 / overlay host）上报给 Gallery 语义预览：打开（`DialogOpened`）、对话框表面模板就绪
 （`RootTemplateApplied`）与关闭回收（`DialogClosed`）位点同步抛 `CrossRootsChanged`，语义预览据此刷新跨根高亮；
 Avalonia `Popup` 宿主路径不受影响。

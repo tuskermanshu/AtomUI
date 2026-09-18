@@ -10,7 +10,8 @@
       "depth": 1,
       "tests": [
         "tests/AtomUI.Controls.Tests/**/*.cs",
-        "tests/AtomUI.Desktop.Controls.Tests/**/*.cs"
+        "tests/AtomUI.Desktop.Controls.Tests/**/*.cs",
+        "tests/AtomUI.Desktop.Controls.Rendering.Tests/**/*.cs"
       ]
     },
     {

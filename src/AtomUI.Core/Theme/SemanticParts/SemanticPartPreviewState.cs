@@ -1,6 +1,6 @@
 using Avalonia;
 
-namespace AtomUI.Theme.SemanticParts;
+namespace AtomUI.Theme;
 
 /// <summary>
 /// 语义部件预览状态契约。Gallery 语义预览在激活 <c>RestHidden</c> 部件（静止态透明/隐藏

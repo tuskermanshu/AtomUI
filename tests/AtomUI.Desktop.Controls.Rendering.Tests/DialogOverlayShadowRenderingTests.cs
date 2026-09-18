@@ -76,118 +76,6 @@ public class DialogOverlayShadowRenderingTests
         }
     }
 
-    [Fact]
-    public async Task Probe_Gallery_ModalShowCase_ConfirmMsgBox()
-    {
-        var page = new AtomUIGallery.ShowCases.Modal.ModalShowCase
-        {
-            DataContext = new AtomUIGallery.ShowCases.Modal.ModalViewModel(new TestScreen())
-        };
-        var window = new Window
-        {
-            Width      = 1280,
-            Height     = 850,
-            Background = Brushes.White,
-            Content    = page
-        };
-        window.Show();
-        window.SetRenderScaling(1);
-        Refresh(window);
-
-        var examples = page.FindControl<AtomUI.Toolkits.GalleryBase.Controls.ShowCasePanel>("ExamplesContent")
-                           .ShouldNotBeNull();
-        for (var i = 0; i <= 2; i++)
-        {
-            ((AtomUI.Toolkits.GalleryBase.Controls.ShowCaseItem)examples.Children[i]).MaterializeDeferredContent();
-        }
-        Dispatcher.UIThread.RunJobs();
-        window.UpdateLayout();
-
-        var messageBox = page.GetVisualDescendants().OfType<MessageBox>().First(c => c.Name == "ConfirmMsgBox");
-        var viewModel  = (AtomUIGallery.ShowCases.Modal.ModalViewModel)page.DataContext!;
-        var opened     = new TaskCompletionSource();
-        messageBox.Opened += (_, _) => opened.TrySetResult();
-        viewModel.IsConfirmMsgBoxOpened = true;
-        await opened.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        await Task.Delay(1200, TestContext.Current.CancellationToken);
-        Refresh(window);
-
-        string Describe(string typeName)
-        {
-            var control = window.GetVisualDescendants()
-                                .FirstOrDefault(v => v.GetType().Name == typeName) as Control;
-            if (control is null)
-            {
-                return $"{typeName}=null";
-            }
-            var transform = control.TransformToVisual(window);
-            var rect = transform is null
-                ? default
-                : new Rect(control.Bounds.Size).TransformToAABB(transform.Value);
-            return $"{typeName}=(visible={control.IsVisible},effVisible={control.IsEffectivelyVisible}," +
-                   $"opacity={control.Opacity},bounds={control.Bounds},windowRect={rect})";
-        }
-
-        using var frame = Capture(window);
-        var minX = int.MaxValue; var minY = int.MaxValue; var maxX = -1; var maxY = -1; var black = 0;
-        var rowProfile = new System.Text.StringBuilder();
-        for (var y = 0; y < frame.Height; y++)
-        {
-            var rowBlack = 0;
-            for (var x = 0; x < frame.Width; x++)
-            {
-                var p = frame.GetPixel(x, y);
-                if (p is { Red: < 64, Green: < 64, Blue: < 64 })
-                {
-                    black++;
-                    rowBlack++;
-                    if (x < minX) minX = x;
-                    if (y < minY) minY = y;
-                    if (x > maxX) maxX = x;
-                    if (y > maxY) maxY = y;
-                }
-            }
-            if (rowBlack > 100)
-            {
-                rowProfile.Append($"y={y}:{rowBlack} ");
-            }
-        }
-
-        var corner = frame.GetPixel(frame.Width - 30, 300);
-        var scalingReports = new System.Text.StringBuilder();
-        foreach (var scaling in new[] { 1.25d, 1.5d, 2d })
-        {
-            window.SetRenderScaling(scaling);
-            Refresh(window);
-            using var scaled = Capture(window);
-            var denseRows = new System.Text.StringBuilder();
-            var sBlack = 0;
-            for (var y = 0; y < scaled.Height; y++)
-            {
-                var rowBlack = 0;
-                for (var x = 0; x < scaled.Width; x++)
-                {
-                    var p = scaled.GetPixel(x, y);
-                    if (p is { Red: < 64, Green: < 64, Blue: < 64 })
-                    {
-                        sBlack++;
-                        rowBlack++;
-                    }
-                }
-                if (rowBlack > 100)
-                {
-                    denseRows.Append($"y={y}:{rowBlack} ");
-                }
-            }
-            scalingReports.Append($"[scaling={scaling} black={sBlack} denseRows={denseRows}] ");
-        }
-
-        throw new Exception(
-            $"black={black} bbox=({minX},{minY})-({maxX},{maxY}); pagePixel(1250,300)={corner}; " +
-            $"rows=[{rowProfile}]; scalingReports={scalingReports}; {Describe("DialogSurface")}; {Describe("OverlayDialogMask")}; " +
-            $"{Describe("OverlayDialogPresenter")}; {Describe("PopupFrameRenderer")}; {Describe("ShadowsAwareContainer")}");
-    }
-
     private sealed class TestScreen : ReactiveUI.IScreen
     {
         public ReactiveUI.RoutingState Router { get; } = new();
@@ -197,12 +85,15 @@ public class DialogOverlayShadowRenderingTests
     [Fact]
     public async Task Overlay_Modal_MessageBox_Dims_The_Page_With_A_Mask()
     {
-        var (window, messageBox) = await ShowConfirmMessageBoxAsync(motionEnabled: false);
+        var (window, messageBox) = await ShowConfirmMessageBoxAsync(motionEnabled: false, open: false);
         try
         {
             using var beforeOpen = Capture(window);
+            var opened = new TaskCompletionSource();
+            messageBox.Opened += (_, _) => opened.TrySetResult();
             messageBox.IsOpen = true;
-            await Task.Delay(300);
+            await opened.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            await Task.Delay(300, TestContext.Current.CancellationToken);
             Refresh(window);
             using var afterOpen = Capture(window);
 
@@ -221,7 +112,7 @@ public class DialogOverlayShadowRenderingTests
         }
     }
 
-    private static async Task<(AvaloniaWindow Window, MessageBox MessageBox)> ShowConfirmMessageBoxAsync(bool motionEnabled)
+    private static async Task<(AvaloniaWindow Window, MessageBox MessageBox)> ShowConfirmMessageBoxAsync(bool motionEnabled, bool open = true)
     {
         var button = new AvaloniaButton
         {
@@ -250,12 +141,15 @@ public class DialogOverlayShadowRenderingTests
         window.SetRenderScaling(1);
         Refresh(window);
 
-        var opened = new TaskCompletionSource();
-        messageBox.Opened += (_, _) => opened.TrySetResult();
-        messageBox.IsOpen = true;
-        await opened.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        await Task.Delay(motionEnabled ? 1000 : 300, TestContext.Current.CancellationToken);
-        Refresh(window);
+        if (open)
+        {
+            var opened = new TaskCompletionSource();
+            messageBox.Opened += (_, _) => opened.TrySetResult();
+            messageBox.IsOpen = true;
+            await opened.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            await Task.Delay(motionEnabled ? 1000 : 300, TestContext.Current.CancellationToken);
+            Refresh(window);
+        }
         return (window, messageBox);
     }
 

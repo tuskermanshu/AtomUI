@@ -4,7 +4,7 @@ using AtomUI.Controls;
 using AtomUI.Controls.Primitives;
 using AtomUI.Data;
 using AtomUI.Desktop.Controls.DesignTokens;
-using AtomUI.Theme.SemanticParts;
+using AtomUI.Theme;
 using AtomUI.Utils;
 using Avalonia;
 using Avalonia.Controls;
