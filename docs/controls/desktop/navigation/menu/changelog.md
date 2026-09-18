@@ -2,6 +2,11 @@
 
 本文档记录 Menu 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-18
+
+- 修复 pin 向所有兄弟项传播导致的开合冲突；同级活动链由 owner 维护，普通关闭使用 coercion 而非关闭后回弹。
+- 修复 Menu、分组、MenuFlyout/Dropdown 间复用残留 SemanticLevel；已实现和延迟实现后代同步到当前 owner 的专用 Style 契约。
+
 ## 2026-09-13
 
 - Features

@@ -289,6 +289,7 @@ Menu Token 只表达组件级视觉变量，例如尺寸、间距、颜色、圆
 - `src/AtomUI.Desktop.Controls/Menu/MenuItem.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemGroup.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuSemanticLevel.cs`
+- `src/AtomUI.Desktop.Controls/Menu/MenuPinnedOpenScope.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemData.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemPseudoClass.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuPopupScrollHost.cs`

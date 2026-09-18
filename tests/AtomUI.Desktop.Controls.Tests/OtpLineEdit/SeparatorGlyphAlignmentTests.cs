@@ -18,6 +18,19 @@ public class SeparatorGlyphAlignmentTests
     }
 
     [Fact]
+    public void Presenter_Scopes_Shaped_Buffer_Outside_The_Glyph_Run()
+    {
+        var source = File.ReadAllText(FindPresenterSource());
+        var shaped = source.IndexOf("var shaped = TextShaper.Current.ShapeText", StringComparison.Ordinal);
+        shaped.ShouldBeGreaterThanOrEqualTo(0);
+        source.IndexOf("using var shaped", StringComparison.Ordinal)
+              .ShouldBeGreaterThanOrEqualTo(0,
+                  "ShapeText returns an independently owned ShapedBuffer and must be disposed on every exit path.");
+        var glyphRun = source.IndexOf("using var glyphRun", shaped, StringComparison.Ordinal);
+        glyphRun.ShouldBeGreaterThan(shaped);
+    }
+
+    [Fact]
     public void Presenter_Falls_Back_To_No_Transform_When_Ink_Metrics_Are_Unavailable()
     {
         // headless 测试宿主使用 BareMinimum 桩字体，字形度量退化，
@@ -94,6 +107,22 @@ public class SeparatorGlyphAlignmentTests
             window.Close();
             Dispatcher.UIThread.RunJobs();
         }
+    }
+
+    private static string FindPresenterSource()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName,
+                "src/AtomUI.Desktop.Controls/OtpLineEdit/OtpSeparatorPresenter.cs");
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+            directory = directory.Parent;
+        }
+        throw new FileNotFoundException("Could not locate OtpSeparatorPresenter.cs.");
     }
 
     private static Point CenterInWindow(Visual visual, Avalonia.Controls.Window window)

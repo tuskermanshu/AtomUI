@@ -281,6 +281,7 @@ TabControl Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - `src/AtomUI.Desktop.Controls/TabControl/TabControl.cs` 与 `CardTabControl.cs`：Line/Card 容器、选中指示器和 add button 外观接入；两控件在容器创建与准备入口同步 `semantic-item` marker。
 - `src/AtomUI.Desktop.Controls/TabControl/TabStrip`：同一家族的无内容页 owner 与 Line/Card 外观，复用上述 overflow 基础设施。
 - `src/AtomUI.Desktop.Controls/TabControl` 下的 `TabControl.SemanticParts.cs`、`CardTabControl.SemanticParts.cs`、`TabItem.SemanticParts.cs` 与 `TabStrip` 目录下的 `TabStrip.SemanticParts.cs`、`CardTabStrip.SemanticParts.cs`、`TabStripItem.SemanticParts.cs`：各 owner 的公开 Semantic Part descriptor 与 marker class 常量。
+
 职责边界：
 
 - 控件主文件保留 public/protected API、Avalonia 属性注册、事件和主要生命周期入口。

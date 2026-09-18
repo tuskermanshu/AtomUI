@@ -35,7 +35,21 @@ public class MenuItemGroup : ItemsControl
     private const string ItemTitleGroupClass = "semantic-item-title-group";
 
     // 分组所在层级由 owner 在 prepare 时下发；分组内的菜单项继承该层级。
-    internal MenuSemanticLevel SemanticLevel { get; set; }
+    private MenuSemanticLevel _semanticLevel;
+
+    internal MenuSemanticLevel SemanticLevel
+    {
+        get => _semanticLevel;
+        set
+        {
+            MenuSemanticLevelScope.ApplyGroupLevel(this, value);
+            if (_semanticLevel != value)
+            {
+                _semanticLevel = value;
+                MenuSemanticLevelScope.ApplyChildrenLevel(this, value);
+            }
+        }
+    }
 
     public MenuItemGroup()
     {
@@ -120,6 +134,12 @@ public class MenuItemGroup : ItemsControl
         }
     }
 
+    protected override void ContainerForItemPreparedOverride(Control container, object? item, int index)
+    {
+        base.ContainerForItemPreparedOverride(container, item, index);
+        MenuPinnedOpenScope.ContainersChanged(Parent);
+    }
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
@@ -127,15 +147,27 @@ public class MenuItemGroup : ItemsControl
          .Classes.Add(DropdownButtonSemanticParts.ItemTitleClass);
     }
 
-    // 分组内的菜单项继承分组层级：顶层分组内的项算一级，子菜单内分组里的项算子菜单项。
+    // Explicit containers do not always receive a generator clear callback.
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == ParentProperty && Parent is null)
+        {
+            SemanticLevel = MenuSemanticLevel.None;
+        }
+    }
+
+    protected override void ClearContainerForItemOverride(Control container)
+    {
+        if (container is MenuItem item)
+        {
+            item.SemanticLevel = MenuSemanticLevel.None;
+        }
+        base.ClearContainerForItemOverride(container);
+    }
+
     private void ApplyChildSemanticLevel(MenuItem menuItem)
     {
-        if (SemanticLevel == MenuSemanticLevel.None)
-        {
-            return;
-        }
-
         menuItem.SemanticLevel = SemanticLevel;
-        MenuSemanticLevelScope.ApplyItemLevel(menuItem, SemanticLevel);
     }
 }

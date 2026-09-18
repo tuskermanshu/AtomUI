@@ -310,7 +310,7 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
         popup[!PopupControl.ShouldUseOverlayLayerProperty]  = this[!ShouldUseOverlayPopupProperty];
         this[!IsPopupHorizontalFlippedProperty]             = popup[!PopupControl.IsHorizontalFlippedProperty];
         this[!IsPopupVerticalFlippedProperty]               = popup[!PopupControl.IsVerticalFlippedProperty];
-        ApplyPopupPinnedOpenSettings(popup);
+        ApplyLightDismissConfiguration(popup);
 
         popup.Opened += HandlePopupOpened;
         popup.Opened += this.OnPopupOpened;
@@ -415,7 +415,7 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
         if (Popup is PopupControl popup)
         {
             popup.SetCurrentValue(PopupControl.IsPopupPinnedOpenProperty, IsPopupPinnedOpen);
-            ApplyPopupPinnedOpenSettings(popup);
+            ApplyLightDismissConfiguration(popup);
         }
         return base.ShowAtCore(placementTarget, showAtPointer);
     }
@@ -452,7 +452,7 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
              change.Property == IsLightDismissEnabledProperty) &&
             Popup is PopupControl popup)
         {
-            ApplyPopupPinnedOpenSettings(popup);
+            ApplyLightDismissConfiguration(popup);
         }
 
         if (change.Property == IsArrowVisibleProperty ||
@@ -479,11 +479,11 @@ public class Flyout : PopupFlyoutBase, IMotionAwareControl
         }
     }
 
-    private void ApplyPopupPinnedOpenSettings(PopupControl popup)
+    private void ApplyLightDismissConfiguration(PopupControl popup)
     {
         popup.SetCurrentValue(
             AvaloniaPopup.IsLightDismissEnabledProperty,
-            IsLightDismissEnabled && !IsPopupPinnedOpen);
+            IsLightDismissEnabled);
     }
 
     protected void ConfigureShowArrowEffective()

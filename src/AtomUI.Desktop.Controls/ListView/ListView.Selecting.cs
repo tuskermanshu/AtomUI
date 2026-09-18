@@ -232,7 +232,11 @@ public partial class ListView
     {
         base.ContainerForItemPreparedOverride(container, item, index);
         SetContainerEntry(container, index);
-        MarkContainerSelected(container, container is ListViewItem listItem && listItem.EntryId is not null && _selection.SelectedEntryIds.Contains(listItem.EntryId.Value));
+        if (container is ListViewItem listItem)
+        {
+            listItem.IsSplitLineVisible = ShouldShowSplitLine(index == ItemCount - 1);
+        }
+        MarkContainerSelected(container, container is ListViewItem selectedItem && selectedItem.EntryId is not null && _selection.SelectedEntryIds.Contains(selectedItem.EntryId.Value));
         if (_selection.AnchorIndex == SourceIndexFromViewIndex(index))
         {
             KeyboardNavigation.SetTabOnceActiveElement(this, container);
@@ -243,7 +247,11 @@ public partial class ListView
     {
         base.ContainerIndexChangedOverride(container, oldIndex, newIndex);
         SetContainerEntry(container, newIndex);
-        MarkContainerSelected(container, container is ListViewItem listItem && listItem.EntryId is not null && _selection.SelectedEntryIds.Contains(listItem.EntryId.Value));
+        if (container is ListViewItem listItem)
+        {
+            listItem.IsSplitLineVisible = ShouldShowSplitLine(newIndex == ItemCount - 1);
+        }
+        MarkContainerSelected(container, container is ListViewItem selectedItem && selectedItem.EntryId is not null && _selection.SelectedEntryIds.Contains(selectedItem.EntryId.Value));
     }
 
     private void SetContainerEntry(Control container, int viewIndex)

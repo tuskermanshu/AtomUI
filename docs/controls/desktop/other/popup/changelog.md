@@ -2,6 +2,11 @@
 
 本文档记录 Popup 控件级 API、Theme、Token、实现结构和设计契约变化，不替代仓库根目录 `CHANGELOG.md`。
 
+## 2026-09-18
+
+- 将 pin 对 light-dismiss 的有效值计算收敛到共享 Popup，保留原始配置与绑定。
+- 运行中同步当前 Popup 会话的遮罩 registration，不重建 host，不通过隐藏共享遮罩影响其他弹层。
+
 ## 2026-09-17
 
 - Design

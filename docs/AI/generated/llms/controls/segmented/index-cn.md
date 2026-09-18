@@ -238,7 +238,7 @@ SegmentedTheme / SegmentedItemTheme
 track + selected thumb + item states
 ```
 
-根控件在 `Render()` 中绘制轨道背景和选中滑块。item 模板绘制每个选项自身的背景、图标、内容和状态颜色。选中滑块位置来自当前选中容器相对根控件的坐标，尺寸来自当前选中容器最终排列后的 `Bounds.Size`。
+根控件在 `Render()` 中绘制轨道背景和选中滑块。item 模板绘制每个选项自身的 hover/pressed 背景遮罩、图标、内容和状态颜色。选中背景由选中滑块独占承载：item 的 `:selected` 不绘制背景，选中滑块飞行途中目标项也不会提前点亮；滑块飞行期间非选中 item 的 hover/pressed 背景遮罩被屏蔽，对齐上游 `thumb ~ item::after` 透明规则。无选中项时滑块不绘制。选中滑块位置来自当前选中容器相对根控件的坐标，尺寸来自当前选中容器最终排列后的 `Bounds.Size`。
 
 `Shape=Default` 时，根、item 和滑块圆角继续由 SizeType 对应的 SharedToken 决定。`Shape=Round` 时，Shape 分支在 SizeType 分支之后统一覆盖根、item 和滑块圆角为胶囊几何；该覆盖不新增 Design Token，也不改变模板结构。
 
@@ -266,6 +266,8 @@ Segmented 不依赖运行时反射或动态成员访问。主题协作通过固�
 - 容器的 `SizeType`、`Shape` 和 `IsMotionEnabled` 是生成容器与 owner 的固定关系，生命周期由容器准备和 Avalonia 绑定系统管理。
 - `SelectionChanged` 订阅必须在 attach/detach 中成对管理。
 - 选中滑块动画只在 `IsMotionEnabled=true` 时通过 transitions 启用。
+- 滑块飞行计时器（`DispatcherTimer`）在 detach 时必须停止并清理抑制态，避免回调持有已分离控件；其生命周期与
+  ControlTheme 声明的过渡时长绑定，修改主题过渡时长会自动跟随，不存在第二份时长配置。
 
 方向和 Shape 不新增 Visual、缓存、timer、subscription 或运行时对象图。Panel 的 measure/arrange 仍为 O(n)，Shape 只增加一个 owner-to-container AvaloniaProperty 绑定；滑块继续使用值类型的 `Point` 和 `Size`，不拆分为方向专用 motion 对象。
 
@@ -297,6 +299,7 @@ Gallery 和测试：
 
 - `controlgallery/AtomUIGallery/ShowCases/DataDisplay/Segmented/`：Segmented 示例、源码片段和本地化文案。
 - `tests/AtomUI.Desktop.Controls.Tests/Segmented/SegmentedSelectionInitializationTests.cs`：选择初始化、Form value 和 expanding 布局回归测试。
+- `tests/AtomUI.Desktop.Controls.Tests/Segmented/SegmentedThumbMotionTests.cs`：选中滑块动效契约测试（过渡时长/缓动、选中 item 背景透明、飞行抑制态生命周期、无选中隐藏滑块、detach 清理）。
 - `tests/AtomUI.Desktop.Controls.Tests/SizeType/CustomizableSizeTypeContractTests.cs`：`ICustomizableSizeTypeAware` 契约测试。
 - `tests/AtomUIGallery.Tests/ShowCases/SegmentedShowCasePageTests.cs`：Gallery 页面结构和示例快照测试。
 

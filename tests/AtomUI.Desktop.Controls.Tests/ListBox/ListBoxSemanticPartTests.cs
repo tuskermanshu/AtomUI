@@ -1,3 +1,4 @@
+using AtomUI.Theme.Styling;
 using System.Collections.ObjectModel;
 using AtomUI.Controls.Data;
 using AtomUI.Controls.Primitives;
@@ -60,6 +61,43 @@ public class ListBoxSemanticPartTests
         ShowInWindow(listBox, () =>
         {
             GetSemanticItems(listBox).Length.ShouldBe(3);
+        });
+    }
+
+    [Fact]
+    public void Explicit_Item_Container_Receives_The_Semantic_Marker()
+    {
+        var view = new SemanticParts.SemanticRepairStylesView();
+        var listBox = view.FindControl<AtomListBox>("ListBox").ShouldNotBeNull();
+        var style = view.Styles.OfType<Style>().SelectMany(owner => owner.Children)
+            .OfType<ListBoxItemStyle>().ShouldHaveSingleItem();
+        style.Setters.OfType<Setter>().Single(setter => setter.Property == Control.TagProperty)
+            .Value.ShouldBe("item");
+        style.Setters.OfType<Setter>().Single(setter => setter.Property == TemplatedControl.BackgroundProperty)
+            .Value.ShouldBe(Brushes.Red);
+        ShowInWindow(view, () =>
+        {
+            var item = GetContainers(listBox).Single();
+            item.Classes.Contains(ItemClass).ShouldBeTrue();
+            item.Tag.ShouldBe("item");
+            item.Background.ShouldBe(Brushes.Red);
+        });
+    }
+
+    [Fact]
+    public void Divider_Uses_Container_Position_Not_Item_Reference()
+    {
+        object repeated = new();
+        var listBox = new AtomListBox
+        {
+            ItemsSource = new object[] { repeated, new object(), repeated }
+        };
+
+        ShowInWindow(listBox, () =>
+        {
+            GetSemanticItems(listBox).Select(GetSplitLineFrame)
+                .Select(static frame => frame.IsVisible)
+                .ShouldBe([true, true, false]);
         });
     }
 

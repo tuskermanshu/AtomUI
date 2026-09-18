@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
+using Avalonia.Layout;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -77,6 +78,30 @@ public class BreadcrumbSemanticPartTests
     {
         AssertNoSemanticSelectors("src/AtomUI.Desktop.Controls/Breadcrumb/Themes/BreadcrumbTheme.axaml");
         AssertNoSemanticSelectors("src/AtomUI.Desktop.Controls/Breadcrumb/Themes/BreadcrumbItemTheme.axaml");
+    }
+
+    [Fact]
+    public void Separator_Margin_Is_Counted_Exactly_Once_In_Flow_Layout()
+    {
+        var view = new SemanticParts.SemanticRepairStylesView();
+        var breadcrumb = view.FindControl<AtomUIBreadcrumb>("Breadcrumb").ShouldNotBeNull();
+        var style = view.Styles.OfType<Style>().SelectMany(owner => owner.Children)
+            .OfType<BreadcrumbSeparatorStyle>().ShouldHaveSingleItem();
+        style.Setters.OfType<Setter>().Single(setter => setter.Property == Layoutable.MarginProperty)
+            .Value.ShouldBe(new Thickness(10, 0));
+        var codeBehind = File.ReadAllText(GetRepoFile(
+            "tests/AtomUI.Desktop.Controls.Tests/SemanticParts/SemanticRepairStylesView.axaml.cs"));
+        codeBehind.ShouldNotContain("Loaded");
+        codeBehind.ShouldNotContain("Unloaded");
+        codeBehind.ShouldNotContain("FindControl");
+        codeBehind.ShouldNotContain("NameScope");
+        ShowInWindow(view, () =>
+        {
+            var separator = GetSemanticSeparators(breadcrumb).Single();
+            breadcrumb.DesiredSize.Width.ShouldBe(110d);
+            separator.Bounds.Left.ShouldBe(50d);
+            separator.Bounds.Width.ShouldBe(10d);
+        });
     }
 
     [Fact]
@@ -225,6 +250,69 @@ public class BreadcrumbSemanticPartTests
             GetSemanticItems(breadcrumb).Length.ShouldBe(3);
             GetSemanticSeparators(breadcrumb).Length.ShouldBe(2);
         });
+    }
+
+    [Fact]
+    public void Adding_Item_Keeps_Existing_Separator_Attached_And_Reuses_It()
+    {
+        var breadcrumb = new AtomUIBreadcrumb
+        {
+            Items =
+            {
+                new AtomUIBreadcrumbItem { Content = "Home" },
+                new AtomUIBreadcrumbItem { Content = "Application" }
+            }
+        };
+
+        ShowInWindow(breadcrumb, () =>
+        {
+            var separator = GetSemanticSeparators(breadcrumb).Single();
+            var attachedCount = 0;
+            var detachedCount = 0;
+            separator.AttachedToVisualTree += (_, _) => attachedCount++;
+            separator.DetachedFromVisualTree += (_, _) => detachedCount++;
+
+            breadcrumb.Items.Add(new AtomUIBreadcrumbItem { Content = "Detail" });
+            Dispatcher.UIThread.RunJobs();
+
+            var separators = GetSemanticSeparators(breadcrumb);
+            separators.Length.ShouldBe(2);
+            separators[0].ShouldBeSameAs(separator);
+            attachedCount.ShouldBe(0);
+            detachedCount.ShouldBe(0);
+        });
+    }
+
+    [Fact]
+    public void Pending_Separator_Update_Is_Cancelled_On_Detach_And_Rebuilt_On_Reattach()
+    {
+        var breadcrumb = new AtomUIBreadcrumb
+        {
+            Items = { new AtomUIBreadcrumbItem { Content = "A" }, new AtomUIBreadcrumbItem { Content = "B" } }
+        };
+        var window = new AvaloniaWindow { Width = 500, Height = 200, Content = breadcrumb };
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            var oldSeparator = GetSemanticSeparators(breadcrumb).Single();
+            breadcrumb.Items.Add(new AtomUIBreadcrumbItem { Content = "C" });
+            window.Content = null;
+            Dispatcher.UIThread.RunJobs();
+            oldSeparator.GetVisualParent().ShouldBeNull();
+            oldSeparator.Parent.ShouldBeNull();
+            breadcrumb.Items.Clear();
+            breadcrumb.Items.Add(new AtomUIBreadcrumbItem { Content = "New", Separator = ":" });
+            breadcrumb.Items.Add(new AtomUIBreadcrumbItem { Content = "Tail" });
+            window.Content = breadcrumb;
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+            GetSemanticSeparators(breadcrumb).Single().Content.ShouldBe(":");
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     [Fact]

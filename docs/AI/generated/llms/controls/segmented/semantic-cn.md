@@ -251,7 +251,7 @@ SegmentedTheme / SegmentedItemTheme
 track + selected thumb + item states
 ```
 
-根控件在 `Render()` 中绘制轨道背景和选中滑块。item 模板绘制每个选项自身的背景、图标、内容和状态颜色。选中滑块位置来自当前选中容器相对根控件的坐标，尺寸来自当前选中容器最终排列后的 `Bounds.Size`。
+根控件在 `Render()` 中绘制轨道背景和选中滑块。item 模板绘制每个选项自身的 hover/pressed 背景遮罩、图标、内容和状态颜色。选中背景由选中滑块独占承载：item 的 `:selected` 不绘制背景，选中滑块飞行途中目标项也不会提前点亮；滑块飞行期间非选中 item 的 hover/pressed 背景遮罩被屏蔽，对齐上游 `thumb ~ item::after` 透明规则。无选中项时滑块不绘制。选中滑块位置来自当前选中容器相对根控件的坐标，尺寸来自当前选中容器最终排列后的 `Bounds.Size`。
 
 `Shape=Default` 时，根、item 和滑块圆角继续由 SizeType 对应的 SharedToken 决定。`Shape=Round` 时，Shape 分支在 SizeType 分支之后统一覆盖根、item 和滑块圆角为胶囊几何；该覆盖不新增 Design Token，也不改变模板结构。
 
@@ -301,6 +301,10 @@ SegmentedToken 不承载以下状态：
 - 生成容器必须接收 owner 的 `SizeType`、`Shape` 和 `IsMotionEnabled`。
 - 水平 `IsExpanding` 只能按可见 `AbstractSegmentedItem` 计数；垂直模式不能扩展父容器高度。
 - 选中滑块矩形必须跟随当前选中容器最终的 `Bounds` 布局结果。
+- 选中背景只能由根 render 层滑块表达；item 的 `:selected` 不得恢复背景绘制。
+- 滑块首次出现、无选中来源、布局校准和过渡未就绪路径必须瞬移，只有选择变化且滑块已可见时才允许飞行。
+- 无选中项时滑块必须停止绘制；飞行抑制态必须有确定的清除路径（计时器 tick 或 detach）。
+- 滑块飞行期间非选中 item 的 hover/pressed 背景遮罩必须被屏蔽。
 - 键盘导航必须首尾循环并跳过 disabled 和 hidden item。
 - Round 必须覆盖所有 SizeType 圆角，但不能改变其他尺寸、颜色、状态或模板契约。
 - 根 render 绘制和 item 主题状态不能互相替代；轨道/滑块在根，item 状态在 item。

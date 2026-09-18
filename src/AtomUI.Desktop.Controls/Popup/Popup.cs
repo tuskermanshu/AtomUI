@@ -191,6 +191,7 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
     private CancellationTokenSource? _motionCts;
     private PopupMotionActor? _motionActor;
     private TopLevel? _openTopLevel;
+    private PopupLightDismissRegistration? _lightDismissRegistration;
 
     #endregion
 
@@ -211,6 +212,8 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
     {
         IsOpenProperty.OverrideMetadata<Popup>(
             new StyledPropertyMetadata<bool>(coerce: CoerceIsOpen));
+        IsLightDismissEnabledProperty.OverrideMetadata<Popup>(
+            new StyledPropertyMetadata<bool>(coerce: (sender, value) => value && !((Popup)sender).IsPopupPinnedOpen));
     }
 
     public Popup()
@@ -230,6 +233,11 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
         _openTopLevel = ResolvePlacementTarget() is { } target
             ? TopLevel.GetTopLevel(target)
             : null;
+        _lightDismissRegistration?.Dispose();
+        _lightDismissRegistration = ResolvePlacementTarget() is { } placementTarget
+            ? PopupLightDismissRegistration.Acquire(this, placementTarget)
+            : null;
+        _lightDismissRegistration?.Update(this);
         _closeMotionState = MotionExecutionState.Idle;
         AttachWheelGuard();
         UpdatePlacementTransformTracker();
@@ -264,6 +272,8 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
     private void HandlePopupClosed(object? sender, EventArgs e)
     {
         _hasRaisedOpened = false;
+        _lightDismissRegistration?.Dispose();
+        _lightDismissRegistration = null;
         CancelMotion();
         _closeMotionState             = MotionExecutionState.Idle;
         _isLogicallyAttachedAtOpen    = false;
@@ -527,8 +537,14 @@ public class Popup : AvaloniaPopup, IMotionAwareControl
         {
             ConfigureFrameShadow();
         }
+        else if (change.Property == IsLightDismissEnabledProperty ||
+                 change.Property == OverlayInputPassThroughElementProperty)
+        {
+            _lightDismissRegistration?.Update(this);
+        }
         else if (change.Property == IsPopupPinnedOpenProperty)
         {
+            CoerceValue(IsLightDismissEnabledProperty);
             if (change.GetNewValue<bool>())
             {
                 _isPinnedOpenSuspended = false;

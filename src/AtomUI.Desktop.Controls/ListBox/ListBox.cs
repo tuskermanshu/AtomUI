@@ -344,7 +344,10 @@ public partial class ListBox : AvaloniaListBox,
     protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
     {
         var listBoxItem = new ListBoxItem();
-        listBoxItem.Classes.Add(ListBoxSemanticParts.ItemClass);
+        if (GetType() == typeof(ListBox))
+        {
+            listBoxItem.Classes.Add(ListBoxSemanticParts.ItemClass);
+        }
         NotifyContainerForItemCreated(listBoxItem, item);
         return listBoxItem;
     }
@@ -370,7 +373,12 @@ public partial class ListBox : AvaloniaListBox,
         base.PrepareContainerForItemOverride(container, item, index);
         if (container is ListBoxItem listBoxItem)
         {
-            listBoxItem.IsSplitLineVisible = ShouldShowSplitLine(IsLastItem(item));
+            if (GetType() == typeof(ListBox))
+            {
+                listBoxItem.Classes.Add(ListBoxSemanticParts.ItemClass);
+            }
+
+            listBoxItem.IsSplitLineVisible = ShouldShowSplitLine(index == ItemCount - 1);
             if (ItemTemplate != null)
             {
                 listBoxItem[!ListBoxItem.ContentTemplateProperty] = this[!ItemTemplateProperty];
@@ -451,9 +459,9 @@ public partial class ListBox : AvaloniaListBox,
         return IsBorderless || !isLastItem;
     }
 
-    private bool IsLastItem(object? item)
+    private bool IsLastItem(Control container)
     {
-        return Items.Count > 0 && ReferenceEquals(Items[Items.Count - 1], item);
+        return IndexFromContainer(container) == ItemCount - 1;
     }
 
     private void RefreshContainerSplitLines()
@@ -474,8 +482,7 @@ public partial class ListBox : AvaloniaListBox,
                 continue;
             }
 
-            var isLast = IsLastItem(listBoxItem) || IsLastItem(listBoxItem.Content);
-            listBoxItem.IsSplitLineVisible = ShouldShowSplitLine(isLast);
+            listBoxItem.IsSplitLineVisible = ShouldShowSplitLine(IsLastItem(listBoxItem));
         }
     }
     

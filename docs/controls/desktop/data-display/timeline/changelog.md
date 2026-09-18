@@ -2,6 +2,10 @@
 
 本文档记录 Timeline 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-18
+
+- 将 header/title/content 默认对齐移至 ControlTheme，移除布局阶段的 LocalValue 写入，支持专用 Semantic Style 覆盖、移除及动态方向/Mode 切换。
+
 ## 2026-08-19
 
 - Design

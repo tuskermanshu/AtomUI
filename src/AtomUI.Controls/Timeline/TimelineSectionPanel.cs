@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Layout;
-using Avalonia.Media;
 
 namespace AtomUI.Controls.Commons;
 
@@ -223,7 +222,6 @@ internal class TimelineSectionPanel : Panel
                 contentPresenter.Arrange(leftRect);
             }
 
-            AlignTextTowardAxis(headerPanel, contentPresenter, effectiveMode);
         }
         else
         {
@@ -336,70 +334,6 @@ internal class TimelineSectionPanel : Panel
         }
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-        SetupItemsHorizontalAlignment();
-    }
-
-    private void SetupItemsHorizontalAlignment()
-    {
-        if (LogicalChildren.Count == 0)
-        {
-            return;
-        }
-
-        var headerPanel      = GetHeaderPanel();
-        var contentPresenter = GetContentPresenter();
-        if (Orientation == Orientation.Horizontal)
-        {
-            if (Mode == TimelineMode.Alternate || IsLabelLayout)
-            {
-                headerPanel.HorizontalAlignment      = HorizontalAlignment.Center;
-                contentPresenter.HorizontalAlignment = HorizontalAlignment.Center;
-            }
-            else
-            {
-                headerPanel.HorizontalAlignment      = HorizontalAlignment.Stretch;
-                contentPresenter.HorizontalAlignment = HorizontalAlignment.Stretch;
-            }
-
-            return;
-        }
-
-        var effectiveMode = GetEffectiveMode();
-        if (IsLabelLayout || Mode == TimelineMode.Alternate)
-        {
-            // 对齐上游 alternate 布局：header 与 content 各自铺满所在列槽，
-            // 文本在槽内朝轴线对齐（title/content 的语义框为整列）。
-            headerPanel.HorizontalAlignment      = HorizontalAlignment.Stretch;
-            contentPresenter.HorizontalAlignment = HorizontalAlignment.Stretch;
-        }
-        else
-        {
-            if (effectiveMode == TimelineMode.Start)
-            {
-                contentPresenter.HorizontalAlignment = HorizontalAlignment.Left;
-            }
-            else
-            {
-                contentPresenter.HorizontalAlignment = HorizontalAlignment.Right;
-            }
-        }
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-        if (change.Property == IsOddProperty ||
-            change.Property == ModeProperty ||
-            change.Property == OrientationProperty ||
-            change.Property == IsLabelLayoutProperty)
-        {
-            SetupItemsHorizontalAlignment();
-        }
-    }
-
     private TimelineMode GetEffectiveMode()
     {
         if (Mode != TimelineMode.Alternate)
@@ -408,32 +342,6 @@ internal class TimelineSectionPanel : Panel
         }
 
         return IsOdd ? TimelineMode.End : TimelineMode.Start;
-    }
-
-    private static void AlignTextTowardAxis(
-        StackPanel headerPanel,
-        ContentPresenter contentPresenter,
-        TimelineMode effectiveMode)
-    {
-        // 文本朝向轴线：Start 时 title 靠右、content 靠左；End 时相反。
-        TextAlignment titleAlignment = effectiveMode == TimelineMode.Start
-            ? TextAlignment.Right
-            : TextAlignment.Left;
-        TextAlignment contentAlignment = effectiveMode == TimelineMode.Start
-            ? TextAlignment.Left
-            : TextAlignment.Right;
-        foreach (var child in headerPanel.Children)
-        {
-            if (child is TextBlock title)
-            {
-                title.TextAlignment = titleAlignment;
-            }
-        }
-
-        if (contentPresenter.Child is TextBlock contentText)
-        {
-            contentText.TextAlignment = contentAlignment;
-        }
     }
 
     private TimelineIndicator GetTimelineIndicator()

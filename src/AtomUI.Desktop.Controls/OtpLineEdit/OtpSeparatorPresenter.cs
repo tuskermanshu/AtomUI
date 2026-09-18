@@ -64,7 +64,7 @@ internal sealed class OtpSeparatorPresenter : ContentControl
         }
 
         var memory = text.AsMemory();
-        var shaped = TextShaper.Current.ShapeText(
+        using var shaped = TextShaper.Current.ShapeText(
             memory,
             new TextShaperOptions(glyphTypeface, FontSize, 0, CultureInfo.CurrentCulture));
         if (shaped.Length == 0)

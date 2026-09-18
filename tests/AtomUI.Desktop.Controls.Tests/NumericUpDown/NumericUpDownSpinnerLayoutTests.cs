@@ -110,6 +110,54 @@ public class NumericUpDownSpinnerLayoutTests
     }
 
     [Fact]
+    public void Suffix_Group_Recomputes_Shift_When_Size_Changes_While_Hovered()
+    {
+        var numericUpDown = new AtomUINumericUpDown
+        {
+            Width = 320,
+            Mode = NumericUpDownMode.Input,
+            Value = 3m,
+            InnerRightContent = "kg",
+            IsMotionEnabled = false
+        };
+
+        var window = new AvaloniaWindow { Width = 480, Height = 120, Content = numericUpDown };
+        window.Show();
+        numericUpDown.ApplyTemplate();
+        window.UpdateLayout();
+        Dispatcher.UIThread.RunJobs();
+        window.UpdateLayout();
+        Dispatcher.UIThread.RunJobs();
+
+        try
+        {
+            var suffix = numericUpDown.GetVisualDescendants()
+                                      .OfType<StackPanel>()
+                                      .Single(control => control.Classes.Contains("semantic-suffix"));
+            var decoratedBox = numericUpDown.GetVisualDescendants()
+                                            .OfType<ButtonSpinnerDecoratedBox>()
+                                            .Single();
+            decoratedBox.IsSpinnerContentHover = true;
+            Dispatcher.UIThread.RunJobs();
+            var middleShift = suffix.RenderTransform.ShouldNotBeNull().Value.M31;
+
+            numericUpDown.SizeType = CustomizableSizeType.Small;
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            var smallShift = suffix.RenderTransform.ShouldNotBeNull().Value.M31;
+            smallShift.ShouldNotBe(middleShift);
+            smallShift.ShouldBe(-decoratedBox.EffectiveContentPadding.Right * 1.5, 0.001);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [Fact]
     public void Suffix_Group_Keeps_A_Visible_Gap_From_The_Spinner_Action_Divider()
     {
         var numericUpDown = new AtomUINumericUpDown

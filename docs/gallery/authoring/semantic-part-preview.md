@@ -408,7 +408,7 @@ public interface ISemanticPartCrossRootProvider
 `popup.list`、`popup.listItem` 随时可解析、可高亮：
 
 1. XAML 上设置 `IsDropDownOpen="True"` + `IsPopupPinnedOpen="True"`（钉住后忽略 light-dismiss 关闭请求）。
-2. 产品控件负责在弹层打开前抑制 light-dismiss 遮罩（见架构文档 9.1）；预览基础设施不得在 Popup 打开后改写
+2. 产品控件在弹层打开前 relay pin，共享 Popup 负责首次打开及运行中 pin 变化的 light-dismiss 注册（见架构文档 9.1）；预览基础设施不得直接改写
    `IsLightDismissEnabled`——Avalonia 仅在打开瞬间读取该属性，打开后修改无效，该路径已被实现并否定。
    注意第 1 条的 `IsDropDownOpen="True"` 是**挂载前**就为 true：若产品控件的模板把弹层写成
    `IsOpen="{TemplateBinding IsDropDownOpen}"`，弹层会在模板充气阶段打开，早于控件的遮罩抑制，于是留下一个

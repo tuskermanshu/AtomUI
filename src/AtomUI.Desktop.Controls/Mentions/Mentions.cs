@@ -689,7 +689,7 @@ public partial class Mentions : TemplatedControl,
             {
                 _popup.OverlayInputPassThroughElement = _textArea;
             }
-            ApplyPopupPinnedOpenSettings();
+
         }
         
         ConfigurePopupPlacement();
@@ -758,7 +758,6 @@ public partial class Mentions : TemplatedControl,
         }
         else if (change.Property == IsPopupPinnedOpenProperty)
         {
-            ApplyPopupPinnedOpenSettings();
             if (change.GetNewValue<bool>() && !IsDropDownOpen)
             {
                 SetCurrentValue(IsDropDownOpenProperty, true);
@@ -766,23 +765,6 @@ public partial class Mentions : TemplatedControl,
         }
     }
 
-    private void ApplyPopupPinnedOpenSettings()
-    {
-        if (_popup is null)
-        {
-            return;
-        }
-
-        if (IsPopupPinnedOpen)
-        {
-            // 与 Select 家族相同:必须以 LocalValue 赶在打开之前抑制遮罩。
-            _popup.IsLightDismissEnabled = false;
-        }
-        else
-        {
-            _popup.ClearValue(Popup.IsLightDismissEnabledProperty);
-        }
-    }
 
     #endregion
 

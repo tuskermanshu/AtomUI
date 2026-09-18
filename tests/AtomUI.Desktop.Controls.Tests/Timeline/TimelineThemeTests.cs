@@ -1,3 +1,4 @@
+using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -43,8 +44,15 @@ public class TimelineThemeTests
         itemTheme.ShouldContain("<Setter Property=\"Padding\" Value=\"{atom:TimelineTokenResource ItemPaddingBottom}\" />");
         CountOccurrences(itemTheme, "ItemPaddingBottomLG").ShouldBe(2);
         itemTheme.ShouldContain("AxisOverflow=\"{TemplateBinding Padding}\"");
-        itemTheme.ShouldNotContain("atom|TextBlock#Label");
-        itemTheme.ShouldNotContain("ContentPresenter#ContentPresenter\"");
+        // Alignment setters on text nodes are valid; spacing must stay on the item.
+        var styles = XDocument.Parse(itemTheme).Descendants()
+            .Where(element => element.Name.LocalName == "Style" &&
+                (element.Attribute("Selector")?.Value.Contains("#Label") == true ||
+                 element.Attribute("Selector")?.Value.Contains("#ContentPresenter") == true));
+        styles.SelectMany(style => style.Elements())
+            .Where(element => element.Name.LocalName == "Setter")
+            .Where(setter => setter.Attribute("Property")?.Value is "Padding" or "Margin")
+            .ShouldBeEmpty();
     }
 
     [Fact]

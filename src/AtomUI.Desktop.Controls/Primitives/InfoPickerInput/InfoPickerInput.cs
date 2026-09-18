@@ -519,7 +519,7 @@ public abstract class InfoPickerInput : TemplatedControl,
                 PickerPopup,
                 Popup.IsPopupPinnedOpenProperty);
             PickerPopup.Closed += HandlePickerPopupClosed;
-            ApplyPopupPinnedOpenSettings();
+
         }
         if (DecoratedBox != null)
         {
@@ -915,7 +915,7 @@ public abstract class InfoPickerInput : TemplatedControl,
 
         if (change.Property == IsPopupPinnedOpenProperty)
         {
-            ApplyPopupPinnedOpenSettings();
+
             if (change.GetNewValue<bool>())
             {
                 SetPickerOpenIfChanged(true);
@@ -934,37 +934,12 @@ public abstract class InfoPickerInput : TemplatedControl,
         }
     }
 
-    private void ApplyPopupPinnedOpenSettings()
-    {
-        if (PickerPopup is null)
-        {
-            return;
-        }
-
-        if (IsPopupPinnedOpen)
-        {
-            // 与 Select 家族相同:Avalonia 只在弹层打开瞬间读取 IsLightDismissEnabled
-            // 创建遮罩,必须以 LocalValue 赶在打开之前抑制,否则遮罩残留并只挡交互。
-            PickerPopup.IsLightDismissEnabled = false;
-        }
-        else
-        {
-            PickerPopup.ClearValue(Popup.IsLightDismissEnabledProperty);
-        }
-    }
 
     private void ApplyPopupOpenState(bool isOpen)
     {
         if (PickerPopup is null)
         {
             return;
-        }
-
-        // 打开前先同步 light-dismiss 抑制状态,确保钉住/预览场景不会在弹层打开后
-        // 残留一个只挡交互的遮罩层(Avalonia 只在打开瞬间读取 IsLightDismissEnabled)。
-        if (isOpen)
-        {
-            ApplyPopupPinnedOpenSettings();
         }
 
         if (PickerPopup.IsOpen != isOpen)

@@ -139,7 +139,8 @@ StyledProperty 和 ControlTheme 均为静态/AOT 可发现契约。源码库存�
 ## 源码索引
 
 - `src/AtomUI.Desktop.Controls/Popup/Popup.cs`：公共 API、自定义定位、翻转通知、frame shadow 选择、动效和 wheel guard。
-- `src/AtomUI.Desktop.Controls/Popup/PopupReflectionExtensions.cs`：对 Avalonia Popup 私有 closing、parent 与定位入口的集中反射桥接。
+- `src/AtomUI.Desktop.Controls/Popup/PopupReflectionExtensions.cs`
+- `src/AtomUI.Desktop.Controls/Popup/PopupLightDismissRegistration.cs`：对 Avalonia Popup 私有 closing、parent 与定位入口的集中反射桥接。
 - `src/AtomUI.Desktop.Controls/Popup/PopupUtils.cs`：placement 算法、popup scope 和 owning popup 查询。
 - `src/AtomUI.Desktop.Controls/Popup/PopupToken.cs`：Popup 家族的阴影、圆角和 anchor margin Token。
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`：MotionScene 共享的 internal 动效执行生命周期定义。

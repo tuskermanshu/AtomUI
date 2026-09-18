@@ -45,6 +45,60 @@
             </ControlTemplate>
         </Setter>
 
+        <!-- Theme defaults remain overridable by generated Semantic Part styles. -->
+        <Style Selector="^[Orientation=Vertical][Mode=Start][IsLabelLayout=False] /template/ ContentPresenter#ContentPresenter">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style Selector="^[Orientation=Vertical][Mode=End][IsLabelLayout=False] /template/ ContentPresenter#ContentPresenter">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
+        <Style Selector="^[Orientation=Horizontal][Mode=Alternate] /template/ StackPanel#Header, ^[Orientation=Horizontal][IsLabelLayout=True] /template/ StackPanel#Header">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="^[Orientation=Horizontal][Mode=Alternate] /template/ ContentPresenter#ContentPresenter, ^[Orientation=Horizontal][IsLabelLayout=True] /template/ ContentPresenter#ContentPresenter">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="^[Orientation=Vertical][Mode=Start][IsLabelLayout=True]">
+            <Style Selector="^ /template/ atom|TextBlock#Label">
+                <Setter Property="TextAlignment" Value="Right" />
+            </Style>
+            <!-- Content may be created by a converter or supplied by the caller.
+                 Inherit alignment from the presenter instead of crossing its content tree. -->
+            <Style Selector="^ /template/ ContentPresenter#ContentPresenter">
+                <Setter Property="TextBlock.TextAlignment" Value="Left" />
+            </Style>
+        </Style>
+        <Style Selector="^[Orientation=Vertical][Mode=End][IsLabelLayout=True]">
+            <Style Selector="^ /template/ atom|TextBlock#Label">
+                <Setter Property="TextAlignment" Value="Left" />
+            </Style>
+            <!-- Content may be created by a converter or supplied by the caller.
+                 Inherit alignment from the presenter instead of crossing its content tree. -->
+            <Style Selector="^ /template/ ContentPresenter#ContentPresenter">
+                <Setter Property="TextBlock.TextAlignment" Value="Right" />
+            </Style>
+        </Style>
+        <Style Selector="^[Orientation=Vertical][Mode=Alternate][IsOdd=False]">
+            <Style Selector="^ /template/ atom|TextBlock#Label">
+                <Setter Property="TextAlignment" Value="Right" />
+            </Style>
+            <!-- Content may be created by a converter or supplied by the caller.
+                 Inherit alignment from the presenter instead of crossing its content tree. -->
+            <Style Selector="^ /template/ ContentPresenter#ContentPresenter">
+                <Setter Property="TextBlock.TextAlignment" Value="Left" />
+            </Style>
+        </Style>
+        <Style Selector="^[Orientation=Vertical][Mode=Alternate][IsOdd=True]">
+            <Style Selector="^ /template/ atom|TextBlock#Label">
+                <Setter Property="TextAlignment" Value="Left" />
+            </Style>
+            <!-- Content may be created by a converter or supplied by the caller.
+                 Inherit alignment from the presenter instead of crossing its content tree. -->
+            <Style Selector="^ /template/ ContentPresenter#ContentPresenter">
+                <Setter Property="TextBlock.TextAlignment" Value="Right" />
+            </Style>
+        </Style>
+
         <Style Selector="^[Orientation=Vertical]">
             <Setter Property="Padding" Value="{atom:TimelineTokenResource ItemPaddingBottom}" />
 

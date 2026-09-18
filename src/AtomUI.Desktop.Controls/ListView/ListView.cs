@@ -694,7 +694,7 @@ public partial class ListView : ItemsControl, ICustomizableSizeTypeAware, IMotio
         base.PrepareContainerForItemOverride(container, item, index);
         if (container is ListViewItem listItem)
         {
-            listItem.IsSplitLineVisible = ShouldShowSplitLine(IsLastItem(item));
+            listItem.IsSplitLineVisible = ShouldShowSplitLine(index == ItemCount - 1);
             if (item is IGroupListItemData groupListItemData)
             {
                 listItem.IsGroupItem = groupListItemData.IsGroupItem;
@@ -803,9 +803,9 @@ public partial class ListView : ItemsControl, ICustomizableSizeTypeAware, IMotio
         return BottomPagination is not null;
     }
 
-    private bool IsLastItem(object? item)
+    private bool IsLastItem(Control container)
     {
-        return Items.Count > 0 && ReferenceEquals(Items[Items.Count - 1], item);
+        return IndexFromContainer(container) == ItemCount - 1;
     }
 
     private void RefreshContainerSplitLines()
@@ -826,8 +826,7 @@ public partial class ListView : ItemsControl, ICustomizableSizeTypeAware, IMotio
                 continue;
             }
 
-            var isLast = IsLastItem(listItem) || IsLastItem(listItem.Content);
-            listItem.IsSplitLineVisible = ShouldShowSplitLine(isLast);
+            listItem.IsSplitLineVisible = ShouldShowSplitLine(IsLastItem(listItem));
         }
     }
     

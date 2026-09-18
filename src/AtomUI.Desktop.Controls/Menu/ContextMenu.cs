@@ -247,6 +247,7 @@ public class ContextMenu : AvaloniaContextMenu,
         base.PrepareContainerForItemOverride(container, item, index);
         if (container is MenuItem menuItem)
         {
+            menuItem.SemanticLevel = MenuSemanticLevel.None;
             if (item != null && item is not Visual)
             {
                 if (!menuItem.IsSet(MenuItem.HeaderProperty))

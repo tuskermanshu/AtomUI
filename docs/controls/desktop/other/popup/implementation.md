@@ -15,7 +15,8 @@ Popup 的物理关闭策略还承载内部钉住打开状态。`IsPopupPinnedOpe
 ## 2. 源码文件结构
 
 - `src/AtomUI.Desktop.Controls/Popup/Popup.cs`：公共 API、自定义定位、翻转通知、frame shadow 选择、动效和 wheel guard。
-- `src/AtomUI.Desktop.Controls/Popup/PopupReflectionExtensions.cs`：对 Avalonia Popup 私有 closing、parent 与定位入口的集中反射桥接。
+- `src/AtomUI.Desktop.Controls/Popup/PopupReflectionExtensions.cs`
+- `src/AtomUI.Desktop.Controls/Popup/PopupLightDismissRegistration.cs`：对 Avalonia Popup 私有 closing、parent 与定位入口的集中反射桥接。
 - `src/AtomUI.Desktop.Controls/Popup/PopupUtils.cs`：placement 算法、popup scope 和 owning popup 查询。
 - `src/AtomUI.Desktop.Controls/Popup/PopupToken.cs`：Popup 家族的阴影、圆角和 anchor margin Token。
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`：MotionScene 共享的 internal 动效执行生命周期定义。
@@ -153,8 +154,14 @@ Popup placement target 和实际 host 必须解析到同一 owning `TopLevel`；
 路径共享 frame renderer 和 surface ownership。
 
 Child 内部控件已处理的 wheel 不被重复消费；未处理的 wheel 在 popup 边界终止，避免滚动 placement target 外层祖先。
-light-dismiss、focus 和 host teardown 继续由 Avalonia Popup 协议负责；需要 pinned 常开的产品 owner 必须在首次物理打开前把
-effective light-dismiss 设为 false，解除 pin 后恢复 owner / trigger 配置，不能在 Popup 打开后补改。
+focus 与 host teardown 继续使用 Avalonia Popup 协议。产品 owner 只提供 light-dismiss 原始配置与 pin 请求，
+共享 Popup 通过 coercion 计算 `configured && !pinned`，保留原绑定和值来源；取消 pin 不应写死恢复为 true。
+
+`PopupLightDismissRegistration` 是共享框架兼容边界：打开后取得当前 Popup 会话自己的遮罩 registration，
+在 effective 配置或穿透目标变化时成对释放/注册，并复用框架的外点处理器。关闭时释放当前 lease 与订阅。
+它不改写共享遮罩的 `IsVisible`、不关闭并重开 host、不按穿透目标猜测其他 Popup 的 registration。
+框架私有会话与 registration 布局由固定类型/成员引用描述；依赖升级后须重新执行多 Popup、实际命中、关闭事件、
+宿主复用与 NativeAOT 验证。普通 Debug 测试不能代替 trimming 和 NativeAOT 发布证据。
 
 ## 9. 资源、性能与 AOT 边界
 

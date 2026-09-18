@@ -520,10 +520,20 @@ public partial class NumericUpDown : AvaloniaNumericUpDown,
         if (e.NameScope.Find<StackPanel>("PART_SuffixGroup") is { } suffixGroup &&
             _buttonSpinner?.DecoratedBox is { } decoratedBox)
         {
+            var refreshSuffixShift = new Action(() => SyncSuffixGroupShift(suffixGroup, decoratedBox));
             _templatePartBindings.Add(decoratedBox.GetPropertyChangedObservable(
                     ButtonSpinnerDecoratedBox.IsSpinnerContentHoverProperty)
-                .Subscribe(_ => SyncSuffixGroupShift(suffixGroup, decoratedBox)));
-            SyncSuffixGroupShift(suffixGroup, decoratedBox);
+                .Subscribe(_ => refreshSuffixShift()));
+            _templatePartBindings.Add(decoratedBox.GetPropertyChangedObservable(
+                    ButtonSpinnerDecoratedBox.EffectiveContentPaddingProperty)
+                .Subscribe(_ => refreshSuffixShift()));
+            _templatePartBindings.Add(decoratedBox.GetPropertyChangedObservable(
+                    ButtonSpinnerDecoratedBox.IsHandleFloatableProperty)
+                .Subscribe(_ => refreshSuffixShift()));
+            _templatePartBindings.Add(decoratedBox.GetPropertyChangedObservable(
+                    ButtonSpinnerDecoratedBox.ButtonSpinnerLocationProperty)
+                .Subscribe(_ => refreshSuffixShift()));
+            refreshSuffixShift();
         }
     }
 

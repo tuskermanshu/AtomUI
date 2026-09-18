@@ -124,7 +124,8 @@ public class DashedBorder : Decorator
     private BorderRenderHelper? _borderRenderHelper = new BorderRenderHelper();
     private Thickness? _renderThickness;
     private double _layoutScale;
-    private bool _clipManaged;
+    private Control? _managedClipChild;
+    private Geometry? _managedClipGeometry;
 
     internal virtual bool ClipTrailingEdgeAtFractionalScale => false;
 
@@ -174,6 +175,11 @@ public class DashedBorder : Decorator
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
+        if (change.Property == ChildProperty)
+        {
+            ReleaseManagedClip();
+        }
+
         base.OnPropertyChanged(change);
         if (change.Property == BorderThicknessProperty ||
             change.Property == UseLayoutRoundingProperty)
@@ -206,23 +212,20 @@ public class DashedBorder : Decorator
     {
         if (Child is null)
         {
+            ReleaseManagedClip();
             return;
         }
 
         if (!ClipContentToCornerRadius)
         {
-            if (_clipManaged)
-            {
-                Child.Clip = null;
-                _clipManaged = false;
-            }
-
+            ReleaseManagedClip();
             return;
         }
 
         var childSize = Child.Bounds.Size;
         if (childSize.Width <= 0 || childSize.Height <= 0)
         {
+            ReleaseManagedClip();
             return;
         }
 
@@ -237,17 +240,27 @@ public class DashedBorder : Decorator
             // figure would silently swallow every pointer over the content. The clip
             // degrades to not-applied so input keeps working; production backends
             // with correct rounded geometry hit-testing always take the clip path.
-            if (_clipManaged)
-            {
-                Child.Clip = null;
-                _clipManaged = false;
-            }
-
+            ReleaseManagedClip();
             return;
         }
 
+        ReleaseManagedClip();
         Child.Clip = figure;
-        _clipManaged = true;
+        _managedClipChild = Child;
+        _managedClipGeometry = figure;
+    }
+
+    private void ReleaseManagedClip()
+    {
+        if (_managedClipChild is not null &&
+            _managedClipGeometry is not null &&
+            ReferenceEquals(_managedClipChild.Clip, _managedClipGeometry))
+        {
+            _managedClipChild.Clip = null;
+        }
+
+        _managedClipChild = null;
+        _managedClipGeometry = null;
     }
 
     /// <summary>

@@ -230,6 +230,26 @@ public class ComboBoxPinnedPopupOverlayTests
         });
     }
 
+    [Fact]
+    public void Unpin_Preserves_Explicitly_Disabled_Light_Dismiss_While_Open()
+    {
+        var comboBox = new AtomUIComboBox
+        {
+            Width = 320, IsMotionEnabled = false, ItemsSource = new[] { "Alpha", "Beta" }
+        };
+        ShowInWindow(comboBox, window =>
+        {
+            comboBox.IsDropDownOpen = true;
+            Dispatcher.UIThread.RunJobs();
+            var popup = comboBox.GetVisualDescendants().OfType<Popup>().Single();
+            popup.IsLightDismissEnabled = false;
+            comboBox.IsPopupPinnedOpen = true;
+            comboBox.IsPopupPinnedOpen = false;
+            popup.IsLightDismissEnabled.ShouldBeFalse();
+            popup.IsOpen.ShouldBeTrue();
+        });
+    }
+
     private static void ShowInWindow(Control content, Action<AvaloniaWindow> assertion)
     {
         var overlayPanel = new ScopeAwareOverlayLayerPanel

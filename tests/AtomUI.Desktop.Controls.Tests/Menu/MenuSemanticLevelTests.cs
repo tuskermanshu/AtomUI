@@ -90,6 +90,131 @@ public class MenuSemanticLevelTests
         }
     }
 
+
+    [Fact]
+    public void Reused_MenuItem_Clears_Plain_Menu_Semantic_Level_When_Moved_To_Flyout_Presenter()
+    {
+        var parent = new AtomUIMenuItem { Header = "File" };
+        var item = new AtomUIMenuItem { Header = "Open" };
+        parent.Items.Add(item);
+
+        var menu = new AtomUIMenu { IsMotionEnabled = false };
+        menu.Items.Add(parent);
+        var menuRoot = CreateRoot(menu);
+        var firstWindow = new AtomUIWindow { Width = 520, Height = 320, Content = menuRoot };
+        try
+        {
+            firstWindow.Show();
+            for (var i = 0; i < 3; i++)
+            {
+                Dispatcher.UIThread.RunJobs();
+                firstWindow.UpdateLayout();
+            }
+
+            parent.SetCurrentValue(Avalonia.Controls.MenuItem.IsSubMenuOpenProperty, true);
+            for (var i = 0; i < 3; i++)
+            {
+                Dispatcher.UIThread.RunJobs();
+                firstWindow.UpdateLayout();
+            }
+
+            item.Classes.Contains("semantic-sub-menu-item").ShouldBeTrue();
+        }
+        finally
+        {
+            firstWindow.Close();
+            Dispatcher.UIThread.RunJobs();
+            parent.Items.Remove(item);
+        }
+
+        var presenter = new MenuFlyoutPresenter { IsMotionEnabled = false };
+        presenter.Items.Add(item);
+        var presenterRoot = CreateRoot(presenter);
+        var secondWindow = new AtomUIWindow { Width = 520, Height = 320, Content = presenterRoot };
+        try
+        {
+            secondWindow.Show();
+            for (var i = 0; i < 3; i++)
+            {
+                Dispatcher.UIThread.RunJobs();
+                secondWindow.UpdateLayout();
+            }
+
+            item.Classes.Contains("semantic-item").ShouldBeTrue();
+            item.Classes.Contains("semantic-sub-menu-item").ShouldBeFalse();
+        }
+        finally
+        {
+            secondWindow.Close();
+            Dispatcher.UIThread.RunJobs();
+        }
+    }
+
+    [Fact]
+    public void Moving_An_Opened_Group_To_Dropdown_Updates_Realized_And_Future_Descendants()
+    {
+        var leaf = new AtomUIMenuItem { Header = "Existing" };
+        var group = new AtomUIMenuItemGroup { Header = "Group", Items = { leaf } };
+        var branch = new AtomUIMenuItem { Header = "Branch", Items = { group } };
+        var menu = new AtomUIMenu { IsMotionEnabled = false, Items = { branch } };
+        var view = new MenuSemanticReuseView();
+        var button = view.FindControl<Desktop.Controls.DropdownButton>("Button").ShouldNotBeNull();
+        var panel = new StackPanel { Children = { menu, view } };
+        var window = new AtomUIWindow { Width = 700, Height = 500, Content = CreateRoot(panel) };
+        void Settle()
+        {
+            for (var i = 0; i < 4; i++)
+            {
+                Dispatcher.UIThread.RunJobs();
+                window.UpdateLayout();
+            }
+        }
+        try
+        {
+            window.Show();
+            Settle();
+            branch.Open();
+            Settle();
+            leaf.Classes.Contains("semantic-sub-menu-item").ShouldBeTrue();
+            branch.Items.Remove(group);
+            Settle();
+            group.SemanticLevel.ShouldBe(MenuSemanticLevel.None);
+            leaf.SemanticLevel.ShouldBe(MenuSemanticLevel.None);
+
+            var flyout = new MenuFlyout { IsMotionEnabled = false, Items = { group } };
+            button.DropdownFlyout = flyout;
+            button.IsPopupPinnedOpen = true;
+            Settle();
+            var added = new AtomUIMenuItem { Header = "Added" };
+            group.Items.Add(added);
+            Settle();
+            foreach (var item in new[] { leaf, added })
+            {
+                item.SemanticLevel.ShouldBe(MenuSemanticLevel.None);
+                item.Classes.Contains("semantic-sub-menu-item").ShouldBeFalse();
+                item.Tag.ShouldBe("dropdown-item");
+                item.Foreground.ShouldBe(Avalonia.Media.Brushes.Red);
+            }
+
+            button.IsPopupPinnedOpen = false;
+            flyout.Hide();
+            flyout.Items.Remove(group);
+            menu.Items.Add(group);
+            Settle();
+            group.SemanticLevel.ShouldBe(MenuSemanticLevel.TopLevel);
+            leaf.SemanticLevel.ShouldBe(MenuSemanticLevel.TopLevel);
+            added.SemanticLevel.ShouldBe(MenuSemanticLevel.TopLevel);
+            leaf.Tag.ShouldBeNull();
+            group.Classes.Contains("semantic-sub-menu-group").ShouldBeFalse();
+        }
+        finally
+        {
+            button.IsPopupPinnedOpen = false;
+            window.Close();
+            Dispatcher.UIThread.RunJobs();
+        }
+    }
+
     [Fact]
     public void Pinned_Open_Declared_Before_Containers_Exist_Still_Opens_Submenu()
     {

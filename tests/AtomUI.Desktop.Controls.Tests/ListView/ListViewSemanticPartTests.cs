@@ -129,6 +129,23 @@ public class ListViewSemanticPartTests
     }
 
     [Fact]
+    public void Divider_Uses_Current_View_Position_For_Repeated_Items()
+    {
+        var repeated = new ListItemData { Content = "same" };
+        var listView = new AtomListView
+        {
+            ItemsSource = new[] { repeated, new ListItemData { Content = "other" }, repeated }
+        };
+
+        ShowInWindow(listView, () =>
+        {
+            Enumerable.Range(0, 3)
+                .Select(index => GetSplitLineFrame(GetSemanticItems(listView)[index]).IsVisible)
+                .ShouldBe([true, true, false]);
+        });
+    }
+
+    [Fact]
     public void Root_Semantic_Part_Projects_The_Standard_Surface_Properties()
     {
         var listView = new AtomListView

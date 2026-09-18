@@ -509,7 +509,7 @@ public abstract class AbstractColorPicker : AvaloniaButton,
         _popup.OverlayDismissEventPassThrough = TriggerType != FlyoutTriggerType.Click;
         _popup.SetCurrentValue(
             Popup.IsLightDismissEnabledProperty,
-            IsLightDismissEnabled && !IsPopupPinnedOpen);
+            IsLightDismissEnabled);
     }
 
     #region Hover trigger

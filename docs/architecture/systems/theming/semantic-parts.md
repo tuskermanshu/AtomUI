@@ -630,10 +630,9 @@ marker 声明在动态创建的 View 模板内，也不得为此引入运行时 
   并以 `popup.list` 的 SelectorClass 作为路由锚点（如 `/template/ .semantic-popup-list >> .semantic-popup-list-item`）。
 
 Gallery 语义预览需要钉住弹层常开（如 AutoComplete 的 `IsDropDownOpen=true` + `IsPopupPinnedOpen=true`）才能解析
-`popup.*`。此时产品控件必须在弹层打开**之前**抑制 light-dismiss 遮罩：Avalonia 仅在 Popup 打开瞬间读取
-`IsLightDismissEnabled` 创建遮罩层，打开后再改无效；而钉住的弹层本就忽略 dismiss 关闭请求，遮罩只会阻断页面其余
-区域的交互。取消钉住时必须恢复控件或 trigger 的原配置；共享宿主的 effective 值应按
-`configured light-dismiss && !IsPopupPinnedOpen` 计算，不能固定恢复为 `true`。
+`popup.*`。产品控件在首次打开前 relay pin 请求，light-dismiss 的有效值及对应注册由共享 Popup 维护：
+有效值为 `configured && !pinned`，运行中切换 pin 只变更当前 Popup 自己的注册，取消 pin 恢复原配置。
+不能直接隐藏共享遮罩，也不能通过重新打开 Popup 清除遮罩；预览基础设施不接管产品的 Popup 生命周期。
 
 Popup 的请求状态、控件业务打开状态、`Popup.IsOpen` 物理状态和 motion actor 视觉状态是四个独立层级。延迟 host 必须同时
 支持 `Opened -> actor-ready` 与 `actor-ready -> Opened` 两种顺序，并从任一入口进入同一幂等开启动画路径；只断言

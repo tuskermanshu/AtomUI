@@ -8,7 +8,6 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.Metadata;
-using Avalonia.Threading;
 
 namespace AtomUI.Desktop.Controls;
 
@@ -196,6 +195,18 @@ public partial class Breadcrumb : ItemsControl, IMotionAwareControl
         _separatorManager.OnTemplateApplied();
     }
 
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _separatorManager.Attach();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        _separatorManager.Dispose();
+        base.OnDetachedFromVisualTree(e);
+    }
+
     private void ConfigureItemSeparator(BreadcrumbItem breadcrumbItem)
     {
         breadcrumbItem.SetValue(BreadcrumbItem.SeparatorProperty, Separator, BindingPriority.Style);
@@ -256,10 +267,7 @@ public partial class Breadcrumb : ItemsControl, IMotionAwareControl
             }
         }
 
-        _separatorManager.Update();
-        // Container realization runs item by item; re-evaluate once the generator
-        // has settled so separator counts track the final item/container state.
-        Dispatcher.UIThread.Post(_separatorManager.Update);
+        _separatorManager.QueueUpdate();
     }
 
     private static void ClearGeneratedItemValues(BreadcrumbItem breadcrumbItem)

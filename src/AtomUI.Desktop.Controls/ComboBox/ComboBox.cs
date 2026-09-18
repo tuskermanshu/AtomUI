@@ -448,9 +448,7 @@ public partial class ComboBox : AvaloniaComboBox,
                 Popup.IsPopupPinnedOpenProperty);
             _popup.Opened += HandlePopupOpened;
             _popup.Closed += HandlePopupClosed;
-            // 必须在弹层打开之前抑制 light-dismiss：Avalonia 只在打开瞬间读取该属性创建遮罩，
-            // 打开后再改属性撤不掉已创建的遮罩层（钉住场景会留下整页拦截输入的遮罩）。
-            ApplyPopupPinnedOpenSettings();
+            // The shared Popup owns effective light-dismiss and its registration.
         }
         if (_editableTextBox != null)
         {
@@ -654,7 +652,6 @@ public partial class ComboBox : AvaloniaComboBox,
         }
         else if (change.Property == IsPopupPinnedOpenProperty)
         {
-            ApplyPopupPinnedOpenSettings();
             if (change.GetNewValue<bool>() && !IsDropDownOpen)
             {
                 SetCurrentValue(IsDropDownOpenProperty, true);
@@ -941,10 +938,6 @@ public partial class ComboBox : AvaloniaComboBox,
         }
     }
 
-    private void ApplyPopupPinnedOpenSettings()
-    {
-        _popup?.SetCurrentValue(Popup.IsLightDismissEnabledProperty, !IsPopupPinnedOpen);
-    }
 
     /// <summary>
     /// 按业务状态打开弹层。开合不再由模板 <c>IsOpen</c> 绑定承担，因为模板充气阶段的绑定求值

@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using AtomUI.Data;
 using AtomUI.Desktop.Controls.DesignTokens;
 using AtomUI.Generated.AtomUIDesktopControls;
@@ -20,6 +21,7 @@ internal sealed class BreadcrumbSeparatorManager : IDisposable
     private readonly List<SeparatorEntry> _separatorEntries = new();
     private BreadcrumbItemsPanel? _itemsPanel;
     private bool _itemsCollectionSubscribed;
+    private DispatcherOperation? _pendingUpdate;
 
     public BreadcrumbSeparatorManager(Breadcrumb owner)
     {
@@ -31,9 +33,28 @@ internal sealed class BreadcrumbSeparatorManager : IDisposable
     /// </summary>
     public void OnTemplateApplied()
     {
+        _pendingUpdate?.Abort();
+        _pendingUpdate = null;
         ClearSeparators();
         _itemsPanel = null;
-        Update();
+        Attach();
+    }
+
+    /// <summary>
+    /// Coalesces collection/container churn into one update after the item generator settles.
+    /// </summary>
+    public void QueueUpdate()
+    {
+        if (!_itemsCollectionSubscribed || _pendingUpdate is not null)
+        {
+            return;
+        }
+
+        _pendingUpdate = Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            _pendingUpdate = null;
+            Update();
+        }, DispatcherPriority.Loaded);
     }
 
     /// <summary>
@@ -41,7 +62,10 @@ internal sealed class BreadcrumbSeparatorManager : IDisposable
     /// </summary>
     public void Update()
     {
-        SubscribeToItemsChanges();
+        if (!_itemsCollectionSubscribed)
+        {
+            return;
+        }
 
         var targetCount = Math.Max(0, _owner.ItemCount - 1);
         while (_separatorEntries.Count > targetCount)
@@ -64,21 +88,33 @@ internal sealed class BreadcrumbSeparatorManager : IDisposable
 
     public void Dispose()
     {
+        _pendingUpdate?.Abort();
+        _pendingUpdate = null;
+        if (_itemsCollectionSubscribed)
+        {
+            _owner.Items.CollectionChanged -= HandleItemsChanged;
+            _itemsCollectionSubscribed = false;
+        }
         ClearSeparators();
+        _itemsPanel = null;
     }
 
-    private void SubscribeToItemsChanges()
+    public void Attach()
     {
-        if (_itemsCollectionSubscribed)
+        if (!_owner.IsAttachedToVisualTree())
         {
             return;
         }
-
-        _itemsCollectionSubscribed = true;
-        // Reset/insert/remove notifications carry no per-container callback when items are
-        // removed, so re-evaluate once the collection change has fully settled.
-        _owner.Items.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(Update);
+        if (!_itemsCollectionSubscribed)
+        {
+            _owner.Items.CollectionChanged += HandleItemsChanged;
+            _itemsCollectionSubscribed = true;
+        }
+        Update();
+        QueueUpdate();
     }
+
+    private void HandleItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => QueueUpdate();
 
     private BreadcrumbItemsPanel? GetItemsPanel()
     {

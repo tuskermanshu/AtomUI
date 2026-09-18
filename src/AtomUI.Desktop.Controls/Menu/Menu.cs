@@ -137,7 +137,6 @@ public partial class Menu : AvaloniaMenu,
         {
             // plain Menu 菜单栏第一层：下发顶层语义层级，让容器带上互斥的一级 marker。
             menuItem.SemanticLevel = MenuSemanticLevel.TopLevel;
-            MenuSemanticLevelScope.ApplyItemLevel(menuItem, MenuSemanticLevel.TopLevel);
 
             if (item != null && item is not Visual)
             {
@@ -192,7 +191,6 @@ public partial class Menu : AvaloniaMenu,
         {
             // 顶层分组：分组标题与分组列表归一级语义层级，组内菜单项继承一级层级。
             menuItemGroup.SemanticLevel = MenuSemanticLevel.TopLevel;
-            MenuSemanticLevelScope.ApplyGroupLevel(menuItemGroup, MenuSemanticLevel.TopLevel);
         }
         else
         {
@@ -207,6 +205,11 @@ public partial class Menu : AvaloniaMenu,
         {
             menuItem.IsPopupPinnedOpen = false;
             menuItem.CloseForLifecycle();
+            menuItem.SemanticLevel = MenuSemanticLevel.None;
+        }
+        else if (container is MenuItemGroup menuItemGroup)
+        {
+            menuItemGroup.SemanticLevel = MenuSemanticLevel.None;
         }
 
         base.ClearContainerForItemOverride(container);

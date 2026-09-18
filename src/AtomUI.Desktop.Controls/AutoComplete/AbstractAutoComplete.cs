@@ -727,13 +727,6 @@ public abstract class AbstractAutoComplete : TemplatedControl,
         }
         else if (change.Property == IsPopupPinnedOpenProperty)
         {
-            if (_popup != null)
-            {
-                // 钉住期间抑制 light-dismiss 遮罩；取消钉住恢复模板默认值，下一轮
-                // 打开时恢复常规遮罩行为。
-                _popup.IsLightDismissEnabled = !change.GetNewValue<bool>();
-            }
-
             if (change.GetNewValue<bool>() && !IsDropDownOpen)
             {
                 SetCurrentValue(IsDropDownOpenProperty, true);
@@ -1374,13 +1367,6 @@ public abstract class AbstractAutoComplete : TemplatedControl,
             _popup.Closed              += HandlePopupClosed;
             _popup.OverlayInputPassThroughElement = TextInputBox;
             ConfigurePopupMotion();
-            // 钉住的弹层会忽略 light-dismiss 关闭请求，而 Avalonia 只在弹层打开瞬间
-            // 读取 IsLightDismissEnabled 创建遮罩，因此必须赶在下方 OpeningDropDown
-            // 之前抑制，否则预览等钉住场景会留下一个只挡交互的遮罩层。
-            if (IsPopupPinnedOpen)
-            {
-                _popup.IsLightDismissEnabled = false;
-            }
         }
         
         // If the drop down property indicates that the popup is open,

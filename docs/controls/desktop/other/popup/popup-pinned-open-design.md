@@ -15,7 +15,7 @@
 - `false` 只解除关闭拦截，不强制关闭已经打开的 Popup；尚未实际打开的 pending 请求必须取消，并清除底层隐藏的 open request、target tracking 和临时资源。
 - 普通交互关闭可以被拦截；生命周期 teardown 必须放行。
 - 生命周期关闭不得被关闭动效延迟。
-- 使用 light-dismiss 的 owner 必须在首次物理打开前按 `configured && !pinned` 计算有效值；取消 pin 恢复原配置。
+- owner 提供 light-dismiss 配置；共享 Popup 在首次打开前及运行期间按 `configured && !pinned` 计算有效值，并同步自身的遮罩注册。取消 pin 恢复原配置，不重开 host、不影响其他 Popup 的注册。
 - 模板、定位、滚动、Overlay、输入路由和视觉尺寸不因测试状态而改变。
 - internal 属性不进入 public API、公开 AXAML 模板契约或 Token。
 

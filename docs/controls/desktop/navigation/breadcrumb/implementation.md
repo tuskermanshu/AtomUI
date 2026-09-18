@@ -82,11 +82,14 @@ Public API / ItemsSource / Command / Event
 - 运行时 semantic marker：`item` 标记在 container 创建与 prepare 时应用，`separator` 标记在 `Breadcrumb` 创建兄弟分隔
   `ContentPresenter` 时应用，container recycle 后不泄漏旧标记；只添加控件自己持有的 marker，不触碰应用侧自行添加的 class。
 - 兄弟分隔符生命周期：`BreadcrumbSeparatorManager` 依据条目数维护 N-1 个分隔符（`Breadcrumb` 在 `UpdateItemStates`
-  末尾与集合变化后经 Dispatcher 延迟转发 `Update`）；每个分隔符是 `Breadcrumb` 的逻辑子级（经
+  末尾与集合变化时合并为一个可取消的 Dispatcher 更新）；每个分隔符是 `Breadcrumb` 的逻辑子级（经
   `AttachSeparatorLogicalChild`/`DetachSeparatorLogicalChild` 挂载）、`BreadcrumbItemsPanel` 的视觉子级，
   `Content`/`ContentTemplate` 绑定到前一条目容器的 `Separator`/`SeparatorTemplate`，默认前景色与间距经
   `TokenResourceBinder` 绑定 `SeparatorColor`/`SeparatorMargin`；模板重套用、条目清除或容器回收时先释放绑定，
-  再移除视觉与逻辑挂载。
+  再移除视觉与逻辑挂载。相同分隔符集合不重新挂载视觉节点，不重复触发布局失效；新增/删除项只修改差异。
+  owner 视觉卸载时取消待调度更新、解除集合订阅并释放所有分隔符，重新挂载时按当前条目重建。
+- `BreadcrumbItemsPanel` 使用已经包含 Margin 的 `DesiredSize` 测量与分配布局槽；具体 Margin 与垂直对齐由
+  Avalonia `ArrangeCore` 处理，面板不再重复加算偏移或间距。
 - DynamicResource、TokenResourceBinder 或 C# binding 必须有明确 owner 和释放点。
 - Browser 和 Desktop 宿主下的主题加载顺序不得影响 public API 语义。
 

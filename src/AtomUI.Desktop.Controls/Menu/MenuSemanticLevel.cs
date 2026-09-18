@@ -35,13 +35,13 @@ internal static class MenuSemanticLevelScope
     private const string SubMenuGroupClass  = "semantic-sub-menu-group";
 
     /// <summary>
-    /// 应用菜单项容器的层级 marker。只有 plain Menu 作用域内的层级才写入：<see cref="MenuSemanticLevel.None"/>
-    /// 表示该容器由复用方创建，保留其创建时的 marker 不变。
+    /// 应用菜单项容器的互斥 marker；None 恢复复用方的默认 semantic-item 语义。
     /// </summary>
     public static void ApplyItemLevel(Control container, MenuSemanticLevel level)
     {
         switch (level)
         {
+            case MenuSemanticLevel.None:
             case MenuSemanticLevel.TopLevel:
                 Apply(container, MenuSemanticParts.ItemClass, MenuSemanticParts.SubMenuItemClass);
                 break;
@@ -52,14 +52,15 @@ internal static class MenuSemanticLevelScope
         }
     }
 
-    /// <summary>
-    /// 应用分组容器的层级 marker。一级分组带 <c>.semantic-scope-group</c>，子菜单内分组带
-    /// <c>.semantic-sub-menu-group</c>；分组内的菜单项继承分组所在层级。
-    /// </summary>
+    /// <summary>应用分组层级；None 释放 plain Menu 的两种分组 marker。</summary>
     public static void ApplyGroupLevel(Control container, MenuSemanticLevel level)
     {
         switch (level)
         {
+            case MenuSemanticLevel.None:
+                container.Classes.Remove(TopLevelGroupClass);
+                container.Classes.Remove(SubMenuGroupClass);
+                break;
             case MenuSemanticLevel.TopLevel:
                 Apply(container, TopLevelGroupClass, SubMenuGroupClass);
                 break;
@@ -67,6 +68,22 @@ internal static class MenuSemanticLevelScope
             case MenuSemanticLevel.SubMenu:
                 Apply(container, SubMenuGroupClass, TopLevelGroupClass);
                 break;
+        }
+    }
+
+    public static void ApplyChildrenLevel(ItemsControl owner, MenuSemanticLevel level)
+    {
+        foreach (var container in owner.GetRealizedContainers())
+        {
+            switch (container)
+            {
+                case MenuItem item:
+                    item.SemanticLevel = level;
+                    break;
+                case MenuItemGroup group:
+                    group.SemanticLevel = level;
+                    break;
+            }
         }
     }
 

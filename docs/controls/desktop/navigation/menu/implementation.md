@@ -25,6 +25,7 @@ Popup 接入边界：`Menu` / MenuFlyout 负责业务状态和内容准备，men
 - `src/AtomUI.Desktop.Controls/Menu/MenuItem.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemGroup.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuSemanticLevel.cs`
+- `src/AtomUI.Desktop.Controls/Menu/MenuPinnedOpenScope.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemData.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuItemPseudoClass.cs`
 - `src/AtomUI.Desktop.Controls/Menu/MenuPopupScrollHost.cs`
@@ -98,6 +99,15 @@ Public API / ItemsSource / Command / Event
 - 集合、选择、展开、过滤、分页、上传任务或异步 loader 必须能处理 reset、replace 和 clear。
 - 伪类和 internal state 必须从单一 owner 推导，避免双向同步导致循环更新。
 - overview.md 的 API 契约说明应与源码实际状态流一致。
+
+子菜单钉住状态按层级管理：`MenuItem` 和 `MenuFlyoutPresenter` 的 `MenuPinnedOpenScope` 只持有当前活动子项，
+分组对同级互斥关系透明。导航到兄弟子菜单时，先解除旧分支的 pin 并关闭其物理 Popup，再钉住新分支；
+不能把 pin 绑定给所有兄弟项。普通收起请求在 `IsSubMenuOpen` coercion 中被拒绝，避免先关闭后重新触发
+`SubmenuOpened` 形成递归。生命周期关闭先解除当前分支的 pin，再关闭后代与物理 Popup。
+
+语义层级属于当前 owner，而不是容器的历史属性。`SemanticLevel` 切换同步更新当前 marker 与已实现后代，
+容器 prepare 为延迟实现后代下发相同层级；生成容器 clear 与显式容器 Parent 移除均释放旧作用域。
+`None` 恢复复用方的 `.semantic-item`，并移除 plain Menu 的子菜单/分组 marker；应用自定义 class 保持不变。
 
 子菜单 pointer 状态流：
 

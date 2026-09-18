@@ -117,6 +117,11 @@ Timeline (public)
 | `Label` | TextBlock theme node | `TimelineItemTheme.axaml` | TimelineItem template | Label、Orientation、Mode | template-stable | 主题可以定制视觉，不能改变状态 owner。 |
 | `ContentPresenter` | ContentPresenter theme node | `TimelineItemTheme.axaml` | TimelineItem template | Content、ContentTemplate、Orientation、Mode | template-stable | 负责内容呈现和受限宽度换行。 |
 
+默认对齐由 `TimelineItemTheme` 的状态选择器提供，`TimelineSectionPanel` 只分配布局槽，不向子节点写入
+`HorizontalAlignment` 或 `TextAlignment` 的 LocalValue。内容文本通过 ContentPresenter 上可继承的
+`TextBlock.TextAlignment` 获得默认值，无需跨入调用方的 Content 子树；调用方显式文本设置优先。
+生成的 header/title/content Style 可覆盖这些默认值，移除 Style、切换方向、Mode 或奇偶状态时重新由主题求值。
+
 ### 5.3 Semantic Part 处置
 
 Batch 2 Gate A 审计结论（2026-08-19 修订版）：Timeline 以单一 owner 公开全部九个 Semantic Part，并为此把

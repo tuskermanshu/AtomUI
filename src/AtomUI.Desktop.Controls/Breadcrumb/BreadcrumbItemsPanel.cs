@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Layout;
 
 namespace AtomUI.Desktop.Controls;
 
@@ -17,9 +16,26 @@ internal class BreadcrumbItemsPanel : Panel
 
     internal void SyncSeparators(IReadOnlyList<Control> separators)
     {
-        ClearSeparatorVisuals();
+        var count = Math.Min(Math.Max(0, Children.Count - 1), separators.Count);
+        if (_separators.Count == count &&
+            _separators.SequenceEqual(separators.Take(count), ReferenceEqualityComparer.Instance))
+        {
+            return;
+        }
 
-        for (var i = 0; i < Children.Count - 1 && i < separators.Count; i++)
+        var desired = new HashSet<Control>(separators.Take(count), ReferenceEqualityComparer.Instance);
+        for (var i = VisualChildren.Count - 1; i >= 0; i--)
+        {
+            if (VisualChildren[i] is Control control &&
+                _separators.Contains(control) &&
+                !desired.Contains(control))
+            {
+                VisualChildren.RemoveAt(i);
+            }
+        }
+
+        _separators.Clear();
+        for (var i = 0; i < count; i++)
         {
             var separator = separators[i];
             if (!VisualChildren.Contains(separator))
@@ -80,25 +96,20 @@ internal class BreadcrumbItemsPanel : Panel
     {
         child.Measure(availableSize);
         var childDesired = child.DesiredSize;
+        // Layoutable.MeasureCore already includes Margin in DesiredSize. Add the
+        // child's slot once; adding Margin again doubles semantic separator spacing.
         desired = new Size(
-            desired.Width + childDesired.Width + child.Margin.Left + child.Margin.Right,
-            Math.Max(desired.Height, childDesired.Height + child.Margin.Top + child.Margin.Bottom));
+            desired.Width + childDesired.Width,
+            Math.Max(desired.Height, childDesired.Height));
     }
 
     private static double ArrangeFlowChild(Control child, double offset, Size finalSize)
     {
-        var height = child.VerticalAlignment == VerticalAlignment.Stretch
-            ? Math.Max(0, finalSize.Height - child.Margin.Top - child.Margin.Bottom)
-            : child.DesiredSize.Height;
-
-        var y = child.VerticalAlignment switch
-        {
-            VerticalAlignment.Center => (finalSize.Height - height - child.Margin.Top - child.Margin.Bottom) / 2 + child.Margin.Top,
-            VerticalAlignment.Bottom => finalSize.Height - height - child.Margin.Bottom,
-            _                        => child.Margin.Top
-        };
-
-        child.Arrange(new Rect(offset + child.Margin.Left, y, child.DesiredSize.Width, height));
-        return offset + child.DesiredSize.Width + child.Margin.Left + child.Margin.Right;
+        // Pass a layout slot that includes the child's DesiredSize (and therefore
+        // its Margin). Layoutable.ArrangeCore applies Margin and cross-axis
+        // alignment exactly once and produces the content Bounds inside that slot.
+        var slotWidth = child.DesiredSize.Width;
+        child.Arrange(new Rect(offset, 0, slotWidth, finalSize.Height));
+        return offset + slotWidth;
     }
 }

@@ -120,7 +120,7 @@ public class TimelineSectionPanelTests
     }
 
     [Fact]
-    public void Vertical_Label_Layout_Start_Stretches_Slots_And_Aligns_Text_To_The_Axis()
+    public void Vertical_Label_Layout_Start_Stretches_Slots()
     {
         var layout = CreateLayout(
             Orientation.Vertical,
@@ -134,12 +134,11 @@ public class TimelineSectionPanelTests
 
         layout.Header.Bounds.ShouldBe(new Rect(0, 0, 50, 40));
         layout.Label.Bounds.Width.ShouldBe(50);
-        layout.Label.TextAlignment.ShouldBe(Avalonia.Media.TextAlignment.Right);
         layout.Content.Bounds.ShouldBe(new Rect(60, 0, 50, 40));
     }
 
     [Fact]
-    public void Vertical_Label_Layout_End_Stretches_Slots_And_Aligns_Text_To_The_Axis()
+    public void Vertical_Label_Layout_End_Stretches_Slots()
     {
         var layout = CreateLayout(
             Orientation.Vertical,
@@ -152,7 +151,6 @@ public class TimelineSectionPanelTests
         layout.Panel.Arrange(new Rect(0, 0, 110, 40));
 
         layout.Header.Bounds.ShouldBe(new Rect(60, 0, 50, 40));
-        layout.Label.TextAlignment.ShouldBe(Avalonia.Media.TextAlignment.Left);
         layout.Content.Bounds.ShouldBe(new Rect(0, 0, 50, 40));
     }
 

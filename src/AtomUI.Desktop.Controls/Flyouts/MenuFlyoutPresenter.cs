@@ -102,10 +102,7 @@ public class MenuFlyoutPresenter : MenuBase,
     internal static readonly StyledProperty<double> ItemHeightProperty =
         AvaloniaProperty.Register<MenuFlyoutPresenter, double>(nameof(ItemHeight));
 
-    // 钉住语义由宿主 Flyout 下发到 Presenter，只用于区分「可恢复的生命周期关闭」与
-    // 「用户主动收起」：前者必须保留声明式子菜单状态，重开后由 MenuItem 的延迟同步恢复。
-    // 注意不要下发给 MenuItem 容器——pinned 的子菜单弹层会被关闭拦截，模板重绑后以
-    // 空壳形式滞留在 overlay 层（只剩圆角白底与阴影的空白弹层）。
+    // The presenter pins only its active branch; leaf and sibling containers do not inherit the pin.
     internal static readonly StyledProperty<bool> IsPopupPinnedOpenProperty =
         Popup.IsPopupPinnedOpenProperty.AddOwner<MenuFlyoutPresenter>();
 
@@ -133,6 +130,7 @@ public class MenuFlyoutPresenter : MenuBase,
     #endregion
 
     private ArrowDecoratedBox? _arrowDecoratedBox;
+    private MenuPinnedOpenScope? _pinnedOpenScope;
 
     static MenuFlyoutPresenter()
     {
@@ -152,6 +150,11 @@ public class MenuFlyoutPresenter : MenuBase,
 
     public override void Close()
     {
+        if (IsPopupPinnedOpen)
+        {
+            return;
+        }
+
         if (InteractionHandler is DefaultMenuInteractionHandler interactionHandler)
         {
             interactionHandler.CancelPendingHoverOperations();
@@ -176,6 +179,41 @@ public class MenuFlyoutPresenter : MenuBase,
         {
             ConfigureMaxPopupHeight();
         }
+        else if (change.Property == IsPopupPinnedOpenProperty || change.Property == ItemCountProperty)
+        {
+            ReconcilePinnedOpenChildren();
+        }
+        else if (change.Property == SelectedIndexProperty)
+        {
+            _pinnedOpenScope?.SelectCurrent();
+        }
+    }
+
+    internal void ReconcilePinnedOpenChildren()
+    {
+        if (IsPopupPinnedOpen)
+        {
+            (_pinnedOpenScope ??= new MenuPinnedOpenScope(this)).Reconcile();
+        }
+        else
+        {
+            _pinnedOpenScope?.Release();
+        }
+    }
+
+    protected override void ContainerForItemPreparedOverride(Control container, object? item, int index)
+    {
+        base.ContainerForItemPreparedOverride(container, item, index);
+        ReconcilePinnedOpenChildren();
+    }
+
+    protected override void OnSubmenuOpened(RoutedEventArgs e)
+    {
+        if (e.Source is MenuItem item)
+        {
+            _pinnedOpenScope?.SubmenuOpened(item);
+        }
+        base.OnSubmenuOpened(e);
     }
 
     protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
@@ -211,6 +249,7 @@ public class MenuFlyoutPresenter : MenuBase,
     {
         if (container is MenuItem menuItem)
         {
+            menuItem.SemanticLevel = MenuSemanticLevel.None;
             menuItem.Classes.Add(DropdownButtonSemanticParts.ItemClass);
 
             if (item != null && item is not Visual)
@@ -254,7 +293,6 @@ public class MenuFlyoutPresenter : MenuBase,
             menuItem[!MenuItem.SizeTypeProperty]              = this[!SizeTypeProperty];
             menuItem[!MenuItem.DisplayPageSizeProperty]       = this[!DisplayPageSizeProperty];
             menuItem[!MenuItem.ShouldUseOverlayPopupProperty] = this[!ShouldUseOverlayPopupProperty];
-            menuItem[!MenuItem.IsPopupPinnedOpenProperty]      = this[!IsPopupPinnedOpenProperty];
 
             PrepareMenuItem(menuItem, item, index);
         }
@@ -262,9 +300,9 @@ public class MenuFlyoutPresenter : MenuBase,
         {
             menuSeparator.Orientation = Orientation.Horizontal;
         }
-        else if (container is MenuItemGroup)
+        else if (container is MenuItemGroup group)
         {
-            // 分组标题与子项的样式由 MenuItemGroup 自身的模板与容器逻辑处理。
+            group.SemanticLevel = MenuSemanticLevel.None;
         }
         else
         {
