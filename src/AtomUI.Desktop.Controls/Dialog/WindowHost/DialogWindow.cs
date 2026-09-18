@@ -99,11 +99,9 @@ internal sealed class DialogWindow : Window, IStyleHost
             return requestedSize;
         }
 
-        if (requestedSize != ClientSize)
-        {
-            ClientSize = requestedSize;
-        }
-
+        // Width/Height request a platform resize through layout. Once shown, ClientSize
+        // belongs to the platform callback: native constraints may reject or adjust the
+        // request, leaving an unpainted strip if the requested size is published as actual.
         return requestedSize;
     }
 

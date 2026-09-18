@@ -81,12 +81,6 @@ public partial class ModalShowCase : GalleryReactiveUserControl<ModalViewModel>
             case "WindowDialogStyledOpenButton":
                 HandleWindowDialogStyledOpenButtonClick(button, e);
                 break;
-            case "MessageBoxOverlayHostButton":
-                HandleMessageBoxOverlayHostButtonClick(button, e);
-                break;
-            case "MessageBoxWindowHostButton":
-                HandleMessageBoxWindowHostButtonClick(button, e);
-                break;
             case "SemanticStyleDialogOpenButton":
                 HandleSemanticStyleDialogOpenButtonClick(button, e);
                 break;
@@ -213,19 +207,13 @@ public partial class ModalShowCase : GalleryReactiveUserControl<ModalViewModel>
         }
     }
 
-    private void HandleMessageBoxOverlayHostButtonClick(object? sender, RoutedEventArgs e)
+    private void HandleMessageBoxHostTypeSwitchChanged(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is ModalViewModel viewModel)
+        if (DataContext is ModalViewModel viewModel && sender is AtomUIToggleSwitch hostTypeSwitch)
         {
-            viewModel.MessageBoxStyleCaseHostType = DialogHostType.Overlay;
-        }
-    }
-
-    private void HandleMessageBoxWindowHostButtonClick(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is ModalViewModel viewModel)
-        {
-            viewModel.MessageBoxStyleCaseHostType = DialogHostType.Window;
+            viewModel.MessageBoxStyleCaseHostType = hostTypeSwitch.IsChecked == true
+                ? DialogHostType.Window
+                : DialogHostType.Overlay;
         }
     }
 

@@ -265,12 +265,6 @@
         <target state="translated">Native Janela:</target>
       </segment>
     </unit>
-    <unit id="P2TextOverlayHost">
-      <segment>
-        <source>Overlay</source>
-        <target state="translated">Overlay</target>
-      </segment>
-    </unit>
     <unit id="P2TextSomeContents">
       <segment>
         <source>Some contents...</source>

@@ -158,9 +158,9 @@ Part 明细：
 | Cardinality | Single |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#ContentFrame`（静态 marker） |
-| 职责 | 正文区域：`ContentPadding` 内边距、内容裁剪与 loading 骨架宿主边界 |
+| 职责 | 正文区域：Overlay 使用 `ContentPadding`；Window 宿主使用 `WindowContentPadding`；同时负责内容裁剪与 loading 骨架宿主边界 |
 | 相关 API | `Content`、`ContentTemplate`、`IsLoading` |
-| 相关 Token | `ContentPadding`、`LoadingIndicatorMargin` |
+| 相关 Token | `ContentPadding`、`WindowContentPadding`、`LoadingIndicatorMargin` |
 | Customization | Selector |
 | Stability | stable |
 
@@ -345,7 +345,7 @@ Gallery 语义预览：对齐上游 `getContainer={false}` 的内联模态——
 | 维度 | 事实 |
 | --- | --- |
 | 尺寸档 | Dialog 家族不实现 `ISizeTypeAware`，没有 `Large/Middle/Small/Custom` 分支；正文尺寸由 `HostWidth/Height/Min/Max` 描述，结构性下限由 Header/Footer/`DialogToken` viewport 基线解析。 |
-| 尺寸属性 owner | owner 根与正文尺寸：`Dialog.HostWidth/Height/Min/Max` + presenter 解析；`container`：`Border#Frame` 的自然测量（受 Surface constraints）；`header`：`OverlayDialogHeader` 的 `Padding`/`Margin`（`HeaderPadding`/`HeaderMarginBottom`）；`body`：`Border#ContentFrame.Padding`（`ContentPadding`）；`footer`：`Border#FooterFrame` 的 `Padding`/`Margin`（`FooterPadding`/`FooterMarginTop`）。 |
+| 尺寸属性 owner | owner 根与正文尺寸：`Dialog.HostWidth/Height/Min/Max` + presenter 解析；`container`：`Border#Frame` 的自然测量（受 Surface constraints）；`header`：`OverlayDialogHeader` 的 `Padding`/`Margin`（`HeaderPadding`/`HeaderMarginBottom`）；`body`：`Border#ContentFrame.Padding`（Overlay 为 `ContentPadding`，Window 宿主为 `WindowContentPadding`）；`footer`：`Border#FooterFrame` 的 `Padding`/`Margin`（`FooterPadding`/`FooterMarginTop`）。 |
 | Token 映射 | 见各 Part 表“相关 Token”列；无尺寸档分支 Token。 |
 | 状态变体 | `IsLoading` 切换 body 内 `Skeleton`/`Content`（不增删 marker）；`DialogHostType` 切换 Overlay 圆角与 Window 方角（`^.window-hosted` 覆盖 `CornerRadius=0`）；`IsResizable` 只影响 `PART_Resizer`（非 Part）。 |
 | 模板路径 | Overlay：`OverlayDialogPresenterTheme` + `DialogSurfaceTheme` + `OverlayDialogHeaderTheme` + `OverlayDialogMaskTheme`；Window：同一 `DialogSurfaceTheme`/`OverlayDialogHeaderTheme`，无 mask/wrapper。 |

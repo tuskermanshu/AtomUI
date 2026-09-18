@@ -84,7 +84,6 @@ public enum ModalShowCaseLangResourceKind
     SemanticPreviewFooterLink,
     SemanticStylesTitle,
     SemanticStylesDescription,
-    P2TextOverlayHost,
     SemanticWindowStageHint,
     SemanticStylesHint,
     SemanticStylesOpenStyledDialog,

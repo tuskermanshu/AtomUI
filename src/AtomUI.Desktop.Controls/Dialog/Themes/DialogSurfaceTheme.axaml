@@ -90,6 +90,13 @@
             <Setter Property="Padding" Value="{atom:DialogTokenResource ContentPadding}" />
         </Style>
 
+        <!-- Window host hides the Overlay header because the native window owns the title bar.
+             Keep the body vertically separated from that title bar and preserve the same
+             horizontal content inset used by the Overlay host. -->
+        <Style Selector="^.window-hosted /template/ Border#ContentFrame">
+            <Setter Property="Padding" Value="{atom:DialogTokenResource WindowContentPadding}" />
+        </Style>
+
         <Style Selector="^ /template/ atom|Skeleton">
             <Setter Property="Margin" Value="{atom:DialogTokenResource LoadingIndicatorMargin}" />
         </Style>

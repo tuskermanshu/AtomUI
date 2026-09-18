@@ -46,10 +46,10 @@ public class ModalShowCasePageTests
         source.ShouldContain("ModalShowCaseLangResource MessageBoxStyleTitle");
         source.ShouldContain("ModalShowCaseLangResource StaticDialogApiTitle");
         source.ShouldContain("ModalShowCaseLangResource P2ContentOpenBeforeCloseDialog");
-        // 所有示例由 Button 触发，不使用开关切换。
-        source.ShouldNotContain("ToggleSwitch");
-        source.ShouldContain("MessageBoxOverlayHostButton");
-        source.ShouldContain("MessageBoxWindowHostButton");
+        // MessageBox 样式示例的宿主类型由 ToggleSwitch 切换（勾选=原生窗口，未勾选=浮层）。
+        source.ShouldContain("Name=\"MessageBoxHostTypeSwitch\"");
+        source.ShouldNotContain("MessageBoxOverlayHostButton");
+        source.ShouldNotContain("MessageBoxWindowHostButton");
         source.ShouldContain("SemanticStyleDialogOpenButton");
         CountOccurrences(source, "HostMaxWidth=\"").ShouldBeGreaterThanOrEqualTo(2);
         CountOccurrences(source, "HostMaxHeight=\"").ShouldBeGreaterThanOrEqualTo(2);

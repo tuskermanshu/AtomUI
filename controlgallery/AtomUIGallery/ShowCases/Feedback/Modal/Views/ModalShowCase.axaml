@@ -358,13 +358,13 @@
                         <DataTemplate x:DataType="viewModels:ModalViewModel">
 
                             <StackPanel Orientation="Vertical" Spacing="20" Loaded="HandleDialogExampleLoaded">
-                                <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="10">
-                                    <atom:Button Name="MessageBoxOverlayHostButton"
-                                                 ButtonType="Primary"
-                                                 Content="{gallery:ModalShowCaseLangResource P2TextOverlayHost}" />
-                                    <atom:Button Name="MessageBoxWindowHostButton"
-                                                 Content="{gallery:ModalShowCaseLangResource P2TextNativeWindow}" />
-                                </WrapPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <atom:ToggleSwitch Name="MessageBoxHostTypeSwitch"
+                                                       VerticalAlignment="Center"
+                                                       IsCheckedChanged="HandleMessageBoxHostTypeSwitchChanged" />
+                                    <TextBlock VerticalAlignment="Center"
+                                               Text="{gallery:ModalShowCaseLangResource P2TextNativeWindow}" />
+                                </StackPanel>
                                 <atom:Separator Title="{gallery:ModalShowCaseLangResource P2TitleNormal}" />
                                 <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="10">
                                     <Panel>

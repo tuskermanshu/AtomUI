@@ -221,11 +221,6 @@
         <source>Native Window:</source>
       </segment>
     </unit>
-    <unit id="P2TextOverlayHost">
-      <segment>
-        <source>Overlay</source>
-      </segment>
-    </unit>
     <unit id="P2TextSomeContents">
       <segment>
         <source>Some contents...</source>

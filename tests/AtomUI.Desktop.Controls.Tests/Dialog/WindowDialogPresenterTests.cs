@@ -21,6 +21,44 @@ public class WindowDialogPresenterTests
     }
 
     [Fact]
+    public void Requested_Size_Does_Not_Overwrite_The_Native_Client_Size_Before_Layout()
+    {
+        RunOnUIThread(() =>
+        {
+            var window = new DialogWindow { Width = 500, Height = 300 };
+            try
+            {
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                window.UpdateLayout();
+                var platform = window.PlatformImpl.ShouldNotBeNull();
+                var nativeSize = platform.ClientSize;
+                nativeSize.ShouldBe(new Size(500, 300));
+
+                window.ApplyRequestedSize(550, 350);
+
+                // Width/Height request layout; only the platform resize callback owns ClientSize.
+                // A native backend may constrain or decline the request, so copying the request
+                // into ClientSize would let the rendered surface diverge from the native window.
+                window.ClientSize.ShouldBe(platform.ClientSize);
+                window.ClientSize.ShouldBe(nativeSize);
+                window.Width.ShouldBe(550);
+                window.Height.ShouldBe(350);
+
+                window.UpdateLayout();
+                Dispatcher.UIThread.RunJobs();
+                window.ClientSize.ShouldBe(new Size(550, 350));
+                window.ClientSize.ShouldBe(platform.ClientSize);
+                window.Bounds.Size.ShouldBe(platform.ClientSize);
+            }
+            finally
+            {
+                window.CloseFromPresenter();
+            }
+        });
+    }
+
+    [Fact]
     public void ShowAsync_Completes_When_The_Native_Window_Opens()
     {
         RunOnUIThread(ShowAsync_Completes_When_The_Native_Window_Opens_Core);
@@ -1204,6 +1242,48 @@ public class WindowDialogPresenterTests
     }
 
     [Fact]
+    public void Window_Hosted_Surface_Leaves_Content_Inset_Below_The_Native_TitleBar()
+    {
+        var owner = new AtomUI.Desktop.Controls.Window
+        {
+            Width = 800,
+            Height = 600
+        };
+        var dialog = new AtomUI.Desktop.Controls.Dialog
+        {
+            Content = new Border { Width = 180, Height = 70 },
+            IsModal = false,
+            IsMotionEnabled = false,
+            HostWidth = 360,
+            HostHeight = 220
+        };
+        var presenter = new WindowDialogPresenter(dialog, owner);
+
+        try
+        {
+            owner.Show();
+            WaitWithDispatcherPump(presenter.ShowAsync(CancellationToken.None).AsTask());
+
+            var surface = GetSurface(presenter);
+            var contentFrame = surface.GetVisualDescendants()
+                                      .OfType<Border>()
+                                      .Single(border => border.Name == "ContentFrame");
+            var verticalPadding = GetThemeResource<double>(SharedTokenKind.PaddingContentVerticalLG);
+
+            contentFrame.Padding.Top.ShouldBe(verticalPadding);
+            contentFrame.Padding.Bottom.ShouldBe(verticalPadding);
+            contentFrame.Padding.Left.ShouldBeGreaterThan(0);
+            contentFrame.Padding.Right.ShouldBeGreaterThan(0);
+        }
+        finally
+        {
+            WaitWithDispatcherPump(presenter.CloseAsync().AsTask());
+            WaitWithDispatcherPump(presenter.DisposeAsync().AsTask());
+            owner.Close();
+        }
+    }
+
+    [Fact]
     public void Presenter_Uses_The_Shared_Surface_Inside_One_Native_Window()
     {
         var owner = new AtomUI.Desktop.Controls.Window
@@ -1471,6 +1551,14 @@ public class WindowDialogPresenterTests
         return presenter.HostWindow.GetVisualDescendants()
                         .OfType<DialogSurface>()
                         .Single();
+    }
+
+    private static T GetThemeResource<T>(object key)
+    {
+        var application = Application.Current.ShouldNotBeNull();
+        application!.TryGetResource(key, application.ActualThemeVariant, out var value).ShouldBeTrue();
+        value.ShouldBeAssignableTo<T>();
+        return (T)value!;
     }
 
     private static Size GetWindowChromeSize(DialogWindow window)

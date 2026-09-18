@@ -265,12 +265,6 @@
         <target state="translated">原生窗口：</target>
       </segment>
     </unit>
-    <unit id="P2TextOverlayHost">
-      <segment>
-        <source>Overlay</source>
-        <target state="translated">浮层</target>
-      </segment>
-    </unit>
     <unit id="P2TextSomeContents">
       <segment>
         <source>Some contents...</source>
