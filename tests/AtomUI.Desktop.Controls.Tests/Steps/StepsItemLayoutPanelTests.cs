@@ -110,7 +110,7 @@ public class StepsItemLayoutPanelTests
     }
 
     [Fact]
-    public void Inline_Item_Wrapper_Fills_The_Item_Cell_For_Hover_Background()
+    public void Inline_Item_Wrapper_Fills_The_Cell_Width_With_v6_Padding_For_The_Hover_Background()
     {
         var panel = CreatePanel(Desktop.Controls.StepsType.Inline, Orientation.Horizontal, Orientation.Horizontal);
         panel.Padding          = new Thickness(6, 9, 6, 0);
@@ -128,9 +128,15 @@ public class StepsItemLayoutPanelTests
 
         Layout(panel, 240, 60);
 
-        wrapper.Bounds.ShouldBe(new Rect(0, 0, 240, 60));
-        wrapper.Bounds.Contains(indicator.Bounds.TopLeft).ShouldBeTrue();
-        wrapper.Bounds.Contains(section.Bounds.Center).ShouldBeTrue();
+        // antd v6 paints the inline hover background on `.ant-steps-item-wrapper`:
+        // a block that fills the item cell width; the wrapper padding contract
+        // (`paddingTop: paddingXS + lineWidth`, no bottom padding) arrives through
+        // the `InlineItemPadding` token bound to the panel `Padding`, so the
+        // background height is the content union (indicator (117,9,6,6) + section
+        // (91,23,58,36)) inflated by the padding's block values.
+        wrapper.Bounds.ShouldBe(new Rect(0, 0, 240, 59));
+        wrapper.Bounds.Contains(indicator.Bounds).ShouldBeTrue();
+        wrapper.Bounds.Contains(section.Bounds).ShouldBeTrue();
     }
 
     [Fact]

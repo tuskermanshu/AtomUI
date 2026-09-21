@@ -445,16 +445,45 @@ internal class StepsItemLayoutPanel : Panel
 
         if (Type == StepsType.Inline)
         {
-            ArrangeInlineItemWrapper(wrapper, itemRect);
+            ArrangeInlineItemWrapper(wrapper, itemRect, padding, wrappedChildren);
             return;
         }
 
         ArrangeContentItemWrapper(wrapper, itemRect, padding, wrappedChildren);
     }
 
-    private static void ArrangeInlineItemWrapper(Control? wrapper, Rect itemRect)
+    // antd v6 paints the inline hover background on `.ant-steps-item-wrapper`
+    // (style/inline.ts + style/index.ts): a block that fills the item cell width,
+    // with the wrapper padding contract (`paddingTop: paddingXS + lineWidth`, no
+    // bottom padding) carried by the theme through the `InlineItemPadding` token
+    // bound to this panel's `Padding`. The wrapper reuses that same padding here:
+    // full cell width, content-height vertical extent inflated by the padding's
+    // block values.
+    private static void ArrangeInlineItemWrapper(
+        Control? wrapper,
+        Rect itemRect,
+        Thickness padding,
+        Control?[] wrappedChildren)
     {
-        wrapper?.Arrange(itemRect);
+        if (wrapper is null)
+        {
+            return;
+        }
+
+        var contentBounds = ComputeWrappedContentBounds(wrappedChildren);
+        if (contentBounds is null)
+        {
+            wrapper.Arrange(default);
+            return;
+        }
+
+        var top    = Math.Max(itemRect.Top, contentBounds.Value.Top - padding.Top);
+        var bottom = Math.Min(itemRect.Bottom, contentBounds.Value.Bottom + padding.Bottom);
+        wrapper.Arrange(new Rect(
+            itemRect.Left,
+            top,
+            Math.Max(0, itemRect.Width),
+            Math.Max(0, bottom - top)));
     }
 
     private static void ArrangeContentItemWrapper(
@@ -468,6 +497,26 @@ internal class StepsItemLayoutPanel : Panel
             return;
         }
 
+        var contentBounds = ComputeWrappedContentBounds(wrappedChildren);
+        if (contentBounds is null)
+        {
+            wrapper.Arrange(default);
+            return;
+        }
+
+        var x = Math.Max(itemRect.Left, contentBounds.Value.Left - padding.Left);
+        var y = Math.Max(itemRect.Top, contentBounds.Value.Top - padding.Top);
+        var right = Math.Min(itemRect.Right, contentBounds.Value.Right + padding.Right);
+        var bottom = Math.Min(itemRect.Bottom, contentBounds.Value.Bottom + padding.Bottom);
+        wrapper.Arrange(new Rect(x, y, Math.Max(0, right - x), Math.Max(0, bottom - y)));
+    }
+
+    /// <summary>
+    /// Union of the arranged bounds of the given wrapper children, skipping
+    /// invisible and zero-sized entries; null when nothing contributes.
+    /// </summary>
+    private static Rect? ComputeWrappedContentBounds(Control?[] wrappedChildren)
+    {
         Rect? contentBounds = null;
         foreach (var child in wrappedChildren)
         {
@@ -487,17 +536,7 @@ internal class StepsItemLayoutPanel : Panel
                 : contentBounds.Value.Union(bounds);
         }
 
-        if (contentBounds is null)
-        {
-            wrapper.Arrange(default);
-            return;
-        }
-
-        var x = Math.Max(itemRect.Left, contentBounds.Value.Left - padding.Left);
-        var y = Math.Max(itemRect.Top, contentBounds.Value.Top - padding.Top);
-        var right = Math.Min(itemRect.Right, contentBounds.Value.Right + padding.Right);
-        var bottom = Math.Min(itemRect.Bottom, contentBounds.Value.Bottom + padding.Bottom);
-        wrapper.Arrange(new Rect(x, y, Math.Max(0, right - x), Math.Max(0, bottom - y)));
+        return contentBounds;
     }
 
     private void ArrangeArrow(Control? arrow, Control? panelArrow, Rect itemRect)

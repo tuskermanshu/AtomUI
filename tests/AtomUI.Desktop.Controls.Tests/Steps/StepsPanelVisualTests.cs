@@ -158,6 +158,85 @@ public class StepsPanelVisualTests
         });
     }
 
+    [Fact]
+    public void Filled_Notch_Clip_Is_Exclusive_To_The_Panel_Type()
+    {
+        // Non-Panel items only paint the item frame as a hover/focus background, so
+        // the Filled leading-notch clip must never apply to them: a notched gray
+        // rectangle shows up as soon as such a background becomes visible.
+        foreach (var type in new[]
+                 {
+                     Desktop.Controls.StepsType.Default,
+                     Desktop.Controls.StepsType.Dot,
+                     Desktop.Controls.StepsType.OutlineDot,
+                     Desktop.Controls.StepsType.Navigation,
+                     Desktop.Controls.StepsType.Inline
+                 })
+        {
+            var steps = new Desktop.Controls.Steps
+            {
+                Width = 720,
+                Height = 120,
+                Type = type,
+                Orientation = Orientation.Horizontal,
+                Current = 1
+            };
+            steps.Items.Add(new Desktop.Controls.StepsItem { Header = "First" });
+            steps.Items.Add(new Desktop.Controls.StepsItem { Header = "Second" });
+            steps.Items.Add(new Desktop.Controls.StepsItem { Header = "Last" });
+
+            ShowInWindow(steps, () =>
+            {
+                foreach (var item in steps.Items.Cast<Desktop.Controls.StepsItem>())
+                {
+                    var wrapper = (Desktop.Controls.StepsPanelItemFrame)FindControl(item, "ItemWrapper");
+                    wrapper.PanelVariant.ShouldBe(Desktop.Controls.StepsPanelVariant.Filled);
+                    wrapper.Clip.ShouldBeNull($"type {type} must not clip the item frame");
+                }
+            });
+        }
+    }
+
+    [Fact]
+    public void Inline_Hover_Background_Fills_The_Item_Cell_Width_Like_Antd_v6()
+    {
+        var steps = new Desktop.Controls.Steps
+        {
+            Width = 720,
+            Height = 120,
+            Type = Desktop.Controls.StepsType.Inline,
+            Orientation = Orientation.Horizontal,
+            Current = 1
+        };
+        steps.Items.Add(new Desktop.Controls.StepsItem { Header = "First", SubHeader = "Sub" });
+        steps.Items.Add(new Desktop.Controls.StepsItem { Header = "Second", SubHeader = "Sub" });
+        steps.Items.Add(new Desktop.Controls.StepsItem { Header = "Last", SubHeader = "Sub" });
+
+        ShowInWindow(steps, () =>
+        {
+            foreach (var item in steps.Items.Cast<Desktop.Controls.StepsItem>())
+            {
+                var wrapper   = FindControl(item, "ItemWrapper");
+                var indicator = FindControl(item, "PART_Indicator");
+                var section   = FindControl(item, "Section");
+                var panel     = (Desktop.Controls.StepsItemLayoutPanel)wrapper.Parent!;
+
+                // Wrapper, indicator and section share the item layout panel as their
+                // visual parent, so their bounds are directly comparable. antd v6
+                // renders the inline hover background on `.ant-steps-item-wrapper`:
+                // a block that fills the item cell width, with the block padding
+                // contract supplied by the `InlineItemPadding` token bound to the
+                // panel `Padding` (top = paddingXS + lineWidth, bottom = 0).
+                wrapper.Bounds.Contains(indicator.Bounds).ShouldBeTrue();
+                wrapper.Bounds.Contains(section.Bounds).ShouldBeTrue();
+                wrapper.Bounds.Left.ShouldBe(panel.Bounds.Left, 0.01);
+                wrapper.Bounds.Right.ShouldBe(panel.Bounds.Right, 0.01);
+                wrapper.Bounds.Top.ShouldBe(Math.Min(indicator.Bounds.Top, section.Bounds.Top) - panel.Padding.Top, 0.01);
+                wrapper.Bounds.Bottom.ShouldBe(Math.Max(indicator.Bounds.Bottom, section.Bounds.Bottom) + panel.Padding.Bottom, 0.01);
+            }
+        });
+    }
+
     private static Desktop.Controls.Steps CreateSteps(
         Desktop.Controls.StepsPanelVariant panelVariant,
         Orientation orientation)

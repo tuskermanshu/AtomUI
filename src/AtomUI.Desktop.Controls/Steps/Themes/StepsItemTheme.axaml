@@ -33,6 +33,7 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         BackgroundSizing="OuterBorderEdge"
                         CornerRadius="{TemplateBinding CornerRadius}"
+                        Type="{TemplateBinding Type}"
                         IsFirst="{TemplateBinding IsFirst}"
                         PanelVariant="{TemplateBinding PanelVariant}"
                         ArrowWidth="{atom:StepsTokenResource PanelArrowWidth}"

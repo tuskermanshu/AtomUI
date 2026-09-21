@@ -199,7 +199,7 @@ Steps (public)
 | `PART_WaveSpirit` | wave decorator | `StepsItemIndicatorTheme.axaml` | Indicator template | IsMotionEnabled、pointer click | internal-observable | 不由用户直接调用。 |
 | `Connector` | border | `StepsItemTheme.axaml` | StepsItem template | ConnectorStatus、Type | internal-observable | ConnectorStatus 来自下一个 item EffectiveStatus。 |
 | `NavigationArrow` | path icon | `StepsItemTheme.axaml` | StepsItem template | Type、Orientation、SizeType | internal-observable | 只在 Navigation 类型可见。 |
-| `ItemWrapper` | Panel item frame | `StepsItemTheme.axaml` / `StepsPanelItemFrame.cs` | StepsItem template | Type、PanelVariant、IsFirst、SizeType | internal-observable | Filled 非首项裁出 notch；Outlined 保留边框主体。 |
+| `ItemWrapper` | Panel item frame | `StepsItemTheme.axaml` / `StepsPanelItemFrame.cs` | StepsItem template | Type、PanelVariant、IsFirst、SizeType | internal-observable | Filled notch 只在 Panel 类型非首项裁出；Inline 时为 antd v6 `-item-wrapper` 同构的 hover 背景（铺满条目格宽，块方向 padding 来自 `InlineItemPadding` token 绑定的 layout panel `Padding`：上 `paddingXS+lineWidth`、下 0，`borderRadiusSM`）；Outlined 保留边框主体。 |
 | `PanelArrow` | internal control | `StepsItemTheme.axaml` / `StepsPanelArrow.cs` | StepsItem template | Type、PanelVariant、SizeType、FlowDirection | internal-observable | 只在 Panel 非末项可见。 |
 | `NavigationActiveIndicator` | border | `StepsItemTheme.axaml` | StepsItem template | Type、Orientation、IsCurrent | internal-observable | 只在 Navigation 当前项可见。 |
 

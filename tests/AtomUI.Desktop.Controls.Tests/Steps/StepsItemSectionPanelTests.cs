@@ -99,6 +99,40 @@ public class StepsItemSectionPanelTests
         section.HeadingLineRight.ShouldBe(60);
     }
 
+    [Fact]
+    public void Horizontal_Body_Keeps_SameLine_When_Arrange_Width_Rounds_Below_The_Heading_Sum()
+    {
+        // Mirrors the Windows/Linux layout-rounding defect: the section is arranged at
+        // the layout-rounded heading width, which sits one ulp below the freshly
+        // recomputed header+subHeader sum. The arrange pass must keep the measure
+        // decision instead of wrapping the subheader onto the content line.
+        var section = CreateSection(
+            Desktop.Controls.StepsType.Default, Orientation.Horizontal, Orientation.Horizontal);
+        section.UseLayoutRounding = false;
+        var header    = AddChild(section, Desktop.Controls.StepsItemLayoutRole.Header, 45.333333333333336, 22);
+        var subHeader = AddChild(section, Desktop.Controls.StepsItemLayoutRole.SubHeader, 60, 18.666666666666668);
+        var content   = AddChild(section, Desktop.Controls.StepsItemLayoutRole.Content, 98, 19.333333333333332);
+        header.UseLayoutRounding = false;
+        subHeader.UseLayoutRounding = false;
+        content.UseLayoutRounding = false;
+
+        section.Measure(new Size(300, 100));
+        header.DesiredSize.Width.ShouldBe(45.333333333333336);
+        section.HeadingHeight.ShouldBe(22);
+
+        section.Arrange(new Rect(0, 0, 105.33333333333333, 41.333333333333336));
+
+        header.Bounds.X.ShouldBe(0);
+        header.Bounds.Y.ShouldBe(0, 0.001);
+        header.Bounds.Width.ShouldBe(45.333333333333336);
+        subHeader.Bounds.X.ShouldBe(45.333333333333336);
+        subHeader.Bounds.Y.ShouldBe(1.6666666666666679, 0.001);
+        subHeader.Bounds.Bottom.ShouldBeLessThan(22);
+        content.Bounds.X.ShouldBe(0);
+        content.Bounds.Y.ShouldBe(22, 0.001);
+        content.Bounds.Size.ShouldBe(new Size(98, 19.333333333333332));
+    }
+
     private static Desktop.Controls.StepsItemSectionPanel CreateSection(
         Desktop.Controls.StepsType type,
         Orientation orientation,

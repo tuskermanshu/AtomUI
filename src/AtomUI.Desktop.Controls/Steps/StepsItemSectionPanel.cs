@@ -6,6 +6,13 @@ namespace AtomUI.Desktop.Controls;
 
 internal class StepsItemSectionPanel : Panel
 {
+    // The arrange width is the layout-rounded value of the measured heading width,
+    // while the check below recomputes header+subHeader as a fresh double sum. On a
+    // heading that exactly fills the section the two can differ by a rounding ulp,
+    // which must not flip the same-line decision between measure and arrange or the
+    // wrapped subheader is stacked onto the content line (text overlap).
+    private const double SameLineTolerance = 0.01;
+
     public static readonly StyledProperty<StepsType> TypeProperty =
         AvaloniaProperty.Register<StepsItemSectionPanel, StepsType>(nameof(Type), StepsType.Default);
 
@@ -77,7 +84,7 @@ internal class StepsItemSectionPanel : Panel
 
         if (EffectiveTitlePlacement == Orientation.Horizontal)
         {
-            var sameLine = header.Width + subHeader.Width <= availableSize.Width;
+            var sameLine = header.Width + subHeader.Width <= availableSize.Width + SameLineTolerance;
             HeadingHeight = sameLine
                 ? Math.Max(header.Height, subHeader.Height)
                 : header.Height + subHeader.Height;
@@ -120,7 +127,7 @@ internal class StepsItemSectionPanel : Panel
         var headerSize = header?.DesiredSize ?? default;
         var subHeaderSize = subHeader?.DesiredSize ?? default;
         var contentSize = content?.DesiredSize ?? default;
-        var sameLine = headerSize.Width + subHeaderSize.Width <= bodyWidth;
+        var sameLine = headerSize.Width + subHeaderSize.Width <= bodyWidth + SameLineTolerance;
         // The parent arranges the section at the indicator-inclusive heading height;
         // when it has not supplied that value the content offset can be derived
         // from the arranged section height.
@@ -138,7 +145,10 @@ internal class StepsItemSectionPanel : Panel
             headerY = Math.Max(0, (headingHeight - headerSize.Height) / 2);
             subHeaderX = headerWidth;
             subHeaderY = Math.Max(0, (headingHeight - subHeaderSize.Height) / 2);
-            subHeaderWidth = Math.Min(subHeaderSize.Width, Math.Max(0, bodyWidth - headerWidth));
+            // The decision above established the heading fits; give the subheader its
+            // full desired width so the tolerance slack cannot shave the slot and
+            // re-wrap the text inside it.
+            subHeaderWidth = subHeaderSize.Width;
         }
         else
         {

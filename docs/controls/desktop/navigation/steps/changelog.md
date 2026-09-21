@@ -3,6 +3,14 @@
 本文档记录 Steps 控件级设计、API、主题契约、Token 和实现结构的变化。
 它不替代仓库根目录 CHANGELOG.md，也不作为正式版本发布说明。
 
+## 2026-09-21
+
+- Behavior
+  - 垂直 Steps 中同时携带 SubHeader 与 Content 的 item 在 Windows/Linux 高 DPI 缩放下不再出现副标题与描述文字叠印：`StepsItemSectionPanel` 的 heading 同行/换行判定在测量与排列两处统一增加 0.01 容差（同 `StepsPanel` 份额宽度比较的既有容差惯例），消除「标题+副标题恰好占满区段宽度时，布局取整使排列宽度比重新求和小 1 ulp，两处判定翻转、换行副标题被排到内容行上」的缺陷；同行分支下副标题取完整期望宽度，容差缝隙不再引起二次换行。
+- Layout
+  - Inline hover 背景对齐 antd v6 `.ant-steps-item-wrapper` 契约（`style/inline.ts` + `style/index.ts`）：wrapper 为铺满 item 单元宽度的块，块方向 padding 契约（上 `paddingXS+lineWidth`、下 0）由既有 `InlineItemPadding` token 经主题绑定到 `StepsItemLayoutPanel.Padding` 提供，`ArrangeInlineItemWrapper` 直接消费该 Padding（与 `ArrangeContentItemWrapper` 同一几何契约来源，共用 `ComputeWrappedContentBounds` 内容并集计算），不再使用布局代码内的硬编码常量；背景带 `motionDurationMid` 过渡，不出现"铺满整格高度遮住相邻间距"或"紧贴内容过小"两种偏差。
+  - Panel Filled 的非首项 leading notch 裁剪只在 `Type=Panel` 时生效（`StepsPanelItemFrame` 新增 `Type` 属性并由模板 TemplateBinding 接入）；其他类型（含 Inline、可点击 Default、Dot、OutlineDot、Navigation）的 hover/focus 背景不再被裁成带缺口的箭头形状。
+
 ## 2026-08-22
 
 - Semantic Part
