@@ -6,7 +6,7 @@
 
 Pagination 的公开语义结构与 Ant Design 6 的 Semantic DOM 对齐：`PaginationSemanticType = { root, item }`（since 6.2.0）。
 `root` 是隐式 owner，`item` 覆盖上一页/下一页按钮与页码项。上游 `rc-pagination` 把 `styles.item` 应用到页码项、上一页/下一页
-与 simple pager，但不应用到 jump-prev / jump-next；AtomUI 将这一排除映射到 Ellipsis 单元格——Ellipsis 单元格动态移除
+与 simple pager，但不应用到 jump-prev / jump-next；AtomUI 将这一排除映射到 `JumpPrevious` / `JumpNext` 快速跳页项——这些项动态移除
 `semantic-item` marker，不属于 `item` Part。
 
 `SimplePagination` 是 AtomUI 的简洁分页变体，公开同一组 `root` + `item`。其 `item` 只覆盖上一页/下一页两个导航项，
@@ -94,14 +94,14 @@ root 不表示模板中的 `StackPanel#PART_RootLayout`、`PART_Nav` 或各 pres
 - 上一页导航项与下一页导航项。
 - 区间内的每个页码指示项。
 
-它明确不覆盖 Ellipsis 单元格：当 `PaginationNavItem.PaginationItemType == PaginationItemType.Ellipses` 时，
+它明确不覆盖快速跳页项：当 `PaginationNavItem.PaginationItemType` 为 `JumpPrevious` 或 `JumpNext` 时，
 marker 被动态移除；该单元格后续被复用为页码项时 marker 重新加回。这对应上游 jump-prev / jump-next 不接受
 `styles.item` 的行为。
 
 `item` 是运行时创建的语义标记。`PaginationTheme.axaml` 在 `PART_Nav`（`PaginationNav`）上声明
 `Classes.semantic-scope-nav="True"` 作为路由作用域；marker 由 `PaginationNavItem` 在初始化与
 `PaginationItemType` 变化时同步，不依赖静态模板 marker。`PaginationNav` 固定预建
-`Pagination.MaxNavItemCount`（11）个 `PaginationNavItem` 容器，未进入显示区间的容器保持隐藏但仍携带
+`Pagination.MaxNavItemCount`（9）个 `PaginationNavItem` 容器，未进入显示区间的容器保持隐藏但仍携带
 marker；有效可见 item 数量由当前显示区间决定。
 
 `ContractType` 为 `ContentControl`：`PaginationNavItem` 是 internal 类型，不能作为公共 Setter 依赖的最低类型，
@@ -233,8 +233,8 @@ selector 表达；Semantic Style 的 Setter 以 trigger 优先级同时覆盖主
 ## 4. 状态与数量语义
 
 - `root` 始终恰好一个，不随状态、模板重套用或集合变化增删。
-- `Pagination.item` 的 marker 数量跟随 `PaginationNav` 的固定容器池（11 个 `PaginationNavItem`）；有效可见的
-  item 数量等于当前显示区间内上一页/下一页加页码项的数量。Ellipsis 单元格在当前区间出现时无 marker，被复用为
+- `Pagination.item` 的 marker 数量跟随 `PaginationNav` 的固定容器池（9 个 `PaginationNavItem`）；有效可见的
+  item 数量等于当前显示区间内上一页/下一页加页码项的数量。`JumpPrevious` / `JumpNext` 在当前区间出现时无 marker，被复用为
   页码项后重新获得 marker。
 - `SimplePagination.item` 的内置 marker 数量恒为 2（上一页/下一页各一），不随 `CurrentPage`、`IsReadOnly` 或
   禁用状态增删。
@@ -254,7 +254,7 @@ selector 表达；Semantic Style 的 Setter 以 trigger 优先级同时覆盖主
   字体、颜色、对齐等文本样式，不得依赖 `PART_InfoIndicator` 节点身份以外的模板结构。
 - 布局型 Setter（`Margin`、`Padding`、`Width`）作用于条目的 Measure/Arrange，需按显示区间变化验证 owner 尺寸
   与裁剪边界。
-- Ellipsis 单元格、`PART_QuickJumper`、`PART_InfoIndicator`、`PART_TotalInfoPresenter`、
+- 快速跳页项、`PART_QuickJumper`、`PART_InfoIndicator`、`PART_TotalInfoPresenter`、
   `PART_SizeChangerPresenter`、`PART_QuickJumperBarPresenter` 明确不属于 `item`，不能通过 Semantic Style 承诺样式。
 - `PaginationNav` 上的 `semantic-scope-nav` 是路由作用域标记，不是公开 Semantic Part，应用不应直接依赖。
 

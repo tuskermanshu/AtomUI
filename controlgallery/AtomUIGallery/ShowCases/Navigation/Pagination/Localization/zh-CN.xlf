@@ -63,8 +63,8 @@
     </unit>
     <unit id="MoreDescription">
       <segment>
-        <source>More pages.</source>
-        <target state="translated">更多页码。</target>
+        <source>Hover or focus an ellipsis to reveal a five-page jump action.</source>
+        <target state="translated">悬停或聚焦省略号可显示跨 5 页跳转操作。</target>
       </segment>
     </unit>
     <unit id="MoreTitle">

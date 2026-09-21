@@ -149,9 +149,9 @@ Part 明细：
 | Cardinality | Single |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `DialogSurfaceTheme.axaml` 的 `Border#ContentFrame`（静态 marker） |
-| 职责 | 正文区域：`ContentPadding` 内边距、内容裁剪与 loading 骨架宿主边界 |
+| 职责 | 正文区域：Overlay 使用 `ContentPadding`；Window 宿主使用 `WindowContentPadding`；同时负责内容裁剪与 loading 骨架宿主边界 |
 | 相关 API | `Content`、`ContentTemplate`、`IsLoading` |
-| 相关 Token | `ContentPadding`、`LoadingIndicatorMargin` |
+| 相关 Token | `ContentPadding`、`WindowContentPadding`、`LoadingIndicatorMargin` |
 | Customization | Selector |
 | Stability | stable |
 

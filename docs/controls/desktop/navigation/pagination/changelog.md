@@ -2,6 +2,17 @@
 
 本文档记录 Pagination 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-21
+
+- Behavior
+  - 页码窗口对齐 `@rc-component/pagination` 1.4.0：默认保持 7 个中间项，`JumpPrevious` / `JumpNext`
+    默认跳转 5 页，`IsShowLessItems=True` 时缩减为 5 个中间项并跳转 3 页。
+  - 快速跳页项默认显示省略号，悬停或键盘聚焦时显示主色双箭头；点击与 Enter 使用同一页码变更路径。
+- API
+  - 新增 `IsShowLessItems` 与 `IsShowPrevNextJumpers`。
+- Semantic Part
+  - `JumpPrevious` / `JumpNext` 继续排除在 `Pagination.item` 之外，固定容器池由 11 个缩减为 9 个。
+
 ## 2026-08-22
 
 - Semantic Part

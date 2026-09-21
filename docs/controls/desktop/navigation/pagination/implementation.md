@@ -121,7 +121,7 @@ Semantic marker 接入点：
 - `Pagination` 的 `item` descriptor 为运行时创建（`RuntimeCreated = true`），路由
   `/template/ .semantic-scope-nav > .semantic-item`。`PaginationTheme.axaml` 在 `PART_Nav` 上声明
   `Classes.semantic-scope-nav="True"` 作用域标记；`PaginationNavItem` 在初始化与 `PaginationItemType`
-  变化时同步 `semantic-item` marker，`Ellipses` 类型移除 marker，其他类型加回。
+  变化时同步 `semantic-item` marker，`JumpPrevious` / `JumpNext` 类型移除 marker，其他类型加回。
 - `SimplePagination` 的 `item` descriptor 为静态标记，`SimplePaginationTheme.axaml` 在
   `PART_PreviousNavItem` 与 `PART_NextNavItem` 上声明 `Classes.semantic-item="True"`。
 - `SimplePagination` 的 `info` descriptor 为静态标记，`SimplePaginationTheme.axaml` 在
@@ -155,9 +155,10 @@ Pagination 的交互事件应从输入源收敛到控件级语义事件：
 
 ### 7.1 导航项容器池与显示区间
 
-`PaginationNav` 固定预建 `Pagination.MaxNavItemCount`（11）个 `PaginationNavItem` 容器，上一页/下一页占用
-前两个位置，其余位置按显示区间复用。`Pagination` 按 `CurrentPage`、`PageCount` 与区间规则依次 push
-页码项与 Ellipsis 单元格，未进入显示区间的容器保持隐藏。容器池是固定的：`CurrentPage`、`PageSize` 或
+`PaginationNav` 固定预建 `Pagination.MaxNavItemCount`（9）个 `PaginationNavItem` 容器，上一页/下一页占用
+首尾位置，其余 7 个位置按显示区间复用。`PaginationNavigationModel` 按 `CurrentPage`、`PageCount`、
+`IsShowLessItems` 与 `IsShowPrevNextJumpers` 生成页码项和 `JumpPrevious` / `JumpNext` 快速跳页项。默认模式保持
+7 个中间项；`IsShowLessItems=True` 时使用 5 个中间项，并把跳转跨度从 5 页改为 3 页。未进入显示区间的容器保持隐藏。容器池是固定的：`CurrentPage`、`PageSize` 或
 `Total` 变化只重排容器内容与可见性，不重建容器；`semantic-item` marker 由 `PaginationItemType` 驱动同步，
 与容器可见性解耦。
 
@@ -202,7 +203,7 @@ Pagination 的交互事件应从输入源收敛到控件级语义事件：
 - `CurrentPage` / `PageSize` 的默认 `TwoWay` binding metadata，以及内部写入不破坏外部 binding 的 `SetCurrentValue` 路径。
 - Template part 名称、ControlTheme key、伪类和资源 key。
 - Semantic Part descriptor、`semantic-scope-nav` 作用域标记、`semantic-item` / `semantic-info` marker 同步规则与
-  生成的 `PaginationItemStyle` / `SimplePaginationItemStyle` / `SimplePaginationInfoStyle` 类型。Ellipsis 单元格
+  生成的 `PaginationItemStyle` / `SimplePaginationItemStyle` / `SimplePaginationInfoStyle` 类型。快速跳页项
   无 `semantic-item` marker 属于上游语义对齐的稳定契约，不能通过主题或代码改动破坏。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。

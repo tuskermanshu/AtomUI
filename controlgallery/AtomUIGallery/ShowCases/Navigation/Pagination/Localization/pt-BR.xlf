@@ -63,8 +63,8 @@
     </unit>
     <unit id="MoreDescription">
       <segment>
-        <source>More pages.</source>
-        <target state="translated">Mais pages.</target>
+        <source>Hover or focus an ellipsis to reveal a five-page jump action.</source>
+        <target state="translated">Passe o mouse ou foque nas reticências para revelar uma ação de salto de cinco páginas.</target>
       </segment>
     </unit>
     <unit id="MoreTitle">

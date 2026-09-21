@@ -77,7 +77,7 @@ public class PaginationSemanticPartTests
     }
 
     [Fact]
-    public void Realized_Nav_Items_Are_Item_Parts_When_No_Ellipsis_Is_Visible()
+    public void Realized_Nav_Items_Are_Item_Parts_When_No_Jump_Item_Is_Visible()
     {
         var pagination = new AtomUIPagination
         {
@@ -89,13 +89,15 @@ public class PaginationSemanticPartTests
 
         var visibleCells = GetVisibleNavItems(pagination);
         visibleCells.Length.ShouldBe(7);
-        visibleCells.ShouldNotContain(static cell => cell.PaginationItemType == PaginationItemType.Ellipses);
+        visibleCells.ShouldNotContain(static cell =>
+            cell.PaginationItemType == PaginationItemType.JumpPrevious ||
+            cell.PaginationItemType == PaginationItemType.JumpNext);
         visibleCells.ShouldAllBe(static cell => cell.Classes.Contains(ItemClass));
         pagination.Classes.ShouldNotContain("semantic-root");
     }
 
     [Fact]
-    public void Ellipsis_Cells_Are_Excluded_From_The_Item_Part()
+    public void Jump_Cells_Are_Excluded_From_The_Item_Part()
     {
         var pagination = new AtomUIPagination
         {
@@ -106,16 +108,16 @@ public class PaginationSemanticPartTests
         using var window = Show(pagination);
 
         var visibleCells = GetVisibleNavItems(pagination);
-        visibleCells.Length.ShouldBe(11);
-        visibleCells.Count(static cell => cell.PaginationItemType == PaginationItemType.Ellipses).ShouldBe(2);
-        visibleCells.Where(static cell => cell.PaginationItemType != PaginationItemType.Ellipses)
+        visibleCells.Length.ShouldBe(9);
+        visibleCells.Count(static cell => cell.PaginationItemType is PaginationItemType.JumpPrevious or PaginationItemType.JumpNext).ShouldBe(2);
+        visibleCells.Where(static cell => cell.PaginationItemType is not PaginationItemType.JumpPrevious and not PaginationItemType.JumpNext)
                     .ShouldAllBe(static cell => cell.Classes.Contains(ItemClass));
-        visibleCells.Where(static cell => cell.PaginationItemType == PaginationItemType.Ellipses)
+        visibleCells.Where(static cell => cell.PaginationItemType is PaginationItemType.JumpPrevious or PaginationItemType.JumpNext)
                     .ShouldAllBe(static cell => !cell.Classes.Contains(ItemClass));
     }
 
     [Fact]
-    public void Page_Range_Change_Syncs_Item_Markers_Across_Ellipsis_Transitions()
+    public void Page_Range_Change_Syncs_Item_Markers_Across_Jump_Transitions()
     {
         var pagination = new AtomUIPagination
         {
@@ -125,27 +127,27 @@ public class PaginationSemanticPartTests
 
         using var window = Show(pagination);
 
-        var ellipsisCell = GetVisibleNavItems(pagination).First(
-            static cell => cell.PaginationItemType == PaginationItemType.Ellipses);
-        ellipsisCell.Classes.ShouldNotContain(ItemClass);
+        var jumpCell = GetVisibleNavItems(pagination).First(
+            static cell => cell.PaginationItemType == PaginationItemType.JumpPrevious);
+        jumpCell.Classes.ShouldNotContain(ItemClass);
 
         pagination.CurrentPage = 1;
         Dispatcher.UIThread.RunJobs();
 
-        ellipsisCell.PaginationItemType.ShouldBe(PaginationItemType.PageIndicator);
-        ellipsisCell.Classes.ShouldContain(ItemClass);
+        jumpCell.PaginationItemType.ShouldBe(PaginationItemType.PageIndicator);
+        jumpCell.Classes.ShouldContain(ItemClass);
 
         var visibleCells = GetVisibleNavItems(pagination);
         visibleCells.Length.ShouldBe(9);
-        visibleCells.Count(static cell => cell.PaginationItemType == PaginationItemType.Ellipses).ShouldBe(1);
-        visibleCells.Where(static cell => cell.PaginationItemType != PaginationItemType.Ellipses)
+        visibleCells.Count(static cell => cell.PaginationItemType == PaginationItemType.JumpNext).ShouldBe(1);
+        visibleCells.Where(static cell => cell.PaginationItemType is not PaginationItemType.JumpPrevious and not PaginationItemType.JumpNext)
                     .ShouldAllBe(static cell => cell.Classes.Contains(ItemClass));
-        visibleCells.Where(static cell => cell.PaginationItemType == PaginationItemType.Ellipses)
+        visibleCells.Where(static cell => cell.PaginationItemType is PaginationItemType.JumpPrevious or PaginationItemType.JumpNext)
                     .ShouldAllBe(static cell => !cell.Classes.Contains(ItemClass));
     }
 
     [Fact]
-    public void Generated_Item_Style_Applies_To_Page_Cells_But_Not_Ellipsis()
+    public void Generated_Item_Style_Applies_To_Page_Cells_But_Not_Jump_Cells()
     {
         var pagination = new AtomUIPagination
         {
@@ -164,14 +166,14 @@ public class PaginationSemanticPartTests
         using var window = Show(pagination);
 
         var markedItems = GetSemanticElements(pagination, ItemClass).OfType<Control>().ToArray();
-        markedItems.Length.ShouldBe(9);
+        markedItems.Length.ShouldBe(7);
         markedItems.ShouldAllBe(static item => Equals(item.Tag, "item"));
-        var visibleEllipsisCells = GetVisibleNavItems(pagination)
-            .Where(static cell => cell.PaginationItemType == PaginationItemType.Ellipses)
+        var visibleJumpCells = GetVisibleNavItems(pagination)
+            .Where(static cell => cell.PaginationItemType is PaginationItemType.JumpPrevious or PaginationItemType.JumpNext)
             .ToArray();
-        visibleEllipsisCells.ShouldNotBeEmpty();
-        visibleEllipsisCells.ShouldAllBe(static cell => !cell.Classes.Contains(ItemClass));
-        visibleEllipsisCells.ShouldAllBe(static cell => cell.Tag == null);
+        visibleJumpCells.ShouldNotBeEmpty();
+        visibleJumpCells.ShouldAllBe(static cell => !cell.Classes.Contains(ItemClass));
+        visibleJumpCells.ShouldAllBe(static cell => cell.Tag == null);
     }
 
     [Fact]

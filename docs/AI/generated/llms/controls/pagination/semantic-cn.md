@@ -44,6 +44,7 @@ Pagination
      -> Panel (template-stable)
         -> PixelAlignedBorder (template-stable)
         -> IconPresenter#IconPresenter (internal-observable)
+        -> IconPresenter#JumpIconPresenter (internal-observable)
         -> ContentPresenter#ContentPresenter (internal-observable)
   -> PaginationNav (control theme, PaginationNavTheme.axaml)
      -> Border#PART_Frame (template-stable)
@@ -70,6 +71,7 @@ Pagination
 | `PaginationNavItem` | item container control theme | `PaginationNavItemTheme.axaml` | Pagination | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `CornerRadius`, `Foreground` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `Panel` | template node (Panel) | `PaginationNavItemTheme.axaml` | PaginationNavItem | `Background`, `BorderBrush`, `BorderThickness`, `Content`, `CornerRadius`, `Icon` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `IconPresenter` | template node (IconPresenter) | `PaginationNavItemTheme.axaml` | PaginationNavItem | `Icon`, `IsEnabled` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
+| `JumpIconPresenter` | template node (IconPresenter) | `PaginationNavItemTheme.axaml` | PaginationNavItem | `IsEnabled`, `JumpIcon` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `ContentPresenter` | template node (ContentPresenter) | `PaginationNavItemTheme.axaml` | PaginationNavItem | `Content` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PaginationNav` | control theme | `PaginationNavTheme.axaml` | Pagination | `CornerRadius`, `Padding` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_Frame` | template node (Border) | `PaginationNavTheme.axaml` | PaginationNav | `CornerRadius`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -92,7 +94,7 @@ Pagination
 | --- | --- | --- |
 | 内容与数据 | `Icon`、`JumpToText`、`PageText`、`PaginationItemType`、`TotalInfoTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `CurrentPage`、`IsHideOnSinglePage`、`IsSelected`、`PageCount`、`PageSize` | 维护选择、展开、过滤、分页、分组或集合状态；`CurrentPage` 和 `PageSize` 默认 `TwoWay`。 |
-| 交互与状态 | `IsMotionEnabled`、`IsPressed`、`IsReadOnly`、`IsShowQuickJumper`、`IsShowSizeChanger`、`IsShowTotalInfo` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
+| 交互与状态 | `IsMotionEnabled`、`IsPressed`、`IsReadOnly`、`IsShowQuickJumper`、`IsShowSizeChanger`、`IsShowTotalInfo`、`IsShowLessItems`、`IsShowPrevNextJumpers` | 表达用户可观察状态、可用性、页码密度、快速跳页、清除、加载或反馈语义。 |
 | 视觉与布局 | `Align`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 其他稳定入口 | `Maximum`、`Minimum`、`Total` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -170,7 +172,7 @@ Pagination Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - `CurrentPage` / `PageSize` 的默认 `TwoWay` binding metadata，以及内部写入不破坏外部 binding 的 `SetCurrentValue` 路径。
 - Template part 名称、ControlTheme key、伪类和资源 key。
 - Semantic Part descriptor、`semantic-scope-nav` 作用域标记、`semantic-item` / `semantic-info` marker 同步规则与
-  生成的 `PaginationItemStyle` / `SimplePaginationItemStyle` / `SimplePaginationInfoStyle` 类型。Ellipsis 单元格
+  生成的 `PaginationItemStyle` / `SimplePaginationItemStyle` / `SimplePaginationInfoStyle` 类型。快速跳页项
   无 `semantic-item` marker 属于上游语义对齐的稳定契约，不能通过主题或代码改动破坏。
 - 旧 template part、事件订阅、Popup/Flyout/Window host 和 collection view 的释放路径。
 - Light/Dark、Browser/Desktop 和不同 SizeType 下的主题一致性。

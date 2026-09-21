@@ -76,7 +76,11 @@ public class DesktopCatalogCoverageTests
             "AtomUI.Desktop.Controls.PaginationLang",
             new ExpectedEntry<PaginationLangResourceKind>(PaginationLangResourceKind.JumpToText, "Go to", "跳至", "跳至"),
             new ExpectedEntry<PaginationLangResourceKind>(PaginationLangResourceKind.PageText, "Page", "页", "頁"),
-            new ExpectedEntry<PaginationLangResourceKind>(PaginationLangResourceKind.TotalInfoFormat, "Total ${Total} items", "共 ${Total} 项", "共 ${Total} 項"));
+            new ExpectedEntry<PaginationLangResourceKind>(PaginationLangResourceKind.TotalInfoFormat, "Total ${Total} items", "共 ${Total} 项", "共 ${Total} 項"),
+            new ExpectedEntry<PaginationLangResourceKind>(PaginationLangResourceKind.PreviousPageText, "Previous Page", "上一页", "上一頁"),
+            new ExpectedEntry<PaginationLangResourceKind>(PaginationLangResourceKind.NextPageText, "Next Page", "下一页", "下一頁"),
+            new ExpectedEntry<PaginationLangResourceKind>(PaginationLangResourceKind.PreviousPagesTextFormat, "Previous {0} Pages", "向前 {0} 页", "向前 {0} 頁"),
+            new ExpectedEntry<PaginationLangResourceKind>(PaginationLangResourceKind.NextPagesTextFormat, "Next {0} Pages", "向后 {0} 页", "向後 {0} 頁"));
     }
 
     [Fact]

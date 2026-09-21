@@ -15,7 +15,8 @@ internal enum PaginationItemType
     Previous,
     PageIndicator,
     Next,
-    Ellipses
+    JumpPrevious,
+    JumpNext
 }
 
 internal class PaginationNavItem : ContentControl, ISelectable
@@ -39,6 +40,9 @@ internal class PaginationNavItem : ContentControl, ISelectable
     
     public static readonly StyledProperty<PathIcon?> IconProperty =
         AvaloniaProperty.Register<PaginationNavItem, PathIcon?>(nameof(Icon));
+
+    public static readonly StyledProperty<PathIcon?> JumpIconProperty =
+        AvaloniaProperty.Register<PaginationNavItem, PathIcon?>(nameof(JumpIcon));
 
     public bool IsSelected
     {
@@ -76,6 +80,12 @@ internal class PaginationNavItem : ContentControl, ISelectable
     {
         get => GetValue(IconProperty);
         set => SetValue(IconProperty, value);
+    }
+
+    public PathIcon? JumpIcon
+    {
+        get => GetValue(JumpIconProperty);
+        set => SetValue(JumpIconProperty, value);
     }
 
     #endregion
@@ -162,11 +172,19 @@ internal class PaginationNavItem : ContentControl, ISelectable
             e.Handled = true;
             if (this.ContainsSelfOrDescendantAt(e.GetPosition(this)))
             {
-                if (PaginationItemType != PaginationItemType.Ellipses)
-                {
-                    OnClick();
-                }
+                OnClick();
             }
+        }
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (IsEnabled && e.Key == Key.Enter)
+        {
+            OnClick();
+            e.Handled = true;
         }
     }
 
@@ -191,7 +209,7 @@ internal class PaginationNavItem : ContentControl, ISelectable
 
     private void SyncSemanticItemMarker()
     {
-        if (PaginationItemType == PaginationItemType.Ellipses)
+        if (PaginationItemType is PaginationItemType.JumpPrevious or PaginationItemType.JumpNext)
         {
             Classes.Remove(PaginationSemanticParts.ItemClass);
         }

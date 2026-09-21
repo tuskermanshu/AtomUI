@@ -43,7 +43,7 @@ Pagination 的公共契约由 public/protected 类型成员、Avalonia 属性、
 | --- | --- | --- |
 | 内容与数据 | `Icon`、`JumpToText`、`PageText`、`PaginationItemType`、`TotalInfoTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `CurrentPage`、`IsHideOnSinglePage`、`IsSelected`、`PageCount`、`PageSize` | 维护选择、展开、过滤、分页、分组或集合状态；`CurrentPage` 和 `PageSize` 默认 `TwoWay`。 |
-| 交互与状态 | `IsMotionEnabled`、`IsPressed`、`IsReadOnly`、`IsShowQuickJumper`、`IsShowSizeChanger`、`IsShowTotalInfo` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
+| 交互与状态 | `IsMotionEnabled`、`IsPressed`、`IsReadOnly`、`IsShowQuickJumper`、`IsShowSizeChanger`、`IsShowTotalInfo`、`IsShowLessItems`、`IsShowPrevNextJumpers` | 表达用户可观察状态、可用性、页码密度、快速跳页、清除、加载或反馈语义。 |
 | 视觉与布局 | `Align`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 其他稳定入口 | `Maximum`、`Minimum`、`Total` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -188,7 +188,7 @@ LLMS 语义区域：
 | Part | Owner | AtomUI 节点 | 职责 | 稳定性 |
 | --- | --- | --- | --- | --- |
 | `root` | `Pagination` / `SimplePagination` | 控件自身 | 分页控件根语义区域，承载分页状态、布局入口和主题视觉。 | stable since 6.2.0 |
-| `item` | `Pagination` | 上一页/下一页导航项与页码指示项 | 承载单个分页导航单元的尺寸、状态与点击语义；Ellipsis 单元格除外。 | stable since 6.2.0 |
+| `item` | `Pagination` | 上一页/下一页导航项与页码指示项 | 承载单个分页导航单元的尺寸、状态与点击语义；`JumpPrevious` / `JumpNext` 快速跳页项除外。 | stable since 6.2.0 |
 | `item` | `SimplePagination` | 上一页/下一页导航项 | 承载简洁模式导航单元的尺寸、状态与点击语义；快速跳转输入与信息文本除外。 | stable since 6.2.0 |
 
 Part 的 Selector、ContractType、数量语义与定制边界以 [Pagination Semantic Part 契约](semantic-part.md) 为唯一完整来源。
