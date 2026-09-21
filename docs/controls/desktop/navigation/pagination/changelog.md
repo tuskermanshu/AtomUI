@@ -8,6 +8,8 @@
   - 页码窗口对齐 `@rc-component/pagination` 1.4.0：默认保持 7 个中间项，`JumpPrevious` / `JumpNext`
     默认跳转 5 页，`IsShowLessItems=True` 时缩减为 5 个中间项并跳转 3 页。
   - 快速跳页项默认显示省略号，悬停或键盘聚焦时显示主色双箭头；点击与 Enter 使用同一页码变更路径。
+  - 页码重排原地复用仍处于同一槽位的快速跳页容器和图标，仅清理不再使用的尾部容器，避免点击后丢失
+    `:pointerover` 并重启透明度过渡。
 - API
   - 新增 `IsShowLessItems` 与 `IsShowPrevNextJumpers`。
 - Semantic Part

@@ -270,22 +270,8 @@ public partial class Pagination : AbstractPagination
             Debug.Assert(_previousPageItem != null);
             Debug.Assert(_nextPageItem != null);
             var count = _paginationNav.ItemCount;
-            // 清空状态 clear state
             _paginationNav.SelectedIndex = -1;
             _selectedNavItemIndex        = -1;
-            for (int i = 1; i < count - 1; i++)
-            {
-                var container = _paginationNav.ContainerFromIndex(i);
-                if (container is PaginationNavItem navItem)
-                {
-                    navItem.PaginationItemType = PaginationItemType.PageIndicator;
-                    navItem.IsVisible          = false;
-                    navItem.Content            = null;
-                    navItem.Icon               = null;
-                    navItem.JumpIcon           = null;
-                    navItem.ClearValue(AutomationProperties.NameProperty);
-                }
-            }
 
             _previousPageItem.IsEnabled  = currentPage > 1;
             _previousPageItem.PageNumber = Math.Max(1, CurrentPage - 1);
@@ -296,6 +282,14 @@ public partial class Pagination : AbstractPagination
             foreach (var item in CreateNavigationItems(currentPage, pageCount))
             {
                 SetupNextNavigationItem(item);
+            }
+
+            for (var index = _nextPushItemIndex; index < count - 1; index++)
+            {
+                if (_paginationNav.ContainerFromIndex(index) is PaginationNavItem navItem)
+                {
+                    ClearNavigationItem(navItem);
+                }
             }
 
             _paginationNav.SelectedIndex = _selectedNavItemIndex;
@@ -338,22 +332,47 @@ public partial class Pagination : AbstractPagination
         Debug.Assert(navItem != null);
         navItem.PaginationItemType = item.ItemType;
         navItem.PageNumber         = item.PageNumber;
-        navItem.Content = item.ItemType == PaginationItemType.PageIndicator
-            ? $"{item.PageNumber}"
-            : null;
-        navItem.Icon = item.ItemType is PaginationItemType.JumpPrevious or PaginationItemType.JumpNext
-            ? new EllipsisOutlined()
-            : null;
-        navItem.JumpIcon = item.ItemType switch
+        if (item.ItemType == PaginationItemType.PageIndicator)
         {
-            PaginationItemType.JumpPrevious when FlowDirection == FlowDirection.RightToLeft => new DoubleRightOutlined(),
-            PaginationItemType.JumpPrevious => new DoubleLeftOutlined(),
-            PaginationItemType.JumpNext when FlowDirection == FlowDirection.RightToLeft => new DoubleLeftOutlined(),
-            PaginationItemType.JumpNext => new DoubleRightOutlined(),
-            _ => null
-        };
+            navItem.Content  = $"{item.PageNumber}";
+            navItem.Icon     = null;
+            navItem.JumpIcon = null;
+        }
+        else
+        {
+            navItem.Content  = null;
+            navItem.Icon   ??= new EllipsisOutlined();
+            navItem.JumpIcon = GetOrCreateJumpIcon(navItem.JumpIcon, item.ItemType);
+        }
+
         navItem.SetValue(AutomationProperties.NameProperty, GetAutomationName(item));
         navItem.IsVisible = true;
+    }
+
+    private PathIcon GetOrCreateJumpIcon(PathIcon? currentIcon, PaginationItemType itemType)
+    {
+        var useDoubleLeft = (itemType, FlowDirection) switch
+        {
+            (PaginationItemType.JumpPrevious, FlowDirection.LeftToRight) => true,
+            (PaginationItemType.JumpPrevious, FlowDirection.RightToLeft) => false,
+            (PaginationItemType.JumpNext, FlowDirection.LeftToRight) => false,
+            (PaginationItemType.JumpNext, FlowDirection.RightToLeft) => true,
+            _ => throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null)
+        };
+
+        return useDoubleLeft
+            ? currentIcon as DoubleLeftOutlined ?? new DoubleLeftOutlined()
+            : currentIcon as DoubleRightOutlined ?? new DoubleRightOutlined();
+    }
+
+    private static void ClearNavigationItem(PaginationNavItem navItem)
+    {
+        navItem.IsVisible          = false;
+        navItem.PaginationItemType = PaginationItemType.PageIndicator;
+        navItem.Content            = null;
+        navItem.Icon               = null;
+        navItem.JumpIcon           = null;
+        navItem.ClearValue(AutomationProperties.NameProperty);
     }
 
     private void RefreshNavigationItems()

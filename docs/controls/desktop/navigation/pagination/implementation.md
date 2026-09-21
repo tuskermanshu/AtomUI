@@ -162,6 +162,10 @@ Pagination 的交互事件应从输入源收敛到控件级语义事件：
 `Total` 变化只重排容器内容与可见性，不重建容器；`semantic-item` marker 由 `PaginationItemType` 驱动同步，
 与容器可见性解耦。
 
+重排时必须先生成新窗口，再按槽位原地更新仍被使用的容器；不能先把所有中间容器设为不可见后重新显示。
+当 jump 类型和方向不变时应复用原 `EllipsisOutlined` 与双箭头实例，仅清理新窗口未使用的尾部容器。该不变量
+保证鼠标静止点击 jump 后 `:pointerover`、双箭头可见性与 opacity transition 不会被无意义重置。
+
 ### 7.2 尺寸与状态基线矩阵
 
 | SizeType | 默认值来源 | 条目尺寸（`PaginationNavItemTheme`） | 布局间距（根模板） |

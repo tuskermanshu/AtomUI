@@ -94,6 +94,35 @@ public class PaginationJumpNavigationTests
     }
 
     [Fact]
+    public void Clicking_A_Stable_Jump_Item_Preserves_Pointer_Over_And_Double_Arrow()
+    {
+        using var fixture = CreateFixture(currentPage: 39, isMotionEnabled: false);
+        var jumpPrevious = GetVisibleNavigationItems(fixture.Pagination)
+            .Single(item => item.PaginationItemType == PaginationItemType.JumpPrevious);
+
+        fixture.Window.MouseMove(CenterOf(jumpPrevious, fixture.Window));
+        jumpPrevious.IsPointerOver.ShouldBeTrue();
+        var (ellipsisBefore, jumpIconBefore) = GetJumpVisuals(jumpPrevious);
+        var ellipsisIconBefore = jumpPrevious.Icon;
+        var doubleArrowIconBefore = jumpPrevious.JumpIcon;
+        ellipsisBefore.Opacity.ShouldBe(0);
+        jumpIconBefore.Opacity.ShouldBe(1);
+
+        Click(fixture.Window, jumpPrevious);
+
+        fixture.Pagination.CurrentPage.ShouldBe(34);
+        var jumpPreviousAfter = GetVisibleNavigationItems(fixture.Pagination)
+            .Single(item => item.PaginationItemType == PaginationItemType.JumpPrevious);
+        jumpPreviousAfter.ShouldBeSameAs(jumpPrevious);
+        jumpPreviousAfter.Icon.ShouldBeSameAs(ellipsisIconBefore);
+        jumpPreviousAfter.JumpIcon.ShouldBeSameAs(doubleArrowIconBefore);
+        jumpPreviousAfter.IsPointerOver.ShouldBeTrue();
+        var (ellipsisAfter, jumpIconAfter) = GetJumpVisuals(jumpPreviousAfter);
+        ellipsisAfter.Opacity.ShouldBe(0);
+        jumpIconAfter.Opacity.ShouldBe(1);
+    }
+
+    [Fact]
     public void Right_To_Left_Flow_Reverses_Icons_Without_Changing_Jump_Targets()
     {
         using var fixture = CreateFixture();
@@ -137,13 +166,14 @@ public class PaginationJumpNavigationTests
     }
 
     private static PaginationFixture CreateFixture(
+        int currentPage = 6,
         bool isEnabled = true,
         bool isMotionEnabled = true)
     {
         var pagination = new global::AtomUI.Desktop.Controls.Pagination
         {
             Total = 500,
-            CurrentPage = 6,
+            CurrentPage = currentPage,
             Width = 700,
             IsEnabled = isEnabled,
             IsMotionEnabled = isMotionEnabled,
