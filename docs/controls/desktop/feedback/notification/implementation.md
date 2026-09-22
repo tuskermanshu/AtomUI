@@ -49,6 +49,8 @@
 - `NotificationProgressBarVisibleConverter`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `NotificationCardToken`：internal 控件 Token scope，负责从全局 token 派生控件语义变量。
 - `WindowNotificationManager`：拥有稳定卡片集合、public Stack 配置、TopLevel host、生命周期调度与用户回调清理。
+- `WindowFeedbackLayer`：作为窗口反馈 manager 的宿主，按最近成功提交的 `Show` 原子移动直接 manager 子项；不拥有卡片、
+  scheduler 或用户回调。
 - `FeedbackStackPresenter`：消费稳定 ItemsSource，独立保存列表 hover，并在数量、开关或阈值变化时派生展开与暂停状态。
 - `FeedbackStackPanel`：按共享几何契约测量每张卡片，生成 Notification 的变高折叠、关闭投影与 Top/Bottom 镜像投影，并标识展开到折叠的单次过渡边界。
 - `FeedbackStackTransitionSnapshotHost`：模板内部正文宿主，只在平铺到折叠期间持有最多一个显式内容位图；外层卡片仍负责背景、阴影和全部 Stack 投影。
@@ -110,6 +112,8 @@ Duration 变化不重启同一 actor，新值从下一次 motion 生效；Comple
 - 构造阶段只注册必要状态，不依赖 template part。
 - 模板应用时获取 part、建立事件订阅和绑定，并先释放旧 part 订阅。
 - manager 的卡片 collection 在模板之外创建并保持稳定；新 `PART_Items` 只重新绑定该 collection，旧 presenter 立即解绑。
+- 带宿主 manager 的跨 manager 层级只由 host layer 的直接子项顺序表达；激活使用 collection `Move`，不得通过
+  `Remove` + `Add` 触发 detach/attach，也不得覆盖 manager/card 的 `ZIndex`。
 - manager 首次 attach 前允许 `Show`，卡片进入稳定集合，有限时长登记保持暂停。detach 时先暂停 scheduler，
   并在视觉树级联完成后确认是否仍离树：持续离树关闭当时卡片，同轮重新入树的 host 迁移保留队列。
 - `Dispose` 解绑 presenter 的集合与 hover 事件、释放 scheduler 和每张 card 的 owner/回调，再移除宿主层及安全区订阅。
@@ -180,7 +184,8 @@ Notification 的交互事件应从输入源收敛到控件级语义事件：
 - FeedbackStackPanel 把展开位置表达为相对稳定宿主边锚点的 transform，使新增、移除和 Stack 切换只更新目标
   transform；不得先改写屏幕位置再通过 Dispatcher 执行补偿动画。motion-disabled 时直接排列可见终态，并保持隐藏项
   的有效展开 Bounds，以避免无意义的 transform 属性写入和 layout-invalid 重试。
-- `Show` 在 UI thread 同步创建并登记卡片，加入稳定 collection 后更新 MaxItems 和 Stack 投影；不使用 cleanup queue 或轮询寻找关闭项。
+- `Show` 在 UI thread 同步创建卡片并加入稳定 collection，随后在生命周期登记、MaxItems 淘汰及其潜在用户回调之前激活
+  当前宿主 manager，再更新 Stack 投影；重入到其他 manager 的后续 `Show` 必须保留为最终栈顶。不使用 cleanup queue 或轮询寻找关闭项。
 - Stack 判定只统计非 closing、非 closed 的活动项，并使用数量严格大于有效阈值。折叠位置从最新项开始，按
   `nextInset = previousFarEdge + 8 - currentHeight` 使用每张卡片的真实高度计算；最多绘制并命中最新
   `Min(3, StackThreshold)` 张，前三层 scale 为 `1`、`0.94`、`0.88`。其余旧项的折叠目标 opacity 为 `0`，但仍必须在
@@ -222,6 +227,8 @@ Notification 的交互事件应从输入源收敛到控件级语义事件：
 性能边界：
 
 - manager、ItemsControl 与 card collection 在 Stack 切换和重套模板之间保持稳定。
+- manager 已位于反馈层末尾时，宿主激活只做一次 O(1) 尾项比较；切换 manager 时只对直接 manager 子项执行一次索引查找
+  和一次 collection `Move`。不得扫描 card、分配临时集合、创建 timer/任务/订阅或保存额外 manager 引用。
 - `MeasureOverride` / `ArrangeOverride` 不允许 LINQ、临时数组、闭包或逐帧 transform 创建。
 - 稳态布局必须复用缓存 transform；目标变化最多创建一个 transform 并交给 transition 插值，不增加逐帧 managed 回调。
 - Notification 进出场必须使用 render-only actor，不能因 translate/fade 在每帧触发 panel Measure；布局只在集合、测量
@@ -270,7 +277,8 @@ Notification 的交互事件应从输入源收敛到控件级语义事件：
 - `FeedbackLifetimeSchedulerTests` 以可控时钟覆盖最近 deadline、进度刷新、剩余时长、普通/Stack 暂停、空闲停表及关闭回调耗时后的重调度；
   `WeakReference` 用例验证 scheduler 保持存活时，最后一批已到期或已在关闭的项也能回收。
 - `FeedbackManagerStackTests` 覆盖无动画批量淘汰的最旧优先顺序，以及关闭回调中的 Dispose、嵌套 DestroyAll 和新增消息；
-  `WeakReference` 用例验证 manager dispose 后的 manager、presenter、card、actor 与回调 owner 对象图释放。
+  `WeakReference` 用例验证 manager dispose 后的 manager、presenter、card、actor 与回调 owner 对象图释放；跨 manager
+  激活还必须覆盖 A/B/A 顺序、Message 混合宿主、栈顶无操作快路径、单次 collection Move 和零 attach/detach。
 - 纯文档改动运行 `git diff --check` 并检查相对链接。
 - 控件 API 或行为变更运行对应 `tests/AtomUI.Desktop.Controls.Tests` 或专用包测试。
 - DataGrid 相关变更运行 `tests/AtomUI.Desktop.Controls.DataGrid.Tests`。

@@ -1,6 +1,6 @@
 # Feedback 堆叠基础设施
 
-本文定义 Message 与 Notification 共用的堆叠、生命周期计时和集合呈现契约。共享实现位于
+本文定义 Message 与 Notification 共用的堆叠、生命周期计时、集合呈现和窗口反馈宿主激活契约。共享实现位于
 `src/AtomUI.Desktop.Controls/Primitives/FeedbackStack`，控件管理器继续拥有各自的 public API、内容模型、位置和关闭事件。目录入口见
 [Control 基础设施](overview.md)，控件入口见 [Message](../../../controls/desktop/feedback/message/overview.md) 与
 [Notification](../../../controls/desktop/feedback/notification/overview.md)。
@@ -21,6 +21,10 @@
 - Stack 配置与展示时长彼此独立：开启或进入折叠态不会把有限时长项改成永久项，也不会自行暂停 deadline。
 - 计时使用单调时间和剩余时长；暂停后从剩余时长继续，不能重新开始完整时长。
 - 一个管理器最多拥有一个惰性调度器；空集合、全部永久展示、detach 或 dispose 时不得保持活动 timer。
+- 同一窗口反馈层中的多个 manager 以最近一次成功提交 `Show` 的 manager 为栈顶；manager 作为原子反馈组参与宿主排序，
+  组内卡片继续由各自的 `FeedbackStackPanel` 排列，不跨 manager 交错成全局卡片队列。
+- 跨 manager 顺序由 `WindowFeedbackLayer` 独占，card、presenter 和 Gallery 不得通过递增 `ZIndex`、全局注册表或重新挂载
+  manager 复制这项职责。
 - 布局热路径不得通过 LINQ、临时数组或逐帧重建视觉树产生分配。
 - 卡片出现与队列让位必须是同一次连续反馈：新卡片从宿主边方向进入，已有卡片同步过渡到新的稳定位置，不允许先跳变
   Bounds 再单独播放新卡片动画。
@@ -34,6 +38,7 @@
 | `FeedbackStackPresenter` | 保存稳定 `ItemsSource` 接入、堆叠 hover 状态和模板背板 | 共享内部呈现层 |
 | `FeedbackStackPanel` | 测量、展开/折叠排列、命中几何和可见项裁剪 | 共享内部布局层 |
 | `FeedbackLifetimeScheduler` | 单调截止时间、暂停/继续、最近截止唤醒和可选进度刷新 | 每个管理器一个内部实例 |
+| `WindowFeedbackLayer` | 承载窗口级 Message / Notification manager，并维护跨 manager 的最近激活顺序 | owning `TopLevel` 的 `VisualLayerManager` |
 | `IFeedbackStackItem` | 卡片关闭、剩余时长、进度和布局投影所需的强类型内部协作 | `MessageCard`、`NotificationCard` |
 | 活动集合 | 创建顺序稳定的卡片；包含进入、展示和正在退出的项 | 对应 Window manager |
 | public 内容对象 | 文本、类型、图标、时长和用户回调 | `IMessage` / `INotification` |
@@ -44,6 +49,7 @@ public surface、模板结构或专属状态强行合并。共享层不引用 Ga
 ```text
 Show(public content)
   -> manager 创建 card 并加入稳定集合
+  -> host layer 将当前 manager 原子激活到反馈层栈顶
   -> presenter / panel 根据 stack state 投影布局
   -> lifetime scheduler 登记单调截止时间
   -> close request -> card exit motion -> closed event
@@ -190,6 +196,21 @@ RenderScaling 大于 1 时不会把局部像素错误放大。
 发生时分配，不替换稳定的 ItemsSource。同步关闭与回调内嵌套关闭不得跳项或越界；回调新增项不纳入外层批次，manager
 被回调 dispose 后停止继续发出关闭请求。
 
+### 6.1 跨 manager 激活顺序
+
+带宿主构造的 `WindowMessageManager` 与 `WindowNotificationManager` 作为 `WindowFeedbackLayer` 的直接子项。一个 manager
+成功把新 card 加入自己的稳定集合后，必须在生命周期登记、`MaxItems` 淘汰和可能触发用户回调之前请求宿主激活；这样回调
+重入到另一个 manager 的后续 `Show` 会成为最终栈顶，不会被外层调用重新覆盖。
+
+激活只调整现有直接子项的 collection order：当前 manager 已是最后一个子项时直接返回；否则先定位其索引，再通过
+`Children.Move` 移到末尾。禁止用 `Remove` + `Add` 模拟移动，因为 manager detach 会暂停 scheduler 并进入延后卡片释放
+路径；也禁止用递增 `ZIndex`、静态序号、timer 或 Dispatcher 延迟表达激活顺序。`Move` 不改变 visual/logical parent，
+不重新应用模板，不取得新的资源，也不创建需要释放的订阅。
+
+`VisualLayerManager` 不可用时，原生 `AdornerLayer` fallback 遵守同一直接子项移动规则。无宿主构造或传入 `null` 的 inline
+manager 由应用视觉树负责层级，`Show` 不得越权重排其外部容器。尚未安装到 host layer 时激活请求不产生副作用；首次安装
+仍按既有逻辑加入层末尾，之后每次可见 `Show` 均重新收敛顺序。
+
 ## 7. Template、资源与动效
 
 `PART_Items` 保持稳定名称和 `ItemsControl` 级模板协作语义。Manager 持有稳定 collection 并绑定为 ItemsSource；
@@ -244,9 +265,16 @@ actor 时，新 motion 必须等待旧 motion 的异步清理完成后才写入�
 `Dispose()` 可重复调用。detach 后 manager 可以重新 attach；旧 host、旧 presenter、旧 timer tick 和旧 card 不得被静态
 事件、Dispatcher queue、动画 continuation 或 collection 间接保留。共享设施不创建全局 cache 或永久订阅。
 
+宿主激活不保存 manager 引用、不建立事件订阅、不创建 disposable；manager 仍只由现有 host collection 持有，并在
+rehost、TopLevel 模板重套用或 `Dispose()` 时通过既有移除路径释放。collection move 不得触发 manager attach/detach，
+因此不能改变 scheduler pause、进入动效或卡片释放状态。
+
 ## 9. 性能边界
 
 - manager collection 与 item container 在普通/折叠切换间保持稳定；不得通过 Clear/Add 或 reparent 重建。
+- manager 已位于宿主层末尾时，激活必须以一次尾项引用比较完成，不发布 collection change；只有切换 manager 时才允许
+  对直接 manager 子项执行一次索引查找和一次 `Move`。成本只随 manager 数量增长，不能扫描 card、创建临时集合、更新
+  每张 card 的 `ZIndex`，也不能引入计数器、timer、异步任务或长期引用。
 - `MeasureOverride` / `ArrangeOverride` 使用索引循环和复用状态；禁止 LINQ、闭包、临时列表与每帧 transform 创建。
 - Notification 的 translate/fade actor 不得使用会在每个动画帧使 Measure 失效的 layout-aware 模式；进出场只更新内部
   render transform 和 opacity。
@@ -290,6 +318,8 @@ Notification 的 MaxItems 默认值。除此之外，内容对象、类型枚举
 | 集合 | MaxItems 淘汰最旧活动项；DestroyAll 一次关闭全部；关闭回调只触发一次 |
 | 模板 | retemplate 不丢项，旧 presenter 不再接收状态；禁用 motion 直接收敛 |
 | 生命周期 | detach/reattach、rehost、dispose、回调异常及延迟 Dispatcher 操作均无保留链；折叠完成、打断、关闭和重套模板均释放内容位图 |
+| manager 激活 | `A.Show -> B.Show -> A.Show` 后栈顶依次为 A、B、A；Message 与 Notification 混合时同样按最近成功提交的 manager 原子排序；组内卡片不跨 manager 交错 |
+| 激活生命周期 | 已在栈顶的重复 `Show` 不发布 move；manager 切换只发布一次 collection `Move`，不触发 attach/detach、template reapply、scheduler pause 或卡片释放 |
 | 性能 | 基线与优化样本同策略，show/close/toggle/首帧主要指标无可测量回退，热路径无新分配 |
 | 平台 | Desktop 与 Browser 主题语义一致；链接注册或模板类型变化通过 NativeAOT 检查 |
 

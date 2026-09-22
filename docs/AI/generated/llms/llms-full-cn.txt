@@ -20312,6 +20312,8 @@ Message Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 性能边界：
 
 - manager、ItemsControl 与 card collection 在 Stack 切换和重套模板之间保持稳定。
+- manager 已位于反馈层末尾时，宿主激活只做一次 O(1) 尾项比较；切换 manager 时只对直接 manager 子项执行一次索引查找
+  和一次 collection `Move`。不得扫描 card、分配临时集合、创建 timer/任务/订阅或保存额外 manager 引用。
 - `MeasureOverride` / `ArrangeOverride` 不允许 LINQ、临时数组、闭包或逐帧 transform 创建。
 - 稳态布局必须复用缓存 transform；目标变化最多创建一个 transform 并交给 transition 插值，不增加逐帧 managed 回调。
 - 没有有限时长活动项时 scheduler 不保持活动 timer；没有 Notification 进度需求时只安排最近 deadline。
@@ -20940,6 +20942,8 @@ Notification Token 只表达组件级视觉变量，例如尺寸、间距、颜�
 性能边界：
 
 - manager、ItemsControl 与 card collection 在 Stack 切换和重套模板之间保持稳定。
+- manager 已位于反馈层末尾时，宿主激活只做一次 O(1) 尾项比较；切换 manager 时只对直接 manager 子项执行一次索引查找
+  和一次 collection `Move`。不得扫描 card、分配临时集合、创建 timer/任务/订阅或保存额外 manager 引用。
 - `MeasureOverride` / `ArrangeOverride` 不允许 LINQ、临时数组、闭包或逐帧 transform 创建。
 - 稳态布局必须复用缓存 transform；目标变化最多创建一个 transform 并交给 transition 插值，不增加逐帧 managed 回调。
 - Notification 进出场必须使用 render-only actor，不能因 translate/fade 在每帧触发 panel Measure；布局只在集合、测量

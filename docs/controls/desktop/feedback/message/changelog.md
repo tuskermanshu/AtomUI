@@ -2,6 +2,20 @@
 
 本文档记录 Message 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-22
+
+- Design / layering
+  - Define and implement `WindowFeedbackLayer` as the single owner of cross-manager activation order: the manager that most recently
+    commits a successful `Show` is the topmost atomic feedback group, while each manager retains its own card ordering,
+    Stack, MaxItems, styling and DestroyAll boundaries.
+  - Require direct child collection `Move` with an O(1) already-topmost fast path; prohibit remove/add reparenting,
+    incrementing ZIndex counters, global registries, timers and Dispatcher-delayed ordering.
+- Lifecycle / performance
+  - Keep manager activation free of subscriptions, disposables, timers, caches and retained manager references,
+    and to leave visual/logical attachment, scheduler pause state and card lifetime unchanged.
+  - Add regression coverage for alternating Message/Notification manager activation, reentrant Show ordering,
+    single Move publication, zero attach/detach and WeakReference collection after disposal.
+
 ## 2026-09-14
 
 - Theme / Semantic Part

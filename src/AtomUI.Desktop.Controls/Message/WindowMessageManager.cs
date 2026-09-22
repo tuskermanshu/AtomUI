@@ -230,6 +230,7 @@ public partial class WindowMessageManager : TemplatedControl, IMessageManager, I
 
         card.MessageClosed += OnMessageClosed;
         _cards.Add(card);
+        WindowFeedbackLayer.Activate(_hostLayer, this);
         if (message.Expiration > TimeSpan.Zero)
         {
             var scheduler = _lifetimeScheduler ??= new FeedbackLifetimeScheduler();

@@ -290,6 +290,8 @@ Message Token 只表达组件级视觉变量，例如尺寸、间距、颜色、
 维护 Message 时必须保持以下不变量：
 
 - Stack API、默认值与共享基础设施文档构成当前契约；后续不得仅修改 Message 一侧而造成两个管理器同名 API 语义分叉。
+- 带宿主的多个反馈 manager 由 `WindowFeedbackLayer` 按最近成功提交的 `Show` 原子激活；Message 不以 card `ZIndex`
+  或 Gallery manager 创建顺序表达跨 manager 层级。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。

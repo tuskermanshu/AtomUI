@@ -224,6 +224,7 @@ public partial class WindowNotificationManager : TemplatedControl, INotification
         card.PointerPressed += OnNotificationPointerPressed;
         card.NotificationClosed += OnNotificationClosed;
         _cards.Add(card);
+        WindowFeedbackLayer.Activate(_hostLayer, this);
         if (expiration > TimeSpan.Zero)
         {
             var scheduler = _lifetimeScheduler ??= new FeedbackLifetimeScheduler();

@@ -132,6 +132,8 @@ Notification 与同分类控件共享尺寸、状态、Token、Gallery 展示和
 维护 Notification 时必须保持以下不变量：
 
 - Stack API、默认值与共享基础设施文档构成当前契约；后续不得仅修改 Notification 一侧而造成两个管理器同名 API 语义分叉。
+- 带宿主的多个反馈 manager 由 `WindowFeedbackLayer` 按最近成功提交的 `Show` 原子激活；Notification 不以 card `ZIndex`
+  或 Gallery manager 创建顺序表达跨 manager 层级。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
@@ -169,7 +171,15 @@ Notification 的视觉选项通过 public API 归一为 theme variables、伪类
 唤醒，有进度时只刷新可见活动项。Stack 开启时，列表 hover 暂停全部活动卡片，即使数量没有超过阈值；Stack 关闭时
 只暂停实际悬停卡片。继续时使用剩余时长。
 
-### 8.6 Gallery Stack 示例
+### 8.6 宿主层激活模型
+
+带宿主的 `WindowNotificationManager` 成功把新卡片加入稳定集合后，由 `WindowFeedbackLayer` 将该 manager 作为一个原子
+反馈组激活到窗口反馈层栈顶。重复向当前栈顶 manager 显示通知不会重排宿主；切换 manager 时只移动直接 manager 子项。
+每个 manager 内仍由 `FeedbackStackPanel` 保证最新卡片靠近宿主边缘，多个 manager 的历史卡片不合并为一个全局队列。
+无宿主的 inline manager 继续由应用视觉树决定层级。该内部契约不新增 Public API，也不改变 Position、Stack、MaxItems、
+样式作用域或 `DestroyAll()` 的 manager 边界。
+
+### 8.7 Gallery Stack 示例
 
 Gallery 的 Stack 示例使用独立 manager，不与基础、类型、placement、进度和自定义关闭示例共享配置或 `DestroyAll()`
 范围。示例显式以 Enabled 开启、Threshold 为 `3` 启动，每次打开交替创建短内容和长内容的零时长通知，便于持续

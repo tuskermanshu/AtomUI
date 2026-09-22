@@ -43,6 +43,8 @@
 - `MessageCard`：控件核心或内部协作类型，维护 public surface 与主题可观察行为。
 - `MessageCardToken`：internal 控件 Token scope，负责从全局 token 派生控件语义变量。
 - `WindowMessageManager`：拥有稳定卡片集合、public Stack 配置、TopLevel host、生命周期调度与用户回调清理。
+- `WindowFeedbackLayer`：作为窗口反馈 manager 的宿主，按最近成功提交的 `Show` 原子移动直接 manager 子项；不拥有卡片、
+  scheduler 或用户回调。
 - `FeedbackStackPresenter`：消费稳定 ItemsSource，管理整体 hover 和 Message 静态背板状态。
 - `FeedbackStackPanel`：按共享几何契约测量和排列，不拥有内容或生命周期。
 - `FeedbackLifetimeScheduler`：按单调 deadline 调度有限时长项；空闲时没有活动 timer。
@@ -95,6 +97,8 @@ Duration 变化不重启同一 actor，新值从下一次 motion 生效；Comple
 - 构造阶段只注册必要状态，不依赖 template part。
 - 模板应用时获取 part、建立事件订阅和绑定，并先释放旧 part 订阅。
 - manager 的卡片 collection 在模板之外创建并保持稳定；新 `PART_Items` 只重新绑定该 collection，旧 presenter 立即解绑。
+- 带宿主 manager 的跨 manager 层级只由 host layer 的直接子项顺序表达；激活使用 collection `Move`，不得通过
+  `Remove` + `Add` 触发 detach/attach，也不得覆盖 manager/card 的 `ZIndex`。
 - manager 首次 attach 前允许 `Show`，卡片进入稳定集合，有限时长登记保持暂停。detach 时先暂停 scheduler，
   并在视觉树级联完成后确认是否仍离树：持续离树关闭当时卡片，同轮重新入树的 host 迁移保留队列。
 - `Dispose` 解绑 presenter 的集合与 hover 事件、释放 scheduler 和每张 card 的 owner/回调，再移除宿主层及安全区订阅。
@@ -151,6 +155,8 @@ Message 的交互事件应从输入源收敛到控件级语义事件：
 - scheduler 在本次唤醒结束时清空扫描临时列表，关闭回调完成后读取最新单调时刻再安排下一次唤醒；空闲 manager 不得
   因复用列表保留已关闭卡片，也不得把回调耗时再次计入后续 deadline。
 - `MaxItems` 淘汰先固定本批最旧活动项，再按创建顺序请求关闭；同步关闭或回调修改集合不得改变已选批次。
+- `Show` 在 UI thread 同步创建卡片并加入稳定 collection，随后在生命周期登记、MaxItems 淘汰及其潜在用户回调之前激活
+  当前宿主 manager；重入到其他 manager 的后续 `Show` 必须保留为最终栈顶。
 - `DestroyAll()` 固定调用时的卡片批次并倒序请求关闭；回调中新建的卡片不属于外层批次，manager dispose 后停止请求。
   正在关闭项不会重复关闭，清理仍由 card 的 `MessageClosed` 单一路径提交。
 - Gallery Stack 示例每次只同步创建一个零时长 Information 消息，并复用一个递增序号；Enabled 与 Threshold 直接更新
@@ -173,6 +179,8 @@ Message 的交互事件应从输入源收敛到控件级语义事件：
 性能边界：
 
 - manager、ItemsControl 与 card collection 在 Stack 切换和重套模板之间保持稳定。
+- manager 已位于反馈层末尾时，宿主激活只做一次 O(1) 尾项比较；切换 manager 时只对直接 manager 子项执行一次索引查找
+  和一次 collection `Move`。不得扫描 card、分配临时集合、创建 timer/任务/订阅或保存额外 manager 引用。
 - `MeasureOverride` / `ArrangeOverride` 不允许 LINQ、临时数组、闭包或逐帧 transform 创建。
 - 稳态布局必须复用缓存 transform；目标变化最多创建一个 transform 并交给 transition 插值，不增加逐帧 managed 回调。
 - 没有有限时长活动项时 scheduler 不保持活动 timer；没有 Notification 进度需求时只安排最近 deadline。
@@ -213,7 +221,8 @@ Message 的交互事件应从输入源收敛到控件级语义事件：
   `WeakReference` 用例验证 scheduler 保持存活时，最后一批已到期或已在关闭的项也能回收。
 - manager 测试覆盖 Stack 开启但未 hover 的有限时长消息保持计时登记且未暂停，以及零时长 Stack 消息不创建 scheduler。
 - `FeedbackManagerStackTests` 覆盖无动画批量淘汰的最旧优先顺序，以及关闭回调中的 Dispose、嵌套 DestroyAll 和新增消息；
-  `WeakReference` 用例验证 manager dispose 后的 manager、presenter、card 与回调 owner 对象图释放。
+  `WeakReference` 用例验证 manager dispose 后的 manager、presenter、card 与回调 owner 对象图释放；跨 manager 激活还必须
+  覆盖 A/B/A 顺序、Notification 混合宿主、栈顶无操作快路径、单次 collection Move 和零 attach/detach。
 - Gallery 行为测试覆盖普通与 Stack 示例 manager 隔离、Stack 控件初值、运行时切换、交替文案、局部 DestroyAll 和 detach 释放。
 - 纯文档改动运行 `git diff --check` 并检查相对链接。
 - 控件 API 或行为变更运行对应 `tests/AtomUI.Desktop.Controls.Tests` 或专用包测试。

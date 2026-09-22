@@ -132,6 +132,8 @@ Message 与同分类控件共享尺寸、状态、Token、Gallery 展示和验�
 维护 Message 时必须保持以下不变量：
 
 - Stack API、默认值与共享基础设施文档构成当前契约；后续不得仅修改 Message 一侧而造成两个管理器同名 API 语义分叉。
+- 带宿主的多个反馈 manager 由 `WindowFeedbackLayer` 按最近成功提交的 `Show` 原子激活；Message 不以 card `ZIndex`
+  或 Gallery manager 创建顺序表达跨 manager 层级。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
@@ -169,7 +171,15 @@ Stack 或超过阈值只改变视觉投影，有限时长消息仍按原 deadlin
 | 开启 | 有限时长 | 超过阈值时折叠，但仍按各自 deadline 自动关闭。 |
 | 开启 | 零时长 | 超过阈值时折叠，并保持展示直到显式关闭。 |
 
-### 8.5 Gallery Stack 示例模型
+### 8.5 宿主层激活模型
+
+带宿主的 `WindowMessageManager` 成功把新卡片加入稳定集合后，由 `WindowFeedbackLayer` 将该 manager 作为一个原子反馈组
+激活到窗口反馈层栈顶。重复向当前栈顶 manager 显示消息不会重排宿主；切换 manager 时只移动直接 manager 子项。
+每个 manager 内仍由 `FeedbackStackPanel` 保证最新卡片顺序，多个 manager 的历史卡片不合并为一个全局队列。无宿主的
+inline manager 继续由应用视觉树决定层级。该内部契约不新增 Public API，也不改变 Position、Stack、MaxItems、样式作用域
+或 `DestroyAll()` 的 manager 边界。
+
+### 8.6 Gallery Stack 示例模型
 
 Gallery 的 Stack 示例使用独立 manager，不与基础、类型、loading 和回调示例共享配置或 `DestroyAll()` 范围。示例本地
 状态以 Enabled 开启、Threshold 为 `3` 启动，并为每次打开显式创建零时长消息，以便持续观察折叠、hover 展开、运行时
