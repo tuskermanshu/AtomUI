@@ -99,6 +99,39 @@ public sealed class BuildLayoutTests
             .ShouldBe("'$(PackageValidationBaselineVersion)' == ''");
         baselineVersion.Value.ShouldBe("$(AtomUIPackageValidationBaselineVersion)");
 
+        // Avalonia's private-API target replaces the facade with real split assemblies only before
+        // CoreCompile. Package validation stops at ResolveReferences, so extend the SDK's collected
+        // per-TFM reference paths after _GetReferencePathFromInnerProjects has populated them.
+        var validationDependsOn = validationProps.Descendants("RunPackageValidationDependsOn")
+                                                   .ShouldHaveSingleItem();
+        validationDependsOn.Value.ShouldContain("AtomUIAddAvaloniaPackageValidationReferences");
+        validationDependsOn.Value.ShouldContain("$(RunPackageValidationDependsOn)");
+
+        var avaloniaReferencesTarget = validationProps.Descendants("Target")
+                                                       .Single(element =>
+                                                           (string?)element.Attribute("Name") ==
+                                                           "AtomUIAddAvaloniaPackageValidationReferences");
+        var avaloniaTargetCondition = ((string?)avaloniaReferencesTarget.Attribute("Condition"))
+            .ShouldNotBeNull();
+        avaloniaTargetCondition.ShouldContain("AvaloniaAccessUnstablePrivateApis");
+        var avaloniaReferences = avaloniaReferencesTarget
+                                 .Descendants("_AtomUIAvaloniaPackageValidationReference")
+                                 .ShouldHaveSingleItem();
+        ((string?)avaloniaReferences.Attribute("Include"))
+            .ShouldBe("$(NuGetPackageRoot)avalonia/$(AvaloniaVersion)/lib/$(_AtomUIAvaloniaPackageValidationFramework)/*.dll");
+
+        var packageValidationReferences = avaloniaReferencesTarget
+                                          .Descendants("PackageValidationReferencePath")
+                                          .ShouldHaveSingleItem();
+        ((string?)packageValidationReferences.Attribute("Update"))
+            .ShouldBe("@(PackageValidationReferencePath)");
+        var referencePath = packageValidationReferences.Element("ReferencePath")
+                                                       .ShouldNotBeNull()
+                                                       .Value;
+        referencePath.ShouldContain("%(PackageValidationReferencePath.ReferencePath)");
+        referencePath.ShouldContain("@(_AtomUIAvaloniaPackageValidationReference->'%(FullPath)', ',')");
+        avaloniaReferencesTarget.Descendants("Error").ShouldHaveSingleItem();
+
         // The release script must accept the baseline and must run both gates. ApiCompat only reads
         // lib/, so verify-package-layout.ps1 is what covers tools/ and buildTransitive/.
         var buildScript = File.ReadAllText(GetRepoFile("scripts/BuildNuGetPackages.ps1"));

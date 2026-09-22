@@ -143,7 +143,10 @@ Repository 配置、`MacOSHomebrewNativeAot.targets` 或 `scripts/` 资产。
 
 - **包 API 校验**：`build/PackageValidation.props` 在传入 `AtomUIPackageValidationBaselineVersion` 时启用
   `EnablePackageValidation` 与 `PackageValidationBaselineVersion`，以 ApiCompat 做 `lib/` 公共 API 的 IL 级比对，
-  并覆盖跨 TFM 一致性。普通开发构建不传该属性，因此不拉取基线包、也不变慢。
+  并覆盖跨 TFM 一致性。普通开发构建不传该属性，因此不拉取基线包、也不变慢。AtomUI 开启 Avalonia private API
+  后，Avalonia 只在 `CoreCompile` 前加入真实拆分程序集；ApiCompat 不执行到该阶段，因此校验 target 会在 SDK 收集完
+  每个 TFM 的引用后，把同一组 Avalonia implementation DLL 追加到现有 `PackageValidationReferencePath`。发布日志中若
+  出现 `Could not resolve reference`，表示 API 校验引用图不完整，不能按普通 warning 忽略。
 - **包布局校验**：`scripts/verification/verify-package-layout.ps1` 比对 `lib/` 的 TFM 集合、`tools/`、`build/`、
   `buildTransitive/`。ApiCompat 看不到这些路径，而 6.1.9 的 `tools/netstandard2.0 → tools/net10.0` 正属于此类。
 

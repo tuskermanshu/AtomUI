@@ -75,6 +75,9 @@
   `pack --no-build` 复用同一 restore。不要在脚本中另加独立 `dotnet restore`：不带 Release 配置的 restore 会用
   Debug 目标框架覆盖 assets 文件，导致 `pack` 报 `NETSDK1005`。前置工具项目（`AtomUI.Generator.LinkedPublish` 等）
   不是发布包，不施加校验属性。
+- AtomUI 开启 `AvaloniaAccessUnstablePrivateApis` 后，`build/PackageValidation.props` 必须在 SDK 完成每个 TFM 的
+  `PackageValidationReferencePath` 收集后追加 Avalonia 真实拆分程序集。任何 `Could not resolve reference` 都说明
+  ApiCompat 引用图不完整；即使命令退出码为 0，也不能把该次运行作为包 API 门禁通过证据。
 - 断言"无破坏"必须有正面证据；只返回空结果的否定式检查不构成证据。
 
 ### 有意破坏的处理
