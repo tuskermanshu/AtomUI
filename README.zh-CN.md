@@ -3,7 +3,7 @@
 <div align="center">
 
 [![AntDesign](https://img.shields.io/badge/AntDesign%20-6.0-1677ff?style=flat-square&logo=antdesign)](https://ant-design.antgroup.com/components/overview-cn)
-[![AtomUI](https://img.shields.io/badge/AtomUI-6.2.0-1677ff?style=flat-square)](https://www.nuget.org/packages/AtomUI.Desktop.Controls)
+[![AtomUI](https://img.shields.io/badge/AtomUI-6.2.1-1677ff?style=flat-square)](https://www.nuget.org/packages/AtomUI.Desktop.Controls)
 [![NuGet Download](https://img.shields.io/nuget/dt/AtomUI.Desktop.Controls?style=flat-square&logo=nuget&label=downloads)](https://www.nuget.org/packages/AtomUI.Desktop.Controls)
 [![][github-license-shield]][github-license-link]
 
@@ -69,9 +69,9 @@ Avalonia 12.1.2<br>
 
 #### 最新版本说明
 
-AtomUI 6.2.0 在控件库中新增 Semantic Part 契约和 Gallery 示例，强化弹层及跨窗口样式处理，并修复异步加载与主题缓存
-中的多项竞态问题。本版本同时修复 canonical 本地化资源并保持发布构建与 NativeAOT 路径可验证。升级前请阅读
-`SearchEdit`、`OtpLineEdit`、`Button`、主题管理器、`Notification` 和 `Transfer` 的[6.2.0 API 迁移指南](docs/releases/6.2.0-api-changes.zh-CN.md)以及
+AtomUI 6.2.1 将 Pagination 的可见页码窗口与快速跳页行为对齐 Ant Design，新增自定义 page-size changer 模板，
+并修复 Menu 子菜单生命周期、反馈层叠、Steps 布局和 Gallery 预览。本版本把 Pagination 导航容器池从 11 个调整为
+9 个；升级前请阅读 [6.2.1 API 迁移指南](docs/releases/6.2.1-api-changes.zh-CN.md)和
 [更新日志](./CHANGELOG.zh-CN.md)。
 
 #### 感谢通明湖中心孵化 AtomUI OSS
@@ -129,10 +129,10 @@ AtomUI 推荐通过 NuGet 安装。先安装主桌面控件包，再根据应用
 | AtomUI.Generator                    | 面向自定义控件、Token 与本地化开发的源代码生成器   |
 
 ```bash
-dotnet add package AtomUI.Desktop.Controls --version 6.2.0
-dotnet add package AtomUI.Desktop.Controls.DataGrid --version 6.2.0
-dotnet add package AtomUI.Desktop.Controls.ColorPicker --version 6.2.0
-dotnet add package AtomUI.Desktop.Controls.Extras --version 6.2.0
+dotnet add package AtomUI.Desktop.Controls --version 6.2.1
+dotnet add package AtomUI.Desktop.Controls.DataGrid --version 6.2.1
+dotnet add package AtomUI.Desktop.Controls.ColorPicker --version 6.2.1
+dotnet add package AtomUI.Desktop.Controls.Extras --version 6.2.1
 ```
 
 您也可以在 IDE 的 NuGet 包管理器中安装。以 Rider 为例，可以依次点击：
@@ -159,10 +159,10 @@ NuGet -> 软件包
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AtomUI.Desktop.Controls" Version="6.2.0"/>
-        <PackageReference Include="AtomUI.Desktop.Controls.DataGrid" Version="6.2.0"/>
-        <PackageReference Include="AtomUI.Desktop.Controls.ColorPicker" Version="6.2.0"/>
-        <PackageReference Include="AtomUI.Desktop.Controls.Extras" Version="6.2.0"/>
+        <PackageReference Include="AtomUI.Desktop.Controls" Version="6.2.1"/>
+        <PackageReference Include="AtomUI.Desktop.Controls.DataGrid" Version="6.2.1"/>
+        <PackageReference Include="AtomUI.Desktop.Controls.ColorPicker" Version="6.2.1"/>
+        <PackageReference Include="AtomUI.Desktop.Controls.Extras" Version="6.2.1"/>
         <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1"/>
     </ItemGroup>
 </Project>

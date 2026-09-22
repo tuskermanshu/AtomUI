@@ -6,6 +6,26 @@ AtomUI 的重要变更记录在此文件中。
 
 英文版本见 [CHANGELOG.md](CHANGELOG.md)。
 
+## 6.2.1
+
+`2026-09-22`
+
+- 破坏性变更
+  - Pagination：固定导航容器与 Semantic Part marker 池由 11 个缩减为 9 个，同时将可见页码窗口与快速跳页行为对齐 Ant Design。依赖旧数量的快照、自动化或主题工具需要同步更新；迁移说明见 [6.2.1 API 变更示例](docs/releases/6.2.1-api-changes.zh-CN.md)。
+- Pagination
+  - 新增可通过指针与 Enter 键触发的向前/向后快速跳页项、本地化自动化名称、默认 5 页跳转，以及 `IsShowLessItems=true` 时的 3 页跳转。
+  - 新增 `IsShowLessItems` 与 `IsShowPrevNextJumpers`；页码窗口变化时复用稳定导航容器，保持 hover/focus 过渡连续。
+  - 新增 `SizeChangerTemplate` 与 `PaginationSizeChangerContext`，允许应用替换默认 page-size ComboBox，同时继续由 Pagination 管理状态并保留 TwoWay binding。
+- Menu
+  - 防止键盘导航到叶子项时打开空子菜单，并在集合动态变化后正确协调钉住或延迟填充的子菜单状态。
+- Steps
+  - 修复垂直副标题叠印，并让 Inline hover 背景与 Panel 裁剪正确跟随 Steps 类型。
+- Message 与 Notification
+  - 管理器激活时重新激活窗口反馈层，使跨管理器反馈层叠顺序保持确定。
+- Gallery
+  - 修复登录 Form 的选项行布局。
+  - 保持 ColorPicker Semantic Part 触发器完整显示在钉住弹层上方，并新增 Pagination 自定义 size changer 示例。
+
 ## 6.2.0
 
 `2026-09-18`

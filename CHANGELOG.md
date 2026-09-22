@@ -4,6 +4,26 @@ All notable changes to AtomUI are documented in this file.
 
 `AtomUI` follows Semantic Versioning 2.0.0.
 
+## 6.2.1
+
+`2026-09-22`
+
+- Breaking Changes
+  - Pagination: reduce the fixed navigation container and Semantic Part marker pool from 11 to 9 while aligning the visible page window and jump behavior with Ant Design. Snapshot, automation or theme tooling that depends on the previous count must update; see the [6.2.1 API change examples](docs/releases/6.2.1-api-changes.md).
+- Pagination
+  - Add interactive previous/next jump items with pointer and Enter-key activation, localized automation names, five-page default jumps and three-page jumps when `IsShowLessItems=true`.
+  - Add `IsShowLessItems` and `IsShowPrevNextJumpers`, and preserve hover/focus transitions by reusing stable navigation containers during page-window updates.
+  - Add `SizeChangerTemplate` and `PaginationSizeChangerContext` so applications can replace the default page-size ComboBox without taking ownership of Pagination state or breaking TwoWay bindings.
+- Menu
+  - Prevent keyboard navigation from opening an empty submenu on leaf items, and reconcile pinned or dynamically populated submenu state after collection changes.
+- Steps
+  - Fix vertical subtitle overlap and align Inline hover backgrounds and Panel clipping with the selected Steps type.
+- Message and Notification
+  - Keep cross-manager feedback stacking deterministic by reactivating a window feedback layer when its manager becomes active.
+- Gallery
+  - Fix the login Form options-row layout.
+  - Keep the ColorPicker Semantic Part trigger fully visible above its pinned popup and add the Pagination custom size-changer example.
+
 ## 6.2.0
 
 `2026-09-18`

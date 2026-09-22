@@ -7,16 +7,22 @@
         <target state="translated">跳至</target>
       </segment>
     </unit>
+    <unit id="NextPageText">
+      <segment>
+        <source>Next Page</source>
+        <target state="translated">下一页</target>
+      </segment>
+    </unit>
+    <unit id="NextPagesTextFormat">
+      <segment>
+        <source>Next {0} Pages</source>
+        <target state="translated">向后 {0} 页</target>
+      </segment>
+    </unit>
     <unit id="PageText">
       <segment>
         <source>Page</source>
         <target state="translated">页</target>
-      </segment>
-    </unit>
-    <unit id="TotalInfoFormat">
-      <segment>
-        <source>Total ${Total} items</source>
-        <target state="translated">共 ${Total} 项</target>
       </segment>
     </unit>
     <unit id="PreviousPageText">
@@ -25,22 +31,16 @@
         <target state="translated">上一页</target>
       </segment>
     </unit>
-    <unit id="NextPageText">
-      <segment>
-        <source>Next Page</source>
-        <target state="translated">下一页</target>
-      </segment>
-    </unit>
     <unit id="PreviousPagesTextFormat">
       <segment>
         <source>Previous {0} Pages</source>
         <target state="translated">向前 {0} 页</target>
       </segment>
     </unit>
-    <unit id="NextPagesTextFormat">
+    <unit id="TotalInfoFormat">
       <segment>
-        <source>Next {0} Pages</source>
-        <target state="translated">向后 {0} 页</target>
+        <source>Total ${Total} items</source>
+        <target state="translated">共 ${Total} 项</target>
       </segment>
     </unit>
   </file>
