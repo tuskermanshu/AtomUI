@@ -140,6 +140,44 @@ public class ColorPickerShowCasePageTests
         });
     }
 
+    [Fact]
+    public void ColorPicker_Semantic_Preview_Keeps_Trigger_Fully_Visible_Above_Popup()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+
+        var page = new ColorPickerShowCase
+        {
+            DataContext = new ColorPickerViewModel(new TestScreen())
+        };
+
+        ShowInWindow(page, 1280, 900, window =>
+        {
+            var host = page.GetVisualDescendants().OfType<GalleryShowCaseHost>().Single();
+            host.SelectedTab = GalleryShowCaseTab.SemanticParts;
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            var preview = page.GetVisualDescendants()
+                              .OfType<SemanticPartPreview>()
+                              .Single(control => control.Name == "ColorPickerSemanticPreview");
+            var stage = preview.GetVisualDescendants()
+                               .OfType<Border>()
+                               .Single(control => control.Name == "PART_PreviewStage");
+            var picker = page.GetVisualDescendants()
+                             .OfType<AtomUIColorPicker>()
+                             .Single(control => control.Name == "ColorPickerSemanticOwner");
+            var triggerOrigin = picker.TranslatePoint(default, stage).ShouldNotBeNull();
+
+            stage.Bounds.Height.ShouldBeGreaterThanOrEqualTo(600,
+                "the stage must reserve the trigger plus the pinned popup's downward expansion space");
+            triggerOrigin.Y.ShouldBeGreaterThanOrEqualTo(0,
+                "the trigger top must not be centered above and clipped by the preview stage");
+            (triggerOrigin.Y + picker.Bounds.Height).ShouldBeLessThanOrEqualTo(stage.Bounds.Height,
+                "the complete trigger must remain visible inside the preview stage");
+        });
+    }
+
     private static string ExtractColorPickerExampleItems(string source)
     {
         const string firstItemMarker  = "<gallery:ShowCaseItem";
