@@ -1384,10 +1384,16 @@
                                PlaceholderText="{gallery:FormShowCaseLangResource P2PlaceholderTextPassword}"/>
             </atom:FormItem>
             <atom:FormItem FieldName="remember">
-                <atom:CheckBox IsChecked="True" Content="{gallery:FormShowCaseLangResource P2ContentRememberMe}" />
-                <atom:FormItem.Extra>
-                    <atom:HyperLinkButton Content="{gallery:FormShowCaseLangResource P2ContentForgotPassword}" />
-                </atom:FormItem.Extra>
+                <atom:FormItemDecorator HorizontalAlignment="Stretch"
+                                        Theme="{StaticResource LoginOptionsDecoratorTheme}">
+                    <atom:CheckBox IsChecked="True"
+                                   Content="{gallery:FormShowCaseLangResource P2ContentRememberMe}" />
+                    <atom:FormItemDecorator.Extra>
+                        <atom:HyperLinkTextBlock HorizontalAlignment="Right"
+                                                 Focusable="True"
+                                                 Text="{gallery:FormShowCaseLangResource P2ContentForgotPassword}" />
+                    </atom:FormItemDecorator.Extra>
+                </atom:FormItemDecorator>
             </atom:FormItem>
             <atom:FormActionsItem>
                 <StackPanel>

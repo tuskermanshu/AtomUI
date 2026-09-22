@@ -3,8 +3,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 using AtomUI.Controls;
 using AtomUI.Desktop.Controls;
+using AtomUI.Toolkits.GalleryBase.Controls;
+using AtomUIGallery.ShowCases.Form;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
+using ReactiveUI;
 using Shouldly;
 using Xunit;
 using AtomUIForm = AtomUI.Desktop.Controls.Form;
@@ -88,6 +94,84 @@ public class FormShowCasePageTests
                 layoutDemo,
                 "<atom:FormStringNotEmptyValidator Message=\"{gallery:FormShowCaseLangResource P2MessagePleaseInput}\" />")
             .ShouldBe(6);
+    }
+
+    [Fact]
+    public void Login_Form_Options_Use_A_Value_Aware_Single_Row_Layout()
+    {
+        AvaloniaTestApp.EnsureInitialized();
+
+        var oldDeferredLoadingDisabled = GalleryShowCaseRuntimeOptions.IsDeferredLoadingDisabled;
+        Avalonia.Controls.Window? window = null;
+        try
+        {
+            GalleryShowCaseRuntimeOptions.IsDeferredLoadingDisabled = true;
+            var viewModel = new FormViewModel(new TestScreen());
+            var showCase = new FormShowCase
+            {
+                DataContext = viewModel
+            };
+            window = new Avalonia.Controls.Window
+            {
+                Width         = 1_280,
+                Height        = 900,
+                Content       = showCase,
+                ShowInTaskbar = false
+            };
+
+            window.Show();
+            RunLayoutJobs();
+            window.UpdateLayout();
+
+            var loginForm = showCase.GetVisualDescendants()
+                                    .OfType<AtomUIForm>()
+                                    .Single(form => form.IsHideItemLabel &&
+                                                    form.Items.OfType<FormItem>()
+                                                        .Any(item => item.FieldName == "remember"));
+            var rememberItem = loginForm.Items
+                                        .OfType<FormItem>()
+                                        .Single(item => item.FieldName == "remember");
+            var forgotPassword = rememberItem.GetVisualDescendants()
+                                             .OfType<HyperLinkTextBlock>()
+                                             .Single();
+            var rememberMe = rememberItem.GetVisualDescendants()
+                                         .OfType<AtomUI.Desktop.Controls.CheckBox>()
+                                         .Single();
+            var decorator = rememberItem.Content.ShouldBeOfType<FormItemDecorator>();
+
+            AssertLoginOptionsLayout(decorator, rememberMe, forgotPassword);
+            loginForm.Width = 560;
+            RunLayoutJobs();
+            window.UpdateLayout();
+            AssertLoginOptionsLayout(decorator, rememberMe, forgotPassword);
+
+            forgotPassword.Focusable.ShouldBeTrue();
+            var clickCount = 0;
+            forgotPassword.Click += (_, _) => clickCount++;
+            forgotPassword.Focus().ShouldBeTrue();
+            forgotPassword.RaiseEvent(new KeyEventArgs
+            {
+                RoutedEvent  = InputElement.KeyDownEvent,
+                Source       = forgotPassword,
+                Key          = Key.Enter,
+                PhysicalKey  = PhysicalKey.Enter,
+                KeyModifiers = KeyModifiers.None
+            });
+            clickCount.ShouldBe(1);
+            ReferenceEquals(decorator.Child, rememberMe).ShouldBeTrue();
+            rememberItem.GetItemValue().ShouldBe(true);
+        }
+        finally
+        {
+            if (window is not null)
+            {
+                window.Content = null;
+                Dispatcher.UIThread.RunJobs();
+                window.Close();
+            }
+
+            GalleryShowCaseRuntimeOptions.IsDeferredLoadingDisabled = oldDeferredLoadingDisabled;
+        }
     }
 
     [Fact]
@@ -371,5 +455,26 @@ public class FormShowCasePageTests
         }
 
         return Path.Combine(AppContext.BaseDirectory, relativePath);
+    }
+
+    private static void AssertLoginOptionsLayout(
+        FormItemDecorator decorator,
+        AtomUI.Desktop.Controls.CheckBox rememberMe,
+        HyperLinkTextBlock forgotPassword)
+    {
+        var rememberPosition = rememberMe.TransformToVisual(decorator).ShouldNotBeNull().Transform(default);
+        var forgotPosition   = forgotPassword.TransformToVisual(decorator).ShouldNotBeNull().Transform(default);
+        var rememberCenterY  = rememberPosition.Y + rememberMe.Bounds.Height / 2;
+        var forgotCenterY    = forgotPosition.Y + forgotPassword.Bounds.Height / 2;
+
+        forgotCenterY.ShouldBe(rememberCenterY, 0.5);
+        rememberPosition.X.ShouldBe(0, 0.5);
+        (forgotPosition.X + forgotPassword.Bounds.Width).ShouldBe(decorator.Bounds.Width, 0.5);
+        forgotPosition.X.ShouldBeGreaterThan(rememberPosition.X + rememberMe.Bounds.Width);
+    }
+
+    private sealed class TestScreen : IScreen
+    {
+        public RoutingState Router { get; } = new();
     }
 }
