@@ -41,6 +41,21 @@
         <source>.NET 10</source>
       </segment>
     </unit>
+    <unit id="CustomComponentAutomationName">
+      <segment>
+        <source>Page size</source>
+      </segment>
+    </unit>
+    <unit id="CustomComponentDescription">
+      <segment>
+        <source>Replace the page size changer with a custom NumericUpDown.</source>
+      </segment>
+    </unit>
+    <unit id="CustomComponentTitle">
+      <segment>
+        <source>Custom component</source>
+      </segment>
+    </unit>
     <unit id="MiniSizeDescription">
       <segment>
         <source>Mini size pagination.</source>

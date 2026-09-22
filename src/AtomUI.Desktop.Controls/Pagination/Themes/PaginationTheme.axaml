@@ -28,7 +28,8 @@
                             SizeType="{TemplateBinding SizeType}" />
                         <ContentPresenter Name="PART_SizeChangerPresenter"
                                           IsVisible="{TemplateBinding IsShowSizeChanger}"
-                                          Content="{TemplateBinding SizeChanger}" />
+                                          Content="{TemplateBinding EffectiveSizeChangerContent}"
+                                          ContentTemplate="{TemplateBinding EffectiveSizeChangerTemplate}" />
                         <ContentPresenter Name="PART_QuickJumperBarPresenter"
                                           IsVisible="{TemplateBinding IsShowQuickJumper}"
                                           Content="{TemplateBinding QuickJumperBar}" />

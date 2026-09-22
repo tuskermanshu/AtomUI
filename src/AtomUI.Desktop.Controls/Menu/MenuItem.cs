@@ -215,14 +215,22 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         {
             ConfigureMaxPopupHeight();
         }
-        else if (change.Property == IsPopupPinnedOpenProperty || change.Property == ItemCountProperty)
+        else if (change.Property == IsPopupPinnedOpenProperty)
         {
             UpdateSubMenuPopupPinnedOpen();
-            if (IsPopupPinnedOpen && HasSubMenu && !IsSubMenuOpen)
+            if (IsPopupPinnedOpen && ItemCount > 0 && !IsSubMenuOpen)
             {
                 SetCurrentValue(IsSubMenuOpenProperty, true);
             }
+
             ReconcilePinnedOpenChildren();
+        }
+        else if (change.Property == ItemCountProperty && this.IsAttachedToVisualTree())
+        {
+            // ItemsControl raises ItemCount before its ItemsPresenter processes the same collection
+            // change. Opening the popup synchronously here would make two presenters realize the
+            // new container. Cross that collection-notification boundary before reconciling state.
+            Dispatcher.Post(ReconcileSubMenuAvailability);
         }
         else if (change.Property == SelectedIndexProperty)
         {
@@ -230,8 +238,28 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
         }
     }
 
+    private void ReconcileSubMenuAvailability()
+    {
+        UpdateSubMenuPopupPinnedOpen();
+        CoerceValue(IsSubMenuOpenProperty);
+        if (IsPopupPinnedOpen && ItemCount > 0 && !IsSubMenuOpen)
+        {
+            SetCurrentValue(IsSubMenuOpenProperty, true);
+        }
+
+        ReconcilePinnedOpenChildren();
+    }
+
     private static bool CoerceIsSubMenuOpen(AvaloniaObject sender, bool value)
     {
+        // ItemCount is the source of truth here. Avalonia publishes ItemCount changes before it
+        // updates the :empty pseudo-class that backs HasSubMenu, so coercion during a collection
+        // transition must not depend on HasSubMenu's transient value.
+        if (sender is MenuItem { ItemCount: 0 } leaf && leaf.IsAttachedToVisualTree())
+        {
+            return false;
+        }
+
         // Reject a normal collapse before Avalonia closes descendants and publishes
         // SubmenuOpened again. Lifecycle teardown unpins before requesting closure.
         return value || sender is MenuItem { IsPopupPinnedOpen: true, HasSubMenu: true } item &&
@@ -445,7 +473,7 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
             return;
         }
 
-        _popup.IsPopupPinnedOpen = IsPopupPinnedOpen && HasSubMenu;
+        _popup.IsPopupPinnedOpen = IsPopupPinnedOpen && ItemCount > 0;
     }
 
     private void SyncSubMenuPopupOpenState()
@@ -522,6 +550,10 @@ public class MenuItem : AvaloniaMenuItem, IMenuItemData, IScrollAwareControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
+        // Avalonia's keyboard handler may call Open() for the newly selected root item even when
+        // it is a leaf. Re-coerce here as well so a leaf configured before attachment cannot leave
+        // its template-owned PART_Popup open as an empty shell.
+        CoerceValue(IsSubMenuOpenProperty);
         // 钉住弹层的宿主生命周期关闭 / 重开会把菜单树整体从视觉树摘下再挂回；
         // IsSubMenuOpen 的属性值在钉住期间被保留（由 IsPopupPinnedOpen 请求驱动），但子弹层
         // 的打开状态不会随属性值自动恢复，重新附着时补一次延迟同步。

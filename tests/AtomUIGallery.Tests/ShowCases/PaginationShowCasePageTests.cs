@@ -13,6 +13,7 @@ using Shouldly;
 using Xunit;
 using AvaloniaWindow = Avalonia.Controls.Window;
 using AtomUIPagination = AtomUI.Desktop.Controls.Pagination;
+using AtomUINumericUpDown = AtomUI.Desktop.Controls.NumericUpDown;
 using AtomUISimplePagination = AtomUI.Desktop.Controls.SimplePagination;
 
 namespace AtomUIGallery.Tests.ShowCases;
@@ -76,13 +77,14 @@ public class PaginationShowCasePageTests
         source.ShouldContain("BadgeText=\"v6.0.8\"");
         source.ShouldContain("PaginationShowCaseLangResource AlignTitle");
         source.ShouldContain("PaginationShowCaseLangResource MoreTitle");
+        source.ShouldContain("PaginationShowCaseLangResource CustomComponentTitle");
         source.ShouldContain("PaginationShowCaseLangResource MiniSizeTitle");
         source.ShouldContain("PaginationShowCaseLangResource TotalNumberTitle");
         source.ShouldContain("PaginationShowCaseLangResource SimpleModeTitle");
-        CountShowCaseItemElements(source).ShouldBe(9);
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(9);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(9);
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:PaginationViewModel\"").ShouldBe(10);
+        CountShowCaseItemElements(source).ShouldBe(10);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(10);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(10);
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:PaginationViewModel\"").ShouldBe(11);
         source.ShouldNotContain("<atom:TabControl");
         source.ShouldNotContain("<atom:DataGrid");
         source.ShouldNotContain(">Gallery<");
@@ -96,6 +98,64 @@ public class PaginationShowCasePageTests
 
         NormalizeMarkup(ExtractPaginationExampleItems(source))
             .ShouldBe(NormalizeMarkup(approved));
+    }
+
+    [Fact]
+    public void Pagination_Custom_Size_Changer_Example_Uses_Compiled_Context_And_Updates_PageSize()
+    {
+        var source = ReadRepoFile(
+            "controlgallery/AtomUIGallery/ShowCases/Navigation/Pagination/Views/PaginationShowCase.axaml");
+        var customSource = ExtractShowCaseItemBySourceKey(source, "pagination-custom-size-changer");
+
+        customSource.ShouldContain("SourceKey=\"pagination-custom-size-changer\"");
+        customSource.ShouldContain("BadgeText=\"v6.2.1\"");
+        customSource.ShouldContain("PaginationShowCaseLangResource CustomComponentTitle");
+        customSource.ShouldContain("PaginationShowCaseLangResource CustomComponentDescription");
+        customSource.ShouldContain("<atom:Pagination.SizeChangerTemplate>");
+        customSource.ShouldContain("DataTemplate x:DataType=\"atom:PaginationSizeChangerContext\"");
+        customSource.ShouldContain("<atom:NumericUpDown");
+        customSource.ShouldContain("Minimum=\"1\"");
+        customSource.ShouldContain("Increment=\"1\"");
+        customSource.ShouldContain("FormatString=\"0\"");
+        customSource.ShouldContain(
+            "AutomationProperties.Name=\"{gallery:PaginationShowCaseLangResource CustomComponentAutomationName}\"");
+        customSource.ShouldContain("SizeType=\"{Binding SizeType}\"");
+        customSource.ShouldContain("Value=\"{Binding PageSize, Mode=TwoWay}\"");
+
+        AssertCustomComponentLocalization("en-US.xlf", "Custom component",
+            "Replace the page size changer with a custom NumericUpDown.", "Page size");
+        AssertCustomComponentLocalization("zh-CN.xlf", "定制组件",
+            "使用自定义 NumericUpDown 替换每页条数切换器。", "每页条数");
+        AssertCustomComponentLocalization("zh-TW.xlf", "自訂元件",
+            "使用自訂 NumericUpDown 取代每頁筆數切換器。", "每頁筆數");
+        AssertCustomComponentLocalization("pt-BR.xlf", "Componente personalizado",
+            "Substitua o seletor de itens por página por um NumericUpDown personalizado.", "Itens por página");
+
+        AvaloniaTestApp.EnsureInitialized();
+        var page = new PaginationShowCase
+        {
+            DataContext = new PaginationViewModel(new TestScreen())
+        };
+
+        ShowInWindow(page, 1280, 900, () =>
+        {
+            var panel = page.GetVisualDescendants().OfType<ShowCasePanel>().Single();
+            var item = panel.Children
+                            .OfType<ShowCaseItem>()
+                            .Single(candidate => candidate.SourceKey == "pagination-custom-size-changer");
+            item.BadgeText.ShouldBe("v6.2.1");
+            item.MaterializeDeferredContent();
+            Dispatcher.UIThread.RunJobs();
+
+            var pagination = item.GetVisualDescendants().OfType<AtomUIPagination>().Single();
+            var numericUpDown = item.GetVisualDescendants().OfType<AtomUINumericUpDown>().Single();
+            numericUpDown.Value.ShouldBe(10m);
+
+            numericUpDown.Value = 25m;
+            Dispatcher.UIThread.RunJobs();
+
+            pagination.PageSize.ShouldBe(25);
+        });
     }
 
     [Fact]
@@ -250,7 +310,7 @@ public class PaginationShowCasePageTests
                                         .OfType<ContentControl>()
                                         .Where(static control => control.Classes.Contains("semantic-item"))
                                         .ToArray();
-            objectItems.Length.ShouldBe(10);
+            objectItems.Length.ShouldBe(8);
             foreach (var objectItem in objectItems)
             {
                 objectItem.CornerRadius.ShouldBe(new CornerRadius(999));
@@ -264,7 +324,7 @@ public class PaginationShowCasePageTests
                                             .OfType<ContentControl>()
                                             .Where(static control => control.Classes.Contains("semantic-item"))
                                             .ToArray();
-            functionItems.Length.ShouldBe(10);
+            functionItems.Length.ShouldBe(8);
 
             var objectSelected   = objectItems.Single(static item => item is ISelectable { IsSelected: true });
             var functionSelected = functionItems.Single(static item => item is ISelectable { IsSelected: true });
@@ -330,6 +390,19 @@ public class PaginationShowCasePageTests
         actual.ShouldNotBeNull()
               .ShouldBeAssignableTo<ISolidColorBrush>()
               .Color.ShouldBe(Color.Parse(expected));
+    }
+
+    private static void AssertCustomComponentLocalization(
+        string fileName,
+        string title,
+        string description,
+        string automationName)
+    {
+        var document = XliffTestDocument.Read(
+            $"controlgallery/AtomUIGallery/ShowCases/Navigation/Pagination/Localization/{fileName}");
+        document["CustomComponentTitle"].ShouldBe(title);
+        document["CustomComponentDescription"].ShouldBe(description);
+        document["CustomComponentAutomationName"].ShouldBe(automationName);
     }
 
     private static string ExtractPaginationExampleItems(string source)

@@ -3922,10 +3922,10 @@ Pagination
 | `PART_Frame` | template node (Border) | `PaginationNavTheme.axaml` | PaginationNav | `CornerRadius`, `Padding` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `ItemsPresenter` | template node (ItemsPresenter) | `PaginationNavTheme.axaml` | PaginationNav | 主题状态 / visual state | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `Pagination` | control theme | `PaginationTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `BorderDashArray`, `BorderDashOffset`, `BorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
-| `PART_RootLayout` | template node (StackPanel) | `PaginationTheme.axaml` | Pagination | `IsEffectiveVisible`, `IsMotionEnabled`, `IsShowQuickJumper`, `IsShowSizeChanger`, `IsShowTotalInfo`, `QuickJumperBar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_RootLayout` | template node (StackPanel) | `PaginationTheme.axaml` | Pagination | `EffectiveSizeChangerContent`, `EffectiveSizeChangerTemplate`, `IsEffectiveVisible`, `IsMotionEnabled`, `IsShowQuickJumper`, `IsShowSizeChanger` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_TotalInfoPresenter` | template node (ContentPresenter) | `PaginationTheme.axaml` | Pagination | `IsShowTotalInfo`, `TotalInfoText` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_Nav` | template node (PaginationNav) | `PaginationTheme.axaml` | Pagination | `IsMotionEnabled`, `SizeType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
-| `PART_SizeChangerPresenter` | template node (ContentPresenter) | `PaginationTheme.axaml` | Pagination | `IsShowSizeChanger`, `SizeChanger` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `PART_SizeChangerPresenter` | template node (ContentPresenter) | `PaginationTheme.axaml` | Pagination | `EffectiveSizeChangerContent`, `EffectiveSizeChangerTemplate`, `IsShowSizeChanger` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_QuickJumperBarPresenter` | template node (ContentPresenter) | `PaginationTheme.axaml` | Pagination | `IsShowQuickJumper`, `QuickJumperBar` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `QuickJumperBar` | control theme | `QuickJumperBarTheme.axaml` | Pagination | `JumpToText`, `PageText`, `SizeType` | internal-observable | 用于理解结构和状态流，不应指导用户代码直接依赖。 |
 | `PART_RootLayout` | template node (StackPanel) | `QuickJumperBarTheme.axaml` | QuickJumperBar | `JumpToText`, `PageText`, `SizeType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -3940,6 +3940,7 @@ Pagination
 | 内容与数据 | `Icon`、`JumpToText`、`PageText`、`PaginationItemType`、`TotalInfoTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `CurrentPage`、`IsHideOnSinglePage`、`IsSelected`、`PageCount`、`PageSize` | 维护选择、展开、过滤、分页、分组或集合状态；`CurrentPage` 和 `PageSize` 默认 `TwoWay`。 |
 | 交互与状态 | `IsMotionEnabled`、`IsPressed`、`IsReadOnly`、`IsShowQuickJumper`、`IsShowSizeChanger`、`IsShowTotalInfo`、`IsShowLessItems`、`IsShowPrevNextJumpers` | 表达用户可观察状态、可用性、页码密度、快速跳页、清除、加载或反馈语义。 |
+| 局部组件定制 | `SizeChangerTemplate`、`PaginationSizeChangerContext` | 只替换 page-size changer 的输入组件；分页状态、可见性、禁用态和页数计算仍由 `Pagination` 管理。 |
 | 视觉与布局 | `Align`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 其他稳定入口 | `Maximum`、`Minimum`、`Total` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -3964,6 +3965,7 @@ Public API / inherited command / item source / user input
 
 - Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
 - 用户点击页码、快速跳转或切换页大小时，通过 `CurrentPage` / `PageSize` 写回同一个受控状态；绑定方不需要显式设置 `Mode=TwoWay`。
+- `SizeChangerTemplate` 只替换页大小输入组件。模板写入经 `PaginationSizeChangerContext` 收敛到 `Pagination.PageSize`，不能成为第二个分页状态 owner。
 - selection/checked/active、collection/filter、input/value、motion、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
 - 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
 - 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
@@ -3986,6 +3988,7 @@ Pagination 使用 `PaginationToken` 作为控件 Token scope。Token 只表达�
 
 - 不删除或重命名已经稳定的 ControlTheme key、template part、伪类和资源 key。
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
+- `PART_SizeChangerPresenter` 保持为唯一页大小组件宿主；默认 ComboBox 与自定义模板不得同时物化。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
 
@@ -4004,6 +4007,7 @@ Pagination Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - 不擅自新增、删除、重命名或改变 public/protected API、Avalonia 属性、事件和默认值。
 - 不破坏 template part、伪类、ControlTheme key、Token 名称和资源 key。
 - 不改变 Gallery 已展示的 XAML 用法、默认外观、交互顺序和状态优先级。
+- `SizeChangerTemplate=null` 时必须继续使用现有 ComboBox、`PageSizeOptions` 和本地化文案；设置自定义模板不能改变 `IsShowSizeChanger` 的可见性语义。
 - Template part 重新应用、集合替换、弹层关闭、窗口失活和控件 detach 时必须释放旧订阅和资源宿主。
 - 不通过隐藏延迟、强制刷新或吞异常掩盖状态同步问题。
 - 不引入运行时反射扫描作为 API、Token 或数据路径发现机制。
@@ -4015,6 +4019,9 @@ Pagination Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 
 - Public API、默认值、事件顺序和 Gallery 可观察行为。
 - `CurrentPage` / `PageSize` 的默认 `TwoWay` binding metadata，以及内部写入不破坏外部 binding 的 `SetCurrentValue` 路径。
+- `SizeChangerTemplate` 默认为 `null`；默认 ComboBox 行为、`PageSizeOptions`、本地化文案和当前页大小插入规则保持不变。
+- 默认 ComboBox 与自定义模板内容互斥，`PART_SizeChangerPresenter` 继续作为唯一宿主；模板替换不改变
+  `IsShowSizeChanger`、`PageCount`、`CurrentPageChanged` 或禁用态语义。
 - Template part 名称、ControlTheme key、伪类和资源 key。
 - Semantic Part descriptor、`semantic-scope-nav` 作用域标记、`semantic-item` / `semantic-info` marker 同步规则与
   生成的 `PaginationItemStyle` / `SimplePaginationItemStyle` / `SimplePaginationInfoStyle` 类型。快速跳页项

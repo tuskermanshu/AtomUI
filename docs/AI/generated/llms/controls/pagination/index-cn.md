@@ -31,7 +31,7 @@ Pagination 的设计语言围绕控件职责、可观察状态和主题契约组
 | 维度 | 含义 | Pagination 中的表达 |
 | --- | --- | --- |
 | 产品语义 | 控件在界面中承担的稳定职责。 | Pagination 是 AtomUI 桌面控件体系中的分页控件，用于在有限页集合中切换页码、页大小和上一页下一页。 |
-| 内容承载 | 用户数据、展示内容、集合项或操作入口如何进入控件。 | `Icon`、`JumpToText`、`PageText`、`PaginationItemType`、`TotalInfoTemplate`。 |
+| 内容承载 | 用户数据、展示内容、集合项或操作入口如何进入控件。 | `Icon`、`JumpToText`、`PageText`、`PaginationItemType`、`TotalInfoTemplate`、`SizeChangerTemplate`。 |
 | 状态反馈 | public API、内部状态和伪类如何形成用户可感知反馈。 | selection/checked/active、collection/filter、input/value、motion、visual option。 |
 | 主题语义 | ControlTheme、SharedToken、控件 Token 和模板绑定如何表达视觉。 | Pagination Token + ControlTheme。 |
 
@@ -46,6 +46,7 @@ Pagination 的公共契约由 public/protected 类型成员、Avalonia 属性、
 | 内容与数据 | `Icon`、`JumpToText`、`PageText`、`PaginationItemType`、`TotalInfoTemplate` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `CurrentPage`、`IsHideOnSinglePage`、`IsSelected`、`PageCount`、`PageSize` | 维护选择、展开、过滤、分页、分组或集合状态；`CurrentPage` 和 `PageSize` 默认 `TwoWay`。 |
 | 交互与状态 | `IsMotionEnabled`、`IsPressed`、`IsReadOnly`、`IsShowQuickJumper`、`IsShowSizeChanger`、`IsShowTotalInfo`、`IsShowLessItems`、`IsShowPrevNextJumpers` | 表达用户可观察状态、可用性、页码密度、快速跳页、清除、加载或反馈语义。 |
+| 局部组件定制 | `SizeChangerTemplate`、`PaginationSizeChangerContext` | 只替换 page-size changer 的输入组件；分页状态、可见性、禁用态和页数计算仍由 `Pagination` 管理。 |
 | 视觉与布局 | `Align`、`SizeType` | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 其他稳定入口 | `Maximum`、`Minimum`、`Total` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -53,7 +54,7 @@ Pagination 的公共契约由 public/protected 类型成员、Avalonia 属性、
 
 主要公开类型与枚举：
 
-- 类型：`AbstractPagination`、`PageNavRequestArgs`、`PageSizeComboBoxItem`、`Pagination`、`PaginationNav`、`PaginationNavItem`、`QuickJumpArgs`、`QuickJumpEdit`、`QuickJumperBar`、`SimplePagination`。
+- 控件与数据契约：`AbstractPagination`、`Pagination`、`SimplePagination`、`PaginationSizeChangerContext`、`PageChangedEventArgs`。
 - 枚举：`PaginationAlign`。
 - 本地化 Catalog：`PaginationLangResourceKind`。
 
@@ -61,20 +62,20 @@ Pagination 的公共契约由 public/protected 类型成员、Avalonia 属性、
 
 | Template Part | 类型 | 职责 |
 | --- | --- | --- |
-| `PART_Frame` | `?` | 承载根视觉、边框、背景或尺寸基线。 |
-| `PART_InfoIndicator` | `?` | 展示指示器、进度、分页或状态反馈。 |
-| `PART_JumpToContentPresenter` | `?` | 展示用户内容、文本、图标或模板化数据。 |
-| `PART_Nav` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
-| `PART_NextNavItem` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
-| `PART_PageContentPresenter` | `?` | 展示用户内容、文本、图标或模板化数据。 |
-| `PART_PageLineEdit` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
-| `PART_PreviousNavItem` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
-| `PART_QuickJumper` | `?` | 稳定模板协作入口，重命名前必须同步主题和实现。 |
-| `PART_QuickJumperBarPresenter` | `?` | 展示用户内容、文本、图标或模板化数据。 |
-| `PART_RootLayout` | `?` | 承载根视觉、边框、背景或尺寸基线。 |
-| `PART_RootLayoutPart` | `?` | 承载根视觉、边框、背景或尺寸基线。 |
-| `PART_SizeChangerPresenter` | `?` | 展示用户内容、文本、图标或模板化数据。 |
-| `PART_TotalInfoPresenter` | `?` | 展示用户内容、文本、图标或模板化数据。 |
+| `PART_Frame` | `Border` | 承载 `PaginationNav` 的裁剪、圆角和布局边界。 |
+| `PART_InfoIndicator` | `TextBlock` | 展示 `SimplePagination` 的“当前页 / 总页数”文本。 |
+| `PART_JumpToContentPresenter` | `ContentPresenter` | 展示快速跳页输入框前置文案。 |
+| `PART_Nav` | `PaginationNav` | 承载上一页、下一页、页码和快速跳页项。 |
+| `PART_NextNavItem` | `PaginationNavItem` | 承载 `SimplePagination` 的下一页操作。 |
+| `PART_PageContentPresenter` | `ContentPresenter` | 展示快速跳页输入框后置文案。 |
+| `PART_PageLineEdit` | `LineEdit` | 接收 `QuickJumperBar` 的目标页输入。 |
+| `PART_PreviousNavItem` | `PaginationNavItem` | 承载 `SimplePagination` 的上一页操作。 |
+| `PART_QuickJumper` | `QuickJumpEdit` | 接收 `SimplePagination` 的目标页输入。 |
+| `PART_QuickJumperBarPresenter` | `ContentPresenter` | 承载 `Pagination` 的快速跳页组件。 |
+| `PART_RootLayout` | `StackPanel` | 承载 `Pagination` 与 `QuickJumperBar` 的水平布局。 |
+| `PART_RootLayoutPart` | `StackPanel` | 承载 `SimplePagination` 的水平布局。 |
+| `PART_SizeChangerPresenter` | `ContentPresenter` | 在默认 ComboBox 与 `SizeChangerTemplate` 生成内容之间切换，稳定承载 page-size changer。 |
+| `PART_TotalInfoPresenter` | `ContentPresenter` | 展示数据总量与当前范围文本。 |
 
 当前未抽取到控件专属伪类；主题主要依赖 Avalonia 标准伪类、模板绑定和内部 StyledProperty。
 
@@ -82,6 +83,7 @@ Pagination 的公共契约由 public/protected 类型成员、Avalonia 属性、
 
 Pagination 的公共契约由 public/protected 类型成员、Avalonia 属性、事件、命令、template part、伪类、ControlTheme key 和资源 key 共同组成。维护时应先确认这些契约是否已经被源码、Gallery 示例或文档暴露。
 稳定事件包括 `Click`。事件触发顺序属于兼容契约，不能因内部状态重排而改变。
+- 控件与数据契约：`AbstractPagination`、`Pagination`、`SimplePagination`、`PaginationSizeChangerContext`、`PageChangedEventArgs`。
 
 ## 使用示例
 
@@ -178,6 +180,7 @@ Public API / inherited command / item source / user input
 
 - Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
 - 用户点击页码、快速跳转或切换页大小时，通过 `CurrentPage` / `PageSize` 写回同一个受控状态；绑定方不需要显式设置 `Mode=TwoWay`。
+- `SizeChangerTemplate` 只替换页大小输入组件。模板写入经 `PaginationSizeChangerContext` 收敛到 `Pagination.PageSize`，不能成为第二个分页状态 owner。
 - selection/checked/active、collection/filter、input/value、motion、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
 - 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
 - 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
@@ -200,6 +203,7 @@ Pagination 使用 `PaginationToken` 作为控件 Token scope。Token 只表达�
 
 - 不删除或重命名已经稳定的 ControlTheme key、template part、伪类和资源 key。
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
+- `PART_SizeChangerPresenter` 保持为唯一页大小组件宿主；默认 ComboBox 与自定义模板不得同时物化。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
 
@@ -216,6 +220,10 @@ Pagination Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 资源和 AOT 约束：
 
 - 不通过运行时反射扫描 public API、Token 或 Gallery 示例数据。
+- `PaginationSizeChangerContext` 只使用显式 Avalonia 属性和强类型 owner 同步；内置与 Gallery 模板使用带
+  `x:DataType` 的编译绑定，不使用字符串 path、`ReflectionBinding`、动态成员发现或运行时组件扫描。
+- Context 不消费 `DynamicResource` 或 TokenResource，因此不实现 scoped resource host；模板内视觉控件从自身
+  ControlTheme 和视觉树获得主题资源。
 - 不把可静态声明的模板结构迁移到 C# 动态创建。
 - 异步加载、上传、弹层和窗口生命周期必须能取消或释放。
 - 缓存对象必须与控件、窗口、弹层或数据 owner 生命周期一致。
@@ -225,6 +233,7 @@ Pagination Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 
 - 控件应优先复用 Avalonia 原生虚拟化、模板绑定和资源系统。
 - 避免为每次状态变化创建不必要的视觉对象、订阅或动画对象。
+- Context 每个 `Pagination` 实例只创建一次；页大小变化只更新值，不重建模板生成的视觉树。
 - 大集合控件必须保证 container recycle 后不会泄漏旧 item 状态。
 
 ## 源码索引
@@ -239,6 +248,7 @@ Pagination Token 只表达组件级视觉变量，例如尺寸、间距、颜色
 - `src/AtomUI.Desktop.Controls/Pagination/PageNavRequestArgs.cs`
 - `src/AtomUI.Desktop.Controls/Pagination/PageSizeComboBoxItem.cs`
 - `src/AtomUI.Desktop.Controls/Pagination/Pagination.cs`
+- `src/AtomUI.Desktop.Controls/Pagination/PaginationSizeChangerContext.cs`
 - `src/AtomUI.Desktop.Controls/Pagination/Pagination.SemanticParts.cs`
 - `src/AtomUI.Desktop.Controls/Pagination/PaginationNav.cs`
 - `src/AtomUI.Desktop.Controls/Pagination/PaginationNavItem.cs`

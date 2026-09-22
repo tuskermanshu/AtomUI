@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -26,6 +27,9 @@ public partial class Pagination : AbstractPagination
     
     public static readonly StyledProperty<bool> IsShowSizeChangerProperty =
         AvaloniaProperty.Register<Pagination, bool>(nameof(IsShowSizeChanger));
+
+    public static readonly StyledProperty<IDataTemplate?> SizeChangerTemplateProperty =
+        AvaloniaProperty.Register<Pagination, IDataTemplate?>(nameof(SizeChangerTemplate));
 
     public static readonly StyledProperty<IReadOnlyList<int>?> PageSizeOptionsProperty =
         AvaloniaProperty.Register<Pagination, IReadOnlyList<int>?>(
@@ -51,6 +55,16 @@ public partial class Pagination : AbstractPagination
     {
         get => GetValue(IsShowSizeChangerProperty);
         set => SetValue(IsShowSizeChangerProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the template that replaces the default page-size ComboBox.
+    /// The template data item is a <see cref="PaginationSizeChangerContext"/>.
+    /// </summary>
+    public IDataTemplate? SizeChangerTemplate
+    {
+        get => GetValue(SizeChangerTemplateProperty);
+        set => SetValue(SizeChangerTemplateProperty, value);
     }
 
     public IReadOnlyList<int>? PageSizeOptions
@@ -98,6 +112,18 @@ public partial class Pagination : AbstractPagination
             o => o.SizeChanger,
             (o, v) => o.SizeChanger = v);
 
+    internal static readonly DirectProperty<Pagination, object?> EffectiveSizeChangerContentProperty =
+        AvaloniaProperty.RegisterDirect<Pagination, object?>(
+            nameof(EffectiveSizeChangerContent),
+            o => o.EffectiveSizeChangerContent,
+            (o, v) => o.EffectiveSizeChangerContent = v);
+
+    internal static readonly DirectProperty<Pagination, IDataTemplate?> EffectiveSizeChangerTemplateProperty =
+        AvaloniaProperty.RegisterDirect<Pagination, IDataTemplate?>(
+            nameof(EffectiveSizeChangerTemplate),
+            o => o.EffectiveSizeChangerTemplate,
+            (o, v) => o.EffectiveSizeChangerTemplate = v);
+
     internal static readonly DirectProperty<Pagination, QuickJumperBar?> QuickJumperBarProperty =
         AvaloniaProperty.RegisterDirect<Pagination, QuickJumperBar?>(nameof(QuickJumperBar),
             o => o.QuickJumperBar,
@@ -119,6 +145,22 @@ public partial class Pagination : AbstractPagination
     {
         get => _sizeChanger;
         set => SetAndRaise(SizeChangerProperty, ref _sizeChanger, value);
+    }
+
+    private object? _effectiveSizeChangerContent;
+
+    internal object? EffectiveSizeChangerContent
+    {
+        get => _effectiveSizeChangerContent;
+        set => SetAndRaise(EffectiveSizeChangerContentProperty, ref _effectiveSizeChangerContent, value);
+    }
+
+    private IDataTemplate? _effectiveSizeChangerTemplate;
+
+    internal IDataTemplate? EffectiveSizeChangerTemplate
+    {
+        get => _effectiveSizeChangerTemplate;
+        set => SetAndRaise(EffectiveSizeChangerTemplateProperty, ref _effectiveSizeChangerTemplate, value);
     }
 
     private QuickJumperBar? _quickJumperBar;
@@ -163,10 +205,18 @@ public partial class Pagination : AbstractPagination
     private IDisposable? _sizeChangerDisposable;
     private IDisposable? _quickJumperDisposable;
     private ILanguageManager? _subscribedLanguageManager;
+    private readonly PaginationSizeChangerContext _sizeChangerContext;
+
+    public Pagination()
+    {
+        _sizeChangerContext = new PaginationSizeChangerContext(this);
+        SynchronizeSizeChangerContext();
+    }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
+        SetupSizeChanger();
         AttachLanguageListener();
         RefreshAutomationNames();
     }
@@ -197,10 +247,7 @@ public partial class Pagination : AbstractPagination
             SetupQuickJumper();
         }
 
-        if (IsShowSizeChanger)
-        {
-            SetupSizeChanger();
-        }
+        SetupSizeChanger();
     }
 
     private void HandleContainerPrepared(object? sender, ContainerPreparedEventArgs args)
@@ -388,7 +435,8 @@ public partial class Pagination : AbstractPagination
         base.OnPropertyChanged(change);
         if (this.IsAttachedToVisualTree())
         {
-            if (change.Property == IsShowSizeChangerProperty)
+            if (change.Property == IsShowSizeChangerProperty ||
+                change.Property == SizeChangerTemplateProperty)
             {
                 SetupSizeChanger();
             }
@@ -417,6 +465,11 @@ public partial class Pagination : AbstractPagination
         else if (change.Property == PageSizeProperty)
         {
             SyncSizeChangerSelection();
+            SynchronizeSizeChangerContext();
+        }
+        else if (change.Property == SizeTypeProperty)
+        {
+            SynchronizeSizeChangerContext();
         }
     }
 
@@ -647,12 +700,22 @@ public partial class Pagination : AbstractPagination
 
     private void SetupSizeChanger()
     {
+        SynchronizeSizeChangerContext();
         if (!IsShowSizeChanger)
         {
             ClearSizeChanger();
             return;
         }
 
+        if (SizeChangerTemplate is not null)
+        {
+            ClearDefaultSizeChanger();
+            EffectiveSizeChangerContent = _sizeChangerContext;
+            EffectiveSizeChangerTemplate = SizeChangerTemplate;
+            return;
+        }
+
+        EffectiveSizeChangerTemplate = null;
         if (SizeChanger == null)
         {
             var sizeChanger = new ComboBox();
@@ -662,9 +725,18 @@ public partial class Pagination : AbstractPagination
             SizeChanger                  =  sizeChanger;
             SyncSizeChangerItems();
         }
+
+        EffectiveSizeChangerContent = SizeChanger;
     }
 
     private void ClearSizeChanger()
+    {
+        EffectiveSizeChangerTemplate = null;
+        ClearDefaultSizeChanger();
+        EffectiveSizeChangerContent = null;
+    }
+
+    private void ClearDefaultSizeChanger()
     {
         if (SizeChanger is not null)
         {
@@ -674,6 +746,11 @@ public partial class Pagination : AbstractPagination
 
         _sizeChangerDisposable?.Dispose();
         _sizeChangerDisposable = null;
+    }
+
+    private void SynchronizeSizeChangerContext()
+    {
+        _sizeChangerContext.Synchronize(PageSize, SizeType);
     }
 
     private void SetupQuickJumper()

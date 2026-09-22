@@ -131,4 +131,56 @@ public class MenuSubmenuOpenStateRecursionTests
             Dispatcher.UIThread.RunJobs();
         }
     }
+
+    [Fact]
+    public void Declared_Open_Request_Follows_Dynamic_Submenu_Availability()
+    {
+        var file = new AtomUIMenuItem
+        {
+            Header = "File",
+            IsSubMenuOpen = true
+        };
+        var menu = new AtomUIMenu { IsMotionEnabled = false };
+        menu.Items.Add(file);
+
+        var vlm = new VisualLayerManager { Child = menu };
+        typeof(VisualLayerManager)
+            .GetProperty("EnablePopupOverlayLayer", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .SetValue(vlm, true);
+
+        var window = new AtomUI.Desktop.Controls.Window { Width = 600, Height = 400, Content = vlm };
+        try
+        {
+            window.Show();
+            Settle(window);
+            var popup = file.GetVisualDescendants().OfType<Popup>().Single();
+            file.IsSubMenuOpen.ShouldBeFalse();
+            popup.IsOpen.ShouldBeFalse();
+
+            var child = new AtomUIMenuItem { Header = "Open" };
+            file.Items.Add(child);
+            Settle(window);
+            file.IsSubMenuOpen.ShouldBeTrue();
+            popup.IsOpen.ShouldBeTrue();
+
+            file.Items.Remove(child);
+            Settle(window);
+            file.IsSubMenuOpen.ShouldBeFalse();
+            popup.IsOpen.ShouldBeFalse();
+        }
+        finally
+        {
+            window.Close();
+            Dispatcher.UIThread.RunJobs();
+        }
+    }
+
+    private static void Settle(Avalonia.Controls.Window window)
+    {
+        for (var i = 0; i < 5; i++)
+        {
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+        }
+    }
 }

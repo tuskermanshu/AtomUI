@@ -49,6 +49,24 @@
         <target state="translated">.NET 10</target>
       </segment>
     </unit>
+    <unit id="CustomComponentAutomationName">
+      <segment>
+        <source>Page size</source>
+        <target state="translated">Itens por página</target>
+      </segment>
+    </unit>
+    <unit id="CustomComponentDescription">
+      <segment>
+        <source>Replace the page size changer with a custom NumericUpDown.</source>
+        <target state="translated">Substitua o seletor de itens por página por um NumericUpDown personalizado.</target>
+      </segment>
+    </unit>
+    <unit id="CustomComponentTitle">
+      <segment>
+        <source>Custom component</source>
+        <target state="translated">Componente personalizado</target>
+      </segment>
+    </unit>
     <unit id="MiniSizeDescription">
       <segment>
         <source>Mini size pagination.</source>

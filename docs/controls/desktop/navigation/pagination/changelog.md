@@ -2,6 +2,22 @@
 
 本文档记录 Pagination 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-22
+
+- Design
+  - 定义 page-size changer 的局部组件替换模型：`Pagination` 继续作为 `PageSize` 唯一状态 owner，
+    `PaginationSizeChangerContext` 只负责向模板投影有效 `PageSize` / `SizeType` 并转发页大小更新请求。
+  - 默认 ComboBox 与自定义模板内容互斥；`IsShowSizeChanger`、页数计算、当前页收敛、禁用态和事件语义保持不变。
+- API
+  - 定义 `SizeChangerTemplate`，默认值为 `null`；空值使用现有 ComboBox，非空模板以
+    `PaginationSizeChangerContext` 为数据上下文。
+- Theme
+  - `PART_SizeChangerPresenter` 保持唯一 page-size changer 宿主，不新增 Semantic Part 或 Pagination Token。
+- Gallery
+  - 新增 `pagination-custom-size-changer` ShowCaseItem，使用 `NumericUpDown` 展示 `SizeChangerTemplate`，并标记为 `v6.2.1`。
+- Docs
+  - 在 overview 与 implementation 中补充公共契约、组合结构、状态流、生命周期、AOT 边界和验证矩阵。
+
 ## 2026-09-21
 
 - Behavior

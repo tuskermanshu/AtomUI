@@ -49,6 +49,24 @@
         <target state="translated">.NET 10</target>
       </segment>
     </unit>
+    <unit id="CustomComponentAutomationName">
+      <segment>
+        <source>Page size</source>
+        <target state="translated">每頁筆數</target>
+      </segment>
+    </unit>
+    <unit id="CustomComponentDescription">
+      <segment>
+        <source>Replace the page size changer with a custom NumericUpDown.</source>
+        <target state="translated">使用自訂 NumericUpDown 取代每頁筆數切換器。</target>
+      </segment>
+    </unit>
+    <unit id="CustomComponentTitle">
+      <segment>
+        <source>Custom component</source>
+        <target state="translated">自訂元件</target>
+      </segment>
+    </unit>
     <unit id="MiniSizeDescription">
       <segment>
         <source>Mini size pagination.</source>

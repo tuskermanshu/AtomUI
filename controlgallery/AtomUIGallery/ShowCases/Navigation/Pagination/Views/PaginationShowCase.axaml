@@ -160,6 +160,35 @@
                 </gallery:ShowCaseItem>
 
                 <gallery:ShowCaseItem
+                    SourceKey="pagination-custom-size-changer"
+                    Title="{gallery:PaginationShowCaseLangResource CustomComponentTitle}"
+                    Description="{gallery:PaginationShowCaseLangResource CustomComponentDescription}"
+                    BadgeText="v6.2.1"
+                    IsOccupyEntireRow="True"
+                    MinHeight="300"
+                    IsDeferredContentEnabled="True">
+                    <gallery:ShowCaseItem.DeferredContentTemplate>
+                        <DataTemplate x:DataType="vm:PaginationViewModel">
+                            <atom:Pagination Total="500"
+                                             CurrentPage="3"
+                                             IsShowSizeChanger="True">
+                                <atom:Pagination.SizeChangerTemplate>
+                                    <DataTemplate x:DataType="atom:PaginationSizeChangerContext">
+                                        <atom:NumericUpDown Width="100"
+                                                            Minimum="1"
+                                                            Increment="1"
+                                                            FormatString="0"
+                                                            AutomationProperties.Name="{gallery:PaginationShowCaseLangResource CustomComponentAutomationName}"
+                                                            SizeType="{Binding SizeType}"
+                                                            Value="{Binding PageSize, Mode=TwoWay}" />
+                                    </DataTemplate>
+                                </atom:Pagination.SizeChangerTemplate>
+                            </atom:Pagination>
+                        </DataTemplate>
+                    </gallery:ShowCaseItem.DeferredContentTemplate>
+                </gallery:ShowCaseItem>
+
+                <gallery:ShowCaseItem
                     Title="{gallery:PaginationShowCaseLangResource MoreTitle}"
                     Description="{gallery:PaginationShowCaseLangResource MoreDescription}"
                     IsOccupyEntireRow="True"
