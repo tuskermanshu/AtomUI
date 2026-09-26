@@ -108,6 +108,10 @@ public partial class DataGrid
     internal bool AreRowBottomGridLinesRequired =>
         AreHorizontalGridLinesVisible;
 
+    private bool IsBottomPaginationVisible =>
+        (EffectivePaginationVisibility & DataGridPaginationVisibility.Bottom) ==
+        DataGridPaginationVisibility.Bottom;
+
     internal bool ShouldDisplayRowBottomGridLine(int slot)
     {
         if (!AreRowBottomGridLinesRequired)
@@ -118,7 +122,7 @@ public partial class DataGrid
         if (!IsFrameBorderVisible ||
             Footer is not null ||
             (_hScrollBar?.IsVisible ?? false) ||
-            (_bottomPagination?.IsVisible ?? false))
+            IsBottomPaginationVisible)
         {
             return true;
         }
@@ -2431,6 +2435,7 @@ public partial class DataGrid
         {
             _synchronizingRangePagination = false;
         }
+        ConfigurePaginationVisibility();
     }
 
     private void HandlePageChangeRequest(object? sender, PageChangedEventArgs args)
@@ -2441,6 +2446,14 @@ public partial class DataGrid
         }
         if (ItemsSource is not null && (AppliedPageRequest ?? PageRequest) is { } pageRequest)
         {
+            if (args.PageSize != pageRequest.DataCount)
+            {
+                var targetPageIndex = Math.Max(0, args.PageIndex - 1);
+                var targetDataStartIndex = checked((long)targetPageIndex * args.PageSize);
+                SetPageRequest(new DataGridPageRequest(targetDataStartIndex, args.PageSize));
+                return;
+            }
+
             // Pagination also raises CurrentPageChanged while applying a delayed template update.
             // Treat the currently projected applied page as state synchronization, not user intent.
             if (args.PageIndex == GetRangePaginationPage(pageRequest))

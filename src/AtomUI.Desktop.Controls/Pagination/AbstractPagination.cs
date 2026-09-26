@@ -183,7 +183,12 @@ public abstract class AbstractPagination : TemplatedControl, ICustomizableSizeTy
         var pageSize    = PageSize <= 0 ? DefaultPageSize : PageSize;
         var pageCount   = (int)Math.Ceiling(total / (double)pageSize);
         var currentPage = Math.Max(1, Math.Min(CurrentPage, pageCount));
-        SetCurrentValue(CurrentPageProperty, currentPage);
+        if (CurrentPage != currentPage)
+        {
+            SetCurrentValue(CurrentPageProperty, currentPage);
+            return;
+        }
+
         PageCount = pageCount;
         NotifyPageConditionChanged(currentPage, pageCount, pageSize, total);
     }

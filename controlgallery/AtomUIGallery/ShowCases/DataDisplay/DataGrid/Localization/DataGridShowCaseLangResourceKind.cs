@@ -49,6 +49,7 @@ public enum DataGridShowCaseLangResourceKind
     EditableCellsDescription,
     BasicPagingTitle,
     BasicPagingDescription,
+    BasicPagingExtraContentText,
     RemoteRangeTitle,
     RemoteRangeDescription,
     RemoteRangeReload,

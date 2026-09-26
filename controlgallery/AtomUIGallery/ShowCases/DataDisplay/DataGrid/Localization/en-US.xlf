@@ -8,7 +8,12 @@
     </unit>
     <unit id="BasicPagingDescription">
       <segment>
-        <source>Basic pagination table.</source>
+        <source>Basic pagination table with a page-size selector and opposite-side extra content.</source>
+      </segment>
+    </unit>
+    <unit id="BasicPagingExtraContentText">
+      <segment>
+        <source>Batch actions</source>
       </segment>
     </unit>
     <unit id="BasicPagingTitle">

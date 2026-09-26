@@ -93,6 +93,7 @@ Public API / inherited command / item source / user input
 
 - Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
 - 用户点击页码、快速跳转或切换页大小时，通过 `CurrentPage` / `PageSize` 写回同一个受控状态；绑定方不需要显式设置 `Mode=TwoWay`。
+- 默认横向布局顺序固定为 total info、page navigation、page-size changer、quick jumper。分页宿主的额外区域必须位于 Pagination 外围，不得移动或复制 page-size selector。
 - `SizeChangerTemplate` 只替换页大小输入组件。模板写入经 `PaginationSizeChangerContext` 收敛到 `Pagination.PageSize`，不能成为第二个分页状态 owner。
 - selection/checked/active、collection/filter、input/value、motion、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
 - 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。

@@ -3965,6 +3965,7 @@ Public API / inherited command / item source / user input
 
 - Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
 - 用户点击页码、快速跳转或切换页大小时，通过 `CurrentPage` / `PageSize` 写回同一个受控状态；绑定方不需要显式设置 `Mode=TwoWay`。
+- 默认横向布局顺序固定为 total info、page navigation、page-size changer、quick jumper。分页宿主的额外区域必须位于 Pagination 外围，不得移动或复制 page-size selector。
 - `SizeChangerTemplate` 只替换页大小输入组件。模板写入经 `PaginationSizeChangerContext` 收敛到 `Pagination.PageSize`，不能成为第二个分页状态 owner。
 - selection/checked/active、collection/filter、input/value、motion、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
 - 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
@@ -13639,11 +13640,17 @@ Source: ./controls/data-grid/semantic-cn.md
     <Border Name="FrameContentClip">
         <Spin>
             <DockPanel>
-                <Pagination Name="{x:Static atom:DataGridThemeConstants.TopPaginationPart}" />
+                <DockPanel Name="{x:Static atom:DataGridThemeConstants.TopPaginationPanelPart}">
+                    <ContentPresenter Name="{x:Static atom:DataGridThemeConstants.TopPaginationExtraContentPart}" />
+                    <Pagination Name="{x:Static atom:DataGridThemeConstants.TopPaginationPart}" />
+                </DockPanel>
                 <PixelAlignedBorder Name="TitleFrame">
                     <ContentPresenter Name="Title" />
                 </PixelAlignedBorder>
-                <Pagination Name="{x:Static atom:DataGridThemeConstants.BottomPaginationPart}" />
+                <DockPanel Name="{x:Static atom:DataGridThemeConstants.BottomPaginationPanelPart}">
+                    <ContentPresenter Name="{x:Static atom:DataGridThemeConstants.BottomPaginationExtraContentPart}" />
+                    <Pagination Name="{x:Static atom:DataGridThemeConstants.BottomPaginationPart}" />
+                </DockPanel>
                 <ContentPresenter Name="Footer" />
                 <Grid>
                     <DataGridTopLeftColumnHeader Name="{x:Static atom:DataGridThemeConstants.TopLeftCornerPart}" />
@@ -13677,7 +13684,8 @@ Source: ./controls/data-grid/semantic-cn.md
 | 内容与数据 | `ItemsSource`、`Query`、`AppliedQuery`、`GroupExpansion`、`TotalItemCount`、`TotalEntryCount`、`AutoGenerateColumns`、`CellTemplate`、`CellEditingTemplate` | 定义数据输入、查询、范围 presentation、模板和业务对象入口；`ItemsSource` 的类型是 `IDataGridSource?`。 |
 | 选择与当前项 | `Selection`、`CurrentRowKey`、`SelectionChanged`、`ClipboardCopyMode` | 以稳定 row key、query scope 和 index interval 维护可跨 range/page 的声明式状态。 |
 | 交互与加载 | `CanUserFilterColumns`、`CanUserReorderRows`、`CanUserResizeColumns`、`CanUserSortColumns`、`QueryChanged`、`LoadState`、`LoadError`、`IsDataStale`、`Reload()` | 表达用户查询意图、异步生命周期、错误与可提交能力。 |
-| 视觉与布局 | `BottomPaginationAlign`、`ColumnWidth`、`HorizontalAlignment`、`HorizontalScrollBarVisibility`、`MaxColumnWidth`、`MinColumnWidth`、`RowHeight`、`SeparatorBrush`、`SizeType`、`SublevelIndent` 等 14 项 | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
+| 视觉与布局 | `BottomPaginationAlign`、`ColumnWidth`、`HorizontalAlignment`、`HorizontalScrollBarVisibility`、`IsShowPageSizeSelector`、`MaxColumnWidth`、`MinColumnWidth`、`RowHeight`、`SeparatorBrush`、`SizeType`、`SublevelIndent` 等 15 项 | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
+| 分页面板扩展 | `TopPaginationExtraContent`、`TopPaginationExtraContentTemplate`、`BottomPaginationExtraContent`、`BottomPaginationExtraContentTemplate` | 在顶部/底部分页区域提供与 Pagination 相反一侧的独立 Extra Content；默认均为 `null`，不拥有分页状态。 |
 | 列查询契约 | `FieldId`、`CanUserSort`、`SupportedSortDirections`、只读 `SortState`、过滤候选展示属性 | 让列声明协议字段与能力覆盖，显示 Binding 不参与查询 identity。 |
 | 其他稳定入口 | `CellTheme`、`CustomOperatingIndicator`、`EmptyIndicator`、`Footer`、`FormatString`、`GridLinesVisibility`、`Level`、`Maximum`、`Minimum` 等 | 保留非数据架构 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
@@ -13704,7 +13712,8 @@ Public API / inherited command / Source invalidation / user input
 - Query、Selection、current、loading、motion 和 visual option 状态由 DataGrid 或明确 Source capability 单向推导，不能在 template part 之间双向竞争。
 - 排序、过滤和分组只由 `Query` 拥有；列、Header、Cell 和 Flyout 只投影相应字段状态。
 - `Filters` 候选项替换、reset 或 clear 时可以重新物化 Flyout 内容，但不能直接改变已应用 Query；用户确认或显式 API 才提交新的 Query。
-- 分页状态以 applied PageRequest 和 `TotalItemCount` 为 owner；上下 Pagination 不能互相覆盖，也不能在模板重建时反向重置 Query 或 Source。
+- 分页状态以 applied PageRequest 和 `TotalItemCount` 为 owner；页大小选择器的输入转换为新的 `DataGridPageRequest`，保持可保留的页序号并在新页数不足时收敛到最后一页。上下 Pagination 不能互相覆盖，也不能在模板重建时反向重置 Query 或 Source。
+- Extra Content 只属于 DataGrid 分页面板，不参与 Query、PageRequest、PageSize 或 Source request。它与内部 Pagination 共享有效可见性，不能在单页隐藏或连续模式下独立残留。
 - Loading 没有可展示的已提交 presentation，实际挂起时驱动 Spin；Refreshing 保持旧 presentation 的几何与完整不透明度，
   不自动启动 Spin。两种状态都禁止 edit/delete/move，成功时原子交换，失败时完整回退。
 - 连续滚轮、惯性或 scrollbar thumb 输入只保留最新有效 `DesiredViewport`。新目标先接管仍需要的 block，再使旧视口 scope
@@ -13797,6 +13806,7 @@ DataGrid Token 只表达组件级视觉变量，例如尺寸、间距、颜色�
 - ControlTheme key、Template Part、伪类、Token、Semantic Part 和 Ready 视觉优先级。
 - Light/Dark、Browser/Desktop、SizeType、冻结列、RowDetails 和 nested scrolling 的一致语义。
 - 文档、源码 public surface、Gallery、tests 与 generated LLMS 的一致性。
+- Extra Content 与 Pagination 共享有效可见性；Pagination Align 为 Start/End 时分别形成左右相反布局，Center 使用右侧 Extra Content 加剩余区域居中 Pagination。
 
 Source: ./controls/descriptions/semantic-cn.md
 

@@ -9,8 +9,14 @@
     </unit>
     <unit id="BasicPagingDescription">
       <segment>
-        <source>Basic pagination table.</source>
-        <target state="translated">基礎分頁表格。</target>
+        <source>Basic pagination table with a page-size selector and opposite-side extra content.</source>
+        <target state="translated">帶每頁筆數選擇器與對側擴展區域的基礎分頁表格。</target>
+      </segment>
+    </unit>
+    <unit id="BasicPagingExtraContentText">
+      <segment>
+        <source>Batch actions</source>
+        <target state="translated">批量操作</target>
       </segment>
     </unit>
     <unit id="BasicPagingTitle">

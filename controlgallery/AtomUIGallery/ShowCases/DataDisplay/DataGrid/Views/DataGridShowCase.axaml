@@ -1084,9 +1084,13 @@
 
             </StackPanel>
             <atom:DataGrid x:Name="BasicPagingCaseGrid" Height="400" PaginationVisibility="Bottom"
+                           IsShowPageSizeSelector="True"
                            PageSize="10"
                            x:DataType="vm:DataGridBaseInfo"
                            AttachedToVisualTree="HandleExampleDataGridAttached">
+                <atom:DataGrid.BottomPaginationExtraContent>
+                    <atom:Button Content="{gallery:DataGridShowCaseLangResource BasicPagingExtraContentText}" />
+                </atom:DataGrid.BottomPaginationExtraContent>
                 <atom:DataGrid.Columns>
                     <atom:DataGridTemplateColumn MinWidth="170" Header="{gallery:DataGridShowCaseLangResource P2HeaderName}">
                         <atom:DataGridTemplateColumn.CellTemplate>

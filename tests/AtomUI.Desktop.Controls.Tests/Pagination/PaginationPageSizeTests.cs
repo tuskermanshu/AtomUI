@@ -23,6 +23,47 @@ public class PaginationPageSizeTests
     }
 
     [Fact]
+    public void Pagination_Custom_SizeSelector_Follows_PageNavigation_By_Default()
+    {
+        var pagination = new AtomUI.Desktop.Controls.Pagination
+        {
+            IsShowSizeChanger  = true,
+            SizeChangerTemplate = CreateSizeChangerTemplate(),
+            IsMotionEnabled    = false
+        };
+
+        ShowInWindow(pagination, () =>
+        {
+            var root = pagination.GetVisualDescendants()
+                                .OfType<StackPanel>()
+                                .Single(control => control.Name == "PART_RootLayout");
+            var childNames = root.Children.OfType<Control>().Select(control => control.Name).ToArray();
+
+            Array.IndexOf(childNames, "PART_Nav")
+                .ShouldBeLessThan(Array.IndexOf(childNames, "PART_SizeChangerPresenter"));
+        });
+    }
+
+    [Fact]
+    public void Pagination_PageSize_Clamp_Emits_Single_State_Notification()
+    {
+        var pagination = new AtomUI.Desktop.Controls.Pagination
+        {
+            Total       = 100,
+            CurrentPage = 10,
+            PageSize    = 10
+        };
+        var notificationCount = 0;
+        pagination.CurrentPageChanged += (_, _) => notificationCount++;
+
+        pagination.PageSize = 100;
+
+        pagination.CurrentPage.ShouldBe(1);
+        pagination.PageCount.ShouldBe(1);
+        notificationCount.ShouldBe(1);
+    }
+
+    [Fact]
     public void Pagination_Custom_Size_Changer_API_Uses_Null_Default_And_TwoWay_Context()
     {
         var pagination = new AtomUI.Desktop.Controls.Pagination();

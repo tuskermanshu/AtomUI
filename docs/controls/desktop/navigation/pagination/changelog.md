@@ -2,6 +2,13 @@
 
 本文档记录 Pagination 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-26
+
+- Behavior
+  - 页大小或总数变化导致当前页收敛时，只发布最终分页状态的一次 `CurrentPageChanged` 通知，避免递归属性更新产生旧页码重复意图。
+- Theme
+  - 保持 Pagination 默认顺序 total info、page navigation、page-size changer、quick jumper；分页宿主 Extra Content 只能在 Pagination 外围组合，不得移动 page-size selector。
+
 ## 2026-09-22
 
 - Design

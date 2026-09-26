@@ -195,6 +195,16 @@ internal sealed class DataGridToken : AbstractControlDesignToken
     /// </summary>
     public Thickness PaginationMarginSM { get; set; }
 
+    /// <summary>
+    /// 分页面板的水平内边距
+    /// </summary>
+    public Thickness PaginationPanelMargin { get; set; }
+
+    /// <summary>
+    /// 分页面板的水平内边距（小号）
+    /// </summary>
+    public Thickness PaginationPanelMarginSM { get; set; }
+
     #region 内部 Token
 
     internal Thickness ExpandIconMargin { get; set; }
@@ -383,6 +393,8 @@ internal sealed class DataGridToken : AbstractControlDesignToken
 
         PaginationMargin   = new Thickness(0, EffectiveGlobalToken.UniformlyMargin);
         PaginationMarginSM = new Thickness(0, EffectiveGlobalToken.UniformlyMarginXS);
+        PaginationPanelMargin   = new Thickness(EffectiveGlobalToken.UniformlyMargin, 0);
+        PaginationPanelMarginSM = new Thickness(EffectiveGlobalToken.UniformlyMarginXS, 0);
     }
     
 }

@@ -122,8 +122,8 @@ public class GalleryCatalogCoverageTests
         sourceFiles.Length.ShouldBe(81);
         // 4748（feature/semantic 基线）+ 14（ComboBox Semantic 示例）+ 18（Splash Semantic 示例）
         // + 8（release/6.0 TabControl/TabStrip 溢出搜索示例）
-        // + 3（Pagination 自定义页大小组件示例）= 4791。
-        sourceFiles.Sum(CountUnits).ShouldBe(4791);
+        // + 3（Pagination 自定义页大小组件示例）+ 1（DataGrid 分页 Extra Content 示例）= 4792。
+        sourceFiles.Sum(CountUnits).ShouldBe(4792);
         foreach (var sourcePath in sourceFiles)
         {
             var targetPath = Path.Combine(

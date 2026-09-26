@@ -4435,7 +4435,10 @@ public partial class DataGrid
 
     private void ConfigurePaginationVisibility()
     {
-        if ((PageRequest?.DataCount ?? PageSize) == 0)
+        var pageSize = PageRequest?.DataCount ?? PageSize;
+        if (pageSize == 0 ||
+            TotalItemCount == 0 ||
+            (IsHideOnSinglePage && TotalItemCount <= pageSize))
         {
             EffectivePaginationVisibility = DataGridPaginationVisibility.None;
         }

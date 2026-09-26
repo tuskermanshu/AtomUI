@@ -2,6 +2,24 @@
 
 本文档记录 DataGrid 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-26
+
+- API
+  - 新增 `IsShowPageSizeSelector`，默认值为 `true`，把页大小选择器可见性转发给顶部和底部 `Pagination.IsShowSizeChanger`，不修改 Pagination 既有属性名。
+- Design
+  - 定义顶部/底部 `PaginationExtraContent` 与 `PaginationExtraContentTemplate`，Extra Content 位于 Pagination 对侧；`Start`/`End` 形成左右互换布局，`Center` 使用右侧 Extra Content 加剩余区域居中 Pagination。
+  - Pagination 默认保持 page navigation -> page-size selector；页大小选择器输入转换为 `DataGridPageRequest`，保持可保留的页序号并在页数不足时收敛到最后一页。
+- Implementation
+  - 顶部和底部 Pagination 共享同一 applied page state；修复页码收敛期间重复状态通知导致的分页请求回写。
+  - 分页区域使用两个 `DockPanel` 组合 Extra Content 与 Pagination，按 Start/End 相反对齐，Center 保留右侧 Extra Content。
+  - Extra Content 相对分页面板垂直居中，Start/End 通过 `PaginationPanelMargin` / `PaginationPanelMarginSM` 保持两侧一致水平间距。
+- Validation
+  - 定义 Extra Content API、对齐、可见性、生命周期和 Pagination 原始 UX 的验证矩阵。
+- Docs
+  - 新增 `pagination-extra-content-design.md`，并同步 overview、implementation、Pagination 默认布局边界和 LLMS 来源清单。
+- Gallery
+  - Basic Paging ShowCase 同时展示右侧 page-size selector 与左侧 Bottom Pagination Extra Content，并同步四种语言描述。
+
 ## 2026-09-14
 
 - Implementation

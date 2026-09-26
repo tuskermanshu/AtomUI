@@ -116,7 +116,7 @@ Pagination (public state owner)
 | --- | --- | --- | --- | --- | --- | --- |
 | 分页状态 owner | `Pagination` | `Pagination.cs` | 控件实例 | `CurrentPage`、`PageSize`、`Total`、`SizeChangerTemplate` | public | 所有分页状态更新最终收敛到 owner。 |
 | 模板数据桥 | `PaginationSizeChangerContext` | `PaginationSizeChangerContext.cs` | `Pagination` | `SizeChangerTemplate`、`PageSize`、`SizeType` | public | 只投影和转发状态，不持有视觉对象或独立业务状态。 |
-| 页大小宿主 | `PART_SizeChangerPresenter` / `ContentPresenter` | `PaginationTheme.axaml` | 当前 ControlTemplate | `IsShowSizeChanger`、`SizeChangerTemplate` | template-stable | 可替换内容，不改变 part 名称、可见性 owner 或布局位置。 |
+| 页大小宿主 | `PART_SizeChangerPresenter` / `ContentPresenter` | `PaginationTheme.axaml` | 当前 ControlTemplate | `IsShowSizeChanger`、`SizeChangerTemplate` | template-stable | 可替换内容，不改变 part 名称、可见性 owner 或默认布局位置。 |
 | 默认页大小输入 | `ComboBox` + `PageSizeComboBoxItem` | `Pagination.cs` | `Pagination` | `PageSize`、`PageSizeOptions`、`SizeType` | internal-observable | 仅在 `SizeChangerTemplate=null` 时存在。 |
 | 自定义页大小输入 | `IDataTemplate` 生成的 Control | 应用/Gallery AXAML | `PART_SizeChangerPresenter` | `SizeChangerTemplate`、Context 状态 | public customization | 输入形态、格式、候选值和可访问性由模板负责。 |
 | 页码导航 | `PaginationNav` + `PaginationNavItem` | Pagination Themes + C# | `Pagination` | `CurrentPage`、`PageCount`、`IsShowLessItems` | internal-observable | 只用于理解固定容器池和导航行为，应用不依赖 internal 类型。 |
@@ -150,7 +150,7 @@ Pagination (public state owner)
 - `PART_PreviousNavItem`：稳定模板协作入口，重命名前必须同步主题和实现。
 - `PART_QuickJumper`：稳定模板协作入口，重命名前必须同步主题和实现。
 - `PART_QuickJumperBarPresenter`：展示用户内容、文本、图标或模板化数据。
-- `PART_RootLayout`：承载根视觉、边框、背景或尺寸基线。
+- `PART_RootLayout`：`StackPanel` 水平布局入口，保持 Pagination 原有节点顺序。
 - `PART_RootLayoutPart`：承载根视觉、边框、背景或尺寸基线。
 - `PART_SizeChangerPresenter`：在默认 ComboBox 与 `SizeChangerTemplate` 生成内容之间互斥切换，并保持
   `IsShowSizeChanger` 可见性语义。
@@ -226,7 +226,8 @@ Pagination.PageSize / SizeType
 
 owner-to-context 同步与 context-to-owner 请求使用不同入口，并在值相同时停止传播，不使用 `_ignoreXxx`、
 `_suppressXxx` 或延迟刷新掩盖循环。页大小变化继续复用 `AbstractPagination` 的页数计算和
-`CurrentPageChanged` 事件路径，不建立自定义模板专属事件模型。
+`CurrentPageChanged` 事件路径，不建立自定义模板专属事件模型。页数收敛先写回 `CurrentPage`，由递归属性处理完成唯一一次
+最终状态通知，避免旧页码通知在页大小变化后重新生成错误 PageRequest。
 
 ### 8.3 尺寸与状态基线矩阵
 

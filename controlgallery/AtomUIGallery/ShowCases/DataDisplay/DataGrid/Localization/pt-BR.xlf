@@ -9,8 +9,14 @@
     </unit>
     <unit id="BasicPagingDescription">
       <segment>
-        <source>Basic pagination table.</source>
-        <target state="translated">Básico paginação tabela.</target>
+        <source>Basic pagination table with a page-size selector and opposite-side extra content.</source>
+        <target state="translated">Tabela de paginação básica com seletor de itens por página e conteúdo extra no lado oposto.</target>
+      </segment>
+    </unit>
+    <unit id="BasicPagingExtraContentText">
+      <segment>
+        <source>Batch actions</source>
+        <target state="translated">Ações em lote</target>
       </segment>
     </unit>
     <unit id="BasicPagingTitle">
