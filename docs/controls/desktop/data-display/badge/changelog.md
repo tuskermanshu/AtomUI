@@ -2,6 +2,16 @@
 
 本文档记录 Badge 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-27
+
+- Implementation
+  - Rework `RibbonBadgeAdorner` fold layout so the ribbon body and fold triangle are derived from the same coordinate model, and corner transform changes rebuild the rendered fold geometry.
+- Tests
+  - Add Ribbon fold regression coverage for standalone Start bounds and dynamic corner transform updates.
+- Docs
+  - Document the RibbonBadge layout and fold rendering contract: body rect, content rect and fold triangle must come from one coordinate model, with pixel-level rendering verification for the fold geometry.
+  - Clarify `RibbonBadgeToken` offset, corner transform, darken amount and text padding semantics; align the token scope list with the existing Count/Dot/Ribbon token classes.
+
 ## 2026-08-13
 
 - Docs

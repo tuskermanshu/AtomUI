@@ -206,7 +206,51 @@ Dot standalone 模板包含 Label，target 模板不包含 Label。nullability �
 
 ### 8.3 Ribbon 布局与绘制
 
-Ribbon target mode 以 target 的最终尺寸为 owner 尺寸；`Placement`、Token offset 和 public `Offset` 决定文本与折角位置。Ribbon standalone 模式的期望尺寸由文本和折角共同决定。背景、圆角和折角继续由 Render 路径绘制，不为 Semantic Part 增加新 Visual。
+Ribbon target mode 以 target 的最终尺寸为 owner 尺寸；standalone 模式的期望尺寸由文本主体和折角共同决定。Ribbon 的
+背景、圆角和折角继续由 `AbstractRibbonBadgeAdorner.Render()` 绘制，不为 Semantic Part 增加新 Visual。
+
+Ribbon 绘制必须先建立同一个布局模型，再从该模型派生文本主体、内容区域和折角几何。模型输入为：
+
+- target 或 standalone 可用尺寸。
+- `Placement`，决定 Start/End 锚点和需要关闭的主体底部圆角。
+- public `Offset`，只表达实例级整体位置修正。
+- Ribbon Token offset，表达 target mode 的外伸量和垂直避让量。
+- Ribbon 折角尺寸、折角变换和折角加深量。
+- `PART_LabelPart.DesiredSize`，表达文本、行高和 padding 后的主体尺寸。
+
+模型输出必须至少包含：
+
+| 输出 | 职责 |
+| --- | --- |
+| Body rect | Ribbon 文本主体的真实背景边界，也是内容 TextBlock 的 arrange 基准。 |
+| Content rect | 文本内容在主体中的可用区域；由 Theme 中的 TextBlock padding 和 line height 形成。 |
+| Fold triangle | 折角暗面三角形，必须与 Body rect 的 Start/End 锚点共享同一条边。 |
+| Desired size | standalone 模式的 owner 尺寸；包含主体和折角完整视觉。 |
+
+`Placement=End` 时，主体向 target 的 End 侧外伸；`Placement=Start` 时，主体向 Start 侧外伸。折角不单独反推自身
+`Bounds` 后再对齐主体，而是从 Body rect 的外伸侧底边直接生成三角点位。这样可以保证主体、折角和 target 边界共享同一坐标系，
+避免折角被主体覆盖成深色竖条、脱离主体成为方块，或在不同文字长度下漂移。
+
+Ribbon Token offset 的两个坐标不得在实现中混用：
+
+| Token 坐标 | 语义 |
+| --- | --- |
+| `X` | target mode 下主体相对 target 边界的水平外伸距离，也是默认折角宽度来源。 |
+| `Y` | target mode 下主体相对 target 上边缘的垂直避让距离，也是默认折角高度来源。 |
+
+如果实现需要把外伸距离、垂直避让和折角尺寸拆成更细的内部值，可以在 Adorner 内部布局模型中命名拆分，但不能改变
+既有 public API、TokenResource key、Theme setter 或 Gallery 可见默认外观。只有确认当前 Token 语义不足以表达默认视觉时，
+才允许引入新 Token，并同步 `token.md`、Theme 引用、生成资源和可视回归。
+
+折角暗面使用 `RibbonColor` 派生色和 `BadgeRibbonCornerDarkenAmount` 计算，不单独读取 public `RibbonColor` 字符串。
+`BadgeRibbonCornerTransform` 若参与折角形状，必须在折角点位或完整 geometry cache key 中体现；不能只把 transform 附在
+cached geometry 上，同时继续用 transform 前的 bounds 做布局。影响 Ribbon 布局或折角形状的属性必须触发对应的
+measure、arrange 或 render 失效，至少包括 `Text`、`Placement`、`Offset`、`BadgeRibbonOffset`、
+`BadgeRibbonCornerTransform`、`BadgeRibbonCornerDarkenAmount` 和 `RibbonColor`。
+
+渲染回归不能只验证 TextBlock 的位置或 owner 的 inline tree。Ribbon 折角必须通过 Skia/headless 捕获后的像素断言验证：
+三角暗面区域为加深色，主体背景区域为 Ribbon 主色，三角外背景区保持目标或窗口背景色。验证矩阵至少覆盖 `Start`/`End`、
+standalone/target、长短文本、预设色与自定义色，以及 target 右边缘 stretch 布局。
 
 ### 8.4 Semantic Style 排查
 
@@ -257,6 +301,9 @@ Badge Semantic Part 的默认运行时成本仅包括 descriptor 静态数据和
 - Count/Dot target mode 的 visual parent 与 logical/style owner 必须分离，detach 时对称清理。
 - Dot standalone 与 target 两套模板必须实现同一个 indicator marker 契约。
 - Ribbon 背景与折角继续由 Render 绘制，不为了 Semantic Part 新增视觉节点。
+- Ribbon 文本主体、内容区域和折角必须由同一个布局模型派生；折角几何不得通过独立 bounds、独立 transform 和独立偏移与主体拼接。
+- Ribbon Token offset 的 X/Y 语义必须保持水平外伸与垂直避让；如实现内部拆分折角尺寸，不能改变现有 TokenResource key 或默认外观。
+- 任何影响 Ribbon 折角几何或主体位置的属性变化都必须触发布局或渲染失效；不能依赖旧 cached geometry 偶然复用。
 - marker 在节点生命周期内静态存在，不表达 visible、status、placement 或 motion phase。
 - `DecoratedTarget`、内部 Label、Count 文本拆分、折角和 motion actor identity 保持非公开。
 - 默认 Theme 不消费 semantic class；实现不引入反射、扫描、额外常驻监听或新的默认视觉对象。
@@ -270,7 +317,8 @@ Badge Semantic Part 的默认运行时成本仅包括 descriptor 静态数据和
 | Count target mode | AdornerLayer 中只有一个 indicator；logical owner 为 CountBadge；owner-scoped Style 可命中；detach 后无残留。 |
 | Dot standalone | indicator 存在且 Label 不带 semantic marker；状态、文本和颜色更新不重建 class。 |
 | Dot target mode | 两套模板 marker 一致；模式切换重建后 marker、owner 和 selector 仍正确。 |
-| Ribbon | standalone/target、Start/End、隐藏保留 target；indicator 与 content 分别命中且不存在跨根 metadata。 |
+| Ribbon | standalone/target、Start/End、隐藏保留 target；indicator 与 content 分别命中且不存在跨根 metadata；折角与主体共享坐标模型。 |
+| Ribbon 渲染 | Skia/headless 像素回归覆盖折角三角暗面、主体主色、三角外背景、长短文本、预设色/自定义色和 stretch target 右边缘。 |
 | Selector | 实例 `.semantic-*` 与 Application owner descendant selector 命中；`/template/` 不作为支持用法。 |
 | 生命周期 | AdornerLayer retry、目标替换、快速显示隐藏、motion cancellation、window close 和重复 attach/detach。 |
 | 性能 | 默认 Theme 无 `.semantic-*` selector；批量实例 class listener 和 detach 释放符合预算；无 runtime registry 查询。 |

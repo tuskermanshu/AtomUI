@@ -123,7 +123,7 @@ Badge 的默认视觉由三个内部 Token scope 与四个 ControlTheme 共同�
 | --- | --- |
 | `CountBadgeToken` | 数量徽标高度、字体、颜色、Padding、圆角和阴影。 |
 | `DotBadgeToken` | 状态点尺寸、颜色、阴影和独立文本间距。 |
-| `RibbonBadgeToken` | Ribbon 偏移、折角、文本 Padding 和行高。 |
+| `RibbonBadgeToken` | Ribbon 外伸、垂直偏移、折角尺寸、折角变换、文本 Padding 和行高。 |
 | `CountBadgeAdornerTheme.axaml` | 数量 indicator 的模板、尺寸变体和默认视觉。 |
 | `DotBadgeAdornerTheme.axaml` | 状态点、独立文本和 target mode 模板。 |
 | `DotBadgeIndicatorTheme.axaml` | 状态点绘制所需的默认属性。 |
@@ -146,6 +146,8 @@ Token 只表达组件视觉语义，不保存数量、状态、可见性、目�
 - `root` 不添加 `.semantic-root`；非 root Part 使用唯一 `.semantic-indicator` 或 `.semantic-content`。
 - Count/Dot 跨根 indicator 的 visual parent 可以是 `AdornerLayer`，logical/style owner 必须保持对应 Badge owner。
 - Ribbon target mode 保持 inline visual tree；隐藏 Ribbon 时必须保留目标内容。
+- Ribbon 文本主体、内容区域和折角必须来自同一个布局模型；`Placement`、Token offset、实例 `Offset` 和折角变换不能各自维护互相漂移的坐标假设。
+- Ribbon 折角必须作为完整 indicator 渲染契约的一部分保持三角折叠语义，不能退化为被主体覆盖的深色竖条、独立方块或依赖目标内容裁剪的偶然形状。
 - `DecoratedTarget`、内部文本拆分、动效节点名称和绘制几何不得升级为隐式公共契约。
 - 删除、重命名 Part、修改 selector class、收窄 ContractType 或改变 cardinality 按公共主题破坏性变更处理。
 - Semantic Part 不引入运行时反射、VisualTree 全局扫描、额外常驻监听或默认路径视觉对象。
@@ -207,4 +209,5 @@ LLMS 导出来源：
 | Selector | 使用 descriptor `SelectorRoute` 验证实例 Style 和 owner-scoped Style 命中，并验证 `DecoratedTarget` 中嵌套 Badge 不被外层命中。 |
 | 生命周期 | 覆盖 AdornerLayer 延迟可用、attach/detach、退出动效取消、目标替换和重复附加。 |
 | Gallery | Semantic Parts Tab 保持延迟创建；三个 owner 使用独立 Preview；Count/Dot 只注册各自具体 runtime Adorner，Ribbon 不使用 additional root。 |
+| Ribbon 渲染 | 使用 Skia/headless 像素回归验证 Start/End、target/standalone、不同文本长度和颜色下的折角三角区、主体区和背景区。 |
 | 性能与 AOT | 验证默认主题不消费 semantic class、无反射/动态代码，并按 overlay 风险执行 NativeAOT 发布检查。 |
