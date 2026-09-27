@@ -135,7 +135,7 @@
                         Background="rgb(191,191,191)"
                         CornerRadius="8" />
             </atom:CountBadge>
-            <atom:CountBadge Count="0" IsZeroVisible="True">
+            <atom:CountBadge Count="0" IsZeroVisible="True" BadgeColor="#52c41a">
                 <Border Width="40"
                         Height="40"
                         Background="rgb(191,191,191)"
