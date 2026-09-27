@@ -14,6 +14,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
+using Avalonia.Rendering.Composition;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -81,6 +82,8 @@ internal sealed class OverlayDialogPresenter : ContentControl,
     private Rect? _resizeOriginBounds;
     private Rect? _restoreBounds;
     private bool _isInitialSizeResolved;
+
+    private static readonly TimeSpan CompositionMotionCompletionSlack = TimeSpan.FromMilliseconds(32);
 
     internal DialogSurface Surface => _surface;
 
@@ -202,22 +205,26 @@ internal sealed class OverlayDialogPresenter : ContentControl,
         {
             _openingMotionCancellationSource =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var motionTasks = new List<Task>
+            var motionToken = _openingMotionCancellationSource.Token;
+            if (!await TryRunCompositorOpeningMotionAsync(motionToken))
             {
-                CreateSurfaceMotion(isOpening: true)
-                    .RunAsync(
-                        _surfaceMotionActor,
-                        cancellationToken: _openingMotionCancellationSource.Token)
-            };
-            if (IsModal && _maskMotionActor is not null)
-            {
-                motionTasks.Add(new FadeInMotion(MotionDuration)
-                    .RunAsync(
-                        _maskMotionActor,
-                        cancellationToken: _openingMotionCancellationSource.Token));
-            }
+                var motionTasks = new List<Task>
+                {
+                    CreateSurfaceMotion(isOpening: true)
+                        .RunAsync(
+                            _surfaceMotionActor,
+                            cancellationToken: motionToken)
+                };
+                if (IsModal && _maskMotionActor is not null)
+                {
+                    motionTasks.Add(new FadeInMotion(MotionDuration)
+                        .RunAsync(
+                            _maskMotionActor,
+                            cancellationToken: motionToken));
+                }
 
-            await Task.WhenAll(motionTasks);
+                await Task.WhenAll(motionTasks);
+            }
         }
     }
 
@@ -244,22 +251,25 @@ internal sealed class OverlayDialogPresenter : ContentControl,
 
         if (IsMotionEnabled && _surfaceMotionActor is not null && _dialogLayer is not null)
         {
-            var motionTasks = new List<Task>
+            if (!await TryRunCompositorClosingMotionAsync())
             {
-                CreateSurfaceMotion(isOpening: false).RunAsync(_surfaceMotionActor)
-            };
-            if (_surface.SurfaceContentLayer is { } surfaceContentLayer)
-            {
-                motionTasks.Add(RunSurfaceContentCloseMotionAsync(surfaceContentLayer));
-            }
+                var motionTasks = new List<Task>
+                {
+                    CreateSurfaceMotion(isOpening: false).RunAsync(_surfaceMotionActor)
+                };
+                if (_surface.SurfaceContentLayer is { } surfaceContentLayer)
+                {
+                    motionTasks.Add(RunSurfaceContentCloseMotionAsync(surfaceContentLayer));
+                }
 
-            if (IsModal && _maskMotionActor is not null)
-            {
-                motionTasks.Add(new FadeOutMotion(MotionDuration, new CubicEaseIn())
-                    .RunAsync(_maskMotionActor));
-            }
+                if (IsModal && _maskMotionActor is not null)
+                {
+                    motionTasks.Add(new FadeOutMotion(MotionDuration, new CubicEaseIn())
+                        .RunAsync(_maskMotionActor));
+                }
 
-            await Task.WhenAll(motionTasks);
+                await Task.WhenAll(motionTasks);
+            }
         }
 
         _surface.DisconnectCompositionChildren();
@@ -299,6 +309,234 @@ internal sealed class OverlayDialogPresenter : ContentControl,
             // restore the live tree for re-use if teardown is interrupted.
             surfaceContentLayer.Opacity = 1;
         }
+    }
+
+    private async Task<bool> TryRunCompositorOpeningMotionAsync(CancellationToken cancellationToken)
+    {
+        var motion = CreateSurfaceMotion(isOpening: true);
+        var surfaceVisual = ElementComposition.GetElementVisual(_surfaceMotionActor!);
+        if (surfaceVisual is null)
+        {
+            return false;
+        }
+
+        CompositionVisual? maskVisual = null;
+        if (IsModal && _maskMotionActor is not null)
+        {
+            maskVisual = ElementComposition.GetElementVisual(_maskMotionActor);
+            if (maskVisual is null)
+            {
+                return false;
+            }
+        }
+
+        var isZoom = motion is DialogZoomInMotion;
+        try
+        {
+            // A newly attached CompositionVisual must reach the server before its first animation batch.
+            await surfaceVisual.Compositor.RequestCommitAsync().WaitAsync(cancellationToken);
+            if (isZoom)
+            {
+                var openingStart = ZoomBigMotionDefinition.OpeningStart;
+                var visible = ZoomBigMotionDefinition.Visible;
+                var origin = ResolveMotionOrigin().Point;
+                surfaceVisual.CenterPoint = new Vector3D(origin.X, origin.Y, 0);
+                StartScaleAnimation(
+                    surfaceVisual,
+                    openingStart.Scale,
+                    visible.Scale,
+                    motion.Easing,
+                    motion.Duration);
+            }
+
+            StartOpacityAnimation(
+                surfaceVisual,
+                isZoom ? ZoomBigMotionDefinition.OpeningStart.Opacity : 0.0,
+                ZoomBigMotionDefinition.Visible.Opacity,
+                motion.Easing,
+                motion.Duration);
+            if (maskVisual is not null)
+            {
+                StartOpacityAnimation(maskVisual, 0.0, 1.0, new LinearEasing(), MotionDuration);
+            }
+
+            await WaitForCompositionMotionAsync(
+                motion.Duration + CompositionMotionCompletionSlack,
+                cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            CompleteCompositorOpeningMotion(surfaceVisual, maskVisual, isZoom);
+            throw;
+        }
+
+        CompleteCompositorOpeningMotion(surfaceVisual, maskVisual, isZoom);
+        return true;
+    }
+
+    private async Task<bool> TryRunCompositorClosingMotionAsync()
+    {
+        var motion = CreateSurfaceMotion(isOpening: false);
+        var surfaceVisual = ElementComposition.GetElementVisual(_surfaceMotionActor!);
+        if (surfaceVisual is null)
+        {
+            return false;
+        }
+
+        CompositionVisual? maskVisual = null;
+        if (IsModal && _maskMotionActor is not null)
+        {
+            maskVisual = ElementComposition.GetElementVisual(_maskMotionActor);
+            if (maskVisual is null)
+            {
+                return false;
+            }
+        }
+
+        CompositionVisual? contentVisual = null;
+        if (_surface.SurfaceContentLayer is { } surfaceContentLayer)
+        {
+            contentVisual = ElementComposition.GetElementVisual(surfaceContentLayer);
+            if (contentVisual is null)
+            {
+                return false;
+            }
+        }
+
+        var isZoom = motion is DialogZoomOutMotion;
+        if (isZoom)
+        {
+            var visible = ZoomBigMotionDefinition.Visible;
+            var closingEnd = ZoomBigMotionDefinition.ClosingEnd;
+            var origin = ResolveMotionOrigin().Point;
+            surfaceVisual.CenterPoint = new Vector3D(origin.X, origin.Y, 0);
+            StartScaleAnimation(
+                surfaceVisual,
+                visible.Scale,
+                closingEnd.Scale,
+                motion.Easing,
+                motion.Duration);
+        }
+
+        var endOpacity = isZoom ? ZoomBigMotionDefinition.ClosingEnd.Opacity : 0.0;
+        StartOpacityAnimation(
+            surfaceVisual,
+            ZoomBigMotionDefinition.Visible.Opacity,
+            endOpacity,
+            motion.Easing,
+            motion.Duration);
+        if (maskVisual is not null)
+        {
+            StartOpacityAnimation(maskVisual, 1.0, 0.0, new CubicEaseIn(), MotionDuration);
+        }
+
+        if (contentVisual is not null)
+        {
+            StartOpacityAnimation(contentVisual, 1.0, 0.0, new LinearEasing(), MotionDuration);
+        }
+
+        await WaitForCompositionMotionAsync(
+            motion.Duration + CompositionMotionCompletionSlack,
+            CancellationToken.None);
+        CompleteCompositorClosingMotion(
+            surfaceVisual,
+            maskVisual,
+            contentVisual,
+            isZoom,
+            endOpacity);
+        return true;
+    }
+
+    private void CompleteCompositorOpeningMotion(CompositionVisual surfaceVisual,
+                                                 CompositionVisual? maskVisual,
+                                                 bool includesScale)
+    {
+        var visible = ZoomBigMotionDefinition.Visible;
+        surfaceVisual.StopAnimation("Opacity");
+        surfaceVisual.Opacity = (float)visible.Opacity;
+        if (includesScale)
+        {
+            surfaceVisual.StopAnimation("Scale");
+            surfaceVisual.Scale       = new Vector3D(visible.Scale, visible.Scale, 1);
+            surfaceVisual.CenterPoint = default;
+        }
+
+        maskVisual?.StopAnimation("Opacity");
+        if (maskVisual is not null)
+        {
+            maskVisual.Opacity = 1;
+        }
+
+        _surfaceMotionActor!.Opacity = visible.Opacity;
+        if (_maskMotionActor is not null)
+        {
+            _maskMotionActor.Opacity = 1;
+        }
+    }
+
+    private static void CompleteCompositorClosingMotion(CompositionVisual surfaceVisual,
+                                                        CompositionVisual? maskVisual,
+                                                        CompositionVisual? contentVisual,
+                                                        bool includesScale,
+                                                        double endOpacity)
+    {
+        surfaceVisual.StopAnimation("Opacity");
+        surfaceVisual.Opacity = (float)endOpacity;
+        if (includesScale)
+        {
+            var closingEnd = ZoomBigMotionDefinition.ClosingEnd;
+            surfaceVisual.StopAnimation("Scale");
+            surfaceVisual.Scale = new Vector3D(closingEnd.Scale, closingEnd.Scale, 1);
+        }
+
+        maskVisual?.StopAnimation("Opacity");
+        if (maskVisual is not null)
+        {
+            maskVisual.Opacity = 0;
+        }
+
+        contentVisual?.StopAnimation("Opacity");
+        if (contentVisual is not null)
+        {
+            contentVisual.Opacity = 1;
+        }
+    }
+
+    private static void StartOpacityAnimation(CompositionVisual visual,
+                                              double from,
+                                              double to,
+                                              Easing easing,
+                                              TimeSpan duration)
+    {
+        var animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        animation.Duration = duration;
+        animation.InsertKeyFrame(0, (float)from, easing);
+        animation.InsertKeyFrame(1, (float)to, easing);
+        visual.StartAnimation("Opacity", animation);
+    }
+
+    private static void StartScaleAnimation(CompositionVisual visual,
+                                            double from,
+                                            double to,
+                                            Easing easing,
+                                            TimeSpan duration)
+    {
+        var animation = visual.Compositor.CreateVector3DKeyFrameAnimation();
+        animation.Duration = duration;
+        animation.InsertKeyFrame(0, new Vector3D(from, from, 1), easing);
+        animation.InsertKeyFrame(1, new Vector3D(to, to, 1), easing);
+        visual.StartAnimation("Scale", animation);
+    }
+
+    private static async Task WaitForCompositionMotionAsync(TimeSpan duration,
+                                                            CancellationToken cancellationToken)
+    {
+        var completionSource = new TaskCompletionSource();
+        using var timer = DispatcherTimer.RunOnce(
+            completionSource.SetResult,
+            duration,
+            DispatcherPriority.Normal);
+        await completionSource.Task.WaitAsync(cancellationToken);
     }
 
     public ValueTask DisposeAsync()

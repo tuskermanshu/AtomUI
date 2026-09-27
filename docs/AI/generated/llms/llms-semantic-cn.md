@@ -20397,7 +20397,8 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - Overlay 与 Window 的 `ShowAsync`/`CloseAsync` 都等待真实 presentation 边界。
 - mask 与 Surface 必须保留在同一个 Overlay presenter 中。
 - Overlay 关闭时 Surface 外层、`PART_SurfaceContentLayer` 和 modal mask 的任务必须由同一个 presenter 聚合；所有任务完成前不得断开 composition children、Dispose Surface 或移除 presenter。
-- `AbstractMotion` 只能在全部 transition 完成或安全 timeout 后报告 Motion 完成；不能按首个 transition 的完成通知 teardown。
+- Overlay server animation 必须在新挂载 visual 完成首次 commit 后启动；opening 取消必须先停止 animation 并恢复 actor 基值。Composition visual 不完整时必须整体回退，不允许 Surface 与 mask/content 分别使用不同的动画时钟。
+- fallback `AbstractMotion` 只能在全部 transition 完成或安全 timeout 后报告 Motion 完成；不能按首个 transition 的完成通知 teardown。
 - `PART_SurfaceContentLayer` 是可选内部协作节点；缺失时仅退化为外层 motion，不能阻断基本关闭流程。动画期间不得改变 Surface Bounds、布局或 visual parent。
 - 所有平台的 Overlay presenter 必须保留在 owning `TopLevel` 的 `OverlayLayer`；drawn decorations overlay 只绘制 chrome，不能承载业务 presentation。
 - Dialog 内容、Popup placement target 与 owning Window 必须解析到同一 `TopLevel`；Popup 使用更高的 Avalonia popup layer，并保留中间 light-dismiss 层。

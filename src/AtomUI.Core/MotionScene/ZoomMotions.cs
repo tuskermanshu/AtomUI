@@ -66,6 +66,15 @@ public class ZoomOutMotion : AbstractMotion
     }
 }
 
+internal static class ZoomBigMotionDefinition
+{
+    internal readonly record struct State(double Opacity, double Scale);
+
+    internal static readonly State OpeningStart = new(0.01, 0.35);
+    internal static readonly State Visible      = new(1.0, 1.0);
+    internal static readonly State ClosingEnd   = new(0.01, 0.85);
+}
+
 public class ZoomBigInMotion : AbstractMotion
 {
     public ZoomBigInMotion(TimeSpan? duration = null,
@@ -83,14 +92,16 @@ public class ZoomBigInMotion : AbstractMotion
 
     protected override void ConfigureMotionStartValue(BaseMotionActor actor)
     {
-        actor.Opacity         = 0.01;
-        actor.MotionTransform = BuildScaleTransform(0.35);
+        var state = ZoomBigMotionDefinition.OpeningStart;
+        actor.Opacity         = state.Opacity;
+        actor.MotionTransform = BuildScaleTransform(state.Scale);
     }
 
     protected override void ConfigureMotionEndValue(BaseMotionActor actor)
     {
-        actor.Opacity         = 1.0;
-        actor.MotionTransform = BuildScaleTransform(1.0);
+        var state = ZoomBigMotionDefinition.Visible;
+        actor.Opacity         = state.Opacity;
+        actor.MotionTransform = BuildScaleTransform(state.Scale);
     }
 }
 
@@ -111,14 +122,16 @@ public class ZoomBigOutMotion : AbstractMotion
 
     protected override void ConfigureMotionStartValue(BaseMotionActor actor)
     {
-        actor.Opacity         = 1.0;
-        actor.MotionTransform = BuildScaleTransform(1.0);
+        var state = ZoomBigMotionDefinition.Visible;
+        actor.Opacity         = state.Opacity;
+        actor.MotionTransform = BuildScaleTransform(state.Scale);
     }
 
     protected override void ConfigureMotionEndValue(BaseMotionActor actor)
     {
-        actor.Opacity         = 0.01;
-        actor.MotionTransform = BuildScaleTransform(0.85);
+        var state = ZoomBigMotionDefinition.ClosingEnd;
+        actor.Opacity         = state.Opacity;
+        actor.MotionTransform = BuildScaleTransform(state.Scale);
     }
     
     protected override void NotifyCompleted(BaseMotionActor actor)

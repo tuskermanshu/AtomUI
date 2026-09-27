@@ -17,6 +17,7 @@ using BindingFlags = System.Reflection.BindingFlags;
 
 namespace AtomUI.Desktop.Controls.Tests.Dialog;
 
+[Collection(DialogLifecycleTestCollection.Name)]
 public class OverlayDialogPresenterTests
 {
     static OverlayDialogPresenterTests()
@@ -839,24 +840,16 @@ public class OverlayDialogPresenterTests
                 var surfaceActor = presenter.GetVisualDescendants()
                                             .OfType<MotionActor>()
                                             .Single(actor => actor.Name == "PART_SurfaceMotionActor");
-                var motionStartCount = 0;
-                bool? showCompletedWhenClosingStarted = null;
-                surfaceActor.PreStart += (_, _) =>
-                {
-                    motionStartCount++;
-                    if (motionStartCount == 2)
-                    {
-                        showCompletedWhenClosingStarted = showTask.IsCompleted;
-                    }
-                };
-
-                Dispatcher.UIThread.RunJobs();
-                motionStartCount.ShouldBe(1);
 
                 var closeTask = presenter.CloseAsync().AsTask();
+                PumpUntil(() => showTask.IsCompleted);
+
+                showTask.IsCompleted.ShouldBeTrue();
+                closeTask.IsCompleted.ShouldBeFalse();
+                surfaceActor.Opacity.ShouldBe(1);
+                surfaceActor.MotionTransform.ShouldBeNull();
                 WaitWithDispatcherPump(closeTask);
 
-                showCompletedWhenClosingStarted.ShouldBe(true);
                 WaitWithDispatcherPump(presenter.DisposeAsync().AsTask());
             }
             finally
@@ -2108,15 +2101,28 @@ public class OverlayDialogPresenterTests
 
     private static void WaitWithDispatcherPump(Task task)
     {
-        var timeoutAt = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(5);
-        while (!task.IsCompleted && DateTimeOffset.UtcNow < timeoutAt)
-        {
-            Dispatcher.UIThread.RunJobs();
-            Thread.Sleep(1);
-        }
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        _ = task.ContinueWith(
+            _ => cancellation.Cancel(),
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+        Dispatcher.UIThread.MainLoop(cancellation.Token);
 
         task.IsCompleted.ShouldBeTrue();
         task.GetAwaiter().GetResult();
+    }
+
+    private static void PumpUntil(Func<bool> condition)
+    {
+        var timeoutAt = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(5);
+        while (!condition() && DateTimeOffset.UtcNow < timeoutAt)
+        {
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(20));
+            Dispatcher.UIThread.MainLoop(cancellation.Token);
+        }
+
+        condition().ShouldBeTrue();
     }
 
     private static void RunOnUIThread(Action action)

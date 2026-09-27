@@ -2,6 +2,18 @@
 
 本文档记录 Modal 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-26
+
+- Performance
+  - Overlay Dialog 的 opening/closing 从 UI-thread `AbstractMotion` transition 主路径切换为 Avalonia Composition visual 的服务端 `Opacity`/`Scale` animation；UI Dispatcher 不再逐帧写 `MotionTransform` 或 `Opacity`。
+  - 新挂载 opening visual 在首次 compositor commit 后启动 animation；同一次 choreography 的 Surface、mask 与内容层任一必需 Composition visual 不可用时整体回退到既有 transition/animation 路径。
+- Lifecycle
+  - 使用一次性 Dispatcher timer 定义 server animation 的 duration 加安全余量完成边界，并在正常完成或 opening 取消时释放；opening 取消先停止 server animation、恢复 actor 基值，再进入 close motion。
+- Tests
+  - 新增 `OverlayDialogPresenterCompositorMotionTests`，覆盖 anchored zoom、无锚点 fade 的 opening/closing UI-thread 帧隔离，以及 opening 中途关闭的状态归一化。
+- Docs
+  - 同步 Overlay motion 的 Composition 主路径、fallback 边界、资源释放和验证不变量；详细取证与未覆盖平台记录在带日期的性能调查文档中。
+
 ## 2026-09-13
 
 - Fix

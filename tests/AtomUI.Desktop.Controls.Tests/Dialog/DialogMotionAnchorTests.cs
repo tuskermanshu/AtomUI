@@ -9,6 +9,7 @@ using Xunit;
 
 namespace AtomUI.Desktop.Controls.Tests.Dialog;
 
+[Collection(DialogLifecycleTestCollection.Name)]
 public class DialogMotionAnchorTests
 {
     static DialogMotionAnchorTests()
@@ -161,12 +162,13 @@ public class DialogMotionAnchorTests
 
     private static void WaitWithDispatcherPump(Task task)
     {
-        var timeoutAt = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(5);
-        while (!task.IsCompleted && DateTimeOffset.UtcNow < timeoutAt)
-        {
-            Dispatcher.UIThread.RunJobs();
-            Thread.Sleep(1);
-        }
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        _ = task.ContinueWith(
+            _ => cancellation.Cancel(),
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+        Dispatcher.UIThread.MainLoop(cancellation.Token);
 
         task.IsCompleted.ShouldBeTrue();
         task.GetAwaiter().GetResult();

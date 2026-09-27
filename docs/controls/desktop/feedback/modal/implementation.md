@@ -26,7 +26,7 @@
 | `MessageBox/MessageBox.SemanticParts.cs` | `MessageBox` 复用同一组 Semantic Part 的独立 descriptor 声明（生成器不继承基类 descriptor）。 |
 | `MessageBox/MessageBoxContent.cs` | MessageBox 的图标与内容组合。 |
 | `Dialog/Themes` / `MessageBox/Themes` | 共享 Surface、Overlay presenter 和 MessageBox AXAML 结构。 |
-| `src/AtomUI.Core/MotionScene/AbstractMotion.cs` | 共享 Motion 的 transition completion boundary；等待全部 transition 或安全超时后才报告完成。 |
+| `src/AtomUI.Core/MotionScene/AbstractMotion.cs` | Composition visual 不可用时的共享 transition fallback；等待全部 transition 或安全超时后才报告完成。 |
 
 对应回归测试位于 `tests/AtomUI.Desktop.Controls.Tests/Dialog` 和 `tests/AtomUI.Desktop.Controls.Tests/MessageBox`。
 
@@ -198,7 +198,11 @@ Overlay 首次 placement 完成前收到 `StructuralMinimumChanged` 时，只重
 
 ### 8.4 Motion
 
-Overlay 的 mask 和 Surface motion 并行等待；关闭时 `OverlayDialogPresenter` 还为 `PART_SurfaceContentLayer` 创建同 duration 的线性 opacity animation，并使用 `Task.WhenAll` 聚合 Surface、内容层和 mask 的任务。全部任务完成后才断开 composition children、Dispose Surface 和移除 presenter。`AbstractMotion` 对一个 Motion 内部的多个 transition 使用 `Task.WhenAll` 作为正常完成条件，并保留最长 duration 加安全余量的 timeout；不能因首个 transition 完成就提前报告 Motion 完成。Window host 不创建 Surface `MotionActor`：它在 native `Show()` 前完成初始尺寸和 placement，首个可见帧直接使用已解析的几何。`DialogWindow.Opened` 和 `DialogWindow.Closed` 是 Window presenter 的原生生命周期边界；关闭流程等待原生 Window 关闭和资源清理，不依赖 Surface close motion。Overlay 的 opening/closing motion 仍由其 presenter 等待，duration 来自 Dialog scope 的 `MotionDurationMid`。详细 choreography 见 [Modal Dialog 关闭动效设计](dialog-close-motion-design.md)。
+Overlay 优先把 Surface 的 `Opacity`/`Scale`、modal mask 的 `Opacity` 和关闭时内容层的 `Opacity` 直接提交给 Avalonia Composition visual。动画由 compositor 时钟驱动；UI Dispatcher 只在开始、取消和结束时参与，不逐帧写 `MotionActor.MotionTransform` 或 `Visual.Opacity`。opening 在新挂载 visual 上启动动画前先等待一次 `RequestCommitAsync`，保证服务端 visual 已建立；之后由一个 duration 加固定安全余量的一次性 Dispatcher timer 定义 presenter task 的完成边界。timer 的 disposable 由等待方法持有，正常完成或 opening 取消都会释放。
+
+当 Surface、mask 或已存在的内容层拿不到 Composition visual 时，presenter 整体回退到现有 `AbstractMotion`/Avalonia `Animation` 路径，避免同一次 choreography 混用两套时钟。fallback 仍用 `Task.WhenAll` 聚合 Surface、内容层和 mask；`AbstractMotion` 保留最长 duration 加安全余量的 completion timeout。opening 被取消时，presenter 先停止 server animation，把 Composition visual 和 actor 基值收敛到完整可见状态，再启动 close motion，关闭动效始终从确定基态开始。
+
+全部关闭 motion 完成后才断开 composition children、Dispose Surface 和移除 presenter。Window host 不创建 Surface `MotionActor`：它在 native `Show()` 前完成初始尺寸和 placement，首个可见帧直接使用已解析的几何。`DialogWindow.Opened` 和 `DialogWindow.Closed` 是 Window presenter 的原生生命周期边界；关闭流程等待原生 Window 关闭和资源清理，不依赖 Surface close motion。Overlay duration 继续来自 Dialog scope 的 `MotionDurationMid`。详细 choreography 见 [Modal Dialog 关闭动效设计](dialog-close-motion-design.md)。
 
 ### 8.5 Overlay 宿主与窗口几何
 
@@ -234,6 +238,7 @@ Dialog 内容区内的 popup 沿 placement target 解析同一 Window `TopLevel`
   持久 listener；内置主题不消费 `.semantic-*` selector，descriptor 与生成 Style 全部来自编译期生成数据，不引入运行时
   反射、程序集扫描或 VisualTree 搜索。
 - Presenter 为 Surface 复用单一 `MatrixTransform` 作为位置 owner。拖动 `PointerMoved` 只更新 Matrix translation 并同步不触发布局的 `Dialog.OffsetX/Y`；位置先按 DPI 取整，再二次 clamp 到 body owner bounds，避免取整重新越界。
+- Overlay opening/closing motion 使用 compositor-only 的 `Opacity`/`Scale` 属性；一次性 completion timer 只定义异步 teardown 边界，不承担逐帧动画。Composition visual 不可用时才回退 UI-thread transition，且同一 choreography 不混用两条路径。
 - drawn decorations 反射兼容边界只读取 frame/titlebar 几何；Modal 不反射发现业务 host，也不新增 trimming root。实现不使用反射修改 TemplatedParent，不扫描程序集发现 Dialog API，不使用同步 DispatcherFrame。
 - Session、Presenter、Surface 和 Content 的关闭回收由 Overlay/Window WeakReference 测试覆盖。
 - 状态机、按钮表和 presenter 选择都是静态类型路径，保持 NativeAOT 友好。
@@ -246,7 +251,8 @@ Dialog 内容区内的 popup 沿 placement target 解析同一 Window `TopLevel`
 - Overlay 与 Window 的 `ShowAsync`/`CloseAsync` 都等待真实 presentation 边界。
 - mask 与 Surface 必须保留在同一个 Overlay presenter 中。
 - Overlay 关闭时 Surface 外层、`PART_SurfaceContentLayer` 和 modal mask 的任务必须由同一个 presenter 聚合；所有任务完成前不得断开 composition children、Dispose Surface 或移除 presenter。
-- `AbstractMotion` 只能在全部 transition 完成或安全 timeout 后报告 Motion 完成；不能按首个 transition 的完成通知 teardown。
+- Overlay server animation 必须在新挂载 visual 完成首次 commit 后启动；opening 取消必须先停止 animation 并恢复 actor 基值。Composition visual 不完整时必须整体回退，不允许 Surface 与 mask/content 分别使用不同的动画时钟。
+- fallback `AbstractMotion` 只能在全部 transition 完成或安全 timeout 后报告 Motion 完成；不能按首个 transition 的完成通知 teardown。
 - `PART_SurfaceContentLayer` 是可选内部协作节点；缺失时仅退化为外层 motion，不能阻断基本关闭流程。动画期间不得改变 Surface Bounds、布局或 visual parent。
 - 所有平台的 Overlay presenter 必须保留在 owning `TopLevel` 的 `OverlayLayer`；drawn decorations overlay 只绘制 chrome，不能承载业务 presentation。
 - Dialog 内容、Popup placement target 与 owning Window 必须解析到同一 `TopLevel`；Popup 使用更高的 Avalonia popup layer，并保留中间 light-dismiss 层。
@@ -269,6 +275,7 @@ Dialog 内容区内的 popup 沿 placement target 解析同一 Window `TopLevel`
 - `DialogSessionTests`: 状态转换、veto、forced close、异常和 presenter failure。
 - `DialogLifecycleTests`: 实例/声明式打开、取消、detach、重开、嵌套焦点和 WeakReference。
 - `OverlayDialogPresenterTests` / `DialogContentPopupLayeringTests`: mask ownership、modal/modeless 输入、栈顶路由、`IsMaskClosable` 门控、TopLevel ownership、popup/light-dismiss、chrome suppression 引用计数、完整 mask bounds、平台 body bounds、结构性最小尺寸、拖动 resize、capacity 退化、maximize/restore 和 motion。
+- `OverlayDialogPresenterCompositorMotionTests`: anchored zoom 与无锚点 fade 的 opening/closing 均不产生 UI-thread transform/opacity 帧，opening 取消在 teardown 前恢复 actor 基值。
 - `WindowDialogPresenterTests`: Opened/Closed 原生生命周期、首帧几何、原生关闭、owner close、自然尺寸、Surface/chrome constraints 换算、native resize、placement 和资源 parent。
 - `DialogButtonBoxTests` / `DialogSurfaceTests`: 有效按钮集合、template 生命周期、内容和配置。
 - `DialogSemanticPartTests`: descriptor（`Dialog`/`MessageBox` 各 8 个部件）、四个主题的静态 marker 清单、Overlay

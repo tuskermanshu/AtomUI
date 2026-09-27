@@ -20724,6 +20724,7 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
   持久 listener；内置主题不消费 `.semantic-*` selector，descriptor 与生成 Style 全部来自编译期生成数据，不引入运行时
   反射、程序集扫描或 VisualTree 搜索。
 - Presenter 为 Surface 复用单一 `MatrixTransform` 作为位置 owner。拖动 `PointerMoved` 只更新 Matrix translation 并同步不触发布局的 `Dialog.OffsetX/Y`；位置先按 DPI 取整，再二次 clamp 到 body owner bounds，避免取整重新越界。
+- Overlay opening/closing motion 使用 compositor-only 的 `Opacity`/`Scale` 属性；一次性 completion timer 只定义异步 teardown 边界，不承担逐帧动画。Composition visual 不可用时才回退 UI-thread transition，且同一 choreography 不混用两条路径。
 - drawn decorations 反射兼容边界只读取 frame/titlebar 几何；Modal 不反射发现业务 host，也不新增 trimming root。实现不使用反射修改 TemplatedParent，不扫描程序集发现 Dialog API，不使用同步 DispatcherFrame。
 - Session、Presenter、Surface 和 Content 的关闭回收由 Overlay/Window WeakReference 测试覆盖。
 - 状态机、按钮表和 presenter 选择都是静态类型路径，保持 NativeAOT 友好。
@@ -20748,7 +20749,7 @@ Modal Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 | `MessageBox/MessageBox.SemanticParts.cs` | `MessageBox` 复用同一组 Semantic Part 的独立 descriptor 声明（生成器不继承基类 descriptor）。 |
 | `MessageBox/MessageBoxContent.cs` | MessageBox 的图标与内容组合。 |
 | `Dialog/Themes` / `MessageBox/Themes` | 共享 Surface、Overlay presenter 和 MessageBox AXAML 结构。 |
-| `src/AtomUI.Core/MotionScene/AbstractMotion.cs` | 共享 Motion 的 transition completion boundary；等待全部 transition 或安全超时后才报告完成。 |
+| `src/AtomUI.Core/MotionScene/AbstractMotion.cs` | Composition visual 不可用时的共享 transition fallback；等待全部 transition 或安全超时后才报告完成。 |
 
 对应回归测试位于 `tests/AtomUI.Desktop.Controls.Tests/Dialog` 和 `tests/AtomUI.Desktop.Controls.Tests/MessageBox`。
 

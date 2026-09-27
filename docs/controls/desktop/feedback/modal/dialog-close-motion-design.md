@@ -6,7 +6,7 @@
 
 关闭动效由两个相互配合的层次组成：
 
-1. 生命周期层确保一个 `Motion` 在正常情况下等待所有 transition 完成；若某个 transition 没有完成通知，则到达既定安全超时后才报告完成。Presenter 随后才能断开 composition children、释放 `DialogSurface` 并移除 Overlay。
+1. 生命周期层优先等待 compositor 服务端动画的 duration 边界；Composition visual 不可用时回退到 `AbstractMotion`，并确保一个 fallback Motion 在正常情况下等待所有 transition 完成。Presenter 随后才能断开 composition children、释放 `DialogSurface` 并移除 Overlay。
 2. 视觉层让 Dialog 外框/阴影与标题、正文、Footer、按钮等前景内容分别承担动效职责。外层保持现有 surface motion，前景内容在相同关闭窗口内独立降低 opacity。
 
 本设计适用于 `Dialog` 和继承它的 `MessageBox` 的 `DialogHostType.Overlay` presentation。它不改变 Dialog 的打开意图、Session 结果、尺寸、位置、焦点或按钮语义，也不把内容替换为快照或从 visual tree 摘出。
@@ -19,6 +19,8 @@
 - 外层表面与前景内容是两个视觉职责。外层负责背景、边框、圆角和阴影；内容层负责标题、正文、Footer、按钮和用户输入控件。
 - 关闭期间保持真实控件树、Bounds、Measure、Arrange、RenderTransform、Margin、Width 和 Height 不变；动效只改变既有 motion actor 或内容层的 opacity。
 - 所有关闭 motion 在同一个 UI 调度上下文内同时开始，并由一个聚合任务统一决定 teardown 时刻。
+- Surface、mask 与内容层能取得 Composition visual 时，只动画服务端 `Opacity`/`Scale`；UI Dispatcher 不逐帧插值或写回 motion actor 属性。
+- 同一次 choreography 要么全部使用 Composition visual，要么整体回退到 Avalonia transition/animation，不能混用两套动画时钟。
 - 内容层是内部 Template 协作节点，不是新的 public Semantic Part、主题资源 key 或用户 API。
 - duration 继续来自 Dialog scope 的 `MotionDurationMid`，不在关闭路径硬编码时长。
 - `IsMotionEnabled=false` 时跳过视觉 motion，但不跳过 presenter 附加、释放、移除和 Session teardown。
@@ -72,10 +74,11 @@ OverlayDialogPresenter
 
 Overlay close 由一个 `OverlayDialogPresenter.CloseAsync` 负责：
 
-- 外层 `DialogSurface` 运行已有的 `FadeOutMotion` 或 anchored `DialogZoomOutMotion`。
-- 如果找到 `PART_SurfaceContentLayer`，并行运行从 opacity `1` 到 `0` 的线性内容层动画。
-- modal 且存在 mask actor 时，并行运行 `FadeOutMotion`。
-- 使用 `Task.WhenAll` 等待所有已创建的关闭任务，然后按统一顺序 teardown。
+- 外层 `DialogSurface` 的 Composition visual 运行 fade 或 anchored zoom（`Opacity` + `Scale`）。
+- 如果找到 `PART_SurfaceContentLayer`，其 Composition visual 并行运行从 opacity `1` 到 `0` 的线性动画。
+- modal 且存在 mask actor 时，mask Composition visual 并行淡出。
+- 一次性 Dispatcher timer 在 duration 加安全余量后完成 presenter 的 motion task，然后按统一顺序 teardown；timer 不驱动动画帧。
+- 任一必需 Composition visual 不可用时，整体回退为 `FadeOutMotion`/`DialogZoomOutMotion`、内容层 Avalonia `Animation` 和 mask `FadeOutMotion`，并以 `Task.WhenAll` 聚合。
 
 内容层在这段时间始终保留在 Surface visual tree 中，因此标题、正文、Footer 和按钮不会先于 Presenter 的关闭边界被摘除。Surface 的几何不参与这段动画重新计算。
 
@@ -87,7 +90,8 @@ Window presenter 不创建 Overlay 的 `PART_SurfaceMotionActor`，也不调用�
 
 | 状态/条件 | Overlay 行为 | teardown 边界 |
 | --- | --- | --- |
-| `IsMotionEnabled=true`、Surface actor 存在 | 外层 motion、内容层 opacity（若存在）、modal mask fade 并行。 | 所有任务完成后断开 composition children、Dispose Surface、移除 layer。 |
+| `IsMotionEnabled=true`、Composition visual 完整 | compositor 服务端并行执行外层、内容层（若存在）与 mask 动画。 | 一次性 completion timer 到期后断开 composition children、Dispose Surface、移除 layer。 |
+| `IsMotionEnabled=true`、Composition visual 不完整 | 整体回退到 `AbstractMotion` / Avalonia `Animation`，不混用服务端动画。 | fallback 聚合任务完成后执行相同 teardown。 |
 | `IsMotionEnabled=true`、自定义模板缺少内容层 | 只执行外层 motion 及 mask fade。 | 外层任务完成后按同一 teardown 顺序执行。 |
 | `IsMotionEnabled=false` | 不创建视觉关闭任务。 | 立即进入既有 teardown；不改变内容层 opacity。 |
 | 正在 opening | 先取消 opening motion，等待 `ShowAsync` 收敛或报告的失败被关闭路径吸收，再启动 close motion。 | `CloseAsync` 仍拥有完整 teardown。 |
@@ -104,24 +108,28 @@ flowchart LR
     A --> D[DialogSurface]
     D --> C
     C --> F[Header / Content / Footer / Buttons]
-    P --> W[Task.WhenAll close boundary]
+    P --> CV[Composition visuals]
+    CV --> W[One-shot completion boundary]
+    X[AbstractMotion fallback] --> FW[Task.WhenAll fallback boundary]
+    P --> X
     W --> T[Disconnect -> Dispose -> Remove layer]
-    X[AbstractMotion] --> A
-    X --> W
+    FW --> T
 ```
 
 | 文件/类型 | 稳定职责 | 明确不负责 |
 | --- | --- | --- |
 | `src/AtomUI.Desktop.Controls/Dialog/Themes/DialogSurfaceTheme.axaml` | 保持 `PART_SurfaceContentLayer` 包围标题、正文和 Footer 的模板结构。 | 不实现关闭状态机，不创建 snapshot，不改变 Surface 尺寸。 |
 | `src/AtomUI.Desktop.Controls/Dialog/DialogSurface.cs` | 在 `OnApplyTemplate` 获取当前内容层；重套模板和 `Dispose` 时清空旧引用。 | 不启动 Overlay close animation，不拥有 Session teardown。 |
-| `src/AtomUI.Desktop.Controls/Dialog/OverlayHost/OverlayDialogPresenter.cs` | 解析内部 part，编排外层、内容层和 mask 的并行关闭任务，等待聚合边界并执行 teardown。 | 不改变 public Dialog API，不管理 Window host 的原生关闭。 |
-| `src/AtomUI.Core/MotionScene/AbstractMotion.cs` | 让一个 Motion 的 transition 集合在全部完成或安全超时后才报告完成，并释放 transition 订阅。 | 不知道 Dialog、Surface 或 mask；不处理具体视觉区域。 |
+| `src/AtomUI.Desktop.Controls/Dialog/OverlayHost/OverlayDialogPresenter.cs` | 解析内部 part，优先编排外层、内容层和 mask 的 Composition animation，持有一次性完成边界；能力缺失时整体回退并执行相同 teardown。 | 不改变 public Dialog API，不管理 Window host 的原生关闭。 |
+| `src/AtomUI.Core/MotionScene/AbstractMotion.cs` | 作为 fallback，让一个 Motion 的 transition 集合在全部完成或安全超时后才报告完成，并释放 transition 订阅。 | 不知道 Dialog、Surface 或 mask；不处理具体视觉区域。 |
 | `DialogSession` | 拥有 Session 状态、结果、关闭仲裁和 presenter task 边界。 | 不直接操作 Template part 或 opacity。 |
 | `WindowDialogPresenter` | 使用原生 Window 生命周期与现有 Surface/资源 teardown。 | 不调用 Overlay 内容层关闭编排。 |
 | `tests/AtomUI.Desktop.Controls.Tests/Dialog/DialogMotionAnchorTests.cs` | 证明关闭期间按钮、内容层仍附着，Surface bounds 不变，完成后 presenter 才移除。 | 不替代真实桌面视觉验收。 |
+| `tests/AtomUI.Desktop.Controls.Tests/Dialog/OverlayDialogPresenterCompositorMotionTests.cs` | 证明 anchored/unanchored 的 opening/closing 不产生 UI-thread motion 帧，并覆盖 opening 取消归一化。 | 不替代平台 compositor 的真实帧节奏验收。 |
 | `tests/AtomUI.Core.Tests/MotionScene/AbstractMotionTests.cs` | 证明不同 transition 时长下 Motion 不会在首个 transition 完成时提前结束。 | 不证明具体 Dialog Template 的渲染效果。 |
 
 Ownership 规则是：获取 part 的 owner 必须负责旧 part 释放；启动动画的 owner 必须等待动画；创建事件、binding、composition link 的 owner 必须在 teardown 中对称清理。
+一次性 completion timer 的 disposable 由等待方法在正常完成或取消时释放，不进入静态缓存，也不跨 presenter 生命周期存活。
 
 ## 6. Template、组合与集成契约
 
@@ -173,11 +181,10 @@ close requested
 ```text
 Show settled
   -> resolve PART_SurfaceMotionActor / PART_MaskMotionActor / PART_SurfaceContentLayer
-  -> create surface close motion
-  -> create content opacity animation (if part exists)
-  -> create modal mask fade (if modal and actor exists)
-  -> start all tasks without awaiting any single task first
-  -> await Task.WhenAll(tasks)
+  -> resolve all required Composition visuals
+  -> if complete: start surface/content/mask server animations together
+  -> await one-shot duration + safety boundary
+  -> otherwise: create all fallback motions and await Task.WhenAll(tasks)
   -> disconnect composition children
   -> dispose Surface
   -> remove presenter from DialogOverlayLayer
@@ -195,11 +202,13 @@ Show settled
 | changed properties | 仅 `Visual.Opacity` |
 | unchanged properties | Bounds、Width、Height、Margin、RenderTransform、布局和 visual parent |
 
-内容层动画使用 `FillMode.Forward` 保持末帧，直到 `Task.WhenAll` 通过；`finally` 将当前层 opacity 恢复为 `1`，随后 Surface 被释放。恢复动作保证模板实例在异常 teardown 或未来复用中不会被遗留的透明状态污染。
+Composition 路径在完成边界后停止内容层 animation 并把其基值恢复为 `1`，随后 Surface 被释放；fallback 使用 `FillMode.Forward` 保持末帧，直到 `Task.WhenAll` 通过，并在 `finally` 做同样恢复。两条路径都保证异常 teardown 或未来复用不会留下透明内容层。
 
-### 7.2 Surface Motion 的 transition 边界
+### 7.2 Composition 与 transition fallback 边界
 
-`PART_SurfaceMotionActor` 的现有 motion 可能同时改变 opacity 与 transform。`AbstractMotion` 将每个 transition 的完成通知转换为 task，并等待：
+opening 的 Surface/Mask visual 是新挂载节点。Presenter 先等待一次 `RequestCommitAsync`，确保服务端 visual 已建立，再提交 `Opacity`/`Scale` animation。动画由 compositor 时钟逐帧计算；UI Dispatcher 只持有 duration 加 32ms 安全余量的一次性完成 timer。关闭 visual 已经 attached，不重复增加启动前 commit。
+
+Composition visual 不完整时，`PART_SurfaceMotionActor` 的 fallback motion 可能同时改变 opacity 与 transform。`AbstractMotion` 将每个 transition 的完成通知转换为 task，并等待：
 
 ```text
 await Task.WhenAny(
@@ -211,16 +220,16 @@ await Task.WhenAny(
 
 ### 7.3 失败与取消
 
-- opening 被取消时，Presenter 先取消 opening cancellation source，并等待已有 `ShowAsync` 任务结算；show 失败由 Session 报告，close 仍继续拥有 teardown。
+- opening 被取消时，Presenter 停止 Surface/Mask server animation，把 Composition visual 与 actor 基值恢复为完整可见状态，再让 `ShowAsync` 以取消结算；close 随后从确定基态启动并继续拥有 teardown。
 - 任一 close motion 抛出异常时，`CloseAsync` 的 `finally`/dispose 路径仍应断开 composition children、释放 Surface、移除 layer；首次异常按既有 presenter/session 规则传播。
 - `IsMotionEnabled` 在关闭开始后不改变当前已创建任务集合；状态切换不会追加第二套动画或重置 Surface 几何。
 - 内容层 part 在重套模板后失效时，当前 presenter 只使用最新引用；旧 part 由 `DialogSurface.OnApplyTemplate` 的 release 流程解除拥有关系。
 
 ## 8. 资源、性能与 AOT 边界
 
-- 内容层动画只创建一个短生命周期的 `Avalonia.Animation.Animation`，不创建 bitmap、离屏窗口、第二个 Surface 或长期缓存。
-- opacity 动画不触发布局重新测量，也不修改 Surface 的位置/尺寸 owner；关闭期间不会进入 drag/resize 几何路径。
-- `AbstractMotion` 继续使用静态 transition 类型和已有 completion observable；修复只改变完成聚合边界，不引入反射、动态发现或同步 DispatcherFrame。
+- 主路径只创建短生命周期的 Composition key-frame animation 和一个一次性 completion timer，不创建 bitmap、离屏窗口、第二个 Surface 或长期缓存。timer 的 disposable 在完成/取消时释放。
+- compositor-only `Opacity`/`Scale` 不触发布局重新测量，也不修改 Surface 的位置/尺寸 owner；关闭期间不会进入 drag/resize 几何路径，UI Dispatcher 不承担逐帧插值。
+- fallback `AbstractMotion` 继续使用静态 transition 类型和已有 completion observable；两条路径都不引入反射、动态发现或同步 DispatcherFrame。
 - Template part、事件、binding 和 composition children 仍由 `DialogSurface` 或 concrete presenter 对称释放；不增加全局订阅和静态 Session 引用。
 - 该设计不新增 NativeAOT trimming root，不依赖运行时类型扫描，不修改 public API 注册或 XAML 动态查找方式。
 
@@ -250,6 +259,8 @@ await Task.WhenAny(
 
 `DialogMotionAnchorTests` 与 Overlay presenter 回归至少覆盖：
 
+- anchored zoom 与无锚点 fade 的 opening/closing 均不产生 UI-thread transform/opacity 帧。
+- 新挂载 opening visual 在首次 commit 后才启动服务端 animation；opening 取消在 close 前恢复 actor 基值。
 - 关闭任务完成前 presenter 仍属于 `DialogOverlayLayer`。
 - Footer button、`PART_SurfaceContentLayer` 和用户内容仍附着在 visual tree。
 - Surface bounds 在整个关闭窗口内保持不变。
