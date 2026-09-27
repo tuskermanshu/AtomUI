@@ -209,6 +209,7 @@ public partial class FloatButtonGroup : TemplatedControl, IMotionAwareControl
     private bool _selfManagesOpen;
     private IDisposable? _clickTriggerDisposable;
     private FloatButton? _triggerButton;
+    private FloatButton? _clickTriggerKeyboardButton;
     ScopeAwareOverlayLayer? _overlayLayer;
     private BaseMotionActor? _motionActor;
     private bool _isAttachedToVisualTree;
@@ -441,6 +442,7 @@ public partial class FloatButtonGroup : TemplatedControl, IMotionAwareControl
         {
             var inputManager = AvaloniaLocator.Current.GetService(typeof(IInputManager)) as IInputManager;
             _clickTriggerDisposable = inputManager?.Process.Subscribe(HandleMouseClick);
+            AttachClickTriggerKeyboardHandler();
         }
 
         if (_itemsControl != null)
@@ -453,6 +455,30 @@ public partial class FloatButtonGroup : TemplatedControl, IMotionAwareControl
     {
         _clickTriggerDisposable?.Dispose();
         _clickTriggerDisposable = null;
+        DetachClickTriggerKeyboardHandler();
+    }
+
+    private void AttachClickTriggerKeyboardHandler()
+    {
+        if (_triggerButton is null || ReferenceEquals(_clickTriggerKeyboardButton, _triggerButton))
+        {
+            return;
+        }
+
+        DetachClickTriggerKeyboardHandler();
+        _triggerButton.AddHandler(KeyDownEvent, HandleClickTriggerKeyDown, handledEventsToo: true);
+        _clickTriggerKeyboardButton = _triggerButton;
+    }
+
+    private void DetachClickTriggerKeyboardHandler()
+    {
+        if (_clickTriggerKeyboardButton is null)
+        {
+            return;
+        }
+
+        _clickTriggerKeyboardButton.RemoveHandler(KeyDownEvent, HandleClickTriggerKeyDown);
+        _clickTriggerKeyboardButton = null;
     }
 
     private void DetachItemsControlChildren()
@@ -492,6 +518,30 @@ public partial class FloatButtonGroup : TemplatedControl, IMotionAwareControl
                 _wasOpenOnPointerPressed = false;
             }
         }
+    }
+
+    private void HandleClickTriggerKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.Enter or Key.Space) ||
+            Trigger != FloatButtonGroupTrigger.Click ||
+            !IsTriggerButtonKeyboardFocused())
+        {
+            return;
+        }
+
+        RequestOpenStateChange(!IsOpen);
+        e.Handled = true;
+    }
+
+    private bool IsTriggerButtonKeyboardFocused()
+    {
+        if (_triggerButton is null)
+        {
+            return false;
+        }
+
+        var topLevel = TopLevel.GetTopLevel(_triggerButton);
+        return ReferenceEquals(topLevel?.FocusManager?.GetFocusedElement(), _triggerButton);
     }
     
     protected override void OnSizeChanged(SizeChangedEventArgs e)
