@@ -340,4 +340,4 @@ Windows caption 类按钮的测量由 `WindowsCaptionButtonLayout` 统一：水�
 - `ImagePreviewerTitleBarThemeTests` 覆盖派生标题栏的标题组、操作区和平台模板契约。
 - 标题几何测试覆盖所有 alignment、对称与非对称操作区、Windows/Linux Logo/LeftAddOn 同时可见及任一 presenter 隐藏时的条件间距、Padding/native inset、窄窗口和非法 metrics。
 - Windows、macOS、Linux 实机验证覆盖 CSD/非 CSD、缩放、最小化/任务栏恢复、最大化/还原和全屏状态；平台支持且系统动画开启时应保留原生窗口状态动画。
-- 文档改动运行 LLMS `verify`、相对链接检查和 `git diff --check`；行为、Theme 或 Public API 变更运行对应 Desktop Controls 测试。
+- 文档改动运行 相对链接检查和 `git diff --check`；行为、Theme 或 Public API 变更运行对应 Desktop Controls 测试。

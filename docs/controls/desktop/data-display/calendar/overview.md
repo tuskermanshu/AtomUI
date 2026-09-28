@@ -152,7 +152,7 @@ LunarCalendar 使用独立 exact Control identity 和 `LunarCalendarToken`，只
 
 Calendar 与 DatePicker、ThemeManager、LanguageManager、Gallery 和 Token 生成系统协作，但不共享 DatePicker 的旧 CalendarView 类型。DatePicker 负责输入弹层和范围输入；Calendar 家族负责独立的面板展示与单值选择。LunarCalendar 的全部运行时实现仍位于 `src/AtomUI.Desktop.Controls/Calendar`，不进入 Extras 或独立包。
 
-Gallery 示例覆盖基础 Fullscreen、Notice Calendar、跨日期 `RangeBars`、Mini Card，以及可选择日历的面板值与最后选择值分离。可选择日历示例通过 `Value` 的默认 TwoWay 绑定接收 Header 面板变化，并只在 `Selected` 事件中更新 Alert 的最后选择值；该示例是页面最后一个 ShowcaseItem。API/Token 表必须来自源码和本目录文档，不能由生成 LLMS 文件反向维护。
+Gallery 示例覆盖基础 Fullscreen、Notice Calendar、跨日期 `RangeBars`、Mini Card，以及可选择日历的面板值与最后选择值分离。可选择日历示例通过 `Value` 的默认 TwoWay 绑定接收 Header 面板变化，并只在 `Selected` 事件中更新 Alert 的最后选择值；该示例是页面最后一个 ShowcaseItem。API/Token 表必须来自源码和本目录文档，
 
 ## 7. 兼容性不变量
 
@@ -169,22 +169,7 @@ Gallery 示例覆盖基础 Fullscreen、Notice Calendar、跨日期 `RangeBars`�
 - `item` 与 `itemContent` 的 marker 在 Cell 构造路径 / Cell 模板中一次性建立，任何状态切换、Bind/Unbind、容器回收、模板重应用与 detach 都不得增删 marker；默认主题不得消费 `.semantic-*` selector。
 - 运行时 marker 通过生成常量添加，不引入 VisualTree 搜索、反射或运行时 AXAML 解析，保持 NativeAOT 友好。
 
-## 8. LLMS 语义区域
-
-下表是 LLMS 语义导出使用的区域映射，独立于 [§3.5 Semantic Part 契约](#35-semantic-part-契约)：`rangeBar` 与 `lunarContent` 只作为 LLMS 语义区域存在，不属于对外 Semantic Part；Semantic Part 的节点映射以 [Calendar Semantic Part 契约](semantic-part.md) 为准。
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Calendar` / `LunarCalendar` | 桌面日历控件根语义区域，承载 public API、状态投影和主题入口。 | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate`、`CellTemplate`、`FullCellTemplate`、`HeaderTemplate` | `CalendarToken`、`LunarCalendarToken` | stable |
-| `header` | `PART_HeaderPresenter` / `CalendarHeader` | 年份、月份和模式切换区域。 | `Value`、`Mode`、`Fullscreen`、`ValidRange` | `YearControlWidth`、`MonthControlWidth` | stable |
-| `body` | `PART_BodyPresenter` / `PART_CalendarView` / `CalendarView` | 日期/月网格、周标题与 overlay 承载区域。 | `Value`、`Mode`、`Fullscreen`、`ShowWeek`、`ValidRange`、`DisabledDate` | `FullBg`、`FullPanelBg`、`MiniContentHeight`、`FullCellMinHeight` | stable |
-| `content` | `PART_CellHost` | 日期、月份和周序号容器区域。 | `Value`、`Mode`、`ShowWeek`、`ValidRange`、`DisabledDate` | `ItemActiveBg` | stable |
-| `item` | `CalendarViewCell` / `PART_Item` | 单个日期、月份或周序号单元。 | `CellTemplate`、`FullCellTemplate`、`Value`、`Mode`、`ShowWeek` | `ItemActiveBg` | stable |
-| `rangeBar` | `PART_RangeBarPanel` / `CalendarRangeBarPanel` | Fullscreen Month 日期网格上方的连续日期范围条 overlay。 | `RangeBars`、`CalendarRangeBar` | `RangeBarHeight` | stable |
-| `itemContent` | `PART_ItemContent` | CellTemplate / FullCellTemplate 的业务内容区域。 | `CellTemplate`、`FullCellTemplate`、`CalendarCellContext` | `ItemActiveBg` | stable |
-| `lunarContent` | `LunarCalendarViewCell` | 农历日期、节气、传统节日、节假日/调休标记和月份相交信息。 | `LunarCalendarCellContext`、`HolidayProvider`、四个显示开关 | LunarCalendar 增量 Token | stable |
-
-## 9. 文档导航、LLMS 导出与验证策略
+## 8. 文档导航与验证策略
 
 日期/月/周算法、Cell 模板优先级、键盘导航、Automation、资源生命周期与性能边界集中记录在 [Calendar 行为设计](behavior-design.md)。农历模型、算法、Provider、大日历/卡片模式和专用主题集中记录在 [LunarCalendar 农历能力设计](lunar-calendar-design.md)。范围条的公共模型、overlay 坐标算法、模板层和非 Visual 资源宿主生命周期集中记录在 [Calendar 范围条设计](range-bar-design.md)。这些专题文档不能替代本 overview 的公共契约摘要。
 
@@ -198,20 +183,9 @@ Gallery 示例覆盖基础 Fullscreen、Notice Calendar、跨日期 `RangeBars`�
 - [Calendar Token 设计](token.md)
 - [Calendar Changelog](changelog.md)
 
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `behavior-design.md` + `lunar-calendar-design.md` + `range-bar-design.md` + `token.md` + Gallery ShowCase | 生成 `controls/calendar/index-cn.md`。 |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + `lunar-calendar-design.md` + `range-bar-design.md` + `Themes/` | 生成 `controls/calendar/semantic-cn.md`。 |
-| API 表 | overview 的 API 摘要 + 源码 public surface | 不在 `docs/AI/generated/llms` 中手工维护第二份契约。 |
-| Token 表 | `token.md` + `CalendarToken` + `LunarCalendarToken` + AXAML 引用 | 以 Token 源码和主题消费点为准。 |
-| 示例 | Gallery API/Token/ShowCase | 只引用稳定的 Gallery 用法。 |
-
 验证要求：
 
 - 文档改动运行 `git diff --check`，并检查本目录及新增专题文档的相对链接。
 - API/行为改动覆盖默认值、事件顺序、范围和禁用、模板优先级、周序号选择、键盘导航与语言切换。
 - Theme 改动检查四个 ControlTheme、伪类、Token 资源以及 Light/Dark 和 Fullscreen/Mini。
 - Semantic Part 改动检查 descriptor 数量/顺序/字段、marker 数量与类型、容器回收后的 marker 身份，以及 Gallery Semantic Preview 的惰性创建，见 [semantic-part.md §7](semantic-part.md#7-兼容性与验证)。
-- 不手工编辑 `docs/AI/generated/llms` 生成产物；LLMS 源文件变化后运行仓库提供的生成/verify 命令。

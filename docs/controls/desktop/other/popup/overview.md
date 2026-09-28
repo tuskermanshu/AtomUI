@@ -127,7 +127,7 @@ host-owned/content-owned 是 Popup 家族唯一的表面分类维度；native/ov
 不得引入“Dialog Popup”“Linux Popup”或“透明 Child 自动检测”等第三套 surface 状态。平台只能影响 native window
 能力和 host 选择，不能改写 `SurfaceBackground` 的语义。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -136,28 +136,6 @@ host-owned/content-owned 是 Popup 家族唯一的表面分类维度；native/ov
 - [Popup 钉住打开设计](popup-pinned-open-design.md)
 - [Popup Changelog](changelog.md)
 - [Modal 内容弹层叠放设计](../../feedback/modal/popup-layering-design.md)
-
-LLMS 导出以本目录四件套、Popup public source 和 Themes 为源。Popup 没有独立 Gallery ShowCase，也不从测试或临时
-人工验收代码导出示例。
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Popup` | 拥有 public placement、motion、shadow 和 surface 状态。 | `SurfaceBackground`、`RequestedPlacement`、`IsOpen` | `PopupToken` | stable |
-| `host` | `PopupRoot` / `OverlayPopupHost` | 提供透明 native/overlay host、输入和 layer 能力。 | `ShouldUseOverlayLayer` | `PopupRootShadow`、`OverlayHostShadow` | stable |
-| `surface` | `ShadowsAwareContainer` frame | 在 Child bounds 内绘制可选 surface 与 shadow。 | `SurfaceBackground` | 无默认颜色 Token；Brush 由调用方提供 | stable |
-| `content` | `Popup.Child` | 承载调用方内容或专用 Presenter。 | `Child` | 由内容 owner 决定 | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 输出 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + public source | `controls/popup/index-cn.md` |
-| 单控件语义文档 | Theme、host composition、surface ownership 与源码结构 | `controls/popup/semantic-cn.md` |
-| API 表 | `Popup.cs` public surface 与 overview 语义摘要 | 不手工维护生成副本 |
-| Token 表 | `PopupToken.cs`、`PopupTheme.axaml` 与 `token.md` | 不手工维护生成副本 |
-| 示例 | 无独立 Gallery ShowCase | 不从测试或临时验收代码导出示例 |
 
 验证分层：
 

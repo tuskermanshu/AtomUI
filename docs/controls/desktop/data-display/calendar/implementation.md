@@ -236,4 +236,4 @@ RangeBars 投影以 `PART_RangeBarPanel` 的本地坐标为坐标系。Panel 先
 - LunarCalendar 全支持范围往返、节气/节日、Provider 面板数据、Fullscreen/Card × Month/Year、模板、RangeBars 避让、容器回收和 NativeAOT 发布边界。
 - Semantic Part：`Calendar` / `LunarCalendar` descriptor 的六个 Part 数量、顺序与字段；三个静态 marker 与 Cell 构造 marker 的放置；Month 42/48、Year 12 的 `semantic-item` 数量；`Value` 同月变化与 Mode/ShowWeek 切换后的容器复用与 marker 身份；`HeaderTemplate` / 无 `CellTemplate` 时 marker 节点隐藏但存在；生成 Style 对 `body` / `content` / `item` 的局部 Setter 生效；Gallery Semantic Preview 惰性创建。
 
-纯文档改动运行 `git diff --check` 和相对链接检查；行为或主题改动运行对应 `tests/AtomUI.Desktop.Controls.Tests` 与 Gallery 验证。LLMS 生成文件只由仓库生成/verify 流程更新。
+纯文档改动运行 `git diff --check` 和相对链接检查；行为或主题改动运行对应 `tests/AtomUI.Desktop.Controls.Tests` 与 Gallery 验证。

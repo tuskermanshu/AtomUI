@@ -307,7 +307,7 @@ public Type? StyleType { get; }
 Descriptor 服务于：
 
 - 构建期模板契约校验。
-- 文档与 LLMS Semantic Parts 输出校验。
+- 控件文档校验。
 - Gallery Semantic Preview；Preview 只读取 descriptor，不把实例、调试状态或高亮信息写回 registry。
 - 控件包静态注册和第三方工具。
 - 兼容性测试。
@@ -725,7 +725,7 @@ public partial class Button
 ```
 
 `Since` 必须是可以被用户引用的具体发布版本，即 `major.minor.patch` 三段非负十进制数字（例如 `6.2.0`）。只写版本线
-（`6.0`、`6.2`）会让 descriptor、控件文档与 LLMS 导出声称一个不存在的引入版本，因此按声明契约错误阻断构建
+（`6.0`、`6.2`）会让 descriptor 与控件文档声称一个不存在的引入版本，因此按声明契约错误阻断构建
 （`ATOMUIGEN038`）；带 `v` 前缀、预发布后缀或段数不符的写法同样被拒绝。缺失 `Since` 仍是 `ATOMUIGEN031` warning，
 与格式非法区分开。
 
@@ -887,6 +887,5 @@ Button 的 `root`、`icon`、`content` 可以作为基础契约测试样本；�
   声明、模板和兼容性规则。
 - [AtomUI 控件 Token 设计规范](../../../engineering/development/control-token-guidelines.md)：Semantic Part、Part Theme 和 Token
   identity 的职责边界。
-- [AtomUI 控件文档规范](../../../engineering/contributing/control-documentation-guidelines.md)：单控件 `semantic-part.md` 契约与
-  LLMS 文档同步规则。
+- [AtomUI 控件文档规范](../../../engineering/contributing/control-documentation-guidelines.md)：单控件 `semantic-part.md` 契约与文档同步规则。
 - [AOT 编程规范](../../../engineering/development/aot-programming-guidelines.md)：静态注册、反射和运行时发现边界。

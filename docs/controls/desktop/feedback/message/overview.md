@@ -186,7 +186,7 @@ Gallery 的 Stack 示例使用独立 manager，不与基础、类型、loading �
 开关和阈值变化。配置标签、ToggleSwitch 与 NumericUpDown 使用同一垂直中心线，示例卡片以 `v6.1.9` RibbonBadge 标记
 能力引入版本。这些值和标记只属于示例场景；控件的 `IsStackEnabled=false` 和默认 3 秒时长不受示例状态影响。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -217,17 +217,6 @@ Semantic Parts 摘要（完整契约见 [Message Semantic Part 契约](semantic-
   均属于公共主题契约变更（见 [系统架构兼容性表](../../../../architecture/systems/theming/semantic-parts.md)）。
 - 行为、关闭状态机、队列与宿主层装卸不属于 Semantic Part；`Message` / `IMessage` / `IMessageManager` /
   `MessageCardToken` 不持有 descriptor。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/message/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/message/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

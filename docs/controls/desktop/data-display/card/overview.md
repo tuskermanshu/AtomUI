@@ -214,7 +214,7 @@ others/null -> Default
 
 `CardTabsContent` 既支持 XAML `Items` 集合，也支持 `TabItemsSource` / `TabItemTemplate`。模板内 `TabControl` 负责实际 tab 选择和内容显示，Card 只负责把内容类型、SizeType 和 Motion 状态同步给它。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -222,17 +222,6 @@ others/null -> Default
 - [Card 桌面版实现原理](implementation.md)
 - [Card Token 设计](token.md)
 - [Card Changelog](changelog.md)
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/card/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + Card Themes | 生成 `controls/card/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 覆盖 Card 与 CardMetaContent 的稳定 public 用法；Semantic Part 示例按独立延迟 Tab 提供。 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

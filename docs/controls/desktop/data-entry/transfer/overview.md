@@ -184,7 +184,7 @@ Transfer 的视觉选项通过 public API 归一为 theme variables、伪类或�
 路由限定，条目级（`source.item` / `target.item` / `source.itemIcon` 等）由视图 `ViewType` 在 prepare 路径一次性
 补挂方向条目类区分。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -192,41 +192,6 @@ Transfer 的视觉选项通过 public API 归一为 theme variables、伪类或�
 - [Transfer Semantic Part 契约](semantic-part.md)
 - [Transfer Token 设计](token.md)
 - [Transfer Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ListTransfer` / `TreeTransfer` | 穿梭框根语义区域，承载 public API、数据、选择状态、过滤和主题入口。 | `ItemsSource`、`TargetKeys`、`SelectedKeys`、`IsOneWay`、`IsStretchView` | `ListTransferToken` / `TreeTransferToken` | stable |
-| `source.section` | internal `TransferItemDecorator#SourceDecoratorView` | 源方向列表分区外框，承载 header、过滤输入、列表宿主和 footer 的组织边界。 | `SourceTitle`、`SourceViewFooter`、`ListWidth`、`ListHeight` | `HeaderHeight`、`HeaderPadding` | stable |
-| `target.section` | internal `TransferItemDecorator#TargetDecoratorView` | 目标方向列表分区外框，与 `source` 结构一致仅方向不同。 | `TargetTitle`、`TargetViewFooter`、`IsOneWay` | 同 `source` | stable |
-| `actions` | `StackPanel#ActionsLayout` | 组织"移至目标 / 移回源"操作按钮的中间操作区。 | `ToTargetTransferIcon`、`ToSourceTransferIcon`、`ToTargetButtonText`、`ToSourceButtonText` | `SpacingXXS`、`SpacingXS` | stable |
-| `header` | `TransferItemDecorator` 模板内 `PixelAlignedBorder#HeaderFrame` | 面板头部分区，承载全选指示、选择计数与标题。 | `IsShowSelectAllCheckbox`、`IsShowSelectDropdownMenu`、`SelectionsIcon` | `HeaderHeight`、`HeaderPadding`、`ColorSplit` | stable |
-| `title` | `TransferItemDecorator` 模板内 `ContentPresenter#TitleContentPresenter` | 承载 `SourceTitle` / `TargetTitle` 及其模板的最终呈现。 | `SourceTitle`、`SourceTitleTemplate`、`TargetTitle`、`TargetTitleTemplate` | `HeaderPadding` | stable |
-| `body` | `TransferItemDecorator` 模板内 `DockPanel#BodyLayout` | 分区主体区域，承载过滤输入与列表宿主的组织边界。 | `IsFilterEnabled`、`FilterPlaceholderText`、`ListHeight` | `MarginXS` | stable |
-| `list` | `TransferItemDecorator` 模板内 `ContentPresenter#ContentPresenter` | 承载源/目标视图控件的宿主分区。 | `ListHeight`、`PageSize`、`ItemTemplate` | `ListHeight`、`BorderRadiusLG` | stable |
-| `footer` | `TransferItemDecorator` 模板内 `PixelAlignedBorder#FooterFrame` | 面板底部分区，承载方向 footer 内容呈现边界。 | `SourceViewFooter`、`TargetViewFooter` | `HeaderPadding`、`ColorSplit` | stable |
-| `source.header` / `target.header` | 同 `header`（方向锚点路由） | 单侧面板头部分区，仅作用于源 / 目标面板。 | 同 `header` | 同 `header` | stable |
-| `source.title` / `target.title` | 同 `title`（方向锚点路由） | 单侧面板标题呈现区域。 | 同 `title` | 同 `title` | stable |
-| `source.body` / `target.body` | 同 `body`（方向锚点路由） | 单侧面板主体区域。 | 同 `body` | 同 `body` | stable |
-| `source.list` / `target.list` | 同 `list`（方向锚点路由） | 单侧视图宿主分区。 | 同 `list` | 同 `list` | stable |
-| `source.footer` / `target.footer` | 同 `footer`（方向锚点路由） | 单侧面板底部区域。 | 同 `footer` | 同 `footer` | stable |
-| `itemIcon` | `TransferListItem` 模板内 `CheckBox#SelectedIndicator` | 条目选择指示区域（仅 `ListTransfer` 发布）。 | `SelectedKeys`、`TargetKeys` | SharedToken | stable |
-| `itemContent` | `TransferListItem` 模板内 `ContentPresenter#ContentPresenter` | 条目内容呈现区域（仅 `ListTransfer` 发布）。 | `ItemTemplate` | SharedToken | stable |
-| `source.item` / `target.item` | 视图容器（`TransferListItem` / `TransferTreeViewItem`） | 单侧条目容器（方向条目类由视图 `ViewType` 在 prepare 补挂）。 | `ItemsSource`、`TargetKeys` | SharedToken | stable |
-| `source.itemIcon` / `target.itemIcon` | 同 `itemIcon`（自锚点路由） | 单侧条目选择指示区域。 | 同 `itemIcon` | SharedToken | stable |
-| `source.itemContent` / `target.itemContent` | 同 `itemContent`（自锚点路由） | 单侧条目内容呈现区域。 | 同 `itemContent` | SharedToken | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/transfer/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/transfer/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

@@ -166,7 +166,7 @@ Skeleton 的动效只表达状态变化反馈，不应改变 public API 语义�
 
 Skeleton 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -175,30 +175,8 @@ Skeleton 的视觉选项通过 public API 归一为 theme variables、伪类或�
 - [Skeleton Semantic Part 契约](semantic-part.md)
 - [Skeleton Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Skeleton` | 主控件根区域，承载整体占位布局和主题入口。 | 见 API 与契约模型 | `SkeletonToken` | stable |
-| `header` | `DockPanel` | 左侧头像占位 cell，只承载 `avatar`。 | `IsShowAvatar`、Avatar API | `AvatarMarginRight` | stable |
-| `section` | `StackPanel` | 右侧内容 cell，填充剩余宽度并承载标题和段落。 | `IsShowTitle`、`IsShowParagraph` | `ParagraphMarginTop` | stable |
-| `avatar` | `SkeletonAvatar` | 主控件模板拥有的头像占位子控件。 | `AvatarShape`、`AvatarSize` | Avatar 尺寸 Token | stable |
-| `title` | `SkeletonTitle` | 主控件模板拥有的标题占位子控件。 | `TitleWidth`、`IsRound` | `TitleHeight`、`BlockRadius` | stable |
-| `paragraph` | `SkeletonParagraph` | 主控件模板拥有的段落占位子控件。 | `ParagraphRows`、宽度属性 | `ParagraphLineHeight` | stable |
-
 `SkeletonAvatar`、`SkeletonButton`、`SkeletonInput`、`SkeletonImage` 和 `SkeletonNode` 的 `root/content` descriptor 与
 主控件分开维护，完整契约见 [Skeleton Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/skeleton/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/skeleton/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

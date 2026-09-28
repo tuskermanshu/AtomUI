@@ -396,9 +396,7 @@ public sealed class BuildLayoutTests
     [Fact]
     public void Tool_Source_Files_Stay_Trackable_While_Tool_Build_Outputs_Are_Ignored()
     {
-        IsIgnoredByGit("tools/AtomUI.Docs.LLMsGenerator/Program.cs").ShouldBeFalse();
         IsIgnoredByGit("tools/performances/AtomUI.Performance/Program.cs").ShouldBeFalse();
-        IsIgnoredByGit("tools/AtomUI.Docs.LLMsGenerator/bin/Debug/tool.dll").ShouldBeTrue();
         IsIgnoredByGit("tools/performances/AtomUI.Performance/obj/project.assets.json").ShouldBeTrue();
     }
 

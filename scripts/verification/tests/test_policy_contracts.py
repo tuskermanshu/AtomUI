@@ -27,7 +27,7 @@ class RealPolicyContracts(unittest.TestCase):
 
     def test_source_reading_consumers_are_selected_across_project_boundaries(self):
         cases = [
-            ("controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml", "GalleryExampleReaderTests"),
+            ("controlgallery/AtomUIGallery/ShowCases/DataEntry/LineEdit/Views/LineEditShowCase.axaml", "GalleryMetadataCleanupTests"),
             ("controlgallery/AtomUIGallery/ShowCases/General/Button/Views/ButtonShowCase.axaml", "ButtonIconOnlyVisualContractTests"),
             ("build/Versions.props", "GalleryVersionInfoTests"),
             ("docs/architecture/foundations/build-and-packaging.md", "GalleryBasePackagingTests"),

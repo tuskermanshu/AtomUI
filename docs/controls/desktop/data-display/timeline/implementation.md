@@ -222,7 +222,7 @@ Timeline 没有控件专属 pointer、keyboard、focus、command 或 popup 状�
 - 水平 Measure/Arrange 为 O(N)，只使用已有容器和局部尺寸值。
 - rail、圆点与图标是静态模板元素，由 Arrange 一次性定位，不持有 Pen 缓存或自绘路径。
 - 新增属性使用静态 AvaloniaProperty 注册和 AXAML 绑定，不引入反射、动态发现或 trimming 风险。
-- Source generator 和 LLMS 生成文件不手工编辑；需要修改时更新源码、主题、Gallery 和人工维护文档源。
+- Source generator 生成文件不手工编辑；需要修改时更新源码、主题、Gallery 和人工维护文档源。
 
 性能边界：
 
@@ -258,4 +258,4 @@ Timeline 没有控件专属 pointer、keyboard、focus、command 或 popup 状�
 - Theme 与 Gallery 测试覆盖 Orientation 传递、方向 selector、三种水平示例和 approved snapshot。
 - 人工走查覆盖 Light/Dark、Desktop/Browser、LTR/RTL、动态切换和有限宽度。
 - Gallery NativeAOT publish 验证 AXAML 属性绑定、枚举引用和 trimming 边界。
-- 所有文档和源码改动收尾运行 `git diff --check`；LLMS 产物由生成器生成并执行 verify。
+- 所有文档和源码改动收尾运行 `git diff --check`。

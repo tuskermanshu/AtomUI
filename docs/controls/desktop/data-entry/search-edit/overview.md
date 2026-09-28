@@ -191,7 +191,7 @@ SearchEdit 的 `SizeType=Custom` 走 LineEdit 家族的 Custom size 规则。未
 
 `AutoCompleteSearchEdit` 暴露 SearchEdit 的搜索按钮属性、`IsOperating`、`IsSearchOnEnterEnabled` 和 `SearchRequested`，并在模板内部使用 `AutoCompleteSearchEditBox`。`AutoCompleteSearchEditBox` 继承 SearchEdit 并把 `StyleKeyOverride` 指向 SearchEdit，使搜索输入视觉与搜索请求语义保持一致。AutoComplete 的候选项、popup、异步加载和选择状态不属于 SearchEdit 控件职责。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -199,20 +199,6 @@ SearchEdit 的 `SizeType=Custom` 走 LineEdit 家族的 Custom size 规则。未
 - [SearchEdit Changelog](changelog.md)
 - [LineEdit 桌面版架构设计](../line-edit/overview.md)
 - [AtomUI Control Token 设计规范](../../../../engineering/development/control-token-guidelines.md)
-
-LLMS 语义区域：
-
-SearchEdit 是输入控件家族中带专属搜索按钮的 public owner，公开 5 个 Selector 部件（`root` 由生成器隐式合成）。
-所有 Part 均为 `Single`、`Customization` 为 `Selector`、`CrossVisualRoot=false`。
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `SearchEdit` | 根语义区域，承载搜索输入 public API、文本值、验证状态和主题入口。 | `Text`、`PlaceholderText`、`Status`、`SizeType`、`StyleVariant` | SearchEdit 无 Own Token，统一消费 SharedToken 与 `InputControlFrame` | stable |
-| `prefix` | `AddOnContentPresenter`（`Classes.semantic-prefix`） | 输入框内部前缀内容承载；路由经 `semantic-scope-prefix` 作用域锚点限定。 | `InnerLeftContentTemplate` | SharedToken 输入前缀视觉 | stable |
-| `input` | `InputTextPresenter#PART_TextPresenter`（`Classes.semantic-input`） | 文本显示、光标、选择、滚动与密码 reveal。 | `Text`、`SelectionStart`、`SelectionEnd`、`PasswordChar`（继承自 `AvaloniaTextBox`） | SharedToken 输入文本与光标视觉 | stable |
-| `suffix` | `StackPanel`（`Classes.semantic-suffix`） | 输入框内部后缀内容承载；路由经 `semantic-scope-suffix` 作用域锚点限定，清除入口位于其下。 | `InnerRightContentTemplate`、`IsAllowClear` | SharedToken 输入后缀视觉 | stable |
-| `clear` | `InputClearIconButton#PART_ClearButton`（`Classes.semantic-clear`） | 清除当前搜索文本的入口。 | `IsAllowClear`、`ClearIcon` | SharedToken 清除图标视觉 | stable |
-| `button` | public `Button#PART_RightAddOn`（`Classes.semantic-button`，运行时创建） | 搜索按钮：图标/文本、loading 状态与点击触发搜索请求。 | `SearchButtonStyle`、`SearchButtonText`、`IsOperating`、`SearchButtonTheme`、`SearchRequested` | SharedToken 按钮视觉 | stable |
 
 路由说明：
 
@@ -226,19 +212,7 @@ SearchEdit 是输入控件家族中带专属搜索按钮的 public owner，公�
 
 Token 说明：
 
-- SearchEdit 当前没有 Own Token，因此没有专属 `token.md`；LLMS 生成按第 5 节说明独立 SearchEdit identity、完整 Effective Global Token、Button Semantic Part 和显式跨 Control 资源边界。
-
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/search-edit/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/search-edit/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
+- SearchEdit 当前没有 Own Token，因此没有专属 `token.md`；Token 边界按第 5 节说明独立 SearchEdit identity、完整 Effective Global Token、Button Semantic Part 和显式跨 Control 资源边界。
 
 验证策略：
 

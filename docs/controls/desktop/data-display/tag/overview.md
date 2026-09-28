@@ -181,7 +181,7 @@ Tag 的视觉选项通过 `TagColor` 和 `Variant` 归一为颜色类别、Brush
 
 CheckableTag 使用 ToggleButton 的二态状态；CheckableTagGroup 将 `Options`、`IsMultiple` 和 `CheckedItem(s)` 归一为内部 SelectionModel，并把选择状态单向投影到子项。完整 Public API、模式矩阵、Template、同步算法、Form、生命周期与 AOT 边界见 [CheckableTag 与 CheckableTagGroup 选择模型设计](checkable-tag-design.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -190,36 +190,6 @@ CheckableTag 使用 ToggleButton 的二态状态；CheckableTagGroup 将 `Option
 - [CheckableTag 与 CheckableTagGroup 选择模型设计](checkable-tag-design.md)
 - [Tag Token 设计](token.md)
 - [Tag Changelog](changelog.md)
-
-LLMS 语义区域：
-
-下表是 LLMS 语义导出使用的区域映射。Semantic Part 有两个 owner：`Tag` 公开 `root` / `icon` / `content` /
-`close`（对齐上游 `TagSemanticType`，`classNames` / `styles` 均为 `{ root?, icon?, content?, close? }`）；
-`CheckableTagGroup` 公开 `root` / `item`（对齐上游 `CheckableTagGroupSemanticType`，`classNames` / `styles`
-均为 `{ root?, item? }`）。上游 `CheckableTag` 没有独立 Semantic DOM Props，AtomUI 同样不为其声明 descriptor，
-其职责由 `item` Part 表达。六个 Part 随 Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一为 `6.2.0`。
-完整契约见 [Tag Semantic Part 契约](semantic-part.md)，marker 归属与生命周期见
-[Tag 桌面版实现原理](implementation.md) 的 Semantic Part 处置一节。
-
-| Part | Owner | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- | --- |
-| `root` | `Tag` | `Tag`（表面投影到 `Frame`） | 标签根语义区域，承载颜色类别、Variant、内容与关闭入口；对应上游 `.ant-tag`。 | `TagColor`、`Variant`、`Text`、`Icon`、`CloseIcon`、`IsClosable`、`Closed` | `DefaultBg`、`DefaultColor`、`TagFontSize`、`TagPadding`、`SolidTextColor`、SharedToken | stable since 6.2.0 |
-| `icon` | `Tag` | `IconPresenter#IconPresenter` | 前置图标区域：图标尺寸、画刷与可见性；对应上游 Tag 的 `icon` 键。 | `Icon` | `TagIconSize` | stable since 6.2.0 |
-| `content` | `Tag` | `TextBlock#TagTextLabel` | 文本区域：文本呈现、行高与内联间距；对应上游 Tag 的 `content` 键。 | `Text` | `TagLineHeight`、`TagTextPaddingInline` | stable since 6.2.0 |
-| `close` | `Tag` | `IconButton#PART_CloseButton` | 关闭入口：关闭图标尺寸、画刷与可见性，承载 `Closed`；对应上游 `.ant-tag-close-icon`。 | `CloseIcon`、`IsClosable`、`Closed` | `TagCloseIconSize`、SharedToken（`IconSizeXS`） | stable since 6.2.0 |
-| `root` | `CheckableTagGroup` | `CheckableTagGroup` | 选择组根语义区域，承载 Options、单选/多选模式、公开选择值与 Form 语义；对应上游 `.ant-tag-checkable-group`。 | `Options`、`ItemTemplate`、`IsMultiple`、`CheckedItem(s)`、`DefaultCheckedItem(s)`、`ItemSpacing`、`LineSpacing`、`Orientation`、`CheckedChanged` | SharedToken（`SpacingXS`、`EnableMotion`） | stable since 6.2.0 |
-| `item` | `CheckableTagGroup` | 每个 `CheckableTag` 容器 | Group 内单个可交互选项，承载选择视觉与 checked/hover/pressed/disabled 状态；对应上游 `.ant-tag-checkable-group-item`。 | `CheckableTag.Content`、`CheckableTag.Icon`、`CheckableTag.IsChecked`、`IsMultiple` | `TagFontSize`、`TagLineHeight`、`TagPadding`、`TagIconSize`、SharedToken（`ColorPrimary*`、`ColorTextLightSolid`） | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `checkable-tag-design.md` + `token.md` + Gallery ShowCase | 生成 `controls/tag/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `checkable-tag-design.md` + theme/template 信息 | 生成 `controls/tag/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

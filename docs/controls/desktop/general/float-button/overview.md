@@ -192,7 +192,7 @@ FloatButton 家族的业务命令只属于真实交互按钮。普通 `FloatButt
 
 `IsShowProgress` 开启后，`BackTopFloatButton` 在按钮边缘显示滚动进度环：进度从 `Target` 的滚动几何派生为 0~1 的 internal 状态，视觉由 `BackTopFloatButtonTheme.axaml` 中的进度环节点表达，线宽与颜色取全局 Token。该模型对齐 antd 6.6.0 `FloatButton.BackTop` 的 `showProgress`。进度环只提供滚动反馈，不改变 `VisibilityHeight` 显隐阈值、命令语义和动效模型；开关关闭时进度环默认隐藏。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -201,27 +201,8 @@ FloatButton 家族的业务命令只属于真实交互按钮。普通 `FloatButt
 - [FloatButton Semantic Part 契约](semantic-part.md)
 - [FloatButton Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `FloatButton` | 按钮根区域，承载形状、类型、徽标选项和主题入口。 | 见 API 与契约模型 | `FloatButtonToken` | stable |
-| `icon` | `IconPresenter` | 图标区域，Circle 与 Square 模板均存在。 | `Icon`、`ButtonType` | `FloatButtonIconSize` | stable |
-| `content` | `ContentPresenter` | 描述内容区域，只在 Square 模板存在。 | `Description`（Host 投影为 `Content`） | `DescriptionLineHeight` | stable |
-
 `BackTopFloatButton` 的 `root/icon/content` 与 `FloatButtonGroup` 的 `root/trigger/list` descriptor 与主控件分开维护，
 完整契约见 [FloatButton Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/float-button/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/float-button/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

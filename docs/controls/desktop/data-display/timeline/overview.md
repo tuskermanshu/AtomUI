@@ -187,7 +187,7 @@ Timeline 以单一 owner 公开全部九个 Semantic Part：`root`、`item`、`i
 方向化布局）与 header 包裹节点，`TimelineIndicator` 从自绘 renderer 改为 rail/圆点/图标元素组合器，几何
 语义逐项保留。完整契约见 [Timeline Semantic Part 契约](semantic-part.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -196,41 +196,6 @@ Timeline 以单一 owner 公开全部九个 Semantic Part：`root`、`item`、`i
 - [Timeline 方向与布局设计](orientation-layout-design.md)
 - [Timeline Token 设计](token.md)
 - [Timeline Changelog](changelog.md)
-
-LLMS 语义区域：
-
-下表是 LLMS 语义导出使用的区域映射。Semantic Part 只有单一 owner：`Timeline` 公开 `root` / `item` /
-`itemWrapper` / `itemIcon` / `itemSection` / `itemHeader` / `itemTitle` / `itemContent` / `itemRail`
-九个 Part（对齐上游 `TimelineSemanticType`，即 `StepsSemanticType` 去掉 `itemSubtitle` 后的全部九个键）。
-为支持上游结构包裹节点与连接线，控件视觉结构补齐为真实节点（`TimelineSectionPanel`、header 包裹节点、
-rail/dot 元素）。上游 "Timeline Items" 逐项 classNames 注入区块没有 AtomUI 对应物，item 级 Part 的
-cardinality 已经是 `Multiple`（Gallery 用 "Timeline" 与 "Timeline Items" 两个 SemanticPartPreview 复刻
-上游双预览结构）。九个 Part 随 Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一为
-`6.0`。完整契约见 [Timeline Semantic Part 契约](semantic-part.md)，marker 归属与生命周期见
-[Timeline 桌面版实现原理](implementation.md) 的 Semantic Part 处置一节。
-
-| Part | Owner | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- | --- |
-| `root` | `Timeline` | `Timeline`（表面投影到 `Border#Frame`） | 时间轴根语义区域，承载 Items、方向、Mode、Reverse 与 Pending；对应上游 `<ol>`。 | `Items`、`ItemsSource`、`Orientation`、`Mode`、`IsReverse`、`Pending`、`PendingIcon` | SharedToken（`ColorBorder`、`ColorBgContainer`） | stable since 6.2.0 |
-| `item` | `Timeline` | 每个 `TimelineItem` 容器 | 单个节点容器，承载单项 Label、Content、Indicator 与视觉顺序派生状态；对应上游 `<li>`。 | `Label`、`Content`、`ContentTemplate`、`IndicatorIcon`、`IndicatorColor` | `ItemPaddingBottom`、`ItemPaddingBottomLG`、`Indicator*ModeMargin` | stable since 6.2.0 |
-| `itemWrapper` | `Timeline` | `TimelineItemPanel#RootLayout` | 节点内容包装根容器，铺满 section；对应上游 item wrapper 节点。 | `Orientation`、`Mode`、`IsLabelLayout`（internal 投影） | SharedToken（`UniformlyPaddingXS`） | stable since 6.2.0 |
-| `itemIcon` | `Timeline` | `Border#PART_Dot` / `Border#PART_IconHost`（互斥可见） | 节点图标区域：无 `IndicatorIcon` 时是内置圆点（`BorderBrush` 即圆环色），有 `IndicatorIcon` 时是图标宿主；对应上游 item icon 节点。 | `IndicatorIcon`、`IndicatorColor` | `IndicatorSize`、`IndicatorDotSize`、`IndicatorDotBorderWidth`、SharedToken（`ColorPrimary`、`ColorBgContainer`） | stable since 6.2.0 |
-| `itemSection` | `Timeline` | `TimelineSectionPanel#Section` | 节点区域容器，承载 header/Indicator/content 的方向化 Measure/Arrange；对应上游 item section 节点。 | `Orientation`、`Mode`、`IsLabelLayout`、`IsOdd`（internal 投影） | SharedToken（`UniformlyPaddingXS`） | stable since 6.2.0 |
-| `itemHeader` | `Timeline` | `StackPanel#Header` | 节点头部容器，承载 title 与对齐方式；对应上游 item header 节点。 | `Label`、`Mode`、`Orientation` | - | stable since 6.2.0 |
-| `itemTitle` | `Timeline` | `TextBlock#Label` | 节点标题/时间标签区域，文本呈现与换行；对应上游 item title 节点。 | `Label`、`Mode`、`Orientation` | - | stable since 6.2.0 |
-| `itemContent` | `Timeline` | `ContentPresenter#ContentPresenter` | 节点详细内容区域，Content/ContentTemplate 呈现与受限换行；对应上游 item content 节点。 | `Content`、`ContentTemplate`、`Mode`、`Orientation` | `LastItemContentMinHeight` | stable since 6.2.0 |
-| `itemRail` | `Timeline` | `Border#PART_Rail` | 节点连接线（轴线轨道条），首尾裁剪 + 圆点掩膜；对应上游 item rail 节点。 | `IndicatorTailColor`、`IndicatorTailWidth`、`IndicatorColor` | `IndicatorTailWidth`、`IndicatorTailColor`、`IndicatorDotSize` | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/timeline/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/timeline/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

@@ -49,13 +49,12 @@ OtpLineEditToken 影响以下控件或主题：
 - `OtpLineEditCellTheme.axaml`
 - Gallery OtpLineEdit 示例
 - OtpLineEdit token.md 语义说明
-- LLMS `controls/otp-line-edit/index-cn.md` 和 `semantic-cn.md` 生成内容
 
 OtpLineEditToken 不影响 LineEdit、SearchEdit、TextArea 或其他输入控件的尺寸和主题。其他控件需要 OTP 风格分格输入时，应直接使用 OtpLineEdit，而不是复制 Token 或 cell 主题。
 
 ## 5. 兼容性要求
 
-OtpLineEditToken 属于 OtpLineEdit 的主题契约。即使 Token 类型是 internal，生成的 TokenKind、AXAML resource 使用点、Token 类型、生成数据和 token.md和 LLMS 产物都会形成稳定依赖。
+OtpLineEditToken 属于 OtpLineEdit 的主题契约。即使 Token 类型是 internal，生成的 TokenKind、AXAML resource 使用点、Token 类型、生成数据和 token.md 都会形成稳定依赖。
 
 Token 变更要求：
 

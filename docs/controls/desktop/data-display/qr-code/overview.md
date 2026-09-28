@@ -148,7 +148,7 @@ QRCode 与同分类控件共享尺寸、状态、Token、Gallery 展示和验证
 cover 是一个静态、单一的 overlay 区域。`Active` 状态下它保留在模板中但不可见；其他状态下它覆盖完整 root，并承载 Loading、Expired
 或 Scanned 内容。该结构避免状态切换时创建或销毁 Visual，也保证 Semantic marker 身份稳定。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -156,24 +156,6 @@ cover 是一个静态、单一的 overlay 区域。`Active` 状态下它保留�
 - [QRCode Semantic Part 契约](semantic-part.md)
 - [QRCode Token 设计](token.md)
 - [QRCode Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `QRCode` | 二维码方形根区域，承载背景、边框、圆角、Padding 和整体布局。 | `Size`、`IsBordered` 及 root 表面属性 | SharedToken | stable |
-| `cover` | 状态 overlay `Border` | 覆盖完整 root，承载 Loading、Expired、Scanned 状态反馈。 | `Status` 与三组状态内容 API | `QRCodeMaskBackgroundColor` | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/qr-code/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/qr-code/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

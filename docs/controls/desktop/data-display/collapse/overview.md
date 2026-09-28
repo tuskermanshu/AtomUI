@@ -211,7 +211,7 @@ Collapse 的动效只处理 content 的布局展开、裁剪、透明度和最�
 
 Collapse 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -220,33 +220,6 @@ Collapse 的视觉选项通过 public API 归一为 theme variables、伪类或�
 - [Collapse Semantic Part 契约](semantic-part.md)
 - [Collapse Token 设计](token.md)
 - [Collapse Changelog](changelog.md)
-
-LLMS 语义区域：
-
-下表是 LLMS 语义导出使用的区域映射，独立于 [§3.5 Semantic Part 契约](#35-semantic-part-契约)：`item` 与 `motion` 只作为
-LLMS 语义区域存在，不属于对外 Semantic Part；Semantic Part 的节点映射以 [Collapse Semantic Part 契约](semantic-part.md)
-为准。
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Collapse` | 折叠面板根语义区域，承载 public API、selection model 与主题入口。 | `IsAccordion`、`IsBorderless`、`IsGhostStyle`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled`、`ItemHeaderPadding`、`ItemContentPadding` | `CollapseToken` | stable |
-| `header` | `PART_HeaderDecorator` | 每个面板的头部区域（Semantic Part `header`）。 | `SizeType`、`ItemHeaderPadding`、`TriggerType`、`IsGhostStyle` | `HeaderBg`、`HeaderPadding`、`CollapseHeaderPaddingSM`、`CollapseHeaderPaddingLG` | stable |
-| `title` | `PART_HeaderPresenter` | 每个面板的标题文字区域（Semantic Part `title`）。 | `Header`、`HeaderTemplate` | `ColorTextHeading`、`ColorTextDisabled` | stable |
-| `icon` | `PART_ExpandButton` | 每个面板的展开/收起箭头（Semantic Part `icon`）。 | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsSelected` | `IconSizeSM`、`Left/RightExpandButtonMargin*` | stable |
-| `body` | `PART_ContentFrame` | 每个面板的内容区域（Semantic Part `body`）。 | `Content`、`ContentTemplate`、`ItemContentPadding`、`IsBorderless`、`IsGhostStyle` | `ContentPadding`、`ContentBg`、`HeaderBg` | stable |
-| `item` | `CollapseItem` 容器 | 单个面板容器与 item shell 分隔线（LLMS 区域，非 Semantic Part）。 | `IsSelected`、`IsShowExpandIcon` | `HeaderBg` | stable |
-| `motion` | `PART_ContentMotionActor` | 展开/收起动效（LLMS 区域，非 Semantic Part）。 | `IsMotionEnabled` | `MotionDurationSlow` | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/collapse/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/collapse/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

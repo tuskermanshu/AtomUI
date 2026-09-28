@@ -197,4 +197,4 @@ StepsToken 只影响：
 | Inline Token | 验证 Inline dot、Connector、padding、hover 和 current 表达。 |
 | 实例语义样式 | 验证三项属性默认 null、非 null 优先级、运行时修改、清空回退，以及不会改变未覆盖的状态/类型 Token 视觉。 |
 | Token 删除或重命名 | 同步类型、生成资源、AXAML、Token 类型、生成数据和 token.md和控件文档。 |
-| 文档 | 运行 `git diff --check`，检查相对链接和 LLMS 源文档一致。 |
+| 文档 | 运行 `git diff --check`，检查相对链接。 |

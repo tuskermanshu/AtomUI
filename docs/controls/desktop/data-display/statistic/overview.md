@@ -143,7 +143,7 @@ Statistic 的动效只表达状态变化反馈，不应改变 public API 语义�
 
 Statistic 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -151,29 +151,6 @@ Statistic 的视觉选项通过 public API 归一为 theme variables、伪类或
 - [Statistic Semantic Part 契约](semantic-part.md)
 - [Statistic Token 设计](token.md)
 - [Statistic Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Statistic` | 整体容器表面，承载背景、边框、虚线、圆角、Padding 和对齐。 | root 表面属性、`StrokeDashArray` | SharedToken | stable since 6.2.0 |
-| `header` | 标题区 `Border` | 承载标题区布局和可见性。 | `Header`、`HeaderTemplate` | SharedToken | stable since 6.2.0 |
-| `title` | `ContentPresenter` | 展示标题内容及其字体、前景色。 | `Header`、`HeaderTemplate` | `TitleFontSize`、SharedToken | stable since 6.2.0 |
-| `content` | 横向 `StackPanel` | 排列 prefix、value、suffix，并承载内容字体和前景色继承。 | `ContentFontSize`、`ContentForeground` | `ContentFontSize`、SharedToken | stable since 6.2.0 |
-| `value` | `ContentPresenter` | 展示格式化数值或自定义 Content。 | `Value`、`Content`、格式属性 | `ContentFontSize`、SharedToken | stable since 6.2.0 |
-| `prefix` | `ContentPresenter` | 展示数值前缀或图标。 | `ValuePrefixAddOn`、`ValuePrefixAddOnTemplate` | SharedToken | stable since 6.2.0 |
-| `suffix` | `ContentPresenter` | 展示数值后缀或单位。 | `ValueSuffixAddOn`、`ValueSuffixAddOnTemplate` | SharedToken | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/statistic/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/statistic/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

@@ -198,7 +198,7 @@ ComboBox 的动效只表达状态变化反馈，不应改变 public API 语义�
 
 ComboBox 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -207,36 +207,8 @@ ComboBox 的视觉选项通过 public API 归一为 theme variables、伪类或�
 - [ComboBox Token 设计](token.md)
 - [ComboBox Changelog](changelog.md)
 
-LLMS 语义区域（与 `ComboBox.SemanticParts.cs` 的实际声明逐条一致；此前的 `root` / `trigger` / `item` / `popup` / `motion` 表为生成器 fallback 占位内容，与控件真实结构不符，已于 2026-09-16 替换）：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ComboBox` | 组合框根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `prefix` | `AddOnContentPresenter`（`ContentLeftAddOn` 投影） | 内容框内联前缀区。 | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` | SharedToken | stable |
-| `frame` | `PART_ContentFrame`（共享 AddOn 模板） | 输入框边框盒。 | `StyleVariant`、`Status`、`FormStatus` | SharedToken | stable |
-| `content` | decorated box 内容 `Panel` | 输入内容面板。 | `PlaceholderText`、`SelectionBoxItem`、`IsEditable` | SharedToken | stable |
-| `placeholder` | `PlaceholderText` | 占位符文本。 | `PlaceholderText` | SharedToken | stable |
-| `input` | `PART_EditableTextBox` | 编辑 / 过滤输入框。 | `IsEditable`、`Text`、`IsFilterEnabled` | SharedToken | stable |
-| `suffix` | `ContentRightAddOn` 的 `StackPanel` | 右侧后缀区。 | `ContentRightAddOn`、`FormFeedback` | SharedToken | stable |
-| `indicator` | `PART_OpenIndicatorButton` | 下拉展开指示器。 | `IsDropDownOpen`、`IsEnabled` | ComboBoxToken | stable |
-| `popup.root` | `PopupFrame` | 弹层框体。 | `MaxDropDownHeight`、`PopupContentPadding` | SharedToken、PopupToken | stable |
-| `popup.list` | `ScrollViewer`（含 `PART_ItemsPresenter`） | 候选列表滚动区。 | `MaxDropDownHeight`、`ItemsPanel` | SharedToken | stable |
-| `popup.listItem` | 运行时 `ComboBoxItem` 容器 | 单个候选项容器。 | `ItemsSource`、`ItemTemplate`、`SelectedItem` | ComboBoxToken | stable |
-| `popup.empty` | `PART_EmptyIndicator` | 生效过滤模式下无匹配项时的弹层空态区。 | `IsEditable`、`IsFilterEnabled`、`Text` / `FilterValue` | SharedToken | stable |
-
 改输入框边框颜色有**两个入口**，按场景选择：直接设置 `ComboBox.BorderBrush` / `Background` 是输入族标准做法（控件把这两个根表面画刷以 `LocalValue` 中继到共享输入帧，压过帧的 hover / focus / 校验状态机）；需要按语义节点精确控制边框宽度、圆角、背景或状态色时，用 `frame` 部件（`ComboBoxFrameStyle`）。两者落在同一帧节点上，`LocalValue` 优先级高于 `Style`，同时使用时根中继胜出。细节见
 [ComboBox Semantic Part 契约](semantic-part.md) §5 与 [ComboBox 实现](implementation.md) §5.2。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/combo-box/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/combo-box/semantic-cn.md`；`semantic-part.md` 是 Part 契约的唯一真源 |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

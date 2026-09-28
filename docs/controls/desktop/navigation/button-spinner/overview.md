@@ -141,25 +141,13 @@ ButtonSpinner 的动效只表达状态变化反馈，不应改变 public API 语
 
 ButtonSpinner 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
 - [ButtonSpinner 桌面版实现原理](implementation.md)
 - [ButtonSpinner Token 设计](token.md)
 - [ButtonSpinner Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | ButtonSpinner owner | 承载尺寸档、variant、状态、步进开关和 owner-scoped Semantic Style 入口。 | `SizeType`、`StyleVariant`、`Status`、`IsSpinEnabled`、`IsButtonSpinnerFloatable`、`ButtonSpinnerLocation` | SharedToken、`ButtonSpinnerToken` | stable since 6.2.0 |
-| `content` | 帧模板内主内容 presenter | 承载 `Content` 与 `ContentTemplate` 的最终呈现。 | `Content`、`ContentTemplate` | 输入尺寸 padding | stable since 6.2.0 |
-| `innerLeftContent` | 帧模板内容左槽 presenter | 承载 `InnerLeftContent` 与 `InnerLeftContentTemplate` 的最终呈现。 | `InnerLeftContent`、`InnerLeftContentTemplate` | `SpacingXXS` | stable since 6.2.0 |
-| `innerRightContent` | 帧模板内容右槽 presenter | 承载 `InnerRightContent` 与 `InnerRightContentTemplate` 的最终呈现。 | `InnerRightContent`、`InnerRightContentTemplate` | `SpacingXXS` | stable since 6.2.0 |
-| `actions` | 帧内步进手柄（`ButtonSpinnerHandle`） | 步进按钮区整体表面：背景填充、分隔线描边、填充圆角与悬浮/浮动呈现。 | `IsButtonSpinnerVisible`、`IsButtonSpinnerFloatable`、`ButtonSpinnerLocation`、`SpinnerHandleWidth` | `HandleWidth`、`HandleBg`、`HandleBorderColor`、`HandleActiveBg` | stable since 6.2.0 |
-| `increaseButton` | 手柄主题内增加按钮（`IconButton`） | 提供增加步进的交互入口表面。 | `IsSpinEnabled`、`ValidSpinDirection` | `HandleIconSize`、`HandleHoverColor` | stable since 6.2.0 |
-| `decreaseButton` | 手柄主题内减少按钮（`IconButton`） | 提供减少步进的交互入口表面。 | `IsSpinEnabled`、`ValidSpinDirection` | `HandleIconSize`、`HandleHoverColor` | stable since 6.2.0 |
 
 七个部件均为 `Single`，通过生成的强类型 Semantic Style 定制。完整 Selector、route、`ContractType`、状态矩阵与
 布局基线见 [ButtonSpinner Semantic Part 契约](semantic-part.md)。
@@ -169,17 +157,6 @@ LLMS 语义区域：
 职责（为不破坏 `NumericUpDown` 已发布的 `Single` route，改用与公开 API 同名的 `innerLeftContent` /
 `innerRightContent`），步进按钮区对应 `actions`。单个上/下按钮上游没有公开语义键，属显式能力补充。
 `LeftAddOn` / `RightAddOn` 外部区域不发布部件，与输入家族保持一致。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/button-spinner/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/button-spinner/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

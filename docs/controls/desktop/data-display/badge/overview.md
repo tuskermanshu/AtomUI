@@ -137,7 +137,7 @@ Token 只表达组件视觉语义，不保存数量、状态、可见性、目�
 - `AbstractCountBadge`、`AbstractDotBadge`、`AbstractRibbonBadge` 负责跨包状态和生命周期；Semantic descriptor 属于桌面具体类型。
 - `DecoratedTarget` 是应用提供的内容，不是 Badge Semantic Part；Badge 不向目标或其内部节点注入 semantic class。
 - Count/Dot 使用 Avalonia 12 原生 `AdornerLayer` 作为 target mode 的视觉宿主；Ribbon 始终使用 owner inline visual tree。
-- Gallery、LLMS 和第三方工具只消费 public owner descriptor，不公开 internal Adorner CLR identity。
+- Gallery 和第三方工具只消费 public owner descriptor，不公开 internal Adorner CLR identity。
 
 ## 7. 兼容性不变量
 
@@ -176,7 +176,7 @@ Badge Gallery 的 Semantic Parts 内容根包含三个独立 `SemanticPartPrevie
 Gallery 预览基础设施和多 owner 内容根的通用生命周期见
 [Semantic Part Gallery Preview](../../../../gallery/authoring/semantic-part-preview.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -186,23 +186,11 @@ Gallery 预览基础设施和多 owner 内容根的通用生命周期见
 - [Badge Changelog](changelog.md)
 - [Semantic Part 系统设计](../../../../architecture/systems/theming/semantic-parts.md)
 
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/badge/index-cn.md`。 |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + Badge Themes | 生成 `controls/badge/semantic-cn.md`。 |
-| API 表 | 本文公共 API 摘要 + 三个 public owner 源码 | 不把 internal Adorner 成员输出为用户 API。 |
-| Design Token 表 | `token.md` + 三个内部 Token 类型 | 不在本文复制生成 Token 表。 |
-| Semantic Parts | `semantic-part.md` Part 表 + 实现文档节点映射 | 分 owner 输出 root、selector、类型、数量与跨根信息。 |
-| 示例 | Gallery Badge ShowCase + Semantic Part Preview | 只引用稳定 public owner 用法。 |
-| 源码索引 | `implementation.md` | 用于定位 owner、Adorner、Theme 和测试。 |
-
 验证策略：
 
 | 改动类型 | 验证要求 |
 | --- | --- |
-| 文档 | 运行 LLMS source verify、`git diff --check` 并确认相对链接存在。 |
+| 文档 | 运行 `git diff --check` 并确认相对链接存在。 |
 | Public API | 覆盖默认值、非负值归一、零值显示、状态色、位置和 target 组合。 |
 | Semantic descriptor | 分别验证三个 owner 的 Part 集合、ContractType、cardinality、cross-root 和 runtime metadata。 |
 | Runtime marker | 覆盖 standalone、target mode、显示隐藏、零值和 Dot 模式切换后的 marker 数量与 owner 隔离。 |

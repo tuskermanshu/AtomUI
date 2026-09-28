@@ -186,7 +186,7 @@ Gallery 的 Stack 示例使用独立 manager，不与基础、类型、placement
 观察不同卡片高度下的折叠、hover 展开、运行时开关和阈值变化。配置标签、ToggleSwitch 与 NumericUpDown 使用同一垂直
 中心线，示例卡片以 `v6.1.9` RibbonBadge 标记能力引入版本。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -212,17 +212,6 @@ Semantic Part 语义区域：
 | `listContent` | `FeedbackStackPresenter#PART_Items` | 列表内容区域；公共契约为 ItemsControl，支持尺寸与对齐定制。 | `Position`、`MaxItems` | `UniformlyMargin` | stable |
 
 完整 Part 表、Selector 用法与定制边界见 [Notification Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/notification/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/notification/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

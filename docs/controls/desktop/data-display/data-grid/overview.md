@@ -347,7 +347,7 @@ DataGrid 的动效只表达状态变化反馈，不应改变 public API 语义�
 
 DataGrid 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -357,39 +357,11 @@ DataGrid 的视觉选项通过 public API 归一为 theme variables、伪类或�
 - [DataGrid Token 设计](token.md)
 - [DataGrid Changelog](changelog.md)
 
-LLMS 语义区域（对齐 Ant Design 6.6.3 Table Semantic DOM，owner 为 `DataGrid`）：
-
-| Part | AtomUI 节点 | 职责 | 专用 Style | Marker 方式 | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `DataGrid` 控件自身（生成器隐式合成） | 表格外层容器：背景、边框、圆角、内容裁剪等容器基础样式；直接对控件设置属性或 ControlTheme 定制。 | 无（root 定制即控件自身定制） | 无（隐式 root） | stable |
-| `section` | `FrameContentClip`（Border） | 内层包装容器：圆角裁剪、Spin 加载包裹等包装容器样式。 | `DataGridSectionStyle` | 静态模板 marker | stable |
-| `title` | `TitleFrame`（PixelAlignedBorder，含标题分隔线） | 表格标题容器：标题区域的布局、分隔线与背景样式。 | `DataGridTitleStyle` | 静态模板 marker | stable |
-| `content` | 主 `Grid`（表头区 + 行区 + 滚动条 + 四角块） | 表格内容区：内容区域的布局与滚动容器样式，不含 title/footer/pagination。 | `DataGridContentStyle` | 静态模板 marker | stable |
-| `header.wrapper` | `ColumnHeadersPresenterFrame`（Border，含普通与分组两个 presenter） | 表头容器：表头的布局与容器样式。 | `DataGridHeaderWrapperStyle` | 静态模板 marker | stable |
-| `header.cell` | `DataGridColumnHeader` 根（运行时创建，含冻结列） | 表头单元格：相对定位、内边距、文字换行、背景、文字颜色、字重等表头单元格样式。 | `DataGridHeaderCellStyle` | 代码注入（运行时创建） | stable |
-| `body.wrapper` | `RowsPresenter`（模板静态件） | 表体容器：表格主体的布局与容器样式。 | `DataGridBodyWrapperStyle` | 静态模板 marker | stable |
-| `body.row` | `DataGridRow` / `DataGridRowGroupHeader` 根（运行时创建，虚拟化回收） | 数据行：悬浮效果、选中状态、展开状态等交互行样式；分组头行同样属于表体行。 | `DataGridBodyRowStyle` | 代码注入（运行时创建） | stable |
-| `body.cell` | `DataGridCell` 根（运行时创建，slot 回收） | 数据单元格：相对定位、内边距、文字换行等数据单元格基础样式。 | `DataGridBodyCellStyle` | 代码注入（运行时创建） | stable |
-| `footer` | `Footer`（ContentPresenter） | 表格底部：背景色、文字颜色等 footer 样式。 | `DataGridFooterStyle` | 静态模板 marker | stable |
-| `pagination.root` | 模板内两处 `Pagination` 实例（顶部/底部槽位） | 分页宿主：表格分页区域的布局与间距样式。 | `DataGridPaginationRootStyle` | 静态模板 marker | stable |
-| `pagination.item` | 分页器生成的页码项（`ContentControl`） | 分页项：页码项尺寸、激活态与间距样式。 | `DataGridPaginationItemStyle` | 运行时 marker | stable |
-
 映射取舍：
 
 - AntD `header.row`（thead 的 tr）在 AtomUI 中没有独立节点：`DataGridColumnHeadersPresenter` 直接承载各列头，因此不声明 `header.row`，避免虚构不存在的结构。
 - `DataGridRowHeader`（行头）无 AntD 对应物，不纳入语义部件。
 - 过滤/排序浮层属于列头触发的 Flyout 内容，遵循共享弹层契约，不在 Table 语义区域内声明。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `query-range-source-design.md` + `column-sizing-design.md` + `pagination-extra-content-design.md` + `token.md` + Gallery ShowCase | 生成 `controls/data-grid/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `query-range-source-design.md` + `column-sizing-design.md` + `pagination-extra-content-design.md` + theme/template 信息 | 生成 `controls/data-grid/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

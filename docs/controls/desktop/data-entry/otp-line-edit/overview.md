@@ -177,7 +177,7 @@ OtpLineEdit 属于 Data Entry 输入控件家族，与 LineEdit、SearchEdit、T
 - `InputClearIconButton`：提供清除入口的稳定视觉和交互语义。
 - `IFormItemAware` / `IFormItemFeedbackAware`：提供表单值、Form 扩展状态和 feedback 内容接入；error 由 `DataValidationErrors` 投射。
 - `CustomizableSizeType`：提供 Large/Middle/Small/Custom 尺寸契约。
-- Gallery ShowCase：提供用户可运行示例、源码片段和 LLMS 示例来源。
+- Gallery ShowCase：提供用户可运行示例和源码片段。
 
 ## 7. 兼容性不变量
 
@@ -237,33 +237,13 @@ OtpLineEdit 的 native validation error 挂在控件根节点。内部 cell 通�
 （focus 的 `BoxShadow` 光晕不受影响）；两个入口都置空后恢复 cell 主题状态机。`Background` 不参与本中继：
 `OtpLineEdit` 自身的 `Background` 是控件级透明背景，中继到 cell 会覆盖 cell 主题的填充色，因此保持不发布。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
 - [OtpLineEdit 桌面版实现原理](implementation.md)
 - [OtpLineEdit Token 设计](token.md)
 - [OtpLineEdit Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `OtpLineEdit` | 控件根语义区域，承载 public API、文本值、验证状态和主题入口。 | `Text`、`Length`、`Status`、`SizeType` | `OtpLineEditToken`、SharedToken | stable |
-| `cellList` | `PART_CellsHost` | 根据 `Length` 展示 cell 和 separator。 | `Length`、`Separator` | `CellGap`、`CellWidth*` | template-stable |
-| `cell` | `OtpLineEditCell` | 展示单个字符、placeholder、mask、active/focus 和 error 状态。 | `Text`、`IsMasked`、`MaskChar` | `CellWidth`、LineEdit 输入字号 | internal-observable |
-| `separator` | 分隔符容器 Border | 展示 cell 之间的分隔符字形，由 `OtpSeparatorPresenter` 按墨迹盒自动居中。 | `Separator`、`SeparatorTemplate` | — | template-stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/otp-line-edit/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `Themes` 文件夹 + theme/template 信息 | 生成 `controls/otp-line-edit/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | `token.md` 或 `OtpLineEditToken` 类型 | 不在 `token.md` 中手工复制生成表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

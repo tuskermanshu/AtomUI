@@ -459,4 +459,4 @@ Part Setter 命中只证明目标属性已生效；如果最终布局仍被 owne
 - 自动高度契约不受 Part 影响：未设置显式高度时 `DesiredSize.Height` 仍包含 Header 通道、内容内边距与内容期望高度。
 - Generator 静态输出与 NativeAOT 路径不依赖反射或运行时扫描：四个 marker 通过静态 AXAML class 在既有模板路径一次性添加，
   不引入 VisualTree 搜索、动态 marker 绑定或运行时 AXAML 解析。
-- 文档一致性：本文件、`overview.md` 的 Part 摘要表与生成的 LLMS 语义文档保持一致，descriptor 与实际模板 marker 无差集。
+- 文档一致性：本文件与 `overview.md` 的 Part 摘要表保持一致，descriptor 与实际模板 marker 无差集。

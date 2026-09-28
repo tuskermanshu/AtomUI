@@ -163,7 +163,7 @@ GroupBox 的边框不是普通完整矩形边框。Header 内容嵌入在边框�
 - 圆角、边框厚度和 DPI 半像素对齐不应因为缺口绘制出现断裂、重叠或多余短线。
 - 透明背景、半透明背景和父容器复杂背景下都不能依赖背景遮挡边框线。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -172,34 +172,10 @@ GroupBox 的边框不是普通完整矩形边框。Header 内容嵌入在边框�
 - [GroupBox Token 设计](token.md)
 - [GroupBox Changelog](changelog.md)
 
-LLMS 语义区域：
-
-下表是 LLMS 语义导出使用的区域映射，与 [§3.5 Semantic Part 契约](#35-semantic-part-契约)一致；Semantic Part 的完整字段、
-存在条件与排除边界以 [GroupBox Semantic Part 契约](semantic-part.md)为准。
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `GroupBox` owner（边框与背景由 owner 自绘） | 分组边框、背景、圆角、内容内边距与标题位置的统一 owner。 | 见 API 与契约模型 | GroupBoxToken、SharedToken | stable since 6.2.0 |
-| `header` | `PART_HeaderContent`（`Border`） | Header 内容区域（Semantic Part `header`），同时是边框缺口的几何来源。 | `HeaderTitle`、`HeaderIcon`、`HeaderTitlePosition`、Header 字体属性 | `HeaderContentPadding`、`HeaderContainerMargin` | stable since 6.2.0 |
-| `icon` | `PART_HeaderIconPresenter` | Header 图标尺寸、颜色与间距（Semantic Part `icon`）。 | `HeaderIcon` | `HeaderIconMargin`、`IconSizeLG` | stable since 6.2.0 |
-| `title` | `PART_HeaderPresenter` | Header 标题文字区域（Semantic Part `title`）。 | `HeaderTitle`、`HeaderTitleColor`、`HeaderFontSize`、`HeaderFontStyle`、`HeaderFontWeight` | `ColorText`、`FontSize` | stable since 6.2.0 |
-| `content` | `PART_ContentPresenter` | 分组内容区域（Semantic Part `content`）。 | `Content`、`ContentTemplate`、`Padding`、`Background` | `ContentPadding` | stable since 6.2.0 |
-
 本次改造同时移除了此前生成器回退路径产出的占位行 `item` 与 `motion`：GroupBox 没有 item 集合、容器生命周期或动效区域，
 按 [Semantic Part 全量改造设计 §5.1](../../../../superpowers/specs/2026-08-12-semantic-part-control-rollout-design.md)不得为了
 覆盖率虚构这两类区域。五个区域的真实节点映射与 `PART_Frame`、`PART_HeaderContainer` 的排除依据见
 [GroupBox Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/group-box/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/group-box/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

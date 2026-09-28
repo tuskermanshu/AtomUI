@@ -151,7 +151,7 @@ DropdownButton 涉及弹层、窗口或 overlay 宿主时，打开状态、取�
 
 DropdownButton 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -159,32 +159,9 @@ DropdownButton 的视觉选项通过 public API 归一为 theme variables、伪�
 - [DropdownButton Semantic Part 契约](semantic-part.md)
 - [DropdownButton Changelog](changelog.md)
 
-LLMS 语义区域（完整 Part 契约见 [DropdownButton Semantic Part 契约](semantic-part.md)）：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `DropdownButton` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | DropdownButtonToken、SharedToken | stable since 6.2.0 |
-| `popup.root` | `ArrowDecoratedBox`（弹层根视觉面） | 下拉菜单弹层根视觉面，承载菜单项集合与弹层根视觉（边框 / 背景 / 圆角，对应上游 antd 的 `root`）。 | `DropdownFlyout`、`Items`、`ItemTemplate`、`ItemContainerTheme` | MenuToken、SharedToken | stable since 6.2.0 |
-| `itemTitle` | `MenuItemGroup` 模板 `GroupTitlePresenter` | 菜单分组标题节点（对应上游 antd 的 `itemTitle` / `ant-menu-item-group-title`，`Multiple`）。 | `MenuItemGroup.Header`、`MenuItemGroup.HeaderTemplate` | MenuToken、SharedToken | stable since 6.2.0 |
-| `item` | `MenuItem` 容器 | 弹层中的单个菜单项容器，覆盖顶层与子菜单（`Multiple`）。 | `Items`、`MenuItem.Header`、`MenuItem.Icon`、`MenuItem.Items` | MenuToken、SharedToken | stable since 6.2.0 |
-| `itemContent` | `MenuItem` 模板 `ItemTextPresenter` | 菜单项模板内的文本内容节点。 | `MenuItem.Header`、`MenuItem.HeaderTemplate` | MenuToken、SharedToken | stable since 6.2.0 |
-| `itemIcon` | `MenuItem` 模板 `ItemIconPresenter` | 菜单项模板内的图标节点。 | `MenuItem.Icon` | MenuToken、SharedToken | stable since 6.2.0 |
-
 Token 说明：
 
-- DropdownButton 当前没有专属 `token.md`；LLMS 生成按第 5 节视觉与主题模型、SharedToken、控件家族 Token 或主题资源说明 Token 边界。
-
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/dropdown-button/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + Themes 文件夹 + theme/template 信息 | 生成 `controls/dropdown-button/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
+- DropdownButton 当前没有专属 `token.md`；Token 边界按第 5 节视觉与主题模型、SharedToken、控件家族 Token 或主题资源说明 Token 边界。
 
 验证策略：
 

@@ -370,9 +370,8 @@ Fullscreen Cell 高度时应通过 Token（`MiniContentHeight` / `FullCellMinHei
   清单，不通过本控件的 Part 获得 marker。
 - 周标题行（`Grid#PART_WeekHeader`）与其文本节点；上游 `<table>` 的 thead 没有独立 Semantic key。
 - `PART_RangeBarPanel` 范围条 overlay、segment 分段与 lane 分配；`RangeBars` 是 AtomUI 桌面扩展，上游 Calendar 没有
-  对应 Semantic key（LLMS 区域 `rangeBar` 不属于 Semantic Part）。
-- `LunarCalendarViewCell` 的次级内容（`PART_SecondaryPresenter`、节气/节日/节假日 marker 与次级文本）；LLMS 区域
-  `lunarContent` 不属于 Semantic Part。
+  对应 Semantic key（`rangeBar` 不属于 Semantic Part）。
+- `LunarCalendarViewCell` 的次级内容（`PART_SecondaryPresenter`、节气/节日/节假日 marker 与次级文本）；`lunarContent` 不属于 Semantic Part。
 - 用户 `CellTemplate` / `FullCellTemplate` 模板生成的子树。
 - `CalendarViewCell` 的 `DisplayText`、Cell 模型字段、键盘 roving focus 与 Automation provider。
 - `PART_*` 名称、internal 类型、状态转换器与 motion phase。

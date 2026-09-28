@@ -156,7 +156,7 @@ Drawer 的动效只表达状态变化反馈，不应改变 public API 语义。�
 
 Drawer 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -164,31 +164,6 @@ Drawer 的视觉选项通过 public API 归一为 theme variables、伪类或模
 - [Drawer Semantic Part 契约](semantic-part.md)
 - [Drawer Token 设计](token.md)
 - [Drawer Changelog](changelog.md)
-
-LLMS 语义区域（完整契约见 [semantic-part.md](semantic-part.md)）：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Drawer`（owner，零尺寸标记控件） | 语义身份与 owner 级样式定制入口；antd fixed root 对应内部 `DrawerContainer`，不暴露。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `mask` | `PART_Mask`（Border） | 遮罩层：定位、层级、背景、指针事件。 | `IsShowMask`、`IsCloseOnMaskClick` | `ColorBgMask` | stable |
-| `section` | `Frame`（Border） | 面板容器：flex 布局、宽高、背景、边缘阴影。 | `DialogSize`、`Placement` | `ColorBgElevated`、`BoxShadowDrawer*` | stable |
-| `header` | `InfoHeader`（Grid） | 头部排布与内边距。 | `Title`、`Extra`、`IsShowCloseButton` | `HeaderMargin` | stable |
-| `title` | `HeaderText`（TextBlock） | 标题文字排版。 | `Title` | `FontSizeLG`、`FontWeightStrong` | stable |
-| `extra` | `ExtraContentPresenter` | 头部尾缘额外操作内容。 | `Extra`、`ExtraTemplate` | - | stable |
-| `body` | `InfoContainer`（ContentPresenter） | 主内容区：占位、内边距、滚动。 | `Content`、`ContentPadding` | `ContentPadding` | stable |
-| `footer` | `InfoFooter`（ContentPresenter） | 底部操作区，仅设置 Footer 时可见。 | `Footer`、`FooterTemplate` | `FooterPadding` | stable |
-| `close` | `PART_CloseButton`（IconButton） | 关闭按钮；钉住预览忽略其关闭请求。 | `IsShowCloseButton`、`IsPinnedOpen` | `CloseIconPadding`、`CloseIconMargin` | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/drawer/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/drawer/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

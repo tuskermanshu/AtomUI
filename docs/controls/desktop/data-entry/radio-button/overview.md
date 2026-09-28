@@ -167,7 +167,7 @@ RadioButton 的视觉选项通过 public API 归一为 theme variables、伪类�
 
 纵向模式默认铺满可用宽度；非 Stretch Alignment 使用最宽 Item 的自然宽度；显式 Width 由调用方接管。完整尺寸矩阵、圆角映射、Custom 边界和验证要求见 [OptionButtonGroup 方向布局设计](option-button-group-orientation-design.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -177,29 +177,10 @@ RadioButton 的视觉选项通过 public API 归一为 theme variables、伪类�
 - [RadioButton Token 设计](token.md)
 - [RadioButton Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `RadioButton` | 控件根语义区域，承载选中值、内容、可用性和动效/水波开关等 public API、状态归一和主题入口。 | `IsChecked`、`Content`、`IsEnabled` | `RadioButtonToken` | stable |
-| `icon` | `RadioIndicator` | 单选指示圆环语义区域，承载指示圆环尺寸与局部布局。 | `IsChecked`、`IsEnabled` | `RadioSize`、`DotSize` | stable |
-| `label` | `ContentPresenter` | 文本语义区域，承载 `Content` 内容与文本视觉状态。 | `Content`、`ContentTemplate` | `TextMargin` | stable |
-
 `icon` 指示圆环语义与上游 Radio `icon` 语义对齐，由模板中的 `RadioIndicator` 节点承载并以 `Single` 基数公开；
 `label` 对应上游 `label` 语义，由 `ContentPresenter` 节点承载。`RadioButtonGroup`、`RadioIndicator`、
 `OptionButton` 与 `OptionButtonGroup` 不持有独立 Semantic descriptor。完整契约见
 [RadioButton Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 专项设计的稳定摘要同步到主文档后生成 `controls/radio-button/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 专项设计的 owner、状态流和组合结构同步到主文档后生成 `controls/radio-button/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

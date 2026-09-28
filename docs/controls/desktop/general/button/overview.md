@@ -284,7 +284,7 @@ Theme 默认值矩阵：
 
 Gallery 的 Custom 尺寸示例继续优先在 Button selector 上设置 `IconWidth`、`IconHeight`，以证明统一 API owner 的数据流。展示 Semantic Part 定制时则使用 `ButtonIconStyle`，不定位两个内部 template part。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -293,17 +293,6 @@ Gallery 的 Custom 尺寸示例继续优先在 Button selector 上设置 `IconWi
 - [Button 桌面版实现原理](implementation.md)
 - [Button Token 设计](token.md)
 - [Button Changelog](changelog.md)
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/button/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + `ButtonTheme.axaml` | 生成 `controls/button/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + `Button.cs` public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | `token.md` + `ButtonToken.cs` | `token.md` 解释 Token 语义边界 |
-| 示例 | `ButtonShowCase.axaml` + source snippet catalog | 覆盖类型、形状、尺寸、图标、加载、危险、幽灵、禁用、渐变、颜色与变体，以及使用 owner-scoped 与 Button 状态选择器定制 Semantic Part |
-| 源码索引 | `implementation.md` | 用于定位 Button 源码、主题、伪类和测试 |
 
 验证策略：
 
@@ -315,4 +304,3 @@ LLMS 导出来源：
 | Token / Palette 改动 | Light / Dark 主题检查，确认 Native 与 Browser 支持宿主使用同一共享主题语义。 |
 | Button 家族影响 | 覆盖 `DropdownButton`、`SplitButton`、`IconButton`、`HyperLinkButton` 关联场景。 |
 | Public API 改动 | 需要授权，并补充 API 兼容测试与文档。 |
-| LLMS 导出改动 | 重新生成 `controls/button/index-cn.md`、`controls/button/semantic-cn.md`、`llms-full-cn.txt` 和 `llms-semantic-cn.md`，确认来源表、API、Token、示例和 semantic parts 一致。 |

@@ -230,7 +230,7 @@ Windows/Linux 的 Leading 容器使用 `HorizontalSpacing` 消费 `LogoAndLeftAd
 
 标题对齐使用 Leading、Title、Trailing 与 Native chrome 四类区域。`Auto` 只解析平台默认值；`Left`、`Center`、`WindowCenter` 和 `Right` 在所有平台保持同一几何语义。标题安全宽度由 managed operation、Padding 与 native chrome inset 共同约束，平台输入 owner、坐标系和共享公式见 [WindowTitleBar 实现原理](implementation.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -251,35 +251,11 @@ Windows/Linux 的 Leading 容器使用 `HorizontalSpacing` 消费 `LogoAndLeftAd
 - `WindowTitleBarButtonTests`：AddOn 按钮继承关系，active/motion/platform 状态投影，checked/unchecked 图标切换，detach 回退，Windows 40×40 与自定义高度方形几何，真实 pointer hover/pressed/exit 状态，macOS 与相邻 managed caption button 的正圆一致性，Linux 尺寸/圆角/光标回归，以及独立主题资产注册和指针输入隔离。
 - `ImagePreviewerTitleBarThemeTests`：派生标题栏的标题组、操作区和平台模板契约。
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `WindowTitleBar` | 承载公共内容契约、平台状态和标题栏主题入口。 | `Logo`、`Title`、`TitleAlignment` | `Height`、`TitleBarPadding`、标题字体与颜色 | public |
-| `frame` | `Border#Frame` | 绘制标题栏背景并定义完整可见 frame。 | `Background`、`Padding` | `Height`、`TitleBarPadding` | template-stable |
-| `leading` | Windows/Linux: `PART_Logo` + `PART_LeftAddOn`；macOS: `PART_LeftAddOn` | 承载起始侧应用操作并占用标题安全空间。Windows/Linux 中 Logo 是物理最左内容，且仅在 Logo 与 LeftAddOn 同时有效时产生内部间距。 | `Logo`、`LogoTemplate`、`LogoVisibility`、`LeftAddOn`、`LeftAddOnTemplate` | `LogoSize`、`LogoAndLeftAddOnSpacing`、`HeaderHorizontalSpacing` | template-stable |
-| `title` | Windows/Linux: `PART_ContentPresenter`；macOS: `PART_Logo` + `PART_ContentPresenter` | 展示、测量、对齐和裁剪标题内容；macOS 同时保留 Logo/Title 连续标题组。 | `Logo`、`LogoTemplate`、`LogoVisibility`、`Title`、`TitleTemplate`、`IsTitleVisible` | `LogoAndTitleSpacing`、标题字体与颜色 | template-stable |
-| `trailing` | `PART_RightAddOn` + `PART_CaptionButtonGroup` | 承载结束侧应用操作和 managed window operations。 | `RightAddOn`、`RightAddOnTemplate`；五个 Window caption visibility 属性 | `HeaderHorizontalSpacing`、caption button 尺寸、间距与状态颜色 | template-stable |
-| `native-chrome` | 平台原生窗口按钮安全区 | 以逻辑像素 inset 约束标题安全空间，不进入 visual tree。 | 平台、CSD、WindowState | 不适用 | internal-observable |
-
-LLMS 生成使用以下来源，不手工修改 `docs/AI/generated/llms` 产物。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + 源码 public surface + `token.md` | 生成 `controls/window-title-bar/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + Themes | 生成 `controls/window-title-bar/semantic-cn.md` |
-| API 表 | 源码 public surface | 不在 `overview.md` 机械复制完整表 |
-| Design Token 表 | `WindowTitleBarToken.cs` + `token.md` | 不手工维护第二份生成表 |
-| 示例 | AtomUIGallery `General / Window` + source snippet catalog | `window-title-visibility` 是稳定示例键；临时验收 Demo 不进入生成来源 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
-
 验证策略：
 
 | 改动类型 | 验证要求 |
 | --- | --- |
-| 文档 | 运行 LLMS `verify`、`git diff --check` 并检查相对链接。 |
+| 文档 | 运行 `git diff --check` 并检查相对链接。 |
 | Public API 与状态 | 覆盖属性默认值、Logo 规则、窗口状态、事件时序和 Window 投影。 |
 | Theme 与 Template | 检查三平台结构、稳定 part、Windows/Linux Leading 条件间距、命中测试、ImagePreviewer 与全屏宿主。 |
 | 标题布局 | 覆盖四种显式对齐、平台 `Auto`、CSD/native inset、Logo/LeftAddOn 动态可见性和窄窗口退化。 |

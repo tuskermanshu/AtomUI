@@ -144,7 +144,7 @@ Semantic target。内置 Default/Simple 图形的颜色由 EmptyToken 与 Shared
 `Description` 负责本地化默认描述或调用方文本；`IsDescriptionVisible` 负责显示状态。`Footer` 与 `FooterTemplate` 负责 Empty
 内部的后续操作区域，避免 Gallery 或业务页面通过外部 StackPanel 模拟一个不属于 Empty owner 的 footer。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -152,26 +152,6 @@ Semantic target。内置 Default/Simple 图形的颜色由 EmptyToken 与 Shared
 - [Empty Semantic Part 契约](semantic-part.md)
 - [Empty Token 设计](token.md)
 - [Empty Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Empty` | 数据展示控件根语义区域，承载 public API、数据状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `image` | `PART_SvgImage` | 展示内置或调用方指定的 SVG 图片。 | `PresetImage`、`ImagePath`、`ImageSource`、`SizeType` | 图片高度与图形颜色 Token | stable |
-| `description` | `TextBlock` | 展示默认或调用方提供的描述文本。 | `Description`、`IsDescriptionVisible`、`SizeType` | 描述间距与文本颜色 Token | stable |
-| `footer` | `ContentPresenter` | 承载空状态后的创建、刷新、返回等操作。 | `Footer`、`FooterTemplate` | `FooterMargin`、SharedToken | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/empty/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/empty/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

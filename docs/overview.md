@@ -16,7 +16,6 @@ AtomUI 文档按知识责任组织。跨模块系统设计、单个源码模块�
 - [Gallery 文档](gallery/overview.md)：Gallery 组织、ShowCase 和平台维护说明。
 - [Releases](releases/overview.md)：按版本查看 API 变化与迁移示例。
 - [Strategy](strategy/overview.md)：产品与产业战略分析。
-- [AI 文档](AI/overview.md)：AI 工具消费层、LLMS 配置和生成产物入口。
 - [Superpowers](superpowers/)：设计过程、实施计划和阶段进度，不作为正式架构的事实来源。
 
 ## 文档职责
@@ -69,7 +68,7 @@ docs/
 - [Android 工程环境](engineering/platforms/android/overview.md)：Host、命令、版本和平台证据尚未验证的责任模型。
 - [Mobile Gallery](gallery/platforms/mobile-gallery.md)：独立 Mobile content、iOS Host、Android Host 和平台验收边界。
 
-Mobile 目标与当前 Desktop 源码结构分开表达。现有 `AtomUI.Toolkits.GalleryBase` 和 Desktop LLMS 也不自动成为 Mobile
+Mobile 目标与当前 Desktop 源码结构分开表达。现有 `AtomUI.Toolkits.GalleryBase` 不自动成为 Mobile
 Foundation 依赖或输出。
 
 随着专题完成职责迁移，本入口同步切换到新的 Architecture、Guide、Reference 或 Module 路径，不保留重复副本。

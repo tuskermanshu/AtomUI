@@ -1,14 +1,14 @@
 using Shouldly;
 using Xunit;
 
-namespace AtomUI.Docs.LLMsGenerator.Tests;
+namespace AtomUIGallery.Tests.ShowCases;
 
 public class GalleryMetadataCleanupTests
 {
     [Fact]
     public void ShowCases_Do_Not_Keep_Api_Or_DesignToken_Metadata_Sidecars()
     {
-        var showCasesRoot = Path.Combine(TestRepository.RootPath, "controlgallery/AtomUIGallery/ShowCases");
+        var showCasesRoot = Path.Combine(GetRepoRoot(), "controlgallery/AtomUIGallery/ShowCases");
 
         Directory.GetFiles(showCasesRoot, "*ApiDataGrid.axaml", SearchOption.AllDirectories)
                  .Select(ToRepoRelativePath)
@@ -70,8 +70,24 @@ public class GalleryMetadataCleanupTests
                source.Contains("public const string TokenStatus", StringComparison.Ordinal);
     }
 
+    private static string GetRepoRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "AtomUI.slnx")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new InvalidOperationException("Unable to locate AtomUI repository root.");
+    }
+
     private static string ToRepoRelativePath(string path)
     {
-        return Path.GetRelativePath(TestRepository.RootPath, path).Replace(Path.DirectorySeparatorChar, '/');
+        return Path.GetRelativePath(GetRepoRoot(), path).Replace(Path.DirectorySeparatorChar, '/');
     }
 }

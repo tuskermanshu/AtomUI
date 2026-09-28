@@ -128,7 +128,7 @@ Alert 与同分类控件共享尺寸、状态、Token、Gallery 展示和验证�
 Alert 公开 `root`、`icon`、`section`、`title`、`description`、`actions` 和 `close`。完整 Selector、Style Type、数量语义、
 状态矩阵与排除边界见 [Alert Semantic Part 契约](semantic-part.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -136,29 +136,6 @@ Alert 公开 `root`、`icon`、`section`、`title`、`description`、`actions` �
 - [Alert Semantic Part 契约](semantic-part.md)
 - [Alert Token 设计](token.md)
 - [Alert Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Alert` | 承载整体反馈表面、类型、内容与样式作用域。 | 全部 Alert public API | AlertToken、SharedToken | stable since 6.2.0 |
-| `icon` | 四个状态 `Icon` | 表达 Success、Info、Warning、Error 的替代图标。 | `Type`、`IsShowIcon` | 图标尺寸与状态色 Token | stable since 6.2.0 |
-| `section` | `StackPanel` | 纵向组织 title 与 description。 | `Message`、`Description` | 间距与文本 Token | stable since 6.2.0 |
-| `title` | `Label` / `MarqueeLabel` | 展示普通消息或跑马灯替代呈现。 | `Message`、`IsMessageMarqueeEnabled` | 字号与行高 Token | stable since 6.2.0 |
-| `description` | `Label` | 展示可选反馈详情。 | `Description` | 描述间距与文本 Token | stable since 6.2.0 |
-| `actions` | `ContentPresenter` | 承载可选 ExtraAction 内容。 | `ExtraAction` | `ExtraElementMargin` | stable since 6.2.0 |
-| `close` | `IconButton` | 提供可选关闭请求入口。 | `IsClosable`、`CloseIcon`、`CloseRequest` | 图标尺寸与间距 Token | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/alert/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/alert/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

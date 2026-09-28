@@ -290,7 +290,7 @@ Upload 的视觉模型由控件模板、ControlTheme、SharedToken 和控件 Tok
 
 错误状态必须投射到 Avalonia `DataValidationErrors`，不得另建 Upload 专属 error 机制。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -299,25 +299,6 @@ Upload 的视觉模型由控件模板、ControlTheme、SharedToken 和控件 Tok
 - [Upload 拖动上传设计](drag-drop-design.md)
 - [Upload Token 设计](token.md)
 - [Upload Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Upload` | 上传状态协调器和 Semantic owner，拥有文件集合、输入入口、上传队列、Form 值投影和生命周期。 | `Files`、`ListType`、`TriggerContent`、`UploadTransport`、`FileValueMode` | `UploadToken`、SharedToken | stable since 6.2.0 |
-| `list` | `UploadList` / `UploadPictureShapeList` | 四种 `ListType` 下唯一活动文件列表，拥有列表滚动或 wrap 布局边界。 | `Files`、`ListType`、`ListMaxHeight`、`ListScrollBarVisibility` | Upload list 主题资源 | stable since 6.2.0 |
-| `item` | `AbstractUploadListItem` 派生容器 | 每个真实文件的容器，投射状态、进度和操作入口；不包含 picture append trigger。 | `UploadFileItem.Status`、`Progress`、`ErrorMessage`、`Result` | Upload item 主题资源 | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/upload/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/upload/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

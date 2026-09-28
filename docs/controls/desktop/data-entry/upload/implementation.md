@@ -240,7 +240,7 @@ AOT 边界：
 - 拖动输入使用 typed DataTransfer、StorageItem 和显式策略，不依赖平台私有反射或动态发现。
 - 新增 public 类型应显式引用并由源码、Gallery 和测试覆盖。
 - Semantic descriptor、`UploadListStyle`、`UploadItemStyle` 与 class 常量由生成器静态产生，不使用运行时类型发现。
-- Source generator 生成文件不手工编辑；LLMS 产物也不在本次运行时代码任务中手工修改。
+- Source generator 生成文件不手工编辑。
 
 ## 10. 维护不变量
 

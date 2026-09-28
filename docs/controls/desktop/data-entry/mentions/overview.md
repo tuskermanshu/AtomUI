@@ -245,7 +245,7 @@ Mentions 将 `OptionsSource` 缓存为 `List<IMentionOption>`，再根据 `Filte
 
 `Placement=Bottom` 映射为 `PlacementMode.BottomEdgeAlignedLeft`，`Placement=Top` 映射为 `PlacementMode.TopEdgeAlignedLeft`。打开候选弹层时，控件根据触发字符 bounds 和 text presenter bounds 计算 popup 偏移，使候选弹层对齐当前触发位置。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -255,32 +255,7 @@ Mentions 将 `OptionsSource` 缓存为 `List<IMentionOption>`，再根据 `Filte
 - [Mentions Changelog](changelog.md)
 - [LineEdit Token 设计](../line-edit/token.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Mentions` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `prefix` | 输入前缀区 | 承载 `ContentLeftAddOn` 用户内容。 | `ContentLeftAddOn`、`ContentLeftAddOnTemplate` | SharedToken | stable |
-| `content` | 输入内容面板 | 承载占位符与多行文本 presenter。 | `Value`、`Lines`、`MinLines`、`MaxLines` | SharedToken | stable |
-| `placeholder` | 占位符文本 | 空文本状态提示。 | `PlaceholderText` | SharedToken | stable |
-| `input` | 多行文本 presenter | 承载 `Value` 与 caret/selection 状态。 | `Value`、`IsReadOnly`、`IsAutoFocus` | SharedToken | stable |
-| `clear` | 清除按钮 | 清除输入内容。 | `IsAllowClear`、`ClearIcon` | SharedToken | stable |
-| `popup.root` | 候选弹层框体 | 承载弹层边框、背景、宽度与圆角。 | `MaxPopupHeight`、`MinPopupWidth`、`PopupContentPadding` | PopupTokenResource、SharedToken | stable |
-| `popup.list` | 候选列表容器 | 承载过滤后的候选项。 | `OptionsSource`、`Filter`、`OptionTemplate` | MentionsToken | stable |
-| `popup.listItem` | 候选条目 | 单个候选选项，运行时容器创建。 | `OptionTemplate`、`DisplayCandidateCount` | SharedToken | stable |
-
 完整 Part 表、SelectorRoute 与定制边界见 [Mentions Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/mentions/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/mentions/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

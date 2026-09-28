@@ -280,7 +280,7 @@ suffix、clear、count 的内容或可见性变化不增删 marker。完整 sele
 Semantic Part；完整 selector route、`ContractType` 与定制边界见
 [LineEdit 家族 Semantic Part 契约](semantic-part.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -288,28 +288,6 @@ Semantic Part；完整 selector route、`ContractType` 与定制边界见
 - [LineEdit Semantic Part 契约](semantic-part.md)
 - [LineEdit Token 设计](token.md)
 - [LineEdit Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `LineEdit` | 承载 public API、文本值、输入状态、验证状态与 owner-scoped Style 入口。 | `Text`、`SizeType`、`StyleVariant`、`Status`、`Background`、`BorderBrush` | SharedToken、`LineEditToken` | stable |
-| `prefix` | 内部前缀 `ContentPresenter` | 承载 `InnerLeftContent` 与其模板。 | `InnerLeftContent`、`InnerLeftContentTemplate` | 输入 spacing / padding | stable |
-| `input` | `InputTextPresenter` | 绘制文本、光标、选择和密码 reveal 结果。 | 文本、选择、caret、password API | 字体、选择色、caret 资源 | stable |
-| `suffix` | 内部后缀 `StackPanel` | 组织 clear、reveal、Form feedback、内部右侧内容和 count。 | 右侧内容及辅助状态 API | 输入 spacing / padding | stable |
-| `clear` | `InputClearIconButton` | 提供清除当前文本的操作入口。 | `IsAllowClear`、`ClearIcon`、`Text` | clear 按钮主题 | stable |
-| `count` | `TextBlock` | 展示当前长度与 `MaxLength`。 | `IsShowCount`、`Text`、`MaxLength` | 字体与 placeholder 色 | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `semantic-part.md` + `token.md` + Gallery ShowCase | 生成 `controls/line-edit/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/line-edit/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

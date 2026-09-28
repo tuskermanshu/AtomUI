@@ -220,7 +220,7 @@ ListBox 的过滤模型面向简单文本列表和候选项列表。`FilterValue
 
 CandidateList 继承 ListBox，并增加候选项键盘导航、候选高亮、commit / cancel 和最大选择数量控制。ListBox 的点击、选择、过滤、空状态和虚拟化上下文规则直接影响 CandidateList，因此 ListBox 变更必须走 CandidateList 验证。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 文档导航：
 
@@ -228,32 +228,6 @@ CandidateList 继承 ListBox，并增加候选项键盘导航、候选高亮、c
 - [ListBox 桌面版实现原理](implementation.md)
 - [ListBox Token 设计](token.md)
 - [ListBox Changelog](changelog.md)
-
-LLMS 语义区域：
-
-下表是 LLMS 语义导出使用的区域映射。Semantic Part 的 owner 是 `ListBox`，对应上游 Ant Design 6.6.0 新增的
-`Listy` 组件（`import { Listy } from 'antd'`，高性能虚拟化列表）：`root`、`item` 自上游 6.6.0 公开，`root` 由生成器
-为带非 root Part 的 owner 隐式加入；AtomUI 两个 Part 随 Batch 2 Semantic Part 改造公开，descriptor 的 `Since` 统一
-为 `6.0`。ListBox 没有分组功能，上游 `groupHeader` 不适用于 ListBox（不虚构 Part）；selection（`SelectedIndicator`）、
-filter 高亮与 empty 不属于对外 Semantic Part。完整契约见 [ListBox Semantic Part 契约](semantic-part.md)，设计与证据见
-[ListBox 桌面版实现原理](implementation.md) 的 Semantic Part 处置一节。
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ListBox` | 根语义区域，即滚动容器，承载字体、行高、相对定位、外框与外框闭合边界，表面投影到 `Frame` / `ScrollViewer`；对应上游 `.ant-listy`。 | `ItemsSource`、`ItemTemplate`、`SizeType`、`IsBorderless`、`IsSelectable`、`SelectionMode` | `ListBoxToken`、SharedToken | stable since 6.2.0 |
-| `item` | 每个 `ListBoxItem` 容器 | 条目元素，设置内间距、分割线与悬浮背景；对应上游 `.ant-listy-item`。 | `SizeType`、`ItemHoverBg`、`ItemSelectedBg` | `ItemPadding*`、`ItemHoverBgColor`、`ColorSplit`、`ControlItemBgHover` | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/list-box/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/list-box/semantic-cn.md` |
-| Semantic Parts | `semantic-part.md` Part 表 + 实现文档节点映射 | 分 owner 输出 root、selector、类型、数量与跨根信息。 |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

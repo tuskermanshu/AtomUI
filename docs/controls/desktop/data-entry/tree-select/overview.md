@@ -191,7 +191,7 @@ TreeSelect 属于 Data Entry 选择控件家族，与 Select、Cascader、DatePi
 
 TreeSelect 使用节点的 `ItemKey` 或 `Value` 组成 `TreeNodePath`，用于 `ItemsSource` 替换后的选择重映射。节点缺少稳定 identity 时，控件无法可靠地跨数据源替换保留选择。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 - [TreeSelect 桌面版实现原理](implementation.md)
 - [TreeSelect Semantic Part 契约](semantic-part.md)
@@ -208,24 +208,3 @@ TreeSelect 使用节点的 `ItemKey` 或 `Value` 组成 `TreeNodePath`，用于 
 | AXAML 或 template part | 验证右侧 AddOn/count/handle binding、hover/pressed relay、popup 内容和 Gallery 示例。 |
 | Token 或尺寸 | 验证 Large / Middle / Small / Custom、tag 高度、popup padding 和最小宽度。 |
 | 文档改动 | 运行 `git diff --check`，检查文档链接存在。 |
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `TreeSelect` | 数据录入控件根语义区域，承载 public API、值状态、验证状态和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `input` | `输入或编辑区域` | 承载用户输入、当前值、占位、格式化或只读状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `trigger` | `触发区域` | 承载清除、展开、提交、步进、上传或辅助操作。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `popup` | `弹层或候选区域` | 承载下拉、候选项、日历、颜色面板或异步内容。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `validation` | `校验反馈区域` | 承载 Form、status、错误、警告、help 或 loading 状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/tree-select/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/tree-select/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |

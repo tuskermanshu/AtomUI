@@ -683,7 +683,7 @@ Semantic Setter 命中只证明目标属性已生效；如果最终布局仍被 
 - 优先级关系成立：`SplashLogoStyle` 的宽高覆盖 `LogoSize` 并且**可见徽标尺寸与 Setter 一致**（以 `Bounds` 断言，避免模板内容自带固定尺寸造成溢出假通过），`SplashProgressBarStyle` 的 `Height` 覆盖 `ProgressBarHeight`，
   `SplashTitleStyle` 的 `Foreground` / `FontSize` 覆盖 Token 投影值，且不改变自然测量之外的布局契约。
 - 尺寸基线契约成立：固定 `Width` + `MinHeight` 下内容仍可自然增长；给 `content` 设置固定 `Height` 会破坏该基线（失败回归）。
-- 文档一致性：本文件、`overview.md` 的 Part 摘要表与生成的 LLMS 语义文档保持一致，descriptor 与实际模板 marker 无差集。
+- 文档一致性：本文件与 `overview.md` 的 Part 摘要表保持一致，descriptor 与实际模板 marker 无差集。
 - Generator 静态输出与 NativeAOT 路径不依赖反射或运行时扫描：九个 marker 通过静态 AXAML class 在既有模板路径一次性添加，
   不引入 VisualTree 搜索、动态 marker 绑定或运行时 AXAML 解析。Extras 是首个采用 Semantic Part 的包，需按
   [Gallery NativeAOT 发布流程](../../../../engineering/workflows/gallery-aot-release-workflow.md)验证发布链路。

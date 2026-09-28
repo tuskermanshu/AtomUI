@@ -166,7 +166,7 @@ ToggleSwitch.IsLoading
 
 ToggleSwitch 当前主题提供普通和小号两组尺寸。`Middle`、`Large` 和 `Custom` 共用普通尺寸，`Small` 使用 small token。控件测量宽度时取 `TrackMinWidth` 与内容宽度加内部边距的较大值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -175,28 +175,9 @@ ToggleSwitch 当前主题提供普通和小号两组尺寸。`Middle`、`Large` 
 - [ToggleSwitch Token 设计](token.md)
 - [ToggleSwitch Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `ToggleSwitch` | 开关值、状态、内容与根视觉样式的统一 owner，承载 `IsChecked`、`SizeType`、`IsLoading`、动效开关和轨道背景。 | `IsChecked`、`GrooveBackground`、`SizeType`、`IsLoading` | `ToggleSwitchToken`、SharedToken | stable |
-| `content` | On/Off `ContentPresenter` | 开关内部 checked / unchecked 内容语义区域，承载 `OnContent` / `OffContent` 文本与图标内容。 | `OnContent`、`OffContent`、`OnContentTemplate`、`OffContentTemplate` | `ContentIconSize`、`ExtraInfoFontSize`、`InnerMinMargin`、`InnerMaxMargin` | stable |
-| `indicator` | `SwitchKnob` | 滑动把手语义区域，承载把手填充、阴影、两端位置和 loading 指示。 | `IsChecked`、`IsLoading` | `HandleBg`、`HandleShadow`、`HandleSize`、`HandleSizeSM` | stable |
-
 `content` 与上游 Switch `content` 语义对齐，由模板中的两个 `ContentPresenter` 节点承载并以 `Multiple` 基数公开；
 `indicator` 对应上游 `indicator` 语义，由 `SwitchKnob` 节点承载并以 `Single` 基数公开。完整契约见
 [ToggleSwitch Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/toggle-switch/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/toggle-switch/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

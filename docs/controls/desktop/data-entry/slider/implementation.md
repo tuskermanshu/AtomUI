@@ -178,4 +178,4 @@ Tooltip 文本和 placement 由 Slider 在模板应用、thumb 数量变化、�
 - `RemainingFormValueBindingTests`：单值与 Range Form 值和数据验证。
 - `AtomUIGallery.Tests` Slider 页面测试：稳定 Showcase、绑定、禁用指定 handle、多点组合结构、Semantic Part 预览与自定义语义结构的样式示例。
 - Gallery 走查：horizontal / vertical、reverse、marks、tick、Light / Dark、多点组合、禁用指定滑块，以及 100% / 125% / 150% 缩放下的 thumb 平滑度与边框清晰度。
-- 文档验证：运行 LLMS generate / verify、目标测试、Gallery build 和 `git diff --check`。
+- 文档验证：运行目标测试、Gallery build 和 `git diff --check`。

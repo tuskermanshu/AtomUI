@@ -245,4 +245,4 @@ FlowDirection 为 RTL 时，视觉 x 坐标按 panel 宽度镜像；日期顺序
 - Template/主题：overlay 与 CalendarView 完全重叠，周标题区不绘制范围条，日期 Cell 横向连续、无可见垂直 Cell 外间距、hover/selected/today/focused/disabled 状态不被范围条覆盖。
 - 资源生命周期：`Background` 使用 DynamicResource/TokenResource 时，RangeBar remove/reset/detach 后释放 owner resource host，不保留 Calendar 或 Gallery。
 - 交互与 Automation：范围条不改变 Cursor、不截获 Pointer、不改变 Cell 选择事件顺序、不改变 SelectionProvider/SelectionItemProvider 语义。
-- Gallery/LLMS/AOT：跨日期事件示例使用 `RangeBars` 展示 public API；LLMS 从 overview、implementation、本文和 Gallery 示例生成；NativeAOT 路径不出现反射或字符串 binding 新风险。
+- Gallery/AOT：跨日期事件示例使用 `RangeBars` 展示 public API；NativeAOT 路径不出现反射或字符串 binding 新风险。

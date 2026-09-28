@@ -217,16 +217,6 @@
       "conservative": true
     },
     {
-      "id": "docs-generator",
-      "roots": [
-        "tools/AtomUI.Docs.LLMsGenerator"
-      ],
-      "depth": 1,
-      "tests": [
-        "tests/AtomUI.Docs.LLMsGenerator.Tests/**/*.cs"
-      ]
-    },
-    {
       "id": "typemap-linker",
       "roots": [
         "src/AtomUI.TypeMap.Linker"
@@ -268,7 +258,7 @@
         "tests/AtomUIGallery.Tests/**/ShowCaseScenarioControllerConventionsTests.cs",
         "tests/AtomUIGallery.Tests/**/MigratedShowCaseDeferredCreationTests.cs",
         "tests/AtomUIGallery.Tests/**/ShowCasePanelStructureTests.cs",
-        "tests/AtomUI.Docs.LLMsGenerator.Tests/GalleryMetadataCleanupTests.cs"
+        "tests/AtomUIGallery.Tests/**/GalleryMetadataCleanupTests.cs"
       ]
     },
     {
@@ -373,19 +363,6 @@
       ],
       "tests": [
         "tests/AtomUI.Localization.IntegrationTests/**/*.cs"
-      ]
-    },
-    {
-      "id": "docs-inputs",
-      "changes": [
-        "docs/controls/**",
-        "docs/AI/generated/**",
-        "src/AtomUI.Controls/**/*.cs",
-        "src/AtomUI.Desktop.Controls*/**/*.cs",
-        "controlgallery/AtomUIGallery/ShowCases/**"
-      ],
-      "tests": [
-        "tests/AtomUI.Docs.LLMsGenerator.Tests/**/*.cs"
       ]
     },
     {

@@ -159,7 +159,7 @@ CheckBox 的动效只表达状态变化反馈，不应改变 public API 语义�
 
 CheckBox 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -168,28 +168,9 @@ CheckBox 的视觉选项通过 public API 归一为 theme variables、伪类或�
 - [CheckBox Token 设计](token.md)
 - [CheckBox Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `CheckBox` | 控件根语义区域，承载勾选值、三态、内容、可用性和动效/水波开关等 public API、状态归一和主题入口。 | `IsChecked`、`IsThreeState`、`Content`、`IsEnabled` | `CheckBoxToken` | stable |
-| `icon` | `CheckBoxIndicator` | 复选框指示框语义区域，承载指示框背景、边框、圆角和尺寸。 | `IsChecked`、`IsThreeState`、`IsEnabled` | `CheckIndicatorSize`、`CheckedMarkSize`、`IndicatorTristateMarkSize` | stable |
-| `label` | `ContentPresenter` | 文本语义区域，承载 `Content` 内容与文本视觉状态。 | `Content`、`ContentTemplate` | `TextMargin` | stable |
-
 `icon` 指示框语义与上游 Checkbox `icon` 语义对齐，由模板中的 `CheckBoxIndicator` 节点承载并以 `Single` 基数公开；
 `label` 对应上游 `label` 语义，由 `ContentPresenter` 节点承载。完整契约见
 [CheckBox Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/check-box/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/check-box/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

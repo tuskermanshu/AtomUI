@@ -227,7 +227,7 @@ Part 集合。完整 selector route、`ContractType`、模板变体矩阵和定�
 增减按钮区域（Spinner 模式的 +/− 按钮与 Input 模式的浮动 handle）尚未开放为 Semantic Part，其内部节点不属于
 公共契约。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -236,30 +236,9 @@ Part 集合。完整 selector route、`ContractType`、模板变体矩阵和定�
 - [NumericUpDown Token 设计](token.md)
 - [NumericUpDown Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `NumericUpDown` | 数值输入控件根语义区域，承载 public API、数值与字符串状态、验证状态和主题入口。 | `Value`、`StringValue`、`FormatString`、`SizeType`、`StyleVariant`、`Status` | `NumericUpDownToken`、`ButtonSpinnerToken` | stable |
-| `prefix` | internal `AddOnContentPresenter` | 内部前缀内容语义区域，承载 `InnerLeftContent` 的最终呈现。 | `InnerLeftContent`、`InnerLeftContentTemplate` | `SpacingXXS` | stable |
-| `input` | internal `EmbeddedTextBox#PART_TextBox` | 数值文本编辑表面，承载字体、文本对齐、光标与选择呈现。 | `Text`、`PlaceholderText`、`IsStringMode`、`IsReadOnly` | `FontSize`、文本与 caret 资源 | stable |
-| `suffix` | 内部后缀布局 `StackPanel` | 后缀布局语义区域，组织 clear 与 `InnerRightContent`。 | `InnerRightContent`、`InnerRightContentTemplate`、`IsAllowClear` | `UniformlyPaddingXXS` | stable |
-| `clear` | `InputClearIconButton#PART_ClearButton` | 清空数值的操作入口。 | `IsAllowClear`、`ClearIcon` | clear 按钮主题与 SharedToken | stable |
-
 `prefix`、`suffix` 与共享 frame 结构的 content 前缀 / 后缀槽对齐；`input` 由内嵌 `TextBox` 承担并在两个模板变体中
 使用同一条默认 route。增减按钮、外部 AddOn、placeholder 与用户内容模板子树不属于 Semantic Part。完整契约见
 [NumericUpDown Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/numeric-up-down/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/numeric-up-down/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

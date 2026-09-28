@@ -77,6 +77,14 @@ class Planner:
         return max(choices, key=lambda x: len(x[1])) if choices else (None, None)
 
     @lru_cache(maxsize=None)
+    def existed_at_base(self, path, base="HEAD"):
+        try:
+            self.repo.git("cat-file", "-e", base + ":" + path)
+            return True
+        except ValueError:
+            return False
+
+    @lru_cache(maxsize=None)
     def suite_files(self, pattern):
         return [p for p in self.repo.tests if matches(p, pattern)]
 
@@ -167,6 +175,13 @@ class Planner:
                     choose(area["tests"], "Project/shared entry change: " + path)
             if not handled:
                 if any(matches(path, g) for g in self.policy.get("ignore", [])):
+                    ignored.append(path)
+                elif not (self.repo.root / path).exists() and self.existed_at_base(path, base):
+                    # A changed path missing from the worktree but present in the base commit
+                    # is a deletion. Files with an area, owner, or rule were already claimed
+                    # above (deleted contracts keep propagating to consumers); only a deletion
+                    # nothing claims remains, and no test can be selected through a path whose
+                    # project no longer exists.
                     ignored.append(path)
                 else:
                     gaps.append("No selection policy for changed input: " + path)

@@ -355,7 +355,7 @@ TreeView 同时支持 checkbox 和 radio。checkbox 可以按 `IsCheckStrictly` 
 - `Header` 仍遵守 Avalonia TreeView 数据项语义：生成容器的 `Header` 是节点对象，`node.Header` 通过 `TreeDataTemplate` 绑定更新展示内容。
 - 普通 `TreeItemNode`、用户自定义 `ITreeItemNode` 与 `BindableTreeItemNode` 可以在同一个 TreeView 数据源中并存。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -363,33 +363,6 @@ TreeView 同时支持 checkbox 和 radio。checkbox 可以按 `IsCheckStrictly` 
 - [TreeView Semantic Part 契约](semantic-part.md)
 - [TreeView Token 设计](token.md)
 - [TreeView Changelog](changelog.md)
-
-LLMS 语义区域：
-
-下表是 LLMS 语义导出使用的区域映射，独立于 [§3.1 Semantic Part 契约](#31-semantic-part-契约)：`motion` 只作为 LLMS
-语义区域存在，不属于对外 Semantic Part；Semantic Part 的节点映射以 [TreeView Semantic Part 契约](semantic-part.md)
-为准。
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `TreeView` | 树根语义区域，承载 public API、节点状态机与主题入口。 | `Items`、`ItemsSource`、`SelectionMode`、`ToggleType`、`IsDraggable`、`NodeHoverMode`、`DataLoader`、`Filter`、`EmptyIndicator` | `TreeViewToken` | stable |
-| `item` | `TreeViewItem` 容器 | 单个树节点容器（Semantic Part `item`）。 | `Header`、`Icon`、`IsSelected`、`IsExpanded`、`IsChecked`、`NodeHoverMode`、`IsShowLine` | `TreeItemMargin`、`HeaderHeight` | stable |
-| `itemSwitcher` | `PART_NodeSwitcherButton` | 节点展开/收起 switcher（Semantic Part `itemSwitcher`）。 | `Switcher*Icon`、`IsSwitcherRotation`、`IsLeaf`、`IsLoading`、`IsExpanded` | `HeaderHeight`、`NodeHoverBg`、`TreeNodeSwitcherMargin` | stable |
-| `itemIndicator` | `ToggleCheckbox` / `ToggleRadio` | 节点勾选指示（Semantic Part `itemIndicator`）。 | `ToggleType`、`IsChecked`、`IsIndicatorEnabled`、`GroupName` | SharedToken `ColorBorder`、`ColorPrimary` | stable |
-| `itemIcon` | `PART_IconPresenter` | 节点图标（Semantic Part `itemIcon`）。 | `Icon`、`IsShowIcon`、`IsShowLeafIcon` | `TreeNodeIconMargin` | stable |
-| `itemTitle` | `HeaderPresenter` | 节点标题文字（Semantic Part `itemTitle`）。 | `Header`、`HeaderTemplate` | `ColorText`、`ColorTextDisabled` | stable |
-| `motion` | `PART_ItemsPresenterMotionActor` | 子节点展开/收起动效（LLMS 区域，非 Semantic Part）。 | `IsMotionEnabled` | `MotionDurationSlow` | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/tree-view/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/tree-view/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

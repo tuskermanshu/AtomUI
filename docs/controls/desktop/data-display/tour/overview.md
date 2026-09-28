@@ -160,7 +160,7 @@ Tour 的动效只表达状态变化反馈，不应改变 public API 语义。初
 
 Tour 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -168,35 +168,6 @@ Tour 的视觉选项通过 public API 归一为 theme variables、伪类或模�
 - [Tour Token 设计](token.md)
 - [Tour Semantic Part 契约](semantic-part.md)
 - [Tour Changelog](changelog.md)
-
-LLMS 语义区域（完整字段契约见 [Tour Semantic Part 契约](semantic-part.md)）：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Tour` | 引导流程 owner：步骤集合、受控开关状态与目标锚定。 | `IsOpen`、`CurrentIndex`、`Steps` | 无独立 Token | stable since 6.2.0 |
-| `popup.root` | `PART_ArrowDecorator`（ArrowDecoratedBox） | 引导卡片容器根，承载内容与箭头。 | `Placement`、`IsArrowVisible` | `TourBorderRadius` | stable since 6.2.0 |
-| `popup.mask` | 共享 `TourLayer`（逻辑父挂载） | 整屏遮罩、镂空高亮目标并阻挡交互。 | `IsShowMask`、`MaskColor`、`GapRadius` | `ColorBgMask` | stable since 6.2.0 |
-| `popup.section` | ArrowDecoratedBox `PART_ContentDecorator` | 卡片主要内容区域（圆角/背景/内边距）。 | `StyleType` | `TourBorderRadius` | stable since 6.2.0 |
-| `popup.cover` | TourStep 模板 `CoverPresenter` | 步骤封面区域。 | `TourStep.Cover` | 无 | stable since 6.2.0 |
-| `popup.close` | TourStep 模板 `CloseButton` | 关闭按钮，结束引导。 | `CloseIcon` | `CloseBtnSize` | stable since 6.2.0 |
-| `popup.header` | TourStep 模板 header Border | 头部容器（标题 + 关闭按钮）。 | 无独立 API | 无 | stable since 6.2.0 |
-| `popup.title` | TourStep 模板 `Title` | 标题文字。 | `TourStep.Title` | `HeaderColor` | stable since 6.2.0 |
-| `popup.description` | TourStep 模板 `DescriptionPresenter` | 描述文字。 | `TourStep.Description` | 无 | stable since 6.2.0 |
-| `popup.footer` | TourStepsView 模板 `FooterFrame` | 底部操作区（指示器 + 按钮组）。 | 无独立 API | 无 | stable since 6.2.0 |
-| `popup.actions` | TourStepsView 模板 `ActionsLayout` | 操作按钮组容器。 | `CustomActions` | `PrimaryPrevBtnBg` | stable since 6.2.0 |
-| `popup.indicators` | TourStepsView 模板 `IndicatorPresenter` | 指示器组容器。 | `Indicator` | 无 | stable since 6.2.0 |
-| `popup.indicator` | DefaultTourIndicator 物化圆点 | 单个步骤指示器圆点（含激活态）。 | `IndicatorSize`、`IndicatorColor` | `IndicatorSize` | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/tour/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/tour/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

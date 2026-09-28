@@ -135,7 +135,7 @@ Result 与同分类控件共享尺寸、状态、Token、Gallery 展示和验证
 Result 公开 `root`、`icon`、`title`、`subTitle`、`extra` 和 `body`。完整 Selector、Style Type、数量语义、状态矩阵与排除边界见
 [Result Semantic Part 契约](semantic-part.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -143,28 +143,6 @@ Result 公开 `root`、`icon`、`title`、`subTitle`、`extra` 和 `body`。完�
 - [Result Semantic Part 契约](semantic-part.md)
 - [Result Token 设计](token.md)
 - [Result Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Result` | 承载整体结果布局、状态和 Semantic Style 作用域。 | 全部 Result public API | ResultToken、SharedToken | stable since 6.2.0 |
-| `icon` | 普通图标 presenter / 异常状态 SVG | 表达普通反馈图标和 403/404/500 图像的替代呈现。 | `Status`、`Icon` | 图标尺寸、状态色、异常图尺寸 Token | stable since 6.2.0 |
-| `title` | 标题 `ContentPresenter` | 展示主结果标题。 | `Header`、`HeaderTemplate`、`HeaderFontSize` | 标题字号、行高、间距和文本色 Token | stable since 6.2.0 |
-| `subTitle` | 副标题 `ContentPresenter` | 展示可选结果说明。 | `SubHeader`、`SubHeaderTemplate`、`SubHeaderFontSize` | 副标题字号、行高和文本色 Token | stable since 6.2.0 |
-| `extra` | 操作区 `ContentPresenter` | 承载可选操作或辅助内容。 | `Extra`、`ExtraTemplate` | `ExtraMargin` | stable since 6.2.0 |
-| `body` | 正文 `ContentPresenter` | 承载可选详细内容区域。 | `Content`、`ContentTemplate` | `ContentMargin`、`ContentPadding`、填充色 Token | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/result/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/result/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

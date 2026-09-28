@@ -11,7 +11,6 @@
 | AXAML 命名空间 | `https://atomui.net` |
 | Gallery 页面 | `controlgallery/AtomUIGallery/ShowCases/Feedback/Modal` |
 | 控件状态 | Stable |
-| LLMS 可见性 | public |
 
 `Dialog` 用于需要独立内容表面、明确结果和受控关闭流程的桌面对话。它支持 Overlay 与原生 Window 两种宿主、modal 与 modeless 两种交互模式、声明式 `IsOpen` 和静态异步 API。
 
@@ -184,7 +183,7 @@ Overlay 使用彼此独立的几何语义：
 
 owner resize、frame shadow、drawn frame thickness、Window state 和 `ClientSize` 变化后，mask 继续使用完整 layer bounds，Dialog Surface 正文按最新 owner bounds 重新约束。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 - [实现原理](implementation.md)
 - [Semantic Part 契约](semantic-part.md)
@@ -214,17 +213,6 @@ owner resize、frame shadow、drawn frame thickness、Window state 和 `ClientSi
 
 宿主边界：`mask`/`wrapper` 仅 Overlay 宿主物化；Window 宿主内 marker 完整存在，但 owner 作用域 Semantic Style 不跨
 `TopLevel` 级联（先例：ImagePreviewer 的 native dialog）。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/modal/index-cn.md` |
-| 单控件语义文档 | overview.md + implementation.md + Themes 文件夹 + theme/template 信息 | 生成 `controls/modal/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 overview.md 中手工复制完整表 |
-| Design Token 表 | token.md 或 Token 类型 | 不在 token.md 中手工复制生成表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | implementation.md | 用于定位控件源码、主题和测试 |
 
 验证按改动范围运行 Dialog/MessageBox 定向测试、完整 Desktop Controls 测试、Gallery 测试与构建；涉及 AOT 发布路径时执行 Gallery NativeAOT publish，并始终运行 `git diff --check`。Dialog 内容 Popup 家族由原语、控件家族、DataGrid 专项与入口库存测试覆盖，完整清单和断言见 [Modal 内容弹层叠放设计](popup-layering-design.md)。
 

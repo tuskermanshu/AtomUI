@@ -193,7 +193,7 @@ Pagination 的动效只表达状态变化反馈，不应改变 public API 语义
 
 Pagination 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -202,26 +202,7 @@ Pagination 的视觉选项通过 public API 归一为 theme variables、伪类�
 - [Pagination Token 设计](token.md)
 - [Pagination Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | Owner | AtomUI 节点 | 职责 | 稳定性 |
-| --- | --- | --- | --- | --- |
-| `root` | `Pagination` / `SimplePagination` | 控件自身 | 分页控件根语义区域，承载分页状态、布局入口和主题视觉。 | stable since 6.2.0 |
-| `item` | `Pagination` | 上一页/下一页导航项与页码指示项 | 承载单个分页导航单元的尺寸、状态与点击语义；`JumpPrevious` / `JumpNext` 快速跳页项除外。 | stable since 6.2.0 |
-| `item` | `SimplePagination` | 上一页/下一页导航项 | 承载简洁模式导航单元的尺寸、状态与点击语义；快速跳转输入与信息文本除外。 | stable since 6.2.0 |
-
 Part 的 Selector、ContractType、数量语义与定制边界以 [Pagination Semantic Part 契约](semantic-part.md) 为唯一完整来源。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/pagination/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/pagination/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

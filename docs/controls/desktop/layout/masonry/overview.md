@@ -209,7 +209,7 @@ Masonry 不提供虚拟化语义。瀑布流虚拟化涉及滚动偏移、容器
 
 Masonry 的布局元数据属于 item container，而不是数据对象或模板内部视觉元素。该规则保证直接子元素和 `ItemsSource` 两种模式都通过同一套 `MasonryPanel.Children` 计算路径布局。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -218,28 +218,9 @@ Masonry 的布局元数据属于 item container，而不是数据对象或模板
 - [Masonry Changelog](changelog.md)
 - [AtomUI 响应式机制设计](../../../../architecture/systems/control-infrastructure/responsive.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Masonry` | 布局控件根语义区域，承载布局 public API、ItemsControl 输入、尺寸和 item Selector 作用域。 | 见 API 与契约模型；完整契约见 `semantic-part.md` | 无专属 Token | stable since 6.2.0 |
-| `item` | item container | 参与 Masonry 测量、列分配和排列的直接子元素或 generated `ContentPresenter`。 | `Items`、`ItemsSource`、`ItemTemplate`、`ItemContainerTheme`、`Masonry.Column`、`Masonry.Span` | 无专属 Token | stable since 6.2.0 |
-
 Token 说明：
 
-- Masonry 当前没有专属 `token.md`；LLMS 生成按第 5 节视觉与主题模型、SharedToken、控件家族 Token 或主题资源说明 Token 边界。
-
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `semantic-part.md` + `implementation.md` + Gallery ShowCase | 生成 `controls/masonry/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/masonry/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
+- Masonry 当前没有专属 `token.md`；Token 边界按第 5 节视觉与主题模型、SharedToken、控件家族 Token 或主题资源说明 Token 边界。
 
 验证策略：
 

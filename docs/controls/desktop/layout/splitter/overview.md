@@ -149,7 +149,7 @@ Splitter 的运行时组合关系如下：
 集成关系：
 
 - Gallery ShowCase 展示基本、水平、嵌套、禁用调整、折叠、多面板和 lazy 场景。
-- API 契约摘要是 LLMS 和用户 API 文档的结构化来源。
+- API 契约摘要是用户 API 文档的结构化来源。
 - Token 类型、生成数据和 token.md是 Splitter Token 的结构化来源。
 - Splitter 不参与 Form value、CompactSpace、Popup/Flyout 或 Window 生命周期。
 
@@ -213,7 +213,7 @@ Splitter 通过 owner-scoped Semantic Selector 公开三个稳定语义区域：
 方向与 lazy 切换只改变布局与状态，不改变 Part 数量。完整字段、SelectorRoute、数量语义与定制边界见
 [Splitter Semantic Part 契约](semantic-part.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -221,25 +221,6 @@ Splitter 通过 owner-scoped Semantic Selector 公开三个稳定语义区域：
 - [Splitter Semantic Part 契约](semantic-part.md)
 - [Splitter Token 设计](token.md)
 - [Splitter Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Splitter` | 控件根语义区域，承载 public API、Children、事件和 Token scope。 | `Orientation`、`IsLazy`、`HandleSize`、`Children` | `SplitBarHandleSize` | stable since 6.2.0 |
-| `panel` | 用户面板子控件 | 可调整尺寸的内容面板。 | attached panel properties | 无专属 Token | stable since 6.2.0 |
-| `dragger` | `SplitterHandle` 模板中的 `PART_DragBar` | 相邻面板之间的拖拽命中区。 | `IsLazy`、`HandleSize`、`LineThickness`、`LineCornerRadius` | `SplitTriggerSize`、`SplitBarDraggableSize`、`HandleLineThickness` | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/splitter/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/splitter/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

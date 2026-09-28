@@ -120,20 +120,6 @@ public event EventHandler<StepsCurrentChangeRequestedEventArgs>?
 
 ### 3.5 主题契约
 
-LLMS 语义区域：
-
-| Part | Owner | AtomUI 节点 | 职责 | 稳定性 |
-| --- | --- | --- | --- | --- |
-| `root` | `Steps` | 控件自身 | 步骤条根语义区域，承载流程状态、布局入口和主题视觉。 | stable since 6.2.0 |
-| `item` | `Steps` | `StepsItem` | 单项状态、内容和交互语义。 | stable since 6.2.0 |
-| `itemWrapper` | `Steps` | `ItemWrapper`（`StepsPanelItemFrame`） | item 包裹层，承载单项整体视觉。 | stable since 6.2.0 |
-| `itemIcon` | `Steps` | `PART_Indicator`（`StepsItemIndicator`） | 数字、状态图标、Dot、自定义 Icon、Progress 和 Wave 目标。 | stable since 6.2.0 |
-| `itemTitle` | `Steps` | `HeaderPresenter` | 标题。 | stable since 6.2.0 |
-| `itemSubtitle` | `Steps` | `SubHeaderPresenter` | 副标题。 | stable since 6.2.0 |
-| `itemSection` | `Steps` | `Section`（`StepsItemSectionPanel`） | item 内容区，承载标题行与详情内容的分组布局容器。 | stable since 6.2.0 |
-| `itemContent` | `Steps` | `ContentPresenter` | 步骤详情。 | stable since 6.2.0 |
-| `itemRail` | `Steps` | `Connector` | 当前 item 与下一个 item 的连接线。 | stable since 6.2.0 |
-
 Part 的 Selector、ContractType、数量语义与定制边界以 [Steps Semantic Part 契约](semantic-part.md) 为唯一完整来源。
 
 内部模板节点（不属于 Semantic Part）：
@@ -385,7 +371,7 @@ Percent.HasValue
 - 上游对文本应用 `word-break: break-word`，超长连续字符串也会断开换行；Avalonia `TextBlock` 只支持按词换行，超长连续字符串在极窄宽度下可能溢出或裁剪，必要时通过自定义 `LineBreakingRules` 对齐。
 - 上游 v6 已废弃描述区默认最大宽度（默认不设上限）；AtomUI 由 `DescriptionMaxWidth` Token（默认 140）表达描述区最大宽度，Token 保留供显式设置。该上限独立于压缩与换行机制。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -393,17 +379,6 @@ Percent.HasValue
 - [Steps 桌面版实现原理](implementation.md)
 - [Steps Token 设计](token.md)
 - [Steps Changelog](changelog.md)
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/steps/index-cn.md`。 |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + Themes 文件夹 | 生成 `controls/steps/semantic-cn.md`。 |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 overview 中维护第二份机械列表。 |
-| Design Token 表 | token.md 或 Token 类型 | Token 文档只解释语义边界。 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只使用稳定示例。 |
-| 源码索引 | `implementation.md` | 用于定位源码、主题和测试。 |
 
 验证策略：
 
@@ -418,4 +393,4 @@ LLMS 导出来源：
 | Token | Indicator、Dot、状态色、Connector、Navigation、Inline、Progress。 |
 | 生命周期 | 容器 owner 释放、语义样式投影建立与释放、直接/生成/回收容器、模板重套、detach/reattach、Wave part 释放。 |
 | Semantic Part | descriptor、路由、marker 同步、生成的 Style 应用与 Gallery 预览。 |
-| 文档 | `git diff --check`、相对链接和 LLMS 源文档一致性。 |
+| 文档 | `git diff --check`、相对链接。 |

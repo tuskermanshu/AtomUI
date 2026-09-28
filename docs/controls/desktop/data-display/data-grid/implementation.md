@@ -594,7 +594,7 @@ Filter Flyout 从 Query.Filters 初始化，提交完整新 Query。候选 Filte
 - 列宽 solver 不依赖 RowsPresenter 可见性；filler 不掩盖 star 分配。
 - ControlTheme key、Template Part、伪类、Token、Semantic Part 和 Ready 视觉优先级。
 - Light/Dark、Browser/Desktop、SizeType、冻结列、RowDetails 和 nested scrolling 的一致语义。
-- 文档、源码 public surface、Gallery、tests 与 generated LLMS 的一致性。
+- 文档、源码 public surface、Gallery 与 tests 的一致性。
 - Extra Content 与 Pagination 共享有效可见性；Pagination Align 为 Start/End 时分别形成左右相反布局，Center 使用右侧 Extra Content 加剩余区域居中 Pagination。
 
 ## 11. 测试与验证
@@ -629,5 +629,5 @@ Filter Flyout 从 Query.Filters 初始化，提交完整新 Query。候选 Filte
 - selected/sorted、hover/focus/disabled、Loading/Refreshing 与 rollback 的结构和截图基线。
 - 100 万本地/逻辑远端行的 sort、首屏、连续滚动、快速跳转、cache、并发、offset lookup 与 allocation。
 - DataGrid detail/recycle/offset/extent 测试保持或加强，不删除或放宽既有行为断言。
-- 运行 DataGrid 专用测试、完整 solution tests、DataGrid performance state verifier、LLMS verify、AOT/trim verify、Gallery
+- 运行 DataGrid 专用测试、完整 solution tests、DataGrid performance state verifier、AOT/trim verify、Gallery
   NativeAOT publish/startup smoke 和 `git diff --check`。

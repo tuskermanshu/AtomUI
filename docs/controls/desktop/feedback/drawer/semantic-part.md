@@ -199,7 +199,7 @@ Drawer 的语义 owner 是 `AtomUI.Desktop.Controls.Drawer` 本身（无模板�
 
 ## 6. 兼容性与验证
 
-契约变更定义：增删部件、修改 SelectorClass/SelectorRoute/ContractType/Cardinality 均为破坏性契约变更，需同步本文、Gallery 演示与 LLMS 重生成。
+契约变更定义：增删部件、修改 SelectorClass/SelectorRoute/ContractType/Cardinality 均为破坏性契约变更，需同步本文与 Gallery 演示。
 
 与上游差异（设计决定，非缺陷）：
 

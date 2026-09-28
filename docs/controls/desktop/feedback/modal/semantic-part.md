@@ -407,7 +407,7 @@ AtomUI `header` 是自绘标题栏，除标题外还承载标题图标、最大�
 
 ### 7.1 与改造前的差异
 
-改造前 `overview.md` 曾以非契约的 LLMS 语义摘要描述 `root`/`host`/`surface`/`content`/`motion`（标注
+改造前 `overview.md` 曾以非契约的语义摘要描述 `root`/`host`/`surface`/`content`/`motion`（标注
 internal-observable）。本次改造将其替换为上述 8 个公共 Part；`host`/`motion` 不再作为公共语义区域，分别归入宿主
 基础设施与 `wrapper` Part。
 

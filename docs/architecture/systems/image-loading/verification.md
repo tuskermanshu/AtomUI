@@ -142,7 +142,7 @@ loading/error template。Masonry 的 `AsyncImage` 在 raster/SVG 请求完成前
 4. 已删除的旧 public API 在 source、AXAML、Gallery 和 tests 中为零；只允许 release breaking-change 文档和历史
    changelog 提到旧名称。
 5. 不存在控件私有 HttpClient、loader、encoded/decoded cache、preview scheduler 或 10 ms 图片加载延迟。
-6. 本目录内部相对链接、模块导航和启动/依赖文档一致；生成 LLMS 只能以当前源码和 Control 文档为输入重新生成。
+6. 本目录内部相对链接、模块导航和启动/依赖文档一致。
 7. Shared、Controls、Desktop、Gallery 图片相关测试、普通 Browser publish/运行验证、Desktop NativeAOT publish/启动和
    Browser AOT publish/start 全部通过；未运行或仍失败的场景不得报告完成。
 8. `git diff --check`、文档 link check 和 public API baseline 检查通过。

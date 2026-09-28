@@ -200,4 +200,4 @@ Calendar 向 Header 和 View 单向投影状态。Template reapply 前解绑旧 
 - 输入与 Automation：禁用 Cell 跳过、焦点伪类、Enter/Space、SelectionProvider、SelectionContainer 和 FullCellTemplate 外层 Peer 保留。
 - Template/主题：CellTemplate 保留值、范围条 overlay 共存、FullCell 优先、WeekHeader 列对齐、Fullscreen/Mini 尺寸、本地化标签、Light/Dark 和运行时主题切换。
 - 生命周期/性能：Template reapply、Detach、owner 替换、池化容器数量和池中 Cell 可回收性。
-- Gallery/LLMS/AOT：Gallery 稳定示例、API/Token 表、范围条示例、LLMS 生成校验、Calendar 定向测试和 NativeAOT Gallery publish。
+- Gallery/AOT：Gallery 稳定示例、API/Token 表、范围条示例、Calendar 定向测试和 NativeAOT Gallery publish。

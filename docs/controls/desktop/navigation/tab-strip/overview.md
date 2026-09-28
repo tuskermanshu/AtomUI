@@ -193,7 +193,7 @@ TabStrip 的动效只表达状态变化反馈，不应改变 public API 语义�
 
 TabStrip 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -202,34 +202,11 @@ TabStrip 的视觉选项通过 public API 归一为 theme variables、伪类或�
 - [TabStrip Semantic Part 契约](semantic-part.md)
 - [TabStrip Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | Owner | AtomUI 节点 | 职责 | 稳定性 |
-| --- | --- | --- | --- | --- |
-| `root` | `TabStrip` / `CardTabStrip` / `TabStripItem` | 控件自身 | 标签条控件根语义区域，承载 public API、状态归一和主题入口。 | stable since 6.2.0 |
-| `item` | `TabStrip` / `CardTabStrip` | `TabStripItem` 容器（运行时标记） | 承载单个页签的尺寸、状态与点击语义。 | stable since 6.2.0 |
-| `add` | `CardTabStrip` | `PART_AddTabButton` | 承载新建页签入口的按钮视觉与状态。 | stable since 6.2.0 |
-| `icon` | `TabStripItem` | `ItemIconPresenter` | 承载页签头部图标呈现。 | stable since 6.2.0 |
-| `label` | `TabStripItem` | `ContentPresenter` | 承载页签头部标题文本呈现。 | stable since 6.2.0 |
-| `close` | `TabStripItem` | `PART_ItemCloseButton` | 承载页签关闭按钮视觉与状态。 | stable since 6.2.0 |
-
 Part 的 Selector、ContractType、数量语义与定制边界以 [TabStrip Semantic Part 契约](semantic-part.md) 为唯一完整来源；内容页版本的 `TabControl` 家族语义区域见 [TabControl Semantic Part 契约](../tab-control/semantic-part.md)。
 
 Token 说明：
 
-- TabStrip 当前没有专属 `token.md`；LLMS 生成按第 5 节视觉与主题模型、SharedToken、控件家族 Token 或主题资源说明 Token 边界。
-
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + Gallery ShowCase | 生成 `controls/tab-strip/index-cn.md`；本控件无独立 token.md |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/tab-strip/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | 第 5 节主题模型、SharedToken 与 TabControl 家族 Token | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
+- TabStrip 当前没有专属 `token.md`；Token 边界按第 5 节视觉与主题模型、SharedToken、控件家族 Token 或主题资源说明 Token 边界。
 
 验证策略：
 

@@ -165,7 +165,7 @@ Tooltip 的动效只表达状态变化反馈，不应改变 public API 语义。
 
 宿主够不到的场景（如 NavMenu 折叠项的内部 header）通过该模型获得完整 tooltip 定制能力，宿主侧不需要新增任何配置语言。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -185,17 +185,6 @@ Tooltip 公开 `root`、`container`、`arrow` 三个 Semantic Part。`root` 是 
 | `root` | 工具提示根语义区域，承载内容、打开状态与主题入口。 |
 | `container` | 内容盒，承载内边距、背景、圆角与文本样式。 |
 | `arrow` | 指向锚定控件的箭头指示器。 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/tooltip/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + Themes 文件夹 + theme/template 信息 | 生成 `controls/tooltip/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

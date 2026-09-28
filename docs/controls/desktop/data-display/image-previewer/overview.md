@@ -557,7 +557,7 @@ fallback 或 `ImageFailed`。
 - hash、验证和 codec 工作不占用 UI dispatcher；Avalonia image 创建与释放遵守合法线程边界。
 - 内置 source、reader、store、validator、codec 和 Application-owned service 由 Package Core 的真实静态调用保留，控件资源遵循 [TypeMap 注册契约](../../../../architecture/foundations/aot-and-trimming.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 - [ImagePreviewer 桌面版实现原理](implementation.md)
 - [ImagePreviewer Semantic Part 契约](semantic-part.md)
@@ -566,17 +566,6 @@ fallback 或 `ImageFailed`。
 - [ImagePreviewer Changelog](changelog.md)
 - [统一图片加载系统](../../../../architecture/systems/image-loading/overview.md)
 - [AtomUI Semantic Part 系统设计](../../../../architecture/systems/theming/semantic-parts.md)
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | overview.md + implementation.md + token.md + Gallery ShowCase | 生成 `controls/image-previewer/index-cn.md` |
-| 单控件语义文档 | semantic-part.md + implementation.md + Themes 文件夹 + theme/template 信息 | 生成 `controls/image-previewer/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 overview.md 中机械复制完整 API 表 |
-| Design Token 表 | token.md + `ImagePreviewerToken` | 不在 token.md 中手工复制生成表 |
-| 示例 | Gallery ImagePreviewer ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | implementation.md | 定位 Previewer、host、viewer、renderer 和 Themes |
 
 验证分层：
 
@@ -592,6 +581,3 @@ LLMS 导出来源：
   作用域样式不跨 TopLevel 级联）、open-close-reopen 生命周期、多 owner 实例隔离、Gallery 语义预览（`root`/`image`/`cover`
   高亮，`popup.*` 仅列出描述）和 NativeAOT publish。
 - Gallery API 与 ShowCase 只能使用 `ItemsSource` 和 `ImagePreviewItem`。
-
-生成 LLMS 输入来自本文、[实现原理](implementation.md)、[Token 设计](token.md)、源码和 Gallery；不手工编辑
-`docs/AI/generated/llms/`。

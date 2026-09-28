@@ -331,7 +331,7 @@ TemplateBinding）；固定 `Height` / `Width` / Min/Max 类布局 Setter 会与
 - `CollapseItem` 容器本身与 item shell 边框（面板之间的底部分隔线）；上游不公开 `.ant-collapse-item`，容器上的
   `.semantic-scope-item` 只是路由用 scope marker。
 - `PART_MainLayout`、`PART_AddOnContentPresenter`（`AddOnContent` 附加内容区域）与 `PART_ContentMotionActor`（展开/收起
-  动效 actor）；LLMS 区域 `item`、`motion`、`content` 的旧分类名不属于 Semantic Part，节点映射以本文档为准。
+  动效 actor）；`item`、`motion`、`content` 的旧分类名不属于 Semantic Part，节点映射以本文档为准。
 - 展开/收起动效由 motion actor 拥有（layout transform 缩放 + 透明度过渡，稳定态切换显式高度），不属于 `body` Part
   的样式契约。
 - 用户自定义 `ItemsPanel` 不影响 Part 路由（容器逻辑父级始终是 Collapse owner）；建议自定义面板根节点声明

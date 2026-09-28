@@ -266,7 +266,7 @@ ProgressBar 不参与 Form 值提交，不实现选择、输入、弹出层或�
 完整 Selector、Style Type、ContractType、数量语义、尺寸基线、官方 Gallery 映射与排除边界见
 [ProgressBar Semantic Part 契约](semantic-part.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -274,17 +274,6 @@ ProgressBar 不参与 Form 值提交，不实现选择、输入、弹出层或�
 - [ProgressBar Semantic Part 契约](semantic-part.md)
 - [ProgressBar Token 设计](token.md)
 - [ProgressBar Changelog](changelog.md)
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/progress-bar/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/progress-bar/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

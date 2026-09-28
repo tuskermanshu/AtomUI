@@ -141,7 +141,7 @@ PopupConfirm 与同分类控件共享尺寸、状态、Token、Gallery 展示和
 
 不适用。PopupConfirm 当前没有独立于公共 API、状态模型和主题模型之外的专项模型；维护重点是保持模板契约和资源边界稳定。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -149,31 +149,6 @@ PopupConfirm 与同分类控件共享尺寸、状态、Token、Gallery 展示和
 - [PopupConfirm Semantic Part 契约](semantic-part.md)
 - [PopupConfirm Token 设计](token.md)
 - [PopupConfirm Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `PopupConfirm` | 触发宿主与确认状态的组织边界。 | 全部 public API | PopupConfirmToken、FlyoutHostToken、SharedToken | stable |
-| `popup.root` | `FlyoutPresenter` | 弹层根视觉面，承载背景、边框、内边距与箭头。 | `Flyout`、`ShouldUseOverlayPopup`、`IsArrowVisible` | FlyoutHostToken、SharedToken | stable |
-| `popup.container` | `Border#PART_ContentDecorator` | 弹层内层容器，承载背景、边框、圆角与内边距。 | `Content`、`ContentTemplate` | SharedToken | stable |
-| `popup.content` | `ContentPresenter#ContentPresenter` | 弹层框体内容呈现面，承载确认体容器。 | `Content`、`ContentTemplate` | SharedToken | stable |
-| `popup.arrow` | `ArrowIndicator#PART_ArrowIndicator` | 指向锚点的浮动箭头。 | `IsArrowVisible`、`Placement` | ArrowDecoratedBoxToken、SharedToken | stable |
-| `popup.icon` | `IconPresenter#PART_IconPresenter` | 确认状态图标，按 `ConfirmStatus` 切换颜色。 | `Icon`、`ConfirmStatus` | PopupConfirmToken、SharedToken | stable |
-| `popup.title` | `TextBlock#PART_Title` | 确认框标题。 | `Title` | PopupConfirmToken、SharedToken | stable |
-| `popup.description` | `ContentPresenter#PART_Content` | 确认描述正文。 | `ConfirmContent`、`ConfirmContentTemplate` | PopupConfirmToken、SharedToken | stable |
-| `popup.actions` | `StackPanel#PART_ButtonLayout` | 确认/取消操作区。 | `OkText`、`CancelText`、`OkButtonType`、`IsShowCancelButton` | PopupConfirmToken、SharedToken | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/popup-confirm/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/popup-confirm/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

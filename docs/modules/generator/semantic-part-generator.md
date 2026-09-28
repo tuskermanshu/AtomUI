@@ -448,7 +448,7 @@ Generator 项目仍以 Analyzer 方式参与构建，不进入应用 Runtime 或
 ## 8. 文档与 Gallery 集成
 
 Control 文档以生成 descriptor 和真实 ControlTemplate 为事实源维护 Semantic Parts 表，不得根据 descriptor 发明
-Abstract AXAML Structure。当前 Semantic Part Generator 不读取 Markdown 或生成 LLMS 文档。
+Abstract AXAML Structure。当前 Semantic Part Generator 不读取 Markdown 文档。
 
 Gallery Semantic Preview 使用 descriptor 展示 Part 名称、StyleType、selector route、ContractType 和 cardinality。代码示例
 优先生成 owner 外层 Style 与 `StyleType` 的嵌套用法，不根据 `RuntimeCreated` 猜测 Selector。预览工具可以使用

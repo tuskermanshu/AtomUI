@@ -233,7 +233,7 @@ Descriptions 是 Data Display 分类下的独立展示控件，不属于输入�
 - item 与视觉控件之间只能保存当前生成周期需要的映射；重建视觉前必须清空旧映射和旧订阅。
 - 不允许通过清空 Gallery DataContext、强制路由释放或改静态资源值来掩盖泄露。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -241,17 +241,6 @@ Descriptions 是 Data Display 分类下的独立展示控件，不属于输入�
 - [Descriptions 桌面版实现原理](implementation.md)
 - [Descriptions Token 设计](token.md)
 - [Descriptions Changelog](changelog.md)
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/descriptions/index-cn.md` |
-| 单控件语义文档 | `semantic-part.md` + `overview.md` + `implementation.md` + Descriptions Themes | 生成 `controls/descriptions/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

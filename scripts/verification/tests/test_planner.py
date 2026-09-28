@@ -153,6 +153,15 @@ class PlannerTests(RepositoryCase):
         plan = self.planner().plan(["src/Controls/Popup/Popup.cs"])
         self.assertIn("Tests.SelectTests", self.selected(plan))
 
+    def test_deleted_orphan_path_is_ignored_not_a_gap(self):
+        self.write("tools/legacy/Legacy.cs", "namespace Legacy; public class LegacyTool {}")
+        self.git("add", "tools/legacy/Legacy.cs")
+        self.git("commit", "-qm", "add legacy tool")
+        (self.root / "tools/legacy/Legacy.cs").unlink()
+        plan = self.planner().plan(["tools/legacy/Legacy.cs"])
+        self.assertFalse(plan["gaps"])
+        self.assertIn("tools/legacy/Legacy.cs", plan["ignored"])
+
     def test_full_scope_discovers_projects_missing_from_solution(self):
         self.write("AtomUI.slnx", "<Solution/>")
         plan = self.planner().plan([], scope="full")

@@ -143,7 +143,7 @@ internal sealed class SemanticPartContractValidator
 
     /// <summary>
     /// <c>Since</c> 必须是可以被用户引用的具体发布版本，即 <c>major.minor.patch</c> 三段非负十进制数字
-    /// （例如 <c>6.2.0</c>）。只写版本线（<c>6.0</c>、<c>6.2</c>）会让 descriptor、文档与 LLMS 导出声称一个
+    /// （例如 <c>6.2.0</c>）。只写版本线（<c>6.0</c>、<c>6.2</c>）会让 descriptor 与控件文档声称一个
     /// 不存在的引入版本；预发布后缀、前导 <c>v</c> 与任意字符串同样不属于可比较的发布版本。
     /// 这里按字符显式解析而不使用正则，与 Generator 不引入正则依赖的既有约定一致。
     /// </summary>

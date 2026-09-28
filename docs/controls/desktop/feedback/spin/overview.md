@@ -138,7 +138,7 @@ Spin 的动效只表达状态变化反馈，不应改变 public API 语义。初
 
 Spin 的视觉选项通过 public API 归一为 theme variables、伪类或模板绑定。Token 保存组件语义值，不能保存实例运行时状态或业务色值。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -147,30 +147,8 @@ Spin 的视觉选项通过 public API 归一为 theme variables、伪类或模�
 - [Spin Semantic Part 契约](semantic-part.md)
 - [Spin Changelog](changelog.md)
 
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Spin` | 主控件根区域，承载加载状态、遮罩选项和主题入口。 | 见 API 与契约模型 | `SpinToken` | stable |
-| `container` | `ContentPresenter` | 嵌套模式的用户内容容器，spinning 时承担透明度或模糊反馈。 | `IsSpinning`、`IsMaskBlurEnabled` | 无 | stable |
-| `mask` | `Border` | 遮罩背景层，spinning 时覆盖内容区域。 | `IsMaskBackgroundEnabled` | `ColorBgMask` | stable |
-| `section` | `StackPanel` | 加载区域，承载指示器和提示文本并居中。 | `SizeType` | `SpacingXXS` | stable |
-| `indicator` | `SpinIndicator` | 主控件模板拥有的加载指示子控件。 | `CustomIndicator`、`DotBgBrush` | `IndicatorSize*`、`DotSize*` | stable |
-| `description` | `TextBlock` | 提示文本区域。 | `Tip`、`IsTipVisible` | `ColorPrimary` | stable |
-
 `SpinIndicator` 的 `root/content` descriptor 与主控件分开维护，完整契约见
 [Spin Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/spin/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/spin/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

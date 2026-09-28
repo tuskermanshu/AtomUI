@@ -271,7 +271,7 @@ Form 家族的 Semantic Part 契约由 `FormItem` 声明：`root`、`label`、`c
 完整 selector route、`ContractType`、状态矩阵和定制边界见
 [Form Semantic Part 契约](semantic-part.md)。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -280,31 +280,9 @@ Form 家族的 Semantic Part 契约由 `FormItem` 声明：`root`、`label`、`c
 - [Form Token 设计](token.md)
 - [Form Changelog](changelog.md)
 
-LLMS 语义区域（owner 为 `FormItem`；`Form` 容器不注册 descriptor）：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `FormItem` | 字段级表单项根语义区域，承载布局、验证状态、内容接入和 Semantic Style 入口。 | `Layout`、`LabelAlign`、`ValidateStatus`、`Content` | `FormToken`、SharedToken | stable |
-| `label` | `TextBlock#PART_Label` | 标签文本区域，承载颜色、字号、对齐和换行。 | `LabelText`、`LabelAlign`、`LabelWrapping` | `LabelColor`、`LabelFontSize` | stable |
-| `content` | `ContentPresenter#ContentPresenter` | 内容呈现区域，承载 `Content` 输入控件的最终呈现位置。 | `Content`、`IsValidateContentType` | `FormItemSpacing`、SharedToken | stable |
-| `extra` | `ContentPresenter#ExtraPresenter` | `Extra` API 的呈现区域（控件与 help 区域下方）。 | `Extra`、`ExtraTemplate` | `ColorTextDescription`、`ControlHeightSM` | stable |
-| `help` | `StackPanel#ExtraInfoLayout` | 验证消息与 `Help` 文案的聚合展示区域。 | `Help`、`ValidateStatus`、`ErrorMessageForeground`、`WarningMessageForeground` | `FormItemSpacing`、状态色 token | stable |
-| `helpItem` | 逐条消息 `TextBlock`（运行时）与静态 `HelpText` | 单条验证错误、警告消息或帮助文案的文本呈现。 | `Help`、`ErrorMessageForeground`、`WarningMessageForeground` | `ColorErrorText`、`ColorWarningText`、`ColorTextDescription` | stable |
-
 标签附属标记（冒号、必填星号、可选文案、tooltip、自定义 mark）、布局容器、消息文本着色、删除按钮区、
 反馈控件和用户内容子树不属于 Semantic Part。完整契约见
 [Form Semantic Part 契约](semantic-part.md)。
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/form/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/form/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

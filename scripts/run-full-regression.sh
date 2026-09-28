@@ -32,7 +32,6 @@ PROJECTS=(
     AtomUI.Desktop.Controls.DataGrid.Tests
     AtomUI.Build.Tasks.Tests
     AtomUI.Localization.Tests
-    AtomUI.Docs.LLMsGenerator.Tests
     AtomUI.Controls.Tests
     AtomUI.Toolkits.GalleryBase.Generator.Tests
     AtomUI.Icons.Shared.Tests

@@ -273,7 +273,7 @@ Header/Content 分隔线由未命名的 Content `PixelAlignedBorder` 拥有，�
 
 分隔线与 Content 一起位于 `PART_ContentMotionActor` 内，因此收起时随 Content 自然隐藏。实现不得通过透明 Brush、边框 transition、延迟刷新或 motion completion 回调维护分隔线。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
@@ -282,32 +282,6 @@ Header/Content 分隔线由未命名的 Content `PixelAlignedBorder` 拥有，�
 - [内容展开与收起动效设计](../../../../architecture/systems/control-infrastructure/content-expansion.md)
 - [Expander Token 设计](token.md)
 - [Expander Changelog](changelog.md)
-
-LLMS 语义区域：
-
-下表是 LLMS 语义导出使用的区域映射，独立于 [§3.5 Semantic Part 契约](#35-semantic-part-契约)：`motion` 只作为 LLMS 语义
-区域存在，不属于对外 Semantic Part；Semantic Part 的节点映射以 [Expander Semantic Part 契约](semantic-part.md)为准。
-Expander 是单面板控件，没有 item 容器，因此不存在 `item` 语义区域。
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Expander` | 单面板折叠容器根语义区域，承载 public API、展开状态、展开方向与主题入口。 | `IsExpanded`、`ExpandDirection`、`IsBorderless`、`IsGhostStyle`、`BorderThickness`、`TriggerType`、`ExpandIconPosition`、`SizeType`、`IsMotionEnabled` | ExpanderToken、SharedToken | stable since 6.2.0 |
-| `header` | `PART_HeaderDecorator` | 头部区域（Semantic Part `header`）。 | `SizeType`、`HeaderPadding`、`TriggerType`、`IsGhostStyle`、`ExpandDirection` | `HeaderBg`、`HeaderPadding`、`HeaderPaddingSM`、`HeaderPaddingLG` | stable since 6.2.0 |
-| `title` | `PART_HeaderPresenter` | 标题文字区域（Semantic Part `title`）。 | `Header`、`HeaderTemplate`、`SizeType` | `ColorTextHeading`、`ColorTextDisabled` | stable since 6.2.0 |
-| `icon` | `PART_ExpandButton` | 展开/收起箭头（Semantic Part `icon`）。 | `ExpandIcon`、`ExpandIconPosition`、`IsShowExpandIcon`、`IsExpanded`、`ExpandDirection` | `IconSizeSM`、`LeftExpandButtonHMargin`、`RightExpandButtonHMargin` | stable since 6.2.0 |
-| `body` | `PART_ContentPresenter` | 内容区域（Semantic Part `body`）。 | `Content`、`ContentTemplate`、`ContentPadding`、`SizeType`、`IsBorderless`、`IsGhostStyle` | `ContentPadding`、`ContentPaddingSM`、`ContentPaddingLG`、`ContentBg`、`HeaderBg` | stable since 6.2.0 |
-| `motion` | `PART_ContentMotionActor` | 展开/收起动效（LLMS 区域，非 Semantic Part）。 | `IsExpanded`、`IsMotionEnabled`、`ExpandDirection`、`MotionDuration` | `MotionDurationSlow` | stable since 6.2.0 |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/expander/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + `semantic-part.md` + theme/template 信息 | 生成 `controls/expander/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 

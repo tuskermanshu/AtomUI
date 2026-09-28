@@ -140,32 +140,13 @@ Breadcrumb 与同分类控件共享尺寸、状态、Token、Gallery 展示和�
 
 Breadcrumb 的动效只表达状态变化反馈，不应改变 public API 语义。初始加载、禁用态和卸载路径应能抑制或取消动效，避免保留旧控件实例。
 
-## 9. 文档导航、LLMS 导出与验证策略
+## 9. 文档导航与验证策略
 
 关联文档：
 
 - [Breadcrumb 桌面版实现原理](implementation.md)
 - [Breadcrumb Token 设计](token.md)
 - [Breadcrumb Changelog](changelog.md)
-
-LLMS 语义区域：
-
-| Part | AtomUI 节点 | 职责 | 相关 API | 相关 Token | 稳定性 |
-| --- | --- | --- | --- | --- | --- |
-| `root` | `Breadcrumb` | 导航控件根语义区域，承载 public API、状态归一和主题入口。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `item` | `BreadcrumbItem` | 承载单项内容、图标、跳转入口和末项状态。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-| `separator` | `条目容器之间的兄弟分隔元素` | 承载分隔符内容、间距和颜色视觉。 | 见 API 与契约模型 | 见视觉与主题模型 | stable |
-
-LLMS 导出来源：
-
-| LLMS 内容 | 来源 | 说明 |
-| --- | --- | --- |
-| 单控件完整文档 | `overview.md` + `implementation.md` + `token.md` + Gallery ShowCase | 生成 `controls/breadcrumb/index-cn.md` |
-| 单控件语义文档 | `overview.md` + `implementation.md` + theme/template 信息 | 生成 `controls/breadcrumb/semantic-cn.md` |
-| API 表 | overview.md 语义摘要 + 源码 public surface | 不在 `overview.md` 中复制完整 API 表 |
-| Design Token 表 | token.md、Token 类型或第 5 节主题模型 | 不在生成产物中手工维护第二份 Token 表 |
-| 示例 | Gallery ShowCase + source snippet catalog | 只引用稳定示例 |
-| 源码索引 | `implementation.md` | 用于定位控件源码、主题和测试 |
 
 验证策略：
 
