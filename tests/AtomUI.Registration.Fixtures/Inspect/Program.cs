@@ -4,6 +4,27 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Xml.Linq;
 
+if (args.Length == 4 && args[0] == "asset-presence")
+{
+    using var input = File.OpenRead(args[1]);
+    using var pe = new PEReader(input);
+    var metadata = pe.GetMetadataReader();
+    var hash = 14695981039346656037UL;
+    foreach (var character in args[2]) hash = unchecked((hash ^ character) * 1099511628211UL);
+    var names = new[] { "CreateResource_" + hash.ToString("X16"), "CreateAsset_" + hash.ToString("X16") };
+    foreach (var name in names)
+    {
+        var present = metadata.TypeDefinitions.Where(handle =>
+            metadata.GetString(metadata.GetTypeDefinition(handle).Name) == "GeneratedRegistrationFactories")
+            .SelectMany(handle => metadata.GetTypeDefinition(handle).GetMethods())
+            .Any(handle => metadata.GetString(metadata.GetMethodDefinition(handle).Name) == name);
+        if (present != bool.Parse(args[3]))
+            throw new InvalidOperationException($"Unexpected asset factory presence: {args[2]} / {name} = {present}");
+    }
+    Console.WriteLine($"ASSET_PLATFORM_PASS {args[2]} present={args[3]}");
+    return;
+}
+
 if (args.Length == 4 && args[0] == "typed-resource-condition")
 {
     using var input = File.OpenRead(args[1]);

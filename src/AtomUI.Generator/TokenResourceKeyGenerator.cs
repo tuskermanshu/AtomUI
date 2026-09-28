@@ -23,9 +23,7 @@ public class TokenResourceKeyGenerator : IIncrementalGenerator
             {
                 input.Right.GlobalOptions.TryGetValue("build_property.AtomUIThemeAssetProjectDirectory", out var directory);
                 input.Right.GetOptions(input.Left).TryGetValue("build_metadata.AdditionalFiles.Link", out var link);
-                input.Right.GetOptions(input.Left).TryGetValue("build_metadata.AdditionalFiles.AtomUISupportedOSPlatforms", out var supported);
-                input.Right.GetOptions(input.Left).TryGetValue("build_metadata.AdditionalFiles.AtomUIUnsupportedOSPlatforms", out var unsupported);
-                return new ThemeAssetInput(input.Left.Path, input.Left.GetText(token)?.ToString() ?? "", directory, link, supported, unsupported);
+                return new ThemeAssetInput(input.Left.Path, input.Left.GetText(token)?.ToString() ?? "", directory, link);
             }).Collect();
         var inputs = initContext.CompilationProvider.Combine(initContext.AnalyzerConfigOptionsProvider).Combine(declarations).Combine(assets);
         var output = inputs.Select(static (input, cancellationToken) =>
@@ -37,7 +35,7 @@ public class TokenResourceKeyGenerator : IIncrementalGenerator
             var assets = input.Right.Select(asset =>
             {
                 var info = ThemeAssetInfo.Create(asset.AsAdditionalText(), asset.Directory, asset.Link,
-                    cancellationToken, out var root, asset.SupportedPlatforms, asset.UnsupportedPlatforms);
+                    cancellationToken, out var root);
                 if (root is not null && !documents.ContainsKey(info.Path)) documents.Add(info.Path, root);
                 return info;
             }).ToArray();

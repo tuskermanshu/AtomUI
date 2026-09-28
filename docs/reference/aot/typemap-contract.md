@@ -7,6 +7,10 @@
 系统行为由 [TypeMap 注册体系](../../architecture/foundations/aot-typemap-registration.md)和
 [控件注册契约](../../architecture/foundations/control-registration-contracts.md)定义。
 
+已实现的[资源平台声明收敛](../../architecture/foundations/aot-typemap-registration.md#7-平台分支)只调整普通生成器的
+编译期事实来源；继续生成现有片段 guard，不改变本 ABI v1、Package marker、TypeMap key、资源 descriptor
+或 contract fingerprint 格式。资源 CLR 平台声明不是应用需要填写的新注册参数，也不是 Browser 后端的新协议。
+
 ## 1. 包 marker
 
 固定名称与构造参数为：

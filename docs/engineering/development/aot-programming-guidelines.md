@@ -249,6 +249,10 @@ Source Generator、Localization writer、控件注册 metadata 和 AXAML Theme w
   空 `typeof`。动态创建沿用类型化工厂、DAM/DD 等官方保留机制，不引入字符串注册清单。
 - 平台判断必须位于 descriptor、语义和资源工厂引用/构造之前，不能在构造全集后以运行时 predicate 过滤。
 
+平台声明的约定是“控件能力放在控件类型，主题额外限制放在正常资源 CLR 类型”，不按目录推断或维护主题路径名单。
+声明归属、可用域算法和迁移边界以[平台分支](../../architecture/foundations/aot-typemap-registration.md#7-平台分支)
+及其状态链接为准。不要为移除资源配置而收窄公共控件的平台能力；已退役的自定义平台元数据不再读取。
+
 TypeMap API、触发条件和异常边界见 [TypeMap 契约](../../reference/aot/typemap-contract.md)。它不保证枚举、任意运行时
 字符串类型名自动保留或不同后端得到完全相同的最小集合。不得通过异常捕获、全包保留或 late registration 掩盖漏注册。
 

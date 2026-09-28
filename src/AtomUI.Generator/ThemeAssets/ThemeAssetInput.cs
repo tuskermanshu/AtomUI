@@ -5,8 +5,7 @@ namespace AtomUI.Generator;
 
 // Comparable additional-file input. The XML document is parsed once in the binding transform,
 // shared with semantic/resource analysis there, and never stored in the incremental cache.
-internal sealed record ThemeAssetInput(string Path, string Text, string? Directory, string? Link,
-    string? SupportedPlatforms, string? UnsupportedPlatforms)
+internal sealed record ThemeAssetInput(string Path, string Text, string? Directory, string? Link)
 {
     internal AdditionalText AsAdditionalText() => new InputText(Path, Text);
     private sealed class InputText : AdditionalText

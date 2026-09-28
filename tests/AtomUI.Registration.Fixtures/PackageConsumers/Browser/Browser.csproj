@@ -4,5 +4,6 @@
         <PackageReference Include="Avalonia.Browser" Version="12.1.2" />
         <PackageReference Include="AtomUI.Desktop.Controls" Version="$(AtomUIFixtureVersion)" />
         <Reference Include="Fixture.BinaryAdapter" HintPath="$(FixtureBinaryAdapterPath)" />
+        <ProjectReference Include="../Author/Author.csproj" />
     </ItemGroup>
 </Project>

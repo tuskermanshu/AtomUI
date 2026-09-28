@@ -191,11 +191,60 @@ StaticResource 的包内来源必须明确；不同局部字典可以有同名 k
 一个字典导出多个控件主题时，该字典保持完整并只挂载一次。显式嵌套字典的声明顺序保留；框架保证完整与裁剪模式中
 共同保留资产的相对优先级一致。资源构造循环需要修正，类型链接闭包不能消除运行时资源递归。
 
-平台专属控件使用正常平台可用性与平台资源声明；跨平台控件无需额外配置。
+平台声明按控件与资源的实际职责分别放置，接入方式见下一节；跨平台控件无需额外配置。
 强类型 Token identity 带有实际 owner；从字符串构造的 identity 仍只是查找数据，不承诺自动保留控件。
 
 动态 URI、运行时 AXAML、运行时类型名与发布后插件遵守 .NET 的裁剪/AOT 限制。
 需要动态构造时优先使用正常的已知类型静态工厂，并按官方类型保留规则表达边界。
+
+### 5.1 平台声明
+
+控件本身不支持某个平台时，在控件声明上使用标准 .NET attribute。生成器已支持读取此类类型域，普通主题通过
+TargetType 自动取得相应限制，不需要重复列出主题路径：
+
+```csharp
+using System.Runtime.Versioning;
+using Avalonia.Controls;
+
+[UnsupportedOSPlatform("browser")]
+public class NativeWindowHost : Control
+{
+}
+```
+
+若只有本包提供的某套主题不支持 Browser，保留控件本身的平台能力，把 attribute 放在正常主题资源类上。
+已有强类型 ControlTheme 直接复用其类；没有资源类的叶子字典（例如 `Themes/NativeOverlayTheme.axaml`）
+可声明自己的 `x:Class`。聚合用的 `*Themes.axaml` 不作为独立注册资产：
+
+```xml
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:Class="Acme.Controls.Themes.NativeOverlayTheme"
+                    x:ClassModifier="internal">
+    <!-- 保留原有主题、资源键和字典内容 -->
+</ResourceDictionary>
+```
+
+```csharp
+using System.Runtime.Versioning;
+using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
+
+namespace Acme.Controls.Themes;
+
+[UnsupportedOSPlatform("browser")]
+internal partial class NativeOverlayTheme : ResourceDictionary
+{
+    public NativeOverlayTheme() => AvaloniaXamlLoader.Load(this);
+}
+```
+
+这是实际可加载的资源类，不是独立的 AOT 标记。外部库类型的本包主题也采用此方式，无需外部库改源码。
+没有资源 CLR 类型时，资源自身的平台上界来自所属程序集；不能因为未写 `x:Class` 而忽略程序集限制。
+声明不会按目录传播，资源移动也不会自动改变支持的平台。
+
+使用配套生成器普通重建并按[迁移说明](../../releases/unreleased-typemap-registration-migration.md#资源平台声明收敛)删除旧元数据。
+应用仍只调用普通包入口，包作者无需维护平台主题路径清单；普通跨平台主题也无需额外资源类。
 
 ## 6. 发布前验证
 
@@ -222,5 +271,7 @@ StaticResource 的包内来源必须明确；不同局部字典可以有同名 k
 真实 `{x:Type T}` 若恰好引用相同 T 的已注册默认主题，并且提供者可用域覆盖消费域，编译出的类型引用本身就是
 现有 TypeMap 的保留条件。这种受验证的默认 type-key 引用继续按环境作用域查找，保留应用级默认主题替换。
 
-主题资产导出多个平台能力不同的目标时，应拆分资源，或通过已有平台资源元数据明确声明共同可用域；
-资产在可用域内引用的 Token owner 必须同样可用，否则报告 `ATOMUIREG006`。
+主题资产导出多个平台能力不同的目标时，应拆分资源；产品确实只提供共同平台上的主题时，按第 5.1 节方式
+在资源类上明确声明限制。生成器不得静默求交集丢失主题；资产引用的 Token owner 必须覆盖其有效域。
+域计算与 `ATOMUIREG006` 边界见[平台分支](../../architecture/foundations/aot-typemap-registration.md#7-平台分支)，
+产品验证与发布状态以本文开头的状态链接为准。

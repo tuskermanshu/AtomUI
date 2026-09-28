@@ -9,6 +9,7 @@ using Avalonia.Controls.Primitives;
 namespace AtomUI.Desktop.Controls;
 
 [PseudoClasses(StdPseudoClass.Normal, StdPseudoClass.Minimized, StdPseudoClass.Maximized, StdPseudoClass.Fullscreen)]
+[global::System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
 internal class CaptionButtonGroup : TemplatedControl, IOperationSystemAware
 {
     #region 公共属性定义

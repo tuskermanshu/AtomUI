@@ -20,6 +20,7 @@ internal sealed class PlatformAvailability : IEquatable<PlatformAvailability>
     private readonly ValueArray<Range> _ranges;
     private PlatformAvailability(IEnumerable<Range> ranges) => _ranges = new(ranges);
     internal static readonly PlatformAvailability All = new(Platforms.Select(_ => Range.All));
+    internal static readonly PlatformAvailability Empty = new(Platforms.Select(_ => new Range(Zero, Zero)));
     internal bool IsEmpty => _ranges.All(r => r.IsEmpty);
     internal PlatformAvailability Intersect(PlatformAvailability other) => ReferenceEquals(this, All) ? other : ReferenceEquals(other, All) ? this
         : new(_ranges.Select((r, i) => r.Intersect(other._ranges[i])));
@@ -34,12 +35,15 @@ internal sealed class PlatformAvailability : IEquatable<PlatformAvailability>
         var result = All;
         for (var current = type; current is not null; current = current.ContainingType)
             result = result.Intersect(FromAttributes(current.GetAttributes(), type.Locations.FirstOrDefault() ?? Location.None, report));
-        result = result.Intersect(FromAttributes(type.ContainingAssembly.GetAttributes(), type.Locations.FirstOrDefault() ?? Location.None, report));
+        result = result.Intersect(FromAssembly(type.ContainingAssembly, report));
         if (result.IsEmpty)
             report(Diagnostic.Create(AtomUIDiagnosticDescriptors.RegistrationUnsupportedBackend, type.Locations.FirstOrDefault(),
                 "type platform declarations have no common supported domain; child annotations may narrow parent availability, not re-enable an excluded platform"));
         return result;
     }
+
+    internal static PlatformAvailability FromAssembly(IAssemblySymbol assembly, Action<Diagnostic> report)
+        => FromAttributes(assembly.GetAttributes(), assembly.Locations.FirstOrDefault() ?? Location.None, report);
 
     private static PlatformAvailability FromAttributes(IEnumerable<AttributeData> attributes, Location location, Action<Diagnostic> report)
     {

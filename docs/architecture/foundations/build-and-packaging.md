@@ -59,6 +59,22 @@ Browser linker 扩展必须加载到其对应 ILLink 阶段，不能混入上述
 
 MacOSHomebrewNativeAot.targets 只服务本仓库 macOS NativeAOT 链接，不随 NuGet 分发；其他平台使用自身工具链。
 
+## 主题资产的平台输入
+
+边界由[类型与资源平台契约](aot-typemap-registration.md#7-平台分支)定义：MSBuild 只提供普通 AXAML 输入和资源编译接线，
+生成器通过 Compilation 读取控件/资源类型的标准平台声明。项目、props 和 targets 均不维护主题平台路径清单。
+
+`AtomUI.Desktop.Controls.csproj` 的平台排除列表及 `AtomUI.ThemeAssets.targets` 的自定义平台 metadata 暴露已删除。
+普通资源输入不再承载第二份平台清单，也不保留旧 metadata 的兼容读取路径。第三方包须使用配套生成器完成普通重建，具体见[迁移说明](../../releases/unreleased-typemap-registration-migration.md#资源平台声明收敛)。
+
+`AvaloniaXaml`、`AdditionalFiles`、`Link`、项目目录、package/catalog 身份和普通资源编译继续使用。
+`GenerateThemeAssetWrappersTask` 及其 `BeforeTargets="GenerateAvaloniaResources"` 接线保留；资源字典和默认 typed
+ControlTheme 的 deferred wrapper、URI、顺序与构造时机保持原契约。新 `x:Class` 资源仍走 Avalonia 正常编译和加载。
+
+不新增平台扫描任务、第二次项目编译或运行时反射发现。平台声明属于现有 C# 编译输入，AXAML 身份属于已有资源输入；
+对两者的增量失效在普通 Generator 测试中验证。源码/冷 NuGet 消费需共同证明项目无需平台路径配置，工具仍只注入一次，
+Browser 后端继续消费同一份已生成 TypeMap 和官方标记结果，无须新增转换协议。
+
 ## Target Framework 与工具链
 
 新控件注册体系的产品目标统一到 net10.0；Browser 使用 net10.0-browser，不携带旧 TFM 的注册兼容分支。

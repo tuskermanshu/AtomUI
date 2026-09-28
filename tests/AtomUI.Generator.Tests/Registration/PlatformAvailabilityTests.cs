@@ -70,10 +70,13 @@ public class PlatformAvailabilityTests
     }
 
     private static bool Evaluate(PlatformAvailability availability, string os, string version)
+        => EvaluateGuards(availability.Guards(), os, version);
+
+    internal static bool EvaluateGuards(IEnumerable<string> guards, string os, string version = "0.0")
     {
         // Execute the emitted guard against the documented BCL predicate behavior on multiple
         // platform/version inputs. No assertion depends on this test machine's OS.
-        var expression = string.Join(" || ", availability.Guards().Select(g => "(" + g + ")"));
+        var expression = string.Join(" || ", guards.Select(g => "(" + g + ")"));
         if (expression.Length == 0) expression = "false";
         expression = expression.Replace("global::System.OperatingSystem.", "ProbeOS.");
         var platformMethods = new[] { "Android", "Browser", "FreeBSD", "IOS", "Linux", "MacCatalyst", "MacOS", "TvOS", "Windows" }

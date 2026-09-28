@@ -11,6 +11,7 @@ namespace AtomUI.Desktop.Controls;
 
 using AvaloniaButton = Avalonia.Controls.Button;
 
+[global::System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
 internal class CaptionButton : AvaloniaButton
 {
     #region 公共属性定义

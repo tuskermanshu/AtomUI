@@ -2188,7 +2188,7 @@ public class SemanticPartGeneratorTests
                 public static Selector Class(this Selector? previous, string name) => new();
             }
 
-            public sealed class ControlTheme
+            public class ControlTheme
             {
             }
         }

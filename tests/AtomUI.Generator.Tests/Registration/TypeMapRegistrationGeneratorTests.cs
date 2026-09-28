@@ -71,6 +71,7 @@ public class TypeMapRegistrationGeneratorTests
             public class SearchEdit : Avalonia.Controls.Control { }
             public class Tab : Avalonia.Controls.Control { }
             public class Tour : Avalonia.Controls.Control { }
+            internal class SearchButtonTheme : Avalonia.Styling.ControlTheme { }
             """,
             Asset("Button", """
                 <ControlTheme x:Key="{x:Type local:Button}" TargetType="local:Button">
@@ -141,8 +142,8 @@ public class TypeMapRegistrationGeneratorTests
         return AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(RuntimeDirectory, "AtomUI.Core.dll"));
     }
 
-    internal static TextFile Asset(string name, string content) => new($"{name}/Themes/{name}Theme.axaml", $"""
-        <ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:Demo">{content}</ResourceDictionary>
+    internal static TextFile Asset(string name, string content, string? resourceClass = null) => new($"{name}/Themes/{name}Theme.axaml", $"""
+        <ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:Demo"{(resourceClass is null ? "" : " x:Class=\"" + resourceClass + "\"")}>{content}</ResourceDictionary>
         """);
 
     internal static GeneratorDriverRunResult Run(string source, params TextFile[] assets) => Run(source, new Options(), assets);

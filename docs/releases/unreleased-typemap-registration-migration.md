@@ -1,6 +1,7 @@
 # 未发布：TypeMap 注册迁移
 
-本文记录当前源码分支的破坏性迁移，不代表一个已发布版本，也不改变仓库版本号。发布前仍须完成正式平台、体积、性能及 API 兼容性审查。
+本文记录当前源码分支的破坏性迁移，不代表一个已发布版本，也不改变仓库版本号。
+发布前仍须完成正式平台、体积、性能及 API 兼容性审查。
 
 ## 应用与控件包
 
@@ -43,3 +44,26 @@
 多目标资源字典必须在显式资源域内具有一致的平台可用性，且所需 Token owner 覆盖该域。
 通过资源拆分或正常平台声明修正 `ATOMUIREG006`；不应使用 warning suppression 隐藏缺失 schema。
 直接 `AddControlPackage` 失败后，该 builder 与生成入口一样不可继续 Build；请创建独立 builder 重试。
+
+## 资源平台声明收敛
+
+当前源码已采用[类型与资源平台契约](../architecture/foundations/aot-typemap-registration.md#7-平台分支)，
+这次收敛与上文旧注册管线退役分别记录。`AtomUISupportedOSPlatforms` / `AtomUIUnsupportedOSPlatforms`
+及 `.csproj` 主题平台路径列表已删除，由标准 .NET 类型平台声明和正常资源 CLR 声明替代，不提供旧 metadata 的兼容读取分支。
+
+包作者与维护者的迁移顺序及验收条件：
+
+1. 保存现有逐控件/资产平台域及 Browser 工厂保留基线，区分控件本身受限与本包主题受限；逐项核对现有路径列表覆盖的资源。
+2. 生成器接入 ResourceDictionary/ControlTheme 的资源 CLR 身份与标准平台声明，复用现有域模型和 guard；
+   增补无资源类的程序集域、非法 `x:Class`、多目标冲突、Token owner 覆盖及增量失效测试。
+3. 普通主题复用 TargetType 的已有声明；真实原生辅助类型补齐自身声明；仅主题受限的资源使用现有或新增正常资源类。
+   外部控件不要求上游修改，可复用控件不因其当前主题受限而被整体禁用。
+4. 证明逐资产有效域与原行为等价，再同时删除项目列表、`AtomUI.ThemeAssets.targets` 的平台 metadata 暴露及
+   `ThemeAssetInput`、`ThemeAssetInfo`、`TokenResourceKeyGenerator` 中的旧字段和读取。普通资源输入、Link 和 wrapper 保留。
+5. 从源码与干净 NuGet 消费执行验证，确认普通全量与桌面裁剪的模板、资源顺序和应用级主题替换不变；Browser trimmed
+   interpreter 与 `RunAOTCompilation=true` 产物均实际运行，并证明不可用的 AtomUI 资产工厂被删除。
+6. 验证资源移动/重命名后平台域不变，同目录新增无关控件/主题不继承限制；源码迁移与发布验收分别记录，以总体状态页的新证据为准。
+
+第三方包需删除旧元数据、采用对应声明并用配套 Generator 普通重建；应用仍保留原包入口，预编译 adapter 不新增使用清单。
+本次不改变 TypeMap ABI v1、资源 schema/fingerprint 或 Browser 转换协议，不拆分原生窗口包，也不扩大平台支持范围。
+既有验证记录不证明本项迁移完成；本项验证关注行为、裁剪、增量正确性和分发，既有体积门槛与未达标记录继续保留。

@@ -37,8 +37,8 @@ def stage_sources(destination):
         shutil.copy2(source, target)
         copied.append(relative)
     consumers = [name for name in copied if name.startswith(str(FIXTURES / "PackageConsumers") + "/")]
-    if len(consumers) != 19:
-        raise RuntimeError(f"Expected all 19 deliverable consumer sources/configs, found {len(consumers)}")
+    if len(consumers) != 20:
+        raise RuntimeError(f"Expected all 20 deliverable consumer sources/configs, found {len(consumers)}")
     return copied
 
 
@@ -156,8 +156,8 @@ def main():
                             "-o", str(destination)], consumer_env)
     receipt_path = source / ordinary / "Browser/obj/Release/net10.0-browser/AtomUI.TypeMap.receipt.json"
     receipt = json.loads(receipt_path.read_text())
-    if receipt["status"] != "output-verified" or len(receipt["accessors"]) != 2:
-        raise RuntimeError("Product package Browser receipt did not verify Common/Desktop")
+    if receipt["status"] != "output-verified" or len(receipt["accessors"]) != 3:
+        raise RuntimeError("Product package Browser receipt did not verify Common/Desktop/Author")
     shutil.copy2(receipt_path, output / "browser-receipt.json")
     results["runtime"]["browser"] = "pending-browser-run"
     if args.serve:

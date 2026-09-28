@@ -30,8 +30,4 @@
         <ProjectReference Include="../AtomUI.Controls/AtomUI.Controls.csproj" />
         <ProjectReference Include="../AtomUI.Generator/AtomUI.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
     </ItemGroup>
-    <ItemGroup>
-        <AvaloniaXaml Update="AdornerLayer/Themes/*.axaml;OtpLineEdit/Themes/*.axaml;SplitView/Themes/*.axaml;Flyouts/Themes/TreeViewFlyoutPresenterTheme.axaml;Window/Themes/*.axaml;WindowTitleBar/Themes/*.axaml"
-                      AtomUIUnsupportedOSPlatforms="browser" />
-    </ItemGroup>
 </Project>

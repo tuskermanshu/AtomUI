@@ -121,19 +121,57 @@ feature switch 必须在发布期消除不可达全量分支；仅运行时 `if`
 
 ## 7. 平台分支
 
+本节的平台声明来源已接入普通生成器，原项目路径配置已移除；实现与验证证据由
+[状态与事实边界](aot-and-trimming.md#1-状态与事实边界)记录。平台可用域比较与片段 guard 复用同一模型。
+
+### 7.1 声明归属
+
+平台能力使用标准 `SupportedOSPlatformAttribute` / `UnsupportedOSPlatformAttribute`，声明放在实际承担限制的对象上：
+
+| 限制属于 | 声明位置 | 生成行为 |
+| --- | --- | --- |
+| 控件本身 | Control 类型及其包含类型、程序集 | 从导出 TargetType 自动取得类型域，普通主题无需重复声明 |
+| 某套主题或资源字典 | 该资产的正常资源 CLR 类型及其包含类型、程序集 | 仅收窄该资产；不反向修改 TargetType 的产品平台能力 |
+| 包内全部类型和资源 | 程序集 | 作为本包类型和资产的平台上界，不按项目名或目录推断 |
+
+ResourceDictionary 与 ControlTheme 的 `x:Class` 均绑定到本资产所属程序集的实际资源类型；已有强类型主题复用自己的 CLR 类型。
+Styles、UserControl 等其他合法 AXAML 根不因位于 Themes 目录而被当成这两类注册资源。
+没有资源 CLR 类型时，资源域来自资产所属程序集，程序集无约束时才是全平台。显式 `x:Class` 无法解析或身份不合法时
+必须诊断，不能静默按无声明处理。资源身份使用定义程序集与完整 CLR 名称，不使用简单类名、文件名或目录作为平台依据。
+
+普通跨平台控件无需平台配置；本来不支持 Browser 的控件，其主题自动随类型域排除。对于外部库拥有的目标类型，
+或控件可跨平台但本包主题具有额外限制的情形，声明应放在本包的正常资源类上。需要新增资源类时，它必须是实际可加载的
+ResourceDictionary/ControlTheme，保持原资源内容与构造语义；不引入标记专用假类型、新 AOT attribute 或路径清单。
+这些声明不会自动发现任意方法体中的原生调用，作者仍须准确表达真实产品能力；不能为了裁剪而扩大控件的禁用范围。
+
+### 7.2 可用域与生成分支
+
+复用现有 `PlatformAvailability` 模型。类型域组合 type、containing type 与 assembly 的标准声明，不另建通用基类或
+方法体能力推导。设资源自身域为 `R`，各导出 TargetType 的类型域为 `T_i`：
+
+```text
+A_i = R ∩ T_i
+不可分割资产要求：所有 A_i 相等且非空
+所需每个 Token owner 的类型域必须覆盖共同的 A_i
+```
+
+单目标资源无额外限制时自然继承目标域；多目标资源不允许静默取不同目标的交集，以免丢失仍可用的主题。
+例如一个目标全平台、另一个不支持 Browser：资源无额外声明时必须拆分，或在产品确实只提供桌面版本时，
+由资源类明确排除 Browser。显式收窄资源仍不得改变其他资产对同一目标的支持范围。
+资产 guard 与默认 type-key 提供者的域覆盖校验消费同一份资源域。Semantic Theme 继续复用同一份 XML/类型/资源索引；
+本次声明来源收敛不新增显式 include 的平台覆盖校验或独立语义主题的平台推导。
+
 ControlContract 的 `PlatformAvailability` 是普通产品平台能力，生成器将其写进每个片段的真实平台分支。
 先判断平台，再引用或构造该片段的 Token、Semantic、asset factory。即使代理因为静态类型证据可达，不可用平台分支内的
 工厂仍必须能被链接器删除。
 
 公共 builder 在构造完 descriptor 后才执行 predicate，不能替代片段内平台 guard。
-本包类型优先使用正常 .NET 平台可用性声明；包对外部类型的主题覆盖使用正常平台资源声明。跨平台控件不需新增 AOT 配置。
-同一资产导出不兼容平台目标、无法形成一致 factory 时，要求正常拆分资源或诊断，不能静默删掉其中一个可用主题。
-
-可用域按平台与版本半开区间规范化，组合 type、containing type、assembly 的普通声明及资产显式平台元数据。
-每个导出先与显式资源域相交；所有导出必须得到同一可用域，RequiredTokenOwner 的类型域必须覆盖该域。
 共同域的 guard 在每条入口到共享 AddAsset 的路径上、descriptor 与 factory 引用之前执行。
-仅取不同导出的隐式交集可能丢失仍可用的主题，因此不作为修复方式。
+资源类型只提供平台事实与真实资源构造，不成为新增的包级 TypeMap 条件或全包静态根；保留既有 theme-class 片段语义。
 
+### 7.3 平台语法与边界
+
+可用域按平台与版本半开区间规范化。
 当前支持 browser、windows、linux、macos/osx、ios、maccatalyst、android、tvos、freebsd；browser/linux 不接受版本，
 其他平台接受对应 OperatingSystem API 的版本分量（Windows 至四段，其余至三段）。子声明只收窄父域；
 重启已排除区间、多区间重新启用、无法表示的 OS/版本以及空域报告 ATOMUIREG006。
@@ -142,6 +180,20 @@ IsIOS/IsIOSVersionAtLeast 包含 MacCatalyst，域比较与生成 guard 均保�
 与 [CA1416](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1416) 的可用性语义；
 这里声明的是生成器支持的有界语法，并不承诺实现分析器的全部属性组合。
 
+### 7.4 首批迁移边界
+
+本次只收敛声明来源，不扩大 Browser 支持范围，也不拆分原生窗口包。原路径排除覆盖的资产按以下归属迁移：
+
+| 对象 | 迁移要求 |
+| --- | --- |
+| Window、WindowTitleBar、SplitView、OtpLineEdit、OtpLineEditCell、TreeViewFlyoutPresenter | 复用已有类型平台声明，普通主题由 TargetType 自动取得限制 |
+| WindowResizer、FullscreenPopoverLayer、CaptionButton、CaptionButtonGroup、WindowsCaptionButton 等原生窗口辅助类型 | 核对实际原生窗口依赖，在类型上补齐真实产品能力；不按同目录批量标注 |
+| WindowTitleBarButton、WindowTitleBarToggleButton 的平台专属主题 | 复用现有主题 CLR 类声明资源限制；不据此收窄可复用控件本身 |
+| Avalonia 的 AdornerLayer、WindowDrawnDecorations 对应的 AtomUI 主题 | 由本包正常资源类声明限制，不修改外部类型，也不要求外部库配合 |
+| OtpTextBox、CaptionButtonFrame 及同目录其他资产 | 按实际控件能力与主题依赖逐项判断；纯资源限制归资源类，不继承目录限制 |
+
+迁移必须先保存原有逐类型/资产的平台域与 Browser 工厂保留基线，再证明新声明得到相同有效域；不能以删除配置为由
+静默放开或收窄行为。窗口模板、资源内容、默认主题键、AssetId/URI、覆盖顺序及应用级主题替换保持原契约。
 
 ## 8. 验证边界
 
@@ -152,6 +204,10 @@ IsIOS/IsIOSVersionAtLeast 包含 MacCatalyst，域比较与生成 guard 均保�
 - 全量数组、全量资源 dispatch 和生成 helper 不把未用 Control 变成根。
 - 多 Group、跨程序集及传递引用可用；未启用可选包没有生命周期副作用。
 - 资源字典多目标闭包正确，新增无关同目录控件不扩大选择范围。
+- 资源 CLR 类型/程序集声明、无资源类的程序集域、不可解析的 `x:Class`、多目标不一致及 Token owner 不覆盖有正反对照。
+- 资源移动或重命名并更新正常引用后，平台域不变；同目录新增跨平台资产不会继承平台排除。原路径/AssetId 的正常变化不等于平台能力变化。
+- 平台声明迁移前后桌面模板与默认主题替换等价；Browser interpreter/AOT 均删除不可用的 AtomUI 资产工厂。
+  不要求 Avalonia 的同名外部目标类型完全消失，它们可能仍被其他合法浏览器路径使用。
 - 原型中的已选 map 结果不能替代完整产品的 UI、NuGet、平台与体积矩阵。
 
 产品验收与实现状态由 [AOT 与裁剪架构](aot-and-trimming.md#8-验证与交付门槛)统一拥有。

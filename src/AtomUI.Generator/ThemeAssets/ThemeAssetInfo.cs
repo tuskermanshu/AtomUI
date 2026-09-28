@@ -13,10 +13,9 @@ internal sealed class ThemeAssetInfo
         string fileName,
         IReadOnlyList<ThemeAssetSemanticThemeInfo> semanticThemes,
         bool isResourceDictionary,
+        string? resourceClassName,
         string? controlThemeClassName,
-        string? controlThemeTargetTypeName,
-        string? supportedOSPlatforms,
-        string? unsupportedOSPlatforms)
+        string? controlThemeTargetTypeName)
     {
         Path = path;
         AssetPath = assetPath;
@@ -24,14 +23,12 @@ internal sealed class ThemeAssetInfo
         FileName = fileName;
         SemanticThemes = semanticThemes;
         IsResourceDictionary = isResourceDictionary;
+        ResourceClassName = resourceClassName;
         ControlThemeClassName = controlThemeClassName;
         ControlThemeTargetTypeName = controlThemeTargetTypeName;
-        SupportedOSPlatforms = supportedOSPlatforms;
-        UnsupportedOSPlatforms = unsupportedOSPlatforms;
     }
 
-    internal string? SupportedOSPlatforms { get; }
-    internal string? UnsupportedOSPlatforms { get; }
+    internal string? ResourceClassName { get; }
     internal string Path { get; }
     internal string AssetPath { get; }
     internal SourceText Source { get; }
@@ -50,8 +47,7 @@ internal sealed class ThemeAssetInfo
 
     internal static ThemeAssetInfo Create(
         AdditionalText text, string? projectDirectory, string? link,
-        CancellationToken cancellationToken, out XElement? documentRoot,
-        string? supportedOSPlatforms = null, string? unsupportedOSPlatforms = null)
+        CancellationToken cancellationToken, out XElement? documentRoot)
     {
         documentRoot = null;
         var source = text.GetText(cancellationToken) ?? SourceText.From(string.Empty);
@@ -60,6 +56,7 @@ internal sealed class ThemeAssetInfo
         IReadOnlyList<ThemeAssetSemanticThemeInfo> semanticThemes =
             Array.Empty<ThemeAssetSemanticThemeInfo>();
         var isResourceDictionary = false;
+        string? resourceClassName = null;
         string? controlThemeClassName = null;
         string? controlThemeTargetTypeName = null;
 
@@ -67,15 +64,19 @@ internal sealed class ThemeAssetInfo
         {
             var document = XDocument.Parse(source.ToString(), LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
             var root = documentRoot = document.Root;
+            XNamespace xamlNamespace = "http://schemas.microsoft.com/winfx/2006/xaml";
             isResourceDictionary = string.Equals(
                 root?.Name.LocalName,
                 "ResourceDictionary",
                 StringComparison.Ordinal);
+            // Other valid AXAML roots (for example Styles or UserControl) may live under
+            // Themes/. They are not registration assets and must retain normal compilation.
+            if (isResourceDictionary || root?.Name.LocalName == "ControlTheme")
+                resourceClassName = root?.Attribute(xamlNamespace + "Class")?.Value;
             if (root is not null &&
                 string.Equals(root.Name.LocalName, "ControlTheme", StringComparison.Ordinal))
             {
-                XNamespace xamlNamespace = "http://schemas.microsoft.com/winfx/2006/xaml";
-                controlThemeClassName = root.Attribute(xamlNamespace + "Class")?.Value;
+                controlThemeClassName = resourceClassName;
                 controlThemeTargetTypeName = GetTypeName(
                     root.Attributes()
                         .FirstOrDefault(static attribute =>
@@ -99,10 +100,9 @@ internal sealed class ThemeAssetInfo
             fileName,
             semanticThemes,
             isResourceDictionary,
+            resourceClassName,
             controlThemeClassName,
-            controlThemeTargetTypeName,
-            supportedOSPlatforms,
-            unsupportedOSPlatforms);
+            controlThemeTargetTypeName);
     }
 
 

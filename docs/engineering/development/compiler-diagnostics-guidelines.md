@@ -73,11 +73,16 @@ dotnet_diagnostic.ATOMUIAOT001.severity = error
 本表记录已有诊断。TypeMap 本地实现与验证状态见 [AOT 与裁剪架构](../../architecture/foundations/aot-and-trimming.md)。
 `REG` 错误语义与历史 `LINK` ID 分列在后文。
 
+[资源平台声明收敛](../../architecture/foundations/aot-typemap-registration.md#7-平台分支)已实现：平台域错误继续使用
+`ATOMUIREG006`，输入来源改为 Control/资源 CLR 类型及程序集的标准声明。显式资源 `x:Class` 无法解析或身份不合法时，
+使用 `ATOMUIREG003`，带 AXAML 位置、类名和所属程序集，不得当作无声明继续。域不一致报告资产、冲突目标或 Token owner。
+资源类校验限于 ResourceDictionary/ControlTheme 根；其他合法 AXAML 根不产生这类错误。退役的 `LINK` ID 不复用。
+
 | ID | Category | Severity | Trigger | Fix | Owner |
 |---|---|---|---|---|---|
 | `ATOMUIREG001` | Registration | Error | 顶层主题导出目标、key 不明确或重复 | 声明可解析的 target 和唯一 Type/string key | Registration generator |
 | `ATOMUIREG002` | Registration | Error | TokenResource 没有唯一且可访问的实际 owner | 修正 namespace 或 Token 契约 | Registration generator |
-| `ATOMUIREG003` | Registration | Error | 主题目标不可访问、开放泛型或不是 StyledElement | 使用可访问的具体主题目标 | Registration generator |
+| `ATOMUIREG003` | Registration | Error | 主题目标不可访问、开放泛型或不是 StyledElement；资源 x:Class 不能绑定到本程序集的可访问具体资源类 | 使用可访问的具体主题目标 | Registration generator |
 | `ATOMUIREG004` | Registration | Error | include 非常量、缺失、构造环，或 StaticResource 没有词法/显式 include 来源或可验证默认 type-key 条件（全包同名字符串导出不算依赖） | 修正 URI、依赖或资源作用域 | Registration generator |
 | `ATOMUIREG005` | Registration | Error | package、Group、Token owner、资产或生成符号身份冲突 | 保留唯一且一致的完整身份 | Registration generator / TypeMap linker |
 | `ATOMUIREG006` | Registration | Error | marker ABI/Group 无效、平台字符串/资源域不兼容（多目标或所需 owner），或 Browser 链接后端/工具链不受支持 | 重新构建匹配 ABI 的包/后端并修正平台或链接配置 | Registration generator / TypeMap linker |

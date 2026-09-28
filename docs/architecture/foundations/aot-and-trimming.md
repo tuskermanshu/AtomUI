@@ -4,18 +4,33 @@
 
 ## 1. 状态与事实边界
 
-**状态：本地源码迁移与旧注册路径退役已完成；正式交付验收尚未完成，未发布。**
+**状态：TypeMap 主体源码迁移与旧注册路径退役已完成；资源平台声明收敛已实现；正式交付验收尚未完成，未发布。**
 
 当前源码采用逐 Control 注册片段与独立主题资产，由官方链接器计算保留闭包。NativeAOT/CoreCLR 使用官方 TypeMap；
 Browser/Mono 在官方 ILLink 标记之后将已选映射转换为静态映射。普通包入口、产品 buildTransitive 与独立冷 NuGet 消费
 已经接入该实现。旧 usage、Sidecar、Unit、应用 Plan 与 LinkedPublish analyzer 已移除，没有可切回的 legacy backend。
+
+2026-09-28 源码已采用[类型与资源平台契约](aot-typemap-registration.md#7-平台分支)：控件的普通 .NET 平台声明
+自动约束其导出主题，主题自身的额外限制由正常资源 CLR 类型声明。项目主题路径排除列表、
+`AtomUISupportedOSPlatforms` / `AtomUIUnsupportedOSPlatforms` 自定义元数据及其读取/传输字段均已删除。
+无资源类时使用资产所属程序集域，显式非法资源类报告错误；其他合法 AXAML 根不按注册资源类校验。
+这是现有 TypeMap 管线的输入契约收敛，不恢复旧依赖分析，也不改变一行包入口、Browser 精细裁剪或运行时注册 ABI。
+本次资源平台声明收敛的生成器 449 项、独立目录受影响测试 6,392/6,392 项通过，构建产物指纹保持不变。
+Desktop 全部资产工厂生成文本与迁移前一致，包括有效平台域、身份、顺序与 fingerprint。真实 Complex 样例的
+普通桌面、NativeAOT 与 fulltrim CoreCLR 均启动并验证 AtomUI 窗口、标题栏和 OTP 模板；Browser interpreter/AOT
+在真实 IAB 各通过 20 项运行检查，17 个桌面主题资产的工厂在两个部署模式中均缺失。冷 NuGet 作者、直接/传递/二进制
+消费和浏览器运行通过；20 包完整性、相对 6.1.8 的布局以及打包任务隔离检查通过。
+统一 runner 的单元测试与产物稳定性校验通过；其状态仍为 pending，因为 NativeAOT/package-layout 专项不能自动回填，
+上述专项另有实际发布和打包命令证据，不手工伪造通过回执。本次是受影响范围验收，不等于全量或全部平台验收。源码责任见[控件注册生成器](../../modules/generator/control-registration.md#4-主题导出与资源)，
+迁移步骤见[未发布迁移说明](../../releases/unreleased-typemap-registration-migration.md#资源平台声明收敛)。
 
 “源码已迁移”与“全部交付门槛通过”分别记录。2026-09-28 修复局部枚举键覆盖与注册契约后的真实桌面 Button/Window 样例在默认配置下为
 20.21 MiB，同配置 full 注册为 44.40 MiB；`OptimizationPreference=Size` 下分别为 19.77 MiB 与 43.57 MiB。
 两组均满足至少缩小 40% 的相对门槛，但均未达到 18 MiB 的绝对门槛，不能宣称体积验收完成。
 样例仅使用 AlibabaSans，没有中文字体包；不得以移除正常全球化、图片服务或诊断能力满足门槛。
 
-已知 Gallery Tab overflow shadow 渲染理论在原始基线及当前分支均出现失败，尚不能认定为本次新增回归或无害波动。
+此前 Gallery Tab overflow shadow 渲染理论在原始基线及迁移分支均出现过失败，尚未确定成因；
+本次受影响渲染组 77/77 通过，但没有通过修改阴影实现来消除此历史问题。
 该失败不通过修改 Tab 几何或削弱像素断言绕过。完整 Browser Gallery、Windows/Linux/iOS 与较旧 macOS 的运行验证
 不在本次本地主机证据内。NativeAOT 本机链接记录了 Homebrew 系统库的部署版本警告。
 
@@ -29,8 +44,8 @@ Browser/Mono 在官方 ILLink 标记之后将已选映射转换为静态映射�
 | 同目录未使用控件 | 裁剪前有真实 TypeMap、代理与资产工厂；NativeAOT 增量 16,512 B，裁剪后代码/工厂缺失 |
 | Gallery Desktop | NativeAOT publish 与精确路径进程启动通过；UI 工具无法绑定该可执行路径，视觉走查未完成 |
 
-本轮注册修复的 Generator 418 项、Core 377 项及 NumericUpDown/标题栏定向 59 项验证通过。
-此前保留的广域受影响验证仍为 7,105/7,106；已知 shadow 渲染失败、Gallery 视觉限制和未运行平台未被这次定向验证消除。
+上一轮 TypeMap 主体注册修复的 Generator 418 项、Core 377 项及 NumericUpDown/标题栏定向 59 项验证通过。
+上一轮保留的广域受影响验证为 7,105/7,106；已知 shadow 渲染失败、Gallery 视觉限制和未运行平台未被这次定向验证消除。
 Chrome 自动化在本轮不可用，Browser 执行证据来自真实 IAB；此前 Chrome 记录属于原快照。
 
 第 8 节门槛继续有效；工具链升级、跨平台验收、体积门槛和已知渲染失败必须分别有证据，才能声明对应范围完成。
@@ -40,7 +55,7 @@ Chrome 自动化在本轮不可用，Browser 执行证据来自真实 IAB；此�
 
 | 文档 | 正式职责 |
 | --- | --- |
-| [TypeMap 注册架构](aot-typemap-registration.md) | 条件映射、代理、Package marker、应用引导和执行模式 |
+| [TypeMap 注册架构](aot-typemap-registration.md) | 条件映射、代理、Package marker、应用引导、执行模式与平台可用域 |
 | [Control 注册契约](control-registration-contracts.md) | 类型、Token、Semantic Part、主题导出、资源作用域及优先级 |
 | [浏览器链接架构](aot-browser-linking.md) | 已选映射转换、链接阶段、构建与失败边界 |
 | [控件注册生成器](../../modules/generator/control-registration.md) | 普通生成器的职责与实现入口 |

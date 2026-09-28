@@ -49,7 +49,7 @@ The runner stages the current Git-eligible source files without `.artifacts`, `b
 
 With `--serve`, open the printed localhost URL in a browser. The browser sends a local pass signal **only after** the actual `COLD_BROWSER_PASS ordinary binary adapter template` assertion runs. The runner records success and shuts down its server. Without `--serve`, it explicitly records Browser runtime as pending, not passed. All commands, exit codes, package hashes/layout, source inventory, receipt and runtime status are saved beneath the chosen output. Nothing is published externally.
 
-`PackageConsumers/` is deliberately outside the repository tooling imports. Its 13 source/configuration files must remain Git-eligible. The generated output/cache files remain ignored.
+`PackageConsumers/` is deliberately outside the repository tooling imports. Its 20 source/configuration files must remain Git-eligible. The generated output/cache files remain ignored.
 
 ## Effective ILLink configuration regression
 
@@ -63,3 +63,5 @@ This supported-toolchain check exercises the actual preparation target with cont
 The Complex desktop/Browser fixture also creates NumericUpDown in Spinner mode and verifies its real inherited ButtonSpinner theme, application-level theme replacement and local customization. Minimal remains the same Button/Window size fixture.
 
 Cold package consumption includes an ordinary author named-resource regression: removing its explicit ResourceInclude must fail normal compilation with located ATOMUIREG004; the unchanged explicit-include author then runs untrimmed and with full CoreCLR trimming. Metadata inspection confirms a separate unused exported control is present before trimming and absent afterwards. The same consumer uses a separate typed-key-only dependency; an IL check follows its compiled AXAML factory and requires the real provider ldtoken, and actual trim must preserve that provider without any provider typeof/constructor in host C#. This fixture adds no authored TypeMap or rooting descriptor.
+
+The ordinary author also exports a desktop-only named resource through a real ResourceDictionary class carrying the standard platform attribute. Its portable AuthorControl remains available in Browser, while FixtureDesktopOverlay is absent; ordinary/fulltrim desktop verifies that the same resource class loads. Complex real-desktop mode uses an AtomUI Window with a title-bar AddOn and exercises the OTP internal text-box theme; Minimal size inputs remain unchanged.

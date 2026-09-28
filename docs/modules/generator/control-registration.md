@@ -1,6 +1,6 @@
 # 控件注册生成
 
-> 本文对应本地已实现的普通生成器。实现、交付验收与发布状态见
+> 本文描述本地已实现的普通生成器与资源平台声明读取。实现、交付验收与发布状态见
 > [AOT 与裁剪架构](../../architecture/foundations/aot-and-trimming.md)。生成接口示例不代表当前已发布 API。
 
 ## 1. 模块边界
@@ -19,7 +19,8 @@
 | Control 声明 | 完整 CLR 类型、可访问性、基类、正常平台可用性声明 |
 | Token 声明 | 可选 Own Token、继承后的 schema、真实 owner 类型与 identity |
 | Semantic Part 声明 | owner、属性、路由、专用 Style 和逐控件语义 descriptor |
-| 包内编译型 AXAML | 顶层主题导出、词法资源作用域、显式常量 include、资产构造与覆盖顺序 |
+| 包内编译型 AXAML | 顶层主题导出、词法资源作用域、显式常量 include、资产构造与覆盖顺序、资源 CLR 身份绑定 |
+| 资源平台声明 | 资源 CLR 类型及其包含类型、程序集的标准平台声明；无资源类时使用资产所属程序集域 |
 | 普通包身份 | 包资源身份及程序集身份，不包含入口方法名 |
 | 已解析程序集引用 | `ControlPackageMarkerAttribute` 及其具体 Group/ABI |
 
@@ -91,15 +92,29 @@ DynamicResource 按开放宿主资源记录，不扫描所有私有字典找同�
 平台限制生成在片段的真实代码分支中，先判断平台，再引用 descriptor/semantic/resource factory。
 公共 builder 的事后 predicate 不能替代链接器可见的平台分支。
 
-Control 读取标准 `SupportedOSPlatformAttribute` / `UnsupportedOSPlatformAttribute`；资源可用性读取
-`AvaloniaXaml` 传给 `AdditionalFiles` 的 `AtomUISupportedOSPlatforms` / `AtomUIUnsupportedOSPlatforms`
-分号列表。资源声明是产品平台契约，不是控件保留名单。支持声明按可选平台取并集，不支持声明进一步排除；
-平台声明规范化为可比较的 OS/版本域；type、containing type、assembly 声明取交集，iOS 谓词包含 MacCatalyst。
-每个导出与显式资源域相交后必须一致，所需 Token owner 域必须覆盖该结果；否则普通诊断要求拆分/修正资源。
-共享 AddAsset guard 同时保护 descriptor 元数据及 resource factory 引用，不能从另一个可用导出绕过。
-支持 browser、windows、linux、macos/osx、ios、android、tvos、maccatalyst、freebsd；可用 .NET 平台版本检查
-表达的版本字符串生成对应 `Is*VersionAtLeast`，不支持或非法字符串报 `ATOMUIREG006`，不忽略版本。平台先排除后按更高版本重新启用的交错范围暂不支持，明确报 `ATOMUIREG006`；
-不能把这类范围静默退化为无版本判断。
+### 4.1 资源平台声明
+
+平台语义统一由[类型与资源平台契约](../../architecture/foundations/aot-typemap-registration.md#7-平台分支)定义。
+Control 与资源 CLR 类型读取标准 `SupportedOSPlatformAttribute` / `UnsupportedOSPlatformAttribute`。
+资源域从本程序集实际资源类取得；没有资源类时取资产所属程序集域，再与导出目标域校验。旧 MSBuild 平台列表输入已删除。
+该变更不改现有平台区间算法、TypeMap key、注册 ABI 或资源 fingerprint。
+
+绑定流程为：复用已解析 AXAML → 确定资源 CLR 身份 → 在当前 Compilation 绑定 symbol → 复用
+`PlatformAvailability` → 由 `AssetAvailability` 校验导出与 owner → 生成已有 guard。显式 `x:Class` 无法唯一绑定时
+报告资产位置和类型身份，不能按全平台继续。无资源类时仍读取资产所属程序集的声明。
+
+| 源码入口 | 实现责任 |
+| --- | --- |
+| `ThemeAssets/ThemeAssetInput.cs` | 删除两个自定义平台列表字段，保留 Path/Text/Directory/Link 等普通资源输入 |
+| `ThemeAssets/ThemeAssetInfo.cs` | 统一提取 ResourceDictionary 与 ControlTheme 的资源 CLR 身份，删除旧平台列表；保留现有默认 typed theme 判定与 wrapper 规则 |
+| `TokenResourceKeyGenerator.cs` | 删除两个平台 metadata 的读取/转发，复用同一份 XML 与资源事实，不另起扫描管线 |
+| `Registration/RegistrationModelBuilder.cs` | 用完整类型身份解析资源类；将资源域接入既有 AssetAvailability、默认 type-key 与语义资源校验 |
+| `Registration/PlatformAvailability.cs` | 复用类型声明绑定、域比较及 guard 生成；提供同语义的程序集域入口，不引入第二套平台规则 |
+
+表中路径相对于 `src/AtomUI.Generator/`。资源类身份提取不得把任意 `x:Class` 字典误判成默认 typed ControlTheme，
+也不得因新增资源类改变资源归属。已有强类型主题复用其类；新建资源类必须由普通 Avalonia 资源加载路径实际使用。
+普通默认主题仍通过既有 deferred wrapper 构造，收集期间不加载字典。MSBuild 接线见
+[构建与打包](../../architecture/foundations/build-and-packaging.md#主题资产的平台输入)。
 
 ## 5. 包入口与引用引导
 
@@ -122,6 +137,10 @@ Control 读取标准 `SupportedOSPlatformAttribute` / `UnsupportedOSPlatformAttr
 Token、主题和 Semantic writer 共享普通契约模型，或使用由完整 metadata name 确定的 partial hook。
 不能依靠生成器执行顺序或读取彼此生成文件。哈希只用于稳定生成符号，不重新引入跨消费程序集协议或应用计划。
 
+资源平台绑定复用当前变换的 XML、类型解析与可用域缓存；缓存键使用完整类型身份。不得为读取资源声明重复解析 AXAML、
+启动额外 MSBuild worker、扫描磁盘或建立应用使用分析。Compilation、资源类型声明、程序集声明和 AXAML 的变更必须
+进入现有增量依赖；无关输入不变时生成输出确定，验证增量失效与输出复用。
+
 ## 7. 构建工具协作
 
 `AtomUI.Build.Tasks` 保留资源 wrapper、Localization 和隔离任务宿主。普通生成器及这些构建资产由产品 NuGet 自动分发，
@@ -135,6 +154,11 @@ Browser 发布由 [TypeMap Linker](../typemap-linker/overview.md)在官方标记
 
 生成测试覆盖 public/internal/nested、无 Own Token、资源独占片段、typed identity、Token-only 与 Semantic Style-only。
 资源测试覆盖默认/命名主题、多目标资产、局部同名 key、显式 include、开放 DynamicResource、平台限制和资源构造循环诊断。
+
+平台来源测试覆盖 ResourceDictionary/ControlTheme 的资源类声明、包含类型/程序集域、无资源类、非法 `x:Class`、
+同短名不同程序集类型、平台域不一致和 owner 不覆盖的用例；沿用版本区间及 iOS/MacCatalyst 既有用例。
+同时覆盖只改变 C# 平台 attribute 或程序集 attribute、AXAML 内容不变的增量更新，避免复用陈旧的资源域。
+资源重命名/移动后的域保持、同目录无关资源不继承限制、默认 typed theme 判定与 wrapper 语义不变也必须有回归对照。
 
 消费测试覆盖直接/传递 ProjectReference、普通预编译 adapter 和干净 NuGet cache；应用与第三方源码不手写 TypeMap。
 验证可选包未启用时无副作用、公共重复入口在 prepare 前失败、不同 builder 独立、错误 builder 不能继续启动。

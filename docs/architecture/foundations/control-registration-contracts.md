@@ -24,6 +24,8 @@ ControlRegistrationFragment
 
 ThemeAsset
   AssetId / URI / factory symbol
+  Optional ResourceClassIdentity  // 编译期资源 CLR 身份
+  ResourceAvailability / EffectiveAvailability
   ExportedThemes[]                 // 导出 key 与 TargetType
   RequiredTokenOwners[]            // identity 与实际 owner Type
   Optional SemanticThemeBindings[]
@@ -91,6 +93,11 @@ TargetType 随片段保留，不需要分析 C# 字符串查找。
 同一包的真正公共资源仍由明确的 core 路径提供；不得把 owner 解析失败自动解释成公共资源。
 
 ### 3.3 Asset schema
+
+编译期资产模型记录可选资源 CLR 身份、资源自身域与经导出目标校验后的有效域；声明归属与计算规则由
+[平台分支](aot-typemap-registration.md#7-平台分支)拥有。来源收敛已实现，验证状态见
+[AOT 与裁剪架构](aot-and-trimming.md#1-状态与事实边界)。资源类不替代导出 TargetType，不改变主题所有权或保留条件。
+这些编译期事实用于校验和生成 guard，不增加运行时 descriptor 字段、序列化平台清单或新的 ABI/fingerprint 格式。
 
 主题资产以 ExportedThemes 与 RequiredTokenOwners 取代单一 OwnerIdentity：
 

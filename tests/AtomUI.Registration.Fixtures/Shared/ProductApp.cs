@@ -33,6 +33,9 @@ public class ProductApp : Application
     private IncludeControl _include = null!;
     private NumericUpDown _numeric = null!;
     private ThemeConfigProvider _scope = null!;
+#if !BROWSER
+    private OtpLineEdit _otp = null!;
+#endif
 #endif
     public override void Initialize()
     {
@@ -74,6 +77,10 @@ public class ProductApp : Application
         stack.Children.Add(_include);
         _numeric = new NumericUpDown { Value = 42, Width = 220, Mode = NumericUpDownMode.Spinner, IsMotionEnabled = false, CornerRadius = new CornerRadius(11) };
         stack.Children.Add(_numeric);
+#if !BROWSER
+        _otp = new OtpLineEdit { Width = 260 };
+        stack.Children.Add(_otp);
+#endif
 #endif
 #if COMPLEX
         _scope = new ThemeConfigProvider { Child = stack, Config = new ThemeConfigBuilder().WithToken(nameof(DesignToken.FontSize), "19").Build() };
@@ -104,6 +111,10 @@ public class ProductApp : Application
         _expander.UpdateLayout();
         Require(_expander.GetVisualDescendants().OfType<TextBlock>().Any(t => t.Text == "nonstring content"), "Expander nonstring content executes");
         Require(_include.Background is ISolidColorBrush brush && brush.Color == Color.Parse("#FF123456"), "cross-package ResourceInclude executes");
+#if !BROWSER
+        Require(_otp.Template is not null && _otp.GetVisualDescendants().Any(control => control.GetType().Name == "OtpTextBox"),
+            "OTP resource class creates internal text box template");
+#endif
         var spinner = _numeric.GetVisualDescendants().OfType<ButtonSpinner>().Single();
         Require(_numeric.Template is not null && spinner.GetVisualDescendants().Any() &&
                 spinner.TryFindResource(spinner.GetType(), out var spinnerTheme) &&

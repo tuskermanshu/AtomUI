@@ -16,6 +16,8 @@ internal sealed class RegistrationModelBuilder
     private readonly Action<Diagnostic> _report;
     private readonly INamedTypeSymbol[] _types;
     private readonly Dictionary<string, PlatformAvailability> _availability = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, PlatformAvailability> _resourceAvailability = new(StringComparer.Ordinal);
+    private PlatformAvailability? _assemblyAvailability;
     private readonly Dictionary<string, INamedTypeSymbol?> _resolved = new(StringComparer.Ordinal);
     private readonly Dictionary<string, (ThemeAssetInfo Input, XElement Root)> _parsed = new(StringComparer.Ordinal);
     private readonly Dictionary<(string Owner, string Property), List<SemanticThemeAssignment>> _semanticAssignments = new();
@@ -50,6 +52,7 @@ internal sealed class RegistrationModelBuilder
             else _parsed.Add(input.AssetPath, (input, root));
             _documentPaths[root] = input.AssetPath;
             if (input.ControlThemeClassName is { } name) _themeClasses[name] = root;
+            ResourceAvailability(input, root);
         }
         ReadSemanticAssignments(new HashSet<string>(semantics.SelectMany(s => s.Parts)
             .Where(p => p.ThemePropertyName is not null).Select(p => p.ThemePropertyName!), StringComparer.Ordinal));
@@ -212,8 +215,7 @@ internal sealed class RegistrationModelBuilder
         IReadOnlyList<RegistrationExport> exports, IReadOnlyList<RegistrationOwner> owners,
         IReadOnlyDictionary<string, INamedTypeSymbol> symbols)
     {
-        var resource = PlatformAvailability.Create((input.SupportedOSPlatforms ?? "").Split(';'),
-            (input.UnsupportedOSPlatforms ?? "").Split(';'), input.CreateLocation(), _report);
+        var resource = ResourceAvailability(input, root);
         var domains = exports.Select(e => resource.Intersect(Availability(symbols[e.Target.AssemblyQualifiedName]))).ToArray();
         var domain = domains[0];
         if (domain.IsEmpty)
@@ -232,6 +234,33 @@ internal sealed class RegistrationModelBuilder
                 Error(AtomUIDiagnosticDescriptors.RegistrationUnsupportedBackend, input, root,
                     "required Token owner '" + owner.Type.MetadataName + "' is unavailable in part of the asset platform domain; split resources or declare a common resource platform domain");
         }
+        return domain;
+    }
+
+    private PlatformAvailability ResourceAvailability(ThemeAssetInfo input, XElement root)
+    {
+        if (_resourceAvailability.TryGetValue(input.AssetPath, out var cached)) return cached;
+        var domain = _assemblyAvailability ??= PlatformAvailability.FromAssembly(_compilation.Assembly, _report);
+        if (input.ResourceClassName is { } name)
+        {
+            // x:Class defines this asset's class in its own assembly. A reference with the same
+            // name cannot supply its platform contract. Keep this separate from XML target lookup.
+            var type = _compilation.Assembly.GetTypeByMetadataName(name) ??
+                _types.SingleOrDefault(candidate => candidate.ToDisplayString() == name);
+            var expectedBase = input.IsResourceDictionary ? "Avalonia.Controls.ResourceDictionary" : "Avalonia.Styling.ControlTheme";
+            var resourceBase = type;
+            while (resourceBase is not null && resourceBase.ToDisplayString() != expectedBase)
+                resourceBase = resourceBase.BaseType;
+            if (type is null || !IsAccessible(type) || type.IsAbstract || resourceBase is null)
+            {
+                Error(AtomUIDiagnosticDescriptors.RegistrationInaccessibleType, input, root,
+                    "x:Class '" + name + "' in '" + _compilation.Assembly.Identity.GetDisplayName() +
+                    "' must resolve to an accessible concrete " + expectedBase + " resource class");
+                domain = PlatformAvailability.Empty;
+            }
+            else domain = Availability(type);
+        }
+        _resourceAvailability.Add(input.AssetPath, domain);
         return domain;
     }
 
@@ -360,8 +389,7 @@ internal sealed class RegistrationModelBuilder
         {
             if (domains.TryGetValue(path, out var cached)) return cached;
             var input = parsed[path].Input;
-            var resource = PlatformAvailability.Create((input.SupportedOSPlatforms ?? "").Split(';'),
-                (input.UnsupportedOSPlatforms ?? "").Split(';'), input.CreateLocation(), _report);
+            var resource = ResourceAvailability(input, parsed[path].Root);
             var result = exports.TryGetValue(path, out var targets)
                 ? targets.Select(t => resource.Intersect(Availability(symbols[t.Target.AssemblyQualifiedName]))).ToArray()
                 : parsed[path].Root.Attribute("TargetType") is { } target && Resolve(parsed[path].Root, target.Value) is { } owner

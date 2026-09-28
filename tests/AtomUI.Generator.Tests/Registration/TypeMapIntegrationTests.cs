@@ -66,8 +66,9 @@ public partial class TypeMapIntegrationTests
             [System.Runtime.Versioning.SupportedOSPlatform("windows7.0")]
             [System.Runtime.Versioning.UnsupportedOSPlatform("windows10.0")]
             public class Later : Avalonia.Controls.Control { }
-            """, new Options(new() { ["build_metadata.AdditionalFiles.AtomUISupportedOSPlatforms"] = "windows7.0" }),
-            Asset("Mixed", "<ControlTheme x:Key=\"Any\" TargetType=\"local:Any\"/><ControlTheme x:Key=\"Later\" TargetType=\"local:Later\"/>"));
+            [System.Runtime.Versioning.SupportedOSPlatform("windows7.0")]
+            internal class MixedTheme : Avalonia.Controls.ResourceDictionary { }
+            """, Asset("Mixed", "<ControlTheme x:Key=\"Any\" TargetType=\"local:Any\"/><ControlTheme x:Key=\"Later\" TargetType=\"local:Later\"/>", "Demo.MixedTheme"));
         result.Diagnostics.ShouldBeEmpty();
         var source = Source(result, "GeneratedTypeMapRegistration.g.cs");
         var add = source.Substring(source.IndexOf("internal static void AddAsset_", StringComparison.Ordinal));
@@ -542,11 +543,14 @@ public partial class TypeMapIntegrationTests
     }
 
     [Fact]
-    public void Resource_Platform_Metadata_Guards_Both_Descriptor_And_Factory()
+    public void Resource_Class_Platform_Guards_Both_Descriptor_And_Factory()
     {
-        var result = Run("namespace Demo { public class Chrome : Avalonia.StyledElement { } }",
-            new Options(new() { ["build_metadata.AdditionalFiles.AtomUIUnsupportedOSPlatforms"] = "browser" }),
-            Asset("Chrome", "<ControlTheme x:Key=\"Chrome\" TargetType=\"local:Chrome\" />"));
+        var result = Run("""
+            namespace Demo;
+            public class Chrome : Avalonia.StyledElement { }
+            [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+            internal class ChromeTheme : Avalonia.Controls.ResourceDictionary { }
+            """, Asset("Chrome", "<ControlTheme x:Key=\"Chrome\" TargetType=\"local:Chrome\" />", "Demo.ChromeTheme"));
         var source = Source(result, "GeneratedTypeMapRegistration.g.cs");
         source.ShouldContain("if (global::System.OperatingSystem.IsBrowser()) return;");
         source.ShouldContain("internal static void AddAsset_");
