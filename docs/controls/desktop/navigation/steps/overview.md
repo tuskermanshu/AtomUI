@@ -301,7 +301,7 @@ Steps 不实现 Form、CompactSpace、Popup、路由或页面内容接口。
 - 三项 item 语义样式保持 nullable；`null` 必须恢复完整的状态和类型 Token 视觉。
 - 每个根、item 和 indicator 主题各保留一套语义模板。
 - 水平布局的 item 收缩与文本换行遵循 8.7 弹性模型的份额算法与 `IconContainerSize` 收缩下限。
-- 测量与排列必须共用同一份额算法，排列宽度等于测量宽度；任何布局路径不得以裁剪代替换行。
+- 测量与排列共用份额算法，但自然尺寸请求与最终分配宽度分开：测量不申请宿主的富余空间，排列按实际分配宽度伸展；受限文本必须获得足够的换行高度。
 
 ## 8. 专项模型
 
@@ -358,11 +358,18 @@ Percent.HasValue
 | 水平 `Navigation` | 等分 | `IconContainerSize` |
 | 垂直 `Orientation` | 不参与横向份额 | 不适用 |
 
+自然尺寸与伸展契约：
+
+- 未指定宽度时，Steps 向父布局请求能够容纳内容的自然宽度，不因父容器可用宽度增加而扩大尺寸请求。`HorizontalAlignment=Stretch` 在排列阶段消费父容器实际分配的宽度。
+- 水平标题的普通布局为非末项预留等宽单元，并让末项保持内容宽度；等宽模式按最宽 item 计算自然单元宽度，Inline 的前导 `Offset` 单元也计入请求。
+- 自然宽度包含可见连接线的可绘制线段及其两端间距，不能只容纳图标和标题后让连接线退化为零宽。默认线段长度由既有 SharedToken 间距提供；它是自然尺寸偏好，不是阻止压缩的最小宽度。
+- 自然宽度受父容器可用宽度约束；宽度不足时仍执行压缩与换行。自动尺寸弹窗可以依据 Steps 的内容需求确定宽度，固定宽度布局仍可让 Steps 伸展。
+
 收缩与换行契约：
 
 - 空间富余时保持既有伸展语义：非末项伸展、末项保持内容宽度；空间不足时全部 item 按内容占比收缩，末项同样参与收缩。
 - 每个 item 的收缩下限是图标容器宽度 `IconContainerSize`；达到下限后 item 不再收缩，文本在剩余宽度内继续换行。
-- 测量与排列共用同一份额算法：`StepsPanel` 以受限份额测量 item，item 内 `StepsItemLayoutPanel` 以 deflate 后的约束测量正文区域，`StepsItemSectionPanel` 完成标题、副标题与详情三个文本节点的分组测量与排列；排列宽度必须等于测量宽度，任何布局路径不得以裁剪代替换行。
+- `StepsPanel` 以自然宽度和可用宽度共同确定的份额测量 item；排列时按最终宽度计算份额。宽度受限时保留换行后的行高，空间富余时允许扩大排列单元。item 内 `StepsItemLayoutPanel` 按扣除图标与间距后的约束测量正文，`StepsItemSectionPanel` 完成标题、副标题与详情的分组测量与排列，任何路径不得以裁剪代替换行。
 - 字符串内容经 `StepsStringToTextBlockConverter` 转换为 `TextWrapping="Wrap"` 的 TextBlock，标题、副标题与描述三者均参与换行；换行后 item 高度为标题行（必要时含副标题独立行）与内容行高度之和，行高取全部 item 的最大值。
 - 标题行空间不足时标题优先保留，副标题换到标题下方独占一行并保持完整文本宽度；任何布局路径不得以裁剪代替换行。
 
@@ -389,7 +396,7 @@ Percent.HasValue
 | 状态 | 纯状态算法、显式覆盖、越界、动态 Items、Connector nextStatus。 |
 | 交互 | Pointer、Enter/Space、disabled、当前 item 重复激活、受控请求、Wave。 |
 | AXAML | 统一模板、两个布局 Panel、稳定 part、运行时布局切换、语义样式只由 StepsItemTheme 在自身模板内消费。 |
-| 布局 | 弹性压缩、文本换行、`IconContainerSize` 收缩下限、宽容器伸展回归、测量与排列宽度一致性。 |
+| 布局 | 弹性压缩、文本换行、`IconContainerSize` 收缩下限、宽容器伸展回归、自然尺寸与实际分配宽度的分离。 |
 | Token | Indicator、Dot、状态色、Connector、Navigation、Inline、Progress。 |
 | 生命周期 | 容器 owner 释放、语义样式投影建立与释放、直接/生成/回收容器、模板重套、detach/reattach、Wave part 释放。 |
 | Semantic Part | descriptor、路由、marker 同步、生成的 Style 应用与 Gallery 预览。 |

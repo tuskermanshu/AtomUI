@@ -6,10 +6,6 @@ namespace AtomUI.Desktop.Controls;
 
 internal class StepsPanel : Panel
 {
-    private double[] _itemBases      = [];
-    private double[] _computedWidths = [];
-    private double   _measureWidth   = double.NaN;
-
     public static readonly StyledProperty<StepsType> TypeProperty =
         AvaloniaProperty.Register<StepsPanel, StepsType>(nameof(Type), StepsType.Default);
 
@@ -66,6 +62,10 @@ internal class StepsPanel : Panel
         set => SetValue(MinItemWidthProperty, value);
     }
 
+    private double[] _itemBases      = [];
+    private double[] _computedWidths = [];
+    private double   _measureWidth   = double.NaN;
+
     static StepsPanel()
     {
         AffectsMeasure<StepsPanel>(
@@ -85,7 +85,7 @@ internal class StepsPanel : Panel
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        return Orientation == Orientation.Vertical
+        return EffectiveOrientation == Orientation.Vertical
             ? MeasureVertically(availableSize)
             : MeasureHorizontally(availableSize);
     }
@@ -94,45 +94,16 @@ internal class StepsPanel : Panel
     {
         var width  = 0d;
         var height = 0d;
-        var orientation = EffectiveOrientation;
-
-        // Panel forces a horizontal row of equal-width cells even when the requested
-        // orientation is vertical, so every visible item must be measured at its
-        // final cell width. Measuring at the full available width would let the
-        // heading fit on one line at measure time and then wrap at arrange time.
-        var panelShareWidth = double.NaN;
-        if (orientation == Orientation.Horizontal &&
-            Type == StepsType.Panel &&
-            double.IsFinite(availableSize.Width))
-        {
-            var visibleCount = Children.Count(static child => child.IsVisible);
-            if (visibleCount > 0)
-            {
-                panelShareWidth = availableSize.Width / visibleCount;
-            }
-        }
-
         foreach (var child in Children)
         {
-            var measureSize = !double.IsNaN(panelShareWidth) && child.IsVisible
-                ? new Size(panelShareWidth, availableSize.Height)
-                : availableSize;
-            child.Measure(measureSize);
+            child.Measure(availableSize);
             if (!child.IsVisible)
             {
                 continue;
             }
 
-            if (orientation == Orientation.Vertical)
-            {
-                width = Math.Max(width, child.DesiredSize.Width);
-                height += child.DesiredSize.Height;
-            }
-            else
-            {
-                width += child.DesiredSize.Width;
-                height = Math.Max(height, child.DesiredSize.Height);
-            }
+            width = Math.Max(width, child.DesiredSize.Width);
+            height += child.DesiredSize.Height;
         }
 
         return new Size(width, height);
@@ -159,10 +130,14 @@ internal class StepsPanel : Panel
             }
         }
 
-        // Pass 2: re-measure every visible item at its computed share so text nodes
-        // wrap to the constrained width and report their wrapped heights.
-        var widths = ComputeHorizontalItemWidths(bases, availableSize.Width);
-        var width  = 0d;
+        // DesiredSize describes the space needed by the content, not the spare space
+        // offered by a parent (for example an auto-sized Dialog). Stretch belongs to
+        // Arrange. Keep constrained re-measurement so narrow rows report wrapped height.
+        var measureWidth = Math.Min(availableSize.Width, CalculateNaturalHorizontalWidth(bases));
+        var widths = ComputeHorizontalItemWidths(bases, measureWidth);
+        var width = Type == StepsType.Inline && widths.Length > 0
+            ? widths[0] * Math.Max(0, Offset)
+            : 0d;
         var height = 0d;
         for (var index = 0; index < visible.Length; ++index)
         {
@@ -173,9 +148,35 @@ internal class StepsPanel : Panel
 
         _itemBases      = bases;
         _computedWidths = widths;
-        _measureWidth   = availableSize.Width;
+        _measureWidth   = measureWidth;
 
         return new Size(width, height);
+    }
+
+    private double CalculateNaturalHorizontalWidth(double[] bases)
+    {
+        if (bases.Length == 0)
+        {
+            return 0;
+        }
+
+        var minWidth = Type == StepsType.Panel ? 0 : Math.Max(0, MinItemWidth);
+        if (Type is StepsType.Navigation or StepsType.Panel || ShouldArrangeTitleVerticalItemsEqually())
+        {
+            var offset = Type == StepsType.Inline ? Math.Max(0, Offset) : 0;
+            return Math.Max(minWidth, bases.Max()) * (bases.Length + (double)offset);
+        }
+
+        // Non-last items share equal cells; the last item keeps its content width.
+        // Reserve the widest non-last basis so an intrinsic arrangement cannot wrap
+        // an item that was measured unconstrained or overflow the requested row width.
+        var cellWidth = minWidth;
+        for (var index = 0; index < bases.Length - 1; index++)
+        {
+            cellWidth = Math.Max(cellWidth, bases[index]);
+        }
+
+        return cellWidth * (bases.Length - 1) + Math.Max(minWidth, bases[^1]);
     }
 
     private double[] ComputeHorizontalItemWidths(double[] bases, double availableWidth)
@@ -211,7 +212,8 @@ internal class StepsPanel : Panel
 
         if (StepsItemLayoutPanel.ResolveTitlePlacement(Type, Orientation, TitlePlacement) == Orientation.Vertical)
         {
-            var share = Math.Max(availableWidth / (count + Math.Max(0, Offset)), minWidth);
+            var offset = Type == StepsType.Inline ? Math.Max(0, Offset) : 0;
+            var share = Math.Max(availableWidth / (count + (double)offset), minWidth);
             Array.Fill(widths, share);
             return widths;
         }

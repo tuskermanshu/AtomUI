@@ -300,7 +300,11 @@ CanInvoke=false 时不进入 Tab 焦点序列，不显示 hand cursor 和 clicka
 
 ### 8.2 布局算法
 
-`StepsPanel` 的水平测量分两遍：第一遍以无限宽度测量每个可见 item，得到自然宽度作为 flex basis；第二遍按共享份额算法算出的宽度重新测量，使标题、副标题、描述等文本节点在受限宽度下换行并上报换行后的行高。测量与排列共用同一个份额计算函数，排列宽度等于测量宽度；任何布局路径不得以裁剪代替换行（份额模型见 overview.md 8.7）。
+`StepsPanel` 按有效方向选择测量路径；Panel 即使请求垂直方向也使用水平测量。水平测量分两遍：第一遍以无限宽度测量可见 item，得到自然宽度作为 flex basis；随后计算整组自然宽度，并以它与可用宽度的较小值分配第二遍测量份额，使受限文本换行并上报完整行高。
+
+整组自然宽度遵循实际排列几何：普通水平标题布局为「最大非末项宽度 × 非末项数量 + 末项宽度」；Navigation、Panel 和垂直标题布局为「最大 item 宽度 × 单元数量」；Inline 的单元数量额外包含非负 `Offset`。除 Panel 外，单元宽度保留 `MinItemWidth` 下限。隐藏 item 不参与自然宽度，空集合返回零尺寸。
+
+`DesiredSize` 只包含所需单元和 Inline 前导单元，不包含父容器提供的额外伸展空间。Arrange 仍以实际 `finalSize.Width` 使用共享份额算法；缓存只在最终宽度等于第二遍测量宽度、可见 item 数量相同时复用，否则根据本轮自然 basis 重新分配。这样自然尺寸宿主不会被 Steps 撑满，固定宽度宿主仍能伸展；受限布局继续保留压缩与换行（份额模型见 overview.md 8.7）。
 
 水平份额规则：
 
@@ -313,6 +317,8 @@ CanInvoke=false 时不进入 Tab 焦点序列，不显示 hand cursor 和 clicka
 - Vertical：按 DesiredSize 顺序堆叠。
 
 `MinItemWidth` 由主题绑定 `IconContainerSize` token，作为水平 item 的收缩下限。
+
+水平可见 Connector 的自然尺寸必须包含线段本身与 Margin。`StepsItemTheme` 通过 style setter 将现有 `SharedToken.UniformlyMargin` 提供给 internal `StepsItemLayoutPanel.PreferredHorizontalConnectorLength`。水平标题布局把该长度计入标题后方的 Connector extent；垂直标题布局同时预留 indicator 宽度、两侧 `HorizontalConnectorGap` 和线段长度。隐藏 Connector（含末项、Navigation、Panel）不预留线段。该值仅影响自然测量，不设置 Connector 的 `MinWidth`，受限排列仍可将线段压缩至零；资源变化通过面板的 measure invalidation 重新计算自然尺寸。
 
 `StepsItemLayoutPanel` 的水平标题路径以相同宽度测量和排列 body：测量时先把 indicator 按完整 item 宽度测量，再把正文区域 `StepsItemSectionPanel` 按「item 宽度 − indicator − spacing」测量，section 内部以同一宽度完成 Header / SubHeader / Content 的测量与排列，与排列时的 body 可用宽度一致。否则当份额落在文本自然宽度的邻近区间（份额 ≥ 文本自然宽度、但份额 − icon 区 < 文本自然宽度）时，文本会被测成单行、排列时再被压成更窄的一行——以裁剪代替换行。
 
@@ -381,7 +387,7 @@ AOT 边界：
 - 语义样式的 `null` 值必须完整回退 Token；容器清理和重新准备不得残留旧 owner 的显式值。
 - Semantic Part descriptor、`semantic-item` 运行时 marker 与七个静态 `semantic-item-*` marker 的同步规则、`> .semantic-item /template/ .semantic-item-x` 容器边界路由形状以及生成的 Steps*Style 类型保持稳定；`itemIcon` 默认圆角只能由主题 style 优先级提供，代码不得再以 local value 写入。
 - StepsPanel、StepsItemLayoutPanel 和 StepsItemSectionPanel 只负责布局。
-- 水平布局的 item 收缩与文本换行遵循 overview.md 8.7 弹性模型的份额算法与 `IconContainerSize` 收缩下限；测量与排列必须共用同一份额算法，排列宽度等于测量宽度，任何布局路径不得以裁剪代替换行。
+- 水平布局的 item 收缩与文本换行遵循 overview.md 8.7 弹性模型的份额算法与 `IconContainerSize` 收缩下限；测量与排列共用份额算法，自然尺寸不包含父容器的富余空间；受限布局必须保留完整换行高度，任何路径不得以裁剪代替换行。
 - 水平标题 heading 行的同行/换行决策由测量与排列共用同一判定条件；Header 与 SubHeader 并排放不下时，SubHeader 必须换到 Header 下方独占一行并保持测量宽度，不得裁成剩余宽度。
 - 水平标题路径的 body 子项（Header / SubHeader / Content）必须按排列时的 body 可用宽度（item 宽度 − indicator − spacing）测量，不得按完整 item 宽度测量；否则份额落在文本自然宽度的邻近区间时会以裁剪代替换行。
 - 宽容器的既有伸展语义（非末 item 等额伸展、末 item 内容宽、单 item 内容宽）不得随压缩能力回归。
@@ -423,7 +429,7 @@ Progress：
 - 运行时布局切换和动态 Items。
 - 弹性压缩：窄容器 item 按自然宽度比例收缩、item 总宽填满容器、`MinItemWidth` 收缩下限、极窄容器触底溢出。
 - 文本换行：压缩后标题、副标题与描述文本在受限宽度下换行，不以裁剪代替换行。
-- 宽容器伸展回归：非末 item 等额伸展、末 item 与单 item 内容宽不变；测量与排列宽度一致。
+- 宽容器伸展回归：非末 item 等额伸展、末 item 与单 item 内容宽不变；自然尺寸请求不随宿主富余宽度增长。
 
 生命周期：
 

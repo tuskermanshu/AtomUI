@@ -31,6 +31,9 @@ internal class StepsItemLayoutPanel : Panel
     public static readonly StyledProperty<double> HorizontalConnectorGapProperty =
         AvaloniaProperty.Register<StepsItemLayoutPanel, double>(nameof(HorizontalConnectorGap));
 
+    public static readonly StyledProperty<double> PreferredHorizontalConnectorLengthProperty =
+        AvaloniaProperty.Register<StepsItemLayoutPanel, double>(nameof(PreferredHorizontalConnectorLength));
+
     public static readonly StyledProperty<double> VerticalConnectorMarginProperty =
         AvaloniaProperty.Register<StepsItemLayoutPanel, double>(nameof(VerticalConnectorMargin));
 
@@ -88,6 +91,12 @@ internal class StepsItemLayoutPanel : Panel
         set => SetValue(HorizontalConnectorGapProperty, value);
     }
 
+    public double PreferredHorizontalConnectorLength
+    {
+        get => GetValue(PreferredHorizontalConnectorLengthProperty);
+        set => SetValue(PreferredHorizontalConnectorLengthProperty, value);
+    }
+
     public double VerticalConnectorMargin
     {
         get => GetValue(VerticalConnectorMarginProperty);
@@ -114,6 +123,7 @@ internal class StepsItemLayoutPanel : Panel
             IndicatorSpacingProperty,
             ConnectorThicknessProperty,
             HorizontalConnectorGapProperty,
+            PreferredHorizontalConnectorLengthProperty,
             VerticalConnectorMarginProperty,
             VerticalItemPaddingProperty);
         AffectsArrange<StepsItemLayoutPanel>(
@@ -190,9 +200,19 @@ internal class StepsItemLayoutPanel : Panel
         var bodyWidth = section?.DesiredSize.Width ?? 0;
         var bodyHeight = section?.DesiredSize.Height ?? 0;
         var sectionHeadingHeight = section?.HeadingHeight ?? 0;
-        var connector = Type == StepsType.Navigation
-            ? default
-            : FindChild(StepsItemLayoutRole.Connector)?.DesiredSize ?? default;
+        var connectorControl = Type == StepsType.Navigation ? null : FindChild(StepsItemLayoutRole.Connector);
+        var connector = connectorControl?.DesiredSize ?? default;
+        if (EffectiveOrientation == Orientation.Horizontal && connectorControl is { IsVisible: true })
+        {
+            // An empty rail otherwise requests only its margins and has no drawable
+            // length at natural size. This is a preferred extent, not MinWidth:
+            // constrained arrangement must still be able to collapse the rail.
+            connector = new Size(
+                Math.Max(connector.Width,
+                    connectorControl.Margin.Left + connectorControl.Margin.Right +
+                    Math.Max(0, PreferredHorizontalConnectorLength)),
+                connector.Height);
+        }
         if (EffectiveTitlePlacement == Orientation.Horizontal)
         {
             var bodyHeightWithHeading = bodyHeight + Math.Max(0, indicator.Height - sectionHeadingHeight);
@@ -223,6 +243,11 @@ internal class StepsItemLayoutPanel : Panel
         var verticalTitleWidth = EffectiveOrientation == Orientation.Horizontal
             ? Math.Max(indicator.Width, bodyWidth)
             : Math.Max(indicator.Width + connector.Width, bodyWidth);
+        if (EffectiveOrientation == Orientation.Horizontal && connectorControl is { IsVisible: true })
+        {
+            verticalTitleWidth = Math.Max(verticalTitleWidth,
+                indicator.Width + Math.Max(0, HorizontalConnectorGap) * 2 + connector.Width);
+        }
         return Inflate(
             new Size(
                 verticalTitleWidth,

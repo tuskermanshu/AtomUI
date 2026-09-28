@@ -130,6 +130,9 @@
             </ControlTemplate>
         </Setter>
 
+        <Style Selector="^ /template/ atom|StepsItemLayoutPanel">
+            <Setter Property="PreferredHorizontalConnectorLength" Value="{atom:SharedTokenResource UniformlyMargin}" />
+        </Style>
         <Style Selector="^[CanInvoke=True]">
             <Setter Property="Cursor" Value="Hand" />
         </Style>

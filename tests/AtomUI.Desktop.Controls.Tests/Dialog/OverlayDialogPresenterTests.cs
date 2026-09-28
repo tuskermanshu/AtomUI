@@ -411,6 +411,107 @@ public class OverlayDialogPresenterTests
     }
 
     [Fact]
+    public void Modal_With_Stretch_Steps_Keeps_Its_Natural_Size_In_Different_Owner_Widths()
+    {
+        RunOnUIThread(() =>
+        {
+            double? naturalWidth = null;
+            foreach (var ownerWidth in new[] { 900d, 1400d })
+            {
+                var placementTarget = new Border { Width = 100, Height = 40 };
+                var window = new AtomUI.Desktop.Controls.Window
+                {
+                    Width = ownerWidth,
+                    Height = 650,
+                    Content = placementTarget
+                };
+                var steps = new AtomUI.Desktop.Controls.Steps
+                {
+                    Margin = new Thickness(72, 0),
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    SizeType = AtomUI.SizeType.Small,
+                    IsItemClickable = false
+                };
+                for (var index = 1; index <= 4; index++)
+                {
+                    steps.Items.Add(new StepsItem { Header = $"第{index}步" });
+                }
+                var content = new UserControl
+                {
+                    Content = new Avalonia.Controls.Grid
+                    {
+                        RowDefinitions = new RowDefinitions("Auto,Auto,*,Auto"),
+                        RowSpacing = 12,
+                        Children = { steps }
+                    }
+                };
+                using var cancellation = new CancellationTokenSource();
+                Task<object?>? dialogTask = null;
+                try
+                {
+                    window.Show();
+                    Dispatcher.UIThread.RunJobs();
+                    dialogTask = AtomUI.Desktop.Controls.Dialog.ShowDialogModalAsync(
+                        content,
+                        options: new DialogOptions
+                        {
+                            PlacementTarget = placementTarget,
+                            Title = "新建",
+                            IsDragMovable = true,
+                            IsMaskClosable = false,
+                            DialogHostType = DialogHostType.Overlay,
+                            HorizontalStartupLocation = DialogHorizontalAnchor.Center,
+                            VerticalStartupLocation = DialogVerticalAnchor.Center,
+                            IsMotionEnabled = false
+                        },
+                        cancellationToken: cancellation.Token);
+                    Dispatcher.UIThread.RunJobs();
+                    AvaloniaHeadlessPlatform.ForceRenderTimerTick(1);
+                    window.UpdateLayout();
+                    dialogTask.IsCompleted.ShouldBeFalse();
+
+                    var surface = content.GetVisualAncestors().OfType<DialogSurface>().Single();
+                    var surfaceBounds = GetSurfaceBodyBounds(surface, window);
+                    surfaceBounds.Width.ShouldBeGreaterThan(400);
+                    surfaceBounds.Width.ShouldBeLessThan(800);
+                    if (naturalWidth is { } previousWidth)
+                    {
+                        surfaceBounds.Width.ShouldBe(previousWidth, 0.01);
+                    }
+                    naturalWidth = surfaceBounds.Width;
+                    surfaceBounds.Center.X.ShouldBe(window.ClientSize.Width / 2, 1);
+                    surfaceBounds.Center.Y.ShouldBe(window.ClientSize.Height / 2, 1);
+                    surface.GetVisualDescendants().OfType<OverlayDialogHeader>().Single().Title.ShouldBe("新建");
+
+                    var mask = window.GetVisualDescendants().OfType<OverlayDialogMask>().Single();
+                    mask.Bounds.Size.ShouldBe(window.ClientSize);
+                    steps.HorizontalAlignment.ShouldBe(HorizontalAlignment.Stretch);
+                    steps.Items.Cast<StepsItem>().ShouldAllBe(item => item.Bounds.Width > 0);
+                    foreach (var item in steps.Items.Cast<StepsItem>().Take(3))
+                    {
+                        var connector = item.GetVisualDescendants().OfType<PixelAlignedBorder>()
+                                            .Single(control => control.Name == "Connector");
+                        connector.IsVisible.ShouldBeTrue();
+                        connector.Bounds.Width.ShouldBeGreaterThan(connector.Bounds.Height);
+                        connector.Background.ShouldNotBeNull();
+                    }
+                }
+                finally
+                {
+                    cancellation.Cancel();
+                    if (dialogTask is not null)
+                    {
+                        PumpUntil(() => dialogTask.IsCompleted);
+                        dialogTask.IsCanceled.ShouldBeTrue();
+                    }
+                    window.Close();
+                    Dispatcher.UIThread.RunJobs();
+                }
+            }
+        });
+    }
+
+    [Fact]
     public void Open_Presenter_Tracks_Dialog_Size_Constraints()
     {
         RunOnUIThread(() =>
