@@ -1,0 +1,14 @@
+<Project>
+    <Import Project="../../Directory.Build.targets" />
+    <ItemGroup Condition="'$(FixtureFullRegistrationDescriptor)' != ''">
+        <TrimmerRootDescriptor Include="$(FixtureFullRegistrationDescriptor)" />
+    </ItemGroup>
+    <!-- Fault injection only: production consumers never configure the backend. -->
+    <Target Name="FixtureOverrideTypeMapBackend" BeforeTargets="AtomUIPrepareTypeMapBackend" Condition="'$(FixtureTypeMapBackendOverride)' != ''">
+        <PropertyGroup><AtomUITypeMapBackendProject></AtomUITypeMapBackendProject></PropertyGroup>
+        <ItemGroup>
+            <AtomUIRegistrationToolCandidate Remove="@(AtomUIRegistrationToolCandidate->WithMetadataValue('Kind', 'Backend'))" />
+            <AtomUIRegistrationToolCandidate Include="$(FixtureTypeMapBackendOverride)" Kind="Backend" />
+        </ItemGroup>
+    </Target>
+</Project>

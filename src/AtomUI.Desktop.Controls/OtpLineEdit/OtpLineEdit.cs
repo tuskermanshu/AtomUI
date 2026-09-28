@@ -14,6 +14,7 @@ using Avalonia.VisualTree;
 
 namespace AtomUI.Desktop.Controls;
 
+[global::System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
 public partial class OtpLineEdit : TemplatedControl,
                                    IMotionAwareControl,
                                    ICustomizableSizeTypeAware,

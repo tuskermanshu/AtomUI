@@ -1,6 +1,6 @@
 # Windows 构建任务 DLL 锁定排查与验证
 
-日期：2026-09-11。当前架构规则由 [构建与打包](../../architecture/foundations/build-and-packaging.md) 维护。
+日期：2026-09-11。本文保留当时的项目与工具名称；其中旧注册生成器不再属于已采纳的 TypeMap 目标架构。当前架构规则由 [构建与打包](../../architecture/foundations/build-and-packaging.md) 维护。
 
 ## 根因与变更
 

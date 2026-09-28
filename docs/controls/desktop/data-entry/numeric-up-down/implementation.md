@@ -117,6 +117,10 @@ String mode 保存 raw text，同时尝试同步可计算 `Value`。内部同步
 
 ### 7.3 Spinner Mode 按需模板
 
+`NumericUpDownSpinnerTheme.BasedOn` 使用真实 `{x:Type ButtonSpinner}` key，生成器按相同 key/TargetType 的
+默认导出与类型条件证明基础主题保留。查找保持环境作用域：Application.Resources 中对 ButtonSpinner 主题的替换
+仍被派生主题继承；不得为声明依赖而加入会遮蔽该替换的局部 include。content padding、派生模板和控件局部属性优先级保持不变。
+
 Spinner mode 使用独立模板创建三段式结构。左右 action 段按输入横向 padding、标准图标尺寸和分隔线自适应宽度，不使用浮动 Handle 的固定宽度和小号箭头规则。
 
 spinner 模式的外层 content frame 必须保持零 padding，避免与左右 action 段和中间输入段自身 padding 叠加，导致控件高度超过输入控件标准高度。

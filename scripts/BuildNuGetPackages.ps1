@@ -49,7 +49,7 @@ if (-not [string]::IsNullOrWhiteSpace($PackageValidationBaselineVersion)) {
 }
 
 # Prerequisite tool projects are not published packages, so they must never be validated against a
-# released baseline (AtomUI.Generator.LinkedPublish has no package on nuget.org).
+# released baseline (build-only tool projects have no published package).
 foreach ($project in $AtomUIReleaseBuildPrerequisiteProjects) {
     Invoke-AtomUIDotNet -Arguments (@("build", $project) + $buildArguments)
 }

@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-$toolSource = Join-Path $repoRoot ".artifacts/bin/$Configuration/net10.0"
+$toolSource = Join-Path $repoRoot ".artifacts/bin/$Configuration/build-tasks/net10.0"
 $testRoot = Join-Path ([IO.Path]::GetTempPath()) ("atomui-task-isolation-" + [Guid]::NewGuid().ToString('N'))
 $toolRoot = Join-Path $testRoot 'tools with spaces'
 
@@ -40,7 +40,7 @@ try {
     $assembly = Escape-Xml (Join-Path $toolRoot 'AtomUI.Build.Tasks.dll')
     $sourceAssembly = Escape-Xml (Join-Path $toolSource 'AtomUI.Build.Tasks.dll')
     $themeTargets = Escape-Xml (Join-Path $featureRoot 'AtomUI.ThemeAssets.targets')
-    $linkedTargets = Escape-Xml (Join-Path $featureRoot 'AtomUI.LinkedRegistration.targets')
+    $localizationTargets = Escape-Xml (Join-Path $featureRoot 'AtomUI.Localization.targets')
     $escapedToolRoot = Escape-Xml $toolRoot
     '<ResourceDictionary xmlns="https://github.com/avaloniaui" />' |
         Set-Content -LiteralPath (Join-Path $testRoot 'theme.axaml') -Encoding utf8
@@ -54,7 +54,7 @@ try {
     <FixtureTheme Include="theme.axaml"><Link>Themes/Fixture.axaml</Link></FixtureTheme>
   </ItemGroup>
   <Import Project="$themeTargets" />
-  <Import Project="$linkedTargets" />
+  <Import Project="$localizationTargets" />
   <Target Name="Verify">
     <AtomUI.Build.Tasks.GenerateThemeAssetWrappersTask TaskAssembly="$assembly" DotNetPath="`$(DOTNET_HOST_PATH)"
         ThemeAssets="@(FixtureTheme)" OutputDirectory="generated%253Bdir" AssemblyName="Fixture" GeneratedCodePath="generated%253Bdir/first.cs">
@@ -63,11 +63,11 @@ try {
     <Error Condition="'@(GeneratedAssets)' == ''" Text="Theme input was lost across the process boundary." />
     <Error Condition="!Exists('%(GeneratedAssets.Identity)')" Text="Output item identity was corrupted." />
     <Error Condition="'%(GeneratedAssets.Link)' == ''" Text="Output item metadata was lost." />
-    <AtomUI.Build.Tasks.CollectAxamlUsageTask TaskAssembly="$assembly" DotNetPath="`$(DOTNET_HOST_PATH)"
-        AxamlFiles="@(FixtureTheme)" ProjectDirectory="`$(MSBuildProjectDirectory)" OutputPath="usage.xml">
-      <Output TaskParameter="UsageCandidates" ItemName="UsageCandidates" />
-    </AtomUI.Build.Tasks.CollectAxamlUsageTask>
-    <Error Condition="'@(UsageCandidates)' == ''" Text="AXAML usage items with custom Identity metadata were lost." />
+    <AtomUI.Build.Tasks.ExportLanguageTemplatesTask TaskAssembly="$assembly" DotNetPath="`$(DOTNET_HOST_PATH)"
+        SourceFiles="" TargetLanguage="ja-JP" OutputRootDirectory="templates">
+      <Output TaskParameter="ExportedFiles" ItemName="ExportedFiles" />
+    </AtomUI.Build.Tasks.ExportLanguageTemplatesTask>
+    <Error Condition="'@(ExportedFiles)' != ''" Text="Empty item output was corrupted across the worker boundary." />
     <!-- Force an overwrite while the same MSBuild process is still alive. -->
     <Copy SourceFiles="$sourceAssembly" DestinationFiles="$assembly" SkipUnchangedFiles="false" Retries="0" />
     <CallTarget Targets="VerifyAgain" />
@@ -101,6 +101,12 @@ finally { $handle.Dispose() }
     $harness = Join-Path $testRoot 'CancellationHarness.cs'
     $harnessSource = Get-Content -LiteralPath (Join-Path $featureRoot 'AtomUI.Build.Tasks.Process.cs') -Raw
     $harnessSource += @'
+
+public sealed class ScalarProbe : AtomUI.Build.Tasks.IsolatedBuildTask
+{
+    public int Input { get; set; }
+    [Output] public int Count { get; set; }
+}
 
 public sealed class VerifyCancellation : Microsoft.Build.Utilities.Task
 {
@@ -146,18 +152,34 @@ public sealed class VerifyCancellation : Microsoft.Build.Utilities.Task
     $blockerXml = Escape-Xml $blocker
     $signalXml = Escape-Xml (Join-Path $testRoot 'worker-started')
     $hostXml = Escape-Xml (Join-Path $PSHOME $(if ($IsWindows) { 'pwsh.exe' } else { 'pwsh' }))
+    $scalarWorker = Join-Path $testRoot 'scalar-worker.ps1'
+    @'
+$request = Get-Content -LiteralPath $args[0] -Raw | ConvertFrom-Json
+if ($request.Properties.Input -ne '2147483646') { throw 'Integer input conversion was not invariant or exact.' }
+'{"Success":true,"Properties":{"Count":"2147483647"},"Items":{},"Diagnostics":[]}'
+'@ | Set-Content -LiteralPath $scalarWorker -Encoding utf8
+    $scalarWorkerXml = Escape-Xml $scalarWorker
     $cancelProject = Join-Path $testRoot 'cancel.proj'
     @"
 <Project>
   <UsingTask TaskName="VerifyCancellation" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="`$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
     <Task><Code Type="Class" Language="cs" Source="$harnessXml" /></Task>
   </UsingTask>
-  <Target Name="Verify"><VerifyCancellation Worker="$blockerXml" Host="$hostXml" Signal="$signalXml" /></Target>
+  <UsingTask TaskName="ScalarProbe" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="`$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+    <Task><Code Type="Class" Language="cs" Source="$harnessXml" /></Task>
+  </UsingTask>
+  <Target Name="Verify">
+    <ScalarProbe TaskAssembly="$scalarWorkerXml" DotNetPath="$hostXml" Input="2147483646">
+      <Output TaskParameter="Count" PropertyName="ScalarCount" />
+    </ScalarProbe>
+    <Error Condition="'`$(ScalarCount)' != '2147483647'" Text="Integer output conversion was not exact." />
+    <VerifyCancellation Worker="$blockerXml" Host="$hostXml" Signal="$signalXml" />
+  </Target>
 </Project>
 "@ | Set-Content -LiteralPath $cancelProject -Encoding utf8
     & dotnet msbuild $cancelProject -target:Verify -nodeReuse:false -maxCpuCount:1 -nologo
     if ($LASTEXITCODE -ne 0) { throw 'Build task cancellation regression failed.' }
-    Write-Host 'PASS: cancellation waits for worker termination and releases its exclusive file handle.'
+    Write-Host 'PASS: integer input/output conversion and cancellation waits for worker termination and releases its exclusive file handle.'
 }
 finally {
     $resolvedTestRoot = [IO.Path]::GetFullPath($testRoot)

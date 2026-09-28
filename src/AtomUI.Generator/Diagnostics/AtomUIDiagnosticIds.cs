@@ -2,6 +2,13 @@ namespace AtomUI.Generator.Diagnostics;
 
 internal static class AtomUIDiagnosticIds
 {
+    public const string RegistrationAmbiguousThemeExport = "ATOMUIREG001";
+    public const string RegistrationInvalidTokenOwner = "ATOMUIREG002";
+    public const string RegistrationInaccessibleType = "ATOMUIREG003";
+    public const string RegistrationInvalidResourceDependency = "ATOMUIREG004";
+    public const string RegistrationIdentityConflict = "ATOMUIREG005";
+    public const string RegistrationUnsupportedBackend = "ATOMUIREG006";
+    public const string RegistrationUnloweredTypeMapAccessor = "ATOMUIREG007";
     public const string AotMissingGeneratedAccessor = "ATOMUIAOT001";
     public const string AotMissingGeneratedPath = "ATOMUIAOT002";
     public const string AotUnverifiableDataMemberPath = "ATOMUIAOT003";
@@ -9,18 +16,10 @@ internal static class AtomUIDiagnosticIds
     public const string ScopedResourceHostRequiresAvaloniaObject = "ATOMUIGEN002";
     public const string ScopedResourceHostRejectsVisualTarget = "ATOMUIGEN003";
     public const string ScopedResourceHostRejectsExistingResourceHost = "ATOMUIGEN004";
-    public const string ThemeAssetMissingIdentity = "ATOMUIGEN007";
-    public const string ThemeAssetUnknownIdentity = "ATOMUIGEN008";
-    public const string ThemeAssetConflictingIdentity = "ATOMUIGEN009";
-    public const string ThemeAssetControlTokenMismatch = "ATOMUIGEN010";
-    public const string ThemeAssetDuplicateUri = "ATOMUIGEN011";
     public const string ControlTokenInvalidName = "ATOMUIGEN012";
     public const string ControlTokenInheritance = "ATOMUIGEN013";
     public const string ControlTokenMissingControl = "ATOMUIGEN014";
     public const string ControlTokenAmbiguousControl = "ATOMUIGEN015";
-    public const string ThemeAssetAmbiguousControl = "ATOMUIGEN016";
-    public const string ThemeAssetSemanticPartTargetMismatch = "ATOMUIGEN017";
-    public const string ThemeAssetUnknownTokenResource = "ATOMUIGEN018";
     public const string ControlTokenGlobalNameConflict = "ATOMUIGEN019";
     public const string ControlTokenMustBeSealed = "ATOMUIGEN020";
     public const string ControlTokenGenericLayer = "ATOMUIGEN021";
@@ -50,16 +49,4 @@ internal static class AtomUIDiagnosticIds
     public const string LocalizationInvalidTranslation = "ATOMUILOC007";
     public const string LocalizationInvalidApplicationHost = "ATOMUILOC008";
     public const string LocalizationInvalidLanguagePackage = "ATOMUILOC009";
-    public const string LinkedPlanOwner = "ATOMUILINK001";
-    public const string LinkedDynamicUsageWidened = "ATOMUILINK002";
-    public const string LinkedLegacyPackageFallback = "ATOMUILINK003";
-    public const string LinkedExplicitRootInvalid = "ATOMUILINK004";
-    public const string LinkedPackageDefinitionInvalid = "ATOMUILINK005";
-    public const string LinkedManifestVersionMismatch = "ATOMUILINK006";
-    public const string LinkedLooseAxamlWidened = "ATOMUILINK007";
-    public const string LinkedPackageEntryMissing = "ATOMUILINK008";
-    public const string LinkedPackageEntryInvalid = "ATOMUILINK009";
-    public const string LinkedDynamicUsageUncovered = "ATOMUILINK010";
-    public const string LinkedExplicitUnitConflict = "ATOMUILINK011";
-    public const string LinkedFileUnitConflict = "ATOMUILINK012";
 }

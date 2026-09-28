@@ -227,21 +227,17 @@ public sealed partial class LanguagePackEndToEndTests
         string toolingPackageVersion)
     {
         var globalPackages = GlobalPackagesPath();
-        // Generator's Pack target builds this sidecar through an MSBuild task, so it
-        // is outside the ordinary ProjectReference restore graph of a fresh fixture.
+        // The pack target builds the Browser backend outside the ordinary reference graph.
+        // Restore it explicitly in this clean fixture's isolated intermediate directory.
         await RunProcess(
-            "Restore AtomUI.Generator.LinkedPublish",
+            "Restore AtomUI.TypeMap.Linker",
             repositoryRoot,
             temporaryRoot,
             "dotnet",
             "restore",
-            Path.Combine(repositoryRoot, "src/AtomUI.Generator.LinkedPublish/AtomUI.Generator.LinkedPublish.csproj"),
-            "--disable-build-servers",
-            "-m:1",
-            "-nr:false",
-            "-p:Configuration=Release",
-            $"-p:Version={toolingPackageVersion}",
-            $"-p:RestorePackagesPath={globalPackages}");
+            Path.Combine(repositoryRoot, "src/AtomUI.TypeMap.Linker/AtomUI.TypeMap.Linker.csproj"),
+            "--disable-build-servers", "-m:1", "-nr:false", "-p:Configuration=Release",
+            $"-p:Version={toolingPackageVersion}", $"-p:RestorePackagesPath={globalPackages}");
         await RunProcess(
             "Pack AtomUI.Generator",
             repositoryRoot,

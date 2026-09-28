@@ -128,6 +128,14 @@ internal sealed class SemanticControlDeclaration
             context.TargetNode.GetLocation());
     }
 
+    internal static SemanticControlDeclaration Create(INamedTypeSymbol type, CancellationToken cancellationToken)
+    {
+        var location = type.Locations.FirstOrDefault() ?? Location.None;
+        var parts = type.GetAttributes().Where(attribute => attribute.AttributeClass?.ToDisplayString() == TargetMarkConstants.SemanticPartAttribute)
+            .Select(attribute => CreatePart(attribute, location, cancellationToken)).OrderBy(part => part.Path, StringComparer.Ordinal).ToArray();
+        return new SemanticControlDeclaration(type, parts, location);
+    }
+
     internal static SemanticControlDeclaration Merge(IEnumerable<SemanticControlDeclaration> declarations)
     {
         var declarationArray = declarations

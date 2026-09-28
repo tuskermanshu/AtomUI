@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="IsAotCompatible;IsTrimmable;EnableAotAnalyzer;EnableTrimAnalyzer;EnableSingleFileAnalyzer;PublishAot;PublishTrimmed;PublishSingleFile;RunAOTCompilation;SelfContained;RuntimeIdentifier">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IncludeInPublish>false</IncludeInPublish>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <EnableAotAnalyzer>false</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <EnableSingleFileAnalyzer>false</EnableSingleFileAnalyzer>
+    <PublishAot>false</PublishAot>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishSingleFile>false</PublishSingleFile>
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier></RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" />
+    <Reference Include="illink" HintPath="$(PkgMicrosoft_NET_ILLink_Tasks)/tools/net/illink.dll" Private="false" />
+    <Reference Include="Mono.Cecil" HintPath="$(PkgMicrosoft_NET_ILLink_Tasks)/tools/net/Mono.Cecil.dll" Private="false" />
+    <InternalsVisibleTo Include="AtomUI.TypeMap.Linker.Tests" />
+  </ItemGroup>
+</Project>

@@ -2,6 +2,7 @@
     <PropertyGroup>
         <TargetFrameworks>$(AtomUITargetFrameworks)</TargetFrameworks>
         <Nullable>enable</Nullable>
+        <AtomUIRegistrationPackageId>AtomUI.Controls.Common</AtomUIRegistrationPackageId>
         <RootNamespace>AtomUI.Controls</RootNamespace>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <CompilerGeneratedFilesOutputPath>GeneratedFiles</CompilerGeneratedFilesOutputPath>

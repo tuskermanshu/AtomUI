@@ -8,6 +8,7 @@ internal static class SemanticPartModelBuilder
         Compilation compilation,
         IEnumerable<SemanticControlDeclaration> declarations,
         IReadOnlyList<ThemeAssetInfo> assets,
+        RegistrationModelBuilder resourceFacts,
         Action<Diagnostic> reportDiagnostic)
     {
         var mergedDeclarations = declarations
@@ -29,9 +30,7 @@ internal static class SemanticPartModelBuilder
         var typeResolver = new SemanticPartTypeResolver(compilation, sourceControls);
         var contractValidator = new SemanticPartContractValidator(
             compilation,
-            sourceControls,
-            assets,
-            typeResolver,
+            resourceFacts,
             reportDiagnostic);
         var templateValidator = new SemanticPartTemplateValidator(
             assets,

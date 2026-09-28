@@ -24,7 +24,7 @@ public sealed partial class LanguagePackEndToEndTests
         {
             string[] properties = ["OutputPathWithoutFramework", "OutputPath", "BaseIntermediateOutputPath",
                 "IntermediateOutputPathWithoutFramework", "IntermediateOutputPath", "MSBuildProjectExtensionsPath",
-                "PackageOutputPath", "AtomUIBuildTasksAssembly", "AtomUILinkedPublishGeneratorAssembly", "AtomUIToolsetCacheRoot"];
+                "PackageOutputPath", "AtomUIBuildTasksOutputDirectory", "AtomUIBuildTasksAssembly", "AtomUIToolsetCacheRoot"];
             var result = await RunProcess("Evaluate isolated paths", repositoryRoot, temporaryRoot,
                 "dotnet", "msbuild", Path.Combine(repositoryRoot, "tests/fixtures/LanguagePackEndToEnd/Module/Module.csproj"),
                 "-p:Configuration=Release", "-p:TargetFramework=net10.0",
@@ -717,8 +717,8 @@ public sealed partial class LanguagePackEndToEndTests
                 new XElement("IntermediateOutputPath", "$(BaseIntermediateOutputPath)$(Configuration)/"),
                 // Repository.props computed these properties before the test path overrides.
                 // Its tool asset Items are evaluated afterwards and use the new output root.
-                new XElement("AtomUIBuildTasksAssembly", "$(OutputPathWithoutFramework)/net10.0/AtomUI.Build.Tasks.dll"),
-                new XElement("AtomUILinkedPublishGeneratorAssembly", "$(OutputPathWithoutFramework)/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"),
+                new XElement("AtomUIBuildTasksOutputDirectory", "$(OutputPathWithoutFramework)/build-tasks"),
+                new XElement("AtomUIBuildTasksAssembly", "$(AtomUIBuildTasksOutputDirectory)/net10.0/AtomUI.Build.Tasks.dll"),
                 new XElement("AtomUIToolsetCacheRoot", Path.Combine(artifactsRoot, "tools")))))
             .Save(propsPath);
         return propsPath;

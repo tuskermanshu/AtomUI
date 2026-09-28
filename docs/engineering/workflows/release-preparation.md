@@ -73,8 +73,8 @@
   `tools/netstandard2.0 → tools/net10.0` 属于包布局门禁的覆盖范围；ApiCompat 看不到它（它只比对 `lib/` 程序集）。
 - 基线包由发布脚本对每个发布包项目的 build 步骤隐式 restore 拉取（该 build 带 Release 配置与校验属性），随后
   `pack --no-build` 复用同一 restore。不要在脚本中另加独立 `dotnet restore`：不带 Release 配置的 restore 会用
-  Debug 目标框架覆盖 assets 文件，导致 `pack` 报 `NETSDK1005`。前置工具项目（`AtomUI.Generator.LinkedPublish` 等）
-  不是发布包，不施加校验属性。
+  Debug 目标框架覆盖 assets 文件，导致 `pack` 报 `NETSDK1005`。前置构建工具不是产品发布包，不施加产品 API 基线属性；TypeMap 目标工具清单与迁移状态见
+  [构建与打包](../../architecture/foundations/build-and-packaging.md)。
 - AtomUI 开启 `AvaloniaAccessUnstablePrivateApis` 后，`build/PackageValidation.props` 必须在 SDK 完成每个 TFM 的
   `PackageValidationReferencePath` 收集后追加 Avalonia 真实拆分程序集。任何 `Could not resolve reference` 都说明
   ApiCompat 引用图不完整；即使命令退出码为 0，也不能把该次运行作为包 API 门禁通过证据。

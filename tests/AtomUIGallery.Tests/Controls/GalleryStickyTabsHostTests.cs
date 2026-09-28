@@ -85,7 +85,7 @@ public class GalleryStickyTabsHostTests
         var themeSource   = ReadRepoFile("src/AtomUI.Toolkits.GalleryBase/Controls/Themes/GalleryStickyTabsHostTheme.axaml");
         var tokenSource   = ReadRepoFile("src/AtomUI.Toolkits.GalleryBase/Controls/GalleryStickyTabsHostToken.cs");
         var assetManifest = ReadRepoFile(
-            "src/AtomUI.Toolkits.GalleryBase/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.ThemeAssetManifestGenerator/GeneratedControlThemeAssetManifest.g.cs");
+            "src/AtomUI.Toolkits.GalleryBase/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.TokenResourceKeyGenerator/GeneratedTypeMapRegistration.g.cs");
 
         hostSource.ShouldContain("HeaderProperty");
         hostSource.ShouldContain("StickyContentProperty");

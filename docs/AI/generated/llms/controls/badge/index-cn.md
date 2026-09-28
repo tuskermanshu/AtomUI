@@ -110,7 +110,7 @@ Gallery key：`ExamplesContent` / item `0`
                 Background="rgb(191,191,191)"
                 CornerRadius="8" />
     </atom:CountBadge>
-    <atom:CountBadge Count="0" IsZeroVisible="True">
+    <atom:CountBadge Count="0" IsZeroVisible="True" BadgeColor="#52c41a">
         <Border Width="40"
                 Height="40"
                 Background="rgb(191,191,191)"
@@ -233,7 +233,7 @@ Badge 的默认视觉由三个内部 Token scope 与四个 ControlTheme 共同�
 | --- | --- |
 | `CountBadgeToken` | 数量徽标高度、字体、颜色、Padding、圆角和阴影。 |
 | `DotBadgeToken` | 状态点尺寸、颜色、阴影和独立文本间距。 |
-| `RibbonBadgeToken` | Ribbon 偏移、折角、文本 Padding 和行高。 |
+| `RibbonBadgeToken` | Ribbon 外伸、垂直偏移、折角尺寸、折角变换、文本 Padding 和行高。 |
 | `CountBadgeAdornerTheme.axaml` | 数量 indicator 的模板、尺寸变体和默认视觉。 |
 | `DotBadgeAdornerTheme.axaml` | 状态点、独立文本和 target mode 模板。 |
 | `DotBadgeIndicatorTheme.axaml` | 状态点绘制所需的默认属性。 |
@@ -247,7 +247,9 @@ Badge Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 当前 Token scope：
 
-- `BadgeToken`，scope id 为 `Badge`，源码位于 `src/AtomUI.Desktop.Controls/Badge/BadgeToken.cs`。
+- `CountBadgeToken`，源码位于 `src/AtomUI.Desktop.Controls/Badge/CountBadgeToken.cs`。
+- `DotBadgeToken`，源码位于 `src/AtomUI.Desktop.Controls/Badge/DotBadgeToken.cs`。
+- `RibbonBadgeToken`，源码位于 `src/AtomUI.Desktop.Controls/Badge/RibbonBadgeToken.cs`。
 
 ## AOT 与裁剪注意事项
 

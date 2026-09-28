@@ -14,7 +14,7 @@
 ## 2026-09-16
 
 - Implementation
-  - Move `ToolTipService` back to `Tooltip/ToolTipService.cs` and declare its Package Core registration ownership with `[AotTrimUnit(AotTrimGeneralUnits.Core)]`, replacing the retired `PackageCore/` directory boundary; the service no longer depends on a dedicated shared directory for unit attribution.
+  - Move `ToolTipService` back to `Tooltip/ToolTipService.cs` and declare its Package Core registration ownership with `[AotTrimUnit(AotTrimGeneralUnits.Core)]`, replacing the retired `PackageCore/` directory boundary; the service no longer depends on a dedicated shared directory for unit attribution. This records the historical registration implementation; the adopted replacement contract is [TypeMap registration](../../../../architecture/foundations/aot-typemap-registration.md).
 - Docs
   - Update the implementation source index to the new `ToolTipService` location and record the annotation as a maintenance invariant.
 

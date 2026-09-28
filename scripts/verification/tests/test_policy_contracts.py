@@ -46,6 +46,26 @@ class RealPolicyContracts(unittest.TestCase):
             with self.subTest(changed=changed):
                 self.assertIn("native-aot", {o["id"] for o in self.planner.plan([changed])["obligations"]})
 
+    def test_typemap_backend_and_fixture_changes_select_backend_tests_and_publish_checks(self):
+        for changed in ["src/AtomUI.TypeMap.Linker/RegistrationAbi.cs",
+                        "tests/AtomUI.TypeMap.Linker.Tests/Fixtures/Contracts/FixtureContracts.cs"]:
+            with self.subTest(changed=changed):
+                plan = self.planner.plan([changed])
+                self.assertEqual([], plan["gaps"])
+                self.assertIn("tests/AtomUI.TypeMap.Linker.Tests/AtomUI.TypeMap.Linker.Tests.csproj",
+                              {job["project"] for job in plan["tests"]})
+                self.assertIn("native-aot", {item["id"] for item in plan["obligations"]})
+
+    def test_ordinary_package_consumers_require_package_and_publish_validation(self):
+        for changed in ["tests/AtomUI.Registration.Fixtures/PackageConsumers/Host/Host.csproj",
+                        "tests/AtomUI.Registration.Fixtures/run_package_consumers.py"]:
+            with self.subTest(changed=changed):
+                plan = self.planner.plan([changed])
+                self.assertEqual([], plan["gaps"])
+                self.assertTrue({"native-aot", "package-layout"}.issubset({o["id"] for o in plan["obligations"]}))
+                names = {c.rsplit(".", 1)[-1] for job in plan["tests"] for c in job["classes"]}
+                self.assertIn("RegistrationSourceConsumerTests", names)
+
     def test_leaf_control_does_not_expand_to_repository_wide_tests(self):
         plan = self.planner.plan(["src/AtomUI.Desktop.Controls/Badge/CountBadge.cs"])
         projects = {j["project"] for j in plan["tests"]}

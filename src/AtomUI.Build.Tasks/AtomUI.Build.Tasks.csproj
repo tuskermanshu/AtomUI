@@ -1,13 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk"
-         TreatAsLocalProperty="IsAotCompatible;EnableAotAnalyzer;EnableTrimAnalyzer;EnableSingleFileAnalyzer;PublishAot;PublishTrimmed;PublishSingleFile;RunAOTCompilation;SelfContained;RuntimeIdentifier">
+         TreatAsLocalProperty="IsTrimmable;IsAotCompatible;EnableAotAnalyzer;EnableTrimAnalyzer;EnableSingleFileAnalyzer;PublishAot;PublishTrimmed;PublishSingleFile;RunAOTCompilation;SelfContained;RuntimeIdentifier">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <OutputType>Exe</OutputType>
+        <!-- The worker owns its output directory. Consumer IncrementalClean must never delete it. -->
+        <OutputPath>$(AtomUIBuildTasksOutputDirectory)/</OutputPath>
         <UseAppHost>false</UseAppHost>
         <DefineConstants>$(DefineConstants);ATOMUI_BUILD_TASK_HOST</DefineConstants>
         <IsPackable>false</IsPackable>
         <IncludeInPublish>false</IncludeInPublish>
         <IsAotCompatible>false</IsAotCompatible>
+        <IsTrimmable>false</IsTrimmable>
+        <RuntimeIdentifier></RuntimeIdentifier>
         <EnableAotAnalyzer>false</EnableAotAnalyzer>
         <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
         <EnableSingleFileAnalyzer>false</EnableSingleFileAnalyzer>
@@ -26,12 +30,6 @@
     <ItemGroup>
         <InternalsVisibleTo Include="AtomUI.Build.Tasks.Tests" />
         <Compile Include="../../build/AtomUI.Build.Tasks.Process.cs" Link="Isolation/TaskProtocol.cs" />
-        <Compile Include="../AtomUI.Generator/LinkedRegistration/LinkedRegistrationProtocol.cs"
-                 Link="LinkedRegistrationProtocol/LinkedRegistrationProtocol.cs" />
-        <Compile Include="../AtomUI.Generator/LinkedRegistration/Manifest/LinkedRegistrationManifestModels.cs"
-                 Link="LinkedRegistrationProtocol/LinkedRegistrationManifestModels.cs" />
-        <Compile Include="../AtomUI.Generator/LinkedRegistration/Manifest/LinkedRegistrationManifestCodec.cs"
-                 Link="LinkedRegistrationProtocol/LinkedRegistrationManifestCodec.cs" />
     </ItemGroup>
 
 </Project>

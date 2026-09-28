@@ -254,7 +254,7 @@ Badge 的默认视觉由三个内部 Token scope 与四个 ControlTheme 共同�
 | --- | --- |
 | `CountBadgeToken` | 数量徽标高度、字体、颜色、Padding、圆角和阴影。 |
 | `DotBadgeToken` | 状态点尺寸、颜色、阴影和独立文本间距。 |
-| `RibbonBadgeToken` | Ribbon 偏移、折角、文本 Padding 和行高。 |
+| `RibbonBadgeToken` | Ribbon 外伸、垂直偏移、折角尺寸、折角变换、文本 Padding 和行高。 |
 | `CountBadgeAdornerTheme.axaml` | 数量 indicator 的模板、尺寸变体和默认视觉。 |
 | `DotBadgeAdornerTheme.axaml` | 状态点、独立文本和 target mode 模板。 |
 | `DotBadgeIndicatorTheme.axaml` | 状态点绘制所需的默认属性。 |
@@ -268,7 +268,9 @@ Badge Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 
 当前 Token scope：
 
-- `BadgeToken`，scope id 为 `Badge`，源码位于 `src/AtomUI.Desktop.Controls/Badge/BadgeToken.cs`。
+- `CountBadgeToken`，源码位于 `src/AtomUI.Desktop.Controls/Badge/CountBadgeToken.cs`。
+- `DotBadgeToken`，源码位于 `src/AtomUI.Desktop.Controls/Badge/DotBadgeToken.cs`。
+- `RibbonBadgeToken`，源码位于 `src/AtomUI.Desktop.Controls/Badge/RibbonBadgeToken.cs`。
 
 ## Customization Boundaries
 
@@ -277,6 +279,8 @@ Badge Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - `root` 不添加 `.semantic-root`；非 root Part 使用唯一 `.semantic-indicator` 或 `.semantic-content`。
 - Count/Dot 跨根 indicator 的 visual parent 可以是 `AdornerLayer`，logical/style owner 必须保持对应 Badge owner。
 - Ribbon target mode 保持 inline visual tree；隐藏 Ribbon 时必须保留目标内容。
+- Ribbon 文本主体、内容区域和折角必须来自同一个布局模型；`Placement`、Token offset、实例 `Offset` 和折角变换不能各自维护互相漂移的坐标假设。
+- Ribbon 折角必须作为完整 indicator 渲染契约的一部分保持三角折叠语义，不能退化为被主体覆盖的深色竖条、独立方块或依赖目标内容裁剪的偶然形状。
 - `DecoratedTarget`、内部文本拆分、动效节点名称和绘制几何不得升级为隐式公共契约。
 - 删除、重命名 Part、修改 selector class、收窄 ContractType 或改变 cardinality 按公共主题破坏性变更处理。
 - Semantic Part 不引入运行时反射、VisualTree 全局扫描、额外常驻监听或默认路径视觉对象。
@@ -293,6 +297,9 @@ Badge Token 只表达组件级视觉变量，例如尺寸、间距、颜色、�
 - Count/Dot target mode 的 visual parent 与 logical/style owner 必须分离，detach 时对称清理。
 - Dot standalone 与 target 两套模板必须实现同一个 indicator marker 契约。
 - Ribbon 背景与折角继续由 Render 绘制，不为了 Semantic Part 新增视觉节点。
+- Ribbon 文本主体、内容区域和折角必须由同一个布局模型派生；折角几何不得通过独立 bounds、独立 transform 和独立偏移与主体拼接。
+- Ribbon Token offset 的 X/Y 语义必须保持水平外伸与垂直避让；如实现内部拆分折角尺寸，不能改变现有 TokenResource key 或默认外观。
+- 任何影响 Ribbon 折角几何或主体位置的属性变化都必须触发布局或渲染失效；不能依赖旧 cached geometry 偶然复用。
 - marker 在节点生命周期内静态存在，不表达 visible、status、placement 或 motion phase。
 - `DecoratedTarget`、内部 Label、Count 文本拆分、折角和 motion actor identity 保持非公开。
 - 默认 Theme 不消费 semantic class；实现不引入反射、扫描、额外常驻监听或新的默认视觉对象。

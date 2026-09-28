@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using AtomUI.Registration;
 using AtomUI.Generated.AtomUICore;
 using AtomUI.Theme.Compilation;
 using AtomUI.Theme.Configuration;
@@ -61,6 +62,7 @@ internal class ThemeManager : Styles, IThemeManager, IDisposable
     private readonly ThemeScopeGraph _scopeGraph;
     private ThemeState? _currentTheme;
     private Application? _application;
+    private readonly Dictionary<IControlThemesProvider, IReadOnlyList<ControlThemeResourceRegistration>> _stagedThemeResources = new();
     private ThemeSchemaRegistry? _startupRegistry;
     private ControlThemeAssetManifest? _startupControlThemeAssetManifest;
     private CompiledThemeCatalog? _compiledThemeCatalog;
@@ -144,7 +146,7 @@ internal class ThemeManager : Styles, IThemeManager, IDisposable
         }
 
         _application = application;
-        _startupRegistry = CreateStartupRegistry();
+        _startupRegistry ??= CreateStartupRegistry();
         _normalizedRuntimeDefaultConfig = ThemeConfigNormalizer.Normalize(
             AddDefaultFont(null) ?? ThemeConfig.Empty,
             _startupRegistry);
@@ -1053,6 +1055,7 @@ internal class ThemeManager : Styles, IThemeManager, IDisposable
 
         _application = null;
         _applicationInitialized = false;
+        _stagedThemeResources.Clear();
         _startupRegistry = null;
         _startupControlThemeAssetManifest = null;
         _compiledThemeCatalog = null;
@@ -1711,17 +1714,31 @@ internal class ThemeManager : Styles, IThemeManager, IDisposable
         return _themeSnapshotCache ??= new ThemeSnapshotCache();
     }
 
+    internal void PrepareRegistrationSchema() => _startupRegistry ??= CreateStartupRegistry();
+
+    internal void StageControlThemeResources(IControlThemesProvider provider, IReadOnlyList<ControlThemeResourceRegistration> resources) =>
+        _stagedThemeResources.Add(provider, resources);
+
     private void MountStaticResources()
     {
         foreach (var provider in _controlThemesProviders)
         {
+            if (_stagedThemeResources.TryGetValue(provider, out var registrations))
+            {
+                foreach (var registration in registrations)
+                {
+                    var resource = registration.Factory() ?? throw new InvalidOperationException(
+                        $"Theme resource factory '{registration.AssetId}' returned null.");
+                    provider.ControlThemes.Add(resource);
+                }
+            }
             foreach (var resourceProvider in provider.ControlThemes)
             {
                 Resources.MergedDictionaries.Add(resourceProvider);
             }
         }
         _controlThemesProviders.Clear();
-
+        _stagedThemeResources.Clear();
     }
 
     private ThemeSchemaRegistry CreateStartupRegistry()
@@ -1731,10 +1748,38 @@ internal class ThemeManager : Styles, IThemeManager, IDisposable
             _controlTokenDescriptors,
             GeneratedThemeSchema.GetAlgorithms(),
             _controlThemeAssetDescriptors);
+        ValidateSemanticContracts(registry);
         _startupControlThemeAssetManifest = new ControlThemeAssetManifest(
             registry,
             _controlThemeAssetDescriptors);
         return registry;
+    }
+
+    private void ValidateSemanticContracts(ThemeSchemaRegistry registry)
+    {
+        foreach (var semantic in SemanticParts.Controls)
+        {
+            var raw = new Schema.ControlTokenIdentity(semantic.Identity.Catalog, semantic.Identity.Id);
+            if (!ControlTokenIdentityCanonicalizer.Matches(semantic.Identity, semantic.ControlType) ||
+                (registry.TryGetControl(raw, out var token) && token.ControlType != semantic.ControlType) ||
+                (registry.TryGetControl(semantic.ControlType, out token) && token.Identity != semantic.Identity))
+            {
+                throw new ThemeSchemaException($"Semantic Control '{semantic.Identity}' conflicts with the registered Token owner.");
+            }
+        }
+        foreach (var asset in _controlThemeAssetDescriptors)
+        {
+            foreach (var binding in asset.SemanticThemeBindings)
+            {
+                if (!SemanticParts.TryGetControl(binding.OwnerIdentity, out var semantic) ||
+                    !semantic.Parts.Any(part => part.Theme is { } theme &&
+                        theme.PropertyName == binding.PropertyName &&
+                        theme.TargetType == binding.TargetType))
+                {
+                    throw new ThemeSchemaException($"Theme asset '{asset.AssetId}' has an invalid semantic binding '{binding.OwnerIdentity}.{binding.PropertyName}'.");
+                }
+            }
+        }
     }
 
     private static ThemeAppearance ResolveSystemAppearance(Application application)

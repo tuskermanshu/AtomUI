@@ -672,6 +672,10 @@ Flyout / FlyoutHost 的弹层根是代码创建、跨视觉根的 `FlyoutPresent
 
 ## 10. Semantic Part Theme
 
+语义 Theme 的具体 TargetType 由 typed AXAML 属性赋值及其词法/include 资源解析证明，并与注册资产共享事实源。
+同名文件或同目录主题不决定属性归属。没有静态赋值时使用声明的 ContractType；无法证明目标的已赋值主题必须诊断，
+不能以猜测的目标类型创建注册保留关系。
+
 `SelectorAndTheme` Part 必须对应真实 public Control，并通过 owner 的强类型 `ControlTheme?` 属性开放完整替换：
 
 ```csharp

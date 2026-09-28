@@ -7,14 +7,14 @@ namespace AtomUI.Generator;
 
 internal sealed class SemanticPartManifestWriter
 {
-    private readonly SourceProductionContext _context;
+    private readonly GenerationOutput _context;
     private readonly string _generatedNamespace;
     private readonly string _controlCatalog;
     private readonly IReadOnlyList<SemanticControlDeclaration> _controls;
     private readonly bool _emitXmlnsDefinition;
 
     internal SemanticPartManifestWriter(
-        SourceProductionContext context,
+        GenerationOutput context,
         string? assemblyName,
         string controlCatalog,
         IReadOnlyList<SemanticControlDeclaration> controls,
@@ -61,23 +61,14 @@ internal sealed class SemanticPartManifestWriter
         source.AppendLine();
         source.AppendLine("internal static class GeneratedSemanticPartManifest");
         source.AppendLine("{");
-        source.AppendLine("    internal static global::System.Collections.Generic.IReadOnlyList<global::AtomUI.Theme.Schema.ControlSemanticDescriptor> GetDescriptors()");
-        source.AppendLine("    {");
-        if (_controls.Count == 0)
+        foreach (var control in _controls)
         {
-            source.AppendLine("        return global::System.Array.Empty<global::AtomUI.Theme.Schema.ControlSemanticDescriptor>();");
+            source.Append("    internal static global::AtomUI.Theme.Schema.ControlSemanticDescriptor ").Append(GetFactoryName(control)).AppendLine("()");
+            source.AppendLine("    {");
+            source.AppendLine("        return");
+            WriteControlDescriptor(source, control);
+            source.AppendLine("    }");
         }
-        else
-        {
-            source.AppendLine("        return new global::AtomUI.Theme.Schema.ControlSemanticDescriptor[]");
-            source.AppendLine("        {");
-            foreach (var control in _controls)
-            {
-                WriteControlDescriptor(source, control);
-            }
-            source.AppendLine("        };");
-        }
-        source.AppendLine("    }");
         source.AppendLine("}");
 
         _context.AddSource(
@@ -85,12 +76,14 @@ internal sealed class SemanticPartManifestWriter
             GeneratedSourceText.From(source.ToString()));
     }
 
+    internal static string GetFactoryName(SemanticControlDeclaration control) => "CreateSemanticDescriptor_" + RegistrationNames.Hash(RegistrationType.MetadataNameOf(control.ControlType));
+
     private void WriteControlDescriptor(StringBuilder source, SemanticControlDeclaration control)
     {
         var controlType = control.ControlType.ToDisplayString(GeneratorSymbolDisplay.FullyQualifiedType);
         source.AppendLine("            new global::AtomUI.Theme.Schema.ControlSemanticDescriptor(");
         source.Append("                typeof(").Append(controlType).AppendLine("),");
-        source.Append("                new global::AtomUI.Theme.Schema.ControlTokenIdentity(")
+        source.Append("                global::AtomUI.Theme.Schema.ControlTokenIdentity.ForControl(typeof(").Append(controlType).Append("), ")
               .Append(FormatStringLiteral(_controlCatalog))
               .Append(", ")
               .Append(FormatStringLiteral(control.ControlType.Name))
@@ -112,7 +105,7 @@ internal sealed class SemanticPartManifestWriter
         {
             WritePartDescriptor(source, control, part);
         }
-        source.AppendLine("                }),");
+        source.AppendLine("                });");
     }
 
     /// <summary>
@@ -182,7 +175,7 @@ internal sealed class SemanticPartManifestWriter
             source.Append("                        new global::AtomUI.Theme.Schema.ControlThemeSemanticPartDescriptor(")
                   .Append(FormatStringLiteral(part.ThemePropertyName!))
                   .Append(", ")
-                  .Append(FormatStringLiteral(themeTargetType))
+                  .Append("typeof(").Append(themeTargetType).Append(")")
                   .AppendLine("),");
         }
         else

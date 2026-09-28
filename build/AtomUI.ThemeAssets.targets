@@ -5,17 +5,15 @@
         <AtomUIThemeAssetProjectDirectory>$(MSBuildProjectDirectory)</AtomUIThemeAssetProjectDirectory>
         <AtomUIThemeControlCatalog
             Condition="'$(AtomUIThemeControlCatalog)' == ''">$(AssemblyName)</AtomUIThemeControlCatalog>
-        <AtomUIPackageSharedThemePaths
-            Condition="'$(AtomUIPackageSharedThemePaths)' == ''">@(AtomUIPackageSharedTheme->'%(Identity)', ';')</AtomUIPackageSharedThemePaths>
     </PropertyGroup>
 
     <ItemGroup>
+        <CompilerVisibleProperty Include="AtomUIRegistrationPackageId" />
         <CompilerVisibleProperty Include="AtomUIThemeAssetProjectDirectory" />
         <CompilerVisibleProperty Include="AtomUIThemeControlCatalog" />
-        <CompilerVisibleProperty Include="AtomUIPackageSharedThemePaths" />
         <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="Link" />
-        <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="AtomUIRegistrationUnit" />
-        <CompilerVisibleItemMetadata Include="Compile" MetadataName="AtomUIRegistrationUnit" />
+        <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="AtomUISupportedOSPlatforms" />
+        <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="AtomUIUnsupportedOSPlatforms" />
     </ItemGroup>
 
     <UsingTask TaskName="AtomUI.Build.Tasks.GenerateThemeAssetWrappersTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">

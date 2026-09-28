@@ -14,6 +14,7 @@ using AvaloniaTextBox = Avalonia.Controls.TextBox;
 namespace AtomUI.Desktop.Controls;
 
 [PseudoClasses(":cell-active", ":input-target")]
+[global::System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
 internal class OtpLineEditCell : InputControlFrame
 {
     #region 公共属性定义

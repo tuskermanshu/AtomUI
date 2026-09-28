@@ -39,10 +39,7 @@
         <InternalsVisibleTo Include="AtomUI.Desktop.Controls.Tests"/>
         <InternalsVisibleTo Include="AtomUI.Desktop.Controls.DataGrid.Tests"/>
         <InternalsVisibleTo Include="AtomUI.Core.Tests"/>
-        <InternalsVisibleTo Include="AtomUI.LinkedRegistration.Fixtures.Minimal"/>
-        <InternalsVisibleTo Include="AtomUI.LinkedRegistration.Fixtures.TwoUnits"/>
-        <InternalsVisibleTo Include="AtomUI.LinkedRegistration.Fixtures.DynamicFallback"/>
-        <InternalsVisibleTo Include="AtomUI.LinkedRegistration.Fixtures.Full"/>
+        <InternalsVisibleTo Include="AtomUI.Registration.Fixtures"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -265,7 +265,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class ColorItemControlTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "ColorItemControl");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.ColorItemControl), "AtomUI", "ColorItemControl");
     }
 
     public class ColorItemControlTokenResourceExtension : TokenResourceExtension<ColorItemControlTokenKey>
@@ -556,7 +556,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class ColorListControlTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "ColorListControl");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.ColorListControl), "AtomUI", "ColorListControl");
     }
 
     public class ColorListControlTokenResourceExtension : TokenResourceExtension<ColorListControlTokenKey>
@@ -847,7 +847,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class GallerySelectableTextBlockTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "GallerySelectableTextBlock");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.GallerySelectableTextBlock), "AtomUI", "GallerySelectableTextBlock");
     }
 
     public class GallerySelectableTextBlockTokenResourceExtension : TokenResourceExtension<GallerySelectableTextBlockTokenKey>
@@ -1180,7 +1180,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class GalleryShowCaseHeaderTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "GalleryShowCaseHeader");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.GalleryShowCaseHeader), "AtomUI", "GalleryShowCaseHeader");
     }
 
     public class GalleryShowCaseHeaderTokenResourceExtension : TokenResourceExtension<GalleryShowCaseHeaderTokenKey>
@@ -1475,7 +1475,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class GalleryShowCaseHostTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "GalleryShowCaseHost");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.GalleryShowCaseHost), "AtomUI", "GalleryShowCaseHost");
     }
 
     public class GalleryShowCaseHostTokenResourceExtension : TokenResourceExtension<GalleryShowCaseHostTokenKey>
@@ -1776,7 +1776,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class GalleryStickyTabsHostTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "GalleryStickyTabsHost");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.GalleryStickyTabsHost), "AtomUI", "GalleryStickyTabsHost");
     }
 
     public class GalleryStickyTabsHostTokenResourceExtension : TokenResourceExtension<GalleryStickyTabsHostTokenKey>
@@ -2079,7 +2079,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class GalleryWindowTitleBarTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "GalleryWindowTitleBar");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.GalleryWindowTitleBar), "AtomUI", "GalleryWindowTitleBar");
     }
 
     public class GalleryWindowTitleBarTokenResourceExtension : TokenResourceExtension<GalleryWindowTitleBarTokenKey>
@@ -2374,7 +2374,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class IconGalleryTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "IconGallery");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.IconGallery), "AtomUI", "IconGallery");
     }
 
     public class IconGalleryTokenResourceExtension : TokenResourceExtension<IconGalleryTokenKey>
@@ -2665,7 +2665,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class IconInfoItemTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "IconInfoItem");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.IconInfoItem), "AtomUI", "IconInfoItem");
     }
 
     public class IconInfoItemTokenResourceExtension : TokenResourceExtension<IconInfoItemTokenKey>
@@ -2956,7 +2956,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class SemanticPartPreviewTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "SemanticPartPreview");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.SemanticPartPreview), "AtomUI", "SemanticPartPreview");
     }
 
     public class SemanticPartPreviewTokenResourceExtension : TokenResourceExtension<SemanticPartPreviewTokenKey>
@@ -3269,7 +3269,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class ShowCaseItemTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "ShowCaseItem");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.ShowCaseItem), "AtomUI", "ShowCaseItem");
     }
 
     public class ShowCaseItemTokenResourceExtension : TokenResourceExtension<ShowCaseItemTokenKey>
@@ -3578,7 +3578,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class ShowCasePanelTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "ShowCasePanel");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.ShowCasePanel), "AtomUI", "ShowCasePanel");
     }
 
     public class ShowCasePanelTokenResourceExtension : TokenResourceExtension<ShowCasePanelTokenKey>
@@ -3885,7 +3885,7 @@ namespace AtomUI.Toolkits.GalleryBase.Controls.DesignTokens
 
     public static class ShowCaseZoomOverlayTokens
     {
-        public static readonly ControlTokenIdentity Identity = new ControlTokenIdentity("AtomUI", "ShowCaseZoomOverlay");
+        public static readonly ControlTokenIdentity Identity = ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.ShowCaseZoomOverlay), "AtomUI", "ShowCaseZoomOverlay");
     }
 
     public class ShowCaseZoomOverlayTokenResourceExtension : TokenResourceExtension<ShowCaseZoomOverlayTokenKey>

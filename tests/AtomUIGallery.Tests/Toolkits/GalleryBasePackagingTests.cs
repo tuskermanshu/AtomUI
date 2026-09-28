@@ -73,7 +73,7 @@ public class GalleryBasePackagingTests
         packageBuild.ShouldBeGreaterThan(prerequisiteBuild);
         packagePack.ShouldBeGreaterThan(packageBuild);
         manifest.ShouldContain("src/AtomUI.Build.Tasks/AtomUI.Build.Tasks.csproj");
-        manifest.ShouldContain("src/AtomUI.Generator.LinkedPublish/AtomUI.Generator.LinkedPublish.csproj");
+        manifest.ShouldContain("src/AtomUI.TypeMap.Linker/AtomUI.TypeMap.Linker.csproj");
         script.ShouldContain("--disable-build-servers");
         script.ShouldContain("-m:1");
         script.ShouldContain("/nr:false");

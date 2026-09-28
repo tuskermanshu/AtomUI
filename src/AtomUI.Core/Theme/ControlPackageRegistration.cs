@@ -1,3 +1,4 @@
+using AtomUI.Registration;
 using AtomUI.Theme.Resources;
 using AtomUI.Theme.Schema;
 
@@ -9,23 +10,19 @@ public sealed class ControlPackageRegistration
         string id,
         IEnumerable<ControlTokenDescriptor> controls,
         IEnumerable<ControlThemeAssetDescriptor> themeAssets,
-        IControlThemesProvider controlThemesProvider)
-        : this(
-            id,
-            controls,
-            themeAssets,
-            Array.Empty<ControlSemanticDescriptor>(),
-            controlThemesProvider)
-    {
-    }
-
-    public ControlPackageRegistration(
-        string id,
-        IEnumerable<ControlTokenDescriptor> controls,
-        IEnumerable<ControlThemeAssetDescriptor> themeAssets,
         IEnumerable<ControlSemanticDescriptor> semanticControls,
-        IControlThemesProvider controlThemesProvider)
+        IControlThemesProvider controlThemesProvider,
+        IEnumerable<ControlThemeResourceRegistration> resources)
     {
+        ArgumentNullException.ThrowIfNull(resources);
+        var resourceArray = resources.ToArray();
+        if (resourceArray.Any(static resource => resource is null))
+        {
+            throw new ArgumentException("Resource registrations cannot contain null.", nameof(resources));
+        }
+        EnsureUnique(resourceArray, static resource => resource.AssetId, StringComparer.Ordinal, "resource AssetId");
+        Resources = Array.AsReadOnly(resourceArray.OrderBy(static resource => resource.Phase)
+            .ThenBy(static resource => resource.Order).ThenBy(static resource => resource.AssetId, StringComparer.Ordinal).ToArray());
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentNullException.ThrowIfNull(controls);
         ArgumentNullException.ThrowIfNull(themeAssets);
@@ -49,6 +46,7 @@ public sealed class ControlPackageRegistration
         var assetArray = themeAssets.OrderBy(
             static asset => asset.AssetUri.ToString(),
             StringComparer.Ordinal).ToArray();
+        EnsureUnique(assetArray, static asset => asset.AssetId, StringComparer.Ordinal, "theme AssetId");
         EnsureUnique(
             assetArray,
             static asset => asset.AssetUri.ToString(),
@@ -77,17 +75,6 @@ public sealed class ControlPackageRegistration
             EqualityComparer<Type>.Default,
             "Semantic Control type");
 
-        var controlsByIdentity = controlArray.ToDictionary(static descriptor => descriptor.Identity);
-        foreach (var semanticDescriptor in semanticArray)
-        {
-            if (!controlsByIdentity.TryGetValue(semanticDescriptor.Identity, out var controlDescriptor) ||
-                controlDescriptor.ControlType != semanticDescriptor.ControlType)
-            {
-                throw new ArgumentException(
-                    $"Semantic Control descriptor '{semanticDescriptor.Identity}' must match a Control Token descriptor in the same package.",
-                    nameof(semanticControls));
-            }
-        }
         Id = id;
         Controls = Array.AsReadOnly(controlArray);
         ThemeAssets = Array.AsReadOnly(assetArray);
@@ -95,6 +82,8 @@ public sealed class ControlPackageRegistration
         ControlThemesProvider = controlThemesProvider;
     }
 
+    public IReadOnlyList<ControlThemeResourceRegistration> Resources { get; }
+    public long PackageCommitOrdinal { get; internal set; } = -1;
     public string Id { get; }
     public IReadOnlyList<ControlTokenDescriptor> Controls { get; }
     public IReadOnlyList<ControlThemeAssetDescriptor> ThemeAssets { get; }

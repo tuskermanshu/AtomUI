@@ -53,7 +53,13 @@ public sealed class SemanticPartRegistry
         ControlTokenIdentity identity,
         [NotNullWhen(true)] out ControlSemanticDescriptor? descriptor)
     {
-        return _controlsByIdentity.TryGetValue(identity, out descriptor);
+        if (_controlsByIdentity.TryGetValue(identity, out descriptor) &&
+            ControlTokenIdentityCanonicalizer.Matches(identity, descriptor.ControlType))
+        {
+            return true;
+        }
+        descriptor = null;
+        return false;
     }
 
     private static Dictionary<TKey, ControlSemanticDescriptor> BuildUniqueMap<TKey>(

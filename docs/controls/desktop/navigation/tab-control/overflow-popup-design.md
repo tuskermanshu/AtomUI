@@ -323,7 +323,7 @@ DataContext 与标题 presenter 的旧模板子树。缓存由单个菜单根拥
 
 Public context 是强类型 CLR API，Gallery 模板使用 compiled binding 或直接属性访问。实现不使用 reflection binding、
 assembly/type 扫描、`Activator.CreateInstance(Type)`、表达式编译或运行时注册。默认 ControlTheme、`IDataTemplate` 和
-静态类型注册沿用 AtomUI generated registration；新增 public 类型与 Theme asset 必须进入对应 Registration Unit 并通过
+静态注册遵循 [TypeMap 控件与资源契约](../../../../architecture/foundations/control-registration-contracts.md)；新类型、主题资产和语义样式必须进入正确的逐控件事实并通过
 真实 NativeAOT Gallery publish。
 
 ## 9. 兼容性与定制边界
@@ -376,6 +376,6 @@ TabControl 与 TabStrip 页面各提供一个稳定 `ShowCaseItem.SourceKey`，�
 | Retention | ordinary close 回到固定 warm baseline；teardown 后 owner、context、snapshot item、header/template、Popup child、DynamicResource anchor 的 weak-reference 回收；嵌套 presenter 替换后的旧 surface 可回收 |
 | Performance | cold/closed、首次打开、重复打开、关闭与 Gallery 导航的时间、分配、Gen0 和对象计数门禁 |
 | Theme | Light/Dark、Line/Card、Desktop/Browser、四向 placement 的普通外阴影参数/方向、视口外侧绘制载体、阴影层裁剪边界与 ControlTheme asset 注册 |
-| AOT | AOT/trim analyzer、linked registration 与真实 Gallery NativeAOT publish/start smoke |
+| AOT | AOT/trim analyzer、TypeMap 精细保留与真实 Gallery NativeAOT publish/start smoke |
 
 自动化测试必须保留触发溢出的真实尺寸约束，不得通过扩大 viewport 或移除 header/add button 来绕过原始布局。

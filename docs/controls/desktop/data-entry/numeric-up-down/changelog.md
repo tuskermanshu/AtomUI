@@ -8,6 +8,10 @@
 - 不记录临时讨论、纯格式化或没有长期价值的实现细节。
 - 架构文档始终描述最新设计状态；历史变化记录在本文档。
 
+## 2026-09-28
+
+- 注册生成器通过真实 type-key 对应的默认主题 TypeMap 条件证明 `NumericUpDownSpinnerTheme.BasedOn` 的保留关系；保持 Application 级 ButtonSpinner 主题替换、content padding、派生模板及局部属性覆盖优先级。
+
 ## 2026-09-16
 
 - Behavior

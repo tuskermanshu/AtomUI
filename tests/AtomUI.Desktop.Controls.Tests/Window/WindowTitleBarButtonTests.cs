@@ -727,7 +727,7 @@ public class WindowTitleBarButtonTests
         var toggleTheme = XDocument.Load(GetRepoFile(
             "src/AtomUI.Desktop.Controls/WindowTitleBar/Themes/WindowTitleBarToggleButtonTheme.axaml"));
         var manifest = File.ReadAllText(GetRepoFile(
-            "src/AtomUI.Desktop.Controls/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.ThemeAssetManifestGenerator/GeneratedControlThemeAssetManifest.g.cs"));
+            "src/AtomUI.Desktop.Controls/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.TokenResourceKeyGenerator/GeneratedTypeMapRegistration.g.cs"));
 
         manifest.ShouldContain("WindowTitleBar/Themes/CaptionButtonFrameTheme.axaml");
 
@@ -771,7 +771,7 @@ public class WindowTitleBarButtonTests
             .ShouldBeAssignableTo<ControlTheme>();
 
         var manifest = File.ReadAllText(GetRepoFile(
-            "src/AtomUI.Desktop.Controls/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.ThemeAssetManifestGenerator/GeneratedControlThemeAssetManifest.g.cs"));
+            "src/AtomUI.Desktop.Controls/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.TokenResourceKeyGenerator/GeneratedTypeMapRegistration.g.cs"));
         manifest.ShouldContain("WindowTitleBarButtonTheme.axaml");
         manifest.ShouldContain("WindowTitleBarToggleButtonTheme.axaml");
 

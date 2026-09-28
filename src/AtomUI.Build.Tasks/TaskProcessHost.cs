@@ -38,12 +38,11 @@ internal static class TaskProcessHost
         // application code or trimmed. Keep dispatch explicit and bounded.
         ITask task = request.TaskName switch
         {
+            nameof(ValidateRegistrationToolchainTask) => new ValidateRegistrationToolchainTask(),
+            nameof(PrepareTypeMapLinkTask) => new PrepareTypeMapLinkTask(),
+            nameof(VerifyTypeMapReceiptTask) => new VerifyTypeMapReceiptTask(),
+            nameof(ResolveRegistrationToolsTask) => new ResolveRegistrationToolsTask(),
             nameof(GenerateThemeAssetWrappersTask) => new GenerateThemeAssetWrappersTask(),
-            nameof(CollectAxamlUsageTask) => new CollectAxamlUsageTask(),
-            nameof(ValidateAssemblyMetadataMarkerTask) => new ValidateAssemblyMetadataMarkerTask(),
-            nameof(GenerateLinkedRegistrationSidecarTask) => new GenerateLinkedRegistrationSidecarTask(),
-            nameof(ResolveLinkedRegistrationSidecarCandidatesTask) => new ResolveLinkedRegistrationSidecarCandidatesTask(),
-            nameof(DiscoverLinkedRegistrationConsumerReferencesTask) => new DiscoverLinkedRegistrationConsumerReferencesTask(),
             nameof(ExportLanguageTemplatesTask) => new ExportLanguageTemplatesTask(),
             nameof(PrepareLanguagePackageAssetsTask) => new PrepareLanguagePackageAssetsTask(),
             nameof(PrepareLanguagePackageTask) => new PrepareLanguagePackageTask(),

@@ -552,25 +552,17 @@ Semantic Part Theme 是 Selector 的可选扩展，不是 Popup、Overlay 或普
 
 ## 14. 开发第三方 AtomUI Control
 
-第三方 Control 使用与 AtomUI 内置 Control 相同的 Control、Own Token 和 Theme 约定。AOT 接入的默认心智模型只有
-Package，不要求普通作者理解 Registration Unit：
+第三方使用与第一方相同的逐控件契约、Token、Semantic Part 和主题导出规则。注册相关接口对应本地已实现的 TypeMap 体系，
+验证与发布状态见 [AOT 与裁剪架构](../../architecture/foundations/aot-and-trimming.md#1-状态与事实边界)。
 
 ```text
-Acme.Controls Package
-+-- Control、可选 Own Token 和 Themes/
+Acme.Controls
++-- 正常 Control、可选 Own Token、Semantic Part 和 Themes/
 +-- AcmeControlThemesProvider
-\-- [ControlPackageRegistrationEntry] UseAcmeControls()
+\-- UseAcmeControls() 调用生成的包注册 helper
 ```
 
-包项目声明稳定 identity：
-
-```xml
-<PropertyGroup>
-  <AtomUIRegistrationPackageId>Acme.Controls</AtomUIRegistrationPackageId>
-</PropertyGroup>
-```
-
-应用在 ThemeManager 构建前显式启用：
+应用保持普通包启用方式：
 
 ```csharp
 this.UseAtomUI(builder =>
@@ -580,16 +572,15 @@ this.UseAtomUI(builder =>
 });
 ```
 
-默认整个 `Acme.Controls` 是一个安全 Unit。包内任一公开 Control 被使用时，Generator 会一起保留内部 View/Presenter、
-descriptor、Own Token 和主题资源。普通作者不写 `AtomUIRegistrationUnit`、Unit dependency、AXAML ownership metadata、
-linker XML 或手工 manifest。
+包身份是普通资源身份；生成器自动输出逐项工厂、条件映射和 Package marker，应用自动生成包引导。
+作者不编写 TypeMap、AOT 分支、目录裁剪单元或依赖清单。内部 presenter 可以只有主题资源；命名主题、局部资源和正常
+ResourceInclude 由统一的资源契约处理，不因为注册一个公开控件就完整保留整个包。
 
-只有包含大量独立控件族、并且有真实体积基线和 NativeAOT 测试的大型包，才显式设置
-`AtomUIRegistrationGranularity=Directory`。该模式是高级裁剪优化，不是普通 AOT 接入步骤。
+NativeAOT/CoreCLR 使用官方映射，Browser 裁剪与 AOT 使用链接结果转换后端，应用与包入口不切换写法。
+正常静态用法无 AOT 专用配置；真正动态输入仍需类型化工厂或明确边界。
 
-完整项目文件、Provider、入口代码和发布检查见
-[第三方 AtomUI Control Package 指南](third-party-control-packages.md)。详细注册顺序见
-[启动与注册链路](../../architecture/foundations/startup-and-registration.md)。
+项目、Provider 与目标入口示例见[第三方控件包指南](third-party-control-packages.md)，资源与 Token 语义见
+[控件与资源注册契约](../../architecture/foundations/control-registration-contracts.md)。
 
 ## 15. 一次主题切换为什么不会暴露半成品
 

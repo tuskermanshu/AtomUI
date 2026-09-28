@@ -1,4 +1,6 @@
 using AtomUI.Controls.Primitives;
+using AtomUI.Controls.Converters;
+using Avalonia.Layout;
 using AtomUI.MotionScene;
 using AtomUI.Theme.Resources;
 using Avalonia;
@@ -26,6 +28,65 @@ public class ExpanderBehaviorTests
     static ExpanderBehaviorTests()
     {
         AvaloniaTestApp.EnsureInitialized();
+    }
+
+    [Fact]
+    public void Content_Converter_Is_Owned_By_The_Expander_Theme_Dictionary()
+    {
+        // This is the compiled wrapper for Expander/Themes/ExpanderTheme.axaml.
+        var dictionary = new AtomUI.Generated.AtomUIDesktopControls.GeneratedThemeAssetResource_AD9E7F86B0580549();
+        dictionary.TryGetResource("StringToTextBlockConverter", null, out var resource).ShouldBeTrue();
+        var converter = resource.ShouldBeOfType<StringToTextBlockConverter>();
+        converter.VerticalAlignment.ShouldBe(VerticalAlignment.Center);
+        converter.HorizontalAlignment.ShouldBe(HorizontalAlignment.Stretch);
+        converter.TextWrapping.ShouldBe(TextWrapping.Wrap);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void String_Content_Keeps_Wrapping_And_Alignment_Despite_A_Host_Converter(bool injectHostConverter)
+    {
+        var expander = new AtomUIExpander { Header = "Header", Content = "A long string content", IsExpanded = true, IsMotionEnabled = false };
+        if (injectHostConverter)
+        {
+            expander.Resources["StringToTextBlockConverter"] = new StringToTextBlockConverter
+            {
+                VerticalAlignment = VerticalAlignment.Top,
+                TextWrapping = TextWrapping.NoWrap
+            };
+        }
+        var window = ShowInWindow(expander);
+        try
+        {
+            var presenter = FindTemplatePart<ContentPresenter>(expander, "PART_ContentPresenter");
+            presenter.ShouldNotBeNull();
+            var content = presenter.Content.ShouldBeOfType<Avalonia.Controls.TextBlock>();
+            content.Text.ShouldBe("A long string content");
+            content.VerticalAlignment.ShouldBe(VerticalAlignment.Center);
+            content.HorizontalAlignment.ShouldBe(HorizontalAlignment.Stretch);
+            content.TextWrapping.ShouldBe(TextWrapping.Wrap);
+            expander.Content = "Updated content";
+            Dispatcher.UIThread.RunJobs();
+            presenter.Content.ShouldBeOfType<Avalonia.Controls.TextBlock>().Text.ShouldBe("Updated content");
+        }
+        finally { window.Close(); }
+    }
+
+    [Fact]
+    public void Non_String_Content_Is_Preserved_By_The_Local_Converter()
+    {
+        var content = new Border { Width = 80, Height = 24 };
+        var expander = new AtomUIExpander { Header = "Header", Content = content, IsExpanded = true, IsMotionEnabled = false };
+        var window = ShowInWindow(expander);
+        try
+        {
+            var presenter = FindTemplatePart<ContentPresenter>(expander, "PART_ContentPresenter");
+            presenter.ShouldNotBeNull();
+            presenter.Content.ShouldBeSameAs(content);
+            content.GetVisualAncestors().ShouldContain(presenter);
+        }
+        finally { window.Close(); }
     }
 
     [Fact]

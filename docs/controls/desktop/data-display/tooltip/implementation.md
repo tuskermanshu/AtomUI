@@ -33,7 +33,7 @@ Popup 接入边界：`ToolTip` 负责业务状态和内容准备，manually crea
 - `ToolTip`：tooltip 内容与视觉宿主，持有游离 `Popup` 作为物理弹层，是打开状态调和流程的唯一执行者。
 - `ToolTipPseudoClass`：伪类常量定义，维护 `:open` 主题可观察契约。
 - `ToolTipToken`：控件 Token scope，负责从全局 token 派生控件语义变量。
-- `ToolTipService`：全局悬停服务，订阅 `InputManager` 原始指针事件识别 tooltip 宿主与出现时机，只写 `ToolTip.IsOpen` 附加属性，不直接持有或开关 popup。服务以 `[AotTrimUnit(AotTrimGeneralUnits.Core)]` 声明 Package Core 注册归属：物理位于 `Tooltip` 控件族目录，但不参与 Tooltip Unit 的证据归属，维护时不得移除该注解。
+- `ToolTipService`：全局悬停服务，订阅 `InputManager` 原始指针事件识别 tooltip 宿主与出现时机，只写 `ToolTip.IsOpen` 附加属性，不直接持有或开关 popup。服务属于包入口的明确初始化逻辑，其存在由实际静态调用决定，不依赖目录裁剪归属；注册遵循 [TypeMap 架构](../../../../architecture/foundations/aot-and-trimming.md)。
 - `OverflowTip`：附加到文本展示节点的共享溢出提示 behavior，只管理自己写入的 tooltip，并在文本实际超出可见宽度时启用提示。
 
 核心协作规则：

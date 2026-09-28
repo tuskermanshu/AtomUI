@@ -3,116 +3,8 @@ using Microsoft.CodeAnalysis;
 namespace AtomUI.Generator.Diagnostics;
 
 #pragma warning disable RS2008
-internal static class AtomUIDiagnosticDescriptors
+internal static partial class AtomUIDiagnosticDescriptors
 {
-    public static readonly DiagnosticDescriptor LinkedPlanOwner = new(
-        AtomUIDiagnosticIds.LinkedPlanOwner,
-        "Linked registration requires one application plan owner",
-        "Linked registration requires exactly one Application Plan owner; detected '{0}'",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedDynamicUsageWidened = new(
-        AtomUIDiagnosticIds.LinkedDynamicUsageWidened,
-        "Dynamic AtomUI usage requires package fallback",
-        "AtomUI dynamic usage '{0}' cannot be resolved to a Registration Unit; Package '{1}' uses full fallback. Add an AtomUIRegistrationUnitRoot when the Unit is known, or an AtomUIPackageRoot for fully dynamic usage.",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedLegacyPackageFallback = new(
-        AtomUIDiagnosticIds.LinkedLegacyPackageFallback,
-        "Legacy package requires full linked-registration fallback",
-        "Package '{0}' has no compatible linked manifest and requires full fallback. Add <AtomUIPackageRoot Include=\"{0}\" /> or upgrade the package.",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedExplicitRootInvalid = new(
-        AtomUIDiagnosticIds.LinkedExplicitRootInvalid,
-        "Explicit AtomUI linked-registration root is invalid",
-        "Explicit {0} root '{1}' cannot be resolved. Use AtomUIRegistrationUnitRoot for a known Unit or AtomUIPackageRoot for a full Package.",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedPackageDefinitionInvalid = new(
-        AtomUIDiagnosticIds.LinkedPackageDefinitionInvalid,
-        "AtomUI linked-registration package definition is invalid",
-        "Package '{0}' contains an invalid registration granularity, Registration Unit, or PackageShared definition: {1}",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedManifestVersionMismatch = new(
-        AtomUIDiagnosticIds.LinkedManifestVersionMismatch,
-        "AtomUI linked-registration input is incompatible",
-        "Linked-registration input '{0}' is incompatible or malformed: {1}",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedLooseAxamlWidened = new(
-        AtomUIDiagnosticIds.LinkedLooseAxamlWidened,
-        "Loose AXAML or dynamic theme requires package fallback",
-        "Dynamic resource source '{0}' can load Package '{1}'; that Package uses full fallback. Add <AtomUIPackageRoot Include=\"{1}\" /> to declare the boundary explicitly.",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedPackageEntryMissing = new(
-        AtomUIDiagnosticIds.LinkedPackageEntryMissing,
-        "AtomUI package usage has no registration entry",
-        "Package '{0}' is used by '{1}', but its UseXxxControls() registration entry is not invoked",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedPackageEntryInvalid = new(
-        AtomUIDiagnosticIds.LinkedPackageEntryInvalid,
-        "AtomUI control package registration entry is invalid",
-        "Control package registration entry '{0}' is invalid: {1}",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedDynamicUsageUncovered = new(
-        AtomUIDiagnosticIds.LinkedDynamicUsageUncovered,
-        "Dynamic AtomUI usage is not covered by the static registration plan",
-        "AtomUI dynamic usage '{0}' cannot be resolved statically; controls of Package '{1}' created only through this site are not registered. Add an AtomUIRegistrationUnitRoot when the Unit is known, or an AtomUIPackageRoot for fully dynamic usage; no action is required when this site never creates AtomUI controls.",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedExplicitUnitConflict = new(
-        AtomUIDiagnosticIds.LinkedExplicitUnitConflict,
-        "Explicit registration unit declarations conflict",
-        "AotTrimUnit '{0}' and AtomUIRegistrationUnit metadata '{1}' declare different Registration Units for '{2}'; the attribute takes precedence. Align both declarations or remove one.",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor LinkedFileUnitConflict = new(
-        AtomUIDiagnosticIds.LinkedFileUnitConflict,
-        "One file declares multiple explicit registration units",
-        "File '{0}' contains types declaring different explicit Registration Units ('{1}' and '{2}'); split the file or align the AotTrimUnit values. The file falls back to directory-derived attribution.",
-        AtomUIDiagnosticCategories.LinkedRegistration,
-        DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
     public static readonly DiagnosticDescriptor AotMissingGeneratedAccessor = new(
         AtomUIDiagnosticIds.AotMissingGeneratedAccessor,
         "AOT-sensitive data member path requires generated accessor",
@@ -176,51 +68,6 @@ internal static class AtomUIDiagnosticDescriptors
         isEnabledByDefault: true,
         customTags: [WellKnownDiagnosticTags.Telemetry]);
 
-    public static readonly DiagnosticDescriptor ThemeAssetMissingIdentity = new(
-        AtomUIDiagnosticIds.ThemeAssetMissingIdentity,
-        "Theme asset requires a convention-owned Control",
-        "Theme asset '{0}' uses Control Token resources but no public owner Control can be determined from its file, directory, Semantic Part property, or Token family",
-        AtomUIDiagnosticCategories.Generator,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor ThemeAssetUnknownIdentity = new(
-        AtomUIDiagnosticIds.ThemeAssetUnknownIdentity,
-        "Theme asset identity is not registered",
-        "Theme asset '{0}' declares unknown Control Token identity '{1}'",
-        AtomUIDiagnosticCategories.Generator,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor ThemeAssetConflictingIdentity = new(
-        AtomUIDiagnosticIds.ThemeAssetConflictingIdentity,
-        "Theme asset contains conflicting identities",
-        "Theme asset '{0}' declares more than one Control Token identity",
-        AtomUIDiagnosticCategories.Generator,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor ThemeAssetControlTokenMismatch = new(
-        AtomUIDiagnosticIds.ThemeAssetControlTokenMismatch,
-        "Theme asset uses a different Control Token family",
-        "Theme asset '{0}' declares identity '{1}' but uses Control Token resources for '{2}'",
-        AtomUIDiagnosticCategories.Generator,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor ThemeAssetDuplicateUri = new(
-        AtomUIDiagnosticIds.ThemeAssetDuplicateUri,
-        "Theme asset URI is duplicated",
-        "Theme asset URI '{0}' is produced by more than one AdditionalFile",
-        AtomUIDiagnosticCategories.Generator,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
     public static readonly DiagnosticDescriptor ControlTokenInvalidName = new(
         AtomUIDiagnosticIds.ControlTokenInvalidName,
         "Control design token name does not follow convention",
@@ -252,33 +99,6 @@ internal static class AtomUIDiagnosticDescriptors
         AtomUIDiagnosticIds.ControlTokenAmbiguousControl,
         "Control design token matches more than one Control",
         "Control design token type '{0}' matches more than one public Control named '{1}'",
-        AtomUIDiagnosticCategories.Generator,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor ThemeAssetAmbiguousControl = new(
-        AtomUIDiagnosticIds.ThemeAssetAmbiguousControl,
-        "Theme asset matches more than one Control",
-        "Theme asset '{0}' matches more than one public Control named '{1}'",
-        AtomUIDiagnosticCategories.Generator,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor ThemeAssetSemanticPartTargetMismatch = new(
-        AtomUIDiagnosticIds.ThemeAssetSemanticPartTargetMismatch,
-        "Semantic Part Theme target must be a Control",
-        "Semantic Part Theme asset '{0}' targets '{1}', which is not a public Control",
-        AtomUIDiagnosticCategories.Generator,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.Telemetry]);
-
-    public static readonly DiagnosticDescriptor ThemeAssetUnknownTokenResource = new(
-        AtomUIDiagnosticIds.ThemeAssetUnknownTokenResource,
-        "Theme asset uses an unknown Control Token resource",
-        "Theme asset '{0}' uses unknown Token '{2}' from Control Token family '{1}'",
         AtomUIDiagnosticCategories.Generator,
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,

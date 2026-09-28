@@ -1,4 +1,5 @@
 using AtomUI.Localization;
+using AtomUI.Registration;
 using AtomUI.Theme;
 using Avalonia;
 
@@ -24,6 +25,8 @@ internal sealed class AtomUIBuilder : IAtomUIBuilder
     internal ThemeManagerBuilder ThemeManagerBuilder { get; }
 
     internal LocalizationBuilder LocalizationBuilder { get; }
+
+    internal ControlRegistrationState ControlRegistrationState => ThemeManagerBuilder.ControlRegistrationState;
 
     internal IReadOnlyList<AtomUIOwnedServiceRegistration> OwnedServiceRegistrations => _ownedServiceRegistrations;
 

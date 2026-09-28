@@ -87,6 +87,7 @@ Button 公开 `root`、`icon` 和 `content` 三个 Semantic Part。Part 名称�
             <ContentPresenter Name="PART_ContentPresenter" />
         </DockPanel>
     </Border>
+    <Border Name="FocusVisual" />
 </Panel>
 ```
 
@@ -108,6 +109,7 @@ Button
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
               -> IconPresenter#PART_ButtonIcon (template-stable)
               -> ContentPresenter#PART_ContentPresenter (template-stable)
+        -> Border#FocusVisual (template-stable)
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
@@ -116,6 +118,7 @@ Button
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
               -> IconPresenter#PART_ButtonIcon (template-stable)
               -> ContentPresenter#PART_ContentPresenter (template-stable)
+        -> Border#FocusVisual (template-stable)
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
@@ -124,6 +127,7 @@ Button
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
               -> IconPresenter#PART_ButtonIcon (template-stable)
               -> ContentPresenter#PART_ContentPresenter (template-stable)
+        -> Border#FocusVisual (template-stable)
 ```
 
 ### 协作节点
@@ -140,6 +144,7 @@ Button
 | `PART_LoadingIcon` | template node (LoadingOutlined) | `ButtonTheme.axaml` | Button | `Foreground`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ButtonIcon` | template node (IconPresenter) | `ButtonTheme.axaml` | Button | `Foreground`, `Icon`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ContentPresenter` | template node (ContentPresenter) | `ButtonTheme.axaml` | Button | `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `FocusVisual` | template node (Border) | `ButtonTheme.axaml` | Button | `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 

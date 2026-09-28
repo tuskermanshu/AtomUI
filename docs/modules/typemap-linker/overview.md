@@ -1,0 +1,114 @@
+# AtomUI.TypeMap.Linker 模块概览
+
+> 后端、产品源码/buildTransitive 自动接线及冷 NuGet 消费已在本地实现和验证；不表示已发布或全部平台已验收。总体状态见
+> [AOT 与裁剪架构](../../architecture/foundations/aot-and-trimming.md#1-状态与事实边界)。
+
+`AtomUI.TypeMap.Linker` 是 Browser/Mono 裁剪发布使用的独立构建工具。它在官方 ILLink 完成条件类型映射的标记后，
+把 AtomUI 自有 map accessor 转换为仅含已选目标的静态映射。Browser 的 trimmed interpreter 与 AOT 都必须使用此后端，
+保持与 Desktop 相同的自动精细裁剪契约。
+
+## 模块所有权
+
+| 边界 | 职责 |
+| --- | --- |
+| 普通 `AtomUI.Generator` | 输出包 marker、条件 TypeMap、具体 Group 的 accessor、预先保留的 helper |
+| 官方 ILLink | 计算类型可达性和 TypeMap 条件标记闭包 |
+| `AtomUI.TypeMap.Linker` | 读取官方已标记结果，验证生成 ABI，转换自有 accessor 并验证转换完整性 |
+| 构建资产 | 自动接入后端、检查工具链、维护增量输入和发布门禁 |
+| Core 注册代码 | 查询映射、收集片段、统一校验/挂载/冻结 |
+
+完整顺序属于 [Browser 链接架构](../../architecture/foundations/aot-browser-linking.md)，符号与字段属于
+[TypeMap 生成 ABI](../../reference/aot/typemap-contract.md)。本模块不分析应用 C#/AXAML/IL 调用图，不计算另一套依赖闭包，
+不改写 BCL，不在运行时扫描裁剪后 Attribute。
+
+## 处理阶段
+
+转换必须在官方 Mark 完成、Sweep 之前进行。Browser AOT 的顺序为：
+
+```text
+普通编译 → ILLink 标记 → AtomUI 映射转换与验证 → Sweep → Mono AOT → bundling
+```
+
+步骤仅处理已解析、带有效包 marker 的程序集及其中可达的自有 accessor。每个 accessor 由
+`GeneratedTypeMapAccessorAttribute(Type group)` 标识，并绑定一个具体 Group；不通过方法名或源码文本猜测目标。
+
+转换流程为：
+
+1. 验证工具链组合、执行阶段、程序集身份、marker ABI、accessor 及 helper 签名。
+2. 读取对应 Group 中由官方标记保留的映射声明，检查 key 和目标类型的有效性。
+3. 验证被写入的代理、字典 helper 及其传递依赖已经在 Mark 阶段保留。
+4. 按确定顺序改写 accessor，只添加已选 key/代理类型；清理原方法的局部变量、异常区间和调试序列点。
+5. 记录转换完成状态，确认所有可达的自有 accessor 均已转换，且其方法体不再调用 Mono 不支持的 TypeMapping API。
+
+转换后的结果只包含已选映射，不得把全部候选代理写入方法。合法的空 map 与零可达 accessor 都允许；
+存在应转换的 accessor 却未运行转换器必须失败。部署程序集若处于不支持的 copy/skip 处理状态，不得报告转换成功。
+
+## 与生成器的 ABI
+
+accessor 是内部、静态、非泛型、无参数方法，返回 `IReadOnlyDictionary<string, Type>`。转换前的方法体直接调用
+具体 Group 的官方 TypeMapping API。字典 helper 是不引用具体控件/代理的闭合实现；它及其传递依赖必须在 Mark 前可达。
+
+本模块在 Mark 后不能引入新的、尚未分析的辅助代码。NativeAOT/CoreCLR 使用官方映射后端，不加载此转换器。
+同一普通 NuGet 输出必须支持这些后端，不能按包编译时的 Debug/Release 常量固化选择。
+
+## 分发与增量构建
+
+产品 NuGet 自动交付后端工具及构建接线；应用和第三方作者不添加 custom-step 命令参数。
+工具不进入 `lib/`、运行时依赖、应用输出或 publish 目录。同一构建消费多个产品包时只加载一份一致版本的转换器，
+冲突版本明确失败，不连续执行不同版本转换同一 accessor。
+
+custom-step DLL、依赖、配置、生成 ABI 与经验证的工具链身份全部属于链接增量输入。
+后端改变必须重新链接；输入不变时复用已经完成后置验证的产物。不能假定 SDK 默认的链接输入已经覆盖扩展 DLL。
+
+custom-step 接口随工具链演进，发布构建只能使用已经验证的组合。未知 ABI、工具缺失或损坏、helper 缺失、
+未完成转换都阻止发布；不退回整包注册，也不跳过后置检查。
+
+## 诊断与验证
+
+使用统一 `REG` 诊断域的语义错误名称，包括 `UnsupportedRegistrationBackend`、`UnloweredTypeMapAccessor` 和
+`RegistrationIdentityConflict`。对应 `ATOMUIREG006`、`ATOMUIREG007` 和 `ATOMUIREG005`；ILLink 公开诊断 API 的传输编号分别为
+`IL6506`、`IL6507`、`IL6505`，消息保留 REG 编号。
+
+必须分别验证 Browser trimmed interpreter 与 `RunAOTCompilation=true` 的真实发布及浏览器运行，覆盖：
+
+- 单/跨程序集、传递 assembly target、多 Group、多条件共用代理、循环类型引用与空 map。
+- 普通预编译 adapter、干净 NuGet cache、可选包未启用以及自动工具分发。
+- 真实 AtomUI 启动、模板、Token、Semantic Part、主题切换与首次实例化前冻结。
+- 未用控件、代理和 factory 在链接后产物中缺失；转换方法不含未用代理和不受支持的调用。
+- 删除/损坏转换器、错误 ABI、缺 helper、残留 accessor 和不支持工具链的失败对照。
+- 后端 DLL 改动触发重新链接，合法 no-op 构建不重复转换。
+
+浏览器页面能启动不等于通过精细裁剪验证，AOT 构建成功也不等于完成浏览器运行验证。
+
+## 独立工具入口与验证回执
+
+工具项目为 `src/AtomUI.TypeMap.Linker`，目标 `net10.0`。它不引用 Core、Generator 或产品运行时，
+并显式关闭发布调用者传播的 trim/AOT 属性。ILLink/Cecil 编译引用来自固定还原包路径，`Private=false`；
+宿主提供这些程序集，不将它们复制进应用。
+
+唯一公开 custom-step 入口为 `AtomUI.TypeMap.Linker.MaterializeTypeMapsStep`。构建资产通过
+`_TrimmerCustomSteps` 的 `AfterStep=MarkStep` 注入，并传入 `AtomUITypeMapBackend` custom-data。
+能力标识属于工具版本契约，由实现中的 `ToolchainContract` 定义；未知或缺失标识导致错误。
+后端另行读取当前已加载 ILLink 的完整程序集身份与 informational version，不能只相信调用者传入的字符串。
+SDK 与实际 WASM workload/runtime assets 的组合检查由构建资产负责。当前组合固定为 SDK `10.0.300`、
+ILLink `10.0.8`（informational version `10.0.8-servicing.26229.119+94ea82652cdd4e0f8046b5bd5becbd11461482ca`）、
+WASM SDK/runtime assets `10.0.10`，能力值为 `atomui-typemap-v1-illink-10.0.8`。NativeAOT 编译器为 `10.0.8`。
+这是一组已适配工具链，版本升级需要重新验证，不能仅修改版本门禁。
+
+后端在筛选 marked accessor **之前**检查所有发现的标记包是否实际采用 `Link` action。
+`Skip` 等 action 不保证方法有 Mark 记录，因此先筛 `IsMarked` 会把未转换包误判成零 slot。
+工具不在 Mark 后改变 action，也不再次执行 Mark。
+
+`AtomUITypeMapReceipt` custom-data 可指定绝对回执路径。工具开始时删除旧回执，保存原始输入哈希，
+通过实例持有的 `MethodDefinition` 在 Sweep 后检查，然后在公开 `OutputStep` 后重新读取自己的输出方法，
+核对完成方法体并写入 `output-verified` JSON。回执只含工具/ABI身份、已验证 package/Group/accessor 身份及
+输入/输出/方法体哈希，不是运行时注册输入。零 slot 的成功执行也写回执，从而与步骤未运行区分。
+自动构建接线必须要求匹配本次工具与输入的回执；不能把“文件存在”当作有效性证明。
+
+回执的程序集输出哈希绑定 **ILLink 输出和实际 AOT 输入**。Mono AOT 随后可能剥离已编译方法的 IL，
+因此最终部署程序集使用独立的 metadata/运行验证，不要求其字节哈希与 AOT 前相同。构建门禁应在 AOT 前
+校验回执，并保证后续没有替换已经校验的输入。
+
+可重复的机制 fixture 位于 `tests/AtomUI.TypeMap.Linker.Tests/Fixtures`：它直接复用 Core ABI Attribute 源码，
+用最小测试 builder 验证多包、条件别名、片段体触发的跨包间接依赖、空 map、PDB 及部署保留结果。
+它不声称覆盖真实 AtomUI 控件、模板、Token 或产品 NuGet 接线；这些仍需产品发布验收。

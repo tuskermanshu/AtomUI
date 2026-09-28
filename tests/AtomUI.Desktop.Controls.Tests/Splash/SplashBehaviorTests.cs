@@ -369,10 +369,10 @@ public class SplashBehaviorTests
     }
 
     [Fact]
-    public void Splash_Theme_Assets_Are_Registered_In_Generated_Manifest()
+    public void Splash_Theme_Assets_Are_Registered_In_Typed_Factories()
     {
         var manifest = File.ReadAllText(GetRepoFile(
-            "src/AtomUI.Desktop.Controls.Extras/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.ThemeAssetManifestGenerator/GeneratedControlThemeAssetManifest.g.cs"));
+            "src/AtomUI.Desktop.Controls.Extras/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.TokenResourceKeyGenerator/GeneratedTypeMapRegistration.g.cs"));
 
         manifest.ShouldContain("Splash/Themes/SplashTheme.axaml");
         manifest.ShouldContain("Splash/Themes/SplashWindowTheme.axaml");

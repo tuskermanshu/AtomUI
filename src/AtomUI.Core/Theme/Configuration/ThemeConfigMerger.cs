@@ -167,7 +167,7 @@ internal static class ThemeConfigMerger
         }
 
         return NormalizedControlThemeConfig.CreateCanonical(
-            local.Identity,
+            parent is null ? local.Identity : ControlTokenIdentityCanonicalizer.Merge(parent.Identity, local.Identity),
             mode,
             algorithms,
             MergeTokens(parent?.GlobalTokens ?? Array.Empty<NormalizedTokenValue>(), local.GlobalTokens),

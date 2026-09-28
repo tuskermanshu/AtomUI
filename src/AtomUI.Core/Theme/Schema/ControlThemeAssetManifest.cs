@@ -13,6 +13,8 @@ internal sealed class ControlThemeAssetManifest
             static descriptor => descriptor.AssetUri.ToString(),
             StringComparer.Ordinal).ToArray();
         var uris = new HashSet<string>(StringComparer.Ordinal);
+        var ids = new HashSet<string>(StringComparer.Ordinal);
+        var exports = new Dictionary<object, string>();
         foreach (var descriptor in ordered)
         {
             ArgumentNullException.ThrowIfNull(descriptor);
@@ -20,12 +22,6 @@ internal sealed class ControlThemeAssetManifest
             {
                 throw new ThemeSchemaException(
                     $"Control theme asset URI '{descriptor.AssetUri}' must be absolute.");
-            }
-            if (!registry.TryGetControl(descriptor.OwnerIdentity, out _))
-            {
-                throw new ThemeSchemaException(
-                    $"Control theme asset '{descriptor.AssetUri}' uses unregistered owner identity " +
-                    $"'{descriptor.OwnerIdentity}'.");
             }
             if (descriptor.ResourceKeySchemaFingerprint == 0)
             {
@@ -46,8 +42,19 @@ internal sealed class ControlThemeAssetManifest
                     $"Control theme asset URI '{descriptor.AssetUri}' is registered more than once.");
             }
 
+            if (!ids.Add(descriptor.AssetId))
+            {
+                throw new ThemeSchemaException($"Control theme asset '{descriptor.AssetId}' is registered more than once.");
+            }
+            foreach (var export in descriptor.ExportedThemes)
+            {
+                if (!exports.TryAdd(export.ResourceKey, descriptor.AssetId))
+                {
+                    throw new ThemeSchemaException($"Theme export '{export.ResourceKey}' conflicts between '{exports[export.ResourceKey]}' and '{descriptor.AssetId}'.");
+                }
+            }
             var identities = new HashSet<ControlTokenIdentity>();
-            foreach (var identity in descriptor.ReferencedControlIdentities)
+            foreach (var identity in descriptor.RequiredTokenOwners)
             {
                 if (!identities.Add(identity))
                 {

@@ -130,7 +130,7 @@ Type name:     <ControlName><PartPathPascalCase>Style
 ```text
 Theme property name
 Theme TargetType
-Theme asset owner
+Theme export / SemanticThemeBinding
 Referenced Control identity
 ```
 
@@ -263,13 +263,16 @@ Semantic Part XML namespace mapping output
 GeneratedControlPackageRegistration.g.cs
 ```
 
-Control 包现有生成式 registration helper 同时注册 `ControlSemanticDescriptor`，并由真实 `UseXxxControls()` 入口调用。
-当引用的 Core 版本尚未提供 `AtomUI.Theme.Schema.ControlSemanticDescriptor` 时，生成器保持四参数 package registration，
-不输出 Semantic manifest，从而维持旧 Core 编译兼容。采用五参数注册时，Semantic descriptor 与 Control descriptor 使用同一个
-`includeIdentity`谓词筛选。运行时 registry冻结后不扫描程序集或 AXAML。
+注册遵循已采纳的 [TypeMap 控件注册模型](control-registration.md)，源码迁移状态见
+[AOT 与裁剪架构](../../architecture/foundations/aot-and-trimming.md#1-状态与事实边界)。
 
-Semantic descriptor 注册失败必须和 Control identity、Token descriptor、Theme asset manifest 冲突一样在启动构建边界
-明确失败，不能静默覆盖。
+每个 Control 生成一个独立 Semantic descriptor factory，完整与选中路径调用同一 factory。控件片段通过共享模型或
+确定命名的 partial hook 同时收集 Token、Semantic 与资源；不得调用全量 Semantic manifest 后再过滤。
+生成的专用 Semantic Style 类型作为 owner 片段的保留条件，覆盖只使用样式类型的场景。
+
+平台限制在片段引用工厂之前执行，与 Control/Token 使用同一可用性契约。各包先暂存记录，全部包收集后校验 owner 与
+Control descriptor 的一致性，再构建冻结 registry。缺失描述或冲突在启动边界失败，不采用无语义描述的兼容分支。
+运行时不反射 SemanticPart 声明或扫描 AXAML；TypeMap 的固定注册代理 Attribute 激活只属于受限启动路径。
 
 ## 4. 模板分析规则
 
@@ -436,11 +439,11 @@ Semantic 声明和 Theme AdditionalFiles 在增量管线中分别收集，再按
 - 不通过 `PropertyInfo` 查找 Theme property。
 - 不在运行时解析 selector class、Part path 或 `SelectorRoute` 字符串。
 - ContractType identity 由编译期 symbol 产生。
-- 生成 Style 直接使用 `typeof(OwnerControl)`、静态构造函数和 Fluent Selector 调用，不依赖反射激活。
-- 包级入口直接注册静态 descriptor。
+- 生成 Style 使用静态构造和 Fluent Selector；显式生成 Style 类型到 owner 注册片段的条件映射，不假设 selector 必然含 owner Type。
+- 包级入口查询发布后端的已选映射并收集单项 descriptor；普通非裁剪路径使用同一事实源的全部片段。
 - 第三方 Control 包使用同一 Generator，不提供反射 fallback。
 
-Generator 项目仍以 Analyzer 方式引用，不参与应用 NativeAOT publish。
+Generator 项目仍以 Analyzer 方式参与构建，不进入应用 Runtime 或发布 payload。
 
 ## 8. 文档与 Gallery 集成
 

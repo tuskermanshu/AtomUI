@@ -163,6 +163,7 @@ MenuFlyout / MenuItem 控件。
             <ContentPresenter Name="PART_ContentPresenter" />
         </DockPanel>
     </Border>
+    <Border Name="FocusVisual" />
 </Panel>
 ```
 
@@ -184,6 +185,7 @@ DropdownButton
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
               -> IconPresenter#PART_ButtonIcon (template-stable)
               -> ContentPresenter#PART_ContentPresenter (template-stable)
+        -> Border#FocusVisual (template-stable)
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
@@ -192,6 +194,7 @@ DropdownButton
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
               -> IconPresenter#PART_ButtonIcon (template-stable)
               -> ContentPresenter#PART_ContentPresenter (template-stable)
+        -> Border#FocusVisual (template-stable)
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
         -> Border#ShadowsFrame (template-stable)
@@ -200,6 +203,7 @@ DropdownButton
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
               -> IconPresenter#PART_ButtonIcon (template-stable)
               -> ContentPresenter#PART_ContentPresenter (template-stable)
+        -> Border#FocusVisual (template-stable)
   -> DropdownButton (control theme, DropdownButtonTheme.axaml)
      -> Panel (template-stable)
         -> WaveSpiritDecorator#PART_WaveSpirit (template-stable)
@@ -211,6 +215,7 @@ DropdownButton
               -> LoadingOutlined#PART_LoadingIcon (template-stable)
               -> IconPresenter#PART_ButtonIcon (template-stable)
               -> ContentPresenter#PART_ContentPresenter (template-stable)
+        -> Border#FocusVisual (template-stable)
 ```
 
 ### 协作节点
@@ -227,6 +232,7 @@ DropdownButton
 | `PART_LoadingIcon` | template node (LoadingOutlined) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Foreground`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ButtonIcon` | template node (IconPresenter) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Foreground`, `Icon`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ContentPresenter` | template node (ContentPresenter) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `FocusVisual` | template node (Border) | `DropdownButtonBaseTheme.axaml` | DropdownButton | `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `DropdownButton` | control theme | `DropdownButtonTheme.axaml` | 用户代码 / 控件宿主 | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `EffectiveBorderThickness` | public | 用户可直接使用 public 控件；可作为示例和 API 入口。 |
 | `Panel` | template node (Panel) | `DropdownButtonTheme.axaml` | DropdownButton | `Background`, `BackgroundSizing`, `BorderBrush`, `Content`, `ContentTemplate`, `EffectiveBorderThickness` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_WaveSpirit` | template node (WaveSpiritDecorator) | `DropdownButtonTheme.axaml` | DropdownButton | `EffectiveCornerRadius`, `IsMotionEnabled`, `IsWaveSpiritEnabled`, `WaveSpiritType` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
@@ -237,6 +243,7 @@ DropdownButton
 | `PART_LoadingIcon` | template node (LoadingOutlined) | `DropdownButtonTheme.axaml` | DropdownButton | `Foreground`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ButtonIcon` | template node (IconPresenter) | `DropdownButtonTheme.axaml` | DropdownButton | `Icon`, `IconHeight`, `IconWidth` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 | `PART_ContentPresenter` | template node (ContentPresenter) | `DropdownButtonTheme.axaml` | DropdownButton | `Content`, `ContentTemplate` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
+| `FocusVisual` | template node (Border) | `DropdownButtonTheme.axaml` | DropdownButton | `EffectiveCornerRadius` | template-stable | 用于主题维护；变更需同步主题、实现和 LLMS。 |
 
 ## Template Parts
 

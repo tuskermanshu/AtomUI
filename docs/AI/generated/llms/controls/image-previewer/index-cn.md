@@ -525,6 +525,7 @@ ImagePreviewer Token 只表达组件级视觉变量，例如尺寸、间距、�
 | `ImagePreviewer.SemanticParts.cs` | `ImagePreviewer` owner 的 `[SemanticPart]` 声明（partial），生成 descriptor、marker 常量与强类型 Semantic Style |
 | `ImageGroupPreviewer.SemanticParts.cs` | `ImageGroupPreviewer` owner 的 `[SemanticPart]` 声明（partial） |
 | `ImagePreviewerDialog` | Desktop native window、标题算法、CurrentIndex relay 和 viewer 组合 |
+| `ImagePreviewerTitleBar` | native dialog 的 internal 标题栏，和 WindowTitleBar 一样声明 Browser 不可用；其主题/Token 依赖不进入 Browser 注册 |
 | `ImagePreviewerOverlayHost` | Browser/无原生窗口平台的 overlay 宿主 |
 | `ImageViewer` | 导航、变换、fit-to-window 和 loading/error 状态呈现 |
 | `ImagePreviewRenderer` | 只渲染 entry 已持有的 `IImage` |

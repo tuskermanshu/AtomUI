@@ -2,7 +2,7 @@ $repositoryRoot = Split-Path -Parent $PSScriptRoot
 
 $AtomUIReleaseBuildPrerequisiteProjects = @(
     "src/AtomUI.Build.Tasks/AtomUI.Build.Tasks.csproj",
-    "src/AtomUI.Generator.LinkedPublish/AtomUI.Generator.LinkedPublish.csproj"
+    "src/AtomUI.TypeMap.Linker/AtomUI.TypeMap.Linker.csproj"
 )
 
 $AtomUIReleasePackages = @(

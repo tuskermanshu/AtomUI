@@ -3,6 +3,14 @@
 本文档记录 Expander 控件级设计、API、主题契约、Token 和实现结构的变化。
 它不替代仓库根目录 CHANGELOG.md，也不作为正式版本发布说明。
 
+## 2026-09-27
+
+- Theme
+  - 由 Expander 主题字典直接持有正文 `StringToTextBlockConverter`，消除对其他主题同名资源的隐式依赖。
+  - 保持字符串正文的垂直居中、水平拉伸与自动换行，以及非字符串内容原样传递；不改变模板布局、交互或 Semantic Part route。
+- Tests
+  - 覆盖编译主题的局部资源所有权、字符串及内容更新、非字符串内容和同名宿主 converter 隔离。
+
 ## 2026-09-10
 
 - Design

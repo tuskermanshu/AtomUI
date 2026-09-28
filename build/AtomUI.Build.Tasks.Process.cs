@@ -285,6 +285,44 @@ namespace AtomUI.Build.Tasks
 
 namespace AtomUI.Build.Tasks
 {
+    public sealed class ValidateRegistrationToolchainTask : IsolatedBuildTask
+    {
+        public string SdkVersion { get; set; } = string.Empty;
+        public string LinkerAssembly { get; set; } = string.Empty;
+        public string NativeCompiler { get; set; } = string.Empty;
+    }
+    public sealed class PrepareTypeMapLinkTask : IsolatedBuildTask
+    {
+        public string SdkVersion { get; set; } = string.Empty;
+        public string WasmSdkTasksPath { get; set; } = string.Empty;
+        public string BackendAssembly { get; set; } = string.Empty;
+        public string LinkerAssembly { get; set; } = string.Empty;
+        public string Capability { get; set; } = string.Empty;
+        public string ReceiptPath { get; set; } = string.Empty;
+        public string SignaturePath { get; set; } = string.Empty;
+        public string LinkSemaphore { get; set; } = string.Empty;
+        public string OutputDirectory { get; set; } = string.Empty;
+        public string Configuration { get; set; } = string.Empty;
+        public ITaskItem[] Inputs { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] Assemblies { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] LinkOptions { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] LinkItems { get; set; } = Array.Empty<ITaskItem>();
+    }
+    public sealed class VerifyTypeMapReceiptTask : IsolatedBuildTask
+    {
+        public string ReceiptPath { get; set; } = string.Empty;
+        public string SignaturePath { get; set; } = string.Empty;
+        public bool BindReceipt { get; set; }
+        public bool RequireConsumedAssemblies { get; set; }
+        public ITaskItem[] ConsumedAssemblies { get; set; } = Array.Empty<ITaskItem>();
+    }
+    public sealed class ResolveRegistrationToolsTask : IsolatedBuildTask
+    {
+        public ITaskItem[] Candidates { get; set; } = Array.Empty<ITaskItem>();
+        public bool IncludeBackend { get; set; }
+        [Output] public string GeneratorAssembly { get; set; } = string.Empty;
+        [Output] public string BackendAssembly { get; set; } = string.Empty;
+    }
     public sealed class GenerateThemeAssetWrappersTask : IsolatedBuildTask
     {
         [Required] public ITaskItem[] ThemeAssets { get; set; } = new ITaskItem[0];
@@ -292,47 +330,6 @@ namespace AtomUI.Build.Tasks
         [Required] public string AssemblyName { get; set; } = string.Empty;
         [Required] public string GeneratedCodePath { get; set; } = string.Empty;
         [Output] public ITaskItem[] GeneratedAssets { get; set; } = new ITaskItem[0];
-    }
-    public sealed class CollectAxamlUsageTask : IsolatedBuildTask
-    {
-        [Required] public ITaskItem[] AxamlFiles { get; set; } = new ITaskItem[0];
-        [Required] public string ProjectDirectory { get; set; } = string.Empty;
-        [Required] public string OutputPath { get; set; } = string.Empty;
-        public string ProjectPackageId { get; set; } = string.Empty;
-        public ITaskItem[] UnitRoots { get; set; } = new ITaskItem[0];
-        public ITaskItem[] PackageRoots { get; set; } = new ITaskItem[0];
-        [Output] public ITaskItem[] UsageCandidates { get; set; } = new ITaskItem[0];
-        [Output] public ITaskItem[] Uncertainties { get; set; } = new ITaskItem[0];
-    }
-    public sealed class ValidateAssemblyMetadataMarkerTask : IsolatedBuildTask
-    {
-        [Required] public string AssemblyPath { get; set; } = string.Empty;
-        [Required] public string MarkerKey { get; set; } = string.Empty;
-        [Output] public int MarkerCount { get; set; }
-    }
-    public sealed class GenerateLinkedRegistrationSidecarTask : IsolatedBuildTask
-    {
-        [Required] public string AssemblyPath { get; set; } = string.Empty;
-        [Required] public string OutputPath { get; set; } = string.Empty;
-        public string TargetFramework { get; set; } = string.Empty;
-        public bool ExtractedFallback { get; set; }
-        public bool ExtractConsumerUsage { get; set; }
-        public ITaskItem[] CatalogSidecars { get; set; } = new ITaskItem[0];
-        [Output] public string SidecarPath { get; set; } = string.Empty;
-        [Output] public bool WroteFile { get; set; }
-    }
-    public sealed class ResolveLinkedRegistrationSidecarCandidatesTask : IsolatedBuildTask
-    {
-        public ITaskItem[] SidecarCandidates { get; set; } = Array.Empty<ITaskItem>();
-        [Required] public ITaskItem[] ReferencePaths { get; set; } = Array.Empty<ITaskItem>();
-        [Output] public ITaskItem[] CanonicalSidecars { get; set; } = Array.Empty<ITaskItem>();
-        [Output] public ITaskItem[] ExtractableReferences { get; set; } = Array.Empty<ITaskItem>();
-    }
-    public sealed class DiscoverLinkedRegistrationConsumerReferencesTask : IsolatedBuildTask
-    {
-        [Required] public ITaskItem[] ReferencePaths { get; set; } = new ITaskItem[0];
-        [Required] public ITaskItem[] CatalogSidecars { get; set; } = new ITaskItem[0];
-        [Output] public ITaskItem[] ConsumerReferences { get; set; } = new ITaskItem[0];
     }
     public sealed class ExportLanguageTemplatesTask : IsolatedBuildTask
     {

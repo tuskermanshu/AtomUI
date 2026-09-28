@@ -313,7 +313,7 @@ public static IAtomUIBuilder UseGalleryBase(
 该入口负责：
 
 - 一次注册 GalleryBase 生成的 Control descriptor、可选 Own Token schema 和强类型 Token 资源扩展。
-- 注册从 `Themes/**/*.axaml` 生成的 ControlTheme asset owner/reference manifest 和平台主题 Provider。
+- 按已采纳的 TypeMap 契约注册主题导出、RequiredTokenOwners、逐控件片段与平台 Provider；[迁移状态](../../architecture/foundations/aot-and-trimming.md#1-状态与事实边界)不代表当前源码已完成转换。
 - 注册 GalleryBase 生成的 Catalog、内置 XLIFF 和语言模块入口。
 - 保存或合并 `GalleryBaseOptions`，供 Shell 构造时读取。
 

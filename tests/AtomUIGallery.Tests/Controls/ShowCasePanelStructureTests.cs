@@ -72,7 +72,7 @@ public class ShowCasePanelStructureTests
         var headerTheme       = ReadRepoFile("src/AtomUI.Toolkits.GalleryBase/Controls/Themes/GalleryShowCaseHeaderTheme.axaml");
         var headerToken       = ReadRepoFile("src/AtomUI.Toolkits.GalleryBase/Controls/GalleryShowCaseHeaderToken.cs");
         var assetManifest     = ReadRepoFile(
-            "src/AtomUI.Toolkits.GalleryBase/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.ThemeAssetManifestGenerator/GeneratedControlThemeAssetManifest.g.cs");
+            "src/AtomUI.Toolkits.GalleryBase/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.TokenResourceKeyGenerator/GeneratedTypeMapRegistration.g.cs");
         var assemblyInfo      = ReadRepoFile("src/AtomUI.Toolkits.GalleryBase/Properties/AssemblyInfo.cs");
         var tokenResources    = ReadRepoFile("src/AtomUI.Toolkits.GalleryBase/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.TokenResourceKeyGenerator/TokenResourceConst.g.cs");
         var languageResources = ReadRepoFile(
@@ -111,7 +111,7 @@ public class ShowCasePanelStructureTests
         assetManifest.ShouldContain("Controls/Themes/GalleryShowCaseHeaderTheme.axaml");
         assemblyInfo.ShouldContain("AtomUI.Toolkits.GalleryBase.Localization");
         tokenResources.ShouldContain("enum GalleryShowCaseHeaderTokenKind");
-        tokenResources.ShouldContain("ControlTokenIdentity(\"AtomUI\", \"GalleryShowCaseHeader\")");
+        tokenResources.ShouldContain("ControlTokenIdentity.ForControl(typeof(global::AtomUI.Toolkits.GalleryBase.Controls.GalleryShowCaseHeader), \"AtomUI\", \"GalleryShowCaseHeader\")");
         tokenResources.ShouldContain("GalleryShowCaseHeaderTokenResourceExtension");
         languageResources.ShouldContain("enum GalleryShowCaseHeaderLangResourceKind");
         languageResources.ShouldContain("[LanguageCatalog]");

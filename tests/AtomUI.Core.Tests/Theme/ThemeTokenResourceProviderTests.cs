@@ -15,6 +15,21 @@ namespace AtomUI.Core.Tests.Theme;
 public class ThemeTokenResourceProviderTests
 {
     [Fact]
+    public void Typed_Own_Keys_Validate_Owner_Without_Removing_Boxed_Enum_Support()
+    {
+        var provider = new ThemeTokenResourceProvider(Compile());
+        var correct = ControlTokenIdentity.ForControl(typeof(ButtonThemeTestControl), "AtomUI", CompilerButtonToken.ID);
+        var wrong = ControlTokenIdentity.ForControl(typeof(DerivedButtonThemeTestControl), "AtomUI", CompilerButtonToken.ID);
+        provider.TryGetResource(ControlTokenResourceKey.Own(correct, CompilerButtonTokenKind.Height), null, out var own).ShouldBeTrue();
+        own.ShouldBe(32d);
+        provider.TryGetResource(CompilerButtonTokenKind.Height, null, out var boxed).ShouldBeTrue();
+        boxed.ShouldBe(32d);
+        Should.Throw<InvalidOperationException>(() => provider.TryGetResource(ControlTokenResourceKey.Own(wrong, CompilerButtonTokenKind.Height), null, out _));
+        Should.Throw<InvalidOperationException>(() => provider.TryGetResource(ControlTokenResourceKey.Global(wrong, SharedTokenKind.ColorPrimary), null, out _));
+        Should.Throw<InvalidOperationException>(() => provider.TryGetResource(ControlTokenResourceKey.Own(correct, BrushTokenKind.Brush), null, out _));
+    }
+
+    [Fact]
     public void ControlShared_Key_Resolves_Private_Value_Without_Changing_Global()
     {
         var snapshot = CompileButtonPrimary("#00b96b");

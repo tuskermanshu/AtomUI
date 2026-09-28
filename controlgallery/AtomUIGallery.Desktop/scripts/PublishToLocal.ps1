@@ -252,7 +252,6 @@ if ($publishAotEnabled) {
         "--no-restore",
         "-p:GalleryPublishTrimmed=true",
         "-p:GalleryPublishAot=true",
-        "-p:AtomUILinkedPublish=true",
         "--disable-build-servers",
         "-m:1",
         "/nr:false",
@@ -276,7 +275,6 @@ if ($publishAotEnabled) {
         $buildType,
         "-p:GalleryPublishTrimmed=true",
         "-p:GalleryPublishAot=false",
-        "-p:AtomUILinkedPublish=true",
         "-p:PublishSingleFile=true"
     )
 }

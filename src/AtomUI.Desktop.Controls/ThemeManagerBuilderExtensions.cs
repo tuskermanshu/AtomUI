@@ -1,7 +1,6 @@
 using AtomUI.Controls;
 using AtomUI.Generated.AtomUIDesktopControls;
 using AtomUI.MotionScene;
-using AtomUI.Registration;
 using AtomUI.Theme;
 using Avalonia;
 using Avalonia.Animation;
@@ -14,31 +13,16 @@ public static class ThemeManagerBuilderExtensions
 {
     internal const string PackageId = "AtomUI.Desktop.Controls";
 
-    [ControlPackageRegistrationEntry]
     public static IAtomUIBuilder UseDesktopControls(this IAtomUIBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        PrepareDesktopPackageCore(builder);
-        if (AotTrimRegistration.IsEnabled)
-        {
-            RegisterGeneratedDesktopPackage(builder);
-        }
-        else
-        {
-            RegisterFullDesktopPackage(builder);
-        }
-        CompleteDesktopPackageCore(builder);
-        return builder;
-    }
-
-    [ControlPackageRegistrationEntry]
-    public static IAtomUIBuilder UseAllDesktopControls(this IAtomUIBuilder builder)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-        PrepareDesktopPackageCore(builder);
-        RegisterFullDesktopPackage(builder);
-        CompleteDesktopPackageCore(builder);
-        return builder;
+        return GeneratedControlPackageRegistration.Register(
+            builder,
+            static () => RuntimePlatform.Features.SupportsNativeWindow
+                ? new DesktopControlThemesProvider()
+                : new BrowserDesktopControlThemesProvider(),
+            PrepareDesktopPackageCore,
+            CompleteDesktopPackageCore);
     }
 
     private static void PrepareDesktopPackageCore(IAtomUIBuilder builder)
@@ -51,44 +35,6 @@ public static class ThemeManagerBuilderExtensions
     {
         GeneratedLanguageModuleRegistration.Register(builder.Localization);
         builder.Theme.AddInitializer(InitializeDesktopRuntime);
-    }
-
-    private static void RegisterGeneratedDesktopPackage(IAtomUIBuilder builder)
-    {
-        if (RuntimePlatform.Features.SupportsNativeWindow)
-        {
-            var provider = new DesktopControlThemesProvider();
-            AotTrimRegistrationPlanRegistry.ApplyPackage(
-                builder,
-                PackageId,
-                provider);
-        }
-        else
-        {
-            var provider = new BrowserDesktopControlThemesProvider();
-            AotTrimRegistrationPlanRegistry.ApplyPackage(
-                builder,
-                PackageId,
-                provider,
-                DesktopControlRegistrationSelector.IsBrowserControlSupported);
-        }
-    }
-
-    private static void RegisterFullDesktopPackage(IAtomUIBuilder builder)
-    {
-        if (RuntimePlatform.Features.SupportsNativeWindow)
-        {
-            GeneratedControlPackageRegistration.Register(
-                builder.Theme,
-                new DesktopControlThemesProvider());
-        }
-        else
-        {
-            GeneratedControlPackageRegistration.Register(
-                builder.Theme,
-                new BrowserDesktopControlThemesProvider(),
-                DesktopControlRegistrationSelector.IsBrowserControlSupported);
-        }
     }
 
     private static void InitializeDesktopRuntime(IThemeManager manager)

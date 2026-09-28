@@ -69,7 +69,7 @@ requests are welcome.
 
 #### Requirements
 
-.NET 8 or later (the .NET 10 SDK is required to build AtomUI MSBuild integration)<br>
+.NET 10 (the .NET 10 SDK is required to build AtomUI MSBuild integration)<br>
 Avalonia 12.1.2<br>
 Windows, macOS and Linux<br>
 
@@ -156,7 +156,7 @@ Search for "AtomUI" and install the packages your project needs.
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>

@@ -16,6 +16,7 @@ namespace AtomUI.Desktop.Controls;
 
 [PseudoClasses(StdPseudoClass.Active)]
 [PseudoClasses(StdPseudoClass.Normal, StdPseudoClass.Minimized, StdPseudoClass.Maximized, StdPseudoClass.Fullscreen)]
+[global::System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
 public class WindowTitleBar : TemplatedControl, 
                               IMotionAwareControl, 
                               IOperationSystemAware

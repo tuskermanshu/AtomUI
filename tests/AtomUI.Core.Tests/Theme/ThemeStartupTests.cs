@@ -15,27 +15,54 @@ namespace AtomUI.Core.Tests.Theme;
 [Collection(ThemeConfigProviderTestCollection.Name)]
 public class ThemeStartupTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Direct_Package_Collection_Failure_Poisons_Builder_Without_Partial_Staging(bool descriptorConflict)
+    {
+        var builder = new ThemeManagerBuilder();
+        var descriptor = ThemeCompilerTests.CreateCompilerButtonDescriptor();
+        var first = new TestControlThemesProvider("Tests.Direct");
+        builder.AddControlPackage(new(first.Id, [descriptor], [], [], first, []));
+        var second = new TestControlThemesProvider(descriptorConflict ? "Tests.Conflict" : first.Id);
+        Should.Throw<ThemeResourceRegisterException>(() => builder.AddControlPackage(new(second.Id, [descriptor], [], [], second, [])));
+        builder.ControlPackages.ShouldHaveSingleItem().Id.ShouldBe(first.Id);
+        Should.Throw<InvalidOperationException>(() => builder.Build());
+        var third = new TestControlThemesProvider("Tests.AfterFailure");
+        Should.Throw<InvalidOperationException>(() => builder.AddControlPackage(new(third.Id, [], [], [], third, [])));
+        var independent = new ThemeManagerBuilder();
+        independent.AddControlPackage(new(third.Id, [], [], [], third, []));
+        using var manager = independent.Build();
+    }
+
+    [Fact]
+    public void Direct_Theme_Builder_Validates_Stale_Assets_Before_Build_And_Poisons_Failure()
+    {
+        var provider = new TestControlThemesProvider("Tests.Stale");
+        var builder = new ThemeManagerBuilder();
+        var asset = new ControlThemeAssetDescriptor("Stale", new Uri("avares://Tests/Stale.axaml"), [], [], [], 1);
+        builder.AddControlPackage(new ControlPackageRegistration(provider.Id, [], [asset], [], provider, []));
+        Should.Throw<ThemeSchemaException>(() => builder.Build());
+        Should.Throw<InvalidOperationException>(() => builder.Build());
+    }
+
+    [Fact]
+    public void Direct_Theme_Builder_Freezes_Registration_After_Build()
+    {
+        var builder = new ThemeManagerBuilder();
+        builder.Build();
+        var provider = new TestControlThemesProvider("Tests.Late");
+        Should.Throw<InvalidOperationException>(() => builder.AddControlPackage(new(provider.Id, [], [], [], provider, [])));
+    }
+
     [Fact]
     public void Control_Package_Registration_Adds_Descriptors_Assets_And_Themes_Atomically()
     {
         HeadlessTestApp.Run(() =>
         {
             var descriptor = ThemeCompilerTests.CreateCompilerButtonDescriptor();
-            var provisional = new ControlThemeAssetDescriptor(
-                new Uri("avares://Tests/Themes/Button.axaml"),
-                descriptor.Identity,
-                [descriptor.Identity],
-                null,
-                1);
-            var registry = TypedThemeSnapshotCacheTests.CreateRegistry([descriptor]);
-            var asset = new ControlThemeAssetDescriptor(
-                provisional.AssetUri,
-                provisional.OwnerIdentity,
-                provisional.ReferencedControlIdentities,
-                provisional.SemanticPart,
-                ThemeSchemaRegistry.ComputeResourceKeySchemaFingerprint(
-                    provisional,
-                    registry.GlobalTokens));
+            var asset = ControlThemeAssetContractTests.Asset([new ControlThemeExportDescriptor(descriptor.ControlType, descriptor.ControlType)],
+                [ControlTokenIdentity.ForControl(descriptor.ControlType, descriptor.Identity.Catalog, descriptor.Identity.Id)], globals: AtomUI.Generated.AtomUICore.GeneratedThemeSchema.GetGlobalTokens());
             var provider = new TestControlThemesProvider("Tests.Controls");
             var semanticDescriptor = new ControlSemanticDescriptor(
                 descriptor.ControlType,
@@ -58,7 +85,7 @@ public class ThemeStartupTests
                 [descriptor],
                 [asset],
                 [semanticDescriptor],
-                provider);
+                provider, []);
             var builder = new ThemeManagerBuilder();
 
             builder.AddControlPackage(package);
@@ -71,20 +98,19 @@ public class ThemeStartupTests
                    .ShouldBeTrue();
             registeredSemanticDescriptor.ShouldBeSameAs(semanticDescriptor);
             manager.Resources.MergedDictionaries.ShouldContain(provider.ControlThemes.Single());
-            Should.Throw<ThemeResourceRegisterException>(() => builder.AddControlPackage(package));
+            Should.Throw<InvalidOperationException>(() => builder.AddControlPackage(package));
         });
     }
 
     [Fact]
-    public void Legacy_Control_Package_Constructor_Registers_An_Empty_Semantic_Contract()
+    public void Control_Package_Can_Register_An_Empty_Semantic_Contract()
     {
         var descriptor = ThemeCompilerTests.CreateCompilerButtonDescriptor();
-        var provider = new TestControlThemesProvider("Tests.LegacyControls");
+        var provider = new TestControlThemesProvider("Tests.EmptySemantics");
         var package = new ControlPackageRegistration(
             provider.Id,
             [descriptor],
-            Array.Empty<ControlThemeAssetDescriptor>(),
-            provider);
+            [], [], provider, []);
         var builder = new ThemeManagerBuilder();
 
         builder.AddControlPackage(package);
@@ -105,7 +131,7 @@ public class ThemeStartupTests
             [descriptor],
             Array.Empty<ControlThemeAssetDescriptor>(),
             [null!],
-            provider));
+            provider, []));
     }
 
     [Fact]

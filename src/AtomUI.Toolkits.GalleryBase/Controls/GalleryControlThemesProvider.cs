@@ -6,6 +6,6 @@ internal class GalleryControlThemesProvider : ControlThemesProvider
 {
     public GalleryControlThemesProvider()
     {
-        Id = "AtomUI.Toolkits.GalleryBase.Controls";
+        Id = ThemeManagerBuilderExtensions.PackageId;
     }
 }

@@ -354,14 +354,13 @@ public class LocalizationBuildAssetsTests
     public async Task Project_Referenced_Language_Pack_Contributes_A_Generated_Bundle()
     {
         var repoRoot = Path.GetDirectoryName(GetRepoFile("AtomUI.slnx"))!;
-        var configuration = new DirectoryInfo(AppContext.BaseDirectory).Parent?.Name ?? "Debug";
-        var buildTasksAssembly = Path.Combine(
-            repoRoot,
-            ".artifacts",
-            "bin",
-            configuration,
-            "net10.0",
-            "AtomUI.Build.Tasks.dll");
+        var configuration = typeof(LocalizationBuildAssetsTests).Assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyConfigurationAttribute), false)
+            .Cast<System.Reflection.AssemblyConfigurationAttribute>().Single().Configuration;
+        var buildTasksAssembly = typeof(LocalizationBuildAssetsTests).Assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyMetadataAttribute), false)
+            .Cast<System.Reflection.AssemblyMetadataAttribute>()
+            .Single(attribute => attribute.Key == "FixtureBuildTasksAssembly").Value!;
         var generatorAssembly = Path.Combine(AppContext.BaseDirectory, "AtomUI.Generator.dll");
         File.Exists(buildTasksAssembly).ShouldBeTrue();
         File.Exists(generatorAssembly).ShouldBeTrue();
@@ -500,7 +499,7 @@ public class LocalizationBuildAssetsTests
 
         var toolAssets = repositoryProps.Descendants("AtomUIGeneratorToolAsset").First();
         var toolIncludes = ((string?)toolAssets.Attribute("Include")).ShouldNotBeNull();
-        repositoryProps.Descendants("AtomUIGeneratorToolAsset").Last().Attribute("Include")!.Value.ShouldContain("AtomUI.Build.Tasks.runtimeconfig.json");
+        repositoryProps.Descendants("AtomUIGeneratorToolAsset").Single(element => element.Attribute("Include")!.Value.Contains("AtomUI.Build.Tasks.dll", StringComparison.Ordinal)).Attribute("Include")!.Value.ShouldContain("AtomUI.Build.Tasks.runtimeconfig.json");
         foreach (var dependency in new[]
                  {
                      "System.Reflection.Metadata.dll",
@@ -572,7 +571,7 @@ public class LocalizationBuildAssetsTests
         properties["PublishTrimmed"].ShouldBe("false");
         properties["PublishSingleFile"].ShouldBe("false");
         properties["SelfContained"].ShouldBe("false");
-        properties.ShouldNotContainKey("RuntimeIdentifier");
+        properties["RuntimeIdentifier"].ShouldBeEmpty();
     }
 
     [Fact]

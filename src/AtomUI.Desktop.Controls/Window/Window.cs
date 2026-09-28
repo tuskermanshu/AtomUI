@@ -26,6 +26,7 @@ namespace AtomUI.Desktop.Controls;
 
 using AvaloniaWindow = Avalonia.Controls.Window;
 
+[global::System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
 public partial class Window : AvaloniaWindow,
                               IOperationSystemAware,
                               IMediaBreakAwareControl

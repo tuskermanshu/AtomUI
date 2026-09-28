@@ -22,8 +22,12 @@ public sealed class ThemeConfig
         Algorithms = algorithms is null ? null : Array.AsReadOnly(algorithms.ToArray());
         Tokens     = new ReadOnlyDictionary<string, string>(
             new Dictionary<string, string>(tokens, StringComparer.Ordinal));
-        Controls   = new ReadOnlyDictionary<ControlTokenIdentity, ControlThemeConfig>(
-            new Dictionary<ControlTokenIdentity, ControlThemeConfig>(controls));
+        var canonicalControls = new Dictionary<ControlTokenIdentity, ControlThemeConfig>();
+        foreach (var entry in controls)
+        {
+            ControlTokenIdentityCanonicalizer.Set(canonicalControls, entry.Key, entry.Value);
+        }
+        Controls = new ReadOnlyDictionary<ControlTokenIdentity, ControlThemeConfig>(canonicalControls);
     }
 
     public bool Inherit { get; }

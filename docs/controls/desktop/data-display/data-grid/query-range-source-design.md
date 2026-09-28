@@ -1051,7 +1051,7 @@ dotnet run --project tools/performances/AtomUI.DataGridPerformance/AtomUI.DataGr
   -c Release --framework net10.0 --no-build -- --verify-states
 dotnet run --project tools/AtomUI.Docs.LLMsGenerator/AtomUI.Docs.LLMsGenerator.csproj \
   -- verify --config docs/AI/generated/llms.config.json
-scripts/verification/verify-aot-trim-registration.sh --full
+python3 tests/AtomUI.Registration.Fixtures/run_package_consumers.py --output /tmp/atomui-datagrid-registration --rid osx-arm64 --serve
 pwsh -NoLogo -NoProfile -File controlgallery/AtomUIGallery.Desktop/scripts/PublishToLocal.ps1 \
   -publishRootPath /tmp/atomui-datagrid-query-aot \
   -runtime osx-arm64 -buildType Release -publishAot true

@@ -555,7 +555,7 @@ fallback 或 `ImageFailed`。
 - encoded content 只有通过当前安全策略验证后才能进入 memory/disk store；codec 只接收已验证内容。
 - SVG 的 DecodeSpec 包含 codec 与安全策略 revision，显示尺寸不进入尺寸无关 DecodeKey。
 - hash、验证和 codec 工作不占用 UI dispatcher；Avalonia image 创建与释放遵守合法线程边界。
-- linked publish 静态保留内置 source、reader、store、validator、codec 和 Application-owned service。
+- 内置 source、reader、store、validator、codec 和 Application-owned service 由 Package Core 的真实静态调用保留，控件资源遵循 [TypeMap 注册契约](../../../../architecture/foundations/aot-and-trimming.md)。
 
 ## 9. 文档导航、LLMS 导出与验证策略
 

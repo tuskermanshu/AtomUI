@@ -187,7 +187,7 @@ Token。合法但没有被当前主题直接或间接消费的 Global Token 可�
 | `ButtonTokenResource` | 由真实 Button 和 `SearchButtonTheme` 显式读取 Button Own/Effective Global Token，负责按钮基础视觉。 |
 | `SharedTokenResource` | 读取真正的 Global Token，只用于不响应 SearchEdit Control 级覆盖的共享值。 |
 
-`SearchButtonTheme` 的 `TargetType` 是 Button，但资产 owner 和组合语义属于 SearchEdit。它可以同时使用
+`SearchButtonTheme` 的 `TargetType` 是 Button，但它是由 SearchEdit 主题实际构造的定制主题，不是全局导出的 Button 默认主题；不能据 TargetType 反向保留 SearchEdit。它可以同时使用
 `SearchEditTokenResource` 与 `ButtonTokenResource`；这是显式跨 Control 资源引用，不是 SearchEdit 借用 Button
 或 LineEdit identity。
 

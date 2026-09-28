@@ -19,6 +19,48 @@ public class NumericUpDownRootSurfaceTests
     }
 
     [Fact]
+    public void Spinner_Theme_Preserves_Application_Base_Replacement_And_Local_Overrides()
+    {
+        var application = Application.Current!;
+        application.TryFindResource(typeof(ButtonSpinner), out var baseValue).ShouldBeTrue();
+        var replacement = new ControlTheme(typeof(ButtonSpinner))
+        {
+            BasedOn = baseValue.ShouldBeOfType<ControlTheme>(),
+            Setters = { new Setter(Control.TagProperty, "application-spinner-theme") }
+        };
+        var priorEntry = application.Resources.FirstOrDefault(pair => Equals(pair.Key, typeof(ButtonSpinner)));
+        application.Resources[typeof(ButtonSpinner)] = replacement;
+        var window = new AvaloniaWindow();
+        try
+        {
+            var builder = new AtomUIBuilder(new Application());
+            builder.UseDesktopControls();
+            var registration = builder.ThemeManagerBuilder.ControlPackages.Single(p => p.Id == "AtomUI.Desktop.Controls")
+                .Resources.Single(r => r.AssetId.EndsWith("NumericUpDown/Themes/NumericUpDownSpinnerTheme.axaml", StringComparison.Ordinal));
+            var wrapper = registration.Factory().ShouldBeAssignableTo<ResourceDictionary>();
+            var dictionary = wrapper.MergedDictionaries.Single().ShouldBeAssignableTo<ResourceDictionary>();
+            var theme = dictionary[typeof(NumericUpDownSpinner)].ShouldBeOfType<ControlTheme>();
+            theme.BasedOn.ShouldBeSameAs(replacement);
+            dictionary["NumericUpDownSpinnerContentPadding"].ShouldBe(new Thickness(0));
+            var spinner = new NumericUpDownSpinner { Theme = theme, CornerRadius = new CornerRadius(13), IsMotionEnabled = false };
+            window.Content = spinner;
+            window.Show();
+            spinner.ApplyTemplate();
+            Dispatcher.UIThread.RunJobs();
+            spinner.Tag.ShouldBe("application-spinner-theme");
+            spinner.CornerRadius.ShouldBe(new CornerRadius(13));
+            spinner.IsMotionEnabled.ShouldBeFalse();
+            spinner.GetVisualDescendants().OfType<ButtonSpinnerDecoratedBox>().ShouldHaveSingleItem();
+        }
+        finally
+        {
+            window.Close();
+            if (priorEntry.Key is not null) application.Resources[typeof(ButtonSpinner)] = priorEntry.Value;
+            else application.Resources.Remove(typeof(ButtonSpinner));
+        }
+    }
+
+    [Fact]
     public void Root_BorderBrush_Relves_Onto_The_Input_Frame()
     {
         var borderBrush = new SolidColorBrush(Colors.MediumPurple);

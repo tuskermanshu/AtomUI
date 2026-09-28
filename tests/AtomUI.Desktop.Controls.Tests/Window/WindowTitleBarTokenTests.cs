@@ -264,7 +264,7 @@ public class WindowTitleBarTokenTests
         var buttonTheme = XDocument.Load(GetRepoFile(
             "src/AtomUI.Desktop.Controls/WindowTitleBar/Themes/CaptionButtonTheme.axaml"));
         var assetManifest = File.ReadAllText(GetRepoFile(
-            "src/AtomUI.Desktop.Controls/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.ThemeAssetManifestGenerator/GeneratedControlThemeAssetManifest.g.cs"));
+            "src/AtomUI.Desktop.Controls/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.TokenResourceKeyGenerator/GeneratedTypeMapRegistration.g.cs"));
 
         var expectedResources = new[]
         {
@@ -324,7 +324,10 @@ public class WindowTitleBarTokenTests
         buttonTheme.ToString().ShouldContain("WindowTitleBarTokenResource ActiveColor");
         buttonTheme.ToString().ShouldContain("WindowTitleBarTokenResource InactiveColor");
 
-        assetManifest.ShouldContain("WindowTitleBar/Themes/WindowsCaptionIconGeometries.axaml");
+        groupTheme.Root!.Elements().Single(element => element.Name.LocalName == "ResourceDictionary.MergedDictionaries")
+            .Elements().ShouldContain(element => element.Name.LocalName == "ResourceInclude" &&
+                (string?)element.Attribute("Source") == "avares://AtomUI.Desktop.Controls/WindowTitleBar/Themes/WindowsCaptionIconGeometries.axaml");
+        assetManifest.ShouldNotContain("WindowTitleBar/Themes/WindowsCaptionIconGeometries.axaml");
         assetManifest.ShouldContain("WindowTitleBar/Themes/CaptionButtonGroupTheme.axaml");
     }
 

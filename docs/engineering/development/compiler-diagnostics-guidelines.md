@@ -63,14 +63,25 @@ dotnet_diagnostic.ATOMUIAOT001.severity = error
 | `XAML` | AXAML | AXAML 静态结构、绑定、资源引用 |
 | `TOKEN` | Theme / Token | Token 定义、注册、资源键、主题约束 |
 | `LOC` | Localization | Language Catalog、XLIFF、语言元数据和静态语言包 |
-| `LINK` | Linked Registration | AOT/Trim 注册管线：粒度、Unit 归属、sidecar 协议与应用计划 |
+| `REG` | Control Registration | TypeMap 控件/资源契约、Package bootstrap、工具链和浏览器后端诊断；已分配 `001`–`007` |
+| `LINK` | 历史 Linked Registration | Deprecated / reserved，仅保留已发布 ID 的历史语义，不用于新注册体系 |
 
 新增领域前缀前必须先更新本文档，说明用途和 owner。
 
 ## 当前诊断注册表
 
+本表记录已有诊断。TypeMap 本地实现与验证状态见 [AOT 与裁剪架构](../../architecture/foundations/aot-and-trimming.md)。
+`REG` 错误语义与历史 `LINK` ID 分列在后文。
+
 | ID | Category | Severity | Trigger | Fix | Owner |
 |---|---|---|---|---|---|
+| `ATOMUIREG001` | Registration | Error | 顶层主题导出目标、key 不明确或重复 | 声明可解析的 target 和唯一 Type/string key | Registration generator |
+| `ATOMUIREG002` | Registration | Error | TokenResource 没有唯一且可访问的实际 owner | 修正 namespace 或 Token 契约 | Registration generator |
+| `ATOMUIREG003` | Registration | Error | 主题目标不可访问、开放泛型或不是 StyledElement | 使用可访问的具体主题目标 | Registration generator |
+| `ATOMUIREG004` | Registration | Error | include 非常量、缺失、构造环，或 StaticResource 没有词法/显式 include 来源或可验证默认 type-key 条件（全包同名字符串导出不算依赖） | 修正 URI、依赖或资源作用域 | Registration generator |
+| `ATOMUIREG005` | Registration | Error | package、Group、Token owner、资产或生成符号身份冲突 | 保留唯一且一致的完整身份 | Registration generator / TypeMap linker |
+| `ATOMUIREG006` | Registration | Error | marker ABI/Group 无效、平台字符串/资源域不兼容（多目标或所需 owner），或 Browser 链接后端/工具链不受支持 | 重新构建匹配 ABI 的包/后端并修正平台或链接配置 | Registration generator / TypeMap linker |
+| `ATOMUIREG007` | Registration | Error | 可达 TypeMap accessor 未正确转换，或 Sweep/输出产物与转换结果不一致 | 启用匹配后端，重新链接并验证生成 accessor/helper | TypeMap linker |
 | `ATOMUIAOT001` | AOT | Warning | 已知 data member path 的 model type，但找不到 generated accessor | 给类型、接口或基类添加 `[GenerateDataMemberAccessors]`，或显式传入 `IDataMemberAccessorDescriptor` | DataMemberAccessors |
 | `ATOMUIAOT002` | AOT | Warning | model type 有 generated accessor，但目标 path 不会被生成 | 改成可访问实例属性、修正 path，或显式传入 descriptor | DataMemberAccessors |
 | `ATOMUIAOT003` | AOT | Warning | 使用字符串常量 path，编译期无法确认 model type | 使用 `nameof(Type.Property)`，或显式传入 descriptor | DataMemberAccessors |
@@ -109,34 +120,67 @@ dotnet_diagnostic.ATOMUIAOT001.severity = error
 | `ATOMUILOC008` | Localization | Error | 应用类型无法实现生成式语言 bootstrap | 保留唯一的非抽象 partial Avalonia Application host，或移除应用级语言输入 | LocalizationGenerator |
 | `ATOMUILOC009` | Localization | Error | 静态语言包包含运行时代码/二进制、非法路径、缺失必需 metadata、未满足 Verified 要求或混合目标语言 | 删除运行时资产，并使用模板生成的声明式 contentFiles/buildTransitive 包结构 | AtomUI.Build.Tasks |
 | `ATOMUILOC010` | Localization | Warning | 静态语言包没有取得目标模块的权威 `en-US` 契约，打包只能执行延迟契约校验 | 添加作者期 `PrivateAssets=all` 组件 PackageReference；社区包也可保留 Deferred 并由消费应用完成完整校验 | AtomUI.Build.Tasks |
-| `ATOMUILINK001` | LinkedRegistration | Error | linked 应用的 Application Plan owner 不唯一 | 保证只有一个入口工程满足 plan owner 条件 | LinkedPublishGenerator |
-| `ATOMUILINK002` | LinkedRegistration | Warning | 动态 AtomUI usage 无法解析到 Registration Unit，当前包使用 full fallback | Unit 已知时添加 `AtomUIRegistrationUnitRoot`，完全动态时添加 `AtomUIPackageRoot` | LinkedPublishGenerator |
-| `ATOMUILINK003` | LinkedRegistration | Warning | 包没有兼容的 linked manifest，需要 full fallback | 升级包版本，或添加 `AtomUIPackageRoot` 显式声明边界 | LinkedPublishGenerator |
-| `ATOMUILINK004` | LinkedRegistration | Error | 显式 root 无法解析 | 已知 Unit 使用 `AtomUIRegistrationUnitRoot`，整包使用 `AtomUIPackageRoot` | LinkedPublishGenerator |
-| `ATOMUILINK005` | LinkedRegistration | Error | 包的粒度、Unit 或 PackageShared 声明非法，或 sidecar 候选未经解析到达 Generator | 修正包声明；消费端先按 assembly identity 与 contractHash 完成 canonical resolution | LinkedPublishGenerator、AtomUI.Build.Tasks |
-| `ATOMUILINK006` | LinkedRegistration | Error | linked-registration 输入 manifest 不兼容或损坏 | 修复 sidecar 版本或内容后重新生成 | AtomUI.Build.Tasks |
-| `ATOMUILINK007` | LinkedRegistration | Warning | loose AXAML 或动态资源源可能加载某包，该包使用 full fallback | 添加 `AtomUIPackageRoot` 显式声明边界 | LinkedPublishGenerator |
-| `ATOMUILINK008` | LinkedRegistration | Error | 包被使用但其 `UseXxxControls()` 注册入口未被调用 | 在应用入口调用注册方法或声明对应 root | LinkedPublishGenerator |
-| `ATOMUILINK009` | LinkedRegistration | Error | Control package 注册入口方法无效 | 按 `[ControlPackageRegistrationEntry]` 契约修正入口签名 | OrdinaryGenerator |
-| `ATOMUILINK010` | LinkedRegistration | Warning | 动态 usage 未被静态注册计划覆盖，仅经该点创建的控件不会注册 | Unit 已知时添加 `AtomUIRegistrationUnitRoot`，完全动态时添加 `AtomUIPackageRoot`；该点从不创建 AtomUI 控件时无需处理 | LinkedPublishGenerator |
-| `ATOMUILINK011` | LinkedRegistration | Warning | `[AotTrimUnit]` attribute 与 `AtomUIRegistrationUnit` metadata 对同一文件声明了不同 Unit | 统一两处声明的 Unit 值，或删除其一 | LinkedPublishGenerator |
-| `ATOMUILINK012` | LinkedRegistration | Warning | 同一文件内多个类型声明了不同的显式 Registration Unit | 拆分文件，或统一为同一 Unit 值 | LinkedPublishGenerator |
+
+独立 ILLink 适配器使用公开 `CreateCustomErrorMessage` API，因此传输编号为 `IL6505`、`IL6506`、`IL6507`，
+分别对应消息中的 `ATOMUIREG005`、`ATOMUIREG006`、`ATOMUIREG007`。REG 保持统一语义编号；不得通过私有 API 改写 ILLink 前缀。
 
 `ATOMUIGEN005` 和 `ATOMUIGEN006` 原本约束 `[ControlDesignToken]` 类型上的 `public const ID`，该手工 ID 契约已
 删除，因此这两个诊断不在新主题架构中复用。无参数 `[ControlDesignToken]` 本身继续保留，只负责标记 Own Token
 类型，不携带 Control 类型或 identity。Control identity 由可主题化 Control 和主题资产约定生成；相关歧义、Token
 继承、Global/Own 重名、资产依赖和注册错误应使用新的独立诊断 ID。
 
+## TypeMap 注册诊断
+
+`REG` 是当前控件注册领域的诊断前缀。以下语义依次对应已实现的 `ATOMUIREG001`–`ATOMUIREG007`，
+精确编号见上表；Core 启动时才可判断的冲突使用运行时异常。旧 `LINK` ID 不复用。
+类型与资源行为以 [控件注册契约](../../architecture/foundations/control-registration-contracts.md)为准，
+发布 ABI 以 [TypeMap 契约](../../reference/aot/typemap-contract.md)为准。
+
+| 错误语义 | 可静态证明的触发条件 | 处理 | 修复方向 | owner |
+| --- | --- | --- | --- | --- |
+| `AmbiguousThemeExport` | 主题导出、TargetType 或默认主题归属不唯一 | Error | 明确默认导出/自定义主题边界，不按目录或短类型名猜归属 | 普通控件注册 Generator |
+| `InvalidTokenOwner` | identity 与实际 owner Type 冲突，或必要 Token owner 不符合契约 | Error；动态合并冲突由运行时校验 | 修正 owner/identity，并在身份去重前完成 canonicalization | 普通 Generator / Core 注册校验 |
+| `InaccessibleRegistrationType` | 生成片段无法正常访问 owner、代理或 factory，或开放泛型没有明确主题 owner | Error | 提供可正常访问的非泛型契约，不以反射绕过 | 普通控件注册 Generator |
+| `InvalidResourceDependency` | 包内 StaticResource 无法在声明作用域解析，include 非法或存在资源构造循环 | Error | 修正本地资源和显式 include；宿主开放 DynamicResource 不按内部依赖误报 | 主题资产 Generator |
+| `RegistrationIdentityConflict` | Package、Group、key、FragmentId、AssetId 或导出定义出现不兼容冲突 | Error | 保持唯一且一致的身份；同 key 不用多个 trimTarget 表达 OR | 普通 Generator / 浏览器链接后端 |
+| `UnsupportedRegistrationBackend` | 未验收工具链、错误后端 ABI、非预期链接阶段或程序集处理状态 | Error，阻止发布 | 使用已验收组合或完成后端适配，不能全包兜底 | 浏览器链接后端 / 构建集成 |
+| `UnloweredTypeMapAccessor` | 应转换的可达自有 accessor 遗漏，或仍调用目标后端不可执行的 TypeMapping API | Error，阻止发布 | 修正自动接线、helpers 保留和转换完整性 | 浏览器链接后端 / 产物验证 |
+
+同名的无关私有资源不能单独触发 `InvalidResourceDependency`；开放宿主 DynamicResource 与包内必需资源必须按普通
+资源作用域区分。运行时才可确认的缺包、跨包 owner、资源和语义错误由启动校验报告，不伪装为应用 usage 编译诊断，
+也不为复刻旧诊断重新引入消费 DLL 调用图分析。
+
+## 历史 LINK 诊断保留表
+
+下列 ID 全部标记为 **retired / reserved**，不分配给新语义。当前源码已移除其生产者；仅用于识别历史版本的日志。
+遇到这些 ID 应检查构建工具版本并保留原始诊断证据，不能把增加旧 root、恢复
+Sidecar 或全包 fallback 作为 TypeMap 的修复方案。
+
+| ID | 历史语义，仅用于识别旧日志 | 历史 owner |
+| --- | --- | --- |
+| `ATOMUILINK001` | 应用静态计划 owner 不唯一 | LinkedPublishGenerator |
+| `ATOMUILINK002` | 动态使用无法解析，旧管线扩大包保留范围 | LinkedPublishGenerator |
+| `ATOMUILINK003` | 缺少兼容旧 manifest | LinkedPublishGenerator |
+| `ATOMUILINK004` | 旧显式 root 无法解析 | LinkedPublishGenerator |
+| `ATOMUILINK005` | 旧粒度、Unit、公共资源声明或输入来源冲突 | LinkedPublishGenerator / Build.Tasks |
+| `ATOMUILINK006` | 旧 linked-registration manifest 不兼容或损坏 | Build.Tasks |
+| `ATOMUILINK007` | 动态 AXAML/资源来源触发旧包级保留 | LinkedPublishGenerator |
+| `ATOMUILINK008` | 旧使用分析判断包入口未调用 | LinkedPublishGenerator |
+| `ATOMUILINK009` | 旧注册入口 Attribute 或方法签名无效 | OrdinaryGenerator |
+| `ATOMUILINK010` | 动态使用未被旧静态计划覆盖 | LinkedPublishGenerator |
+| `ATOMUILINK011` | 旧 Attribute 与项目 metadata 的 Unit 声明不一致 | LinkedPublishGenerator |
+| `ATOMUILINK012` | 同一文件内旧 Unit 声明冲突 | LinkedPublishGenerator |
+
 ## Severity 规则
 
 - 默认使用 `Warning`。
 - 只有生成结果必然错误、编译产物不可用、或继续编译会掩盖严重错误时才使用 `Error`。
 - 对迁移期可能大量触发的问题，先使用 `Warning`，再由具体项目通过 `.editorconfig` 升级为 `Error`。
-- 不要用 analyzer warning 替代运行时 guard。编译期无法证明安全时，运行时仍要有明确异常或 fallback 边界。
+- 不要用 analyzer warning 替代运行时 guard。编译期无法证明安全时，运行时仍要有明确异常或该领域允许的兼容边界；控件注册和 Browser 发布禁止自动全包 fallback。
 
 ## 代码组织
 
-公共诊断定义集中放在：
+Roslyn 诊断定义集中放在：
 
 ```text
 src/AtomUI.Generator/Diagnostics/
@@ -147,11 +191,14 @@ src/AtomUI.Generator/Diagnostics/
 
 规则：
 
-- diagnostic ID 必须来自 `AtomUIDiagnosticIds`。
-- category 必须来自 `AtomUIDiagnosticCategories`。
+- Roslyn diagnostic ID 必须来自 `AtomUIDiagnosticIds`。
+- Roslyn category 必须来自 `AtomUIDiagnosticCategories`。
 - `DiagnosticDescriptor` 优先定义在 `AtomUIDiagnosticDescriptors`。
 - analyzer 可以放在对应领域目录，例如 `DataMemberAccessors/`、`DesignToken/`、`Language/`。
 - analyzer 不要在业务文件中散落硬编码 ID、category 或重复 descriptor。
+
+浏览器链接后端不能为了复用诊断定义而加载 Roslyn Generator。跨工具共享的 ID/消息契约应采用无 Roslyn/ILLink
+运行时依赖的共同定义或生成输入，仍以本注册表为唯一分配来源；工具适配层分别形成 Roslyn diagnostic 或构建错误。
 
 ## Descriptor 编码规则
 
@@ -174,6 +221,7 @@ src/AtomUI.Generator/Diagnostics/
 - 不要依赖源码字符串匹配判断语义；使用 `SemanticModel`、`ISymbol`、`ITypeSymbol` 等 Roslyn API。
 - 诊断位置要落在用户需要修改的表达式上。
 - analyzer 自身不能引入运行时依赖，必须保持可作为 analyzer 包加载。
+- 浏览器链接后端诊断由独立编译工具产生，不把 ILLink/Cecil 依赖装入普通 Roslyn Generator；错误 ID 仍由本注册表统一管理。
 
 ## 测试规则
 
@@ -190,7 +238,10 @@ src/AtomUI.Generator/Diagnostics/
 tests/AtomUI.Generator.Tests/
 ```
 
-测试中如果故意验证 fallback 或错误路径，需要用局部 `#pragma warning disable <ID>` 标明意图，不要在项目级别全局 suppress。
+浏览器后端还必须覆盖实际转换阶段、工具链/ABI 不匹配、helpers 缺失和残留 accessor 的失败对照；不能只断言诊断文本而
+跳过真实发布产物检查。
+
+测试中如果故意验证该领域允许的 fallback 或错误路径，需要用局部 `#pragma warning disable <ID>` 标明意图，不要在项目级别全局 suppress。
 
 ## 文档要求
 

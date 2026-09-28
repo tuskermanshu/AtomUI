@@ -2,6 +2,10 @@
 
 本文档记录 ImagePreviewer 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-09-28
+
+- 为 internal `ImagePreviewerTitleBar` 补齐与 native `WindowTitleBar` 一致的 Browser 平台排除声明，使生成的主题资产与所需 WindowTitleBar Token schema 具有一致可用域；Browser 继续使用既有 overlay 宿主。
+
 ## 2026-09-09
 
 - 移除 `popup.close` 语义部件：关闭职能在 native dialog 由 OS 标题栏按钮、在 overlay 宿主由内嵌关闭按钮（`PART_CloseButton`，非语义部件）承担，发布部件 9 → 8；同步移除生成 `ImagePreviewerPopupCloseStyle` / `ImageGroupPreviewerPopupCloseStyle`、overlay 模板 marker 与示例描述。

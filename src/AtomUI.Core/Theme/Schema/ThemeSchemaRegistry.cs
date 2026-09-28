@@ -111,38 +111,69 @@ internal sealed class ThemeSchemaRegistry
         ArgumentNullException.ThrowIfNull(descriptor);
         ArgumentNullException.ThrowIfNull(globalTokens);
 
-        var hash = 14695981039346656037UL;
-        AddAssetFingerprint(ref hash, descriptor.OwnerIdentity);
-        foreach (var identity in descriptor.ReferencedControlIdentities)
-        {
-            AddAssetFingerprint(ref hash, identity);
-        }
+        var fingerprint = new SchemaFingerprintBuilder();
+        AddAssetSchema(ref fingerprint, descriptor);
+        fingerprint.Add(globalTokens.Count);
         foreach (var token in globalTokens.OrderBy(static token => token.Slot))
         {
-            AddAssetFingerprint(ref hash, token.Name);
+            fingerprint.Add(token.Name);
         }
-        if (descriptor.SemanticPart is { } semanticPart)
-        {
-            AddAssetFingerprint(ref hash, semanticPart.PropertyName);
-            AddAssetFingerprint(ref hash, semanticPart.TargetTypeName);
-        }
-        return hash;
+        return fingerprint.Value;
     }
 
-    private static void AddAssetFingerprint(ref ulong hash, ControlTokenIdentity identity)
+    // Generated factories supply their compiled snapshot, never the current registry's globals.
+    internal static ulong ComputeGeneratedResourceKeySchemaFingerprint(
+        ControlThemeAssetDescriptor descriptor, IReadOnlyList<string> compiledGlobalTokenNames)
     {
-        AddAssetFingerprint(ref hash, identity.Catalog);
-        AddAssetFingerprint(ref hash, identity.Id);
+        var fingerprint = new SchemaFingerprintBuilder();
+        AddAssetSchema(ref fingerprint, descriptor);
+        fingerprint.Add(compiledGlobalTokenNames.Count);
+        foreach (var name in compiledGlobalTokenNames) fingerprint.Add(name);
+        return fingerprint.Value;
     }
 
-    private static void AddAssetFingerprint(ref ulong hash, string value)
+    internal static ulong ComputeGeneratedContractFingerprint(
+        ControlThemeAssetDescriptor descriptor, IReadOnlyList<string> compiledGlobalTokenNames)
     {
-        foreach (var character in value)
+        var fingerprint = new SchemaFingerprintBuilder();
+        fingerprint.Add("AtomUI.GeneratedControlThemeAssetContract");
+        fingerprint.Add(1);
+        fingerprint.Add(descriptor.AssetId);
+        fingerprint.Add(descriptor.AssetUri.ToString());
+        fingerprint.Add(descriptor.ExportedThemes.Count);
+        // This layer is independently ordered by metadata names, not reference/runtime AQN order.
+        foreach (var export in descriptor.ExportedThemes.OrderBy(static value => value.TargetType.FullName, StringComparer.Ordinal)
+                     .ThenBy(static value => value.ResourceKey is Type ? 0 : 1)
+                     .ThenBy(static value => value.ResourceKey is Type type ? type.FullName : (string)value.ResourceKey, StringComparer.Ordinal))
         {
-            hash ^= character;
-            hash *= 1099511628211UL;
+            fingerprint.Add(export.TargetType.FullName!);
+            fingerprint.Add(export.ResourceKey is Type ? (byte)1 : (byte)0);
+            fingerprint.Add(export.ResourceKey is Type type ? type.FullName! : (string)export.ResourceKey);
         }
+        fingerprint.Add(descriptor.RequiredTokenOwners.Count);
+        foreach (var owner in descriptor.RequiredTokenOwners.OrderBy(static value => value.Catalog, StringComparer.Ordinal).ThenBy(static value => value.Id, StringComparer.Ordinal))
+        {
+            fingerprint.Add(owner.Catalog);
+            fingerprint.Add(owner.Id);
+            fingerprint.Add(owner.OwnerType!.FullName!);
+        }
+        fingerprint.Add(descriptor.SemanticThemeBindings.Count);
+        foreach (var binding in descriptor.SemanticThemeBindings.OrderBy(static value => value.OwnerIdentity.Catalog, StringComparer.Ordinal)
+                     .ThenBy(static value => value.OwnerIdentity.Id, StringComparer.Ordinal)
+                     .ThenBy(static value => value.PropertyName, StringComparer.Ordinal)
+                     .ThenBy(static value => value.TargetType.FullName, StringComparer.Ordinal))
+        {
+            fingerprint.Add(binding.OwnerIdentity.Catalog);
+            fingerprint.Add(binding.OwnerIdentity.Id);
+            fingerprint.Add(binding.OwnerIdentity.OwnerType!.FullName!);
+            fingerprint.Add(binding.PropertyName);
+            fingerprint.Add(binding.TargetType.FullName!);
+        }
+        fingerprint.Add(compiledGlobalTokenNames.Count);
+        foreach (var name in compiledGlobalTokenNames) fingerprint.Add(name);
+        return fingerprint.Value;
     }
+
 
     internal bool TryGetGlobalToken(
         string name,
@@ -155,7 +186,13 @@ internal sealed class ThemeSchemaRegistry
         ControlTokenIdentity identity,
         [NotNullWhen(true)] out ControlTokenDescriptor? descriptor)
     {
-        return _controlsByIdentity.TryGetValue(identity, out descriptor);
+        if (_controlsByIdentity.TryGetValue(identity, out descriptor) &&
+            ControlTokenIdentityCanonicalizer.Matches(identity, descriptor.ControlType))
+        {
+            return true;
+        }
+        descriptor = null;
+        return false;
     }
 
     internal bool TryGetControl(
@@ -276,20 +313,13 @@ internal sealed class ThemeSchemaRegistry
         foreach (var asset in themeAssets)
         {
             ArgumentNullException.ThrowIfNull(asset);
-            if (!controlsByIdentity.ContainsKey(asset.OwnerIdentity))
+            foreach (var identity in asset.RequiredTokenOwners)
             {
-                throw new ThemeSchemaException(
-                    $"Control theme asset '{asset.AssetUri}' uses unregistered owner identity " +
-                    $"'{asset.OwnerIdentity}'.");
-            }
-
-            foreach (var identity in asset.ReferencedControlIdentities)
-            {
-                if (!controlsByIdentity.ContainsKey(identity))
+                if (!controlsByIdentity.TryGetValue(identity, out var descriptor) ||
+                    !ControlTokenIdentityCanonicalizer.Matches(identity, descriptor.ControlType))
                 {
                     throw new ThemeSchemaException(
-                        $"Control theme asset '{asset.AssetUri}' references unregistered identity " +
-                        $"'{identity}'.");
+                        $"Control theme asset '{asset.AssetUri}' requires unregistered or incorrectly owned Token identity '{identity}'.");
                 }
             }
         }
@@ -299,6 +329,10 @@ internal sealed class ThemeSchemaRegistry
         ControlTokenDescriptor descriptor,
         IReadOnlyDictionary<string, TokenDescriptor> globalTokens)
     {
+        if (!ControlTokenIdentityCanonicalizer.Matches(descriptor.Identity, descriptor.ControlType))
+        {
+            throw new ThemeSchemaException($"Control Token identity '{descriptor.Identity}' has an incorrect owner.");
+        }
         ValidateDenseSlots(descriptor.OwnTokens, static token => token.Slot, $"{descriptor.Identity} own Token");
         var ownNames = new HashSet<string>(StringComparer.Ordinal);
         foreach (var token in descriptor.OwnTokens)
@@ -377,8 +411,7 @@ internal sealed class ThemeSchemaRegistry
         {
             fingerprint.Add(control.Identity.Catalog);
             fingerprint.Add(control.Identity.Id);
-            fingerprint.Add(control.ControlType.Assembly.GetName().Name ?? string.Empty);
-            fingerprint.Add(control.ControlType.FullName ?? control.ControlType.Name);
+            fingerprint.Add(control.ControlType.AssemblyQualifiedName!);
             fingerprint.Add(control.Slot);
             fingerprint.Add(control.OwnTokens.Count);
             foreach (var token in control.OwnTokens)
@@ -398,30 +431,41 @@ internal sealed class ThemeSchemaRegistry
         fingerprint.Add(themeAssets.Count);
         foreach (var asset in themeAssets)
         {
-            fingerprint.Add(asset.AssetUri.ToString());
-            fingerprint.Add(asset.OwnerIdentity.Catalog);
-            fingerprint.Add(asset.OwnerIdentity.Id);
+            AddAssetSchema(ref fingerprint, asset);
             fingerprint.Add(asset.ResourceKeySchemaFingerprint);
-            fingerprint.Add(asset.ReferencedControlIdentities.Count);
-            foreach (var identity in asset.ReferencedControlIdentities)
-            {
-                fingerprint.Add(identity.Catalog);
-                fingerprint.Add(identity.Id);
-            }
-
-            if (asset.SemanticPart is { } semanticPart)
-            {
-                fingerprint.Add((byte)1);
-                fingerprint.Add(semanticPart.PropertyName);
-                fingerprint.Add(semanticPart.TargetTypeName);
-            }
-            else
-            {
-                fingerprint.Add((byte)0);
-            }
         }
 
         return new ThemeSchemaRevision(fingerprint.Value);
+    }
+
+    private static void AddAssetSchema(ref SchemaFingerprintBuilder fingerprint, ControlThemeAssetDescriptor asset)
+    {
+        fingerprint.Add(1); // Typed asset schema format, independent of the generated registration ABI.
+        fingerprint.Add(asset.AssetId);
+        fingerprint.Add(asset.AssetUri.ToString());
+        fingerprint.Add(asset.ExportedThemes.Count);
+        foreach (var export in asset.ExportedThemes)
+        {
+            fingerprint.Add(export.TargetType.AssemblyQualifiedName!);
+            fingerprint.Add(export.ResourceKey is Type ? (byte)1 : (byte)0);
+            fingerprint.Add(export.ResourceKey is Type type ? type.AssemblyQualifiedName! : (string)export.ResourceKey);
+        }
+        fingerprint.Add(asset.RequiredTokenOwners.Count);
+        foreach (var identity in asset.RequiredTokenOwners)
+        {
+            fingerprint.Add(identity.Catalog);
+            fingerprint.Add(identity.Id);
+            fingerprint.Add(identity.OwnerType!.AssemblyQualifiedName!);
+        }
+        fingerprint.Add(asset.SemanticThemeBindings.Count);
+        foreach (var binding in asset.SemanticThemeBindings)
+        {
+            fingerprint.Add(binding.OwnerIdentity.Catalog);
+            fingerprint.Add(binding.OwnerIdentity.Id);
+            fingerprint.Add(binding.OwnerIdentity.OwnerType!.AssemblyQualifiedName!);
+            fingerprint.Add(binding.PropertyName);
+            fingerprint.Add(binding.TargetType.AssemblyQualifiedName!);
+        }
     }
 
     private static void AddToken(ref SchemaFingerprintBuilder fingerprint, TokenDescriptor token)

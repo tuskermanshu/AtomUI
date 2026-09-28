@@ -50,7 +50,7 @@ def output_manifest(repository, projects, configuration="Debug"):
 
 
 def output_fingerprint(root, configuration="Debug", framework="net10.0", manifest=None):
-    # Include generator/netstandard and Release/net8 outputs as well as the test TFM.
+    # Include generator/netstandard and all configured runtime outputs as well as the test TFM.
     output = Path(root) / ".artifacts" / "bin" / configuration
     digest = hashlib.sha256()
     count = 0

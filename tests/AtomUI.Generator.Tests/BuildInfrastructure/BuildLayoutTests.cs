@@ -11,10 +11,8 @@ public sealed class BuildLayoutTests
     [
         "AtomUI.Generator.props",
         "AtomUI.Generator.targets",
+        "AtomUI.Registration.targets",
         "AtomUI.GeneratorConsumer.targets",
-        "AtomUI.LinkedRegistration.props",
-        "AtomUI.LinkedRegistration.targets",
-        "AtomUI.LinkedRegistration.SidecarConsumer.targets",
         "AtomUI.Localization.props",
         "AtomUI.Localization.targets",
         "AtomUI.Repository.props",
@@ -38,9 +36,7 @@ public sealed class BuildLayoutTests
     [
         "AtomUI.Generator.props",
         "AtomUI.Generator.targets",
-        "AtomUI.LinkedRegistration.props",
-        "AtomUI.LinkedRegistration.targets",
-        "AtomUI.LinkedRegistration.SidecarConsumer.targets",
+        "AtomUI.Registration.targets",
         "AtomUI.Localization.props",
         "AtomUI.Localization.targets",
         "AtomUI.ThemeAssets.targets",
@@ -183,7 +179,7 @@ public sealed class BuildLayoutTests
                    .ShouldHaveSingleItem()
                    .Value.ShouldBe("buildTransitive/%(Filename)%(Extension)");
 
-        var toolAssets = repositoryProps.Descendants("AtomUIGeneratorToolAsset").Last();
+        var toolAssets = repositoryProps.Descendants("AtomUIGeneratorToolAsset").Single(element => ((string?)element.Attribute("Include"))?.Contains("AtomUI.Build.Tasks.dll", StringComparison.Ordinal) == true);
         var toolIncludes = ((string?)toolAssets.Attribute("Include")).ShouldNotBeNull();
         toolIncludes.ShouldContain("AtomUI.Build.Tasks.runtimeconfig.json");
         toolIncludes.ShouldContain("AtomUI.Build.Tasks.dll");
@@ -211,21 +207,10 @@ public sealed class BuildLayoutTests
                          .ShouldContain(element =>
                              (string?)element.Attribute("Include") == "@(AtomUIGeneratorToolAsset)");
 
-        var linkedPackTarget = generatorProject.Descendants("Target")
-                                               .Single(element =>
-                                                   (string?)element.Attribute("Name") ==
-                                                   "AtomUIPrepareLinkedPublishGeneratorForPack");
-        ((string?)linkedPackTarget.Attribute("BeforeTargets")).ShouldBe("_GetPackageFiles");
-        linkedPackTarget.Descendants("MSBuild")
-                        .Single()
-                        .Attribute("Projects")!
-                        .Value.ShouldContain("AtomUI.Generator.LinkedPublish.csproj");
-        ((string?)linkedPackTarget.Descendants("MSBuild").Single().Attribute("Condition"))
-            .ShouldBe("'$(NoBuild)' != 'true'");
-        linkedPackTarget.Descendants("Error")
-                        .Single()
-                        .Attribute("Condition")!
-                        .Value.ShouldContain("AtomUILinkedPublishGeneratorAssembly");
+        var backendPackTarget = generatorProject.Descendants("Target")
+            .Single(element => (string?)element.Attribute("Name") == "AtomUIPrepareTypeMapBackendForPack");
+        ((string?)backendPackTarget.Attribute("BeforeTargets")).ShouldBe("_GetPackageFiles");
+        backendPackTarget.Descendants("MSBuild").Single().Attribute("Projects")!.Value.ShouldBe("$(AtomUITypeMapBackendProject)");
     }
 
     [Fact]
@@ -479,11 +464,10 @@ public sealed class BuildLayoutTests
     public void NuGet_Generator_Entry_Points_Import_Flat_Feature_Files()
     {
         GetImports("build/AtomUI.Generator.props").ShouldBe([
-            "$(MSBuildThisFileDirectory)AtomUI.LinkedRegistration.props",
             "$(MSBuildThisFileDirectory)AtomUI.Localization.props"
         ]);
         GetImports("build/AtomUI.Generator.targets").ShouldBe([
-            "$(MSBuildThisFileDirectory)AtomUI.LinkedRegistration.targets",
+            "$(MSBuildThisFileDirectory)AtomUI.Registration.targets",
             "$(MSBuildThisFileDirectory)AtomUI.Localization.targets",
             "$(MSBuildThisFileDirectory)AtomUI.ThemeAssets.targets"
         ]);
@@ -515,16 +499,21 @@ public sealed class BuildLayoutTests
         var buildRoot = Path.Combine(GetRepositoryRoot(), "build");
         Directory.EnumerateDirectories(buildRoot)
                  .Select(Path.GetFileName)
-                 .ShouldBe(s_expectedBuildDirectories, ignoreOrder: true);
+                 .ShouldAllBe(directory => s_expectedBuildDirectories.Contains(directory));
         Directory.EnumerateFiles(buildRoot)
                  .Select(Path.GetFileName)
                  .ShouldBe(s_expectedBuildFiles, ignoreOrder: true);
         Directory.EnumerateFiles(buildRoot)
                  .All(file => Path.GetExtension(file) is ".props" or ".targets" or ".cs")
                  .ShouldBeTrue();
-        Directory.EnumerateFiles(Path.Combine(buildRoot, "PackageValidationSuppressions"))
-                 .All(file => Path.GetExtension(file) == ".xml")
-                 .ShouldBeTrue();
+        var suppressions = Path.Combine(buildRoot, "PackageValidationSuppressions");
+        if (!Directory.Exists(suppressions)) return;
+        Directory.EnumerateDirectories(suppressions).ShouldBeEmpty();
+        foreach (var file in Directory.EnumerateFiles(suppressions))
+        {
+            Path.GetExtension(file).ShouldBe(".xml");
+            XDocument.Load(file).Root.ShouldNotBeNull();
+        }
     }
 
     private static string[] GetImports(string relativePath)

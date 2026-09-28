@@ -141,7 +141,7 @@ Semantic Part 改造不增加反射、运行时 descriptor 扫描、订阅、tim
 - `list` 使用两个静态 AXAML marker，每个活动模板只实例化一个。
 - `item` 只在容器创建时追加一个 class，不在 measure、arrange、render、进度更新或文件状态热路径分配对象。
 - route 只跨一个 `/template/` 边界和一个直接 logical child 边界，不使用 descendant selector。
-- NativeAOT 继续依赖既有 linked registration pipeline，不需要运行时发现 Upload 或 Semantic Style 类型。
+- AOT 注册遵循 [TypeMap 注册管线](../../../../architecture/foundations/aot-typemap-registration.md)；Upload 与专用 Semantic Style 都应成为相应契约片段的保留条件，不使用运行时类型发现。
 
 ## 6. 验证要求
 

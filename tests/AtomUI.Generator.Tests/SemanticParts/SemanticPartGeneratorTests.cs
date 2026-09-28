@@ -23,7 +23,7 @@ public class SemanticPartGeneratorTests
         var manifest = GetGeneratedSource(outputCompilation, "GeneratedSemanticPartManifest.g.cs");
         manifest.ShouldContain("internal static class GeneratedSemanticPartManifest");
         manifest.ShouldContain("typeof(global::Demo.Button)");
-        manifest.ShouldContain("new global::AtomUI.Theme.Schema.ControlTokenIdentity(\"AtomUI\", \"Button\")");
+        manifest.ShouldContain("global::AtomUI.Theme.Schema.ControlTokenIdentity.ForControl(typeof(global::Demo.Button), \"AtomUI\", \"Button\")");
         manifest.ShouldContain("\"root\"");
         manifest.ShouldContain("null,");
         manifest.ShouldContain("SemanticPartCustomization.Root");
@@ -55,11 +55,9 @@ public class SemanticPartGeneratorTests
         constants.ShouldContain("internal const string ContentSelectorRoute = \"/template/ .semantic-content\"");
         constants.ShouldNotContain("RootClass");
 
-        var registration = GetGeneratedSource(outputCompilation, "GeneratedControlPackageRegistration.g.cs");
-        registration.ShouldContain("GeneratedSemanticPartManifest.GetDescriptors()");
-        registration.ShouldContain("selectedSemanticControls");
-        registration.ShouldContain("includeIdentity(semanticControl.Identity)");
-        registration.ShouldContain("            selectedSemanticControls,");
+        manifest.ShouldContain("CreateSemanticDescriptor_");
+        manifest.ShouldNotContain("GetDescriptors()");
+
     }
 
     /// <summary>
@@ -752,7 +750,7 @@ public class SemanticPartGeneratorTests
 
         diagnostics.ShouldBeEmpty();
         var manifest = GetGeneratedSource(output, "GeneratedSemanticPartManifest.g.cs");
-        manifest.ShouldContain("ControlThemeSemanticPartDescriptor(\"ActionTheme\", \"global::Avalonia.Controls.Control\")");
+        manifest.ShouldContain("ControlThemeSemanticPartDescriptor(\"ActionTheme\", typeof(global::Avalonia.Controls.Control))");
     }
 
     [Fact]
@@ -787,6 +785,7 @@ public class SemanticPartGeneratorTests
             <ControlTheme xmlns="https://github.com/avaloniaui"
                           xmlns:atom="using:Demo"
                           TargetType="atom:Button">
+                <Setter Property="ActionTheme"><ControlTheme TargetType="atom:ActionControl" /></Setter>
                 <Setter Property="Template">
                     <ControlTemplate>
                         <atom:ActionControl Classes="semantic-action" />
@@ -807,7 +806,7 @@ public class SemanticPartGeneratorTests
         diagnostics.ShouldBeEmpty();
         var manifest = GetGeneratedSource(output, "GeneratedSemanticPartManifest.g.cs");
         manifest.ShouldContain(
-            "ControlThemeSemanticPartDescriptor(\"ActionTheme\", \"global::Demo.ActionControl\")");
+            "ControlThemeSemanticPartDescriptor(\"ActionTheme\", typeof(global::Demo.ActionControl))");
     }
 
     [Fact]
@@ -841,7 +840,9 @@ public class SemanticPartGeneratorTests
             """
             <ControlTheme xmlns="https://github.com/avaloniaui"
                           xmlns:atom="using:Demo"
-                          TargetType="atom:UnrelatedElement" />
+                          TargetType="atom:Button">
+                <Setter Property="ActionTheme"><ControlTheme TargetType="atom:UnrelatedElement" /></Setter>
+            </ControlTheme>
             """);
 
         _ = RunGenerator(source, out var diagnostics, ButtonTheme, actionTheme);
@@ -881,6 +882,7 @@ public class SemanticPartGeneratorTests
             <ControlTheme xmlns="https://github.com/avaloniaui"
                           xmlns:atom="using:Demo"
                           TargetType="atom:Button">
+                <Setter Property="ActionTheme"><ControlTheme TargetType="atom:ActionControl" /></Setter>
                 <Setter Property="Template">
                     <ControlTemplate>
                         <atom:ActionControl Classes="semantic-action" />
@@ -905,7 +907,7 @@ public class SemanticPartGeneratorTests
             [new TokenResourceKeyGenerator().AsSourceGenerator()],
             new AdditionalText[] { ownerTheme, actionTheme }.ToImmutableArray(),
             (CSharpParseOptions)compilation.SyntaxTrees[0].Options,
-            null);
+            new BuiltinCatalogOptionsProvider(null));
 
         driver = driver.RunGeneratorsAndUpdateCompilation(
             compilation,
@@ -913,9 +915,10 @@ public class SemanticPartGeneratorTests
             out _,
             TestContext.Current.CancellationToken);
         GetGeneratedSource((CSharpCompilation)firstOutput, "GeneratedSemanticPartManifest.g.cs")
-            .ShouldContain("ControlThemeSemanticPartDescriptor(\"ActionTheme\", \"global::Demo.ActionControl\")");
+            .ShouldContain("ControlThemeSemanticPartDescriptor(\"ActionTheme\", typeof(global::Demo.ActionControl))");
 
-        driver = driver.ReplaceAdditionalText(actionTheme, unrelatedTheme)
+        driver = driver.ReplaceAdditionalText(ownerTheme, new InMemoryAdditionalText(ownerTheme.Path, ownerTheme.GetText(TestContext.Current.CancellationToken)!.ToString().Replace(
+                           "<Setter Property=\"ActionTheme\"><ControlTheme TargetType=\"atom:ActionControl\" /></Setter>", "")))
                        .RunGeneratorsAndUpdateCompilation(
                            compilation,
                            out var secondOutput,
@@ -924,7 +927,7 @@ public class SemanticPartGeneratorTests
 
         GetGeneratedSource((CSharpCompilation)secondOutput, "GeneratedSemanticPartManifest.g.cs")
             .ShouldContain(
-                "ControlThemeSemanticPartDescriptor(\"ActionTheme\", \"global::Avalonia.Controls.Control\")");
+                "ControlThemeSemanticPartDescriptor(\"ActionTheme\", typeof(global::Avalonia.Controls.Control))");
     }
 
     [Fact]
@@ -1973,7 +1976,7 @@ public class SemanticPartGeneratorTests
             [new TokenResourceKeyGenerator().AsSourceGenerator()],
             additionalTexts.ToImmutableArray(),
             (CSharpParseOptions)compilation.SyntaxTrees[0].Options,
-            null);
+            new BuiltinCatalogOptionsProvider(null));
 
         driver.RunGeneratorsAndUpdateCompilation(
             compilation,
@@ -2244,30 +2247,6 @@ public class SemanticPartGeneratorTests
                 Dark
             }
 
-            public interface IThemeManagerBuilder
-            {
-                void AddControlPackage(ControlPackageRegistration package);
-            }
-
-            public sealed class ControlPackageRegistration
-            {
-                public ControlPackageRegistration(
-                    string id,
-                    System.Collections.Generic.IEnumerable<AtomUI.Theme.Schema.ControlTokenDescriptor> controls,
-                    System.Collections.Generic.IEnumerable<AtomUI.Theme.Schema.ControlThemeAssetDescriptor> assets,
-                    AtomUI.Theme.Resources.IControlThemesProvider provider)
-                {
-                }
-
-                public ControlPackageRegistration(
-                    string id,
-                    System.Collections.Generic.IEnumerable<AtomUI.Theme.Schema.ControlTokenDescriptor> controls,
-                    System.Collections.Generic.IEnumerable<AtomUI.Theme.Schema.ControlThemeAssetDescriptor> assets,
-                    System.Collections.Generic.IEnumerable<AtomUI.Theme.Schema.ControlSemanticDescriptor> semanticControls,
-                    AtomUI.Theme.Resources.IControlThemesProvider provider)
-                {
-                }
-            }
         }
 
         namespace AtomUI.Theme.Resources
@@ -2298,6 +2277,7 @@ public class SemanticPartGeneratorTests
 
             public static class ControlTokenResourceKey
             {
+                public static object Own(AtomUI.Theme.Schema.ControlTokenIdentity identity, object key) => key;
                 public static object Global(
                     AtomUI.Theme.Schema.ControlTokenIdentity identity,
                     SharedTokenKind kind) => kind;
@@ -2314,7 +2294,10 @@ public class SemanticPartGeneratorTests
                 Control
             }
 
-            public readonly record struct ControlTokenIdentity(string Catalog, string Id);
+            public readonly record struct ControlTokenIdentity(string Catalog, string Id)
+            {
+                public static ControlTokenIdentity ForControl(System.Type controlType, string catalog, string id) => new(catalog, id);
+            }
 
             public sealed class TokenDescriptor
             {
@@ -2339,7 +2322,7 @@ public class SemanticPartGeneratorTests
 
             public sealed class ControlThemeSemanticPartDescriptor
             {
-                public ControlThemeSemanticPartDescriptor(string propertyName, string targetTypeName)
+                public ControlThemeSemanticPartDescriptor(string propertyName, System.Type targetType)
                 {
                 }
             }
@@ -2402,25 +2385,6 @@ public class SemanticPartGeneratorTests
             }
         }
 
-        namespace AtomUI.Generated.SemanticPartGeneratorTests
-        {
-            internal static class GeneratedControlThemeAssetManifest
-            {
-                internal static System.Collections.Generic.IReadOnlyList<AtomUI.Theme.Schema.ControlThemeAssetDescriptor> GetDescriptors()
-                {
-                    return System.Array.Empty<AtomUI.Theme.Schema.ControlThemeAssetDescriptor>();
-                }
-            }
-
-            internal static class GeneratedControlThemeAssetResources
-            {
-                internal static void AddResources(
-                    AtomUI.Theme.Resources.IControlThemesProvider provider,
-                    System.Collections.Generic.IReadOnlyList<AtomUI.Theme.Schema.ControlThemeAssetDescriptor> assets)
-                {
-                }
-            }
-        }
         """;
 
     private sealed class InMemoryAdditionalText : AdditionalText

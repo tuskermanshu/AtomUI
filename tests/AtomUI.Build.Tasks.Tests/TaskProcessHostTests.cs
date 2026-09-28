@@ -62,45 +62,52 @@ public sealed class TaskProcessHostTests : IDisposable
     }
 
     [Fact]
-    public void Worker_Preserves_Empty_Item_Lists_And_Integer_Outputs()
+    public void Worker_Preserves_Empty_Item_Lists()
     {
         var response = RoundTrip(new TaskRequest
         {
-            TaskName = nameof(ValidateAssemblyMetadataMarkerTask),
-            Properties =
-            {
-                ["AssemblyPath"] = typeof(TaskProcessHost).Assembly.Location,
-                ["MarkerKey"] = "Not.An.AtomUI.Marker"
-            }
+            TaskName = nameof(ExportLanguageTemplatesTask),
+            Properties = { ["TargetLanguage"] = "ja-JP" },
+            Items = { ["SourceFiles"] = [] }
         });
         response.Success.ShouldBeTrue();
-        response.Properties["MarkerCount"].ShouldBe("0");
+        response.Items["ExportedFiles"].ShouldBeEmpty();
+    }
 
-        response = RoundTrip(new TaskRequest
+    [Fact]
+    public void Protocol_Preserves_Scalar_Output_Values_And_Diagnostic_Integers()
+    {
+        var path = Path.Combine(_root, "scalar.json");
+        var response = new TaskResponse
         {
-            TaskName = nameof(ResolveLinkedRegistrationSidecarCandidatesTask),
-            Items = { ["SidecarCandidates"] = [], ["ReferencePaths"] = [] }
-        });
-        response.Success.ShouldBeTrue();
-        response.Items["CanonicalSidecars"].ShouldBeEmpty();
-        response.Items["ExtractableReferences"].ShouldBeEmpty();
+            Success = true, Properties = { ["Count"] = "2147483647" },
+            Diagnostics = [new TaskDiagnostic { Line = 42, Column = 7, Importance = 2 }]
+        };
+        TaskWire.Write(path, response);
+        var restored = TaskWire.Read<TaskResponse>(File.ReadAllText(path));
+        restored.Properties["Count"].ShouldBe("2147483647");
+        var diagnostic = restored.Diagnostics.ShouldHaveSingleItem();
+        diagnostic.Line.ShouldBe(42);
+        diagnostic.Column.ShouldBe(7);
+        diagnostic.Importance.ShouldBe(2);
     }
 
     [Fact]
     public void Worker_Returns_Failure_With_Original_Diagnostic_Code_And_File()
     {
-        var missingFile = Path.Combine(_root, "missing.dll");
+        var missingFile = Path.Combine(_root, "missing.xlf");
         var response = RoundTrip(new TaskRequest
         {
-            TaskName = nameof(ValidateAssemblyMetadataMarkerTask),
-            Properties = { ["AssemblyPath"] = missingFile, ["MarkerKey"] = "Any" }
+            TaskName = nameof(ExportLanguageTemplatesTask),
+            Properties = { ["TargetLanguage"] = "ja-JP" },
+            Items = { ["SourceFiles"] = [new TaskWireItem { ItemSpec = missingFile }] }
         });
         response.Success.ShouldBeFalse();
         var error = response.Diagnostics.ShouldHaveSingleItem();
         error.Kind.ShouldBe("error");
-        error.Code.ShouldBe("ATOMUILINK001");
+        error.Code.ShouldBe("ATOMUILOC005");
         error.File.ShouldBe(missingFile);
-        error.Message.ShouldContain("missing.dll");
+        error.Message.ShouldContain("missing.xlf");
     }
 
     [Fact]

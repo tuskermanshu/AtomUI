@@ -23,7 +23,7 @@ public class IndependentThemeAssetMigrationTests
 
         var manifest = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src/AtomUI.Desktop.Controls/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.ThemeAssetManifestGenerator/GeneratedControlThemeAssetManifest.g.cs"));
+            "src/AtomUI.Desktop.Controls/GeneratedFiles/AtomUI.Generator/AtomUI.Generator.TokenResourceKeyGenerator/GeneratedTypeMapRegistration.g.cs"));
         manifest.ShouldContain(assetPath);
     }
 

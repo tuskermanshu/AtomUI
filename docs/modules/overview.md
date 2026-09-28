@@ -13,6 +13,7 @@
 | [Controls](controls/overview.md) | `src/AtomUI.Controls` | [渲染系统](../architecture/systems/rendering/overview.md)、[统一图片加载](../architecture/systems/image-loading/overview.md) |
 | [Mobile Controls](mobile-controls/overview.md) | `AtomUI.Mobile.Controls` 预实现目标项目与包；Source 未实现 | [Mobile 系统](../architecture/systems/mobile/overview.md) |
 | [Generator](generator/overview.md) | `src/AtomUI.Generator` | [主题系统](../architecture/systems/theming/overview.md)、[本地化系统](../architecture/systems/localization/overview.md) |
+| [TypeMap Linker](typemap-linker/overview.md) | `src/AtomUI.TypeMap.Linker`，已实现的 Browser 构建后端；交付状态见总体架构 | [Browser TypeMap 链接](../architecture/foundations/aot-browser-linking.md) |
 | [Fonts](fonts/overview.md) | `src/AtomUI.Fonts.*` | [主题系统](../architecture/systems/theming/overview.md) |
 | [Icons](icons/overview.md) | `src/AtomUI.Icons.*` | [整体架构](../architecture/overview.md) |
 | [GalleryBase](toolkits-gallery-base/overview.md) | `src/AtomUI.Toolkits.GalleryBase` | [启动与注册](../architecture/foundations/startup-and-registration.md) |
@@ -20,5 +21,5 @@
 `src/AtomUI.Build.Tasks`、语言包项目和 GalleryBase Generator 作为跨项目系统的一部分，分别由本地化架构和
 对应宿主模块说明；当其形成独立发布边界和维护入口时，再新增模块目录。
 
-表中只有 Mobile Controls 使用预实现状态；它不是当前解决方案项目。真实项目落地后，模块文档必须按源码、注册、测试和
+表中 Mobile Controls 与 TypeMap Linker 均明确区分目标项目与当前源码。真实项目落地后，模块文档必须按源码、注册、测试和
 发布证据更新，不能只移除状态说明。

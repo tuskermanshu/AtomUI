@@ -280,6 +280,8 @@ Global Token snapshot。
 
 ## 5. Theme Schema 与注册
 
+> 本节注册与资产模型对应本地已实现的 TypeMap 契约，验证与发布状态见 [AOT 与裁剪架构](../../foundations/aot-and-trimming.md#1-状态与事实边界)。
+
 `ThemeSchemaRegistry` 在应用主题初始化前一次性构建。Control、Token 和主题资产只来自源生成结果；
 主题算法可以通过显式 `ThemeAlgorithmDescriptor` 注册：
 
@@ -290,7 +292,7 @@ ThemeSchemaRegistry
 +-- ControlTokenDescriptor[ControlTokenIdentity]
 |   \-- exact CLR type, factory, own token schema, evaluator, resource projector
 +-- ControlThemeAssetManifest
-|   \-- theme asset, owner identity, referenced Control identities, semantic part contract
+|   \-- asset identity, exported themes, required Token owners, semantic bindings, resource order
 \-- ThemeAlgorithmDescriptor[ThemeAlgorithm]
     \-- revision, evaluator, AOT factory, appearance effect
 ```
@@ -324,14 +326,14 @@ revision。
 Registry 在首个 snapshot 编译前冻结。Manager 构建完成后不能追加 Token、Control、算法或主题资产
 descriptor；可选控件包必须在 `UseAtomUI` Builder 阶段完成显式注册。
 
-生成器分配的 Token 和 Control slot 只保证在同一 registry revision 生命周期内稳定。不同 revision 可以重新
+Token schema slot 与冻结时绑定的 Control slot 只保证在同一 registry revision 生命周期内稳定。不同 revision 可以重新
 分配 slot，公开协议、持久化配置和跨版本缓存不得依赖整数 slot 不变，而应使用稳定 identity 并在绑定后解析
 当前 revision 的 slot。
 
 源生成器必须为每个内置、对外可主题化的 Control 生成以下内容；Control 没有 Own Token 时仍生成 identity、
 descriptor 和资源扩展，只省略 Own Token builder/schema：
 
-- 稳定的 `ControlTokenIdentity`，包括 catalog 和 control id。
+- 稳定的 `ControlTokenIdentity`，以 catalog/control id 保持字符串相等语义；生成身份附带实际使用和校验的 owner Type。
 - 发现无参数 `[ControlDesignToken]` 标记的可选 Own Token 类型；标记的抽象类型只贡献
   定义，标记的 `sealed` 具体类型是终端 Own Token。Attribute 和抽象定义层都不参与 Control identity 或资产关联。
 - Own Token name 对应的强类型赋值委托查找表；没有 Own Token 时为空。
@@ -340,7 +342,7 @@ descriptor 和资源扩展，只省略 Own Token builder/schema：
 - Control CLR type 和 Own Token schema；descriptor 不包含 Global Token 消费白名单。
 - 生成式 `XxxTokens.Identity`、`XxxTokenKey` 和 `XxxTokenResourceExtension`；Token key 必须强类型化，不能在
   ProvideValue 热路径解析字符串。
-- 每个主题资产的 URI、owner Control identity、引用的 Control identities 和 Semantic Part Theme 资产关系。
+- 每个资产的 AssetId/URI、导出的默认或命名主题、RequiredTokenOwners、Semantic Theme 关联和确定资源顺序。
 - 每个 Control 的生成式 Semantic Part descriptor、Selector class、ContractType 和 cardinality。
 - 每个包的生成式注册 helper 和 manifest；由包作者的公开 `UseXxxControls()` 入口一次注册完整 descriptor 和资产，
   不要求逐 Control 手工注册。
@@ -357,12 +359,16 @@ Control Design Token CLR 继承只在生成期复用 Own Token 定义。Generato
 descriptor，运行时不保存声明层、继承深度或基类 identity。完整契约见
 [Control Design Token 继承架构](control-design-token-inheritance.md)。
 
-第三方 Control 包必须使用 AtomUI 源生成器，并且只通过一个带 `[ControlPackageRegistrationEntry]` 的公开包级入口注册
-Control descriptor、可选 Own Token 和主题资产。普通第三方包默认以整个 Package 作为一个安全 Registration Unit，不维护
-Unit ownership 或依赖图。Own Token 使用无参数 `[ControlDesignToken]` 供生成器发现，但不声明 Control 类型、identity 或
-ID。目标继承契约允许第三方包从上游 `public abstract` `[ControlDesignToken]` 定义层派生自己的 `sealed` 终端 Token；抽象层不生成
-注册产物。不存在手写 descriptor/manifest、运行时程序集扫描或 AXAML 文本扫描 fallback。完整接入步骤见
-[第三方 AtomUI Control Package 指南](../../../guides/theming/third-party-control-packages.md)。
+第三方控件包调用统一的生成式包注册 helper，作者只维护 Provider 和正常生命周期逻辑。普通生成器提供逐控件片段、
+TypeMap 条件及包引导信息；Runtime 只查询映射和收集记录，官方 linker 计算保留闭包。内部资源控件不被迫拥有公开 Token
+身份；普通与裁剪路径调用同一 descriptor factory。完整接入见[第三方控件包指南](../../../guides/theming/third-party-control-packages.md)。
+
+带 owner 的 identity 在配置/资产/注册集合去重之前规范化：raw 与 typed 合并保留 owner，冲突 owner 立即失败，最终 registry
+再次验证实际 ControlType。不得让 Dictionary 保留旧的 raw key 而丢失新输入的类型约束。
+
+所有包先收集后统一校验跨包依赖；资源按 PackageCommitOrdinal 和包内声明规则排序。全量与选中路径共同保留的资产具有同样的
+相对优先级，开放宿主资源输入遵守相同契约。注册表冻结后不再追加片段。详细事实由
+[控件与资源注册契约](../../foundations/control-registration-contracts.md)拥有。
 
 ## 6. 主题文件
 

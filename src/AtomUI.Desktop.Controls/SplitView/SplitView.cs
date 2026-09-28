@@ -10,6 +10,7 @@ namespace AtomUI.Desktop.Controls;
 
 using AvaloniaSplitView = Avalonia.Controls.SplitView;
 
+[global::System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
 public class SplitView : AvaloniaSplitView, IMotionAwareControl
 {
     #region 公共属性定义

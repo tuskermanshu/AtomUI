@@ -67,17 +67,21 @@ internal sealed class ThemeTokenResourceProvider : ResourceProvider
 
         if (key is ControlOwnTokenResourceKey ownKey)
         {
-            if (!snapshot.Registry.TryGetControl(ownKey.ControlType, out var descriptor))
+            ControlTokenDescriptor? descriptor;
+            var registered = ownKey.ControlType is { } controlType
+                ? snapshot.Registry.TryGetControl(controlType, out descriptor)
+                : snapshot.Registry.TryGetControl(ownKey.Identity, out descriptor);
+            if (!registered || descriptor is null)
             {
                 throw new InvalidOperationException(
-                    $"Control type '{ownKey.ControlType.FullName}' is not registered in the active theme schema.");
+                    $"Control owner '{ownKey.ControlType?.FullName ?? ownKey.Identity.ToString()}' is not registered in the active theme schema.");
             }
             if (!snapshot.Registry.TryGetControlResourceSlot(ownKey.ResourceKey, out var ownControlSlot) ||
                 ownControlSlot != descriptor.Slot)
             {
                 throw new InvalidOperationException(
                     $"Own Token resource key '{ownKey.ResourceKey}' does not belong to Control type " +
-                    $"'{ownKey.ControlType.FullName}'.");
+                    $"'{descriptor.ControlType.FullName}'.");
             }
 
             var found = snapshot.Controls[descriptor.Slot]

@@ -10,22 +10,16 @@ internal sealed class SemanticPartContractValidator
     private const string AvaloniaControlThemeType = "global::Avalonia.Styling.ControlTheme";
 
     private readonly Compilation _compilation;
-    private readonly IReadOnlyList<INamedTypeSymbol> _sourceControls;
-    private readonly IReadOnlyList<ThemeAssetInfo> _assets;
-    private readonly SemanticPartTypeResolver _typeResolver;
+    private readonly RegistrationModelBuilder _resourceFacts;
     private readonly Action<Diagnostic> _reportDiagnostic;
 
     internal SemanticPartContractValidator(
         Compilation compilation,
-        IReadOnlyList<INamedTypeSymbol> sourceControls,
-        IReadOnlyList<ThemeAssetInfo> assets,
-        SemanticPartTypeResolver typeResolver,
+        RegistrationModelBuilder resourceFacts,
         Action<Diagnostic> reportDiagnostic)
     {
         _compilation = compilation;
-        _sourceControls = sourceControls;
-        _assets = assets;
-        _typeResolver = typeResolver;
+        _resourceFacts = resourceFacts;
         _reportDiagnostic = reportDiagnostic;
     }
 
@@ -237,11 +231,9 @@ internal sealed class SemanticPartContractValidator
             return false;
         }
 
-        var property = control.ControlType.GetMembers(part.ThemePropertyName!)
-                              .OfType<IPropertySymbol>()
-                              .SingleOrDefault(static candidate =>
-                                  !candidate.IsStatic && candidate.DeclaredAccessibility == Accessibility.Public);
+        var property = SemanticThemePropertyResolver.FindInstanceProperty(control.ControlType, part.ThemePropertyName!);
         if (property is null ||
+            property.DeclaredAccessibility != Accessibility.Public ||
             property.GetMethod is null ||
             property.GetMethod.DeclaredAccessibility != Accessibility.Public ||
             property.SetMethod is null ||
@@ -271,14 +263,9 @@ internal sealed class SemanticPartContractValidator
         themeTargetType = null;
         INamedTypeSymbol? sharedTarget = null;
         var valid = true;
-        foreach (var asset in _assets
-                     .Where(asset => IsSemanticThemeAssetForControl(
-                         control.ControlType,
-                         part.ThemePropertyName!,
-                         asset))
-                     .OrderBy(static asset => asset.AssetPath, StringComparer.Ordinal))
+        foreach (var asset in _resourceFacts.SemanticAssignments(control.ControlType, part.ThemePropertyName!))
         {
-            var target = ResolveSemanticThemeTarget(asset);
+            var target = asset.Target;
             if (target is null || !SemanticPartTypeResolver.IsAssignableTo(target, contractType))
             {
                 ReportInvalidTheme(
@@ -307,54 +294,6 @@ internal sealed class SemanticPartContractValidator
             themeTargetType = sharedTarget;
         }
         return valid;
-    }
-
-    private bool IsSemanticThemeAssetForControl(
-        INamedTypeSymbol controlType,
-        string propertyName,
-        ThemeAssetInfo asset)
-    {
-        if (!string.Equals(asset.FileName, propertyName, StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        if (asset.ControlCandidate is not null &&
-            ControlThemeModelBuilder.FindPublicControlsByName(
-                _compilation,
-                _sourceControls,
-                asset.ControlCandidate).Any())
-        {
-            return false;
-        }
-
-        var owners = _sourceControls.Where(control => HasControlThemeProperty(control, propertyName)).ToArray();
-        return owners.Length == 1 && SymbolEqualityComparer.Default.Equals(owners[0], controlType);
-    }
-
-    private static bool HasControlThemeProperty(INamedTypeSymbol control, string propertyName)
-    {
-        return control.GetMembers(propertyName)
-                      .OfType<IPropertySymbol>()
-                      .Any(static property =>
-                          !property.IsStatic &&
-                          property.DeclaredAccessibility == Accessibility.Public &&
-                          string.Equals(
-                              property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                              AvaloniaControlThemeType,
-                              StringComparison.Ordinal));
-    }
-
-    private INamedTypeSymbol? ResolveSemanticThemeTarget(ThemeAssetInfo asset)
-    {
-        foreach (var targetType in asset.TargetTypes)
-        {
-            if (_typeResolver.ResolveTargetType(targetType) is { } target)
-            {
-                return target;
-            }
-        }
-        return null;
     }
 
     private bool ValidateUnique(

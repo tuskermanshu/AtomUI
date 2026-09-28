@@ -111,6 +111,7 @@ internal sealed class NormalizedControlThemeConfig : IEquatable<NormalizedContro
         return ReferenceEquals(this, other) ||
                other is not null &&
                Identity == other.Identity &&
+               Identity.OwnerType == other.Identity.OwnerType &&
                AlgorithmMode == other.AlgorithmMode &&
                SequenceEqual(_algorithms, other._algorithms) &&
                SequenceEqual(_globalTokens, other._globalTokens) &&

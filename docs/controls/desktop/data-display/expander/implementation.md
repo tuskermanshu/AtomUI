@@ -34,6 +34,11 @@ Expander 的实现重点是在 Avalonia `Expander` 基础上稳定扩展 AtomUI 
 
 `ExpanderTheme.axaml` 是模板和视觉状态的唯一来源。稳定 template part 不应在 C# 中动态创建，也不应通过 C# 绑定替代可由 AXAML 表达的关系。
 
+正文字符串转换由 `ExpanderTheme.axaml` 自己的资源字典持有 `StringToTextBlockConverter`。
+模板通过同一词法作用域的 `StaticResource` 引用它，将字符串转换为垂直居中、水平拉伸且自动换行的 `TextBlock`；
+非字符串内容原样传递，`ContentTemplate` 保持原有处理路径。该转换器不依赖其他控件主题或宿主同名资源，
+按片段选择主题时也必须保留相同的内容呈现语义。
+
 ## 4. 状态与数据流
 
 展开状态流：

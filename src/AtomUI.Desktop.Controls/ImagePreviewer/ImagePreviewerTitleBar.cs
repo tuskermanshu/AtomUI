@@ -5,6 +5,7 @@ using Avalonia.Controls.Metadata;
 
 namespace AtomUI.Desktop.Controls;
 
+[global::System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
 [TemplatePart("PART_IconPresenter", typeof(IconPresenter))]
 internal class ImagePreviewerTitleBar : WindowTitleBar
 {

@@ -1,10 +1,8 @@
-using AtomUI.Registration;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 
 namespace AtomUI.Desktop.Controls;
 
-[AotTrimUnit(AotTrimGeneralUnits.Core)]
 internal static class DialogInputCaptureTracker
 {
     private static bool s_initialized;

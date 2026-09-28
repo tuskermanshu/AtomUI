@@ -75,16 +75,6 @@
       ]
     },
     {
-      "id": "linked-publish",
-      "roots": [
-        "src/AtomUI.Generator.LinkedPublish"
-      ],
-      "depth": 0,
-      "tests": [
-        "tests/AtomUI.Generator.Tests/LinkedRegistration/**/*.cs"
-      ]
-    },
-    {
       "id": "build-tasks",
       "roots": [
         "src/AtomUI.Build.Tasks"
@@ -235,6 +225,17 @@
       "tests": [
         "tests/AtomUI.Docs.LLMsGenerator.Tests/**/*.cs"
       ]
+    },
+    {
+      "id": "typemap-linker",
+      "roots": [
+        "src/AtomUI.TypeMap.Linker"
+      ],
+      "depth": 0,
+      "tests": [
+        "tests/AtomUI.TypeMap.Linker.Tests/**/*.cs"
+      ],
+      "conservative": true
     }
   ],
   "rules": [
@@ -348,14 +349,12 @@
       ]
     },
     {
-      "id": "linked-shared-compilation",
+      "id": "shared-tool-compilation",
       "changes": [
         "build/AtomUI.Build.Tasks.Process.cs",
-        "src/AtomUI.Generator/LinkedRegistration/**",
         "src/AtomUI.Generator/Diagnostics/**",
         "src/AtomUI.Generator/GeneratedSourceText.cs",
         "src/AtomUI.Generator/TargetMarkConstants.cs",
-        "src/AtomUI.Build.Tasks/LinkedRegistration/**",
         "src/AtomUI.Build.Tasks/LocalizationBuild/**",
         "src/AtomUI.Build.Tasks/SourceGeneration/**"
       ],
@@ -374,15 +373,6 @@
       ],
       "tests": [
         "tests/AtomUI.Localization.IntegrationTests/**/*.cs"
-      ]
-    },
-    {
-      "id": "linked-fixtures",
-      "changes": [
-        "tests/AtomUI.LinkedRegistration*/**"
-      ],
-      "tests": [
-        "tests/AtomUI.Generator.Tests/LinkedRegistration/**/*.cs"
       ]
     },
     {
@@ -470,7 +460,7 @@
         "scripts/verification/verify-aot-*.sh"
       ],
       "tests": [
-        "tests/AtomUI.Generator.Tests/LinkedRegistration/**/*.cs"
+        "tests/AtomUI.Generator.Tests/Registration/**/*.cs"
       ]
     },
     {
@@ -480,6 +470,38 @@
       ],
       "tests": [
         "tests/AtomUI.Desktop.Controls.Tests/Performance/**/*.cs"
+      ]
+    },
+    {
+      "id": "typemap-linker-fixtures",
+      "changes": [
+        "tests/AtomUI.TypeMap.Linker.Tests/Fixtures/**"
+      ],
+      "tests": [
+        "tests/AtomUI.TypeMap.Linker.Tests/**/*.cs"
+      ]
+    },
+    {
+      "id": "typed-registration-product-fixtures",
+      "changes": [
+        "tests/AtomUI.Registration.Fixtures/**"
+      ],
+      "tests": [
+        "tests/AtomUI.Build.Tasks.Tests/RegistrationBuildTasksTests.cs",
+        "tests/AtomUI.Build.Tasks.Tests/TypeMapPublishGateTests.cs",
+        "tests/AtomUI.Toolkits.GalleryBase.Tests/Configuration/GalleryBaseRegistrationTests.cs",
+        "tests/AtomUI.Build.Tasks.Tests/RegistrationSourceConsumerTests.cs"
+      ]
+    },
+    {
+      "id": "retired-registration-inputs",
+      "changes": [
+        "src/AtomUI.Generator.LinkedPublish/**",
+        "tests/AtomUI.LinkedRegistration*/**"
+      ],
+      "tests": [
+        "tests/AtomUI.Generator.Tests/Registration/**/*.cs",
+        "tests/AtomUI.Build.Tasks.Tests/Registration*Tests.cs"
       ]
     }
   ],
@@ -511,8 +533,6 @@
       "id": "native-aot",
       "changes": [
         "src/AtomUI.Generator/**",
-        "src/AtomUI.Generator.LinkedPublish/**",
-        "src/AtomUI.Build.Tasks/LinkedRegistration/**",
         "src/AtomUI.Core/Registration/**",
         "src/AtomUI.Native/**",
         "build/**",
@@ -520,7 +540,6 @@
         "global.json",
         "controlgallery/AtomUIGallery.Desktop/*.csproj",
         "controlgallery/AtomUIGallery.Desktop/scripts/**",
-        "tests/AtomUI.LinkedRegistration*/**",
         "scripts/verification/verify-aot-*.sh",
         "src/AtomUI.Core/Theme/*Registration*",
         "src/AtomUI.Core/Theme/*Builder*",
@@ -528,7 +547,10 @@
         "src/AtomUI.Build.Tasks/SourceGeneration/**",
         "src/AtomUI.Build.Tasks/LocalizationBuild/**",
         "src/AtomUI.Controls/Theme*",
-        "src/AtomUI.Desktop.Controls*/Theme*"
+        "src/AtomUI.Desktop.Controls*/Theme*",
+        "src/AtomUI.TypeMap.Linker/**",
+        "tests/AtomUI.TypeMap.Linker.Tests/Fixtures/**",
+        "tests/AtomUI.Registration.Fixtures/**"
       ],
       "description": "Validate the affected real NativeAOT/trim publish and startup paths according to docs/engineering/development/aot-programming-guidelines.md. Unit test success alone does not satisfy this obligation."
     },
@@ -543,7 +565,10 @@
         "scripts/verification/verify-build-task-isolation.ps1",
         ".github/workflows/release-nuget-packages.yml",
         "src/**/*.csproj",
-        "src/**/*.nuspec"
+        "src/**/*.nuspec",
+        "src/AtomUI.TypeMap.Linker/**",
+        "tests/AtomUI.Registration.Fixtures/PackageConsumers/**",
+        "tests/AtomUI.Registration.Fixtures/run_package_consumers.py"
       ],
       "description": "Validate actual package assets with scripts/verification/verify-package-layout.ps1 and verify-build-task-isolation.ps1 for the affected package configuration."
     },

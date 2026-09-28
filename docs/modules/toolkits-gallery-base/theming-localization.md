@@ -119,7 +119,7 @@ Appearance 子菜单，Compact、Motion 和 Wave Spirit 保留为外层 Theme �
 
 ```text
 <ControlFolder>/Themes/**/*.axaml
-    -> ControlTheme asset owner/reference manifest
+    -> 导出主题、RequiredTokenOwners 与逐控件注册片段
     -> package-level UseGalleryBase() registration
 ```
 

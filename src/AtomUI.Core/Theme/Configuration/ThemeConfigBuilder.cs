@@ -34,7 +34,7 @@ public sealed class ThemeConfigBuilder
     public ThemeConfigBuilder WithControl(ControlTokenIdentity identity, ControlThemeConfig config)
     {
         ArgumentNullException.ThrowIfNull(config);
-        _controls[identity] = config;
+        ControlTokenIdentityCanonicalizer.Set(_controls, identity, config);
         return this;
     }
 
