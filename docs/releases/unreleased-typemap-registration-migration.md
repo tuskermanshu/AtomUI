@@ -8,6 +8,9 @@
 
 第三方控件包必须用当前 Generator 重新构建并重新分发。移除旧 `AotTrimRegistration`、`AotTrimRegistrationPlanRegistry`、`AotTrimControlPackageRegistrationBuilder`、`AotTrimUnitAttribute` / `AotTrimGeneralUnits` 及 `ControlPackageRegistrationEntryAttribute`。旧 Unit、应用 usage、Sidecar、Plan、全包回退及其生成 ABI 不再被读取或执行，旧二进制注册协议不能直接复用。
 
+旧主题发现标记 `ControlThemeProviderAttribute` 与单主题 `IControlThemeProvider` 接口一并删除，不保留无消费者的兼容空壳。
+当前包使用 `IControlThemesProvider` / `ControlThemesProvider` 和生成的注册入口；`BaseControlTheme` 的独立强类型模板绑定能力保持不变。
+
 作者使用 [第三方控件包接入](../guides/theming/third-party-control-packages.md) 定义普通包入口。资产导出来自实际 AXAML 目标和资源键，局部资源通过词法作用域及常量 include 解析；删除目录推导所有权和 `AtomUIPackageSharedTheme` / `AtomUIPackageSharedThemePaths` 开关。真正公共的包资源由显式 Package Core/provider 提供，辅助资源使用正常 include。
 
 `ControlThemeAssetDescriptor` 使用 AssetId、实际 Type 导出、带 owner Type 的 Token identity 及语义绑定；删除旧 owner/reference/string 资产构造器与属性。`ControlThemeSemanticPartDescriptor` 的目标必须是 `Type`；删除字符串目标构造器。`ControlPackageRegistration` 使用包含语义描述和资源注册的完整构造器。共同提交先验证 schema，再冻结注册；失败后的 builder 不能继续使用。

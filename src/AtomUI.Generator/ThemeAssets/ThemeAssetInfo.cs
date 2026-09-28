@@ -11,8 +11,6 @@ internal sealed class ThemeAssetInfo
         string assetPath,
         SourceText source,
         string fileName,
-        string? controlCandidate,
-        IReadOnlyList<ThemeAssetTargetTypeReference> targetTypes,
         IReadOnlyList<ThemeAssetSemanticThemeInfo> semanticThemes,
         bool isResourceDictionary,
         string? controlThemeClassName,
@@ -24,8 +22,6 @@ internal sealed class ThemeAssetInfo
         AssetPath = assetPath;
         Source = source;
         FileName = fileName;
-        ControlCandidate = controlCandidate;
-        TargetTypes = targetTypes;
         SemanticThemes = semanticThemes;
         IsResourceDictionary = isResourceDictionary;
         ControlThemeClassName = controlThemeClassName;
@@ -40,8 +36,6 @@ internal sealed class ThemeAssetInfo
     internal string AssetPath { get; }
     internal SourceText Source { get; }
     internal string FileName { get; }
-    internal string? ControlCandidate { get; }
-    internal IReadOnlyList<ThemeAssetTargetTypeReference> TargetTypes { get; }
     internal IReadOnlyList<ThemeAssetSemanticThemeInfo> SemanticThemes { get; }
     internal bool IsResourceDictionary { get; }
     internal string? ControlThemeClassName { get; }
@@ -55,14 +49,6 @@ internal sealed class ThemeAssetInfo
     internal bool HasGeneratedResourceWrapper => IsResourceDictionary || IsDefaultTypedControlTheme;
 
     internal static ThemeAssetInfo Create(
-        AdditionalText text,
-        string? projectDirectory,
-        string? link,
-        CancellationToken cancellationToken,
-        string? supportedOSPlatforms = null,
-        string? unsupportedOSPlatforms = null) => Create(text, projectDirectory, link, cancellationToken, out _, supportedOSPlatforms, unsupportedOSPlatforms);
-
-    internal static ThemeAssetInfo Create(
         AdditionalText text, string? projectDirectory, string? link,
         CancellationToken cancellationToken, out XElement? documentRoot,
         string? supportedOSPlatforms = null, string? unsupportedOSPlatforms = null)
@@ -71,7 +57,6 @@ internal sealed class ThemeAssetInfo
         var source = text.GetText(cancellationToken) ?? SourceText.From(string.Empty);
         var assetPath = NormalizeAssetPath(text.Path, projectDirectory, link);
         var fileName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
-        var targetTypes = new List<ThemeAssetTargetTypeReference>();
         IReadOnlyList<ThemeAssetSemanticThemeInfo> semanticThemes =
             Array.Empty<ThemeAssetSemanticThemeInfo>();
         var isResourceDictionary = false;
@@ -101,20 +86,6 @@ internal sealed class ThemeAssetInfo
             {
                 semanticThemes = SemanticThemeAssetParser.Parse(root);
             }
-            foreach (var element in document.Descendants())
-            {
-                if (!string.Equals(element.Name.LocalName, "ControlTheme", StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                foreach (var targetType in element.Attributes().Where(static attribute =>
-                             string.Equals(attribute.Name.LocalName, "TargetType", StringComparison.Ordinal)))
-                {
-                    targetTypes.Add(ThemeAssetTargetTypeReference.Create(element, targetType.Value));
-                }
-            }
-
         }
         catch
         {
@@ -126,8 +97,6 @@ internal sealed class ThemeAssetInfo
             assetPath,
             source,
             fileName,
-            GetControlCandidate(fileName),
-            targetTypes,
             semanticThemes,
             isResourceDictionary,
             controlThemeClassName,
@@ -187,20 +156,6 @@ internal sealed class ThemeAssetInfo
         var span = new TextSpan(0, Source.Length);
         return Location.Create(Path, span, Source.Lines.GetLinePositionSpan(span));
     }
-
-    private static string? GetControlCandidate(string fileName)
-    {
-        const string suffix = "Theme";
-        if (!fileName.EndsWith(suffix, StringComparison.Ordinal) ||
-            fileName.EndsWith("Themes", StringComparison.Ordinal) ||
-            fileName.Length == suffix.Length)
-        {
-            return null;
-        }
-
-        return fileName.Substring(0, fileName.Length - suffix.Length);
-    }
-
 
     internal static string NormalizeAssetPath(
         string path,
