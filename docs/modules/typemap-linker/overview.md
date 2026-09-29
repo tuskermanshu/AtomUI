@@ -92,8 +92,12 @@ custom-step 接口随工具链演进，发布构建只能使用已经验证的�
 后端另行读取当前已加载 ILLink 的完整程序集身份与 informational version，不能只相信调用者传入的字符串。
 SDK 与实际 WASM workload/runtime assets 的组合检查由构建资产负责。当前组合固定为 SDK `10.0.300`、
 ILLink `10.0.8`（informational version `10.0.8-servicing.26229.119+94ea82652cdd4e0f8046b5bd5becbd11461482ca`）、
-WASM SDK/runtime assets `10.0.10`，能力值为 `atomui-typemap-v1-illink-10.0.8`。NativeAOT 编译器为 `10.0.8`。
+WASM SDK/runtime assets `10.0.10`，能力值为 `atomui-typemap-v1-illink-10.0.8`。
 这是一组已适配工具链，版本升级需要重新验证，不能仅修改版本门禁。
+
+上述精确组合只约束 Browser 后端，因为它读取 ILLink 的内部管线。桌面 trimmed CoreCLR 与 NativeAOT 只消费官方
+TypeMap 契约，不加载本工具，也不校验 SDK 版本字符串；它们只要求实际 ILLink（官方身份）与 NativeAOT 编译器的
+版本不低于已验证的 `10.0.8`，不设上限，因此运行时补丁前滚（例如 ILCompiler `10.0.9`）不会阻断桌面发布。
 
 后端在筛选 marked accessor **之前**检查所有发现的标记包是否实际采用 `Link` action。
 `Skip` 等 action 不保证方法有 Mark 记录，因此先筛 `IsMarked` 会把未转换包误判成零 slot。

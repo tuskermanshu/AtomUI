@@ -288,7 +288,7 @@ Global Token snapshot。
 ```text
 ThemeSchemaRegistry
 +-- GlobalTokenSchema
-|   \-- token name, kind, stage, value type, parser, setter, getter, resource key
+|   \-- token name, kind, stage, value codec, token accessor, resource key
 +-- ControlTokenDescriptor[ControlTokenIdentity]
 |   \-- exact CLR type, factory, own token schema, evaluator, resource projector
 +-- ControlThemeAssetManifest
@@ -336,8 +336,11 @@ descriptor 和资源扩展，只省略 Own Token builder/schema：
 - 稳定的 `ControlTokenIdentity`，以 catalog/control id 保持字符串相等语义；生成身份附带实际使用和校验的 owner Type。
 - 发现无参数 `[ControlDesignToken]` 标记的可选 Own Token 类型；标记的抽象类型只贡献
   定义，标记的 `sealed` 具体类型是终端 Own Token。Attribute 和抽象定义层都不参与 Control identity 或资产关联。
-- Own Token name 对应的强类型赋值委托查找表；没有 Own Token 时为空。
-- Own Token value 到 Avalonia resource value 的投影；没有 Own Token 时为空。
+- Own Token 的强类型读写与 Avalonia resource value 投影；没有 Own Token 时为空。生成代码不为每个 Token 生成委托：
+  隐藏 ABI `TokenDescriptor.CreateGenerated(name, slot, stage, codec, resourceKey, accessor)` 接收按值类型共享的
+  `TokenValueCodec<T>.Instance`（Parse/Format）和按 Token 类生成的 `TokenValueAccessor` 子类（按 descriptor slot
+  switch 读写与投影，投影仍用属性静态类型选择 `ThemeResourceValue.Project` 重载）。accessor 只由所属 descriptor
+  工厂引用，随未用控件一起裁剪；包级 lambda 静态缓存不再随全部 Token 保留。公开委托构造函数保留，旧生成代码无需重编。
 - 可选 Own Token builder 的直接构造委托。
 - Control CLR type 和 Own Token schema；descriptor 不包含 Global Token 消费白名单。
 - 生成式 `XxxTokens.Identity`、`XxxTokenKey` 和 `XxxTokenResourceExtension`；Token key 必须强类型化，不能在

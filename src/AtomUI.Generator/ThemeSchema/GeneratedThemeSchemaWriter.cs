@@ -93,6 +93,7 @@ internal sealed class GeneratedThemeSchemaWriter
                 token,
                 slot,
                 $"global::AtomUI.Theme.Resources.SharedTokenKind.{token.Name}",
+                GlobalTokenAccessorName,
                 "            ",
                 ";");
             source.AppendLine("    }");
@@ -111,6 +112,67 @@ internal sealed class GeneratedThemeSchemaWriter
             source.AppendLine();
         }
         source.AppendLine("}");
+
+        if (_globalTokens.Count != 0)
+        {
+            source.AppendLine();
+            WriteAccessor(source, GlobalTokenAccessorName, _globalTokens);
+        }
+        foreach (var control in _controls.Where(static control => control.HasDescriptor && control.HasOwnToken))
+        {
+            var tokens = OrderedOwnTokens(control);
+            if (tokens.Count == 0)
+            {
+                continue;
+            }
+            source.AppendLine();
+            WriteAccessor(source, GetControlTokenAccessorName(control), tokens);
+        }
+    }
+
+    // One accessor per token class keeps descriptors free of per-token delegates; an accessor is referenced only
+    // from its own descriptor factory, so it is trimmed together with an unused control descriptor.
+    private static void WriteAccessor(StringBuilder source, string className, IReadOnlyList<SchemaTokenInfo> tokens)
+    {
+        const string tokenType = "global::AtomUI.Theme.DesignTokens.AbstractDesignToken";
+        source.Append("internal sealed class ").Append(className).AppendLine(" : TokenValueAccessor");
+        source.AppendLine("{");
+        source.Append("    internal static readonly ").Append(className).Append(" Instance = new ")
+              .Append(className).AppendLine("();");
+        source.AppendLine();
+        source.Append("    public override object GetValue(").Append(tokenType).AppendLine(" token, int slot)");
+        WriteSwitch(source, tokens, static (builder, token) => builder
+            .Append("return ((").Append(token.DeclaringType).Append(")token).").Append(token.Name).Append(';'));
+        source.AppendLine();
+        source.Append("    public override void SetValue(").Append(tokenType).AppendLine(" token, int slot, object value)");
+        WriteSwitch(source, tokens, static (builder, token) => builder
+            .Append("((").Append(token.DeclaringType).Append(")token).").Append(token.Name)
+            .Append(" = (").Append(token.ValueType).Append(")value!; return;"));
+        source.AppendLine();
+        source.Append("    public override object ProjectResourceValue(").Append(tokenType).AppendLine(" token, int slot)");
+        WriteSwitch(source, tokens, static (builder, token) => builder
+            .Append("return global::AtomUI.Theme.Schema.ThemeResourceValue.Project(((").Append(token.DeclaringType)
+            .Append(")token).").Append(token.Name).Append(");"));
+        source.AppendLine("}");
+    }
+
+    private static void WriteSwitch(
+        StringBuilder source,
+        IReadOnlyList<SchemaTokenInfo> tokens,
+        Action<StringBuilder, SchemaTokenInfo> writeCase)
+    {
+        source.AppendLine("    {");
+        source.AppendLine("        switch (slot)");
+        source.AppendLine("        {");
+        for (var slot = 0; slot < tokens.Count; slot++)
+        {
+            source.Append("            case ").Append(slot).Append(": ");
+            writeCase(source, tokens[slot]);
+            source.AppendLine();
+        }
+        source.AppendLine("            default: throw new global::System.ArgumentOutOfRangeException(nameof(slot));");
+        source.AppendLine("        }");
+        source.AppendLine("    }");
     }
 
     private void WriteControlDescriptor(
@@ -137,11 +199,12 @@ internal sealed class GeneratedThemeSchemaWriter
         var typeName = FullyQualify(control.OwnToken!.GetFullyQualifiedTokenTypeName());
         source.Append(indentation).AppendLine("    new TokenDescriptor[]");
         source.Append(indentation).AppendLine("    {");
-        var tokens = control.OwnSchemaTokens.OrderBy(static token => token.Name, StringComparer.Ordinal).ToArray();
-        for (var slot = 0; slot < tokens.Length; slot++)
+        var tokens = OrderedOwnTokens(control);
+        var accessor = GetControlTokenAccessorName(control);
+        for (var slot = 0; slot < tokens.Count; slot++)
         {
             var resourceKey = $"global::{control.ControlNamespace}.DesignTokens.{control.TokenKindType}.{tokens[slot].Name}";
-            WriteToken(source, tokens[slot], slot, resourceKey, indentation + "        ");
+            WriteToken(source, tokens[slot], slot, resourceKey, accessor, indentation + "        ");
         }
         source.Append(indentation).AppendLine("    },");
         source.Append(indentation).Append("    static () => new ").Append(typeName).AppendLine("(),");
@@ -170,25 +233,21 @@ internal sealed class GeneratedThemeSchemaWriter
         SchemaTokenInfo token,
         int slot,
         string resourceKey,
+        string accessor,
         string indentation = "        ",
         string suffix = ",")
     {
         var name = SymbolDisplay.FormatLiteral(token.Name, quote: true);
-        source.Append(indentation).Append("new TokenDescriptor(").Append(name).Append(", ").Append(slot)
-              .Append(", TokenStage.").Append(token.Stage).Append(", typeof(").Append(token.ValueType)
-              .Append("), ").Append(resourceKey).AppendLine(",");
-        source.Append(indentation).Append("    static value => ThemeTokenValueParser.Parse<")
-              .Append(token.ValueType).AppendLine(">(value),");
-        source.Append(indentation).Append("    static value => ThemeTokenValueFormatter.Format((")
-              .Append(token.ValueType).AppendLine(")value!),");
-        source.Append(indentation).Append("    static token => ((").Append(token.DeclaringType).Append(")token).")
-              .Append(token.Name).AppendLine(",");
-        source.Append(indentation).Append("    static (token, value) => ((").Append(token.DeclaringType).Append(")token).")
-              .Append(token.Name).Append(" = (").Append(token.ValueType).AppendLine(")value!,");
-        source.Append(indentation).Append("    static token => ThemeResourceValue.Project(((")
-              .Append(token.DeclaringType).Append(")token).")
-              .Append(token.Name).Append("))").AppendLine(suffix);
+        source.Append(indentation).Append("TokenDescriptor.CreateGenerated(").Append(name).Append(", ").Append(slot)
+              .Append(", TokenStage.").Append(token.Stage)
+              .Append(", TokenValueCodec<").Append(token.ValueType).Append(">.Instance, ")
+              .Append(resourceKey).Append(", ").Append(accessor).Append(".Instance)").AppendLine(suffix);
     }
+
+    private static IReadOnlyList<SchemaTokenInfo> OrderedOwnTokens(ControlThemeInfo control) =>
+        control.OwnSchemaTokens.OrderBy(static token => token.Name, StringComparer.Ordinal).ToArray();
+
+    private const string GlobalTokenAccessorName = "GeneratedGlobalTokenAccessor";
 
     private static string GetGlobalTokenDescriptorFactoryMethodName(SchemaTokenInfo token)
     {
@@ -198,6 +257,11 @@ internal sealed class GeneratedThemeSchemaWriter
     internal static string GetControlDescriptorFactoryMethodName(ControlThemeInfo control)
     {
         return $"CreateControlDescriptor_{ToIdentifier(control.ControlName)}_{ComputeHash(control.ControlMetadataName):X16}";
+    }
+
+    private static string GetControlTokenAccessorName(ControlThemeInfo control)
+    {
+        return $"GeneratedTokenAccessor_{ToIdentifier(control.ControlName)}_{ComputeHash(control.ControlMetadataName):X16}";
     }
 
     private static string ToIdentifier(string value)

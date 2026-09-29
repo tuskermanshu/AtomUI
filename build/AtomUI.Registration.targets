@@ -17,7 +17,7 @@
     </UsingTask>
     <Target Name="AtomUIValidateNativeCompiler" BeforeTargets="IlcCompile" Condition="'$(PublishAot)' == 'true'">
         <AtomUI.Build.Tasks.ValidateRegistrationToolchainTask TaskAssembly="$(AtomUIBuildTasksAssembly)" DotNetPath="$(DOTNET_HOST_PATH)"
-            SdkVersion="$(NETCoreSdkVersion)" NativeCompiler="$(IlcToolsPath)/ilc$(_ExeExt)" />
+            NativeCompiler="$(IlcToolsPath)/ilc$(_ExeExt)" />
     </Target>
 
     <Target Name="AtomUIResolveRegistrationGenerator" BeforeTargets="CoreCompile" DependsOnTargets="ResolveReferences"
@@ -39,9 +39,8 @@
          Ordinary builds (even with inherited PublishTrimmed) retain the ordinary full collector. -->
     <Target Name="AtomUISetRegistrationPublishMode" BeforeTargets="PrepareForILLink"
             Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'">
-        <Error Condition="'$(NETCoreSdkVersion)' != '10.0.300'" Code="ATOMUIREG006" Text="AtomUI registration publish supports SDK 10.0.300; actual SDK is $(NETCoreSdkVersion)." />
         <AtomUI.Build.Tasks.ValidateRegistrationToolchainTask TaskAssembly="$(AtomUIBuildTasksAssembly)" DotNetPath="$(DOTNET_HOST_PATH)"
-            SdkVersion="$(NETCoreSdkVersion)" LinkerAssembly="$([System.IO.Path]::Combine($([System.IO.Path]::GetDirectoryName('$(ILLinkTasksAssembly)')), 'illink.dll'))" />
+            LinkerAssembly="$([System.IO.Path]::Combine($([System.IO.Path]::GetDirectoryName('$(ILLinkTasksAssembly)')), 'illink.dll'))" />
         <ItemGroup>
             <RuntimeHostConfigurationOption Remove="AtomUI.Registration.Trimmed" />
             <RuntimeHostConfigurationOption Include="AtomUI.Registration.Trimmed" Value="true" Trim="true" />
@@ -50,6 +49,7 @@
 
     <Target Name="AtomUIPrepareTypeMapBackend" AfterTargets="PrepareForILLink" BeforeTargets="_RunILLink"
             Condition="'$(RuntimeIdentifier)' == 'browser-wasm' and '$(PublishTrimmed)' == 'true' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">
+        <Error Condition="'$(NETCoreSdkVersion)' != '10.0.300'" Code="ATOMUIREG006" Text="AtomUI Browser TypeMap publish supports SDK 10.0.300; actual SDK is $(NETCoreSdkVersion)." />
         <Error Condition="'$(TargetFramework)' != 'net10.0-browser' or '$(TrimMode)' != 'full' or '$(RunILLink)' == 'false'" Code="ATOMUIREG006" Text="AtomUI Browser TypeMap requires net10.0-browser with actual full ILLink processing." />
         <MSBuild Projects="$(AtomUITypeMapBackendProject)" Targets="Build" BuildInParallel="false"
                  RemoveProperties="RuntimeIdentifier;PublishAot;PublishTrimmed;RunAOTCompilation;SelfContained;TargetFramework;_IsPublishing"

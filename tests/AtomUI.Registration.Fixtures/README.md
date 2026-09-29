@@ -30,6 +30,14 @@ The current post-compatibility-fix macOS 26.6.2 / SDK 10.0.300 / osx-arm64 measu
 
 The 2026-09-29 combined reflection-retention and short-key pass produced 20,182,000 / 45,001,952 bytes for selected/full under the default profile, a 55.15% selected reduction. `OptimizationPreference=Size` produced 19,717,728 / 44,139,696 bytes, a 55.33% selected reduction. Every binary reported `PRODUCT_PASS selected`. The selected executables remain 1,307,632 bytes (1.25 MiB) and 843,360 bytes (0.80 MiB), respectively, above the 18 MiB gate.
 
+Size acceptance no longer uses an absolute MiB gate; the 18 MiB figures above are historical. `FluentBaseline` is the official Avalonia template (FluentTheme + Inter) with the same 600×500 window, StackPanel and Button, built with the same fixture settings and no AtomUI package. Publish it with exactly the Minimal command line (it needs no `FixtureRealDesktop` switch) and run it until it prints `BASELINE_PASS fluent`:
+
+```sh
+LIBRARY_PATH=/opt/homebrew/lib:/opt/homebrew/opt/openssl@3/lib dotnet publish tests/AtomUI.Registration.Fixtures/FluentBaseline/FluentBaseline.csproj -c Release -r osx-arm64 --self-contained true -p:PublishAot=true -o .artifacts/registration-product/fluent-baseline
+```
+
+The framework delta is Minimal selected minus FluentBaseline under one toolchain. The attribution, ratchet and mechanism-detection rules are owned by [AOT and trimming](../../docs/architecture/foundations/aot-and-trimming.md#81-体积评判标准).
+
 The inspector's `selected` mode validates absence using metadata names, without rooting unused classes through `typeof`. Browser runtime success requires `PRODUCT_PASS browser` after the UI loads, not just a successful page load. Mono AOT may strip IL after the receipt gate; receipt byte hashes bind linked/pre-AOT files, while deployed metadata and runtime are checked separately.
 
 `PackageConsumers/Author` proves ordinary authoring from the independently packed `AtomUI.Generator` package, including analyzer dependencies and generated package bootstrap. `PackageConsumers/Host` exercises direct, transitive and precompiled binary consumers; its own Directory.Build files intentionally do not import repository tooling. `NegativeBrowser` deliberately removes both converter and gate in its test project to demonstrate the Mono runtime failure; this is never a supported consumer configuration. `ZeroBrowser` verifies referenced-but-disabled packages produce a valid zero-slot link receipt.

@@ -67,3 +67,14 @@
 第三方包需删除旧元数据、采用对应声明并用配套 Generator 普通重建；应用仍保留原包入口，预编译 adapter 不新增使用清单。
 本次不改变 TypeMap ABI v1、资源 schema/fingerprint 或 Browser 转换协议，不拆分原生窗口包，也不扩大平台支持范围。
 既有验证记录不证明本项迁移完成；本项验证关注行为、裁剪、增量正确性和分发，既有体积门槛与未达标记录继续保留。
+
+## Token 描述符生成形态与桌面工具链门禁
+
+普通 Generator 生成的 Token 描述符改用隐藏 ABI `TokenDescriptor.CreateGenerated`：按值类型共享
+`TokenValueCodec<T>.Instance`，按 Token 类生成一个 `TokenValueAccessor`，不再为每个 Token 生成 parse/format/get/set/project
+五个委托。公开委托构造函数与 `Parse`/`Format`/`GetValue`/`SetValue`/`ProjectResourceValue` 行为不变；用旧 Generator 构建的
+第三方包无需修改即可继续运行，用当前 Generator 重建后才获得体积与启动分配收益。新生成代码需要配套的 AtomUI.Core。
+
+桌面 trimmed CoreCLR 与 NativeAOT 发布不再要求 SDK 恰好为 `10.0.300`，也不再要求 ILCompiler 与 ILLink 的某个构建完全一致，
+只要求实际官方 ILLink 与 NativeAOT 编译器不低于已验证的 `10.0.8`；运行时补丁前滚不再触发 `ATOMUIREG006`。
+Browser trimmed/AOT 发布依赖 ILLink 内部管线，继续固定 SDK `10.0.300`、ILLink `10.0.8` 与 WASM assets `10.0.10`。

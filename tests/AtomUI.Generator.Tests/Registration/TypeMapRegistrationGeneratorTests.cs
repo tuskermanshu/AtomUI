@@ -133,6 +133,36 @@ public class TypeMapRegistrationGeneratorTests
     }
 
     [Fact]
+    public void TypeMap_Key_Collisions_Are_All_Reported_Against_The_First_Identity()
+    {
+        RegistrationControl Control(string name) => new(
+            new RegistrationType("global::Demo." + name, "Demo." + name, "Demo." + name + ", Demo"),
+            null,
+            null,
+            new ValueArray<string>(["global::Demo." + name]),
+            new ValueArray<string>([]),
+            new ValueArray<string>([]));
+        var package = new RegistrationPackage(
+            "Demo",
+            "Demo, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+            "Demo.Generated",
+            new ValueArray<RegistrationControl>([Control("Alpha"), Control("Beta"), Control("Gamma")]),
+            new ValueArray<RegistrationAsset>([]),
+            new ValueArray<string>([]));
+        var output = new GenerationOutput();
+
+        TypeMapRegistrationWriter.Write(output, package, static _ => "0000000000000000");
+        var result = output.Freeze();
+
+        var collisions = result.Diagnostics.Where(diagnostic => diagnostic.Descriptor.Id == "ATOMUIREG005").ToArray();
+        collisions.Length.ShouldBe(2);
+        collisions.ShouldAllBe(diagnostic => diagnostic.Message.Contains("Demo.Alpha, Demo"));
+        collisions.ShouldContain(diagnostic => diagnostic.Message.Contains("Demo.Beta, Demo"));
+        collisions.ShouldContain(diagnostic => diagnostic.Message.Contains("Demo.Gamma, Demo"));
+        result.Files.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void Exports_Respect_Lexical_Scope_Named_Keys_And_Multiple_Targets()
     {
         var result = Run("""

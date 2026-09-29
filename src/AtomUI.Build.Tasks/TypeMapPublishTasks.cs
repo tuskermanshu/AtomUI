@@ -13,6 +13,25 @@ internal static class TypeMapBuildContract
     internal const string Capability = "atomui-typemap-v1-illink-10.0.8";
     internal const string LinkerIdentity = "illink, Version=10.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
     internal const string LinkerVersion = "10.0.8-servicing.26229.119+94ea82652cdd4e0f8046b5bd5becbd11461482ca";
+    // Desktop trimming consumes only the official TypeMap contract, so any official toolchain at or after the
+    // verified servicing build is accepted. The Browser backend depends on ILLink internals and keeps exact pins.
+    internal static readonly Version DesktopToolchainFloor = new(10, 0, 8);
+    private const string MicrosoftPublicKeyToken = "31BF3856AD364E35";
+
+    internal static bool IsSupportedDesktopToolchain(string informationalVersion)
+    {
+        var end = informationalVersion.IndexOfAny(['-', '+']);
+        var numeric = end < 0 ? informationalVersion : informationalVersion[..end];
+        return Version.TryParse(numeric.Trim(), out var version) && version >= DesktopToolchainFloor;
+    }
+
+    internal static bool IsSupportedDesktopLinker(string identity, string informationalVersion)
+    {
+        var name = new AssemblyName(identity);
+        return name.Name == "illink" &&
+               Convert.ToHexString(name.GetPublicKeyToken() ?? []) == MicrosoftPublicKeyToken &&
+               IsSupportedDesktopToolchain(informationalVersion);
+    }
     internal static string Hash(string path) => ResolveRegistrationToolsTask.Hash(path);
     internal static string InformationalVersion(string path)
     {
@@ -205,17 +224,16 @@ public sealed class VerifyTypeMapReceiptTask : RegistrationBuildTask
 
 public sealed class ValidateRegistrationToolchainTask : RegistrationBuildTask
 {
-    public string SdkVersion { get; set; } = string.Empty;
     public string LinkerAssembly { get; set; } = string.Empty;
     public string NativeCompiler { get; set; } = string.Empty;
     public override bool Execute()
     {
         try
         {
-            if (SdkVersion != "10.0.300") throw new InvalidDataException($"Unsupported actual SDK '{SdkVersion}'. Expected 10.0.300.");
-            if (!string.IsNullOrEmpty(LinkerAssembly) && (AssemblyName.GetAssemblyName(LinkerAssembly).FullName != TypeMapBuildContract.LinkerIdentity ||
-                TypeMapBuildContract.InformationalVersion(LinkerAssembly) != TypeMapBuildContract.LinkerVersion))
-                throw new InvalidDataException($"Unsupported actual ILLink binary '{LinkerAssembly}'. Expected ILLink 10.0.8.");
+            if (!string.IsNullOrEmpty(LinkerAssembly) && !TypeMapBuildContract.IsSupportedDesktopLinker(
+                    AssemblyName.GetAssemblyName(LinkerAssembly).FullName, TypeMapBuildContract.InformationalVersion(LinkerAssembly)))
+                throw new InvalidDataException(
+                    $"Unsupported actual ILLink binary '{LinkerAssembly}'. Expected official ILLink {TypeMapBuildContract.DesktopToolchainFloor} or later.");
             if (!string.IsNullOrEmpty(NativeCompiler))
             {
                 using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(NativeCompiler)
@@ -225,8 +243,9 @@ public sealed class ValidateRegistrationToolchainTask : RegistrationBuildTask
                 var version = process.StandardOutput.ReadToEnd().Trim();
                 var errors = process.StandardError.ReadToEnd();
                 process.WaitForExit();
-                if (process.ExitCode != 0 || version != TypeMapBuildContract.LinkerVersion)
-                    throw new InvalidDataException($"Unsupported actual NativeAOT compiler '{NativeCompiler}': {version} {errors}. Expected 10.0.8.");
+                if (process.ExitCode != 0 || !TypeMapBuildContract.IsSupportedDesktopToolchain(version))
+                    throw new InvalidDataException(
+                        $"Unsupported actual NativeAOT compiler '{NativeCompiler}': {version} {errors}. Expected ILCompiler {TypeMapBuildContract.DesktopToolchainFloor} or later.");
             }
             return true;
         }

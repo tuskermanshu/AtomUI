@@ -287,7 +287,6 @@ namespace AtomUI.Build.Tasks
 {
     public sealed class ValidateRegistrationToolchainTask : IsolatedBuildTask
     {
-        public string SdkVersion { get; set; } = string.Empty;
         public string LinkerAssembly { get; set; } = string.Empty;
         public string NativeCompiler { get; set; } = string.Empty;
     }

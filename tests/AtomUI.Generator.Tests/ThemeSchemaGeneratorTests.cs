@@ -28,14 +28,17 @@ public class ThemeSchemaGeneratorTests
         source.ShouldContain("typeof(global::Demo.Button)");
         source.ShouldContain("ControlTokenIdentity.ForControl(typeof(global::Demo.Button), \"AtomUI\", \"Button\")");
         source.ShouldContain("global::AtomUI.Theme.Resources.SharedTokenKind");
-        source.ShouldContain("new TokenDescriptor(\"Alpha\", 0, TokenStage.Seed");
-        source.ShouldContain("new TokenDescriptor(\"Zeta\", 1, TokenStage.Alias");
-        source.ShouldContain("new TokenDescriptor(\"Height\", 0, TokenStage.Control");
-        source.ShouldContain("new TokenDescriptor(\"Label\", 1, TokenStage.Control");
+        source.ShouldContain("TokenDescriptor.CreateGenerated(\"Alpha\", 0, TokenStage.Seed, TokenValueCodec<global::System.Double>.Instance");
+        source.ShouldContain("TokenDescriptor.CreateGenerated(\"Zeta\", 1, TokenStage.Alias");
+        source.ShouldContain("TokenDescriptor.CreateGenerated(\"Height\", 0, TokenStage.Control");
+        source.ShouldContain("TokenDescriptor.CreateGenerated(\"Label\", 1, TokenStage.Control");
         source.ShouldNotContain("SupportedGlobalToken");
-        source.ShouldContain("ThemeTokenValueParser.Parse<global::System.Double>(value)");
-        source.ShouldContain("ThemeTokenValueFormatter.Format((global::System.Double)value!)");
-        source.ShouldContain("((global::Demo.ButtonToken)token).Height = (global::System.Double)value!");
+        source.ShouldContain("case 0: ((global::Demo.ButtonToken)token).Height = (global::System.Double)value!; return;");
+        source.ShouldContain("case 0: return global::AtomUI.Theme.Schema.ThemeResourceValue.Project(((global::Demo.ButtonToken)token).Height);");
+        // Per-token delegates and their static caches scale with the whole package, not with retained controls.
+        source.ShouldNotContain("static value =>");
+        source.ShouldNotContain("static token =>");
+        source.ShouldNotContain("static (token, value) =>");
         source.ShouldContain("static () => new global::Demo.ButtonToken()");
         source.ShouldContain("((global::Demo.ButtonToken)token).CalculateTokenValues(appearance == global::AtomUI.Theme.ThemeAppearance.Dark)");
         source.ShouldContain("new ThemeAlgorithmDescriptor(global::AtomUI.Theme.Algorithms.ThemeAlgorithm.Dark, 1, ThemeAppearanceEffect.Dark");
@@ -320,8 +323,27 @@ public class ThemeSchemaGeneratorTests
                 public static ControlTokenIdentity ForControl(System.Type controlType, string catalog, string id) => new(catalog, id);
             }
 
+            public abstract class TokenValueCodec
+            {
+            }
+
+            public sealed class TokenValueCodec<T> : TokenValueCodec
+            {
+                public static readonly TokenValueCodec<T> Instance = new();
+            }
+
+            public abstract class TokenValueAccessor
+            {
+                public abstract object? GetValue(AtomUI.Theme.DesignTokens.AbstractDesignToken token, int slot);
+                public abstract void SetValue(AtomUI.Theme.DesignTokens.AbstractDesignToken token, int slot, object? value);
+                public abstract object? ProjectResourceValue(AtomUI.Theme.DesignTokens.AbstractDesignToken token, int slot);
+            }
+
             public sealed class TokenDescriptor
             {
+                public static TokenDescriptor CreateGenerated(
+                    string name, int slot, TokenStage stage, TokenValueCodec codec, object resourceKey, TokenValueAccessor accessor) => null!;
+
                 public TokenDescriptor(
                     string name,
                     int slot,

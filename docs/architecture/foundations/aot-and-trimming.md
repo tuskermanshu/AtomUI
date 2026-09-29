@@ -34,6 +34,15 @@ Desktop 全部资产工厂生成文本与迁移前一致，包括有效平台域
 19,717,728 / 44,139,696 bytes，selected 缩小 55.33%。两组均通过运行检查和 40% 相对门槛；默认 selected 距
 18 MiB 门槛仍差 1,307,632 bytes（1.25 MiB），Size selected 仍差 843,360 bytes（0.80 MiB），因此绝对体积门槛仍未通过。
 
+上述 MiB 门槛已由 [8.1 体积评判标准](#81-体积评判标准) 取代，以上数字作为历史记录保留。2026-09-29 Token 描述符改用共享
+codec/accessor 后，同口径（macOS 26.6.2、SDK 10.0.300、ILCompiler 10.0.8、Avalonia 12.1.3、osx-arm64、默认配置、仅
+AlibabaSans）实测：Minimal selected 19,715,664 bytes（较 20,182,000 减少 466,336），full 注册 43,304,544 bytes，
+selected 为 full 的 45.53%；FluentBaseline 16,573,248 bytes；框架增量 Δ = 3,142,416 bytes（AtomUI/Fluent 1.19，仅报告）。
+三者均运行通过。此 Δ 记为首个棘轮记录，但归因门槛尚未通过：已归因的大项为 AtomUI 程序集约 1.42 MB（其中语言核心的
+标准语言定义与 LanguageTags 约 250 KB）和默认图片服务网络栈约 1.0 MB（Net.Http/Security、Cryptography、Asn1、Sockets），
+Fluent 侧则多出主题与 Avalonia 模板约 2.44 MB；两个已知缺口是 Desktop 10 个未用控件语言目录（估算 30–40 KB，
+仍在 complete 阶段整包注册）以及 Regex、Immutable、Numerics 等较小 BCL 项尚未追到具体使用方。Size 档本轮未重测。
+
 此前 Gallery Tab overflow shadow 渲染理论在原始基线及迁移分支均出现过失败，尚未确定成因；
 本次受影响渲染组 77/77 通过，但没有通过修改阴影实现来消除此历史问题。
 该失败不通过修改 Tab 几何或削弱像素断言绕过。完整 Browser Gallery、Windows/Linux/iOS 与较旧 macOS 的运行验证
@@ -185,10 +194,25 @@ Common 在 Desktop 前、扩展包在基础包后的顺序由真实入口调用�
 fixture 必须实际初始化 ThemeManager、解析资源、创建模板并切换主题。只构造 builder 或输出排序后的注册快照不能证明
 冻结时序、资源优先级和 UI 行为。负向保留断言不能通过 `typeof(UnusedControl)` 将被检查类型自行保留。
 
-体积比较固定 SDK、RID、字体、配置与样例；记录 NativeAOT 主程序和排除调试符号后的 payload，不能相减不同实验程序大小。
-最小控件样例的 NativeAOT 主程序相对同口径 full 注册主程序至少缩小 `40%`。
-桌面固定 `osx-arm64` Button/Window 样例移除中文字体后，主程序第一阶段上限为 `18 MiB`，后续目标为 `16 MiB`
-或同场景 Fluent 的 125%；新增未使用控件后的主程序增量不得超过 `256 KiB`。改变门槛需要同口径的新证据。
+### 8.1 体积评判标准
+
+体积不使用绝对 MiB 门槛。主程序中 BCL、运行时与 Avalonia 占大头，会随 SDK/Avalonia 升级变化且不受 AtomUI 控制；
+固定数值既区分不了“AtomUI 变大”和“工具链变了”，也说明不了剩余字节是否合理。标准只衡量 AtomUI 增加了什么、是否都有来由。
+
+所有比较固定 SDK、RID、Avalonia 版本、配置、字体策略与原生库路径；记录 NativeAOT 主程序和排除调试符号后的 payload，
+只在同一口径的程序之间相减。
+
+| 条目 | 类型 | 规则 |
+| --- | --- | --- |
+| 对照组 | 定义 | `tests/AtomUI.Registration.Fixtures/FluentBaseline`：官方 Avalonia 模板（FluentTheme + Inter），与 Minimal 相同的 600×500 窗口、StackPanel 与一个 Button，相同 fixture 构建设置，不含 AtomUI |
+| 框架增量 Δ | 指标 | Minimal selected 主程序 − FluentBaseline 主程序 |
+| 归因 | 硬门槛 | ILC map 中 Δ 必须归到已使用控件的契约或文档列明的 Package Core 能力（主题/Token 运行时、注册、语言核心、默认图片服务及其网络栈、默认字体）；未用控件的类型、代理、工厂与本地化目录由 Inspector `selected` 模式证明缺失；归不进去的字节是缺陷，修复而不是放宽 |
+| 棘轮 | 硬门槛 | 验收记录 Δ 与工具链身份（SDK、ILC、Avalonia）；同一工具链下 Δ 只能持平或下降，上升必须写明新增的具名能力并重新记录；升级工具链时两侧同时重测，比较 Δ 而不是绝对大小 |
+| 机制检测 | 硬门槛 | selected ≤ 同口径 full 注册的 60%；新增同目录未用控件后其代码与工厂缺失，主程序增量 ≤ 256 KiB。两者检测裁剪机制是否失效（正常约 45% 与数十 KiB，失效时接近 100% 与整控件体积），不是体积目标 |
+| 报告项 | 不设门槛 | AtomUI/Fluent 比值、`OptimizationPreference=Size` 数据 |
+
+macOS arm64 的 Mach-O 段按 16 KiB 页对齐，主程序字节存在页量化；细粒度比较用 map 节点长度之和，主程序字节按页容差比较。
+改变规则需要同口径的新证据；本节取代此前的 18 MiB、16 MiB 与“同场景 Fluent 的 125%”门槛。
 
 上线前还须审计源码、项目、脚本、正式文档、nupkg 和构建产物：旧应用 usage/Sidecar/UnitEdge/SCC/Plan、旧 analyzer、
 旧 linked MSBuild 传播均退出活动路径。不能只禁用 target 而继续编译分发旧工具。

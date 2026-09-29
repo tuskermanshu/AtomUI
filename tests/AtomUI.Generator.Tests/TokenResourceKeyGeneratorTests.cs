@@ -450,9 +450,9 @@ public class TokenResourceKeyGeneratorTests
         tokenResources.ShouldNotContain("CommonButtonTokenKind");
 
         var schema = GetGeneratedSource(outputCompilation, "GeneratedThemeSchema.g.cs");
-        schema.ShouldContain("static token => ((global::Demo.ButtonToken)token).ContentHeight");
-        schema.ShouldContain("static token => ((global::Demo.ButtonToken)token).CornerRadius");
-        schema.ShouldContain("static token => ((global::Demo.ButtonToken)token).Label");
+        schema.ShouldContain("return ((global::Demo.ButtonToken)token).ContentHeight;");
+        schema.ShouldContain("return ((global::Demo.ButtonToken)token).CornerRadius;");
+        schema.ShouldContain("return ((global::Demo.ButtonToken)token).Label;");
         schema.ShouldContain("static () => new global::Demo.ButtonToken()");
     }
 
@@ -1131,7 +1131,7 @@ public class TokenResourceKeyGeneratorTests
         resources.ShouldContain("ContentHeight = -1");
         resources.ShouldContain("CornerRadius = -2");
         var schema = GetGeneratedSource(platformOutput, "GeneratedThemeSchema.g.cs");
-        schema.ShouldContain("static token => ((global::PlatformControls.ButtonToken)token).ContentHeight");
+        schema.ShouldContain("return ((global::PlatformControls.ButtonToken)token).ContentHeight;");
     }
 
     [Fact]
@@ -1797,8 +1797,27 @@ public class TokenResourceKeyGeneratorTests
                 public static ControlTokenIdentity ForControl(System.Type controlType, string catalog, string id) => new(catalog, id);
             }
 
+            public abstract class TokenValueCodec
+            {
+            }
+
+            public sealed class TokenValueCodec<T> : TokenValueCodec
+            {
+                public static readonly TokenValueCodec<T> Instance = new();
+            }
+
+            public abstract class TokenValueAccessor
+            {
+                public abstract object? GetValue(AtomUI.Theme.DesignTokens.AbstractDesignToken token, int slot);
+                public abstract void SetValue(AtomUI.Theme.DesignTokens.AbstractDesignToken token, int slot, object? value);
+                public abstract object? ProjectResourceValue(AtomUI.Theme.DesignTokens.AbstractDesignToken token, int slot);
+            }
+
             public sealed class TokenDescriptor
             {
+                public static TokenDescriptor CreateGenerated(
+                    string name, int slot, TokenStage stage, TokenValueCodec codec, object resourceKey, TokenValueAccessor accessor) => null!;
+
                 public TokenDescriptor(
                     string name,
                     int slot,
