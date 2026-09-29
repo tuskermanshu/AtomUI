@@ -382,7 +382,7 @@ public partial class TreeView
             var topLevel = TopLevel.GetTopLevel(this);
             if (topLevel != null)
             {
-                topLevel.GetLayoutManager()?.ExecuteLayoutPass();
+                topLevel.UpdateLayout();
             }
         }
         if (current.Presenter?.Panel is { })

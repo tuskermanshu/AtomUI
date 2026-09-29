@@ -1490,7 +1490,7 @@ public partial class NavMenu : ItemsControl,
         var topLevel = TopLevel.GetTopLevel(current);
         void ExecuteLayoutPass()
         {
-            topLevel?.GetLayoutManager()?.ExecuteLayoutPass();
+            topLevel?.UpdateLayout();
         }
 
         ExecuteLayoutPass();

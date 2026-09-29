@@ -367,7 +367,7 @@ internal static class PopupUtils
             placement.AnchorRectangle.Y * scaling + clientScreenPos.Y,
             placement.AnchorRectangle.Width  * scaling,
             placement.AnchorRectangle.Height * scaling);
-        var popupSizePx = placement.PopupSize * scaling;
+        var popupSizePx = placement.PopupSize.Deflate(placement.Deflate) * scaling;
         var offsetPx    = placement.Offset    * scaling;
 
         // —— 选屏：与 ManagedPopupPositioner.GetBounds 优先级一致：先 anchor 所在屏，再 TopLevel 所在屏，再主屏 ——
@@ -424,7 +424,7 @@ internal static class PopupUtils
             placement,
             placement.AnchorRectangle,
             bounds,
-            placement.PopupSize,
+            placement.PopupSize.Deflate(placement.Deflate),
             placement.Offset);
     }
 
@@ -603,9 +603,10 @@ internal static class PopupUtils
             return false;
         }
 
+        var popupSize = placement.PopupSize.Deflate(placement.Deflate);
         var (geometry, horizontalFlipped, verticalFlipped) = CalculateConstrainedGeometry(
             placement.AnchorRectangle,
-            placement.PopupSize,
+            popupSize,
             placement.Anchor,
             placement.Gravity,
             placement.ConstraintAdjustment,
@@ -613,8 +614,9 @@ internal static class PopupUtils
             bounds);
 
         // OverlayPopupHost positions against the full CSD surface. Convert the result into an
-        // unconstrained, RTL-invariant placement so Avalonia preserves the visible-frame geometry.
-        placement.AnchorRectangle      = new Rect(geometry.Position, placement.PopupSize);
+        // unconstrained, RTL-invariant placement of the deflated content rectangle.
+        // Avalonia inflates that rectangle by the child margin after positioning.
+        placement.AnchorRectangle      = new Rect(geometry.Position, popupSize);
         placement.Anchor               = PopupAnchor.None;
         placement.Gravity              = PopupGravity.None;
         placement.ConstraintAdjustment = PopupPositionerConstraintAdjustment.None;

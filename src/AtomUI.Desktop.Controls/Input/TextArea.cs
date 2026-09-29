@@ -154,8 +154,10 @@ public partial class TextArea : AbstractTextInput
     {
         var fontSize = FontSize;
         var typeface = new Typeface(FontFamily, FontStyle, FontWeight, FontStretch);
-        var paragraphProperties = TextLayoutReflectionExtensions.CreateTextParagraphProperties(typeface, fontSize, null, default, default, null, default, LineHeight, default, FontFeatures);
-        var textLayout = new TextLayout(new LineTextSource(lines), paragraphProperties);
+        var textRunProperties = new GenericTextRunProperties(typeface, fontSize, fontFeatures: FontFeatures);
+        var paragraphProperties = new GenericTextParagraphProperties(
+            default, default, true, false, textRunProperties, default, LineHeight, 0, 0);
+        using var textLayout = new TextLayout(new LineTextSource(lines), paragraphProperties);
         var verticalSpace = this.GetVerticalSpaceBetweenScrollViewerAndPresenter();
         return Math.Ceiling(textLayout.Height + verticalSpace);
     }

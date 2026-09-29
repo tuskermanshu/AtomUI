@@ -404,10 +404,13 @@ public class DenseThemeCompilerTests
               .ShouldBeSameAs(transform);
     }
 
-    [Fact]
-    public void Compile_Clones_Mutable_Spline_Easing_Control_Token_Values()
+    [Theory]
+    [InlineData("token")]
+    [InlineData("resource")]
+    [InlineData("consumer")]
+    public void Compile_Clones_Mutable_Spline_Easing_Control_Token_Values(string path)
     {
-        var easing = new SplineEasing(0.1, 0.9, 0.2, 1.0);
+        var easing = new SplineEasing { X1 = 0.1, Y1 = 0.3, X2 = 0.6, Y2 = 0.8 };
         var control = EasingControl("SplitView", easing);
         var registry = CreateRegistry([control]);
         registry.TryGetControl(control.Identity, out control).ShouldBeTrue();
@@ -415,14 +418,20 @@ public class DenseThemeCompilerTests
         var result = new ThemeCompiler().Compile(CreateInput(registry));
 
         result.Success.ShouldBeTrue();
-        var frozen = result.Snapshot!.Controls[control.Slot]
-                           .ControlTokenValues.Get<Easing>(0)
-                           .ShouldBeOfType<SplineEasing>();
+        var snapshot = result.Snapshot!.Controls[control.Slot];
+        var frozen = (path switch
+        {
+            "token" => snapshot.ControlTokenValues.GetValue(0),
+            "resource" => snapshot.ControlResources[control.OwnTokens[0].ResourceKey],
+            "consumer" => snapshot.ControlTokenValues.Get<Easing>(0),
+            _ => throw new ArgumentOutOfRangeException(nameof(path))
+        }).ShouldBeOfType<SplineEasing>();
         frozen.ShouldNotBeSameAs(easing);
-        frozen.X1.ShouldBe(easing.X1);
-        frozen.Y1.ShouldBe(easing.Y1);
-        frozen.X2.ShouldBe(easing.X2);
-        frozen.Y2.ShouldBe(easing.Y2);
+        easing.Y1 = 0.9;
+        frozen.X1.ShouldBe(0.1);
+        frozen.Y1.ShouldBe(0.3);
+        frozen.X2.ShouldBe(0.6);
+        frozen.Y2.ShouldBe(0.8);
     }
 
     [Fact]

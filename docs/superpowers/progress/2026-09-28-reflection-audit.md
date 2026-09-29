@@ -2,7 +2,8 @@
 
 日期：2026-09-28。范围：`src/`、`controlgallery/` 的生产反射访问，使用 `tests/`、AXAML、生成器和文档核对调用与契约。
 
-本次仅评估，未修改生产代码、依赖版本或测试，也未创建提交。当前 AtomUI 仍引用 Avalonia 12.1.2。
+本文记录实施前的只读评估，当时未修改生产代码、依赖版本或测试，AtomUI 引用 Avalonia 12.1.2。
+用户批准后的实际执行与验证见 [升级执行日志](2026-09-28-avalonia-12.1.3-upgrade-log.md)。
 参考源码为本地 `/Users/chinboy/Projects/ReferenceProjects/Avalonia`，HEAD 为 12.1.3 / `8eeda4f6f546165b3f72e63c9f42247abb306905`；
 历史可用性通过 12.1.2 / `d3c867a9e2de379249b03dbeb3495bd7f076a81a` 复核。
 
@@ -218,4 +219,7 @@ Avalonia 自身注释推荐公开入口，但它并非完全等价替换：
 TreeView/NavMenu/Cascader 布局、AutoComplete/Mentions 模板重套、Tour/反馈层及 Tooltip 输入边界。
 改动资源或反射保留时补真实 NativeAOT/Browser trim 验证。删除无调用封装不需要为“文件已不存在”编写测试。
 
-本轮证据为源码差异、目标成员可访问性和调用点审查；没有执行 12.1.3 构建、回归、AOT 发布或性能测量。
+以上为实施前审计结论。用户批准后，第一批 7 个文件删除、等价 API 替代、局部死成员删除及 Notifying
+PropertyInfo 缓存已实施；TypeHelper 动态数据入口与第二批条件性替代保留。构建、回归、包消费和真实
+NativeAOT/Browser 验证及失败诊断见 [升级执行日志](2026-09-28-avalonia-12.1.3-upgrade-log.md)。
+未进行性能基准测量，不把减少反射次数直接表述为已测得的性能收益。
