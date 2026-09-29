@@ -117,6 +117,7 @@ AtomUI 自身版本由 `build/Versions.props` 中的 `AtomUIVersion` 管理。
 ```bash
 python3 scripts/verification/test.py plan
 python3 scripts/verification/test.py run --scope iterate --path <affected-module-path>
+# 仅在用户明确要求或发版时：
 scripts/run-full-regression.sh
 ```
 

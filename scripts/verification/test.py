@@ -34,7 +34,7 @@ def print_plan(plan):
         print("REQUIRED " + check["id"] + ": " + check["description"])
     if not plan["changes"] and plan["scope"] != "full":
         print("No local changes relative to HEAD. Use --base REF to include committed branch changes.")
-    print("Final full regression is explicit: run scripts/run-full-regression.sh once after the bug-fix loop is green.")
+    print("Full regression is not part of the change gate: run scripts/run-full-regression.sh only on explicit request or during a release.")
 
 
 def parser():

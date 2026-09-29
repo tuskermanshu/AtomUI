@@ -16,7 +16,7 @@ python3 scripts/verification/test.py run --scope iterate \
   --path src/AtomUI.Desktop.Controls/Popup \
   --path tests/AtomUI.Desktop.Controls.Tests/Popup
 
-# Bug 修复完成后的唯一最终全量门禁
+# 全量回归：仅在用户明确要求或发版时运行；Bug 修复与普通改动只验证所修改的模块
 scripts/run-full-regression.sh
 
 # 分支/CI affected 比较：必须显式提供比较基线
@@ -128,12 +128,12 @@ runner 用临时 solution 汇总选中项目，一次构建共享依赖；构建
 工具不提供 `--ignore-obligations` 或仅凭文字声明生成成功 receipt 的开关。NativeAOT publish 也不等于 UI 行为验证；
 hover、滚动、裁剪、资源释放等仍保留原始复现条件和交互/生命周期检查。
 
-依赖与 SDK 变更需要显式全量及目标平台/TFM 验证；focused 执行不会为了扩大范围自动运行全量。
+依赖与 SDK 变更需要目标平台/TFM 验证；全量回归仍只在用户明确要求或发版时运行，focused 执行不会为了扩大范围自动运行全量。
 
 ## 全量、CI 和维护
 
 ```bash
-# Bug 修复最终门禁、用户明确要求或版本发布时使用
+# 仅在用户明确要求或版本发布时使用
 scripts/run-full-regression.sh
 
 # 维护影响规则时的快速检查

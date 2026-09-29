@@ -140,8 +140,8 @@ class Planner:
             for reader in self.file_readers.get(Path(path).name, set()):
                 selected[reader].add("Reads repository input: " + path)
                 handled = True
-            # Bug-fix iteration stays inside the owning module. Shared/cross-module
-            # policy rules are deferred to the single final full regression.
+            # Iteration stays inside the changed modules. Shared/cross-module policy
+            # rules apply to change scope (CI) and to explicit or release full runs.
             for rule in self.policy.get("rules", []) if scope != "iterate" else []:
                 if any(matches(path, g) for g in rule["changes"]):
                     choose(rule.get("tests", []), rule["id"] + ": " + path)

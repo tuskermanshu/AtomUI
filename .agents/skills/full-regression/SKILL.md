@@ -7,8 +7,8 @@ description: Use when the user asks to run the full AtomUI regression test suite
 
 ## 触发条件
 
-用户要求全量回归 / 跑全部测试 / full regression、执行 version-release，或一个 Bug 修复已经完成 focused 红绿迭代并进入
-最终门禁时使用。Bug 修复过程中禁止提前调用本 skill；单个项目或少量测试的日常迭代直接使用精确 `dotnet test --filter`
+仅在用户明确要求全量回归 / 跑全部测试 / full regression，或执行 version-release 时使用。Bug 修复和普通代码改动
+完成后不自动调用本 skill，只验证所修改模块的测试；单个项目或少量测试的日常迭代直接使用精确 `dotnet test --filter`
 或 `test.py run --scope iterate --path ...`。
 
 ## 执行方式
