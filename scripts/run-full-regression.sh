@@ -59,6 +59,8 @@ FAILURES="$WORKDIR/failures.txt"
 filter_args=""
 [ -n "$FILTER" ] && filter_args="--filter $FILTER"
 
+echo "[MODE] FINAL FULL REGRESSION — only after focused bug-module tests are green"
+
 fmt_clock() { # 秒 -> mm:ss
     awk -v s="$1" 'BEGIN { printf "%02d:%02d", int(s/60), s%60 }'
 }

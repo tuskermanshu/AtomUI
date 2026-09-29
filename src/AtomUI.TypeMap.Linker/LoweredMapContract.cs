@@ -39,19 +39,19 @@ internal sealed class LoweredMapContract
         }).ToArray();
     }
 
-    internal void Validate(AssemblyDefinition assembly, MethodDefinition method)
+    internal void Validate(AssemblyDefinition assembly, MethodDefinition method, RegistrationMetadataIndex metadata)
     {
-        try { ValidateStructure(assembly, method); }
+        try { ValidateStructure(assembly, method, metadata); }
         catch (BackendDiagnostic error)
         {
             throw BackendDiagnostic.Unlowered($"Lowered accessor '{_accessorName}' is invalid: {error.Message}");
         }
     }
 
-    private void ValidateStructure(AssemblyDefinition assembly, MethodDefinition method)
+    private void ValidateStructure(AssemblyDefinition assembly, MethodDefinition method, RegistrationMetadataIndex metadata)
     {
         Require(assembly.Name.FullName == _assemblyIdentity, "assembly identity changed");
-        var types = RegistrationAbi.AllTypes(assembly.MainModule.Types).ToArray();
+        var types = metadata.Types(assembly);
         var group = One(types.Where(t => t.FullName == _groupName), "Group");
         Require(group.IsPublic && group.IsSealed && !group.HasGenericParameters && group.DeclaringType is null,
             "Group metadata changed");

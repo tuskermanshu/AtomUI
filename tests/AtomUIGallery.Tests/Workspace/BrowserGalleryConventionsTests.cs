@@ -56,6 +56,8 @@ public class BrowserGalleryConventionsTests
         galleryBaseSource.ShouldContain("EnableBrowserMediaBreakpoints");
         galleryBaseSource.ShouldContain("IMediaBreakAwareControl");
         galleryBaseSource.ShouldContain("VisualLayerManager");
+        galleryBaseSource.ShouldContain("OverlayLayer.GetOverlayLayer(visualLayerManager)");
+        galleryBaseSource.ShouldNotContain("GetVisualLayerManagerPropertyValue(visualLayerManager, \"OverlayLayer\")");
     }
 
     private static string ReadRepoFile(string relativePath)

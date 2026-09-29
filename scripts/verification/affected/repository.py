@@ -140,6 +140,22 @@ class Repository:
         changed += self.git("ls-files", "--others", "--exclude-standard", "-z").split("\0")
         return sorted(set(changed) - {""})
 
+    def focus_paths(self, paths):
+        """Expand explicit module directories without pulling in sibling modules."""
+        focused = set()
+        for path in paths:
+            normalized = self.normalize(path)
+            candidate = self.root / normalized
+            if candidate.is_dir():
+                prefix = normalized.rstrip("/") + "/"
+                matches = [item for item in self.files if item.startswith(prefix) and (self.root / item).is_file()]
+                if not matches:
+                    raise ValueError("Focused module directory contains no Git-eligible files: " + normalized)
+                focused.update(matches)
+            else:
+                focused.add(normalized)
+        return sorted(focused)
+
     def snapshot(self):
         digest = hashlib.sha256()
         # Refresh inventory: edits and new files during a run invalidate evidence.

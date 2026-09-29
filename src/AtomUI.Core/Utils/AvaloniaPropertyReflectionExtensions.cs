@@ -8,8 +8,12 @@ namespace AtomUI.Utils;
 internal static class AvaloniaPropertyReflectionExtensions
 {
     private static readonly Lazy<PropertyInfo> NotifyingPropertyInfo = new(() =>
-        typeof(AvaloniaProperty).GetPropertyInfoOrThrow("Notifying",
-            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy));
+        FixedMemberReflection.RequireProperty(
+            typeof(AvaloniaProperty).GetProperty(
+                "Notifying",
+                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy),
+            typeof(AvaloniaProperty),
+            "Notifying"));
 
     public static void InvokeNotifying(this AvaloniaProperty property, AvaloniaObject target, bool status)
     {

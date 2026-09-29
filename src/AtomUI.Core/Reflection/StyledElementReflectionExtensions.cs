@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Avalonia;
 
@@ -8,10 +7,11 @@ internal static class StyledElementReflectionExtensions
 {
     #region 反射信息定义
     
-    [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicProperties, typeof(StyledElement))]
-    private static readonly Lazy<PropertyInfo> TemplatedParentPropertyInfo = new Lazy<PropertyInfo>(() =>
-        typeof(StyledElement).GetPropertyInfoOrThrow("TemplatedParent",
-            BindingFlags.Instance | BindingFlags.Public));
+    private static readonly Lazy<PropertyInfo> TemplatedParentPropertyInfo = new(() =>
+        FixedMemberReflection.RequireProperty(
+            typeof(StyledElement).GetProperty("TemplatedParent", BindingFlags.Instance | BindingFlags.Public),
+            typeof(StyledElement),
+            "TemplatedParent"));
     
     #endregion
     

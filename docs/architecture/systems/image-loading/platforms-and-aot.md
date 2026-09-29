@@ -114,6 +114,9 @@ Loader snapshot 和 event 只暴露有界 diagnostics：队列长度、active co
   注册，不通过运行时枚举属性。
 - `UseCommonControls()` 的 Package Core 以真实静态调用保留 image service factory、raster reader/codec、
   `SvgImageCodec`、安全验证器和直接引用的 SVG dependency 类型；AsyncImage/Avatar 的契约片段由官方 TypeMap 条件选择。
+- HTTP transport 的实例在首次网络 source read 时才创建，以避免未使用图片应用的启动对象；网络 reader 与 transport
+  类型仍属于 `UseCommonControls()` 的静态能力闭包。这一延迟只承诺减少未使用路径的运行时构造，不承诺链接器删除
+  `System.Net.Http` 或缩小 NativeAOT 文件，体积结论必须来自同口径发布测量。
 - 未被应用显式注册的自定义 codec/reader 不作为动态 fallback 保留。
 
 Browser 的交付门槛同时包含裁剪运行与 AOT 的真实启动、图片/主题行为和未用类型保留检查。

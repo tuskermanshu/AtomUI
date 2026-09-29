@@ -17,12 +17,15 @@ internal sealed class VerificationReceipt : IStep
     private readonly Dictionary<AssemblyDefinition, string> _inputHashes;
     private readonly Dictionary<MethodDefinition, string> _bodyHashes;
     private readonly HashSet<AssemblyDefinition> _symbolOutputs;
+    private readonly RegistrationMetadataIndex _metadata;
     internal bool SweepVerified { get; set; }
 
-    private VerificationReceipt(LinkContext context, string path, IReadOnlyList<MapSlot> slots)
+    private VerificationReceipt(LinkContext context, string path, IReadOnlyList<MapSlot> slots,
+        RegistrationMetadataIndex metadata)
     {
         _path = path;
         _slots = slots;
+        _metadata = metadata;
         _inputHashes = slots.Select(s => s.Accessor.Module.Assembly).Distinct().ToDictionary(a => a,
             a => HashFile(context.GetAssemblyLocation(a)));
         _symbolOutputs = slots.Select(s => s.Accessor.Module.Assembly).Where(a => context.LinkSymbols && a.MainModule.HasSymbols).ToHashSet();
@@ -38,12 +41,13 @@ internal sealed class VerificationReceipt : IStep
         return path;
     }
 
-    internal static VerificationReceipt? Schedule(LinkContext context, string? path, IReadOnlyList<MapSlot> slots)
+    internal static VerificationReceipt? Schedule(LinkContext context, string? path, IReadOnlyList<MapSlot> slots,
+        RegistrationMetadataIndex? metadata = null)
     {
         if (path is null) return null;
         if (!context.Pipeline.ContainsStep(typeof(OutputStep)))
             throw BackendDiagnostic.Unsupported("The TypeMap receipt requires the standard ILLink OutputStep after Sweep.");
-        var receipt = new VerificationReceipt(context, path, slots);
+        var receipt = new VerificationReceipt(context, path, slots, metadata ?? new RegistrationMetadataIndex());
         context.Pipeline.AddStepAfter(typeof(OutputStep), receipt);
         return receipt;
     }
@@ -70,14 +74,15 @@ internal sealed class VerificationReceipt : IStep
                     throw BackendDiagnostic.Unlowered($"Expected emitted symbols for '{assembly.Name.FullName}' are missing or unreadable.");
                 if (emitted.Name.FullName != assembly.Name.FullName)
                     throw BackendDiagnostic.Unlowered($"Output identity for '{assembly.Name.FullName}' changed after Sweep.");
+                var emittedMethods = _metadata.Methods(emitted);
                 foreach (var slot in _slots.Where(s => s.Accessor.Module.Assembly == assembly))
                 {
-                    var methods = RegistrationAbi.AllTypes(emitted.MainModule.Types).SelectMany(t => t.Methods)
+                    var methods = emittedMethods
                         .Where(m => m.FullName == slot.AccessorIdentity).Take(2).ToArray();
                     if (methods.Length != 1 || !methods[0].HasBody)
                         throw BackendDiagnostic.Unlowered($"Emitted accessor '{slot.AccessorIdentity}' is missing, ambiguous or has no body.");
                     var method = methods[0];
-                    slot.Contract.Validate(emitted, method);
+                    slot.Contract.Validate(emitted, method, _metadata);
                     if (HashBody(method) != _bodyHashes[slot.Accessor])
                         throw BackendDiagnostic.Unlowered($"Emitted accessor '{slot.Accessor.FullName}' does not match its verified lowered body.");
                 }
@@ -103,7 +108,11 @@ internal sealed class VerificationReceipt : IStep
         }
     }
 
-    private static string HashFile(string path) => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+    private static string HashFile(string path)
+    {
+        using var stream = File.OpenRead(path);
+        return Convert.ToHexString(SHA256.HashData(stream));
+    }
     private static string HashBody(MethodDefinition method)
     {
         var instructions = method.Body.Instructions.Select(i => new

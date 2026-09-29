@@ -143,16 +143,24 @@ Detailed AI collaboration rules live in [docs/engineering/contributing/agent-gui
 
 ## Common Commands
 
-Use [affected verification](docs/engineering/workflows/affected-verification.md) as the default. Inspect the plan, use direct scope while iterating, and verify consumers once before completion. Full regression is explicit; the solution does not enumerate every test project.
+Use [affected verification](docs/engineering/workflows/affected-verification.md) as the default. The following bug-fix sequence is a mandatory hard constraint:
+
+1. Reproduce with the exact failing test or test class.
+2. During implementation, run only the owning module through `run --scope iterate --path ...`; every iterate run must name its module paths explicitly.
+3. Do not run local `change` scope, affected-wide regression, or full regression while the fix is still changing.
+4. After all focused module tests are green and the implementation is stable, run `scripts/run-full-regression.sh` exactly once as the final regression gate.
+5. If that full run fails, let it finish and collect the complete failure list. Repair every failure with focused tests, then run one final full confirmation. Never rerun the full suite after each individual failure.
+
+These steps are enforced by the verification CLI. Local `change` scope requires an explicit branch base, local `full` scope is rejected, and focused iterate scope requires `--path`. CI may continue to use `--base`/`--tests-only` for selected or baseline jobs.
 
 ```bash
 python3 scripts/verification/test.py plan
-python3 scripts/verification/test.py run --scope iterate
-python3 scripts/verification/test.py run
+python3 scripts/verification/test.py run --scope iterate --path src/AtomUI.Desktop.Controls/Popup
+scripts/run-full-regression.sh
 python3 scripts/verification/test.py audit
 ```
 
-For committed branch changes pass `--base <target-branch>`. Direct project commands below are for diagnosis or an explicitly justified module-wide check:
+For CI or an explicitly requested committed-branch comparison, pass `--scope change --base <target-branch>`. Direct project commands below are for reproduction and module-focused diagnosis:
 
 ```bash
 dotnet test tests/AtomUI.Controls.Shared.Tests/AtomUI.Controls.Shared.Tests.csproj --framework net10.0 --no-restore

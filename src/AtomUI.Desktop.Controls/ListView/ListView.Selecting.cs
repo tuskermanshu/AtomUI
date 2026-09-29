@@ -363,7 +363,7 @@ public partial class ListView
 
     protected bool MoveSelection(NavigationDirection direction, bool wrap = false, bool rangeModifier = false)
     {
-        var focused = FocusManagerReflectionExtensions.GetFocusManager(this)?.GetFocusedElement();
+        var focused = TopLevel.GetTopLevel(this)?.FocusManager.GetFocusedElement();
         return MoveSelection(GetContainerFromEventSource(focused), direction, wrap, rangeModifier);
     }
 

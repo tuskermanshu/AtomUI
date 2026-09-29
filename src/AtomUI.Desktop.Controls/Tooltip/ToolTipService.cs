@@ -1,10 +1,10 @@
 using System.Reactive.Disposables;
 using AtomUI.Controls;
-using AtomUI.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
+using Avalonia.Rendering;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 
@@ -40,12 +40,12 @@ public sealed class ToolTipService : IDisposable
         {
             bool isTooltipEvent = false;
             if (_tipControl?.GetValue(ToolTip.ToolTipProperty) is { } currentTip
-                && e.Root == currentTip.GetVisualRoot() as IInputRoot)
+                && e.Root == GetInputRoot(currentTip))
             {
                 isTooltipEvent = true;
                 _lastTipEventTime = pointerEvent.Timestamp;
             }
-            else if (e.Root.GetRootElement() == _tipControl?.GetVisualRoot())
+            else if (GetRootVisual(e.Root) == _tipControl?.GetVisualRoot())
             {
                 _lastWindowEventTime = pointerEvent.Timestamp;
             }
@@ -56,7 +56,7 @@ public sealed class ToolTipService : IDisposable
                     Update(pointerEvent.Root, pointerEvent.GetInputHitTestResult().element as Visual);
                     break;
                 case RawPointerEventType.LeaveWindow
-                    when (e.Root.GetRootElement() == _tipControl?.GetVisualRoot() &&
+                    when (GetRootVisual(e.Root) == _tipControl?.GetVisualRoot() &&
                           _lastTipEventTime != e.Timestamp) ||
                          (isTooltipEvent && _lastWindowEventTime != e.Timestamp):
                     ClearTip();
@@ -83,11 +83,23 @@ public sealed class ToolTipService : IDisposable
         }
     }
 
+    internal static Visual GetRootVisual(IInputRoot inputRoot)
+    {
+        ArgumentNullException.ThrowIfNull(inputRoot);
+        if (inputRoot is not IPresentationSource { RootVisual: { } rootVisual })
+        {
+            throw new InvalidOperationException(
+                $"The input root must expose its visual root through {nameof(IPresentationSource)}.");
+        }
+
+        return rootVisual;
+    }
+
     public void Update(IInputRoot root, Visual? candidateToolTipHost)
     {
         var currentToolTip = _tipControl?.GetValue(ToolTip.ToolTipProperty);
 
-        if (root == currentToolTip?.GetVisualRoot() as IInputRoot)
+        if (root == GetInputRoot(currentToolTip))
         {
             return;
         }
@@ -126,6 +138,9 @@ public sealed class ToolTipService : IDisposable
         HandleTipControlChanged(_tipControl, newControl);
         _tipControl = newControl;
     }
+
+    private static IInputRoot? GetInputRoot(Visual? visual) =>
+        visual?.GetPresentationSource() as IInputRoot;
 
     private void ServiceEnabledChanged(AvaloniaPropertyChangedEventArgs<bool> args)
     {

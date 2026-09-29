@@ -2,6 +2,7 @@ using AtomUI.Controls;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -21,6 +22,74 @@ public class TextInputLifecycleTests
     static TextInputLifecycleTests()
     {
         AvaloniaTestApp.EnsureInitialized();
+    }
+
+    [Fact]
+    public void TextArea_Caret_And_Mention_Geometry_Use_The_Current_Template_Presenter()
+    {
+        var autoComplete = new TestAutoCompleteTextAreaBox
+        {
+            Text = "value",
+            CaretIndex = 2
+        };
+        var firstAutoPresenter = CreatePresenter("value", 12);
+        autoComplete.ApplyPresenter(firstAutoPresenter);
+        var firstAutoBounds = autoComplete.GetCaretBounds();
+
+        var secondAutoPresenter = CreatePresenter("value", 28);
+        autoComplete.ApplyPresenter(secondAutoPresenter);
+        var secondAutoBounds = autoComplete.GetCaretBounds();
+
+        secondAutoBounds.ShouldBe(secondAutoPresenter.TextLayout.HitTestTextPosition(autoComplete.CaretIndex));
+        secondAutoBounds.ShouldNotBe(firstAutoBounds);
+
+        var mention = new TestMentionTextArea
+        {
+            TriggerPrefix = ["@"]
+        };
+        var firstMentionPresenter = CreatePresenter("@a", 12);
+        mention.ApplyPresenter(firstMentionPresenter);
+        Rect? firstTriggerBounds = null;
+        EventHandler<ShowMentionCandidateRequestEventArgs> firstHandler =
+            (_, args) => firstTriggerBounds = args.TriggerBounds;
+        mention.CandidateOpenRequest += firstHandler;
+        mention.Text = "@a";
+        mention.CaretIndex = 2;
+        mention.CandidateOpenRequest -= firstHandler;
+        firstTriggerBounds.ShouldBe(firstMentionPresenter.TextLayout.HitTestTextPosition(0));
+
+        var secondMentionPresenter = CreatePresenter("@ab", 28);
+        mention.ApplyPresenter(secondMentionPresenter);
+        Rect? secondTriggerBounds = null;
+        mention.CandidateOpenRequest += (_, args) => secondTriggerBounds = args.TriggerBounds;
+        mention.Text = "@ab";
+        mention.CaretIndex = 3;
+
+        secondTriggerBounds.ShouldBe(secondMentionPresenter.TextLayout.HitTestTextPosition(0));
+        secondTriggerBounds.ShouldNotBe(firstTriggerBounds);
+    }
+
+    [Fact]
+    public void TextArea_Template_Still_Requires_PART_TextPresenter()
+    {
+        Should.Throw<KeyNotFoundException>(() => new TestAutoCompleteTextAreaBox().ApplyMissingPresenter());
+        Should.Throw<KeyNotFoundException>(() => new TestMentionTextArea().ApplyMissingPresenter());
+    }
+
+    [Fact]
+    public void TextArea_Geometry_Does_Not_Reflect_The_Base_Presenter_Field()
+    {
+        var repoRoot = GetRepoRoot();
+        File.ReadAllText(Path.Combine(repoRoot,
+                "src/AtomUI.Desktop.Controls/AutoComplete/AutoCompleteTextAreaBox.cs"))
+            .ShouldNotContain("this.GetTextPresenter()");
+        File.ReadAllText(Path.Combine(repoRoot,
+                "src/AtomUI.Desktop.Controls/Mentions/MentionTextArea.cs"))
+            .ShouldNotContain("this.GetTextPresenter()");
+        var reflectionSource = File.ReadAllText(Path.Combine(repoRoot,
+            "src/AtomUI.Desktop.Controls/Input/Utils/TextBoxReflectionExtensions.cs"));
+        reflectionSource.ShouldNotContain("TextPresenterFieldInfo");
+        reflectionSource.ShouldNotContain("GetTextPresenter(");
     }
 
     [Theory]
@@ -218,6 +287,33 @@ public class TextInputLifecycleTests
         return input;
     }
 
+    private static TextPresenter CreatePresenter(string text, double fontSize)
+    {
+        var presenter = new TextPresenter
+        {
+            Text = text,
+            FontSize = fontSize
+        };
+        presenter.Measure(new Size(300, 100));
+        return presenter;
+    }
+
+    private static string GetRepoRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            if (Directory.Exists(Path.Combine(directory.FullName, "src/AtomUI.Desktop.Controls")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Unable to locate the AtomUI repository root.");
+    }
+
     private static FeedbackLifecycleCase CreateFeedbackLifecycleCase(
         string controlKind,
         FormValidateFeedback feedback)
@@ -305,4 +401,38 @@ public class TextInputLifecycleTests
     }
 
     private sealed record FeedbackLifecycleCase(Control Control, Func<bool> IsFeedbackVisible);
+
+    private sealed class TestAutoCompleteTextAreaBox : AutoCompleteTextAreaBox
+    {
+        internal void ApplyPresenter(TextPresenter presenter) => ApplyTemplatePart(presenter);
+
+        internal void ApplyMissingPresenter() => ApplyTemplatePart(null);
+
+        private void ApplyTemplatePart(TextPresenter? presenter)
+        {
+            var nameScope = new NameScope();
+            if (presenter is not null)
+            {
+                nameScope.Register("PART_TextPresenter", presenter);
+            }
+            OnApplyTemplate(new TemplateAppliedEventArgs(nameScope));
+        }
+    }
+
+    private sealed class TestMentionTextArea : MentionTextArea
+    {
+        internal void ApplyPresenter(TextPresenter presenter) => ApplyTemplatePart(presenter);
+
+        internal void ApplyMissingPresenter() => ApplyTemplatePart(null);
+
+        private void ApplyTemplatePart(TextPresenter? presenter)
+        {
+            var nameScope = new NameScope();
+            if (presenter is not null)
+            {
+                nameScope.Register("PART_TextPresenter", presenter);
+            }
+            OnApplyTemplate(new TemplateAppliedEventArgs(nameScope));
+        }
+    }
 }

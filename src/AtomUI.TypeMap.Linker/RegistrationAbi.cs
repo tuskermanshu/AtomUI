@@ -12,12 +12,19 @@ internal sealed record MapSlot(string PackageId, TypeDefinition Group, MethodDef
     internal LoweredMapContract Contract { get; set; } = null!;
 }
 
-internal sealed class RegistrationAbi(LinkContext context)
+internal sealed class RegistrationAbi
 {
     private const string MarkerName = "AtomUI.Registration.ControlPackageMarkerAttribute";
     private const string AccessorName = "AtomUI.Registration.GeneratedTypeMapAccessorAttribute";
     private const string FragmentName = "AtomUI.Registration.ControlRegistrationFragmentAttribute";
-    private readonly LinkContext _context = context;
+    private readonly LinkContext _context;
+    private readonly RegistrationMetadataIndex _metadata;
+
+    internal RegistrationAbi(LinkContext context, RegistrationMetadataIndex metadata)
+    {
+        _context = context;
+        _metadata = metadata;
+    }
 
     internal IReadOnlyList<MapSlot> Read()
     {
@@ -49,7 +56,7 @@ internal sealed class RegistrationAbi(LinkContext context)
         var slots = new List<MapSlot>();
         foreach (var (assembly, id, group, core) in packages)
         {
-            var markedAccessors = AllTypes(assembly.MainModule.Types).SelectMany(t => t.Methods)
+            var markedAccessors = _metadata.Methods(assembly)
                 .Where(m => _context.Annotations.IsMarked(m) && m.CustomAttributes.Any(a => a.AttributeType.FullName == AccessorName)).ToArray();
             if (markedAccessors.Length == 0) continue;
             if (markedAccessors.Length != 1)
@@ -196,9 +203,9 @@ internal sealed class RegistrationAbi(LinkContext context)
         }
     }
 
-    private static TypeDefinition? FindDefinition(ModuleDefinition module, string fullName)
+    private TypeDefinition? FindDefinition(ModuleDefinition module, string fullName)
     {
-        var matches = AllTypes(module.Types).Where(t => t.FullName == fullName).Take(2).ToArray();
+        var matches = _metadata.Types(module.Assembly).Where(t => t.FullName == fullName).Take(2).ToArray();
         if (matches.Length > 1) throw BackendDiagnostic.Conflict($"Duplicate metadata type '{fullName}' in '{module.Name}'.");
         return matches.SingleOrDefault();
     }

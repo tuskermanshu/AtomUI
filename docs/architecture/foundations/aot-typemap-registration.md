@@ -36,8 +36,8 @@
     "Button/style-content", typeof(ButtonRegistration), typeof(ButtonContentStyle))]
 ```
 
-不得为同一个 key 声明不同 trimTarget 来模拟 OR；不同条件必须使用不同 key。Key 的唯一性包含具体 Group 和稳定的
-程序集/类型身份，不能以简单类型名替代完整身份。
+不得为同一个 key 声明不同 trimTarget 来模拟 OR；不同条件必须使用不同 key。生成器以具体 Group、Control 完整程序集
+身份和条件类型完整身份计算版本化短 key，并在生成期检查 hash 碰撞。不能以简单类型名、源码顺序或目录替代完整输入身份。
 
 所有类型、Token、主题和代码引用先交给官方链接器计算闭包。片段不递归调用其他片段；类型之间的保留循环由官方闭包收敛，
 不需要 AtomUI 的运行时 visited graph 或应用 SCC planner。
@@ -65,6 +65,7 @@ TypeMap 不提供可用的枚举契约。生成器产生纯字符串候选 key �
 
 候选表禁止包含 Control Type、代理实例、descriptor、资源实例或工厂 delegate。候选 key 数量决定查询次数，实际保留的
 proxy 数量决定激活次数；不能为省去有限查询而引入全量类型根。
+短 key 只减少生成字符串和元数据负担，不改变候选查询次数，也不作为资源优先级或运行时诊断文本。
 
 每个包必须生成具体、闭合、非泛型 accessor：
 

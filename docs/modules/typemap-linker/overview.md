@@ -99,11 +99,16 @@ WASM SDK/runtime assets `10.0.10`，能力值为 `atomui-typemap-v1-illink-10.0.
 `Skip` 等 action 不保证方法有 Mark 记录，因此先筛 `IsMarked` 会把未转换包误判成零 slot。
 工具不在 Mark 后改变 action，也不再次执行 Mark。
 
+后端按验证阶段建立实例级元数据索引。同一输入程序集的嵌套类型和方法在读取阶段只展开一次；Sweep 后使用新的延迟索引，
+避免用 Sweep 前的 Cecil 定义掩盖已删除成员；OutputStep 后重读的程序集再以其自身定义建立索引。索引只复用元数据枚举结果，
+不缓存或重新计算 `Annotations.IsMarked` 的可达性结论。
+
 `AtomUITypeMapReceipt` custom-data 可指定绝对回执路径。工具开始时删除旧回执，保存原始输入哈希，
 通过实例持有的 `MethodDefinition` 在 Sweep 后检查，然后在公开 `OutputStep` 后重新读取自己的输出方法，
 核对完成方法体并写入 `output-verified` JSON。回执只含工具/ABI身份、已验证 package/Group/accessor 身份及
 输入/输出/方法体哈希，不是运行时注册输入。零 slot 的成功执行也写回执，从而与步骤未运行区分。
 自动构建接线必须要求匹配本次工具与输入的回执；不能把“文件存在”当作有效性证明。
+工具、输入、符号、回执和输出文件均以流式 SHA-256 读取，哈希内容与格式不变，并避免为大文件分配等长字节数组。
 
 回执的程序集输出哈希绑定 **ILLink 输出和实际 AOT 输入**。Mono AOT 随后可能剥离已编译方法的 IL，
 因此最终部署程序集使用独立的 metadata/运行验证，不要求其字节哈希与 AOT 前相同。构建门禁应在 AOT 前

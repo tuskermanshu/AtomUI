@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Shouldly;
 using Xunit;
@@ -7,6 +8,37 @@ namespace AtomUI.Build.Tasks.Tests;
 
 public class TypeMapReceiptIntegrityTests
 {
+    [Theory]
+    [InlineData(0)]
+    [InlineData(17)]
+    [InlineData(4 * 1024 * 1024)]
+    public void File_hash_matches_SHA256_oracle(int size)
+    {
+        var path = Path.Combine(Path.GetTempPath(), "atomui-hash-" + Guid.NewGuid().ToString("N"));
+        var bytes = new byte[size];
+        new Random(42).NextBytes(bytes);
+        File.WriteAllBytes(path, bytes);
+        try
+        {
+            TypeMapBuildContract.Hash(path).ShouldBe(Convert.ToHexString(SHA256.HashData(bytes)));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Production_hash_does_not_buffer_the_whole_file()
+    {
+        var source = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/AtomUI.Build.Tasks/ResolveRegistrationToolsTask.cs"));
+
+        source.ShouldNotContain("File.ReadAllBytes");
+        source.ShouldContain("SHA256.HashData(stream)");
+    }
+
     [Fact]
     public void Valid_zero_slot_receipt_is_bound_and_reusable()
     {
@@ -90,5 +122,19 @@ public class TypeMapReceiptIntegrityTests
         internal VerifyTypeMapReceiptTask Task(bool bind) => new() { BuildEngine = Engine, ReceiptPath = Receipt, SignaturePath = Signature, BindReceipt = bind };
         internal bool Verify(bool bind) => Task(bind).Execute();
         public void Dispose() => System.IO.Directory.Delete(Directory, true);
+    }
+
+    private static string GetRepoRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            if (Directory.Exists(Path.Combine(directory.FullName, "src/AtomUI.Build.Tasks")))
+            {
+                return directory.FullName;
+            }
+            directory = directory.Parent;
+        }
+        throw new DirectoryNotFoundException("Unable to locate the AtomUI repository root.");
     }
 }

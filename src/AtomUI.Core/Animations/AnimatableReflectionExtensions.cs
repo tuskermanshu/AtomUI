@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AtomUI.Reflection;
 using Avalonia.Animation;
@@ -8,15 +7,17 @@ namespace AtomUI.Animations;
 public static class AnimatableReflectionExtensions
 {
     #region 反射信息定义
-    [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicMethods, typeof(Animatable))]
-    private static readonly Lazy<MethodInfo> EnableTransitionsMethodInfo = new Lazy<MethodInfo>(() =>
-        typeof(Animatable).GetMethodInfoOrThrow("EnableTransitions",
-            BindingFlags.Instance | BindingFlags.NonPublic));
+    private static readonly Lazy<MethodInfo> EnableTransitionsMethodInfo = new(() =>
+        FixedMemberReflection.RequireMethod(
+            typeof(Animatable).GetMethod("EnableTransitions", BindingFlags.Instance | BindingFlags.NonPublic),
+            typeof(Animatable),
+            "EnableTransitions"));
 
-    [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicMethods, typeof(Animatable))]
-    private static readonly Lazy<MethodInfo> DisableTransitionsMethodInfo = new Lazy<MethodInfo>(() =>
-        typeof(Animatable).GetMethodInfoOrThrow("DisableTransitions",
-            BindingFlags.Instance | BindingFlags.NonPublic));
+    private static readonly Lazy<MethodInfo> DisableTransitionsMethodInfo = new(() =>
+        FixedMemberReflection.RequireMethod(
+            typeof(Animatable).GetMethod("DisableTransitions", BindingFlags.Instance | BindingFlags.NonPublic),
+            typeof(Animatable),
+            "DisableTransitions"));
     #endregion
 
     public static void EnableTransitions(this Animatable animatable)

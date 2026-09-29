@@ -1,6 +1,6 @@
 # 按改动影响选择验证
 
-本文定义 AtomUI 日常验证入口、影响选择规则和结果有效性。全量测试是显式基线；常规迭代使用受影响范围，
+本文定义 AtomUI 日常验证入口、影响选择规则和结果有效性。Bug 修复采用“精确复现 → 模块迭代 → 一次最终全量”；
 不能把 `dotnet test AtomUI.slnx` 当作默认或完整测试清单。测试项目由仓库实际 `.csproj` 发现，不依赖解决方案是否收录。
 
 ## 日常入口
@@ -11,25 +11,37 @@
 # 查看本地暂存、未暂存、新增、删除和重命名输入对应的计划
 python3 scripts/verification/test.py plan
 
-# 开发过程：控件/功能域的直接验证，不构成最终交付验证
-python3 scripts/verification/test.py run --scope iterate
+# Bug 修复开发过程：必须显式限制到缺陷模块，可重复传入 --path
+python3 scripts/verification/test.py run --scope iterate \
+  --path src/AtomUI.Desktop.Controls/Popup \
+  --path tests/AtomUI.Desktop.Controls.Tests/Popup
 
-# 收尾：直接影响 + 必要消费路径，一次构建后执行选中的测试
-python3 scripts/verification/test.py run
+# Bug 修复完成后的唯一最终全量门禁
+scripts/run-full-regression.sh
 
-# 已提交分支：显式提供比较基线，同时纳入本地修改
-python3 scripts/verification/test.py run --base origin/main
+# 分支/CI affected 比较：必须显式提供比较基线
+python3 scripts/verification/test.py run --scope change --base origin/main
 
 # 需要额外验证时只追加，不替换自动选择的测试
-python3 scripts/verification/test.py run --include-test 'tests/AtomUI.Desktop.Controls.Tests/ScrollViewer/**/*.cs'
+python3 scripts/verification/test.py run --scope iterate \
+  --path src/AtomUI.Desktop.Controls/ScrollViewer \
+  --include-test 'tests/AtomUI.Desktop.Controls.Tests/ScrollViewer/**/*.cs'
 ```
 
 `origin/main` 是基线参数示例，使用实际目标分支。`--base` 使用与 HEAD 的 merge-base；默认 HEAD 只比较工作区，
 工作区干净时报告 `no-changes`，不会声称已验证整个分支。所有运行认证**当前工作树**；暂存版本与工作树不同的文件
 单独列出，不能用这份报告声称暂存快照已经验证。
 
-`plan --path <path>` 可以反复传入路径试算，输出明确标记为 preview，不能交给 runner 当成当前改动的验证证据。
+`plan --path <path>` 可以反复传入路径试算，输出明确标记为 preview。`run --scope iterate --path <path>` 是实际的
+Bug 修复模块验证，只认证这些显式路径；它不读取工作树中的其他改动来扩大范围，也不能作为 change/full 证据。
 `--json` 输出全部测试类、源文件、命中理由、编译项目、覆盖缺口和专项义务。
+
+CLI 硬拒绝以下误用：iterate 未传 `--path`、focused `--path` 搭配 change/full、本地无 `--base` 的 change、以及 agent
+通过 `test.py run --scope full` 发起全量。`--tests-only` 保留给 CI test phase；agent 不得把它作为本地绕过参数。
+iterate 只使用模块自身的所有权、符号和测试文件关系；跨模块显式规则、消费者传播和专项执行均延后到最终全量。
+
+最终全量若出现失败，当前全量进程继续执行以一次收集完整失败清单。每个失败分别回到精确测试和 focused 模块验证；
+所有失败局部转绿后，只再运行一次最终全量确认。不得在每个失败修复后分别启动全量，也不得因全量失败而丢弃已经收集的其他项目结果。
 
 ## 选择依据
 
@@ -84,7 +96,7 @@ runner 用临时 solution 汇总选中项目，一次构建共享依赖；构建
 | --- | --- | --- |
 | `passed` | 本次计划内检查完成，不代表整个仓库已验证 | 0 |
 | `reused` | 相同输入/配置/产物匹配已有通过证据，保留原验证时间 | 0 |
-| `iteration-passed` | 开发阶段直接验证通过，仍需执行 change 范围 | 0 |
+| `iteration-passed` | 指定模块的开发阶段验证通过；Bug 修复稳定后仍需一次最终全量 | 0 |
 | `tests-passed` | 显式 `--tests-only` 的测试阶段通过，专项义务仍单独列出 | 0 |
 | `no-changes` | 当前比较范围没有改动，没有执行测试 | 0 |
 | `pending` | 测试通过，但仍有专项验证义务 | 2 |
@@ -116,13 +128,13 @@ runner 用临时 solution 汇总选中项目，一次构建共享依赖；构建
 工具不提供 `--ignore-obligations` 或仅凭文字声明生成成功 receipt 的开关。NativeAOT publish 也不等于 UI 行为验证；
 hover、滚动、裁剪、资源释放等仍保留原始复现条件和交互/生命周期检查。
 
-依赖与 SDK 变更需要显式全量及目标平台/TFM 验证；常规执行不会为了扩大范围自动运行全量。
+依赖与 SDK 变更需要显式全量及目标平台/TFM 验证；focused 执行不会为了扩大范围自动运行全量。
 
 ## 全量、CI 和维护
 
 ```bash
-# 用户明确要求或版本发布时使用，发现全部测试项目
-python3 scripts/verification/test.py run --scope full --fresh
+# Bug 修复最终门禁、用户明确要求或版本发布时使用
+scripts/run-full-regression.sh
 
 # 维护影响规则时的快速检查
 python3 scripts/verification/test.py audit
@@ -130,7 +142,8 @@ python3 scripts/verification/test.py self-test
 python3 scripts/verification/test.py metrics
 ```
 
-`.github/workflows/verify-affected.yml` 在 PR 上按基线选择测试，保存短期紧凑报告；手动 workflow 可以显式选择全量。
+`.github/workflows/verify-affected.yml` 在 PR 上按基线选择测试，保存短期紧凑报告；手动 workflow 的 full test phase
+是 CI 例外，仍使用 `test.py --tests-only` 生成机器可读证据。agent 本地最终全量只使用带进度、ETA、继续收集失败的脚本。
 CI 没有定期全量任务，不改仓库 branch protection；是否要求该 job 通过由仓库管理员配置。
 该 job 明确命名为 `Selected tests and impact report`，使用 `--tests-only`，成功只表示选中的测试阶段通过；
 专项义务仍保留在 JSON 中，必须由发布/平台检查单独覆盖。这个 job 不承担发布可用性 gate，不能把它的绿色结果

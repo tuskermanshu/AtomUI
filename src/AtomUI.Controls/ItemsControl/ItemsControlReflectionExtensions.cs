@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AtomUI.Reflection;
 using Avalonia.Controls;
@@ -9,10 +8,11 @@ internal static class ItemsControlReflectionExtensions
 {
     #region 反射信息定义
 
-    [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicProperties, typeof(ItemsControl))]
-    private static readonly Lazy<PropertyInfo> WrapFocusPropertyInfo = new Lazy<PropertyInfo>(() => 
-        typeof(ItemsControl).GetPropertyInfoOrThrow("WrapFocus",
-            BindingFlags.Instance | BindingFlags.NonPublic));
+    private static readonly Lazy<PropertyInfo> WrapFocusPropertyInfo = new(() =>
+        FixedMemberReflection.RequireProperty(
+            typeof(ItemsControl).GetProperty("WrapFocus", BindingFlags.Instance | BindingFlags.NonPublic),
+            typeof(ItemsControl),
+            "WrapFocus"));
     
     #endregion
     

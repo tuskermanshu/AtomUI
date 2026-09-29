@@ -29,6 +29,11 @@ Desktop 全部资产工厂生成文本与迁移前一致，包括有效平台域
 两组均满足至少缩小 40% 的相对门槛，但均未达到 18 MiB 的绝对门槛，不能宣称体积验收完成。
 样例仅使用 AlibabaSans，没有中文字体包；不得以移除正常全球化、图片服务或诊断能力满足门槛。
 
+2026-09-29 在相同 SDK、RID、字体与配置下，固定反射保留收窄和短 TypeMap key 合并后的默认 selected/full 主程序为
+20,182,000 / 45,001,952 bytes，selected 缩小 55.15%；`OptimizationPreference=Size` 下为
+19,717,728 / 44,139,696 bytes，selected 缩小 55.33%。两组均通过运行检查和 40% 相对门槛；默认 selected 距
+18 MiB 门槛仍差 1,307,632 bytes（1.25 MiB），Size selected 仍差 843,360 bytes（0.80 MiB），因此绝对体积门槛仍未通过。
+
 此前 Gallery Tab overflow shadow 渲染理论在原始基线及迁移分支均出现过失败，尚未确定成因；
 本次受影响渲染组 77/77 通过，但没有通过修改阴影实现来消除此历史问题。
 该失败不通过修改 Tab 几何或削弱像素断言绕过。完整 Browser Gallery、Windows/Linux/iOS 与较旧 macOS 的运行验证

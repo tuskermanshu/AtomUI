@@ -17,6 +17,8 @@ from affected.runner import run_verification, run_specialist_check
 def print_plan(plan):
     count = sum(len(j["classes"]) for j in plan["tests"])
     print("Scope: " + plan["scope"] + (" (preview with supplied paths)" if plan.get("preview") else ""))
+    if plan.get("focused"):
+        print("FOCUSED BUG-FIX ITERATION: validates only the supplied module paths; it does not certify the working tree.")
     print(str(len(plan["changes"])) + " changed inputs; " + str(len(plan["tests"])) + "/" + str(plan["inventory"]["projects"]) + " test projects; " + str(count) + " test classes")
     for job in plan["tests"]:
         print("  " + job["project"] + ": " + str(len(job["classes"])) + " classes")
@@ -32,7 +34,7 @@ def print_plan(plan):
         print("REQUIRED " + check["id"] + ": " + check["description"])
     if not plan["changes"] and plan["scope"] != "full":
         print("No local changes relative to HEAD. Use --base REF to include committed branch changes.")
-    print("Full verification is explicit: run --scope full. A focused run does not certify the entire repository.")
+    print("Final full regression is explicit: run scripts/run-full-regression.sh once after the bug-fix loop is green.")
 
 
 def parser():
@@ -45,9 +47,10 @@ def parser():
         command.add_argument("--scope", choices=("iterate", "change", "full"), default="change")
         command.add_argument("--json", action="store_true", help="Print structured output")
         command.add_argument("--include-test", action="append", default=[], help="Add a test source glob; never removes automatically selected tests")
-        if name == "plan":
-            command.add_argument("--path", action="append", help="Preview specified paths without running tests (repeatable)")
-        else:
+        command.add_argument("--path", action="append", help=(
+            "Preview specified paths without running tests (repeatable)" if name == "plan" else
+            "Bug-fix module path to verify; repeatable and valid only with --scope iterate"))
+        if name == "run":
             command.add_argument("--fresh", action="store_true", help="Do not reuse a passing receipt")
             command.add_argument("--tests-only", action="store_true", help="Report only the test phase; preserve outstanding specialist obligations (CI test job)")
             command.add_argument("--timeout", type=int, default=1800, help="Seconds per build/test command")
@@ -63,8 +66,30 @@ def parser():
     return result
 
 
+def validate_run_arguments(args):
+    if args.command != "run":
+        return
+    paths = args.path or []
+    if paths and args.scope != "iterate":
+        raise ValueError("--path is only valid with --scope iterate; focused paths cannot certify change or full coverage")
+    if args.scope == "iterate":
+        if not paths:
+            raise ValueError("Bug-fix iteration requires at least one --path for the affected module")
+        if args.base:
+            raise ValueError("--base cannot be combined with focused --scope iterate --path verification")
+    elif args.scope == "change" and not args.base and not args.tests_only:
+        raise ValueError("Local bug fixing must use --scope iterate --path; branch/CI change verification requires --base")
+    elif args.scope == "full" and not args.tests_only:
+        raise ValueError("Final full regression must use scripts/run-full-regression.sh")
+
+
+def verification_changes(args, repository):
+    return repository.focus_paths(args.path) if args.path else repository.changes(args.base)
+
+
 def main(argv=None):
     args = parser().parse_args(argv)
+    validate_run_arguments(args)
     started = time.monotonic()
     root = args.root.resolve()
     output = root / ".artifacts/verification"
@@ -96,9 +121,13 @@ def main(argv=None):
                 print("BLOCKED: " + error)
         return 2 if audit["errors"] else 0
     preview = args.command == "plan" and bool(args.path)
+    focused = args.command == "run" and bool(args.path)
     base = repository.git("merge-base", "HEAD", args.base).strip() if args.base else "HEAD"
-    plan = planner.plan(args.path if preview else repository.changes(args.base), scope=args.scope, base=base, extra_tests=args.include_test)
+    plan = planner.plan(verification_changes(args, repository), scope=args.scope, base=base, extra_tests=args.include_test)
     plan["preview"] = preview
+    plan["focused"] = focused
+    if focused:
+        plan["validates"] = "selected-paths"
     plan["base"] = repository.git("rev-parse", base).strip()
     plan["gaps"] = sorted(set(plan["gaps"] + audit["errors"]))
     if args.command == "plan":

@@ -74,14 +74,15 @@ public sealed class ControlThemeAssetDescriptor
         : this(assetId, assetUri, exportedThemes, requiredTokenOwners, semanticThemeBindings, 0)
     {
         ArgumentNullException.ThrowIfNull(compiledGlobalTokenNames);
-        var names = compiledGlobalTokenNames.ToArray();
-        if (ThemeSchemaRegistry.ComputeGeneratedContractFingerprint(this, names) != compiledContractFingerprint)
+        if (ThemeSchemaRegistry.ComputeGeneratedContractFingerprint(this, compiledGlobalTokenNames) != compiledContractFingerprint)
         {
             throw new ThemeSchemaException($"Control theme asset '{AssetUri}' has stale generated contract evidence.");
         }
         // Full runtime Type identities are materialized only for this selected descriptor. The
         // registry later checks this fingerprint independently against its actual global schema.
-        ResourceKeySchemaFingerprint = ThemeSchemaRegistry.ComputeGeneratedResourceKeySchemaFingerprint(this, names);
+        ResourceKeySchemaFingerprint = ThemeSchemaRegistry.ComputeGeneratedResourceKeySchemaFingerprint(
+            this,
+            compiledGlobalTokenNames);
     }
 
     internal bool HasSameMetadata(ControlThemeAssetDescriptor other) =>

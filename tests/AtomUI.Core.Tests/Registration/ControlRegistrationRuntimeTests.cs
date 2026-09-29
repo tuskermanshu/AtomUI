@@ -60,15 +60,18 @@ public class ControlRegistrationRuntimeTests
     [InlineData("complete")]
     public void Failed_Registration_Poisons_Build_And_Other_Builders_Remain_Independent(string phase)
     {
-        var builder = new AtomUIBuilder(new Application());
-        Should.Throw<InvalidOperationException>(() => ControlRegistrationRuntime.RegisterPackage(builder, "Test",
-            () => { Fail("provider"); return new Provider("Test"); }, _ => Fail("collect"), _ => Fail("prepare"), _ => Fail("complete")));
-        Should.Throw<InvalidOperationException>(() => builder.ThemeManagerBuilder.Build());
-        var other = new AtomUIBuilder(new Application());
-        ControlRegistrationRuntime.RegisterPackage(other, "Test", static () => new Provider("Test"), static _ => { });
-        using var manager = other.ThemeManagerBuilder.Build();
-        return;
-        void Fail(string at) { if (phase == at) throw new InvalidOperationException(at); }
+        HeadlessTestApp.Run(() =>
+        {
+            var builder = new AtomUIBuilder(new Application());
+            Should.Throw<InvalidOperationException>(() => ControlRegistrationRuntime.RegisterPackage(builder, "Test",
+                () => { Fail("provider"); return new Provider("Test"); }, _ => Fail("collect"), _ => Fail("prepare"), _ => Fail("complete")));
+            Should.Throw<InvalidOperationException>(() => builder.ThemeManagerBuilder.Build());
+            var other = new AtomUIBuilder(new Application());
+            ControlRegistrationRuntime.RegisterPackage(other, "Test", static () => new Provider("Test"), static _ => { });
+            using var manager = other.ThemeManagerBuilder.Build();
+            return;
+            void Fail(string at) { if (phase == at) throw new InvalidOperationException(at); }
+        });
     }
 
     [Theory]
@@ -125,57 +128,66 @@ public class ControlRegistrationRuntimeTests
     [InlineData(false)]
     public void Foreign_Owner_Is_Validated_Only_After_All_Packages_Are_Collected(bool provideOwner)
     {
-        var builder = new AtomUIBuilder(new Application());
-        var owner = ControlTokenIdentity.ForControl(typeof(Button), "Foreign", "Button");
-        var factories = 0;
-        var asset = ControlThemeAssetContractTests.Asset([], [owner], globals: GeneratedThemeSchema.GetGlobalTokens());
-        ControlRegistrationRuntime.RegisterPackage(builder, "First", static () => new Provider("First"), collection =>
+        HeadlessTestApp.Run(() =>
         {
-            collection.AddThemeAsset(asset, new(asset.AssetId, ControlResourcePhase.Control, 0, () => { factories++; return new ResourceDictionary(); }));
+            var builder = new AtomUIBuilder(new Application());
+            var owner = ControlTokenIdentity.ForControl(typeof(Button), "Foreign", "Button");
+            var factories = 0;
+            var asset = ControlThemeAssetContractTests.Asset([], [owner], globals: GeneratedThemeSchema.GetGlobalTokens());
+            ControlRegistrationRuntime.RegisterPackage(builder, "First", static () => new Provider("First"), collection =>
+            {
+                collection.AddThemeAsset(asset, new(asset.AssetId, ControlResourcePhase.Control, 0, () => { factories++; return new ResourceDictionary(); }));
+            });
+            factories.ShouldBe(0);
+            if (provideOwner)
+            {
+                ControlRegistrationRuntime.RegisterPackage(builder, "Later", static () => new Provider("Later"), collection => collection.AddControl(new(typeof(Button), owner)));
+                using var manager = builder.ThemeManagerBuilder.Build();
+            }
+            else
+            {
+                Should.Throw<ThemeSchemaException>(() => builder.ThemeManagerBuilder.Build());
+            }
+            factories.ShouldBe(0);
         });
-        factories.ShouldBe(0);
-        if (provideOwner)
-        {
-            ControlRegistrationRuntime.RegisterPackage(builder, "Later", static () => new Provider("Later"), collection => collection.AddControl(new(typeof(Button), owner)));
-            using var manager = builder.ThemeManagerBuilder.Build();
-        }
-        else
-        {
-            Should.Throw<ThemeSchemaException>(() => builder.ThemeManagerBuilder.Build());
-        }
-        factories.ShouldBe(0);
     }
 
     [Fact]
     public void Semantic_Only_Contract_Is_Legal_But_Conflicting_Token_Owner_Is_Not()
     {
-        var builder = new AtomUIBuilder(new Application());
-        var identity = ControlTokenIdentity.ForControl(typeof(Button), "Test", "Button");
-        ControlRegistrationRuntime.RegisterPackage(builder, "Semantic", static () => new Provider("Semantic"), collection =>
-            collection.AddSemanticControl(new(typeof(Button), identity,
-                [new SemanticPartDescriptor("root", "root", null, typeof(Button), SemanticPartCardinality.Single, SemanticPartCustomization.Root, null, false, null, false)])));
-        using var manager = builder.ThemeManagerBuilder.Build();
-        manager.SemanticParts.TryGetControl(identity, out _).ShouldBeTrue();
+        HeadlessTestApp.Run(() =>
+        {
+            var builder = new AtomUIBuilder(new Application());
+            var identity = ControlTokenIdentity.ForControl(typeof(Button), "Test", "Button");
+            ControlRegistrationRuntime.RegisterPackage(builder, "Semantic", static () => new Provider("Semantic"), collection =>
+                collection.AddSemanticControl(new(typeof(Button), identity,
+                    [new SemanticPartDescriptor("root", "root", null, typeof(Button), SemanticPartCardinality.Single, SemanticPartCustomization.Root, null, false, null, false)])));
+            using var manager = builder.ThemeManagerBuilder.Build();
+            manager.SemanticParts.TryGetControl(identity, out _).ShouldBeTrue();
 
-        var conflicting = new AtomUIBuilder(new Application());
-        ControlRegistrationRuntime.RegisterPackage(conflicting, "Semantic", static () => new Provider("Semantic"), collection =>
-            collection.AddSemanticControl(builder.ThemeManagerBuilder.ControlPackages.Single().SemanticControls.Single()));
-        ControlRegistrationRuntime.RegisterPackage(conflicting, "Token", static () => new Provider("Token"), collection =>
-            collection.AddControl(new(typeof(TextBox), new ControlTokenIdentity("Test", "Button"))));
-        Should.Throw<ThemeSchemaException>(() => conflicting.ThemeManagerBuilder.Build());
+            var conflicting = new AtomUIBuilder(new Application());
+            ControlRegistrationRuntime.RegisterPackage(conflicting, "Semantic", static () => new Provider("Semantic"), collection =>
+                collection.AddSemanticControl(builder.ThemeManagerBuilder.ControlPackages.Single().SemanticControls.Single()));
+            ControlRegistrationRuntime.RegisterPackage(conflicting, "Token", static () => new Provider("Token"), collection =>
+                collection.AddControl(new(typeof(TextBox), new ControlTokenIdentity("Test", "Button"))));
+            Should.Throw<ThemeSchemaException>(() => conflicting.ThemeManagerBuilder.Build());
+        });
     }
 
     [Fact]
     public void Ensure_Skips_Only_Completed_Packages_And_Frozen_Builder_Rejects_Registration()
     {
-        var builder = new AtomUIBuilder(new Application());
-        var prepares = 0;
-        ControlRegistrationRuntime.RegisterPackage(builder, "Test", static () => new Provider("Test"), static _ => { });
-        ControlRegistrationRuntime.EnsurePackage(builder, "Test", static () => new Provider("Test"), static _ => { }, _ => prepares++);
-        prepares.ShouldBe(0);
-        using var manager = builder.ThemeManagerBuilder.Build();
-        Should.Throw<InvalidOperationException>(() => ControlRegistrationRuntime.EnsurePackage(builder, "Test", static () => new Provider("Test"), static _ => { }, _ => prepares++));
-        prepares.ShouldBe(0);
+        HeadlessTestApp.Run(() =>
+        {
+            var builder = new AtomUIBuilder(new Application());
+            var prepares = 0;
+            ControlRegistrationRuntime.RegisterPackage(builder, "Test", static () => new Provider("Test"), static _ => { });
+            ControlRegistrationRuntime.EnsurePackage(builder, "Test", static () => new Provider("Test"), static _ => { }, _ => prepares++);
+            prepares.ShouldBe(0);
+            using var manager = builder.ThemeManagerBuilder.Build();
+            Should.Throw<InvalidOperationException>(() => ControlRegistrationRuntime.EnsurePackage(builder, "Test", static () => new Provider("Test"), static _ => { }, _ => prepares++));
+            prepares.ShouldBe(0);
+        });
     }
 
     [Fact]
@@ -279,22 +291,25 @@ public class ControlRegistrationRuntimeTests
     [InlineData(true)]
     public void Semantic_Binding_Validates_Registered_Semantic_Owner_And_Target(bool wrongTarget)
     {
-        var builder = new AtomUIBuilder(new Application());
-        var owner = ControlTokenIdentity.ForControl(typeof(Button), "Test", "Button");
-        var semantic = new ControlSemanticDescriptor(typeof(Button), owner,
-        [
-            new SemanticPartDescriptor("root", "root", null, typeof(Button), SemanticPartCardinality.Single, SemanticPartCustomization.Root, null, false, null, false),
-            new SemanticPartDescriptor("content", "content", "semantic-content", typeof(TextBox), SemanticPartCardinality.Single, SemanticPartCustomization.SelectorAndTheme,
-                new ControlThemeSemanticPartDescriptor("ContentTheme", typeof(TextBox)), false, null, false)
-        ]);
-        var asset = ControlThemeAssetContractTests.Asset([], bindings:
-            [new ControlThemeBindingDescriptor(owner, "ContentTheme", wrongTarget ? typeof(Button) : typeof(TextBox))],
-            globals: GeneratedThemeSchema.GetGlobalTokens());
-        ControlRegistrationRuntime.RegisterPackage(builder, "Asset", static () => new Provider("Asset"), collection =>
-            collection.AddThemeAsset(asset, new(asset.AssetId, ControlResourcePhase.Control, 0, CreateResource)));
-        ControlRegistrationRuntime.RegisterPackage(builder, "Semantic", static () => new Provider("Semantic"), collection => collection.AddSemanticControl(semantic));
-        if (wrongTarget) Should.Throw<ThemeSchemaException>(() => builder.ThemeManagerBuilder.Build());
-        else { using var manager = builder.ThemeManagerBuilder.Build(); }
+        HeadlessTestApp.Run(() =>
+        {
+            var builder = new AtomUIBuilder(new Application());
+            var owner = ControlTokenIdentity.ForControl(typeof(Button), "Test", "Button");
+            var semantic = new ControlSemanticDescriptor(typeof(Button), owner,
+            [
+                new SemanticPartDescriptor("root", "root", null, typeof(Button), SemanticPartCardinality.Single, SemanticPartCustomization.Root, null, false, null, false),
+                new SemanticPartDescriptor("content", "content", "semantic-content", typeof(TextBox), SemanticPartCardinality.Single, SemanticPartCustomization.SelectorAndTheme,
+                    new ControlThemeSemanticPartDescriptor("ContentTheme", typeof(TextBox)), false, null, false)
+            ]);
+            var asset = ControlThemeAssetContractTests.Asset([], bindings:
+                [new ControlThemeBindingDescriptor(owner, "ContentTheme", wrongTarget ? typeof(Button) : typeof(TextBox))],
+                globals: GeneratedThemeSchema.GetGlobalTokens());
+            ControlRegistrationRuntime.RegisterPackage(builder, "Asset", static () => new Provider("Asset"), collection =>
+                collection.AddThemeAsset(asset, new(asset.AssetId, ControlResourcePhase.Control, 0, CreateResource)));
+            ControlRegistrationRuntime.RegisterPackage(builder, "Semantic", static () => new Provider("Semantic"), collection => collection.AddSemanticControl(semantic));
+            if (wrongTarget) Should.Throw<ThemeSchemaException>(() => builder.ThemeManagerBuilder.Build());
+            else { using var manager = builder.ThemeManagerBuilder.Build(); }
+        });
     }
 
     [Fact]
@@ -310,8 +325,11 @@ public class ControlRegistrationRuntimeTests
     [Fact]
     public void Semantic_Binding_Accepts_A_Nested_Target_With_Exact_Type_Identity()
     {
-        var builder = BuildSemanticBinding(typeof(NestedTarget), typeof(NestedTarget));
-        using var manager = builder.ThemeManagerBuilder.Build();
+        HeadlessTestApp.Run(() =>
+        {
+            var builder = BuildSemanticBinding(typeof(NestedTarget), typeof(NestedTarget));
+            using var manager = builder.ThemeManagerBuilder.Build();
+        });
     }
 
     private static AtomUIBuilder BuildSemanticBinding(Type declaredTarget, Type boundTarget)

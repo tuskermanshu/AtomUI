@@ -105,6 +105,13 @@ owned transport/file-cache 资源。没有在途工作时 Dispose 保持同步�
 把剩余管线 drain 转移到后台，不能同步等待 dispatcher、网络或解码 worker。取消 token source、HTTP response、stream
 和图片释放不得在持有 coordinator/cache lock 时执行。
 
+HTTP transport、`HttpMessageHandler` 和 `HttpClient` 在第一个真实 HTTP/HTTPS source read 时按 loader 延迟创建，普通
+Asset/File/Bytes/Stream/Borrowed 请求不触发网络对象。延迟 owner 在同一锁内完成唯一实例的构造和发布；构造失败不发布
+半初始化实例，后续请求可以重新尝试。loader dispose 与首次创建竞争时，dispose 必须等待当前构造完成，再把已经发布的
+transport 恰好释放一次；dispose 已开始后不允许新建 transport。未发生 HTTP 请求时，dispose 只丢弃未执行的 factory。
+传入的自定义 `HttpMessageHandler` 与默认 handler 沿用 `HttpClient(..., disposeHandler: true)` 所有权，由实际创建的
+transport 释放；多个 Application loader 从不共享 transport、handler 或 client。
+
 ## 注册语义
 
 `UseImageLoading()` 由 Shared 提供，`UseCommonControls()` 调用它；Controls 随后把统一 `SvgImageCodec` 添加到同一个图片

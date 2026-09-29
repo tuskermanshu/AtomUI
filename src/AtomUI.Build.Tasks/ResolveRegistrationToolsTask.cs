@@ -59,7 +59,11 @@ public sealed class ResolveRegistrationToolsTask : ITask
         foreach (var name in names.Order(StringComparer.Ordinal)) content.Append('\n').Append(name).Append('=').Append(Hash(Path.Combine(directory, name)));
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(content.ToString())));
     }
-    internal static string Hash(string path) => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+    internal static string Hash(string path)
+    {
+        using var stream = File.OpenRead(path);
+        return Convert.ToHexString(SHA256.HashData(stream));
+    }
     private bool Fail(string code, string message)
     {
         BuildEngine.LogErrorEvent(new BuildErrorEventArgs("Registration", code, BuildEngine.ProjectFileOfTaskNode, 0, 0, 0, 0, message, null, nameof(ResolveRegistrationToolsTask)));

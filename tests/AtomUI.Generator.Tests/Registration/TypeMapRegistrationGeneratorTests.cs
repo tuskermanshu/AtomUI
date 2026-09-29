@@ -63,6 +63,76 @@ public class TypeMapRegistrationGeneratorTests
     }
 
     [Fact]
+    public void TypeMap_Keys_Are_Versioned_Fixed_Length_And_Identity_Sensitive()
+    {
+        var first = RegistrationNames.TypeMapKey("Demo.Group, Demo", "Demo.Button, Demo", "global::Demo.Button");
+        var repeat = RegistrationNames.TypeMapKey("Demo.Group, Demo", "Demo.Button, Demo", "global::Demo.Button");
+        var otherTrigger = RegistrationNames.TypeMapKey("Demo.Group, Demo", "Demo.Button, Demo", "global::Demo.ButtonToken");
+        var otherGroup = RegistrationNames.TypeMapKey("Demo.OtherGroup, Demo", "Demo.Button, Demo", "global::Demo.Button");
+
+        first.ShouldBe(repeat);
+        first.ShouldStartWith("v1:");
+        first.Length.ShouldBe(19);
+        otherTrigger.ShouldNotBe(first);
+        otherGroup.ShouldNotBe(first);
+    }
+
+    [Fact]
+    public void Generated_Candidate_Keys_Do_Not_Embed_Assembly_Qualified_Names()
+    {
+        var result = Run("""
+            namespace Demo;
+            public class Button : Avalonia.Controls.Control { }
+            [AtomUI.Theme.DesignTokens.ControlDesignToken]
+            internal sealed class ButtonToken : AtomUI.Theme.DesignTokens.AbstractControlDesignToken
+            {
+                public double Height { get; set; }
+                public override void CalculateTokenValues(bool dark) { }
+            }
+            """);
+        var source = Source(result, "GeneratedTypeMapRegistration.g.cs");
+        var candidateBlock = source.Split("CandidateKeys = new string[]", StringSplitOptions.None)[1]
+            .Split("};", StringSplitOptions.None)[0];
+        var keys = candidateBlock.Split('\n')
+            .Select(line => line.Trim().TrimEnd(','))
+            .Where(line => line.StartsWith("\"", StringComparison.Ordinal))
+            .Select(line => line.Trim('"'))
+            .ToArray();
+
+        keys.ShouldNotBeEmpty();
+        keys.ShouldAllBe(key => key.StartsWith("v1:", StringComparison.Ordinal) && key.Length == 19);
+        candidateBlock.ShouldNotContain("Version=");
+        candidateBlock.ShouldNotContain("PublicKeyToken=");
+    }
+
+    [Fact]
+    public void TypeMap_Key_Collision_Reports_Registration_Diagnostic_And_Emits_No_Source()
+    {
+        var control = new RegistrationControl(
+            new RegistrationType("global::Demo.Button", "Demo.Button", "Demo.Button, Demo"),
+            null,
+            null,
+            new ValueArray<string>(["global::Demo.Button", "global::Demo.ButtonToken"]),
+            new ValueArray<string>([]),
+            new ValueArray<string>([]));
+        var package = new RegistrationPackage(
+            "Demo",
+            "Demo, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+            "Demo.Generated",
+            new ValueArray<RegistrationControl>([control]),
+            new ValueArray<RegistrationAsset>([]),
+            new ValueArray<string>([]));
+        var output = new GenerationOutput();
+
+        TypeMapRegistrationWriter.Write(output, package, static _ => "0000000000000000");
+        var result = output.Freeze();
+
+        result.Diagnostics.ShouldContain(diagnostic =>
+            diagnostic.Descriptor.Id == "ATOMUIREG005" && diagnostic.Message.Contains("TypeMap key collision"));
+        result.Files.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void Exports_Respect_Lexical_Scope_Named_Keys_And_Multiple_Targets()
     {
         var result = Run("""

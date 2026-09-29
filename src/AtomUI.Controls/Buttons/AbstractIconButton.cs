@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AtomUI.Animations;
 using AtomUI.Reflection;
@@ -97,10 +96,11 @@ public abstract class AbstractIconButton : AvaloniaButton, IMotionAwareControl
     #endregion
     
     #region 反射信息定义
-    [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicFields, typeof(AvaloniaButton))]
-    private static readonly Lazy<FieldInfo> IsFlyoutOpenFieldInfo = new Lazy<FieldInfo>(() => 
-        typeof(AvaloniaButton).GetFieldInfoOrThrow("_isFlyoutOpen",
-            BindingFlags.Instance | BindingFlags.NonPublic));
+    private static readonly Lazy<FieldInfo> IsFlyoutOpenFieldInfo = new(() =>
+        FixedMemberReflection.RequireField(
+            typeof(AvaloniaButton).GetField("_isFlyoutOpen", BindingFlags.Instance | BindingFlags.NonPublic),
+            typeof(AvaloniaButton),
+            "_isFlyoutOpen"));
     #endregion
 
     static AbstractIconButton()

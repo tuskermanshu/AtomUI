@@ -20,6 +20,9 @@ using Button = AtomUI.Desktop.Controls.Button;
 using Expander = AtomUI.Desktop.Controls.Expander;
 using NumericUpDown = AtomUI.Desktop.Controls.NumericUpDown;
 using ButtonSpinner = AtomUI.Desktop.Controls.ButtonSpinner;
+using TextArea = AtomUI.Desktop.Controls.TextArea;
+using AtomToolTip = AtomUI.Desktop.Controls.ToolTip;
+using AvaloniaScrollViewer = Avalonia.Controls.ScrollViewer;
 
 namespace AtomUI.Registration.Fixtures;
 
@@ -32,6 +35,7 @@ public class ProductApp : Application
     private Expander _expander = null!;
     private IncludeControl _include = null!;
     private NumericUpDown _numeric = null!;
+    private TextArea _textArea = null!;
     private ThemeConfigProvider _scope = null!;
 #if !BROWSER
     private OtpLineEdit _otp = null!;
@@ -77,6 +81,8 @@ public class ProductApp : Application
         stack.Children.Add(_include);
         _numeric = new NumericUpDown { Value = 42, Width = 220, Mode = NumericUpDownMode.Spinner, IsMotionEnabled = false, CornerRadius = new CornerRadius(11) };
         stack.Children.Add(_numeric);
+        _textArea = new TextArea { Text = "AOT reflection probe", Lines = 2, Width = 220 };
+        stack.Children.Add(_textArea);
 #if !BROWSER
         _otp = new OtpLineEdit { Width = 260 };
         stack.Children.Add(_otp);
@@ -111,6 +117,35 @@ public class ProductApp : Application
         _expander.UpdateLayout();
         Require(_expander.GetVisualDescendants().OfType<TextBlock>().Any(t => t.Text == "nonstring content"), "Expander nonstring content executes");
         Require(_include.Background is ISolidColorBrush brush && brush.Color == Color.Parse("#FF123456"), "cross-package ResourceInclude executes");
+        Require(_textArea.Template is not null && _textArea.GetVisualDescendants().OfType<AvaloniaScrollViewer>().Any(),
+            "trimmed TextArea private ScrollViewer adapter executes");
+#if REAL_DESKTOP
+        AtomToolTip.SetTip(_button, "AOT popup probe");
+        AtomToolTip.SetIsOpen(_button, true);
+        Require(AtomToolTip.GetIsOpen(_button), "trimmed Popup private parent adapter executes");
+        AtomToolTip.SetIsOpen(_button, false);
+#elif BROWSER
+        // The fixture's SingleView host intentionally has no popup implementation or
+        // overlay layer. Opening reaches AtomUI's private SetPopupParent adapter first;
+        // the expected host failure therefore proves that trimmed reflection resolved.
+        AtomToolTip.SetTip(_button, "AOT popup reflection probe");
+        var reachedUnsupportedHost = false;
+        try
+        {
+            AtomToolTip.SetIsOpen(_button, true);
+        }
+        catch (InvalidOperationException error) when (
+            error.Message.Contains("Unable to create IPopupImpl", StringComparison.Ordinal))
+        {
+            reachedUnsupportedHost = true;
+        }
+        finally
+        {
+            AtomToolTip.SetIsOpen(_button, false);
+            AtomToolTip.SetTip(_button, null);
+        }
+        Require(reachedUnsupportedHost, "trimmed Popup private parent adapter executes before unsupported host rejection");
+#endif
 #if !BROWSER
         Require(_otp.Template is not null && _otp.GetVisualDescendants().Any(control => control.GetType().Name == "OtpTextBox"),
             "OTP resource class creates internal text box template");

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AtomUI.Reflection;
 using Avalonia.Controls;
@@ -12,19 +11,23 @@ internal static class PopupReflectionExtensions
 {
     #region 反射信息定义
 
-    [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicEvents, typeof(AvaloniaPopup))]
-    private static readonly Lazy<EventInfo> ClosingEventInfo = new Lazy<EventInfo>(() =>
-        typeof(AvaloniaPopup).GetEventInfoOrThrow("Closing", BindingFlags.NonPublic | BindingFlags.Instance));
+    private static readonly Lazy<EventInfo> ClosingEventInfo = new(() =>
+        FixedMemberReflection.RequireEvent(
+            typeof(AvaloniaPopup).GetEvent("Closing", BindingFlags.NonPublic | BindingFlags.Instance),
+            typeof(AvaloniaPopup),
+            "Closing"));
 
-    [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicMethods, typeof(AvaloniaPopup))]
-    private static readonly Lazy<MethodInfo> SetPopupParentMethodInfo = new Lazy<MethodInfo>(() =>
-        typeof(AvaloniaPopup).GetMethodInfoOrThrow("SetPopupParent",
-            BindingFlags.Instance | BindingFlags.NonPublic));
+    private static readonly Lazy<MethodInfo> SetPopupParentMethodInfo = new(() =>
+        FixedMemberReflection.RequireMethod(
+            typeof(AvaloniaPopup).GetMethod("SetPopupParent", BindingFlags.Instance | BindingFlags.NonPublic),
+            typeof(AvaloniaPopup),
+            "SetPopupParent"));
 
-    [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicMethods, typeof(AvaloniaPopup))]
-    private static readonly Lazy<MethodInfo> HandlePositionChangeMethodInfo = new Lazy<MethodInfo>(() =>
-        typeof(AvaloniaPopup).GetMethodInfoOrThrow("HandlePositionChange",
-            BindingFlags.Instance | BindingFlags.NonPublic));
+    private static readonly Lazy<MethodInfo> HandlePositionChangeMethodInfo = new(() =>
+        FixedMemberReflection.RequireMethod(
+            typeof(AvaloniaPopup).GetMethod("HandlePositionChange", BindingFlags.Instance | BindingFlags.NonPublic),
+            typeof(AvaloniaPopup),
+            "HandlePositionChange"));
 
     #endregion
     

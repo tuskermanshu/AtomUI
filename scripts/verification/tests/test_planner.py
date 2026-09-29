@@ -86,6 +86,18 @@ class PlannerTests(RepositoryCase):
         plan = self.planner().plan(["src/Controls/Popup/Popup.cs"])
         self.assertEqual({"Tests.PopupTests", "Tests.SelectTests"}, self.selected(plan))
 
+    def test_iterate_scope_defers_cross_module_explicit_rules(self):
+        self.policy["rules"].append({
+            "id": "popup-integration",
+            "changes": ["src/Controls/Popup/**"],
+            "tests": ["tests/Integration.Tests/**/*.cs"],
+        })
+
+        plan = self.planner().plan(["src/Controls/Popup/Popup.cs"], scope="iterate")
+
+        self.assertIn("Tests.PopupTests", self.selected(plan))
+        self.assertNotIn("Integration.Checks", self.selected(plan))
+
     def test_theme_target_change_includes_control_consumers(self):
         self.write("src/Controls/Popup/Themes/PopupTheme.axaml", '<ControlTheme TargetType="atom:Popup" x:Class="Themes.PopupTheme"/>')
         plan = self.planner().plan(["src/Controls/Popup/Themes/PopupTheme.axaml"])
@@ -217,6 +229,16 @@ class PlannerTests(RepositoryCase):
 
 
 class ChangeDiscoveryTests(RepositoryCase):
+    def test_focused_module_directory_expands_only_its_git_eligible_files(self):
+        self.write("src/Controls/Button/NewButtonPart.cs", "class NewButtonPart {}")
+        repository = Repository(self.root)
+
+        focused = repository.focus_paths(["src/Controls/Button"])
+
+        self.assertIn("src/Controls/Button/Button.cs", focused)
+        self.assertIn("src/Controls/Button/NewButtonPart.cs", focused)
+        self.assertNotIn("src/Controls/Popup/Popup.cs", focused)
+
     def test_staged_change_hidden_by_worktree_revert_is_still_reported(self):
         self.planner()
         original = (self.root / "src/Controls/Button/Button.cs").read_text()

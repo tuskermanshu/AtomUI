@@ -60,6 +60,12 @@ internal static class RegistrationNames
         foreach (var ch in value) { hash ^= ch; hash = unchecked(hash * 1099511628211UL); }
         return hash.ToString("X16", System.Globalization.CultureInfo.InvariantCulture);
     }
+    internal static string TypeMapKey(
+        string groupIdentity,
+        string controlAssemblyIdentity,
+        string triggerIdentity,
+        Func<string, string>? hash = null) =>
+        "v1:" + (hash ?? Hash)(groupIdentity + "\n" + controlAssemblyIdentity + "\n" + triggerIdentity);
     internal static string Proxy(RegistrationControl control) => "ControlFragment_" + Hash(control.Type.AssemblyQualifiedName);
     internal static string AssetFactory(string id) => "CreateResource_" + Hash(id);
     internal static string AssetDescriptor(string id) => "CreateAsset_" + Hash(id);

@@ -7,8 +7,9 @@ description: Use when the user asks to run the full AtomUI regression test suite
 
 ## 触发条件
 
-用户要求全量回归 / 跑全部测试 / full regression 时使用。单个项目或少量测试的日常迭代
-不走本 skill（直接 `dotnet test <csproj>` 即可）。
+用户要求全量回归 / 跑全部测试 / full regression、执行 version-release，或一个 Bug 修复已经完成 focused 红绿迭代并进入
+最终门禁时使用。Bug 修复过程中禁止提前调用本 skill；单个项目或少量测试的日常迭代直接使用精确 `dotnet test --filter`
+或 `test.py run --scope iterate --path ...`。
 
 ## 执行方式
 
@@ -39,8 +40,11 @@ scripts/run-full-regression.sh
    最后汇总时一并列出。
 5. **完成判定**：只有看到最终 `[SUMMARY] TOTAL: ... 全部通过` 行才可宣称全量通过；
    `[SUMMARY]` 给出失败清单时必须逐条转述，不得省略。
-6. **耗时对照**：汇报总耗时时与既有基线对照（Desktop.Controls 全套约 3.5 分钟、
-   全量约 10 分钟量级）；显著放大（>2x）即使通过也要提示可能存在环境争抢或性能回归。
+6. **耗时对照**：使用最近一次同机、同项目集的 `[SUMMARY]` 或验证历史作为基线；不得沿用硬编码的旧耗时估计。
+   显著放大（>2x）即使通过也要提示可能存在环境争抢或性能回归。
+7. **Bug 修复硬顺序**：确认 focused 模块测试全绿且实现不再变化后才启动一次全量。禁止在实现过程中把全量当作探针。
+8. **全量失败后**：必须让当前脚本跑完并收集全部失败。随后对失败逐项做 focused 修复，不得每修一项重跑全量；全部
+   focused 结果转绿后，再执行一次最终全量确认。
 
 ## 输出行前缀参考
 

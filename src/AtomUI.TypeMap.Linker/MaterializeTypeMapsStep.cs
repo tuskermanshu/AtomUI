@@ -18,10 +18,13 @@ public sealed class MaterializeTypeMapsStep : IStep
             _processed = true;
             ToolchainContract.Validate(context);
             // Validate every slot before modifying any body. A bad package never leaves a partially lowered pipeline.
-            var slots = new RegistrationAbi(context).Read();
+            var readMetadata = new RegistrationMetadataIndex();
+            var slots = new RegistrationAbi(context, readMetadata).Read();
             foreach (var slot in slots) Materialize(slot);
-            var receipt = VerificationReceipt.Schedule(context, receiptPath, slots);
-            context.Pipeline.AddStepAfter(typeof(SweepStep), new VerifyTypeMapsStep(slots, receipt));
+            // Sweep mutates the Cecil model, so post-Sweep validation must use a fresh lazy index.
+            var outputMetadata = new RegistrationMetadataIndex();
+            var receipt = VerificationReceipt.Schedule(context, receiptPath, slots, outputMetadata);
+            context.Pipeline.AddStepAfter(typeof(SweepStep), new VerifyTypeMapsStep(slots, receipt, outputMetadata));
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {

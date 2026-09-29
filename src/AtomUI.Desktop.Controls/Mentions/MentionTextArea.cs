@@ -201,7 +201,8 @@ internal class MentionTextArea : TextArea
             if (TryGetTriggerPrefix(ch, out var triggerText))
             {
                 var triggerIndex  = index - 1;
-                var presenter     = this.GetTextPresenter();
+                var presenter = _textPresenter ??
+                    throw new InvalidOperationException("PART_TextPresenter is not available for mention geometry.");
                 var textLayout    = presenter.TextLayout;
                 var triggerBounds = textLayout.HitTestTextPosition(triggerIndex);
                 var predicate     = text.Substring(index, CaretIndex - index);

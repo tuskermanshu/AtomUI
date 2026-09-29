@@ -39,8 +39,14 @@ marker 不包含控件列表、入口方法名或应用使用记录，不产生�
 每条条件映射关联一个具体 Group、一个字符串 key、一个代理类型和一个真实 `trimTarget` 类型。
 逻辑片段可以具有多个条件，但每个条件必须有独立 key；同 key 多条件不是受支持的 OR 表达。
 
-key 由生成器根据稳定的片段身份和条件身份确定，不写绝对路径、机器信息或扫描序号。
-同一 Group 内 key 唯一；重复或冲突声明在构建时失败。内部编码由 ABI 版本统一管理，用户不填写或解析 key。
+key 由生成器把完整 Group 身份、Control 程序集限定身份和条件类型身份输入稳定 hash，编码为
+`v1:<16 位十六进制>`。生成文本不重复携带完整程序集限定名，也不写绝对路径、机器信息或扫描序号。
+同一 Group 内生成器同时保存短 key 到完整输入的映射；不同完整输入发生短 key 碰撞时报告 `ATOMUIREG005` 并停止生成，
+不允许覆盖或依赖发现顺序。用户不填写或解析 key。
+
+key 内容对 Core、官方 TypeMap 和 Browser 后端都是不透明字符串：attribute 与候选表由同一次包编译共同产生，后端只验证
+同一 Group 内的字符串唯一性并原样写入 accessor。因此这次短 key 编码不改变 ABI v1 marker、accessor 或 helper 签名；
+旧预编译包可以继续携带自己的长 key，新旧包不共享 Group dictionary。
 
 候选 key 表只包含字符串。运行时只使用 `TryGetValue` 查询，不使用 TypeMap dictionary 的枚举、Count、Keys 或 Values。
 先按代理 Type 去重，再激活片段，避免多个条件命中时重复创建 Attribute。
