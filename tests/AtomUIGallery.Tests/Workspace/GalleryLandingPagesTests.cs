@@ -161,7 +161,7 @@ public class GalleryLandingPagesTests
         source.IndexOf("/Assets/atom-innovation-logo-white.svg", StringComparison.Ordinal)
               .ShouldBeGreaterThan(darkThemeScopeIndex);
 
-        lightLogo.ShouldContain("fill=\"#da1219\"");
+        lightLogo.ShouldContain("fill=\"#DE2910\"");
         darkLogo.ShouldContain("fill=\"#ffffff\"");
         foreach (var logo in new[] { lightLogo, darkLogo })
         {

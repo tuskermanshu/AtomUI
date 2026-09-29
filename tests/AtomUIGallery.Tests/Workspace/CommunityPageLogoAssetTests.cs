@@ -30,7 +30,7 @@ public class CommunityPageLogoAssetTests
         light.Path.ShouldBe("/Assets/atom-innovation-logo.svg");
         light.Model.ShouldNotBeNull();
         light.Bounds.Width.ShouldBe(220);
-        (light.Bounds.Width / light.Bounds.Height).ShouldBe(663d / 162d, 0.001);
+        (light.Bounds.Width / light.Bounds.Height).ShouldBe(1508d / 415d, 0.001);
 
         page.SetCurrentValue(CommunityPage.IsDarkThemeModeProperty, true);
         Dispatcher.UIThread.RunJobs();
@@ -38,6 +38,8 @@ public class CommunityPageLogoAssetTests
         var dark = FindLogo(page);
         dark.Path.ShouldBe("/Assets/atom-innovation-logo-white.svg");
         dark.Model.ShouldNotBeNull();
+        dark.Bounds.Width.ShouldBe(220);
+        (dark.Bounds.Width / dark.Bounds.Height).ShouldBe(1508d / 415d, 0.001);
 
         window.Close();
     }
