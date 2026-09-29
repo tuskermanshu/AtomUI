@@ -16,7 +16,7 @@ Popup 的物理关闭策略还承载内部钉住打开状态。`IsPopupPinnedOpe
 
 - `src/AtomUI.Desktop.Controls/Popup/Popup.cs`：公共 API、自定义定位、翻转通知、frame shadow 选择、动效和 wheel guard。
 - `src/AtomUI.Desktop.Controls/Popup/PopupReflectionExtensions.cs`
-- `src/AtomUI.Desktop.Controls/Popup/PopupLightDismissRegistration.cs`：对 Avalonia Popup 私有 closing、parent 与定位入口的集中反射桥接。
+- `src/AtomUI.Desktop.Controls/Popup/PopupLightDismissRegistration.cs`：取得当前 open session 的 light-dismiss registration，负责配置变化时的更新和释放。
 - `src/AtomUI.Desktop.Controls/Popup/PopupUtils.cs`：placement 算法、popup scope 和 owning popup 查询。
 - `src/AtomUI.Desktop.Controls/Popup/PopupToken.cs`：Popup 家族的阴影、圆角和 anchor margin Token。
 - `src/AtomUI.Core/MotionScene/MotionExecutionState.cs`：MotionScene 共享的 internal 动效执行生命周期定义。
@@ -91,6 +91,11 @@ native host 的 measure 根据 box-shadow thickness 扩展尺寸，arrange 将 C
 Popup 将普通 Avalonia placement 转换为 custom placement，并统一计算 anchor、gravity、offset、shadow thickness、arrow
 center 修正和 flip。center 使用 owning `TopLevel.ClientSize`；pointer 使用 owning TopLevel 的 client 坐标。surface 不进入
 任何 placement 输入，因此不能改变位置或尺寸。
+
+翻转预测使用定位请求中的有效尺寸：从 host 的 `PopupSize` 扣除 `Deflate` 后计算边界约束，
+native 路径再按 desktop scaling 转换到屏幕坐标。CSD overlay 的可见区域约束和最终 anchor 回写使用同一有效矩形，
+host 定位完成后再恢复 margin 占用，避免非对称 Margin 导致预测翻转与实际内容位置不一致。
+`Deflate` 为零时沿用完整 host 尺寸；不通过删除 Child Margin、阴影或改变模板结构来修正定位。
 
 ## 6. 生命周期与模板接入
 
@@ -172,7 +177,7 @@ Pinned target/ancestor 订阅只在请求有效期内存在，并由 target repl
 释放。Pinned open 不使用 retry timer、程序集扫描、runtime type discovery、反射查找控件或字符串 binding；恢复只依赖
 generation-checked Dispatcher callback 和 AvaloniaProperty relay。
 
-`PopupReflectionExtensions` 集中反射 Avalonia Popup 的私有 closing event、parent setter、open-state flag 与定位刷新入口，
+`PopupReflectionExtensions` 集中反射 Avalonia Popup 的非公开 closing event、parent setter 与定位刷新入口，
 每个反射成员都通过 `DynamicDependency` 声明 NativeAOT 保留要求；Popup 不做程序集扫描或 runtime type discovery。
 StyledProperty 和 ControlTheme 均为静态/AOT 可发现契约。源码库存测试使用正则扫描，但只存在于测试项目，不进入 runtime
 或 NativeAOT 路径。

@@ -70,7 +70,7 @@ requests are welcome.
 #### Requirements
 
 .NET 10 (the .NET 10 SDK is required to build AtomUI MSBuild integration)<br>
-Avalonia 12.1.2<br>
+Avalonia 12.1.3<br>
 Windows, macOS and Linux<br>
 
 #### Latest Release Notes

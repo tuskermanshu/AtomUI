@@ -363,8 +363,7 @@ public partial class NumericUpDown : AvaloniaNumericUpDown,
             var topLevel = TopLevel.GetTopLevel(this);
             if (topLevel != null)
             {
-                var layoutManager = topLevel.GetLayoutManager();
-                layoutManager?.ExecuteLayoutPass();
+                topLevel.UpdateLayout();
                 addOnDecoratedBox = _buttonSpinner?.DecoratedBox;
             }
         }

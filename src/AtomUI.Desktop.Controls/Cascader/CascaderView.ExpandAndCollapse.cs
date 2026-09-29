@@ -256,7 +256,7 @@ public partial class CascaderView
     private void ExecuteLayoutPass()
     {
         var topLevel = TopLevel.GetTopLevel(this);
-        topLevel?.GetLayoutManager()?.ExecuteLayoutPass();
+        topLevel?.UpdateLayout();
     }
 
     private void CollapseSiblingOptionsAtLevel(CascaderViewLevelList levelList, ICascaderOption currentNode)

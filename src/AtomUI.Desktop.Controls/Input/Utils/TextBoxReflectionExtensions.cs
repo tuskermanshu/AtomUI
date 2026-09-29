@@ -38,11 +38,6 @@ internal static class TextBoxReflectionExtensions
     
     #endregion
 
-    public static ScrollViewer? GetScrollViewer(this AvaloniaTextBox textBox)
-    {
-        return ScrollViewerFieldInfo.Value.GetValue(textBox) as ScrollViewer;
-    }
-    
     public static AvaloniaTextBox SetScrollViewer(this AvaloniaTextBox textBox, ScrollViewer scrollViewer)
     {
         ScrollViewerFieldInfo.Value.SetValue(textBox, scrollViewer);

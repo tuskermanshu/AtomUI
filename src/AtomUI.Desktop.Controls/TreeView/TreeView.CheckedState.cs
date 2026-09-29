@@ -181,7 +181,7 @@ public partial class TreeView
         {
             treeViewItem.SetCurrentValue(TreeViewItem.IsExpandedProperty, true);
             var topLevel = TopLevel.GetTopLevel(this);
-            topLevel?.GetLayoutManager()?.ExecuteLayoutPass();
+            topLevel?.UpdateLayout();
         }
 
         foreach (var childItem in treeViewItem.Items)

@@ -416,7 +416,7 @@ public partial class ListView : ItemsControl, ICustomizableSizeTypeAware, IMotio
         // Selecting 相关设置，只能通过反射设置目前
         ((ItemCollection)ItemsView).AddSourceChangedEvent(OnItemsViewSourceChanged);
         _selection.Changed += (_, change) => HandleSelectionChange(change);
-        var items = this.GetItems();
+        var items = Items;
         items.CollectionChanged += HandleItemsViewCollectionChanged;
         Items.CollectionChanged += HandleItemCollectionChanged;
     }

@@ -64,7 +64,7 @@ Token 和本地化开发的源代码生成器。欢迎提交 Issue、PR 和改�
 #### 运行环境
 
 .NET 10（构建 AtomUI MSBuild 集成需要 .NET 10 SDK）<br>
-Avalonia 12.1.2<br>
+Avalonia 12.1.3<br>
 支持 Windows、macOS、Linux 跨平台<br>
 
 #### 最新版本说明

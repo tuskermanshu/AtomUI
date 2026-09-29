@@ -2,6 +2,12 @@
 
 本文档记录 Popup 控件级 API、Theme、Token、实现结构和设计契约变化，不替代仓库根目录 `CHANGELOG.md`。
 
+## 2026-09-28
+
+- native/overlay 翻转预测和 CSD 可见区域约束统一使用扣除 Child Margin 后的有效定位尺寸。
+- 补充非对称 Margin、零 Margin、水平/垂直边缘、CSD 和 native 屏幕坐标预测回归，保留原有 shadow/motion 宿主结构。
+- 删除无调用的 open-state flag 和 closing 解绑反射封装，保留实际使用的生命周期桥接。
+
 ## 2026-09-18
 
 - 将 pin 对 light-dismiss 的有效值计算收敛到共享 Popup，保留原始配置与绑定。
