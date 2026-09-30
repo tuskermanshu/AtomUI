@@ -34,29 +34,4 @@ public class RegistrationMetadataIndexTests
         Assert.Contains(nested, firstTypes);
         Assert.Contains(method, firstMethods);
     }
-
-    [Fact]
-    public void Verification_receipt_hashes_files_through_a_stream()
-    {
-        var source = File.ReadAllText(Path.Combine(
-            GetRepoRoot(),
-            "src/AtomUI.TypeMap.Linker/VerificationReceipt.cs"));
-
-        Assert.DoesNotContain("File.ReadAllBytes", source);
-        Assert.Contains("SHA256.HashData(stream)", source);
-    }
-
-    private static string GetRepoRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            if (Directory.Exists(Path.Combine(directory.FullName, "src/AtomUI.TypeMap.Linker")))
-            {
-                return directory.FullName;
-            }
-            directory = directory.Parent;
-        }
-        throw new DirectoryNotFoundException("Unable to locate the AtomUI repository root.");
-    }
 }

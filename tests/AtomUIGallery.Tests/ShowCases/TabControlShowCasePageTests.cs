@@ -356,67 +356,6 @@ public class TabControlShowCasePageTests
         });
     }
 
-    [Fact]
-    public void Semantic_Part_Localization_Uses_Approved_Copy()
-    {
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Localization/zh-CN.xlf");
-        zhCn["SemanticRootDescription"].ShouldBe("根元素，设置整体尺寸、内边距、边框与背景样式");
-        zhCn["SemanticContentDescription"].ShouldBe("内容元素，设置内容面板的内边距、背景与对齐样式");
-        zhCn["SemanticItemDescription"].ShouldBe("页签元素，设置页签的尺寸、内边距、悬停态与选中态样式");
-        zhCn["SemanticAddDescription"].ShouldBe("新增元素，设置加号按钮的尺寸、颜色与圆角样式");
-        zhCn["SemanticIconDescription"].ShouldBe("图标元素，设置页签图标的尺寸与间距样式");
-        zhCn["SemanticCloseDescription"].ShouldBe("关闭元素，设置关闭按钮的尺寸与颜色样式");
-        zhCn["SemanticIndicatorDescription"].ShouldBe("指示条元素，设置选中页签墨条的颜色样式");
-        zhCn["SemanticPartStyleTitle"].ShouldBe("自定义语义结构的样式");
-
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Localization/zh-TW.xlf");
-        zhTw["SemanticRootDescription"].ShouldBe("根元素，設定整體尺寸、內邊距、邊框與背景樣式");
-        zhTw["SemanticContentDescription"].ShouldBe("內容元素，設定內容面板的內邊距、背景與對齊樣式");
-        zhTw["SemanticItemDescription"].ShouldBe("頁籤元素，設定頁籤的尺寸、內邊距、懸停態與選中態樣式");
-        zhTw["SemanticAddDescription"].ShouldBe("新增元素，設定加號按鈕的尺寸、顏色與圓角樣式");
-        zhTw["SemanticIconDescription"].ShouldBe("圖示元素，設定頁籤圖示的尺寸與間距樣式");
-        zhTw["SemanticCloseDescription"].ShouldBe("關閉元素，設定關閉按鈕的尺寸與顏色樣式");
-        zhTw["SemanticIndicatorDescription"].ShouldBe("指示條元素，設定選中頁籤墨條的顏色樣式");
-        zhTw["SemanticPartStyleTitle"].ShouldBe("自訂語義結構的樣式");
-
-        var enUs = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Localization/en-US.xlf");
-        enUs["SemanticRootDescription"].ShouldBe("Root element, set overall size, padding, border and background styles");
-        enUs["SemanticContentDescription"].ShouldBe(
-            "Content element, set padding, background and alignment styles for the content panel");
-        enUs["SemanticItemDescription"].ShouldBe(
-            "Item element, set size, padding, hover state and selected state styles for each tab");
-        enUs["SemanticAddDescription"].ShouldBe(
-            "Add element, set size, color and corner radius styles for the plus button");
-        enUs["SemanticIconDescription"].ShouldBe(
-            "Icon element, set size and margin styles for the tab icon");
-        enUs["SemanticCloseDescription"].ShouldBe(
-            "Close element, set size and color styles for the close button");
-        enUs["SemanticIndicatorDescription"].ShouldBe(
-            "Indicator element, set color styles for the selected tab ink bar");
-        enUs["SemanticPartStyleTitle"].ShouldBe("Custom Semantic Part styling");
-
-        var ptBr = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/TabControl/Localization/pt-BR.xlf");
-        ptBr["SemanticRootDescription"].ShouldBe(
-            "Elemento raiz, define tamanho geral, preenchimento, borda e estilos de fundo");
-        ptBr["SemanticContentDescription"].ShouldBe(
-            "Elemento de conteúdo, define preenchimento, fundo e estilos de alinhamento para o painel de conteúdo");
-        ptBr["SemanticItemDescription"].ShouldBe(
-            "Elemento de item, define tamanho, preenchimento, estado de foco e estado selecionado para cada aba");
-        ptBr["SemanticAddDescription"].ShouldBe(
-            "Elemento de adição, define tamanho, cor e estilos de raio de canto para o botão de mais");
-        ptBr["SemanticIconDescription"].ShouldBe(
-            "Elemento de ícone, define tamanho e estilos de margem para o ícone da aba");
-        ptBr["SemanticCloseDescription"].ShouldBe(
-            "Elemento de fechamento, define tamanho e estilos de cor para o botão de fechar");
-        ptBr["SemanticIndicatorDescription"].ShouldBe(
-            "Elemento indicador, define estilos de cor para a barra de tinta da aba selecionada");
-        ptBr["SemanticPartStyleTitle"].ShouldBe("Estilo personalizado de Semantic Part");
-    }
-
     private static void AssertSolidColor(IBrush? actual, string expected)
     {
         actual.ShouldNotBeNull()

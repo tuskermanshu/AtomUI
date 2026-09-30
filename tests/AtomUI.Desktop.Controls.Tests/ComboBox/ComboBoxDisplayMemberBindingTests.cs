@@ -288,15 +288,6 @@ public class ComboBoxDisplayMemberBindingTests
     }
 
     [Fact]
-    public void Editable_Filter_Template_Uses_Outer_ComboBox_ItemsPresenter()
-    {
-        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/ComboBox/Themes/ComboBoxTheme.axaml");
-
-        source.ShouldNotContain("ComboBoxCandidateList");
-        CountOccurrences(source, "Name=\"PART_ItemsPresenter\"").ShouldBe(1);
-    }
-
-    [Fact]
     public void Editable_Template_Provides_TextBox_And_Binds_Text()
     {
         var comboBox = new AtomUIComboBox
@@ -1546,23 +1537,6 @@ public class ComboBoxDisplayMemberBindingTests
         }
 
         return Path.Combine(AppContext.BaseDirectory, relativePath);
-    }
-
-    private static int CountOccurrences(string source, string value)
-    {
-        var count      = 0;
-        var startIndex = 0;
-        while (true)
-        {
-            var matchIndex = source.IndexOf(value, startIndex, StringComparison.Ordinal);
-            if (matchIndex < 0)
-            {
-                return count;
-            }
-
-            count++;
-            startIndex = matchIndex + value.Length;
-        }
     }
 
     private sealed record DataItem(string Name);

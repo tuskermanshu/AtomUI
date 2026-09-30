@@ -31,11 +31,14 @@ public class TabOverflowMenuReuseTests
 
     public enum OwnerKind { TabControl, CardTabControl, TabStrip, CardTabStrip }
 
-    public static TheoryData<OwnerKind> OwnerKinds =>
-    [OwnerKind.TabControl, OwnerKind.CardTabControl, OwnerKind.TabStrip, OwnerKind.CardTabStrip];
+    // Item projection differs between the two owner bases; the cache itself is shared.
+    public static TheoryData<OwnerKind> BaseOwnerKinds =>
+    [OwnerKind.TabControl, OwnerKind.TabStrip];
+
+    public static TheoryData<OwnerKind> SharedViewerOwner => [OwnerKind.TabControl];
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Reopening_Reuses_Empty_Containers_And_Their_Templates_With_Current_State_And_Resources(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, window) =>
@@ -97,7 +100,7 @@ public class TabOverflowMenuReuseTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void The_Empty_Cache_Shrinks_To_The_Most_Recent_Snapshot(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, window) =>
@@ -113,7 +116,7 @@ public class TabOverflowMenuReuseTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Closed_Cached_Containers_Release_Snapshots_Headers_Templates_And_Template_DataContexts(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, window) =>
@@ -178,7 +181,7 @@ public class TabOverflowMenuReuseTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void Full_Teardown_Releases_The_Menu_And_Its_Empty_Container_Cache(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, window) =>

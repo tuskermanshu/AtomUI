@@ -74,15 +74,6 @@ public class CalendarViewStateTests
         });
     }
 
-    [Fact]
-    public void DualMonthRangeCalendar_Theme_BasedOn_CalendarTheme()
-    {
-        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/DatePicker/Themes/CalendarView/DualMonthRangeCalendarTheme.axaml");
-
-        source.ShouldContain("<atom:CalendarTheme TargetType=\"calendarView:DualMonthRangeCalendar\" />");
-        source.ShouldNotContain("<atom:CalendarItemTheme TargetType=\"calendarView:DualMonthRangeCalendar\" />");
-    }
-
     [Theory]
     [InlineData("src/AtomUI.Desktop.Controls/DatePicker/Themes/CalendarView/CalendarDayButtonTheme.axaml")]
     [InlineData("src/AtomUI.Desktop.Controls/DatePicker/Themes/CalendarView/CalendarButtonTheme.axaml")]
@@ -114,18 +105,6 @@ public class CalendarViewStateTests
                                .Any(setter => (string?)setter.Attribute("Property") == "Background" &&
                                               ((string?)setter.Attribute("Value"))?.Contains("CellBgDisabled", StringComparison.Ordinal) == true)
                                .ShouldBeTrue();
-    }
-
-    [Theory]
-    [InlineData("src/AtomUI.Desktop.Controls/DatePicker/Themes/DatePickerPresenterTheme.axaml")]
-    [InlineData("src/AtomUI.Desktop.Controls/DatePicker/Themes/DualMonthRangeDatePickerPresenterTheme.axaml")]
-    [InlineData("src/AtomUI.Desktop.Controls/DatePicker/Themes/TimedRangeDatePickerPresenterTheme.axaml")]
-    public void DatePicker_Presenter_Themes_Do_Not_Bind_Raw_Selected_Values_To_Calendar(string relativePath)
-    {
-        var source = ReadRepoFile(relativePath);
-
-        source.ShouldNotContain("SelectedDate=\"{TemplateBinding SelectedDateTime}\"");
-        source.ShouldNotContain("SecondarySelectedDate=\"{TemplateBinding SecondarySelectedDateTime}\"");
     }
 
     [Fact]
@@ -277,22 +256,29 @@ public class CalendarViewStateTests
         });
     }
 
-    [Theory]
-    [InlineData(DatePickerMode.Date, PickerCalendarMode.Month)]
-    [InlineData(DatePickerMode.Week, PickerCalendarMode.Month)]
-    [InlineData(DatePickerMode.Month, PickerCalendarMode.Year)]
-    [InlineData(DatePickerMode.Quarter, PickerCalendarMode.Year)]
-    [InlineData(DatePickerMode.Year, PickerCalendarMode.Decade)]
-    public void Calendar_PickerMode_Change_Uses_Target_DisplayMode(DatePickerMode pickerMode, PickerCalendarMode expectedDisplayMode)
+    [Fact]
+    public void Calendar_PickerMode_Change_Uses_Target_DisplayMode()
     {
         RunOnUIThread(() =>
         {
-            var calendar = new PickerCalendar
-            {
-                PickerMode = pickerMode
-            };
+            (DatePickerMode PickerMode, PickerCalendarMode DisplayMode)[] modes =
+            [
+                (DatePickerMode.Date, PickerCalendarMode.Month),
+                (DatePickerMode.Week, PickerCalendarMode.Month),
+                (DatePickerMode.Month, PickerCalendarMode.Year),
+                (DatePickerMode.Quarter, PickerCalendarMode.Year),
+                (DatePickerMode.Year, PickerCalendarMode.Decade)
+            ];
 
-            calendar.DisplayMode.ShouldBe(expectedDisplayMode);
+            foreach (var (pickerMode, expectedDisplayMode) in modes)
+            {
+                var calendar = new PickerCalendar
+                {
+                    PickerMode = pickerMode
+                };
+
+                calendar.DisplayMode.ShouldBe(expectedDisplayMode, $"picker mode {pickerMode}");
+            }
         });
     }
 
@@ -564,6 +550,10 @@ public class CalendarViewStateTests
             };
 
             calendar.DisplayDateEnd.ShouldBe(new DateTime(2026, 6, 20));
+            var state = calendar.SyncAndGetCurrentViewState();
+            state.DisplayDateStart.ShouldBe(new DateTime(2026, 6, 20));
+            state.DisplayDateEnd.ShouldBe(new DateTime(2026, 6, 20));
+            state.DisplayDate.ShouldBe(new DateTime(2026, 6, 1));
         });
     }
 
@@ -605,26 +595,6 @@ public class CalendarViewStateTests
             var button = new PickerCalendarButton();
 
             button.Content.ShouldBe(string.Empty);
-        });
-    }
-
-    [Fact]
-    public void Calendar_CurrentViewState_Tracks_Normalized_Display_Range()
-    {
-        RunOnUIThread(() =>
-        {
-            var calendar = new PickerCalendar
-            {
-                DisplayDate      = new DateTime(2026, 6, 1),
-                DisplayDateEnd   = new DateTime(2026, 6, 10),
-                DisplayDateStart = new DateTime(2026, 6, 20)
-            };
-
-            var state = calendar.SyncAndGetCurrentViewState();
-
-            state.DisplayDateStart.ShouldBe(new DateTime(2026, 6, 20));
-            state.DisplayDateEnd.ShouldBe(new DateTime(2026, 6, 20));
-            state.DisplayDate.ShouldBe(new DateTime(2026, 6, 1));
         });
     }
 

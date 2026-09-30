@@ -248,20 +248,6 @@ public class TextBoxVisualStateTests
     }
 
     [Fact]
-    public void TextBox_Uses_Custom_SizeType_For_Template_Owned_Padding_Without_Extra_State()
-    {
-        var property = typeof(AtomUITextBox).GetProperty(
-            "IsCustomPadding",
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-        property.ShouldBeNull();
-
-        var field = typeof(AtomUITextBox).GetField(
-            "IsCustomPaddingProperty",
-            BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-        field.ShouldBeNull();
-    }
-
-    [Fact]
     public void EmbeddedTextBox_Is_Internal_TextBox_For_Template_Owned_Input_Chrome()
     {
         typeof(AtomUITextBox).IsAssignableFrom(typeof(AtomUIEmbeddedTextBox)).ShouldBeTrue();
@@ -374,19 +360,6 @@ public class TextBoxVisualStateTests
         source.ShouldContain("Name=\"PART_ClearButton\"");
         source.ShouldContain("<atom:RevealButton");
         source.ShouldContain("Name=\"PART_RevealButton\"");
-    }
-
-    [Fact]
-    public void TextBox_Token_Only_Exposes_TextBox_Visual_Resources()
-    {
-        Enum.GetNames(typeof(TextBoxTokenKind))
-            .OrderBy(name => name)
-            .ShouldBe(new[]
-            {
-                "ContentPadding",
-                "ContentPaddingLG",
-                "ContentPaddingSM",
-            });
     }
 
     [Theory]

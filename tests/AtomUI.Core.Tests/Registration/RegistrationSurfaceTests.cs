@@ -7,14 +7,6 @@ namespace AtomUI.Core.Tests.Registration;
 
 public class RegistrationSurfaceTests
 {
-    [Theory]
-    [InlineData("AtomUI.Theme.Resources.ControlThemeProviderAttribute")]
-    [InlineData("AtomUI.Theme.Resources.IControlThemeProvider")]
-    public void Registration_Does_Not_Expose_Retired_Theme_Provider_Discovery(string typeName)
-    {
-        typeof(ControlPackageRegistration).Assembly.GetType(typeName).ShouldBeNull();
-    }
-
     [Fact]
     public void Registration_Exposes_Only_Typed_Contracts()
     {

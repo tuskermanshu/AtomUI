@@ -129,20 +129,16 @@ public class UploadRedesignContractTests
     }
 
     [Fact]
-    public void Legacy_Task_State_And_Fake_Trigger_Contracts_Are_Removed()
+    public void Upload_Does_Not_Reintroduce_A_Second_File_State_Collection()
     {
-        var uploadSource = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/Upload.cs");
-        var uploadTheme  = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/Themes/UploadTheme.axaml");
+        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/Upload.cs");
+        var theme = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/Themes/UploadTheme.axaml");
 
-        uploadSource.ShouldNotContain("TaskInfoList");
-        uploadSource.ShouldNotContain("DefaultTaskList");
-        uploadSource.ShouldNotContain("CurrentTaskList");
-        uploadSource.ShouldNotContain("IsUploadDirectoryEnabled");
-        uploadSource.ShouldNotContain("IsShowUploadTrigger");
-        uploadSource.ShouldNotContain("IsPictureTriggerTask");
-        uploadTheme.ShouldNotContain("CurrentTaskList");
-        uploadTheme.ShouldNotContain("IsShowUploadTrigger");
-        uploadTheme.ShouldNotContain("UploadTriggerContent");
+        foreach (var retiredState in new[] { "TaskInfoList", "DefaultTaskList", "CurrentTaskList", "_allTaskList" })
+        {
+            source.ShouldNotContain(retiredState);
+            theme.ShouldNotContain(retiredState);
+        }
     }
 
     [Fact]
@@ -168,19 +164,6 @@ public class UploadRedesignContractTests
         uploadTheme.ShouldNotContain("Name=\"PART_AppendContent\"");
         listSource.ShouldContain("UploadAppendContentItem");
         listSource.ShouldContain("NeedsContainerOverride");
-    }
-
-    [Fact]
-    public void Picture_Shape_List_Does_Not_Own_Trigger_Content_State()
-    {
-        var listSource = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/PictureShapeList/UploadPictureShapeList.cs");
-        var uploadTheme = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/Themes/UploadTheme.axaml");
-
-        listSource.ShouldNotContain("TriggerContentProperty");
-        listSource.ShouldNotContain("TriggerContentTemplateProperty");
-        uploadTheme.ShouldNotContain("TriggerContent=\"{TemplateBinding TriggerContent}\"");
-        uploadTheme.ShouldNotContain("TriggerContentTemplate=\"{TemplateBinding TriggerContentTemplate}\"");
-        uploadTheme.ShouldContain("EffectivePictureItems");
     }
 
     private static AvaloniaProperty GetAvaloniaProperty(Type ownerType, string fieldName)

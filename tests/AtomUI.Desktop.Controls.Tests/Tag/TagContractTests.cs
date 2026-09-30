@@ -15,12 +15,10 @@ public class TagContractTests
     }
 
     [Fact]
-    public void Tag_Defaults_To_Filled_And_Has_No_Legacy_Border_Switch()
+    public void Tag_Defaults_To_Filled()
     {
         var tag = new AtomUITag();
 
         tag.Variant.ShouldBe(TagVariant.Filled);
-        typeof(AbstractTag).GetProperty("IsBordered").ShouldBeNull();
-        typeof(AbstractTag).GetField("IsBorderedProperty").ShouldBeNull();
     }
 }

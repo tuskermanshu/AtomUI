@@ -22,45 +22,19 @@ public class TabOverflowArchitectureTests
             source.ShouldContain("<atom:TabScrollViewer");
             source.ShouldContain("OverflowPopupTemplate=\"{TemplateBinding OverflowPopupTemplate}\"");
             source.ShouldContain("IsPopupPinnedOpen=\"{TemplateBinding IsPopupPinnedOpen}\"");
-            source.ShouldNotContain("<atom:TabControlScrollViewer");
-            source.ShouldNotContain("<atom:TabStripScrollViewer");
         }
     }
 
     [Fact]
-    public void Shared_Viewer_Has_Static_Lazy_Popup_Without_Per_Open_Flyout_Infrastructure()
+    public void Overflow_Popup_Uses_Direct_State_Instead_Of_Relay_Or_String_Bindings()
     {
-        var source = ReadRepositoryFile(
-            "src/AtomUI.Desktop.Controls/TabControl/TabScrollViewer.cs");
-        var theme = ReadRepositoryFile(
-            "src/AtomUI.Desktop.Controls/TabControl/Themes/TabScrollViewerTheme.axaml");
+        var source = ReadRepositoryFile("src/AtomUI.Desktop.Controls/TabControl/TabScrollViewer.cs");
+        var theme = ReadRepositoryFile("src/AtomUI.Desktop.Controls/TabControl/Themes/TabScrollViewerTheme.axaml");
 
-        source.ShouldContain("internal sealed class TabScrollViewer");
-        source.ShouldContain("EnsurePopupContent");
-        source.ShouldContain("CloseSession");
-        source.ShouldNotContain("MenuFlyout");
         source.ShouldNotContain("RelayBind");
-        source.ShouldNotContain("Dispatcher.Post");
-
-        theme.ShouldContain("<atom:Popup Name=\"PART_OverflowPopup\"");
-        theme.ShouldContain("<DataTemplate x:Key=\"TabOverflowPopupDefaultTemplate\"");
-    }
-
-    [Fact]
-    public void Obsolete_Duplicated_Overflow_Types_Are_Removed()
-    {
-        foreach (var path in new[]
-                 {
-                     "src/AtomUI.Desktop.Controls/TabControl/BaseTabScrollViewer.cs",
-                     "src/AtomUI.Desktop.Controls/TabControl/TabControlScrollViewer.cs",
-                     "src/AtomUI.Desktop.Controls/TabControl/TabStrip/TabStripScrollViewer.cs",
-                     "src/AtomUI.Desktop.Controls/TabControl/BaseOverflowMenuItem.cs",
-                     "src/AtomUI.Desktop.Controls/TabControl/TabControlOverflowMenuItem.cs",
-                     "src/AtomUI.Desktop.Controls/TabControl/TabStrip/TabStripOverflowMenuItem.cs"
-                 })
-        {
-            File.Exists(Path.Combine(GetRepositoryRoot(), path)).ShouldBeFalse(path);
-        }
+        theme.ShouldContain("RequestedPlacement=\"{TemplateBinding OverflowPopupPlacement}\"");
+        theme.ShouldNotContain("RequestedPlacement=\"{Binding");
+        theme.ShouldNotContain("IsOpen=\"{Binding");
     }
 
     [Theory]

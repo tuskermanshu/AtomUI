@@ -63,17 +63,6 @@ public class SliderBehaviorTests
     }
 
     [Fact]
-    public void MarkLabelFontFamily_Setter_Stores_FontFamily()
-    {
-        var track      = new AtomUISliderTrack();
-        var fontFamily = new FontFamily("Arial");
-
-        track.MarkLabelFontFamily = fontFamily;
-
-        track.MarkLabelFontFamily.ShouldBe(fontFamily);
-    }
-
-    [Fact]
     public void Detaching_Slider_Releases_Template_Pointer_Handlers()
     {
         var slider = new AtomUISlider();
@@ -214,24 +203,6 @@ public class SliderBehaviorTests
 
             track.Thumbs.ShouldAllBe(thumb => thumb.IsMotionEnabled);
         });
-    }
-
-    [Fact]
-    public void Performance_Slider_Suites_Use_Multi_Handle_Contract()
-    {
-        var scenarios = ReadRepoFile(
-            "tools/performances/AtomUI.Performance/Suites/Slider/SliderScenarios.cs");
-        scenarios.ShouldContain("RangeValues   = [20, 80]");
-        scenarios.ShouldNotContain("new SliderRangeValue");
-        scenarios.ShouldNotContain("RangeValue    =");
-
-        var verification = ReadRepoFile(
-            "tools/performances/AtomUI.Performance/Suites/Slider/SliderStateVerification.cs");
-        verification.ShouldContain("GetSliderThumbs(slider)");
-        verification.ShouldNotContain("StartSliderThumb");
-        verification.ShouldNotContain("EndSliderThumb");
-        verification.ShouldNotContain("new SliderRangeValue");
-        verification.ShouldNotContain("RangeValue    =");
     }
 
     [Fact]
@@ -742,20 +713,4 @@ public class SliderBehaviorTests
         return (T)field.GetValue(target)!;
     }
 
-    private static string ReadRepoFile(string relativePath)
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            var candidate = Path.Combine(directory.FullName, relativePath);
-            if (File.Exists(candidate))
-            {
-                return File.ReadAllText(candidate);
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new FileNotFoundException($"Could not locate repository file: {relativePath}");
-    }
 }

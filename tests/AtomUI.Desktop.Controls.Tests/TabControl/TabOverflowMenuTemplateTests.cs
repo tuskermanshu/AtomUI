@@ -35,6 +35,17 @@ public class TabOverflowMenuTemplateTests
         OwnerKind.CardTabStrip
     ];
 
+    // Shared TabScrollViewer behavior needs one representative of each owner base.
+    public static TheoryData<OwnerKind> BaseOwnerKinds =>
+    [
+        OwnerKind.TabControl,
+        OwnerKind.TabStrip
+    ];
+
+    // Popup hosting, visual effects, and retention live in the shared viewer.
+    public static TheoryData<OwnerKind> SharedViewerOwner => [OwnerKind.TabControl];
+
+    // Each owner and placement keeps its own directional shadow and viewport checks.
     public static TheoryData<OwnerKind, Dock> OwnerPlacementCases
     {
         get
@@ -135,7 +146,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Selection_Change_Republishes_Immutable_Snapshot(OwnerKind kind)
     {
         var owner = CreateOwner(kind);
@@ -162,7 +173,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void External_Collection_Mutation_Invalidates_And_Closes_Session(OwnerKind kind)
     {
         var owner = CreateOwner(kind);
@@ -184,7 +195,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Successful_Close_Uses_Owner_Events_And_Invalidates_Session(OwnerKind kind)
     {
         var owner = CreateOwner(kind, isClosable: true);
@@ -208,7 +219,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Cancelled_Close_Leaves_Owner_And_Session_Untouched(OwnerKind kind)
     {
         var owner = CreateOwner(kind, isClosable: true);
@@ -233,7 +244,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void Custom_Template_Root_Is_Lazy_And_Reused_Between_Ordinary_Closes(OwnerKind kind)
     {
         var template = new CapturingTemplate();
@@ -261,7 +272,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void Template_Replacement_Performs_Full_Teardown(OwnerKind kind)
     {
         var oldTemplate = new CapturingTemplate();
@@ -456,7 +467,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void Default_Overflow_Menu_Hides_The_Scrollbar_But_Remains_Scrollable(OwnerKind kind)
     {
         var owner = CreateOwner(kind);
@@ -515,7 +526,7 @@ public class TabOverflowMenuTemplateTests
 
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void Detach_Performs_Full_Teardown_Regardless_Of_Pinned_State(OwnerKind kind)
     {
         var template = new CapturingTemplate();
@@ -557,7 +568,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void Default_Overflow_Surface_Uses_The_Menu_Corner_Radius(OwnerKind kind)
     {
         var owner = CreateOwner(kind);
@@ -575,7 +586,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Opening_Overflow_From_Pointer_Does_Not_Move_Focus_Into_The_Popup(OwnerKind kind)
     {
         var owner = CreateOwner(kind);
@@ -639,7 +650,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Default_Menu_Keyboard_Activation_Disabled_State_And_Escape_Are_Session_Safe(OwnerKind kind)
     {
         var owner = CreateOwner(kind);
@@ -683,7 +694,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void Repeated_Ordinary_Open_Close_Reuses_One_Context_And_Visual_Root(OwnerKind kind)
     {
         var owner = CreateOwner(kind);
@@ -726,7 +737,7 @@ public class TabOverflowMenuTemplateTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(SharedViewerOwner))]
     public void Detached_Opened_Owner_Popup_And_Context_Are_Collectible(OwnerKind kind)
     {
         var references = CreateDetachedOverflowGraphReferences(kind);

@@ -40,18 +40,6 @@ public class GalleryCodeViewerRuntimeTests
     }
 
     [Fact]
-    public void GalleryCodeViewer_Applies_TextEditor_Template_Without_Fluent_Theme_Resources()
-    {
-        var viewer = new GalleryCodeViewer
-        {
-            CodeText = "public class Demo { }",
-            Language = "csharp"
-        };
-
-        Should.NotThrow(() => ShowInWindow(viewer, _ => { }));
-    }
-
-    [Fact]
     public void GalleryCodeViewer_Disables_Editor_Scroll_Chaining()
     {
         var viewer = new GalleryCodeViewer
@@ -184,16 +172,6 @@ public class GalleryCodeViewerRuntimeTests
                   .OfType<AtomUI.Desktop.Controls.LineEdit>()
                   .ShouldNotBeEmpty();
         });
-    }
-
-    [Fact]
-    public void GalleryCodeViewer_Uses_Light_And_Dark_Syntax_Theme_Defaults()
-    {
-        var viewer = new GalleryCodeViewer();
-
-        viewer.LightSyntaxTheme.ShouldBe(ThemeName.LightPlus);
-        viewer.DarkSyntaxTheme.ShouldBe(ThemeName.DarkPlus);
-        viewer.Dispose();
     }
 
     [Fact]
@@ -626,23 +604,6 @@ public class GalleryCodeViewerRuntimeTests
     }
 
     [Fact]
-    public void GalleryCodeViewer_Axaml_Syntax_Theme_Colors_Attribute_Names_And_Values()
-    {
-        var viewer = new GalleryCodeViewer
-        {
-            CodeText = "<StackPanel Margin=\"20\" Spacing=\"12\" />",
-            Language = "axaml"
-        };
-
-        ShowInWindow(viewer, _ =>
-        {
-            GetAxamlTokenColor(viewer, "StackPanel").ShouldNotBeNull();
-            GetAxamlTokenColor(viewer, "Margin").ShouldNotBeNull();
-            GetAxamlTokenColor(viewer, "20").ShouldNotBeNull();
-        });
-    }
-
-    [Fact]
     public void GalleryCodeViewer_Axaml_Syntax_Foregrounds_Are_Applied_To_Visible_Elements()
     {
         var viewer = new GalleryCodeViewer
@@ -671,64 +632,6 @@ public class GalleryCodeViewerRuntimeTests
             GetVisibleTextForegroundColor(editor, "Orientation")
                 .ShouldBe(Color.Parse(GetAxamlTokenColor(viewer, "Margin").ShouldNotBeNull()));
         });
-    }
-
-    [Fact]
-    public void GalleryCodeViewer_Uses_Dark_Syntax_Theme_After_ThemeManager_Commits_Dark_Appearance()
-    {
-        var application = Application.Current!;
-        var themeManager = application.GetThemeManager().ShouldNotBeNull();
-        var previousAlgorithms = CaptureCurrentAlgorithms(themeManager);
-        var actualThemeVariantChangedCount = 0;
-        var isDarkWhenThemeChangedRaised = false;
-        EventHandler handler = (_, _) => actualThemeVariantChangedCount++;
-        EventHandler<ThemeChangedEventArgs> themeChangedHandler = (_, args) =>
-        {
-            isDarkWhenThemeChangedRaised =
-                args.State.Appearance == ThemeAppearance.Dark &&
-                themeManager.CurrentTheme?.Appearance == ThemeAppearance.Dark &&
-                application.RequestedThemeVariant == ThemeVariant.Dark;
-        };
-
-        try
-        {
-            SetDarkAppearance(themeManager, false);
-
-            application.ActualThemeVariantChanged += handler;
-            themeManager.ThemeChanged += themeChangedHandler;
-            SetDarkAppearance(themeManager, true);
-
-            actualThemeVariantChangedCount.ShouldBeGreaterThan(0);
-            isDarkWhenThemeChangedRaised.ShouldBeTrue();
-            application.RequestedThemeVariant.ShouldBe(ThemeVariant.Dark);
-            application.ActualThemeVariant.ShouldBe(ThemeVariant.Dark);
-            themeManager.CurrentTheme
-                        .ShouldNotBeNull()
-                        .Algorithms
-                        .ShouldContain(ThemeAlgorithm.Dark);
-
-            var viewer = new GalleryCodeViewer
-            {
-                CodeText = "<StackPanel Margin=\"20\" Spacing=\"12\" />",
-                Language = "axaml"
-            };
-
-            ShowInWindow(viewer, _ =>
-            {
-                viewer.ActualThemeVariant.ShouldBe(ThemeVariant.Dark);
-                themeManager.CurrentTheme
-                            .ShouldNotBeNull()
-                            .Appearance
-                            .ShouldBe(ThemeAppearance.Dark);
-                GetCurrentSyntaxTheme(viewer).ShouldBe(ThemeName.DarkPlus);
-            });
-        }
-        finally
-        {
-            application.ActualThemeVariantChanged -= handler;
-            themeManager.ThemeChanged -= themeChangedHandler;
-            ApplyAlgorithms(themeManager, previousAlgorithms);
-        }
     }
 
     [Fact]

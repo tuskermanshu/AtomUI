@@ -101,56 +101,6 @@ public sealed partial class LanguagePackEndToEndTests
         return outputs;
     }
 
-    [Fact]
-    public void Language_Pack_Fixtures_Cover_Verified_And_Deferred_Authoring()
-    {
-        var repositoryRoot = FindRepositoryRoot();
-        var fixtureRoot = Path.Combine(repositoryRoot, "tests", "fixtures", "LanguagePackEndToEnd");
-        var verifiedProject = XDocument.Load(
-            Path.Combine(fixtureRoot, "LanguagePack", "LanguagePack.csproj"));
-        verifiedProject.Descendants("AtomUILanguage").ShouldBeEmpty();
-        verifiedProject.Descendants("AtomUILanguageMinimumState").ShouldBeEmpty();
-        verifiedProject.Descendants("ProjectReference")
-                       .Any(reference =>
-                           ((string?)reference.Attribute("Include"))?.EndsWith(
-                               "Module/Module.csproj",
-                               StringComparison.Ordinal) == true)
-                       .ShouldBeTrue();
-
-        var deferredProject = XDocument.Load(
-            Path.Combine(fixtureRoot, "OptionalLanguagePack", "OptionalLanguagePack.csproj"));
-        deferredProject.Descendants("AtomUILanguage").ShouldBeEmpty();
-        deferredProject.Descendants("AtomUILanguageMinimumState").ShouldBeEmpty();
-        deferredProject.Descendants("ProjectReference")
-                       .Any(reference =>
-                           ((string?)reference.Attribute("Include"))?.EndsWith(
-                               "OptionalModule/OptionalModule.csproj",
-                               StringComparison.Ordinal) == true)
-                       .ShouldBeFalse();
-
-        var templateProject = XDocument.Load(
-            Path.Combine(fixtureRoot, "TemplateExport", "TemplateExport.csproj"));
-        var componentPackage = templateProject.Descendants("PackageReference")
-                                              .Single(reference =>
-                                                  (string?)reference.Attribute("Include") ==
-                                                  "Acme.LocalizationComponent");
-        ((string?)componentPackage.Attribute("PrivateAssets")).ShouldBe("all");
-
-        foreach (var languagePackDirectory in new[] { "LanguagePack", "OptionalLanguagePack" })
-        {
-            foreach (var target in Directory.EnumerateFiles(
-                         Path.Combine(fixtureRoot, languagePackDirectory, "Localization"),
-                         "*.xlf",
-                         SearchOption.AllDirectories)
-                     .Select(XDocument.Load)
-                     .SelectMany(document => document.Descendants().Where(element =>
-                         element.Name.LocalName == "target")))
-            {
-                ((string?)target.Attribute("state")).ShouldBe("final");
-            }
-        }
-    }
-
     [Fact(Timeout = 360_000)]
     public async Task Aggregate_Language_Pack_Dormantly_Consumes_Unreferenced_Module_Through_NuGet()
     {

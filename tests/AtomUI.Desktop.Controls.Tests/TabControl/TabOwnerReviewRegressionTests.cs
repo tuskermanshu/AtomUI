@@ -49,6 +49,13 @@ public class TabOwnerReviewRegressionTests
         OwnerKind.CardTabStrip
     ];
 
+    // Callback and drag commit paths are implemented by the two owner bases.
+    public static TheoryData<OwnerKind> BaseOwnerKinds =>
+    [
+        OwnerKind.TabControl,
+        OwnerKind.TabStrip
+    ];
+
     public static TheoryData<OwnerKind, CollectionMutation> ShiftCases => Cases(
         CollectionMutation.InsertBefore,
         CollectionMutation.RemoveBefore);
@@ -74,7 +81,7 @@ public class TabOwnerReviewRegressionTests
         get
         {
             var cases = new TheoryData<OwnerKind, bool>();
-            foreach (var owner in OwnerKinds)
+            foreach (var owner in BaseOwnerKinds)
             {
                 cases.Add(owner, false);
                 cases.Add(owner, true);
@@ -159,7 +166,7 @@ public class TabOwnerReviewRegressionTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Close_Rechecks_The_Target_After_SelectionChanged_Inserts_A_Preceding_Item(OwnerKind kind)
     {
         var source = CreateSource();
@@ -188,7 +195,7 @@ public class TabOwnerReviewRegressionTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Close_Preserves_An_Explicit_SelectionChanged_Choice_After_Inserting_An_Item(OwnerKind kind)
     {
         var source = CreateSource();
@@ -217,7 +224,7 @@ public class TabOwnerReviewRegressionTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Close_Stops_When_SelectionChanged_Replaces_The_Source(OwnerKind kind)
     {
         var source = CreateSource();
@@ -376,7 +383,7 @@ public class TabOwnerReviewRegressionTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Cancelled_Reorder_Preserves_Source_Selection_And_Removes_Preview(OwnerKind kind)
     {
         var source = CreateSource();
@@ -467,7 +474,7 @@ public class TabOwnerReviewRegressionTests
     private static TheoryData<OwnerKind, CollectionMutation> Cases(params CollectionMutation[] mutations)
     {
         var result = new TheoryData<OwnerKind, CollectionMutation>();
-        foreach (var owner in OwnerKinds)
+        foreach (var owner in BaseOwnerKinds)
         {
             foreach (var mutation in mutations)
             {

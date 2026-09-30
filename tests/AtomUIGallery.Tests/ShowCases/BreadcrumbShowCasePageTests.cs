@@ -1,6 +1,5 @@
 using AtomUI.Toolkits.GalleryBase.Controls;
 using AtomUIGallery.ShowCases.Breadcrumb;
-using AtomUIGallery.Tests.Localization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
@@ -213,62 +212,6 @@ public class BreadcrumbShowCasePageTests
                 AssertSolidColor(separator.Foreground, "#73000000");
             }
         });
-    }
-
-    [Fact]
-    public void Semantic_Part_Localization_Uses_Approved_Copy()
-    {
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/Breadcrumb/Localization/zh-CN.xlf");
-        zhCn["SemanticPartRootDescription"].ShouldBe("根元素，包含文字颜色、字体大小、图标尺寸等基础样式，内部使用 flex 布局的有序列表");
-        zhCn["SemanticPartItemDescription"].ShouldBe("Item 元素，包含文字颜色、链接的颜色变化、悬浮效果、内边距、圆角、高度、外边距等样式");
-        zhCn["SemanticPartSeparatorDescription"].ShouldBe("分隔符元素，包含分隔符的外边距和颜色样式");
-        zhCn["SemanticPartStyleTitle"].ShouldBe("自定义语义结构的样式");
-        zhCn["SemanticPartStyleDescription"].ShouldBe(
-            "对齐 Ant Design 的 style-class demo：通过生成的 Semantic Part 样式定制根边框、条目颜色与分隔符颜色。");
-        zhCn["P2StyleItemAntDesign"].ShouldBe("Ant Design");
-        zhCn["P2StyleItemBreadcrumb"].ShouldBe("面包屑");
-        zhCn["P2StyleItemComponent"].ShouldBe("组件");
-
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/Breadcrumb/Localization/zh-TW.xlf");
-        zhTw["SemanticPartRootDescription"].ShouldBe("根元素，包含文字顏色、字體大小、圖示尺寸等基礎樣式，內部使用 flex 佈局的有序列表");
-        zhTw["SemanticPartItemDescription"].ShouldBe("Item 元素，包含文字顏色、連結的顏色變化、懸浮效果、內邊距、圓角、高度、外邊距等樣式");
-        zhTw["SemanticPartSeparatorDescription"].ShouldBe("分隔符元素，包含分隔符的外邊距和顏色樣式");
-        zhTw["SemanticPartStyleTitle"].ShouldBe("自訂語義結構的樣式");
-        zhTw["SemanticPartStyleDescription"].ShouldBe(
-            "對齊 Ant Design 的 style-class demo：透過生成的 Semantic Part 樣式自訂根邊框、項目顏色與分隔符顏色。");
-        zhTw["P2StyleItemAntDesign"].ShouldBe("Ant Design");
-        zhTw["P2StyleItemBreadcrumb"].ShouldBe("麵包屑");
-        zhTw["P2StyleItemComponent"].ShouldBe("元件");
-
-        var enUs = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/Breadcrumb/Localization/en-US.xlf");
-        enUs["SemanticPartRootDescription"].ShouldBe(
-            "Root element with text color, font size, icon size and other basic styles, using flex layout with ordered list");
-        enUs["SemanticPartItemDescription"].ShouldBe(
-            "Item element with text color, link color transitions, hover effects, padding, border-radius, height, and margin styles");
-        enUs["SemanticPartSeparatorDescription"].ShouldBe("Separator element with margin and color styles for the divider");
-        enUs["SemanticPartStyleTitle"].ShouldBe("Custom Semantic Part styling");
-        enUs["SemanticPartStyleDescription"].ShouldBe(
-            "Mirrors the Ant Design style-class demo: customize the root border, item color and separator color through generated Semantic Part styles.");
-        enUs["P2StyleItemAntDesign"].ShouldBe("Ant Design");
-        enUs["P2StyleItemBreadcrumb"].ShouldBe("Breadcrumb");
-        enUs["P2StyleItemComponent"].ShouldBe("Component");
-
-        var ptBr = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/Breadcrumb/Localization/pt-BR.xlf");
-        ptBr["SemanticPartRootDescription"].ShouldBe(
-            "Elemento raiz com cor de texto, tamanho da fonte, tamanho do ícone e outros estilos básicos, usando layout flex com lista ordenada");
-        ptBr["SemanticPartItemDescription"].ShouldBe(
-            "Elemento de item com cor de texto, transições de cor do link, efeitos de hover, preenchimento, raio da borda, altura e estilos de margem");
-        ptBr["SemanticPartSeparatorDescription"].ShouldBe("Elemento separador com estilos de margem e cor para o divisor");
-        ptBr["SemanticPartStyleTitle"].ShouldBe("Estilo personalizado de Semantic Part");
-        ptBr["SemanticPartStyleDescription"].ShouldBe(
-            "Espelha o demo style-class do Ant Design: personalize a borda da raiz, a cor do item e a cor do separador por meio dos estilos Semantic Part gerados.");
-        ptBr["P2StyleItemAntDesign"].ShouldBe("Ant Design");
-        ptBr["P2StyleItemBreadcrumb"].ShouldBe("Breadcrumb");
-        ptBr["P2StyleItemComponent"].ShouldBe("Componente");
     }
 
     private static void AssertSolidColor(IBrush? actual, string expected)

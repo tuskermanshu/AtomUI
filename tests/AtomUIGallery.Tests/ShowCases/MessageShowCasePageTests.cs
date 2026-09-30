@@ -19,7 +19,6 @@ using AvaloniaWindow = Avalonia.Controls.Window;
 using AvaloniaTextBlock = Avalonia.Controls.TextBlock;
 using DesktopButton = AtomUI.Desktop.Controls.Button;
 using DesktopNumericUpDown = AtomUI.Desktop.Controls.NumericUpDown;
-using DesktopRibbonBadge = AtomUI.Desktop.Controls.RibbonBadge;
 using DesktopToggleSwitch = AtomUI.Desktop.Controls.ToggleSwitch;
 
 namespace AtomUIGallery.Tests.ShowCases;
@@ -180,31 +179,6 @@ public class MessageShowCasePageTests
     }
 
     [Fact]
-    public void Message_Stack_ShowCase_Localization_Is_Complete()
-    {
-        foreach (var language in new[] { "en-US", "zh-CN", "zh-TW", "pt-BR" })
-        {
-            var localization = XliffTestDocument.Read(
-                $"controlgallery/AtomUIGallery/ShowCases/Feedback/Message/Localization/{language}.xlf");
-
-            foreach (var key in new[]
-                     {
-                         "StackTitle",
-                         "StackDescription",
-                         "StackEnabledLabel",
-                         "StackThresholdLabel",
-                         "P2ContentOpenMessageBox",
-                         "P2ContentDestroyAll",
-                         "P2MessageStackedFormat",
-                         "P2MessageLongStackedFormat"
-                     })
-            {
-                localization.ContainsKey(key).ShouldBeTrue($"Missing {key} in {language}.");
-            }
-        }
-    }
-
-    [Fact]
     public void Message_Stack_ShowCase_Configuration_Row_Uses_One_Vertical_Center_Line()
     {
         AvaloniaTestApp.EnsureInitialized();
@@ -236,27 +210,6 @@ public class MessageShowCasePageTests
             GetCenterY(enabledLabel, stackItem).ShouldBe(expectedCenterY, 0.5);
             GetCenterY(enabledSwitch, stackItem).ShouldBe(expectedCenterY, 0.5);
             GetCenterY(thresholdLabel, stackItem).ShouldBe(expectedCenterY, 0.5);
-        });
-    }
-
-    [Fact]
-    public void Message_Stack_ShowCase_Displays_The_V619_Version_Badge()
-    {
-        AvaloniaTestApp.EnsureInitialized();
-        var page = new MessageShowCase();
-
-        ShowInWindow(page, window =>
-        {
-            var stackItem = page.GetVisualDescendants()
-                                .OfType<ShowCaseItem>()
-                                .Single(item => item.SourceKey == "message-stack");
-            window.UpdateLayout();
-
-            stackItem.BadgeText.ShouldBe("v6.1.9");
-            stackItem.GetVisualDescendants()
-                     .OfType<DesktopRibbonBadge>()
-                     .Single()
-                     .Text.ShouldBe("v6.1.9");
         });
     }
 

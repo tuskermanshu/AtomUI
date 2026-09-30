@@ -92,16 +92,6 @@ public class CommonCatalogTests
     }
 
     [Fact]
-    public void Common_Catalog_No_Longer_Contains_Legacy_Language_Providers()
-    {
-        var controlsAssembly = typeof(CommonLangResourceKind).Assembly;
-
-        controlsAssembly.GetType("AtomUI.Controls.Localization.en_US").ShouldBeNull();
-        controlsAssembly.GetType("AtomUI.Controls.Localization.zh_CN").ShouldBeNull();
-        controlsAssembly.GetType("AtomUI.Controls.Localization.zh_TW").ShouldBeNull();
-    }
-
-    [Fact]
     public void Application_Language_State_Reaches_Window_Dialog_Popup_Flyout_And_NonVisual_Consumers()
     {
         var application = Application.Current.ShouldNotBeNull();

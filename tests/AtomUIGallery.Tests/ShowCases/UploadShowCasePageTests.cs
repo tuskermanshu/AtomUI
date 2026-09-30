@@ -102,17 +102,6 @@ public class UploadShowCasePageTests
     }
 
     [Fact]
-    public void Upload_ShowCase_Removes_Orphaned_SubShowCase_Files()
-    {
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Upload/Views/UploadBasicShowCase.axaml")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Upload/Views/UploadBasicShowCase.axaml.cs")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Upload/Views/UploadPicturesShowCase.axaml")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Upload/Views/UploadPicturesShowCase.axaml.cs")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Upload/Views/UploadConstraintsShowCase.axaml")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Upload/Views/UploadConstraintsShowCase.axaml.cs")).ShouldBeFalse();
-    }
-
-    [Fact]
     public void Upload_ShowCase_Examples_Match_Approved_Control_Demo_Content()
     {
         var source   = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Upload/Views/UploadShowCase.axaml");

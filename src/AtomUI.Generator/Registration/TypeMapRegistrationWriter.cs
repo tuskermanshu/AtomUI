@@ -85,11 +85,27 @@ internal static class TypeMapRegistrationWriter
             var proxy = RegistrationNames.Proxy(control);
             source.Append('[').Append(proxy).AppendLine("]");
             source.Append("internal sealed class ").Append(proxy).AppendLine(" : global::AtomUI.Registration.ControlRegistrationFragmentAttribute\n{");
+            if (control.TokenFactory is not null || control.SemanticFactory is not null)
+            {
+                source.AppendLine("    // The nested holder initializes only after this fragment's platform guards pass.");
+                source.AppendLine("    private static class CachedDescriptors\n    {");
+                if (control.TokenFactory is not null)
+                {
+                    WriteCachedDescriptor(source, "Token", "global::AtomUI.Theme.Schema.ControlTokenDescriptor",
+                        "GeneratedThemeSchemaDescriptorFactory." + control.TokenFactory + "()");
+                }
+                if (control.SemanticFactory is not null)
+                {
+                    WriteCachedDescriptor(source, "Semantic", "global::AtomUI.Theme.Schema.ControlSemanticDescriptor",
+                        "GeneratedSemanticPartManifest." + control.SemanticFactory + "()");
+                }
+                source.AppendLine("    }");
+            }
             source.Append("    public override string FragmentId => ").Append(L(package.Id + ":" + control.Type.AssemblyQualifiedName)).AppendLine(";");
             source.AppendLine("    public override void Add(global::AtomUI.Registration.ControlPackageRegistrationBuilder builder)\n    {");
             foreach (var guard in control.Guards) source.Append("        if (").Append(guard).AppendLine(") return;");
-            if (control.TokenFactory is not null) source.Append("        builder.AddControl(GeneratedThemeSchemaDescriptorFactory.").Append(control.TokenFactory).AppendLine("());");
-            if (control.SemanticFactory is not null) source.Append("        builder.AddSemanticControl(GeneratedSemanticPartManifest.").Append(control.SemanticFactory).AppendLine("());");
+            if (control.TokenFactory is not null) source.AppendLine("        builder.AddControl(CachedDescriptors.Token);");
+            if (control.SemanticFactory is not null) source.AppendLine("        builder.AddSemanticControl(CachedDescriptors.Semantic);");
             foreach (var asset in package.Assets.Where(a => control.Assets.Contains(a.Id))) WriteAssetReference(source, asset, "        ");
             source.AppendLine("    }\n}");
         }
@@ -118,6 +134,13 @@ internal static class TypeMapRegistrationWriter
             source.AppendLine("        },\n        new global::AtomUI.Theme.Schema.ControlThemeBindingDescriptor[]\n        {");
             foreach (var binding in asset.Bindings) source.Append("            new(").Append(Identity(binding.Owner)).Append(", ").Append(L(binding.Property)).Append(", typeof(").Append(binding.Target.Name).AppendLine(")),");
             source.Append("        }, CompiledGlobalTokenNames, 0x").Append(asset.CompiledContractFingerprint.ToString("X16")).AppendLine("UL);");
+            source.Append("    private static class CachedAsset_").Append(RegistrationNames.Hash(asset.Id)).AppendLine("\n    {");
+            WriteCachedDescriptor(source, "Descriptor", "global::AtomUI.Theme.Schema.ControlThemeAssetDescriptor",
+                RegistrationNames.AssetDescriptor(asset.Id) + "()");
+            WriteCachedDescriptor(source, "Resource", "global::AtomUI.Registration.ControlThemeResourceRegistration",
+                "new global::AtomUI.Registration.ControlThemeResourceRegistration(" + L(asset.Id) + ", global::AtomUI.Registration.ControlResourcePhase.Control, " +
+                asset.Order + ", " + RegistrationNames.AssetFactory(asset.Id) + ")");
+            source.AppendLine("    }");
         }
         source.AppendLine("}");
         return source.ToString();
@@ -127,10 +150,23 @@ internal static class TypeMapRegistrationWriter
 
     private static void WriteAssetRegistration(StringBuilder source, RegistrationAsset asset, string indent)
     {
-        source.Append(indent).Append("builder.AddThemeAsset(GeneratedRegistrationFactories.").Append(RegistrationNames.AssetDescriptor(asset.Id)).Append("(), ");
-        source.Append("new global::AtomUI.Registration.ControlThemeResourceRegistration(").Append(L(asset.Id))
-            .Append(", global::AtomUI.Registration.ControlResourcePhase.Control, ").Append(asset.Order)
-            .Append(", GeneratedRegistrationFactories.").Append(RegistrationNames.AssetFactory(asset.Id)).AppendLine("));");
+        source.Append(indent).Append("builder.AddThemeAsset(CachedAsset_").Append(RegistrationNames.Hash(asset.Id))
+            .Append(".Descriptor, CachedAsset_").Append(RegistrationNames.Hash(asset.Id)).AppendLine(".Resource);");
+    }
+    private static void WriteCachedDescriptor(StringBuilder source, string name, string type, string expression)
+    {
+        var field = "_" + char.ToLowerInvariant(name[0]) + name.Substring(1);
+        // A failed factory call must retain its original exception type. Concurrent first calls may
+        // construct twice, but every builder receives the same published immutable descriptor.
+        source.Append("        private static ").Append(type).Append("? ").Append(field).AppendLine(";");
+        source.Append("        internal static ").Append(type).Append(' ').Append(name).AppendLine("\n        {");
+        source.AppendLine("            get\n            {");
+        source.Append("                var cached = global::System.Threading.Volatile.Read(ref ").Append(field).AppendLine(");");
+        source.AppendLine("                if (cached is not null) return cached;");
+        source.Append("                var created = ").Append(expression).AppendLine(";");
+        source.Append("                return global::System.Threading.Interlocked.CompareExchange(ref ").Append(field)
+            .AppendLine(", created, null) ?? created;");
+        source.AppendLine("            }\n        }");
     }
     private static string Identity(RegistrationOwner owner) => "global::AtomUI.Theme.Schema.ControlTokenIdentity.ForControl(typeof(" + owner.Type.Name + "), " + L(owner.Catalog) + ", " + L(owner.Id) + ")";
     private static (IReadOnlyList<TypeMapEntry> Entries, IReadOnlyList<string> Collisions) CreateMapEntries(

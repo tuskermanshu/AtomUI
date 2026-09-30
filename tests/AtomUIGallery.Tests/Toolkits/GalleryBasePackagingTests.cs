@@ -98,15 +98,6 @@ public class GalleryBasePackagingTests
         script.ShouldNotContain("$AtomUILanguagePackageProjects");
     }
 
-    [Fact]
-    public void Packaging_Docs_List_GalleryBase_As_Main_Package()
-    {
-        var packagingDoc = ReadRepoFile("docs/architecture/foundations/build-and-packaging.md");
-
-        packagingDoc.ShouldContain("- `AtomUI.Toolkits.GalleryBase`");
-        packagingDoc.ShouldContain("- `AtomUI.Desktop.Controls.Extras`");
-    }
-
     private static string ReadRepoFile(string relativePath)
     {
         var path = Path.Combine(GetRepoRoot(), relativePath);

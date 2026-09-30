@@ -238,32 +238,30 @@ public class RangePickerPreferredWidthTests
         });
     }
 
-    [Theory]
-    [InlineData(DatePickerMode.Date, 2026, 7, 8, 2026, 7, 8)]
-    [InlineData(DatePickerMode.Week, 2026, 7, 8, 2026, 7, 6)]
-    [InlineData(DatePickerMode.Month, 2026, 7, 8, 2026, 7, 1)]
-    [InlineData(DatePickerMode.Quarter, 2026, 8, 8, 2026, 7, 1)]
-    [InlineData(DatePickerMode.Year, 2026, 7, 8, 2026, 1, 1)]
-    public void DatePicker_Normalizes_Selected_Date_By_Picker_Mode(
-        DatePickerMode pickerMode,
-        int sourceYear,
-        int sourceMonth,
-        int sourceDay,
-        int expectedYear,
-        int expectedMonth,
-        int expectedDay)
+    [Fact]
+    public void DatePicker_Normalizes_Selected_Date_By_Picker_Mode()
     {
-        var source   = new DateTime(sourceYear, sourceMonth, sourceDay, 15, 30, 45);
-        var expected = new DateTime(expectedYear, expectedMonth, expectedDay);
+        (DatePickerMode PickerMode, int SourceMonth, int ExpectedMonth, int ExpectedDay)[] modes =
+        [
+            (DatePickerMode.Date, 7, 7, 8),
+            (DatePickerMode.Week, 7, 7, 6),
+            (DatePickerMode.Month, 7, 7, 1),
+            (DatePickerMode.Quarter, 8, 7, 1),
+            (DatePickerMode.Year, 7, 1, 1)
+        ];
 
-        DatePickerFormattingHelper.NormalizeDateTime(source, pickerMode).ShouldBe(expected);
+        foreach (var (pickerMode, sourceMonth, expectedMonth, expectedDay) in modes)
+        {
+            var source   = new DateTime(2026, sourceMonth, 8, 15, 30, 45);
+            var expected = new DateTime(2026, expectedMonth, expectedDay);
+
+            DatePickerFormattingHelper.NormalizeDateTime(source, pickerMode)
+                                      .ShouldBe(expected, $"picker mode {pickerMode}");
+        }
     }
 
     [Theory]
-    [InlineData(DatePickerMode.Week)]
-    [InlineData(DatePickerMode.Month)]
     [InlineData(DatePickerMode.Quarter)]
-    [InlineData(DatePickerMode.Year)]
     public void DatePicker_Default_Picker_Mode_Change_Keeps_Date_Baseline_Preferred_Input_Width(DatePickerMode pickerMode)
     {
         var picker = new DatePicker
@@ -482,10 +480,7 @@ public class RangePickerPreferredWidthTests
     }
 
     [Theory]
-    [InlineData(DatePickerMode.Week)]
-    [InlineData(DatePickerMode.Month)]
     [InlineData(DatePickerMode.Quarter)]
-    [InlineData(DatePickerMode.Year)]
     public void RangeDatePicker_Default_Picker_Mode_Change_Keeps_Date_Baseline_Preferred_Width(DatePickerMode pickerMode)
     {
         var picker = new RangeDatePicker

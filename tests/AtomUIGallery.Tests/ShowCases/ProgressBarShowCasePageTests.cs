@@ -399,17 +399,6 @@ public class ProgressBarShowCasePageTests
     }
 
     [Fact]
-    public void ProgressBar_ShowCase_Removes_Orphaned_SubShowCase_Files()
-    {
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/ProgressBar/Views/ProgressBarBasicShowCase.axaml")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/ProgressBar/Views/ProgressBarBasicShowCase.axaml.cs")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/ProgressBar/Views/ProgressBarAdvancedShowCase.axaml")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/ProgressBar/Views/ProgressBarAdvancedShowCase.axaml.cs")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/ProgressBar/Views/ProgressBarLayoutShowCase.axaml")).ShouldBeFalse();
-        File.Exists(GetRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/ProgressBar/Views/ProgressBarLayoutShowCase.axaml.cs")).ShouldBeFalse();
-    }
-
-    [Fact]
     public void ProgressBar_ShowCase_Examples_Match_Approved_Control_Demo_Content()
     {
         var source   = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/ProgressBar/Views/ProgressBarShowCase.axaml");

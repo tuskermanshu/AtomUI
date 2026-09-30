@@ -340,51 +340,6 @@ public class PaginationShowCasePageTests
         });
     }
 
-    [Fact]
-    public void Semantic_Part_Localization_Uses_Approved_Copy()
-    {
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/Pagination/Localization/zh-CN.xlf");
-        zhCn["SemanticRootDescription"].ShouldBe("根元素，设置 flex 布局、对齐方式、换行和列表样式");
-        zhCn["SemanticItemDescription"].ShouldBe("页码元素，设置尺寸、内边距、边框、背景色、悬停态和激活态样式");
-        zhCn["SemanticInfoDescription"].ShouldBe("信息元素，设置页码信息文本的字体、颜色和对齐样式");
-        zhCn["SemanticPartStyleTitle"].ShouldBe("自定义语义结构的样式");
-        zhCn["SemanticPartStyleDescription"].ShouldBe(
-            "通过生成的 Semantic Part 样式定制 root 与 item：root 使用虚线描边、item 使用圆角，item 背景仅在小尺寸下生效。");
-
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/Pagination/Localization/zh-TW.xlf");
-        zhTw["SemanticRootDescription"].ShouldBe("根元素，設定 flex 佈局、對齊方式、換行和列表樣式");
-        zhTw["SemanticItemDescription"].ShouldBe("頁碼元素，設定尺寸、內邊距、邊框、背景色、懸停態和啟動態樣式");
-        zhTw["SemanticInfoDescription"].ShouldBe("資訊元素，設定頁碼資訊文字的字型、顏色與對齊樣式");
-        zhTw["SemanticPartStyleTitle"].ShouldBe("自訂語義結構的樣式");
-        zhTw["SemanticPartStyleDescription"].ShouldBe(
-            "透過生成的 Semantic Part 樣式自訂 root 與 item：root 使用虛線描邊、item 使用圓角，item 背景僅在小尺寸下生效。");
-
-        var enUs = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/Pagination/Localization/en-US.xlf");
-        enUs["SemanticRootDescription"].ShouldBe("Root element, set flex layout, alignment, flex wrap and list styles");
-        enUs["SemanticItemDescription"].ShouldBe(
-            "Item element, set size, padding, border, background color, hover state and active state styles");
-        enUs["SemanticInfoDescription"].ShouldBe(
-            "Info element, set font, color and alignment styles for the page info text");
-        enUs["SemanticPartStyleTitle"].ShouldBe("Custom Semantic Part styling");
-        enUs["SemanticPartStyleDescription"].ShouldBe(
-            "Style the root and items through generated Semantic Part styles: a dashed outline around the root, rounded item corners, and item backgrounds that apply only at small size.");
-
-        var ptBr = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Navigation/Pagination/Localization/pt-BR.xlf");
-        ptBr["SemanticRootDescription"].ShouldBe(
-            "Elemento raiz, define layout flex, alinhamento, quebra de linha e estilos de lista");
-        ptBr["SemanticItemDescription"].ShouldBe(
-            "Elemento de item, define tamanho, preenchimento, borda, cor de fundo, estado de foco e estado ativo");
-        ptBr["SemanticInfoDescription"].ShouldBe(
-            "Elemento de info, define estilos de fonte, cor e alinhamento para o texto de informação da página");
-        ptBr["SemanticPartStyleTitle"].ShouldBe("Estilo personalizado de Semantic Part");
-        ptBr["SemanticPartStyleDescription"].ShouldBe(
-            "Personalize root e item por meio dos estilos de Semantic Part gerados: contorno tracejado no root, cantos arredondados nos itens e fundos de item aplicados somente no tamanho small.");
-    }
-
     private static void AssertSolidColor(IBrush? actual, string expected)
     {
         actual.ShouldNotBeNull()

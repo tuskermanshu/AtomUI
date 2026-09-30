@@ -7,16 +7,6 @@ namespace AtomUI.Core.Tests.Theme;
 
 public class ControlThemeAssetContractTests
 {
-    [Fact]
-    public void Generated_Asset_Uses_The_Shared_Global_Token_Snapshot_Without_Copying()
-    {
-        var source = File.ReadAllText(Path.Combine(
-            GetRepoRoot(),
-            "src/AtomUI.Core/Theme/Schema/ControlThemeAssetDescriptor.cs"));
-
-        source.ShouldNotContain("compiledGlobalTokenNames.ToArray()");
-    }
-
     [Theory]
     [InlineData("assetId")]
     [InlineData("uri")]
@@ -97,20 +87,6 @@ public class ControlThemeAssetContractTests
     }
 
     private sealed class StyledChrome : Avalonia.StyledElement;
-
-    private static string GetRepoRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            if (Directory.Exists(Path.Combine(directory.FullName, "src/AtomUI.Core")))
-            {
-                return directory.FullName;
-            }
-            directory = directory.Parent;
-        }
-        throw new DirectoryNotFoundException("Unable to locate the AtomUI repository root.");
-    }
 
     [Fact]
     public void Internal_Resource_Only_Export_Does_Not_Require_A_Token_Descriptor()

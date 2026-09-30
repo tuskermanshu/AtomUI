@@ -49,6 +49,45 @@ public class TypedPackageEntryTests
     }
 
     [AvaloniaFact]
+    public void Generated_descriptors_are_reused_without_sharing_application_state()
+    {
+        var firstBuilder = new AtomUIBuilder(new Application());
+        var secondBuilder = new AtomUIBuilder(new Application());
+        firstBuilder.UseDesktopControls();
+        secondBuilder.UseDesktopControls();
+
+        var firstPackage = firstBuilder.ThemeManagerBuilder.ControlPackages
+            .Single(package => package.Id == "AtomUI.Desktop.Controls");
+        var secondPackage = secondBuilder.ThemeManagerBuilder.ControlPackages
+            .Single(package => package.Id == "AtomUI.Desktop.Controls");
+
+        firstPackage.ShouldNotBeSameAs(secondPackage);
+        firstPackage.ControlThemesProvider.ShouldNotBeSameAs(secondPackage.ControlThemesProvider);
+        var assetPaths = firstPackage.ThemeAssets
+            .Select(asset => asset.AssetUri.AbsolutePath)
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (var leafAsset in new[]
+                 {
+                     "/Drawer/Themes/DrawerTheme.axaml",
+                     "/Primitives/ArrowDecoratedBox/Themes/DualMonthArrowDecoratedBoxTheme.axaml",
+                     "/ImagePreviewer/Themes/ImagePreviewerOverlayHostTheme.axaml",
+                     "/Statistic/Themes/AbstractStatisticDefaultTheme.axaml"
+                 })
+        {
+            assetPaths.ShouldContain(leafAsset);
+        }
+        AssertSharedDescriptors(firstPackage.Controls, secondPackage.Controls);
+        AssertSharedDescriptors(firstPackage.SemanticControls, secondPackage.SemanticControls);
+        AssertSharedDescriptors(firstPackage.ThemeAssets, secondPackage.ThemeAssets);
+        AssertSharedDescriptors(firstPackage.Resources, secondPackage.Resources);
+        firstPackage.Resources[0].Factory().ShouldNotBeSameAs(secondPackage.Resources[0].Factory());
+        using var firstManager = firstBuilder.ThemeManagerBuilder.Build();
+        using var secondManager = secondBuilder.ThemeManagerBuilder.Build();
+        firstManager.ShouldNotBeSameAs(secondManager);
+        firstManager.SemanticParts.ShouldNotBeSameAs(secondManager.SemanticParts);
+    }
+
+    [AvaloniaFact]
     public void All_optional_packages_initialize_and_freeze_with_desktop_enabled_explicitly()
     {
         var app = new Application();
@@ -70,6 +109,17 @@ public class TypedPackageEntryTests
             case "ColorPicker": builder.UseDesktopColorPicker(); break;
             case "Extras": builder.UseDesktopExtras(); break;
             default: throw new ArgumentException(name);
+        }
+    }
+
+    private static void AssertSharedDescriptors<T>(IReadOnlyList<T> first, IReadOnlyList<T> second)
+        where T : class
+    {
+        first.ShouldNotBeEmpty();
+        first.Count.ShouldBe(second.Count);
+        for (var index = 0; index < first.Count; index++)
+        {
+            first[index].ShouldBeSameAs(second[index], $"generated descriptor {index} must be reused");
         }
     }
 }
