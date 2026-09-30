@@ -120,6 +120,7 @@ public class ShowCasePanel : TemplatedControl
 - 控制是否使用内部 ScrollViewer。
 - 在 Browser 端渐进挂载首批 item，降低初始渲染压力。
 - 使用一个 panel 级 `EffectiveViewportChanged` 监听 materialize 近 viewport item。
+- 初始数量和视口批量只计算同时启用 `IsDeferredContentEnabled` 且提供 `DeferredContentTemplate` 的卡片；其他卡片不占配额，也不触发后续批次重投。
 
 滚动规则：
 
@@ -376,6 +377,7 @@ xmlns:gallery="https://atomui.net/toolkits/gallery-base"
 - materialize 后不重复创建内容。
 - DataContext 变化同步到已 materialize 内容。
 - `ShowCasePanel` 只使用一个 panel 级 viewport 监听。
+- 混合可延迟与不可延迟卡片时，初始和视口批次跳过不可实例化卡片，并能继续创建后面的有效内容。
 - Browser 渐进挂载不影响 deferred content 策略。
 - Masonry full span item 占满整行。
 - `GalleryShowCaseHeader` 可按属性组合渲染分类、状态、引入版本和 metadata。
