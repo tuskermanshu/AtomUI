@@ -84,7 +84,7 @@ Read the relevant document before touching the corresponding area:
 - Mobile target architecture: [docs/architecture/systems/mobile/overview.md](docs/architecture/systems/mobile/overview.md)
 - Localization target architecture: [docs/architecture/systems/localization/overview.md](docs/architecture/systems/localization/overview.md)
 - AI collaboration and bug-fix discipline: [docs/engineering/contributing/agent-guidelines.md](docs/engineering/contributing/agent-guidelines.md)
-- Test value, lifecycle, and mandatory bug-fix acceptance: [docs/engineering/development/test-value-and-lifecycle.md](docs/engineering/development/test-value-and-lifecycle.md)
+- Test value, temporary-first lifecycle, and mandatory feature/bug-fix acceptance: [docs/engineering/development/test-value-and-lifecycle.md](docs/engineering/development/test-value-and-lifecycle.md)
 - Reference project source lookup: [docs/engineering/contributing/reference-project-source-guidelines.md](docs/engineering/contributing/reference-project-source-guidelines.md)
 - AOT and trimming architecture: [docs/architecture/foundations/aot-and-trimming.md](docs/architecture/foundations/aot-and-trimming.md)
 - TypeMap registration pipeline: [docs/architecture/foundations/aot-typemap-registration.md](docs/architecture/foundations/aot-typemap-registration.md)
@@ -113,7 +113,7 @@ Detailed AI collaboration rules live in [docs/engineering/contributing/agent-gui
 - Keep changes scoped to the user request and the ownership boundary.
 - When the user asks to reference another project's source, follow the local-first lookup order in [Reference Project Source Lookup](docs/engineering/contributing/reference-project-source-guidelines.md) before using GitHub or relying on memory.
 - Prefer root-cause fixes over trigger-point patches.
-- Every bug fix must satisfy [test value and lifecycle](docs/engineering/development/test-value-and-lifecycle.md): new reproduction tests are temporary by default and must be deleted after validation unless justified as permanent contract tests. Without before/after evidence, test disposition, cleanup, and final module verification, the bug fix is incomplete and must not be reported as fixed. TDD does not require permanently retaining reproduction code.
+- Every new feature and bug fix must satisfy [test value and lifecycle](docs/engineering/development/test-value-and-lifecycle.md): new tests are temporary by default, must be written in the prescribed temporary location, and must be deleted after validation. The global suite defaults to zero net-new permanent tests; exceptions require proof of independent value, global-run necessity and reasonable cost. Without before/after evidence, test disposition, cleanup and final module verification, the work is incomplete. TDD does not require permanently retaining validation code.
 - For hover, pointer, hit-testing, wheel, scrolling, clipping, or overlay bugs, preserve the original UX contract and follow the [UI input and scrolling bug discipline](docs/engineering/contributing/agent-guidelines.md#ui-输入与滚动-bug).
 - Treat AOT compatibility as a first-class design constraint for new features and bug fixes.
 - Verify with tests or publish checks that match the risk of the change.
