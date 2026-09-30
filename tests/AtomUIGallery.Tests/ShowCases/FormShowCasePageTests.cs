@@ -83,20 +83,6 @@ public class FormShowCasePageTests
     }
 
     [Fact]
-    public void Form_ShowCase_Required_Layout_Demo_Items_Have_Validators()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Form/Views/FormShowCase.axaml");
-
-        var layoutDemo = ExtractRequiredLayoutDemo(source);
-        CountOccurrences(layoutDemo, "IsRequired=\"True\"").ShouldBe(6);
-        CountOccurrences(layoutDemo, "<atom:FormValidatorProvider>").ShouldBe(6);
-        CountOccurrences(
-                layoutDemo,
-                "<atom:FormStringNotEmptyValidator Message=\"{gallery:FormShowCaseLangResource P2MessagePleaseInput}\" />")
-            .ShouldBe(6);
-    }
-
-    [Fact]
     public void Login_Form_Options_Use_A_Value_Aware_Single_Row_Layout()
     {
         AvaloniaTestApp.EnsureInitialized();

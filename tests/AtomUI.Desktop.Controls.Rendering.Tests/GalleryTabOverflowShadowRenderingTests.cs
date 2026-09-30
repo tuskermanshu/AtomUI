@@ -21,7 +21,7 @@ public class GalleryTabOverflowShadowRenderingTests
     [InlineData(false, 2)]
     [InlineData(true, 1)]
     [InlineData(true, 2)]
-    public void Production_Search_Example_Keeps_Visible_Shadows_Inside_The_Scrolled_Page(bool strip, double scaling)
+    public void Production_Search_Example_Clips_Overflow_Shadow_And_Preserves_Inner_Scroll(bool strip, double scaling)
     {
         Control page = strip
             ? new TabStripShowCase { DataContext = new TabStripViewModel(new TestScreen()) }
@@ -61,7 +61,39 @@ public class GalleryTabOverflowShadowRenderingTests
                 var origin = viewport.TranslatePoint(default, window).ShouldNotBeNull();
                 origin.Y.ShouldBeGreaterThanOrEqualTo(0);
                 (origin.Y + viewport.Bounds.Height).ShouldBeLessThanOrEqualTo(window.ClientSize.Height);
-                TabOverflowShadowRenderingTests.AssertPixels(window, viewport, start, end, horizontal: true);
+
+                var layer = end.GetVisualParent().ShouldBeOfType<Canvas>();
+                start.GetVisualParent().ShouldBe(layer);
+                layer.ClipToBounds.ShouldBeTrue();
+                layer.IsHitTestVisible.ShouldBeFalse();
+                start.IsHitTestVisible.ShouldBeFalse();
+                end.IsHitTestVisible.ShouldBeFalse();
+                var viewportBounds = TransformBounds(viewport, window);
+                TransformBounds(layer, window).ShouldBe(viewportBounds);
+                var endBounds = TransformBounds(end, window);
+                endBounds.Left.ShouldBe(viewportBounds.Right, 0.5);
+                var shadows = end.GetValue(Border.BoxShadowProperty);
+                shadows.Count.ShouldBe(1);
+                shadows[0].OffsetX.ShouldBeLessThan(0);
+                shadows[0].IsInset.ShouldBeFalse();
+                shadows[0].Color.A.ShouldBeGreaterThan((byte)0);
+                var shadowBounds = shadows.TransformBounds(new Rect(end.Bounds.Size))
+                    .TransformToAABB(end.TransformToVisual(window).ShouldNotBeNull());
+                shadowBounds.Left.ShouldBeLessThan(viewportBounds.Right);
+                shadowBounds.Right.ShouldBeGreaterThan(viewportBounds.Left);
+
+                viewer.Offset = new Vector(viewer.ScrollBarMaximum.X, 0);
+                Dispatcher.UIThread.RunJobs();
+                window.UpdateLayout();
+                viewer.Offset.X.ShouldBeGreaterThan(0);
+                start.IsVisible.ShouldBeTrue();
+                end.IsVisible.ShouldBeFalse();
+                TransformBounds(layer, window).ShouldBe(TransformBounds(viewport, window));
+                var startBounds = TransformBounds(start, window);
+                startBounds.Right.ShouldBe(viewportBounds.Left, 0.5);
+                var startShadows = start.GetValue(Border.BoxShadowProperty);
+                startShadows.Count.ShouldBe(1);
+                startShadows[0].OffsetX.ShouldBeGreaterThan(0);
             }
         }
         finally
@@ -73,6 +105,9 @@ public class GalleryTabOverflowShadowRenderingTests
 
     private static T Find<T>(Control root, string name) where T : Control =>
         root.GetVisualDescendants().OfType<T>().Single(control => control.Name == name);
+
+    private static Rect TransformBounds(Control control, Visual relativeTo) =>
+        new Rect(control.Bounds.Size).TransformToAABB(control.TransformToVisual(relativeTo).ShouldNotBeNull());
 
     private sealed class TestScreen : IScreen
     {

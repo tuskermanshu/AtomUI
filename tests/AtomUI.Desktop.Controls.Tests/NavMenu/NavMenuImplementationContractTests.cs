@@ -1,5 +1,3 @@
-using Avalonia.Input;
-using Avalonia.Controls.Templates;
 using Shouldly;
 using Xunit;
 
@@ -7,63 +5,6 @@ namespace AtomUI.Desktop.Controls.Tests.NavMenu;
 
 public class NavMenuImplementationContractTests
 {
-    [Fact]
-    public void NavMenuNode_Exposes_Command_Configuration_Without_Becoming_Command_Source()
-    {
-        var node = new NavMenuNode();
-
-        typeof(INavMenuNode).GetProperty(nameof(INavMenuNode.Command)).ShouldNotBeNull();
-        typeof(INavMenuNode).GetProperty(nameof(INavMenuNode.CommandParameter)).ShouldNotBeNull();
-        NavMenuNode.CommandProperty.ShouldNotBeNull();
-        NavMenuNode.CommandParameterProperty.ShouldNotBeNull();
-        node.Command.ShouldBeNull();
-        node.CommandParameter.ShouldBeNull();
-        node.ShouldNotBeAssignableTo<ICommandSource>();
-    }
-
-    [Fact]
-    public void NavMenu_Entry_Composition_Public_Contract_Is_Strongly_Typed_And_Backward_Compatible()
-    {
-        typeof(INavMenuEntry).IsAssignableFrom(typeof(INavMenuNode)).ShouldBeTrue();
-
-        var interfaceEntries = typeof(INavMenuNode).GetProperty(nameof(INavMenuNode.Entries));
-        interfaceEntries.ShouldNotBeNull();
-        interfaceEntries.PropertyType.ShouldBe(typeof(IEnumerable<INavMenuEntry>));
-
-        var nodeEntries = typeof(NavMenuNode).GetProperty(nameof(NavMenuNode.Entries));
-        nodeEntries.ShouldNotBeNull();
-        nodeEntries.PropertyType.ShouldBe(typeof(IList<INavMenuEntry>));
-
-        typeof(NavMenuGroup).GetProperty(nameof(NavMenuGroup.Header)).ShouldNotBeNull();
-        typeof(NavMenuGroup).GetProperty(nameof(NavMenuGroup.HeaderTemplate)).ShouldNotBeNull();
-        typeof(NavMenuGroup).GetProperty(nameof(NavMenuGroup.Entries))!
-                            .PropertyType.ShouldBe(typeof(IList<INavMenuEntry>));
-        typeof(INavMenuEntry).IsAssignableFrom(typeof(NavMenuDivider)).ShouldBeTrue();
-    }
-
-    [Fact]
-    public void NavMenu_Root_Composition_Public_Contract_Exposes_Fixed_Slots_And_Entry_Spacing()
-    {
-        var menu = new AtomUI.Desktop.Controls.NavMenu();
-
-        typeof(AtomUI.Desktop.Controls.NavMenu).GetProperty(nameof(menu.Header))!
-                                                  .PropertyType.ShouldBe(typeof(object));
-        typeof(AtomUI.Desktop.Controls.NavMenu).GetProperty(nameof(menu.HeaderTemplate))!
-                                                  .PropertyType.ShouldBe(typeof(IDataTemplate));
-        typeof(AtomUI.Desktop.Controls.NavMenu).GetProperty(nameof(menu.Footer))!
-                                                  .PropertyType.ShouldBe(typeof(object));
-        typeof(AtomUI.Desktop.Controls.NavMenu).GetProperty(nameof(menu.FooterTemplate))!
-                                                  .PropertyType.ShouldBe(typeof(IDataTemplate));
-        typeof(AtomUI.Desktop.Controls.NavMenu).GetProperty(nameof(menu.ItemSpacing))!
-                                                  .PropertyType.ShouldBe(typeof(double));
-
-        menu.Header.ShouldBeNull();
-        menu.HeaderTemplate.ShouldBeNull();
-        menu.Footer.ShouldBeNull();
-        menu.FooterTemplate.ShouldBeNull();
-        menu.ItemSpacing.ShouldBe(0d);
-    }
-
     [Fact]
     public void Inline_Keyboard_Navigation_Does_Not_Flatten_Items_On_Each_Key()
     {

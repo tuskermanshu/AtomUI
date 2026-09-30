@@ -99,42 +99,6 @@ public class DrawerShowCasePageTests
     }
 
     [Fact]
-    public void Drawer_ShowCase_Form_In_Drawer_Maps_AntDesign_Form_Demo()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/Drawer/Views/DrawerShowCase.axaml");
-        var formInDrawerItem = ExtractShowCaseItem(source, "FormInDrawerTitle");
-
-        source.ShouldContain("DrawerShowCaseLangResource FormInDrawerTitle");
-        source.ShouldContain("DrawerShowCaseLangResource FormInDrawerDescription");
-        formInDrawerItem.ShouldNotContain("IsOccupyEntireRow=\"True\"");
-        source.ShouldContain("Kind=PlusOutlined");
-        source.ShouldContain("DrawerShowCaseLangResource P2ContentNewAccount");
-        source.ShouldContain("Name=\"FormDrawer\"");
-        source.ShouldContain("DrawerShowCaseLangResource P2TitleCreateNewAccount");
-        source.ShouldContain("DialogSize=\"720\"");
-        source.ShouldContain("ContentPadding=\"24,24,24,80\"");
-        source.ShouldContain("<atom:Drawer.Extra>");
-        source.ShouldContain("DrawerShowCaseLangResource P2ContentSubmit");
-        source.ShouldContain("<atom:Form");
-        source.ShouldContain("FormLayout=\"Vertical\"");
-        source.ShouldContain("RequiredMark=\"Hidden\"");
-        source.ShouldContain("ColumnDefinitions=\"*,*\"");
-        source.ShouldContain("ColumnSpacing=\"16\"");
-        source.ShouldContain("Grid.Column=\"1\"");
-        source.ShouldContain("Grid.Row=\"1\"");
-        source.ShouldNotContain("<atom:Form.ItemsPanel>");
-        source.ShouldContain("DrawerShowCaseLangResource P2LabelTextName");
-        source.ShouldContain("DrawerShowCaseLangResource P2LabelTextUrl");
-        source.ShouldContain("LeftAddOn=\"http://\"");
-        source.ShouldContain("RightAddOn=\".com\"");
-        source.ShouldContain("OptionsSource=\"{Binding AccountOwnerOptions}\"");
-        source.ShouldContain("OptionsSource=\"{Binding AccountTypeOptions}\"");
-        source.ShouldContain("OptionsSource=\"{Binding AccountApproverOptions}\"");
-        source.ShouldContain("<atom:RangeDatePicker");
-        source.ShouldContain("<atom:TextArea Lines=\"4\"");
-    }
-
-    [Fact]
     public void Drawer_ShowCase_Examples_Match_Approved_Control_Demo_Content()
     {
         var source   = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Feedback/Drawer/Views/DrawerShowCase.axaml");

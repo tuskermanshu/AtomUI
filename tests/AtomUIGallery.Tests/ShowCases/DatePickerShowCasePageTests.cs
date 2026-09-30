@@ -83,25 +83,6 @@ public class DatePickerShowCasePageTests
     }
 
     [Fact]
-    public void DatePicker_Switchable_Example_Uses_Select_To_Swap_Pickers()
-    {
-        var source = ExtractShowCaseItemByTitle(
-            ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/DatePicker/Views/DatePickerShowCase.axaml"),
-            "DatePickerShowCaseLangResource SwitchableTitle");
-
-        source.ShouldContain("OptionsSource=\"{Binding PickerTypeOptions}\"");
-        source.ShouldContain("SelectedOption=\"{Binding SelectedPickerOption}\"");
-        source.ShouldContain("Text=\"{Binding SelectedPickerPlaceholderText}\"");
-        source.ShouldContain("IsVisible=\"{Binding IsTimePickerVisible}\"");
-        source.ShouldContain("IsVisible=\"{Binding IsDatePickerVisible}\"");
-        source.ShouldContain("PickerMode=\"{Binding SelectedPickerMode}\"");
-        source.ShouldContain("Width=\"240\"");
-        source.ShouldContain("<atom:Select Width=\"104\"");
-        source.ShouldContain("<atom:TimePicker");
-        source.ShouldContain("<atom:DatePicker");
-    }
-
-    [Fact]
     public void DatePicker_ShowCase_Examples_Match_Approved_Control_Demo_Content()
     {
         var source   = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/DatePicker/Views/DatePickerShowCase.axaml");

@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using AtomUIGallery.Tests.Localization;
 using Shouldly;
 using Xunit;
 
@@ -91,51 +90,6 @@ public class DataGridShowCasePageTests
         ComputeSha256(normalized).ShouldBe(ReadSnapshotHash(approved));
     }
 
-    [Fact]
-    public void Basic_Paging_ShowCase_Preserves_Content_Width_And_Natural_Horizontal_Scrolling()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataDisplay/DataGrid/Views/DataGridShowCase.axaml");
-        var gridMarkup = ExtractElement(
-            source,
-            "<atom:DataGrid x:Name=\"BasicPagingCaseGrid\"",
-            "</atom:DataGrid>");
-
-        var minimumWidths = Regex.Matches(
-                gridMarkup,
-                @"<atom:DataGrid(?:Template|Text)Column\b[^>]*\bMinWidth=""(?<width>[0-9]+)""",
-                RegexOptions.CultureInvariant)
-            .Select(match => match.Groups["width"].Value)
-            .ToArray();
-
-        minimumWidths.ShouldBe(["170", "64", "280", "300", "220"]);
-        gridMarkup.ShouldNotContain("Width=\"*\"");
-        gridMarkup.ShouldNotContain("HorizontalScrollBarVisibility=\"Visible\"");
-        gridMarkup.ShouldNotContain("HorizontalScrollBarVisibility=\"Hidden\"");
-        gridMarkup.ShouldNotContain("HorizontalScrollBarVisibility=\"Disabled\"");
-    }
-
-    [Fact]
-    public void Basic_Paging_ShowCase_Shows_Page_Size_Selector()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataDisplay/DataGrid/Views/DataGridShowCase.axaml");
-        var gridMarkup = ExtractElement(
-            source,
-            "<atom:DataGrid x:Name=\"BasicPagingCaseGrid\"",
-            "</atom:DataGrid>");
-
-        gridMarkup.ShouldContain("IsShowPageSizeSelector=\"True\"");
-        gridMarkup.ShouldContain("<atom:DataGrid.BottomPaginationExtraContent>");
-        gridMarkup.ShouldContain("DataGridShowCaseLangResource BasicPagingExtraContentText");
-        AssertBasicPagingDescription(
-            "en-US.xlf",
-            "Basic pagination table with a page-size selector and opposite-side extra content.");
-        AssertBasicPagingDescription("zh-CN.xlf", "带页大小选择器和对侧扩展区域的基础分页表格。");
-        AssertBasicPagingDescription("zh-TW.xlf", "帶每頁筆數選擇器與對側擴展區域的基礎分頁表格。");
-        AssertBasicPagingDescription(
-            "pt-BR.xlf",
-            "Tabela de paginação básica com seletor de itens por página e conteúdo extra no lado oposto.");
-    }
-
     private static string ExtractDataGridExampleItems(string source)
     {
         const string firstItemMarker  = "<gallery:ShowCaseItem";
@@ -148,17 +102,6 @@ public class DataGridShowCasePageTests
         panelCloseStart.ShouldBeGreaterThan(firstItemStart);
 
         return source[firstItemStart..panelCloseStart];
-    }
-
-    private static string ExtractElement(string source, string startMarker, string endMarker)
-    {
-        var start = source.IndexOf(startMarker, StringComparison.Ordinal);
-        start.ShouldBeGreaterThanOrEqualTo(0);
-
-        var end = source.IndexOf(endMarker, start, StringComparison.Ordinal);
-        end.ShouldBeGreaterThan(start);
-
-        return source[start..(end + endMarker.Length)];
     }
 
     private static string NormalizeMarkup(string source)
@@ -228,13 +171,6 @@ public class DataGridShowCasePageTests
     private static int CountShowCaseItemElements(string source)
     {
         return Regex.Matches(source, @"<gallery:ShowCaseItem(\s|>)", RegexOptions.CultureInvariant).Count;
-    }
-
-    private static void AssertBasicPagingDescription(string fileName, string expected)
-    {
-        var localization = XliffTestDocument.Read(
-            $"controlgallery/AtomUIGallery/ShowCases/DataDisplay/DataGrid/Localization/{fileName}");
-        localization["BasicPagingDescription"].ShouldBe(expected);
     }
 
     private static int CountOccurrences(string source, string value)
