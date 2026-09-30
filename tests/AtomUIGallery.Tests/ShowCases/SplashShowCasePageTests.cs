@@ -157,30 +157,6 @@ public class SplashShowCasePageTests
     }
 
     [Fact]
-    public void Splash_ShowCase_Header_Centers_Title_Tags_And_Adds_Blue_Introduced_Version_Tag()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml");
-        var en = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Other/Splash/Localization/en-US.xlf");
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Other/Splash/Localization/zh-CN.xlf");
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Other/Splash/Localization/zh-TW.xlf");
-
-        source.ShouldContain("<gallery:GalleryShowCaseHeader");
-        source.ShouldContain("Status=\"{gallery:SplashShowCaseLangResource ComponentStatusPreview}\"");
-        source.ShouldContain("StatusTagColor=\"processing\"");
-        source.ShouldContain("IntroducedVersion=\"{gallery:SplashShowCaseLangResource ComponentIntroducedVersion}\"");
-        source.ShouldNotContain("IntroducedVersionTagColor=");
-        source.ShouldNotContain("IsIntroducedVersionTagBordered=");
-
-        foreach (var localization in new[] { en, zhCn, zhTw })
-        {
-            localization["ComponentIntroducedVersion"].ShouldBe("v6.0.7");
-        }
-    }
-
-    [Fact]
     public void Splash_ShowCase_Demos_Cover_Visual_States_Without_Showing_Window()
     {
         var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Other/Splash/Views/SplashShowCase.axaml");

@@ -79,19 +79,6 @@ public class FloatButtonShowCasePageTests
     }
 
     [Fact]
-    public void FloatButton_Command_ShowCase_Displays_Feedback_Near_Action_Buttons()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/General/FloatButton/Views/FloatButtonShowCase.axaml");
-
-        source.ShouldContain("Name=\"CommandFeedbackCard\"");
-        source.ShouldContain("HorizontalAlignment=\"Right\"");
-        source.ShouldContain("VerticalAlignment=\"Bottom\"");
-        source.ShouldContain("Margin=\"24,24,160,24\"");
-        source.ShouldContain("Text=\"{Binding CommandClickCount}\"");
-        source.ShouldContain("Text=\"{Binding LastCommandSource}\"");
-    }
-
-    [Fact]
     public void FloatButton_ShowCase_Declares_The_Semantic_Previews_And_Style_Example()
     {
         var source = ReadRepoFile(

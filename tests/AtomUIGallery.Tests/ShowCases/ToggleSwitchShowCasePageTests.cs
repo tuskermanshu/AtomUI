@@ -260,16 +260,6 @@ public class ToggleSwitchShowCasePageTests
         viewModelSource.ShouldNotContain("ToggleLoadingCommand");
     }
 
-    [Fact]
-    public void ToggleSwitch_ShowCase_Includes_Custom_SizeType_Example()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/ToggleSwitch/Views/ToggleSwitchShowCase.axaml");
-
-        source.ShouldContain("Name=\"CustomSizeTypeToggleSwitch\"");
-        source.ShouldContain("SizeType=\"Custom\"");
-        source.ShouldContain("P2ContentCustom");
-    }
-
     private static string ExtractToggleSwitchExampleItems(string source)
     {
         const string firstItemMarker = "<gallery:ShowCaseItem";

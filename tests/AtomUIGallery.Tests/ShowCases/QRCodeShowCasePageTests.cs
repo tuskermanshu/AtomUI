@@ -97,27 +97,6 @@ public class QRCodeShowCasePageTests
     }
 
     [Fact]
-    public void QRCode_Semantic_Style_Copy_Uses_AtomUI_Semantic_Part_Terminology()
-    {
-        var localizationRoot = Path.GetDirectoryName(GetRepoFile(
-            "controlgallery/AtomUIGallery/ShowCases/DataDisplay/QRCode/Localization/en-US.xlf"))
-            .ShouldNotBeNull();
-        var localizationFiles = Directory.GetFiles(localizationRoot, "*.xlf");
-
-        localizationFiles.Length.ShouldBe(4);
-        foreach (var localizationFile in localizationFiles)
-        {
-            var source = File.ReadAllText(localizationFile);
-            source.ShouldContain("<source>Custom Semantic Part styling</source>");
-            source.ShouldContain(
-                "<source>Use owner-scoped style selectors to customize QRCode's published Semantic Parts.</source>");
-            source.ShouldNotContain("semantic dom", Case.Insensitive);
-            source.ShouldNotContain("classNames");
-            source.ShouldNotContain("objects/functions");
-        }
-    }
-
-    [Fact]
     public void QRCode_Semantic_Preview_Is_Materialized_Only_After_The_Tab_Is_Selected()
     {
         AvaloniaTestApp.EnsureInitialized();

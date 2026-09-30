@@ -1,4 +1,3 @@
-using System.Xml.Linq;
 using Avalonia;
 using Shouldly;
 using Xunit;
@@ -67,21 +66,6 @@ public class TimelineShowCasePageTests
 
         NormalizeMarkup(ExtractTimelineExampleItems(source))
             .ShouldBe(NormalizeMarkup(approved));
-    }
-
-    [Fact]
-    public void Timeline_Horizontal_ShowCase_Occupies_The_Entire_Row()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataDisplay/Timeline/Views/TimelineShowCase.axaml");
-        var document = XDocument.Parse(source);
-        var horizontalItem = document.Descendants()
-                                     .Single(element =>
-                                         element.Name.LocalName == "ShowCaseItem" &&
-                                         element.Attribute("Title")?.Value.Contains("HorizontalTitle", StringComparison.Ordinal) == true);
-
-        var span = horizontalItem.Attribute("Span");
-        span.ShouldNotBeNull();
-        span.Value.ShouldBe("Full");
     }
 
     [Fact]

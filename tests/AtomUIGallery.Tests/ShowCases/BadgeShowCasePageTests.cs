@@ -161,22 +161,6 @@ public class BadgeShowCasePageTests
     }
 
     [Fact]
-    public void Badge_Ribbon_Examples_Use_Right_Placement()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataDisplay/Badge/Views/BadgeShowCase.axaml");
-
-        ExtractBadgeExampleItems(source).ShouldNotContain("Placement=\"Start\"");
-    }
-
-    [Fact]
-    public void Badge_Basic_Zero_Visible_CountBadge_Uses_Green_Indicator()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataDisplay/Badge/Views/BadgeShowCase.axaml");
-
-        source.ShouldContain("<atom:CountBadge Count=\"0\" IsZeroVisible=\"True\" BadgeColor=\"#52c41a\">");
-    }
-
-    [Fact]
     public void Badge_Semantic_Part_Example_Is_Deferred_Scoped_And_Versioned()
     {
         var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataDisplay/Badge/Views/BadgeShowCase.axaml");

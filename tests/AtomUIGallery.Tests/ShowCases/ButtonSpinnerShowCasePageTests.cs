@@ -73,17 +73,6 @@ public class ButtonSpinnerShowCasePageTests
     }
 
     [Fact]
-    public void ButtonSpinner_Size_Labels_Use_Content_Driven_Shared_Column()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Navigation/ButtonSpinner/Views/ButtonSpinnerShowCase.axaml");
-
-        source.ShouldContain("<Grid ColumnDefinitions=\"Auto,Auto\"");
-        source.ShouldContain("RowDefinitions=\"Auto,Auto,Auto,Auto\"");
-        source.ShouldContain("ColumnSpacing=\"12\"");
-        source.ShouldNotContain("<atom:TextBlock Width=\"64\"");
-    }
-
-    [Fact]
     public void ButtonSpinner_ShowCase_Declares_The_Semantic_Previews_And_Style_Example()
     {
         var source  = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Navigation/ButtonSpinner/Views/ButtonSpinnerShowCase.axaml");

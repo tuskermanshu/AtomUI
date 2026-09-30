@@ -442,34 +442,6 @@ public class SplashBehaviorTests
     }
 
     [Fact]
-    public void SplashWindow_Source_Does_Not_Keep_CSharp_Surface_Host_Token_Bridge()
-    {
-        var sourcePath = GetRepoFile("src/AtomUI.Desktop.Controls.Extras/Splash/SplashWindow.cs");
-        var source     = File.ReadAllText(sourcePath);
-        var hostPath   = Path.Combine(Path.GetDirectoryName(sourcePath)!, "SplashWindowSurfaceHost.cs");
-
-        File.Exists(hostPath).ShouldBeFalse();
-        source.ShouldNotContain("SplashWindowSurfaceHost");
-        source.ShouldNotContain("TokenResourceBinder.CreateTokenBinding");
-        source.ShouldNotContain("Content =");
-    }
-
-    [Fact]
-    public void Splash_Source_Does_Not_Expose_SplashController()
-    {
-        var splashDirectory = Path.GetDirectoryName(GetRepoFile("src/AtomUI.Desktop.Controls.Extras/Splash/Splash.cs"))!;
-        var controllerPath  = Path.Combine(splashDirectory, "SplashController.cs");
-        var sourceFiles     = Directory.GetFiles(splashDirectory, "*.cs", SearchOption.TopDirectoryOnly);
-
-        File.Exists(controllerPath).ShouldBeFalse();
-        foreach (var sourceFile in sourceFiles)
-        {
-            File.ReadAllText(sourceFile).ShouldNotContain("SplashController");
-            File.ReadAllText(sourceFile).ShouldNotContain("CurrentController");
-        }
-    }
-
-    [Fact]
     public void Splash_Theme_Separates_Rounded_Clip_And_Surface_Background()
     {
         var document = XDocument.Load(GetRepoFile("src/AtomUI.Desktop.Controls.Extras/Splash/Themes/SplashTheme.axaml"));

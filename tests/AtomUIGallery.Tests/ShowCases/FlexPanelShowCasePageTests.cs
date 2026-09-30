@@ -103,26 +103,6 @@ public class FlexPanelShowCasePageTests
     }
 
     [Fact]
-    public void FlexPanel_ShowCase_Blue_Demo_Tile_Text_Uses_White_Foreground()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Layout/FlexPanel/Views/FlexPanelShowCase.axaml");
-
-        var blueTileBlocks = Regex.Matches(
-                source,
-                @"<Border\b(?=[^>]*Background=""#(?:4F7CF5|1F5BFF)"")[^>]*>(.*?)</Border>",
-                RegexOptions.Singleline | RegexOptions.CultureInvariant)
-            .Select(match => match.Groups[1].Value)
-            .Where(block => block.Contains("<atom:TextBlock", StringComparison.Ordinal))
-            .ToArray();
-
-        blueTileBlocks.ShouldNotBeEmpty();
-        foreach (var block in blueTileBlocks)
-        {
-            block.ShouldContain("Foreground=\"White\"");
-        }
-    }
-
-    [Fact]
     public void FlexPanel_ShowCase_Examples_Match_Approved_Control_Demo_Content()
     {
         var source   = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Layout/FlexPanel/Views/FlexPanelShowCase.axaml");

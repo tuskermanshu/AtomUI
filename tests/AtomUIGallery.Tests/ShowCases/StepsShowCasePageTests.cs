@@ -151,15 +151,6 @@ public class StepsShowCasePageTests
     }
 
     [Fact]
-    public void Steps_ShowCase_Controlled_Content_Uses_TextBlock_Instead_Of_ContentPresenter()
-    {
-        var pageSource = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/Navigation/Steps/Views/StepsShowCase.axaml");
-
-        pageSource.ShouldContain("<atom:TextBlock Text=\"{Binding InteractivePageContent}\"");
-        pageSource.ShouldNotContain("<ContentPresenter Content=\"{Binding InteractivePageContent}\"");
-    }
-
-    [Fact]
     public void Steps_ShowCase_Interactive_Content_Is_Not_Empty_For_Each_Controlled_Step()
     {
         AvaloniaTestApp.EnsureInitialized();

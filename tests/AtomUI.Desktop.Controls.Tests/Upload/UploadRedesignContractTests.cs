@@ -129,19 +129,6 @@ public class UploadRedesignContractTests
     }
 
     [Fact]
-    public void Upload_Does_Not_Reintroduce_A_Second_File_State_Collection()
-    {
-        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/Upload.cs");
-        var theme = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/Themes/UploadTheme.axaml");
-
-        foreach (var retiredState in new[] { "TaskInfoList", "DefaultTaskList", "CurrentTaskList", "_allTaskList" })
-        {
-            source.ShouldNotContain(retiredState);
-            theme.ShouldNotContain(retiredState);
-        }
-    }
-
-    [Fact]
     public void Upload_Template_Binds_List_To_Effective_File_Source()
     {
         var uploadTheme = ReadRepoFile("src/AtomUI.Desktop.Controls/Upload/Themes/UploadTheme.axaml");

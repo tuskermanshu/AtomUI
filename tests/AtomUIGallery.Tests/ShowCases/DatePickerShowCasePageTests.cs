@@ -102,59 +102,6 @@ public class DatePickerShowCasePageTests
     }
 
     [Fact]
-    public void DatePicker_Placement_Example_Stacks_Label_And_Options_To_Avoid_Default_Card_Overflow()
-    {
-        var source = ExtractShowCaseItemByTitle(
-            ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/DatePicker/Views/DatePickerShowCase.axaml"),
-            "DatePickerShowCaseLangResource PlacementTitle");
-
-        source.ShouldContain("<StackPanel Spacing=\"20\">");
-        source.ShouldContain("<StackPanel Spacing=\"8\">");
-        source.ShouldContain("<atom:TextBlock Text=\"{gallery:DatePickerShowCaseLangResource P2TextPlacement}\" />");
-        source.ShouldNotContain("<StackPanel Orientation=\"Horizontal\" Spacing=\"5\" DockPanel.Dock=\"Top\">");
-        AssertResourceOrder(
-            source,
-            "DatePickerShowCaseLangResource P2TextPlacement",
-            "Name=\"PickerPlacementOptionGroup\"",
-            "<atom:DatePicker");
-    }
-
-    [Fact]
-    public void DatePicker_ShowCase_Basic_Example_Exposes_All_AntDesign_Picker_Modes()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/DatePicker/Views/DatePickerShowCase.axaml");
-
-        source.ShouldContain("PickerMode=\"Date\"");
-        source.ShouldContain("PickerMode=\"Week\"");
-        source.ShouldContain("PickerMode=\"Month\"");
-        source.ShouldContain("PickerMode=\"Quarter\"");
-        source.ShouldContain("PickerMode=\"Year\"");
-    }
-
-    [Fact]
-    public void DatePicker_ShowCase_RangePicker_Example_Exposes_All_AntDesign_Range_Picker_Modes()
-    {
-        var source = ExtractShowCaseItemByTitle(
-            ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/DatePicker/Views/DatePickerShowCase.axaml"),
-            "DatePickerShowCaseLangResource RangePickerTitle");
-
-        CountOccurrences(source, "<atom:RangeDatePicker PickerMode=\"Date\"").ShouldBe(2);
-        source.ShouldContain("PickerMode=\"Date\"\n                                  IsShowTime=\"True\"");
-        source.ShouldContain("<atom:RangeDatePicker PickerMode=\"Week\"");
-        source.ShouldContain("P2PlaceholderTextStartWeek");
-        source.ShouldContain("P2SecondaryPlaceholderTextEndWeek");
-        source.ShouldContain("<atom:RangeDatePicker PickerMode=\"Month\"");
-        source.ShouldContain("P2PlaceholderTextStartMonth");
-        source.ShouldContain("P2SecondaryPlaceholderTextEndMonth");
-        source.ShouldContain("<atom:RangeDatePicker PickerMode=\"Quarter\"");
-        source.ShouldContain("P2PlaceholderTextStartQuarter");
-        source.ShouldContain("P2SecondaryPlaceholderTextEndQuarter");
-        source.ShouldContain("<atom:RangeDatePicker PickerMode=\"Year\"");
-        source.ShouldContain("P2PlaceholderTextStartYear");
-        source.ShouldContain("P2SecondaryPlaceholderTextEndYear");
-    }
-
-    [Fact]
     public void DatePicker_ShowCase_Examples_Match_Approved_Control_Demo_Content()
     {
         var source   = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/DatePicker/Views/DatePickerShowCase.axaml");

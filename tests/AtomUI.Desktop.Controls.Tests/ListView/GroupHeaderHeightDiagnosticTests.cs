@@ -46,12 +46,6 @@ public class GroupHeaderHeightDiagnosticTests
                                   .ToArray();
             headers.Length.ShouldBe(2);
 
-            foreach (var header in headers)
-            {
-                System.Console.WriteLine($"HEADER '{((ListViewItem)header).Content}' bounds={header.Bounds} height={header.Bounds.Height}");
-            }
-
-            headers.Length.ShouldBe(2);
             headers[0].Bounds.Height.ShouldBe(headers[1].Bounds.Height);
         });
     }
