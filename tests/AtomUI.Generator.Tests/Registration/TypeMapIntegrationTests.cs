@@ -473,6 +473,47 @@ public partial class TypeMapIntegrationTests
         probe.GetField("Providers")!.GetValue(null).ShouldBe(1);
     }
 
+    [Fact]
+    public void Invalid_Generated_Asset_Reports_Schema_Error_Without_Static_Initializer_Wrapper()
+    {
+        var source = """
+            namespace Demo;
+            public class Button : Avalonia.Controls.Control { }
+            public sealed class Provider : AtomUI.Theme.Resources.ControlThemesProvider
+            {
+                public Provider() { Id = "Demo.Controls"; }
+            }
+            public static class Probe
+            {
+                public static void Register(AtomUI.IAtomUIBuilder builder) =>
+                    AtomUI.Generated.TypeMapFixture.GeneratedControlPackageRegistration.Register(builder, static () => new Provider());
+            }
+            """;
+        var asset = Asset("Button", "<ControlTheme x:Key=\"Button\" TargetType=\"local:Button\" />");
+        var generated = Run(source, asset).GeneratedTrees;
+        var registration = generated.Single(tree => tree.FilePath.EndsWith("GeneratedTypeMapRegistration.g.cs", StringComparison.Ordinal));
+        var invalidRegistration = System.Text.RegularExpressions.Regex.Replace(
+            registration.ToString(),
+            @"(?<=CompiledGlobalTokenNames, )0x[0-9A-F]+UL",
+            "0x0UL");
+        invalidRegistration.ShouldNotBe(registration.ToString());
+        var trees = generated.Select(tree => tree == registration
+            ? CSharpSyntaxTree.ParseText(invalidRegistration, (CSharpParseOptions)tree.Options, tree.FilePath)
+            : tree);
+        using var stream = new MemoryStream();
+        var emit = Compilation(source, [asset]).AddSyntaxTrees(trees).Emit(stream, cancellationToken: TestContext.Current.CancellationToken);
+        emit.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        LoadCore();
+        var assembly = Assembly.Load(stream.ToArray());
+        var application = Activator.CreateInstance(Assembly.Load("Avalonia.Controls").GetType("Avalonia.Application")!);
+        var builder = Activator.CreateInstance(LoadCore().GetType("AtomUI.AtomUIBuilder")!,
+            BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { application }, null)!;
+        var register = assembly.GetType("Demo.Probe")!.GetMethod("Register")!;
+
+        var failure = Should.Throw<TargetInvocationException>(() => register.Invoke(null, new[] { builder }));
+        failure.InnerException!.GetType().FullName.ShouldBe("AtomUI.Theme.Schema.ThemeSchemaException");
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(2)]
