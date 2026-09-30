@@ -443,8 +443,8 @@ public class ShowCasePanelStructureTests
     [Fact]
     public void ShowCase_Runtime_Options_Do_Not_Let_Runtime_Stop_Override_Environment_Disable()
     {
-        GalleryShowCaseRuntimeOptions.ResetDeferredLoadingDisabledOverride();
         var oldValue = SetDeferredLoadingEnvironment("1");
+        GalleryShowCaseRuntimeOptions.ResetDeferredLoadingDisabledOverride();
         try
         {
             GalleryShowCaseRuntimeOptions.IsDeferredLoadingDisabled.ShouldBeTrue();

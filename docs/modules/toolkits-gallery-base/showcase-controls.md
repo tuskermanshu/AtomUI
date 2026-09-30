@@ -76,6 +76,9 @@ public class ShowCaseItem : ContentControl
 - 已创建内容不回收，避免复杂控件状态、焦点、Popup/Flyout 生命周期被破坏。
 - `DeferredContent` 为空时使用 `DataContext` 构建模板。
 - DataContext 变化后，已创建内容需要同步 DataContext。
+- 延迟内容尚未创建时使用 AtomUI `Skeleton` 作为占位；`DeferredPlaceholderHeight` 表示预期内容高度，默认值为
+  `160`，`DeferredPlaceholderCornerRadius` 控制 Skeleton 占位框圆角。当示例内容高度不同且需要避免物化时的布局跳动时，
+  页面必须把 `DeferredPlaceholderHeight` 设置为实际预期高度。
 
 XAML 使用规范：
 
@@ -345,6 +348,8 @@ GalleryBase 拥有以下实现边界：
 - 环境变量关闭延迟创建。
 - F5/F6 自动切页压测时运行时关闭或恢复延迟创建。
 - 事件通知已存在 panel 更新 materialization 状态。
+- 环境变量值在进程内缓存；普通读取不再访问进程环境，只有显式设置
+  `IsDeferredLoadingDisabled` 或调用 `ResetDeferredLoadingDisabledOverride()` 时才重新读取并更新有效状态。
 
 环境变量沿用：
 

@@ -221,7 +221,7 @@ public class ShowCaseItem : ContentControl
 
         var data    = DeferredContent ?? DataContext;
         var content = DeferredContentTemplate.Build(data);
-        if (content is StyledElement styledElement)
+        if (data is not null && content is StyledElement styledElement)
         {
             styledElement.DataContext = data;
         }

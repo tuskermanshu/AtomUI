@@ -18,11 +18,19 @@
                         CornerRadius="{gallery:ShowCaseItemTokenResource CardCornerRadius}">
                     <StackPanel Orientation="Vertical">
                         <Grid Margin="{gallery:ShowCaseItemTokenResource PreviewMargin}">
-                            <Border Name="PART_DeferredPlaceholder"
-                                    IsVisible="False"
-                                    MinHeight="{TemplateBinding DeferredPlaceholderHeight}"
-                                    Background="{atom:SharedTokenResource ColorFillTertiary}"
-                                    CornerRadius="{gallery:ShowCaseItemTokenResource DeferredPlaceholderCornerRadius}" />
+                            <atom:Skeleton Name="PART_DeferredPlaceholder"
+                                           IsVisible="False"
+                                           IsLoading="True"
+                                           IsActive="True"
+                                           IsShowTitle="False"
+                                           ParagraphRows="4"
+                                           MinHeight="{TemplateBinding DeferredPlaceholderHeight}"
+                                           HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Stretch"
+                                           BorderBrush="{atom:SharedTokenResource ColorFillTertiary}"
+                                           BorderThickness="{atom:SharedTokenResource BorderThickness}"
+                                           CornerRadius="{gallery:ShowCaseItemTokenResource DeferredPlaceholderCornerRadius}"
+                                           ClipToBounds="True" />
                             <ContentPresenter Name="PART_ContentPresenter"
                                               Content="{TemplateBinding Content}"
                                               ContentTemplate="{TemplateBinding ContentTemplate}" />
@@ -81,11 +89,19 @@
                                 CornerRadius="{gallery:ShowCaseItemTokenResource CardCornerRadius}">
                             <StackPanel Orientation="Vertical">
                                 <Grid Margin="{gallery:ShowCaseItemTokenResource BadgePreviewMargin}">
-                                    <Border Name="PART_DeferredPlaceholder"
-                                            IsVisible="{Binding IsDeferredPlaceholderVisible, RelativeSource={RelativeSource AncestorType=gallery:ShowCaseItem}}"
-                                            MinHeight="{Binding DeferredPlaceholderHeight, RelativeSource={RelativeSource AncestorType=gallery:ShowCaseItem}}"
-                                            Background="{atom:SharedTokenResource ColorFillTertiary}"
-                                            CornerRadius="{gallery:ShowCaseItemTokenResource DeferredPlaceholderCornerRadius}" />
+                                    <atom:Skeleton Name="PART_DeferredPlaceholder"
+                                                   IsVisible="{Binding IsDeferredPlaceholderVisible, RelativeSource={RelativeSource AncestorType=gallery:ShowCaseItem}}"
+                                                   IsLoading="True"
+                                                   IsActive="True"
+                                                   IsShowTitle="False"
+                                                   ParagraphRows="4"
+                                                   MinHeight="{Binding DeferredPlaceholderHeight, RelativeSource={RelativeSource AncestorType=gallery:ShowCaseItem}}"
+                                                   HorizontalAlignment="Stretch"
+                                                   VerticalAlignment="Stretch"
+                                                   BorderBrush="{atom:SharedTokenResource ColorFillTertiary}"
+                                                   BorderThickness="{atom:SharedTokenResource BorderThickness}"
+                                                   CornerRadius="{gallery:ShowCaseItemTokenResource DeferredPlaceholderCornerRadius}"
+                                                   ClipToBounds="True" />
                                     <ContentPresenter Name="PART_ContentPresenter"
                                                       IsVisible="{Binding IsDeferredPlaceholderVisible, RelativeSource={RelativeSource AncestorType=gallery:ShowCaseItem}, Converter={x:Static BoolConverters.Not}}"
                                                       Content="{Binding Content, RelativeSource={RelativeSource AncestorType=gallery:ShowCaseItem}}"
@@ -143,7 +159,7 @@
         <Style Selector="^[IsFake=True] /template/ atom|IconButton#PART_ZoomButton">
             <Setter Property="IsVisible" Value="False" />
         </Style>
-        <Style Selector="^[IsDeferredPlaceholderVisible=True] /template/ Border#PART_DeferredPlaceholder">
+        <Style Selector="^[IsDeferredPlaceholderVisible=True] /template/ atom|Skeleton#PART_DeferredPlaceholder">
             <Setter Property="IsVisible" Value="True" />
         </Style>
         <Style Selector="^[IsDeferredPlaceholderVisible=True] /template/ ContentPresenter#PART_ContentPresenter">
