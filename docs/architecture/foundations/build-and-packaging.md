@@ -145,8 +145,10 @@ scripts/run-full-regression.sh
 
 `scripts/BuildNuGetPackages.ps1` 的 `-PackageValidationBaselineVersion` 同时驱动两者：它先对发布包项目 restore 以拉取
 基线包（pack 使用 `--no-build`，不会自行 restore），随后 pack，最后运行布局校验。前置工具项目不是发布包，不施加校验
-属性。有意变更的豁免分别是 `build/PackageValidationSuppressions/<ProjectName>.xml` 与
-`scripts/verification/package-layout-allowlist.json`（按基线版本与包 ID 记录，未命中的条目会导致失败）。
+属性。包 API 校验不加载 ApiCompat suppression；对所选基线存在公开 API 删除、成员删除或枚举值变化时，
+发布门禁必须失败。若这些变化是产品要求，发布策略必须改为不声明与该基线兼容（例如调整版本/基线策略），
+而不是在包验证中隐藏诊断。包布局有意变更仍由 `scripts/verification/package-layout-allowlist.json`
+按基线版本与包 ID 记录，未命中的条目会导致失败。
 
 本地验证：
 

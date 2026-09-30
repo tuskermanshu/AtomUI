@@ -49,13 +49,4 @@
             </PackageValidationReferencePath>
         </ItemGroup>
     </Target>
-
-    <!--
-        Intentional, documented breaking API changes are acknowledged per package in
-        build/PackageValidationSuppressions/<ProjectName>.xml. Generate one with the MSBuild
-        property ApiCompatGenerateSuppressionFile=true, then review it before committing.
-    -->
-    <ItemGroup Condition="'$(AtomUIPackageValidationBaselineVersion)' != '' and Exists('$(MSBuildThisFileDirectory)PackageValidationSuppressions/$(MSBuildProjectName).xml')">
-        <ApiCompatSuppressionFile Include="$(MSBuildThisFileDirectory)PackageValidationSuppressions/$(MSBuildProjectName).xml" />
-    </ItemGroup>
 </Project>

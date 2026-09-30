@@ -82,8 +82,8 @@
 
 ### 有意破坏的处理
 
-- **包 API 破坏**：用 `-p:ApiCompatGenerateSuppressionFile=true` 生成
-  `build/PackageValidationSuppressions/<ProjectName>.xml`，审阅后提交。抑制项即"已确认的破坏"。
+- **包 API 破坏**：不得用 ApiCompat suppression 让兼容性门禁通过。若公共 API 删除、成员删除或枚举值变化是产品要求，
+  发布必须调整版本/基线策略，使该发布不再声明与被比较基线 API 兼容；否则包验证失败是正确结果。
 - **包布局破坏**：在 `scripts/verification/package-layout-allowlist.json` 中按**基线版本 + 包 ID** 记录条目与
   `reason`。条目必须被当前比对实际命中，否则门禁失败，防止清单腐化。
 - 两类确认都必须同时补 `docs/releases/<version>-api-changes.md` 迁移说明。

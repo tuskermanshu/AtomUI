@@ -27,10 +27,7 @@ public sealed class BuildLayoutTests
         "Versions.props"
     ];
 
-    private static readonly string[] s_expectedBuildDirectories =
-    [
-        "PackageValidationSuppressions"
-    ];
+    private static readonly string[] s_expectedBuildDirectories = [];
 
     private static readonly string[] s_expectedNuGetBuildAssets =
     [
@@ -504,14 +501,6 @@ public sealed class BuildLayoutTests
         Directory.EnumerateFiles(buildRoot)
                  .All(file => Path.GetExtension(file) is ".props" or ".targets" or ".cs")
                  .ShouldBeTrue();
-        var suppressions = Path.Combine(buildRoot, "PackageValidationSuppressions");
-        if (!Directory.Exists(suppressions)) return;
-        Directory.EnumerateDirectories(suppressions).ShouldBeEmpty();
-        foreach (var file in Directory.EnumerateFiles(suppressions))
-        {
-            Path.GetExtension(file).ShouldBe(".xml");
-            XDocument.Load(file).Root.ShouldNotBeNull();
-        }
     }
 
     private static string[] GetImports(string relativePath)
