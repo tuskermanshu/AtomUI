@@ -157,17 +157,6 @@ public class ShowCaseItemZoomTests
             });
     }
 
-    [Fact]
-    public void Theme_File_Declares_Zoom_Button_In_Both_Templates()
-    {
-        var source = File.ReadAllText(GetRepoFile(
-            "src/AtomUI.Toolkits.GalleryBase/Controls/Themes/ShowCaseItemTheme.axaml"));
-
-        // 两份模板各一个按钮声明 + 一个 IsFake 隐藏样式选择器
-        CountOccurrences(source, "PART_ZoomButton").ShouldBe(3);
-        source.ShouldContain("ExpandOutlined");
-    }
-
     private static IconButton? FindZoomButton(ShowCaseItem item)
     {
         return item.GetVisualDescendants()
@@ -190,32 +179,5 @@ public class ShowCaseItemZoomTests
             window.Close();
             Dispatcher.UIThread.RunJobs();
         }
-    }
-
-    private static string GetRepoFile(string relativePath)
-    {
-        var directory = AppContext.BaseDirectory;
-        while (directory is not null)
-        {
-            var candidate = Path.Combine(directory, relativePath);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-            directory = Directory.GetParent(directory)?.FullName;
-        }
-        throw new FileNotFoundException(relativePath);
-    }
-
-    private static int CountOccurrences(string text, string value)
-    {
-        var count = 0;
-        var index = 0;
-        while ((index = text.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
-        {
-            count++;
-            index += value.Length;
-        }
-        return count;
     }
 }

@@ -15,7 +15,7 @@ public class PopupPinnedOpenContractTests
         typeof(global::AtomUI.Desktop.Controls.AbstractColorPicker).Assembly;
     private static readonly Assembly DataGridAssembly = typeof(global::AtomUI.Desktop.Controls.DataGrid).Assembly;
 
-    public static IEnumerable<object[]> DirectContractOwners()
+    private static IEnumerable<object[]> DirectContractOwners()
     {
         // Semantic preview owners expose the pin publicly; physical/internal owners retain internal access.
         foreach (var (type, isPublic) in new[]
@@ -53,7 +53,7 @@ public class PopupPinnedOpenContractTests
         }
     }
 
-    public static IEnumerable<object[]> InheritedContractOwners()
+    private static IEnumerable<object[]> InheritedContractOwners()
     {
         yield return [DesktopType("AtomUI.Desktop.Controls.Select"), DesktopType("AtomUI.Desktop.Controls.AbstractSelect")];
         yield return [DesktopType("AtomUI.Desktop.Controls.TreeSelect"), DesktopType("AtomUI.Desktop.Controls.AbstractSelect")];
@@ -70,9 +70,25 @@ public class PopupPinnedOpenContractTests
         yield return [DesktopType("AtomUI.Desktop.Controls.PopupConfirm"), DesktopType("AtomUI.Desktop.Controls.FlyoutHost")];
     }
 
-    [Theory]
-    [MemberData(nameof(DirectContractOwners))]
-    public void Direct_Popup_Pinned_Open_Contracts_Keep_Their_Declared_Visibility(Type ownerType, bool isPublic)
+    [Fact]
+    public void Direct_Popup_Pinned_Open_Contracts_Keep_Their_Declared_Visibility()
+    {
+        foreach (var contract in DirectContractOwners())
+        {
+            var ownerType = (Type)contract[0];
+            var isPublic = (bool)contract[1];
+            try
+            {
+                AssertDirectContract(ownerType, isPublic);
+            }
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException($"Popup pin contract mismatch: {ownerType.FullName}.", exception);
+            }
+        }
+    }
+
+    private static void AssertDirectContract(Type ownerType, bool isPublic)
     {
         const BindingFlags propertyFlags =
             BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
@@ -101,9 +117,25 @@ public class PopupPinnedOpenContractTests
             BindingFlags.Static | oppositeVisibility | BindingFlags.DeclaredOnly).ShouldBeNull();
     }
 
-    [Theory]
-    [MemberData(nameof(InheritedContractOwners))]
-    public void Leaf_Controls_Inherit_The_Contract_From_Their_Semantic_Owner(Type leafType, Type expectedOwnerType)
+    [Fact]
+    public void Leaf_Controls_Inherit_The_Contract_From_Their_Semantic_Owner()
+    {
+        foreach (var contract in InheritedContractOwners())
+        {
+            var leafType = (Type)contract[0];
+            var expectedOwnerType = (Type)contract[1];
+            try
+            {
+                AssertInheritedContract(leafType, expectedOwnerType);
+            }
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException($"Popup pin inheritance mismatch: {leafType.FullName}.", exception);
+            }
+        }
+    }
+
+    private static void AssertInheritedContract(Type leafType, Type expectedOwnerType)
     {
         var property = FindDeclaredProperty(leafType, PropertyName);
         property.ShouldNotBeNull($"{leafType.FullName} must inherit the popup pin contract.");
@@ -141,15 +173,20 @@ public class PopupPinnedOpenContractTests
         }
     }
 
-    [Theory]
-    [InlineData("AtomUI.Desktop.Controls.Dialog")]
-    [InlineData("AtomUI.Desktop.Controls.Drawer")]
-    [InlineData("AtomUI.Desktop.Controls.ImagePreviewer")]
-    public void Non_Popup_Session_Controls_Do_Not_Expose_The_Contract(string typeName)
+    [Fact]
+    public void Non_Popup_Session_Controls_Do_Not_Expose_The_Contract()
     {
-        var controlType = DesktopType(typeName);
-        FindDeclaredProperty(controlType, PropertyName).ShouldBeNull();
-        FindDeclaredField(controlType, PropertyFieldName).ShouldBeNull();
+        foreach (var typeName in new[]
+                 {
+                     "AtomUI.Desktop.Controls.Dialog",
+                     "AtomUI.Desktop.Controls.Drawer",
+                     "AtomUI.Desktop.Controls.ImagePreviewer"
+                 })
+        {
+            var controlType = DesktopType(typeName);
+            FindDeclaredProperty(controlType, PropertyName).ShouldBeNull($"{typeName} must not expose popup pin state.");
+            FindDeclaredField(controlType, PropertyFieldName).ShouldBeNull($"{typeName} must not register popup pin state.");
+        }
     }
 
     [Fact]

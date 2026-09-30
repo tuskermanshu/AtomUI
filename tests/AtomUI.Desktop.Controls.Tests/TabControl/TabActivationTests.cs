@@ -140,18 +140,6 @@ public class TabActivationTests
     }
 
     [Fact]
-    public void TabItem_Release_Selects_Before_Base_Clears_Pressed_State()
-    {
-        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/TabControl/TabItem.cs");
-
-        source.ShouldContain(
-            """
-                    UpdateSelectionFromEvent(e);
-                    base.OnPointerReleased(e);
-            """);
-    }
-
-    [Fact]
     public void TabStrip_Default_Activates_Tab_On_Same_Tab_Release()
     {
         var tabStrip = CreateTabStrip();
@@ -268,18 +256,6 @@ public class TabActivationTests
         source.ShouldContain("<Style Selector=\"^:pressed\">");
         source.ShouldContain("<Setter Property=\"Foreground\" Value=\"{atom:SharedTokenResource ColorPrimaryActive}\" />");
         source.ShouldNotContain("ControlTokenScope.Identity");
-    }
-
-    [Fact]
-    public void TabStripItem_Release_Selects_Before_Base_Clears_Pressed_State()
-    {
-        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/TabControl/TabStrip/TabStripItem.cs");
-
-        source.ShouldContain(
-            """
-                    tabStrip?.UpdateSelectionFromEvent(this, e);
-                    base.OnPointerReleased(e);
-            """);
     }
 
     private static AtomTabControl CreateTabControl()

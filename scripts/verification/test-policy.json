@@ -257,8 +257,7 @@
         "tests/AtomUIGallery.Tests/**/GalleryShowCaseStyleBoundaryTests.cs",
         "tests/AtomUIGallery.Tests/**/ShowCaseScenarioControllerConventionsTests.cs",
         "tests/AtomUIGallery.Tests/**/MigratedShowCaseDeferredCreationTests.cs",
-        "tests/AtomUIGallery.Tests/**/ShowCasePanelStructureTests.cs",
-        "tests/AtomUIGallery.Tests/**/GalleryMetadataCleanupTests.cs"
+        "tests/AtomUIGallery.Tests/**/ShowCasePanelStructureTests.cs"
       ]
     },
     {
@@ -269,27 +268,25 @@
       ],
       "tests": [
         "tests/AtomUIGallery.Tests/Localization/GalleryCatalogCoverageTests.cs",
-        "tests/AtomUI.Build.Tasks.Tests/Xliff21WriterTests.cs",
         "tests/AtomUI.Localization.IntegrationTests/**/*.cs"
       ]
     },
     {
       "id": "test-xliff-inputs",
       "changes": [
-        "tests/**/*.xlf"
+        "tests/fixtures/LanguagePackEndToEnd/**/*.xlf"
       ],
       "tests": [
-        "tests/AtomUI.Build.Tasks.Tests/Xliff21WriterTests.cs"
+        "tests/AtomUI.Localization.IntegrationTests/LanguagePackEndToEndTests.cs"
       ]
     },
     {
-      "id": "localization-source-boundary",
+      "id": "core-test-xliff-inputs",
       "changes": [
-        "src/AtomUI.Localization/**/*.cs",
-        "src/AtomUI.Core/**/*.cs"
+        "tests/AtomUI.Core.Tests/Localization/Generated/*.xlf"
       ],
       "tests": [
-        "tests/AtomUI.Localization.Tests/LocalizationSourceLayoutTests.cs"
+        "tests/AtomUI.Core.Tests/Localization/ApplicationLocalizationStartupTests.cs"
       ]
     },
     {
@@ -402,8 +399,7 @@
         "tests/AtomUI.Core.Tests/Theme/**/*.cs",
         "tests/AtomUI.Desktop.Controls.Tests/Theme/**/*.cs",
         "tests/AtomUI.Desktop.Controls.Tests/**/*LifetimeTests.cs",
-        "tests/AtomUI.Desktop.Controls.DataGrid.Tests/Lifecycle/**/*.cs",
-        "tests/AtomUI.Toolkits.GalleryBase.Tests/Controls/GalleryBaseThemeScopeMigrationTests.cs"
+        "tests/AtomUI.Desktop.Controls.DataGrid.Tests/Lifecycle/**/*.cs"
       ]
     },
     {

@@ -98,7 +98,7 @@ public class TextInputRootBrushRelayTests
 
     [Theory]
     [MemberData(nameof(TextInputKinds))]
-    public void Root_BorderBrush_Clear_Restores_The_Frame_State_Machine(string kind)
+    public void Root_BorderBrush_Default_And_Clear_Use_The_Frame_State_Machine(string kind)
     {
         var control = CreateTextInput(kind, out var window);
         try
@@ -110,6 +110,18 @@ public class TextInputRootBrushRelayTests
             var restBorder    = GetThemeResource<IBrush>(SharedTokenKind.ColorBorder);
             var hoverBorder   = GetThemeResource<IBrush>(SharedTokenKind.ColorPrimaryHover);
             var customBorder  = new SolidColorBrush(Color.Parse("#f759ab"));
+
+            control.BorderBrush.ShouldBeNull(
+                "The input themes must not set a dead owner-level BorderBrush default; the frame theme owns the rest state.");
+            GetSolidBrushColor(frame.BorderBrush).ShouldBe(GetSolidBrushColor(restBorder));
+
+            frame.IsInnerBoxHover = true;
+            Dispatcher.UIThread.RunJobs();
+            GetSolidBrushColor(frame.BorderBrush).ShouldBe(GetSolidBrushColor(hoverBorder));
+
+            frame.IsInnerBoxHover = false;
+            Dispatcher.UIThread.RunJobs();
+            GetSolidBrushColor(frame.BorderBrush).ShouldBe(GetSolidBrushColor(restBorder));
 
             control.BorderBrush = customBorder;
             Dispatcher.UIThread.RunJobs();
@@ -157,34 +169,6 @@ public class TextInputRootBrushRelayTests
             var frame = FindFrame(lineEdit);
             GetSolidBrushColor(frame.BorderBrush).ShouldBe(Color.Parse("#f759ab"),
                 "A root brush assigned before the template exists must be relayed once the template is applied.");
-        }
-        finally
-        {
-            window.Close();
-        }
-    }
-
-    [Theory]
-    [MemberData(nameof(TextInputKinds))]
-    public void Uncustomized_Inputs_Keep_The_Frame_Theme_Rest_State(string kind)
-    {
-        var control = CreateTextInput(kind, out var window);
-        try
-        {
-            window.Show();
-            Dispatcher.UIThread.RunJobs();
-
-            var frame      = FindFrame(control);
-            var restBorder = GetThemeResource<IBrush>(SharedTokenKind.ColorBorder);
-
-            control.BorderBrush.ShouldBeNull(
-                "The input themes must not set a dead owner-level BorderBrush default; the frame theme owns the rest state.");
-            GetSolidBrushColor(frame.BorderBrush).ShouldBe(GetSolidBrushColor(restBorder));
-
-            frame.IsInnerBoxHover = true;
-            Dispatcher.UIThread.RunJobs();
-            GetSolidBrushColor(frame.BorderBrush)
-                .ShouldBe(GetSolidBrushColor(GetThemeResource<IBrush>(SharedTokenKind.ColorPrimaryHover)));
         }
         finally
         {

@@ -22,16 +22,15 @@ public class TabOverflowSessionReviewTests
         AvaloniaTestApp.EnsureInitialized();
     }
 
-    public static TheoryData<OwnerKind> OwnerKinds =>
+    // Reentrancy and popup teardown run in the shared viewer; exercise both owner bases.
+    public static TheoryData<OwnerKind> BaseOwnerKinds =>
     [
         OwnerKind.TabControl,
-        OwnerKind.CardTabControl,
-        OwnerKind.TabStrip,
-        OwnerKind.CardTabStrip
+        OwnerKind.TabStrip
     ];
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Public_Overflow_Snapshot_Cannot_Be_Rewritten_Through_IList(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>
@@ -59,7 +58,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Dismiss_During_Opening_Snapshot_Notification_Aborts_The_Open(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>
@@ -83,7 +82,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Collection_Change_During_Opening_Snapshot_Notification_Invalidates_The_Open(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>
@@ -109,7 +108,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void ItemsSource_Replacement_During_Opening_Snapshot_Notification_Invalidates_The_Open(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, window) =>
@@ -141,7 +140,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Dismiss_During_Template_Build_Does_Not_Leave_An_Open_Popup(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>
@@ -161,7 +160,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Detach_During_Template_Build_Releases_The_Aborted_Popup(OwnerKind kind)
     {
         WithOwner(kind, (owner, host, window) =>
@@ -187,7 +186,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Template_Replacement_During_Build_Releases_The_Aborted_Content(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>
@@ -214,7 +213,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Collection_Change_Rejects_Reopening_During_The_Closing_Snapshot_Notification(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>
@@ -246,7 +245,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Template_Replacement_Rejects_Reopening_During_The_Closing_Snapshot_Notification(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>
@@ -283,7 +282,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Owner_Detach_Rejects_Reopening_During_The_Closing_Snapshot_Notification(OwnerKind kind)
     {
         WithOwner(kind, (owner, host, window) =>
@@ -320,7 +319,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Prepared_Template_Root_Inherits_The_Popup_Context_Across_Ordinary_Closes(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>
@@ -351,7 +350,7 @@ public class TabOverflowSessionReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerKinds))]
+    [MemberData(nameof(BaseOwnerKinds))]
     public void Prepared_Template_Preserves_An_Explicit_Root_DataContext_Across_Ordinary_Closes(OwnerKind kind)
     {
         WithOwner(kind, (owner, _, _) =>

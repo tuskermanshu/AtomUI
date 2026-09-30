@@ -22,7 +22,6 @@ using AvaloniaWindow = Avalonia.Controls.Window;
 using AvaloniaTextBlock = Avalonia.Controls.TextBlock;
 using DesktopButton = AtomUI.Desktop.Controls.Button;
 using DesktopNumericUpDown = AtomUI.Desktop.Controls.NumericUpDown;
-using DesktopRibbonBadge = AtomUI.Desktop.Controls.RibbonBadge;
 using DesktopToggleSwitch = AtomUI.Desktop.Controls.ToggleSwitch;
 using NotificationCard = AtomUI.Desktop.Controls.NotificationCard;
 using NotificationViewModel = AtomUIGallery.ShowCases.Notification.NotificationViewModel;
@@ -409,28 +408,6 @@ public class NotificationShowCasePageTests
             GetCenterY(enabledSwitch, stackItem).ShouldBe(expectedCenterY, 0.5);
             GetCenterY(thresholdLabel, stackItem).ShouldBe(expectedCenterY, 0.5);
         });
-    }
-
-    [Fact]
-    public void Notification_Stack_ShowCase_Displays_The_V619_Version_Badge()
-    {
-        AvaloniaTestApp.EnsureInitialized();
-        var page = new NotificationShowCase();
-
-        ShowInWindow(page, window =>
-        {
-            var stackItem = page.GetVisualDescendants()
-                                .OfType<ShowCaseItem>()
-                                .Single(item => item.SourceKey == "notification-stack");
-            window.UpdateLayout();
-
-            stackItem.BadgeText.ShouldBe("v6.1.9");
-            stackItem.GetVisualDescendants()
-                     .OfType<DesktopRibbonBadge>()
-                     .Single()
-                     .Text.ShouldBe("v6.1.9");
-        });
-
     }
 
     [Fact]

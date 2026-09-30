@@ -37,6 +37,13 @@ public class TabContainerLayoutReviewTests
         }
     }
 
+    // Degenerate arrange uses the same branch for both sides of each axis.
+    public static TheoryData<bool, Dock> NarrowArrangeAxisCases => new()
+    {
+        { false, Dock.Top },
+        { true, Dock.Left }
+    };
+
     [Theory]
     [MemberData(nameof(OwnerPlacementCases))]
     public void Centered_Card_Tabs_Reserve_The_Add_Button_Without_Unnecessary_Overflow(bool strip, Dock placement)
@@ -80,7 +87,7 @@ public class TabContainerLayoutReviewTests
     }
 
     [Theory]
-    [MemberData(nameof(OwnerPlacementCases))]
+    [MemberData(nameof(NarrowArrangeAxisCases))]
     public void Card_Tabs_Tolerate_Arrange_Smaller_Than_The_Measured_Add_Button(bool strip, Dock placement)
     {
         var owner = CreateCardOwner(strip, placement, itemCount: 3);

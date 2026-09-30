@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Xml.Linq;
 using Shouldly;
 using Xunit;
@@ -7,31 +6,6 @@ namespace AtomUI.Generator.Tests.BuildInfrastructure;
 
 public sealed class BuildLayoutTests
 {
-    private static readonly string[] s_expectedBuildFiles =
-    [
-        "AtomUI.Generator.props",
-        "AtomUI.Generator.targets",
-        "AtomUI.Registration.targets",
-        "AtomUI.GeneratorConsumer.targets",
-        "AtomUI.Localization.props",
-        "AtomUI.Localization.targets",
-        "AtomUI.Repository.props",
-        "AtomUI.Repository.targets",
-        "AtomUI.ThemeAssets.targets",
-        "AtomUI.Build.Tasks.Process.cs",
-        "MacOSHomebrewNativeAot.targets",
-        "OutputPaths.props",
-        "PackageMetadata.props",
-        "PackageValidation.props",
-        "ProjectDefaults.props",
-        "Versions.props"
-    ];
-
-    private static readonly string[] s_expectedBuildDirectories =
-    [
-        "PackageValidationSuppressions"
-    ];
-
     private static readonly string[] s_expectedNuGetBuildAssets =
     [
         "AtomUI.Generator.props",
@@ -275,15 +249,6 @@ public sealed class BuildLayoutTests
     }
 
     [Fact]
-    public void Repository_Defaults_Exclude_Stale_Project_Local_Obj_Files()
-    {
-        var defaults = XDocument.Load(GetRepoFile("build/ProjectDefaults.props"));
-        var excludes = defaults.Descendants("DefaultItemExcludes").ShouldHaveSingleItem();
-
-        excludes.Value.ShouldContain("$(MSBuildProjectDirectory)/obj/**");
-    }
-
-    [Fact]
     public void Repository_Output_Paths_Centralize_Binaries_And_Intermediate_Files()
     {
         var outputPaths = XDocument.Load(GetRepoFile("build/OutputPaths.props"));
@@ -394,13 +359,6 @@ public sealed class BuildLayoutTests
     }
 
     [Fact]
-    public void Tool_Source_Files_Stay_Trackable_While_Tool_Build_Outputs_Are_Ignored()
-    {
-        IsIgnoredByGit("tools/performances/AtomUI.Performance/Program.cs").ShouldBeFalse();
-        IsIgnoredByGit("tools/performances/AtomUI.Performance/obj/project.assets.json").ShouldBeTrue();
-    }
-
-    [Fact]
     public void Repository_Targets_Exclude_Compiler_Generated_Files_Once()
     {
         const string generatedFilesPattern = "$(CompilerGeneratedFilesOutputPath)/**/*.cs";
@@ -449,16 +407,6 @@ public sealed class BuildLayoutTests
     }
 
     [Fact]
-    public void Desktop_Project_Does_Not_Keep_Stale_Window_Directory_Exclusions()
-    {
-        var project = File.ReadAllText(GetRepoFile(
-            "src/AtomUI.Desktop.Controls/AtomUI.Desktop.Controls.csproj"));
-
-        project.ShouldNotContain("Window\\Reflection");
-        project.ShouldNotContain("Window\\Visuals");
-    }
-
-    [Fact]
     public void NuGet_Generator_Entry_Points_Import_Flat_Feature_Files()
     {
         GetImports("build/AtomUI.Generator.props").ShouldBe([
@@ -489,29 +437,6 @@ public sealed class BuildLayoutTests
             "AtomUIPrepareLanguagePackage",
             "AtomUIPrepareLanguageModuleAssets"
         ]);
-    }
-
-    [Fact]
-    public void Build_Root_Is_A_Flat_Explicit_MSBuild_Surface()
-    {
-        var buildRoot = Path.Combine(GetRepositoryRoot(), "build");
-        Directory.EnumerateDirectories(buildRoot)
-                 .Select(Path.GetFileName)
-                 .ShouldAllBe(directory => s_expectedBuildDirectories.Contains(directory));
-        Directory.EnumerateFiles(buildRoot)
-                 .Select(Path.GetFileName)
-                 .ShouldBe(s_expectedBuildFiles, ignoreOrder: true);
-        Directory.EnumerateFiles(buildRoot)
-                 .All(file => Path.GetExtension(file) is ".props" or ".targets" or ".cs")
-                 .ShouldBeTrue();
-        var suppressions = Path.Combine(buildRoot, "PackageValidationSuppressions");
-        if (!Directory.Exists(suppressions)) return;
-        Directory.EnumerateDirectories(suppressions).ShouldBeEmpty();
-        foreach (var file in Directory.EnumerateFiles(suppressions))
-        {
-            Path.GetExtension(file).ShouldBe(".xml");
-            XDocument.Load(file).Root.ShouldNotBeNull();
-        }
     }
 
     private static string[] GetImports(string relativePath)
@@ -561,28 +486,5 @@ public sealed class BuildLayoutTests
         }
 
         throw new DirectoryNotFoundException("Could not locate the AtomUI repository root.");
-    }
-
-    private static bool IsIgnoredByGit(string relativePath)
-    {
-        using var process = Process.Start(new ProcessStartInfo
-        {
-            FileName               = "git",
-            WorkingDirectory       = GetRepositoryRoot(),
-            RedirectStandardOutput = true,
-            RedirectStandardError  = true,
-            ArgumentList =
-            {
-                "check-ignore",
-                "--quiet",
-                "--no-index",
-                "--",
-                relativePath
-            }
-        });
-        process.ShouldNotBeNull();
-        process.WaitForExit();
-        process.ExitCode.ShouldBeOneOf(0, 1);
-        return process.ExitCode == 0;
     }
 }

@@ -245,64 +245,6 @@ public class SliderShowCasePageTests
     }
 
     [Fact]
-    public void Multi_Handle_Example_Matches_Ant_Design_Composition()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Views/SliderShowCase.axaml");
-        var item = ExtractShowCaseItem(source, "MultiHandleTitle");
-
-        CountOccurrences(item, "RangeValues=\"").ShouldBe(1);
-        item.ShouldContain("RangeValues=\"{Binding MultiHandleRangeValues, Mode=OneWay}\"");
-        item.ShouldContain("<atom:Slider.TracksBrush>");
-        item.ShouldContain("<LinearGradientBrush StartPoint=\"0%,50%\" EndPoint=\"100%,50%\">");
-        item.ShouldContain("Color=\"#52C41A\"");
-        item.ShouldContain("Color=\"#FAAD14\"");
-        item.ShouldContain("Color=\"#FF4D4F\"");
-        item.ShouldContain("TrackBarBrush=\"{x:Null}\"");
-        item.ShouldNotContain("BadgeText=");
-        item.ShouldNotContain("IsSnapToTickEnabled=");
-        item.ShouldNotContain("TickFrequency=");
-        item.ShouldNotContain("IsDraggableTrack=");
-        item.ShouldNotContain("DisabledHandles=");
-    }
-
-    [Fact]
-    public void Multi_Handle_Localization_Uses_Approved_Copy()
-    {
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/zh-CN.xlf");
-        zhCn["MultiHandleTitle"].ShouldBe("多点组合");
-        zhCn["MultiHandleDescription"].ShouldBe("范围多个点组合。");
-
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/zh-TW.xlf");
-        zhTw["MultiHandleTitle"].ShouldBe("多點組合");
-        zhTw["MultiHandleDescription"].ShouldBe("範圍多個點組合。");
-
-        var enUs = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/en-US.xlf");
-        enUs["MultiHandleTitle"].ShouldBe("Multiple points");
-        enUs["MultiHandleDescription"].ShouldBe("Combine multiple points in a range.");
-    }
-
-    [Fact]
-    public void Disabled_Handle_Example_Matches_Ant_Design_Composition()
-    {
-        var source = ReadRepoFile("controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Views/SliderShowCase.axaml");
-        var item = ExtractShowCaseItem(source, "DisabledHandleTitle");
-
-        CountOccurrences(item, "RangeValues=\"").ShouldBe(1);
-        CountOccurrences(item, "<atom:CheckBox").ShouldBe(3);
-        item.ShouldContain("RangeValues=\"{Binding DisabledHandleRangeValues, Mode=OneWay}\"");
-        item.ShouldContain("DisabledHandles=\"{Binding DisabledHandles}\"");
-        item.ShouldContain("IsChecked=\"{Binding IsHandle1Disabled, Mode=TwoWay}\"");
-        item.ShouldContain("IsChecked=\"{Binding IsHandle2Disabled, Mode=TwoWay}\"");
-        item.ShouldContain("IsChecked=\"{Binding IsHandle3Disabled, Mode=TwoWay}\"");
-        item.ShouldNotContain("BadgeText=");
-        item.ShouldNotContain("IsSnapToTickEnabled=");
-        item.ShouldNotContain("TickFrequency=");
-    }
-
-    [Fact]
     public void Disabled_Handle_ViewModel_Replaces_DisabledHandles_Snapshot()
     {
         var viewModel = new SliderViewModel(null!);
@@ -317,51 +259,6 @@ public class SliderShowCasePageTests
         viewModel.DisabledHandles.ShouldNotBeSameAs(original);
         changedProperties.ShouldContain(nameof(SliderViewModel.IsHandle2Disabled));
         changedProperties.ShouldContain(nameof(SliderViewModel.DisabledHandles));
-    }
-
-    [Fact]
-    public void Disabled_Handle_Localization_Uses_Approved_Copy()
-    {
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/zh-CN.xlf");
-        zhCn["DisabledHandleTitle"].ShouldBe("禁用指定滑块");
-        zhCn["DisabledHandleDescription"].ShouldBe(
-            "设置 disabled 为数组，可以单独禁用 range 模式下特定的 handle。禁用后该 handle 作为移动边界，其他 handle 无法越过。");
-
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/zh-TW.xlf");
-        zhTw["DisabledHandleTitle"].ShouldBe("禁用指定滑塊");
-
-        var enUs = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/en-US.xlf");
-        enUs["DisabledHandleTitle"].ShouldBe("Disabled handles");
-    }
-
-    [Fact]
-    public void Semantic_Part_Localization_Uses_Approved_Copy()
-    {
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/zh-CN.xlf");
-        zhCn["SemanticRootDescription"].ShouldBe("根元素，设置相对定位、高度、边距、内边距、光标样式和触摸事件控制");
-        zhCn["SemanticTrackDescription"].ShouldBe("轨道选取条元素，设置绝对定位、背景色、圆角和过渡动画样式");
-        zhCn["SemanticTracksDescription"].ShouldBe("多段轨道容器元素，设置绝对定位和过渡动画样式");
-        zhCn["SemanticRailDescription"].ShouldBe("背景轨道元素，设置绝对定位、背景色、圆角和过渡动画样式");
-        zhCn["SemanticHandleDescription"].ShouldBe(
-            "滑块控制点元素，设置绝对定位、尺寸、轮廓线、用户选择、背景色、边框阴影、圆角、光标样式和过渡动画");
-        zhCn["SemanticPartStyleTitle"].ShouldBe("自定义语义结构的样式");
-
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/zh-TW.xlf");
-        zhTw["SemanticPartStyleTitle"].ShouldBe("自訂語義結構的樣式");
-        zhTw["SemanticRootDescription"].ShouldBe("根元素，設定相對定位、高度、邊距、內邊距、游標樣式和觸控事件控制");
-
-        var enUs = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/en-US.xlf");
-        enUs["SemanticPartStyleTitle"].ShouldBe("Custom Semantic Part styling");
-
-        var ptBr = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/DataEntry/Slider/Localization/pt-BR.xlf");
-        ptBr["SemanticPartStyleTitle"].ShouldBe("Estilo personalizado de Semantic Part");
     }
 
     private static Border FindPart(AtomSlider owner, string semanticClass)

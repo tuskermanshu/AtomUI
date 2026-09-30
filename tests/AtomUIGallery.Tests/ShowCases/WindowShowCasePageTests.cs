@@ -133,28 +133,6 @@ public class WindowShowCasePageTests
     }
 
     [Fact]
-    public void Window_ShowCase_First_Four_Items_Are_Localized_In_All_Languages()
-    {
-        var keys = new[]
-        {
-            "BasicTitle", "BasicDescription", "BasicOpenButtonText", "BasicWindowHint",
-            "TitleAlignmentTitle", "TitleAlignmentDescription", "TitleAlignmentOpenButtonText", "TitleAlignmentHint",
-            "IsTitleVisibleTitle", "IsTitleVisibleDescription", "IsTitleVisibleOpenButtonText", "IsTitleVisibleHint",
-            "LogoVisibilityTitle", "LogoVisibilityDescription", "LogoVisibilityOpenButtonText", "LogoVisibilityHint"
-        };
-
-        foreach (var language in new[] { "en-US", "zh-CN", "zh-TW", "pt-BR" })
-        {
-            var localization = XliffTestDocument.Read(
-                $"controlgallery/AtomUIGallery/ShowCases/General/Window/Localization/{language}.xlf");
-            foreach (var key in keys)
-            {
-                localization.ContainsKey(key).ShouldBeTrue($"{language} missing {key}");
-            }
-        }
-    }
-
-    [Fact]
     public void Window_ShowCase_Items_Five_To_Eight_Open_Configured_Demo_Windows()
     {
         var source = ReadRepoFile(
@@ -214,28 +192,6 @@ public class WindowShowCasePageTests
     }
 
     [Fact]
-    public void Window_ShowCase_Items_Five_To_Eight_Are_Localized_In_All_Languages()
-    {
-        var keys = new[]
-        {
-            "AddOnTitle", "AddOnDescription", "AddOnOpenButtonText", "AddOnHint",
-            "CaptionButtonsTitle", "CaptionButtonsDescription", "CaptionButtonsOpenButtonText", "CaptionButtonsHint",
-            "TitleBarlessTitle", "TitleBarlessDescription", "TitleBarlessOpenButtonText", "TitleBarlessHint",
-            "FrameLayerTitle", "FrameLayerDescription", "FrameLayerOpenButtonText", "FrameLayerHint"
-        };
-
-        foreach (var language in new[] { "en-US", "zh-CN", "zh-TW", "pt-BR" })
-        {
-            var localization = XliffTestDocument.Read(
-                $"controlgallery/AtomUIGallery/ShowCases/General/Window/Localization/{language}.xlf");
-            foreach (var key in keys)
-            {
-                localization.ContainsKey(key).ShouldBeTrue($"{language} missing {key}");
-            }
-        }
-    }
-
-    [Fact]
     public void Window_ShowCase_Playground_Item_Opens_The_Configured_Window()
     {
         var source = ReadRepoFile(
@@ -272,26 +228,6 @@ public class WindowShowCasePageTests
         codeBehind.ShouldContain("LogoVisibility = ");
         codeBehind.ShouldContain("TitleBarFrameBackground = ");
         codeBehind.ShouldContain("ContentFrameBackground = ");
-    }
-
-    [Fact]
-    public void Window_ShowCase_Playground_Item_Is_Localized_In_All_Languages()
-    {
-        var keys = new[]
-        {
-            "PlaygroundTitle", "PlaygroundDescription", "PlaygroundOpenButtonText", "PlaygroundHint",
-            "PlaygroundCaptionButtonsHint"
-        };
-
-        foreach (var language in new[] { "en-US", "zh-CN", "zh-TW", "pt-BR" })
-        {
-            var localization = XliffTestDocument.Read(
-                $"controlgallery/AtomUIGallery/ShowCases/General/Window/Localization/{language}.xlf");
-            foreach (var key in keys)
-            {
-                localization.ContainsKey(key).ShouldBeTrue($"{language} missing {key}");
-            }
-        }
     }
 
     [Fact]

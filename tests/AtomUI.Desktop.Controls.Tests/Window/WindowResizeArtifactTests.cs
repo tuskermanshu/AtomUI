@@ -525,26 +525,19 @@ public class WindowResizeArtifactTests
     }
 
     [Fact]
-    public void Native_Linux_Window_Utilities_Do_Not_Keep_Legacy_Ignore_Mouse_Shape_Query_Code()
+    public void Linux_Input_Region_Does_Not_Use_Whole_Window_Mouse_Ignore_Or_Shape_Queries()
     {
         var extensionSource = File.ReadAllText(GetRepoFile("src/AtomUI.Native/WindowExtensions.cs"));
-        var linuxSource     = File.ReadAllText(GetRepoFile("src/AtomUI.Native/Linux/WindowUtils.Linux.cs"));
-        var interopSource   = File.ReadAllText(GetRepoFile("src/AtomUI.Native/Linux/WindowUtils.Interop.cs"));
+        var linuxSource = File.ReadAllText(GetRepoFile("src/AtomUI.Native/Linux/WindowUtils.Linux.cs"));
+        var interopSource = File.ReadAllText(GetRepoFile("src/AtomUI.Native/Linux/WindowUtils.Interop.cs"));
 
-        extensionSource.ShouldNotContain("SetWindowIgnoreMouseEventsLinux");
-        extensionSource.ShouldNotContain("IsWindowIgnoreMouseEventsLinux");
-        linuxSource.ShouldNotContain("SetWindowIgnoreMouseEventsLinux");
-        linuxSource.ShouldNotContain("IsWindowIgnoreMouseEventsLinux");
-        linuxSource.ShouldNotContain("GetWindowGeometry");
-
-        interopSource.ShouldNotContain("xcb_get_geometry");
-        interopSource.ShouldNotContain("xcb_get_geometry_reply");
-        interopSource.ShouldNotContain("xcb_shape_get_rectangles");
-        interopSource.ShouldNotContain("xcb_shape_get_rectangles_reply");
-        interopSource.ShouldNotContain("xcb_shape_get_rectangles_rectangles_length");
-        interopSource.ShouldNotContain("xcb_get_geometry_reply_t");
-        interopSource.ShouldNotContain("xcb_shape_get_rectangles_reply_t");
-        interopSource.ShouldNotContain("xcb_shape_query_version_reply_t");
+        foreach (var source in new[] { extensionSource, linuxSource, interopSource })
+        {
+            source.ShouldNotContain("SetWindowIgnoreMouseEventsLinux");
+            source.ShouldNotContain("IsWindowIgnoreMouseEventsLinux");
+            source.ShouldNotContain("xcb_get_geometry");
+            source.ShouldNotContain("xcb_shape_get_rectangles");
+        }
     }
 
     [Fact]

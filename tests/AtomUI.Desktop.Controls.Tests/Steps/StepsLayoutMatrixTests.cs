@@ -20,23 +20,39 @@ public class StepsLayoutMatrixTests
         AvaloniaTestApp.EnsureInitialized();
     }
 
-    public static IEnumerable<object[]> LayoutCases
+    public static IEnumerable<object[]> LayoutTypes
     {
         get
         {
             foreach (var type in Enum.GetValues<Desktop.Controls.StepsType>())
-            foreach (var orientation in Enum.GetValues<Orientation>())
-            foreach (var titlePlacement in Enum.GetValues<Orientation>())
-            foreach (var sizeType in new[] { AtomUISizeType.Middle, AtomUISizeType.Small })
             {
-                yield return [type, orientation, titlePlacement, sizeType];
+                yield return [type];
             }
         }
     }
 
     [Theory]
-    [MemberData(nameof(LayoutCases))]
-    public void Every_Layout_Combination_Uses_One_Finite_Semantic_Tree(
+    [MemberData(nameof(LayoutTypes))]
+    public void Every_Layout_Combination_Uses_One_Finite_Semantic_Tree(Desktop.Controls.StepsType type)
+    {
+        foreach (var orientation in Enum.GetValues<Orientation>())
+        foreach (var titlePlacement in Enum.GetValues<Orientation>())
+        foreach (var sizeType in new[] { AtomUISizeType.Middle, AtomUISizeType.Small })
+        {
+            try
+            {
+                AssertLayoutCombination(type, orientation, titlePlacement, sizeType);
+            }
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException(
+                    $"Steps layout failed for type={type}, orientation={orientation}, titlePlacement={titlePlacement}, sizeType={sizeType}.",
+                    exception);
+            }
+        }
+    }
+
+    private static void AssertLayoutCombination(
         Desktop.Controls.StepsType type,
         Orientation orientation,
         Orientation titlePlacement,

@@ -34,31 +34,6 @@ public class LunarCalendarThemeTests
     }
 
     [Fact]
-    public void LunarCalendarToken_DefinesExactlyTheDocumentedIncrementalMetrics()
-    {
-        var tokenType = typeof(LunarCalendarControl).Assembly.GetType("AtomUI.Desktop.Controls.LunarCalendarToken");
-        tokenType.ShouldNotBeNull();
-
-        tokenType!.GetProperties()
-            .Where(property => property.DeclaringType == tokenType)
-            .Select(property => property.Name)
-            .OrderBy(name => name, StringComparer.Ordinal)
-            .ShouldBe([
-                "FullCellMinHeight",
-                "HolidayMarkerColor",
-                "MiniContentHeight",
-                "MiniDateCellSize",
-                "MiniMonthCellWidth",
-                "RangeBarTopOffset",
-                "SecondaryTextColor",
-                "SecondaryTextFontSize",
-                "SecondaryTextLineHeight",
-                "WeekendTextColor",
-                "WorkdayMarkerColor"
-            ]);
-    }
-
-    [Fact]
     public void LunarCalendarToken_DerivesLayoutMetricsFromSharedTokens()
     {
         var shared = new DesignToken

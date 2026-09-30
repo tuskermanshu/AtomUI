@@ -490,20 +490,18 @@ public class ButtonBehaviorTests
     }
 
     [Fact]
-    public void Button_Root_Surface_Has_No_CustomBackground_Workaround()
+    public void Button_Surface_Does_Not_Expose_A_Parallel_CustomBackground_Channel()
     {
-        var sources = new[]
+        foreach (var path in new[]
+                 {
+                     "src/AtomUI.Desktop.Controls/Buttons/Button.cs",
+                     "src/AtomUI.Desktop.Controls/Buttons/Themes/ButtonTheme.axaml",
+                     "src/AtomUI.Desktop.Controls/Buttons/Themes/DropdownButtonTheme.axaml",
+                     "src/AtomUI.Desktop.Controls/Buttons/Themes/DropdownButtonBaseTheme.axaml"
+                 })
         {
-            "src/AtomUI.Desktop.Controls/Buttons/Button.cs",
-            "src/AtomUI.Desktop.Controls/Buttons/Themes/ButtonTheme.axaml",
-            "src/AtomUI.Desktop.Controls/Buttons/Themes/DropdownButtonTheme.axaml",
-            "src/AtomUI.Desktop.Controls/Buttons/Themes/DropdownButtonBaseTheme.axaml"
-        };
-
-        foreach (var source in sources)
-        {
-            ReadRepoFile(source).ShouldNotContain("CustomBackground",
-                customMessage: $"The root surface channel is the standard Background property; {source} must not reintroduce a parallel customization property.");
+            ReadRepoFile(path).ShouldNotContain("CustomBackground",
+                customMessage: $"{path} must use the standard Background surface channel.");
         }
     }
 
@@ -967,26 +965,19 @@ public class ButtonBehaviorTests
 
     private static string ReadRepoFile(string relativePath)
     {
-        var path = GetRepoFile(relativePath);
-        File.Exists(path).ShouldBeTrue($"Expected repository file to exist: {relativePath}");
-        return File.ReadAllText(path);
-    }
-
-    private static string GetRepoFile(string relativePath)
-    {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var candidate = Path.Combine(directory.FullName, relativePath);
-            if (File.Exists(candidate))
+            var path = Path.Combine(directory.FullName, relativePath);
+            if (File.Exists(path))
             {
-                return candidate;
+                return File.ReadAllText(path);
             }
 
             directory = directory.Parent;
         }
 
-        return Path.Combine(AppContext.BaseDirectory, relativePath);
+        throw new FileNotFoundException($"Unable to locate repository file '{relativePath}'.");
     }
 
     private static void BrushShouldHaveColor(IBrush? actual, Color expected)

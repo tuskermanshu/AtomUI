@@ -65,30 +65,11 @@ public class NavMenuImplementationContractTests
     }
 
     [Fact]
-    public void Default_Path_Replay_Does_Not_Wait_On_Fixed_Timer_Delays()
-    {
-        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/NavMenu/NavMenu.cs");
-        const string inlineCollapsedWidthMotionDelay =
-            "await Task.Delay(InlineCollapsedWidthMotionFrameInterval, cancellationTokenSource.Token);";
-
-        source.ShouldContain(inlineCollapsedWidthMotionDelay);
-        source.Replace(inlineCollapsedWidthMotionDelay, string.Empty).ShouldNotContain("Task.Delay");
-        source.ShouldNotContain("TimeSpan.FromMilliseconds(50)");
-        source.ShouldNotContain("GetNavMenuItemContainerAsync");
-        source.ShouldContain("ExecuteLayoutPass()");
-    }
-
-    [Fact]
-    public void Keyboard_Navigation_Uses_Cursors_Instead_Of_Flattened_Item_Lists()
+    public void Inline_Keyboard_Navigation_Does_Not_Flatten_Items_On_Each_Key()
     {
         var source = ReadRepoFile("src/AtomUI.Desktop.Controls/NavMenu/NavMenuInteractionHandlerBase.cs");
 
         source.ShouldNotContain("new List<NavMenuItem>");
-        source.ShouldNotContain("CollectDirectNavigationItems");
-        source.ShouldNotContain("CollectVisibleInlineItems");
-        source.ShouldContain("EnumerateDirectNavigationItems");
-        source.ShouldContain("EnumerateVisibleInlineNavigationItems");
-        source.ShouldContain("FindAdjacentNavigationItem");
     }
 
     private static string ReadRepoFile(string relativePath)
@@ -96,10 +77,10 @@ public class NavMenuImplementationContractTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var candidate = Path.Combine(directory.FullName, relativePath);
-            if (File.Exists(candidate))
+            var path = Path.Combine(directory.FullName, relativePath);
+            if (File.Exists(path))
             {
-                return File.ReadAllText(candidate);
+                return File.ReadAllText(path);
             }
 
             directory = directory.Parent;

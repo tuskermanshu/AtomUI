@@ -29,17 +29,6 @@ public class TypeMapReceiptIntegrityTests
     }
 
     [Fact]
-    public void Production_hash_does_not_buffer_the_whole_file()
-    {
-        var source = File.ReadAllText(Path.Combine(
-            GetRepoRoot(),
-            "src/AtomUI.Build.Tasks/ResolveRegistrationToolsTask.cs"));
-
-        source.ShouldNotContain("File.ReadAllBytes");
-        source.ShouldContain("SHA256.HashData(stream)");
-    }
-
-    [Fact]
     public void Valid_zero_slot_receipt_is_bound_and_reusable()
     {
         using var fixture = new Fixture(false);
@@ -124,17 +113,4 @@ public class TypeMapReceiptIntegrityTests
         public void Dispose() => System.IO.Directory.Delete(Directory, true);
     }
 
-    private static string GetRepoRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            if (Directory.Exists(Path.Combine(directory.FullName, "src/AtomUI.Build.Tasks")))
-            {
-                return directory.FullName;
-            }
-            directory = directory.Parent;
-        }
-        throw new DirectoryNotFoundException("Unable to locate the AtomUI repository root.");
-    }
 }

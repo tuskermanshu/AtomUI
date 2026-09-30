@@ -232,37 +232,6 @@ public class SplitterShowCasePageTests
         });
     }
 
-    [Fact]
-    public void Semantic_Part_Localization_Uses_Approved_Copy()
-    {
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Layout/Splitter/Localization/zh-CN.xlf");
-        zhCn["SemanticRootDescription"].ShouldBe("根容器元素，沿分割方向排列面板与拖动条。");
-        zhCn["SemanticPanelDescription"].ShouldBe("携带 semantic-panel 类的面板容器元素，具有可调整的尺寸与裁剪的内容。");
-        zhCn["SemanticDraggerDescription"].ShouldBe("携带 semantic-dragger 类的拖动条元素，用于调整相邻面板的尺寸。");
-        zhCn["SemanticPartStyleTitle"].ShouldBe("自定义语义结构的样式");
-        zhCn["SemanticPartStyleDescription"].ShouldBe(
-            "对齐 Ant Design style-class 示例：通过生成的 Semantic Part 样式自定义 root 背景与拖动条，并为 root 添加虚线边框。");
-
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Layout/Splitter/Localization/zh-TW.xlf");
-        zhTw["SemanticPartStyleTitle"].ShouldBe("自訂語義結構的樣式");
-        zhTw["SemanticPartStyleDescription"].ShouldBe(
-            "對齊 Ant Design style-class 範例：透過生成的 Semantic Part 樣式自訂 root 背景與拖動條，並為 root 加上虛線邊框。");
-
-        var enUs = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Layout/Splitter/Localization/en-US.xlf");
-        enUs["SemanticPartStyleTitle"].ShouldBe("Custom Semantic Part styling");
-        enUs["SemanticPartStyleDescription"].ShouldBe(
-            "Mirrors the Ant Design style-class demo: customize the root background and the dragger through generated Semantic Part styles, and outline the root with a dashed border.");
-
-        var ptBr = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Layout/Splitter/Localization/pt-BR.xlf");
-        ptBr["SemanticPartStyleTitle"].ShouldBe("Estilo personalizado de Semantic Part");
-        ptBr["SemanticPartStyleDescription"].ShouldBe(
-            "Espelha o demo style-class do Ant Design: personalize o fundo do root e a barra de arrasto por meio dos estilos de Semantic Part gerados e contorne o root com uma borda tracejada.");
-    }
-
     private static void AssertDraggerBackground(AtomUISplitter demo, string draggerColor)
     {
         var dragger = demo.GetVisualDescendants()

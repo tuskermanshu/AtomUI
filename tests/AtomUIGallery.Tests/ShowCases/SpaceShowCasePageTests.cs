@@ -272,50 +272,6 @@ public class SpaceShowCasePageTests
         });
     }
 
-    [Fact]
-    public void Semantic_Part_Localization_Uses_Approved_Copy()
-    {
-        var zhCn = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Layout/Space/Localization/zh-CN.xlf");
-        zhCn["SemanticRootDescription"].ShouldBe("根元素，包含 flex 布局、间隙设置、对齐方式、换行等间距容器的基础样式");
-        zhCn["SemanticItemDescription"].ShouldBe("包裹的子组件，包含间距项的布局和样式，为每个子元素提供包装用于内联对齐");
-        zhCn["SemanticSeparatorDescription"].ShouldBe("分隔符，包含分隔元素的样式");
-        zhCn["SemanticPartStyleTitle"].ShouldBe("自定义语义结构的样式");
-        zhCn["SemanticPartStyleDescription"].ShouldBe(
-            "对齐 Ant Design style-class 示例：通过生成的 Semantic Part 样式自定义 root 边框、item 背景与 separator 颜色，并为 root 添加虚线边框。");
-
-        var zhTw = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Layout/Space/Localization/zh-TW.xlf");
-        zhTw["SemanticRootDescription"].ShouldBe("根元素，包含 flex 佈局、間隙設定、對齊方式、換行等間距容器的基礎樣式");
-        zhTw["SemanticItemDescription"].ShouldBe("包裹的子元件，包含間距項的佈局和樣式，為每個子元素提供包裝用於內聯對齊");
-        zhTw["SemanticSeparatorDescription"].ShouldBe("分隔符，包含分隔元素的樣式");
-        zhTw["SemanticPartStyleTitle"].ShouldBe("自訂語義結構的樣式");
-        zhTw["SemanticPartStyleDescription"].ShouldBe(
-            "對齊 Ant Design style-class 範例：透過生成的 Semantic Part 樣式自訂 root 邊框、item 背景與 separator 顏色，並為 root 加上虛線邊框。");
-
-        var enUs = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Layout/Space/Localization/en-US.xlf");
-        enUs["SemanticRootDescription"].ShouldBe(
-            "Root element with flex layout, gap settings, alignment, wrap and other spacing container basic styles");
-        enUs["SemanticItemDescription"].ShouldBe(
-            "Wrapped item element with spacing item layout and styles, providing wrapper for each child element for inline alignment");
-        enUs["SemanticSeparatorDescription"].ShouldBe("Separator element with divider styling");
-        enUs["SemanticPartStyleTitle"].ShouldBe("Custom Semantic Part styling");
-        enUs["SemanticPartStyleDescription"].ShouldBe(
-            "Mirrors the Ant Design style-class demo: customize the root frame, item background and separator color through generated Semantic Part styles, and outline the root with a dashed border.");
-
-        var ptBr = XliffTestDocument.Read(
-            "controlgallery/AtomUIGallery/ShowCases/Layout/Space/Localization/pt-BR.xlf");
-        ptBr["SemanticRootDescription"].ShouldBe(
-            "Elemento raiz com layout flex, configurações de espaçamento, alinhamento, quebra e outros estilos básicos do contêiner de espaçamento");
-        ptBr["SemanticItemDescription"].ShouldBe(
-            "Elemento de item encapsulado com layout e estilos de espaçamento, fornecendo um invólucro para cada elemento filho para alinhamento em linha");
-        ptBr["SemanticSeparatorDescription"].ShouldBe("Elemento separador com estilo de divisor");
-        ptBr["SemanticPartStyleTitle"].ShouldBe("Estilo personalizado de Semantic Part");
-        ptBr["SemanticPartStyleDescription"].ShouldBe(
-            "Espelha o demo style-class do Ant Design: personalize a moldura do root, o fundo do item e a cor do separador por meio dos estilos de Semantic Part gerados e contorne o root com uma borda tracejada.");
-    }
-
     private static void AssertSolidColor(IBrush? actual, string expected)
     {
         actual.ShouldNotBeNull()

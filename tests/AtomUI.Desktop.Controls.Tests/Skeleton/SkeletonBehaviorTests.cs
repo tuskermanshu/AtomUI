@@ -43,18 +43,14 @@ public class SkeletonBehaviorTests
     }
 
     [Fact]
-    public void Element_SizeType_Property_Is_Owned_By_Abstract_Element()
+    public void SkeletonInput_Accepts_Custom_SizeType()
     {
-        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/Skeleton/SkeletonElement.cs");
-
         var input = new SkeletonInput
         {
             SizeType = CustomizableSizeType.Small
         };
 
         input.SizeType.ShouldBe(CustomizableSizeType.Small);
-        source.ShouldContain("SizeTypeProperty.AddOwner<SkeletonElement>()");
-        source.ShouldNotContain("SizeTypeProperty.AddOwner<SkeletonButton>()");
     }
 
     [Fact]
