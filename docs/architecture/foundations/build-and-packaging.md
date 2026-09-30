@@ -65,7 +65,7 @@ MacOSHomebrewNativeAot.targets 只服务本仓库 macOS NativeAOT 链接，不�
 生成器通过 Compilation 读取控件/资源类型的标准平台声明。项目、props 和 targets 均不维护主题平台路径清单。
 
 `AtomUI.Desktop.Controls.csproj` 的平台排除列表及 `AtomUI.ThemeAssets.targets` 的自定义平台 metadata 暴露已删除。
-普通资源输入不再承载第二份平台清单，也不保留旧 metadata 的兼容读取路径。第三方包须使用配套生成器完成普通重建，具体见[迁移说明](../../releases/unreleased-typemap-registration-migration.md#资源平台声明收敛)。
+普通资源输入不再承载第二份平台清单，也不保留旧 metadata 的兼容读取路径。第三方包须使用配套生成器完成普通重建，具体见[迁移说明](../../releases/6.2.2-api-changes.zh-CN.md#资源平台声明收敛)。
 
 `AvaloniaXaml`、`AdditionalFiles`、`Link`、项目目录、package/catalog 身份和普通资源编译继续使用。
 `GenerateThemeAssetWrappersTask` 及其 `BeforeTargets="GenerateAvaloniaResources"` 接线保留；资源字典和默认 typed
@@ -130,7 +130,7 @@ scripts/run-full-regression.sh
 
 ## 破坏性变更门禁
 
-当前源码的 net10 与注册工具布局迁移见 [未发布 TypeMap 迁移说明](../../releases/unreleased-typemap-registration-migration.md)。
+当前源码的 net10 与注册工具布局迁移见 [6.2.2 TypeMap 迁移说明](../../releases/6.2.2-api-changes.zh-CN.md)。
 
 发布准备对上一版做两道机械化比对，避免只靠人工审计漏掉破坏性变更。两道门禁观测产物事实，不依赖提交的 `!` 标记。
 

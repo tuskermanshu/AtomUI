@@ -1,9 +1,12 @@
 # Releases
 
-- [未发布 TypeMap 注册迁移](unreleased-typemap-registration-migration.md)：当前源码的 net10、注册 API 与构建工具布局变化；未指定发布版本。
-
 本目录按版本维护公共 API 变化和迁移示例。正式发布摘要继续由仓库根目录的 `CHANGELOG.md` 与
 `CHANGELOG.zh-CN.md` 维护。
+
+## 6.2.2
+
+- [API Change Examples](6.2.2-api-changes.md)
+- [API 变更示例](6.2.2-api-changes.zh-CN.md)
 
 ## 6.2.1
 

@@ -23,9 +23,11 @@ PRUNE=0
 # 默认项目集：按预期耗时降序，大套件先跑尽早暴露问题
 PROJECTS=(
     AtomUI.Desktop.Controls.Tests
+    AtomUI.Desktop.Controls.Rendering.Tests
     AtomUI.Localization.IntegrationTests
     AtomUIGallery.Tests
     AtomUI.Generator.Tests
+    AtomUI.TypeMap.Linker.Tests
     AtomUI.Core.Tests
     AtomUI.Toolkits.GalleryBase.Tests
     AtomUI.Controls.Shared.Tests

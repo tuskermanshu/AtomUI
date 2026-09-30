@@ -6,6 +6,31 @@ AtomUI 的重要变更记录在此文件中。
 
 英文版本见 [CHANGELOG.md](CHANGELOG.md)。
 
+## 6.2.2
+
+`2026-09-30`
+
+- 破坏性变更
+  - Packaging：产品包现在只提供 `lib/net10.0`；面向 `net8.0` 的应用与类库必须改为 `net10.0` 并使用 .NET 10 SDK。详见 [6.2.2 API 迁移指南](docs/releases/6.2.2-api-changes.zh-CN.md)。
+  - 注册与主题：以生成的 TypeMap 替换 Unit/Plan/Sidecar AOT 注册 ABI，移除旧注册、单主题 provider 和资产 Schema 契约。第三方控件包必须使用 v6.2.2 生成器重建；迁移步骤见指南。
+  - 构建与平台元数据：退役 `AtomUI.LinkedRegistration*` 资产及自定义主题平台元数据，改用 `AtomUI.Registration.targets` 与标准平台 Attribute。自定义构建导入和主题作者需按指南迁移。
+  - 生成 Token 与桌面注册：移除未声明 Own Token 的控件所对应的生成 Token key 类型及 `UseAllDesktopControls()`；DataGrid 和 WindowTitleBar Token 枚举数字值发生变化。集成代码需重建，并改用 `UseDesktopControls()` 和 Token 成员名称；详见迁移指南。
+- DataGrid
+  - 增加顶部/底部分页区域的额外内容与模板，以及控制页大小选择器显示的 `IsShowPageSizeSelector`。
+- Button、WindowTitleBar 与 Steps
+  - 恢复 Button 键盘焦点环，并对齐 WindowTitleBar AddOn 与 caption 按钮的几何尺寸。
+  - 修复 Steps 自然尺寸测量，同时保留连接线。
+- Flyout、FloatButton 与 RibbonBadge
+  - 支持通过键盘触发 Flyout 和 FloatButton 组的展开与收起。
+  - 修复 RibbonBadge 折角绘制坐标。
+- Dialog、Motion 与 Gallery
+  - 将 Dialog 遮罩动效移至合成器并统一 Zoom 状态。
+  - 增加 Gallery 示例放大与 DataGrid 分页示例，更新 Badge 示例和 Gallery 品牌图形。
+- NativeAOT、构建与依赖
+  - 以 TypeMap 管线替换 linked registration 与裁剪流程，改进反射裁剪并缩小生成的 Token 描述符。
+  - 桌面裁剪与 NativeAOT 发布兼容后续 .NET 10 补丁工具链，Browser 继续使用固定工具链。
+  - 将 Avalonia 升级到 12.1.3。
+
 ## 6.2.1
 
 `2026-09-22`

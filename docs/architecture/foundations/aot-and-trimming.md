@@ -22,7 +22,7 @@ Desktop 全部资产工厂生成文本与迁移前一致，包括有效平台域
 消费和浏览器运行通过；20 包完整性、相对 6.1.8 的布局以及打包任务隔离检查通过。
 统一 runner 的单元测试与产物稳定性校验通过；其状态仍为 pending，因为 NativeAOT/package-layout 专项不能自动回填，
 上述专项另有实际发布和打包命令证据，不手工伪造通过回执。本次是受影响范围验收，不等于全量或全部平台验收。源码责任见[控件注册生成器](../../modules/generator/control-registration.md#4-主题导出与资源)，
-迁移步骤见[未发布迁移说明](../../releases/unreleased-typemap-registration-migration.md#资源平台声明收敛)。
+迁移步骤见[6.2.2 迁移说明](../../releases/6.2.2-api-changes.zh-CN.md#资源平台声明收敛)。
 
 “源码已迁移”与“全部交付门槛通过”分别记录。2026-09-28 修复局部枚举键覆盖与注册契约后的真实桌面 Button/Window 样例在默认配置下为
 20.21 MiB，同配置 full 注册为 44.40 MiB；`OptimizationPreference=Size` 下分别为 19.77 MiB 与 43.57 MiB。

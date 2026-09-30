@@ -30,8 +30,8 @@
     <!-- AvaloniaAccessUnstablePrivateApis removes the Avalonia facade during reference resolution,
          then adds the real split assemblies only immediately before CoreCompile. ApiCompat stops at
          ResolveReferences, so append the same implementation assemblies to its already-collected
-         per-TFM reference paths. Avalonia currently uses its net8.0 implementation surface for both
-         AtomUI release TFMs (net8.0 and net10.0). -->
+         per-TFM reference paths. Avalonia uses its net8.0 implementation surface for AtomUI's
+         net10.0 release TFM. -->
     <Target Name="AtomUIAddAvaloniaPackageValidationReferences"
             Condition="'$(AtomUIPackageValidationBaselineVersion)' != '' and '$(AvaloniaAccessUnstablePrivateApis)' == 'true'">
         <PropertyGroup>

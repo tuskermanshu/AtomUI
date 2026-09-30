@@ -4,6 +4,31 @@ All notable changes to AtomUI are documented in this file.
 
 `AtomUI` follows Semantic Versioning 2.0.0.
 
+## 6.2.2
+
+`2026-09-30`
+
+- Breaking Changes
+  - Packaging: product packages now ship only `lib/net10.0`; applications and libraries targeting `net8.0` must move to `net10.0` and use a .NET 10 SDK. See the [6.2.2 API migration guide](docs/releases/6.2.2-api-changes.md).
+  - Registration and Theme: replace the Unit/Plan/Sidecar AOT registration ABI with generated TypeMaps and remove the old registration, single-theme provider and asset-schema contracts. Third-party control packages must rebuild with the v6.2.2 generator; see the migration guide.
+  - Build and platform metadata: retire `AtomUI.LinkedRegistration*` assets and custom theme-platform metadata in favor of `AtomUI.Registration.targets` and standard platform attributes. Custom build imports and theme authors must migrate as described in the guide.
+  - Generated tokens and desktop registration: remove token-key types for controls without an own token and `UseAllDesktopControls()`; DataGrid and WindowTitleBar token enum numbers change. Rebuild integrations and use `UseDesktopControls()` and named token members; see the migration guide.
+- DataGrid
+  - Add top and bottom pagination extra content and templates, plus `IsShowPageSizeSelector` for page-size selector visibility.
+- Button, WindowTitleBar and Steps
+  - Restore the Button keyboard focus ring and align WindowTitleBar AddOn/caption geometry.
+  - Fix Steps natural-size measurement while preserving connector lines.
+- Flyout, FloatButton and RibbonBadge
+  - Support keyboard-triggered Flyout and FloatButton group expansion and collapse.
+  - Fix RibbonBadge corner rendering coordinates.
+- Dialog, Motion and Gallery
+  - Move Dialog overlay motion to the compositor and unify zoom state.
+  - Add Gallery showcase zoom and DataGrid pagination examples; update Badge examples and Gallery branding.
+- NativeAOT, Build and Dependencies
+  - Replace linked registration and trimming with the TypeMap pipeline, improve reflection trimming and reduce generated Token descriptor size.
+  - Keep desktop trimmed and NativeAOT publishing compatible with later .NET 10 patch toolchains while retaining the pinned Browser toolchain.
+  - Upgrade Avalonia to 12.1.3.
+
 ## 6.2.1
 
 `2026-09-22`

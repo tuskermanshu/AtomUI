@@ -243,7 +243,7 @@ internal partial class NativeOverlayTheme : ResourceDictionary
 没有资源 CLR 类型时，资源自身的平台上界来自所属程序集；不能因为未写 `x:Class` 而忽略程序集限制。
 声明不会按目录传播，资源移动也不会自动改变支持的平台。
 
-使用配套生成器普通重建并按[迁移说明](../../releases/unreleased-typemap-registration-migration.md#资源平台声明收敛)删除旧元数据。
+使用配套生成器普通重建并按[迁移说明](../../releases/6.2.2-api-changes.zh-CN.md#资源平台声明收敛)删除旧元数据。
 应用仍只调用普通包入口，包作者无需维护平台主题路径清单；普通跨平台主题也无需额外资源类。
 
 ## 6. 发布前验证

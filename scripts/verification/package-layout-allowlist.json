@@ -17,7 +17,7 @@
         "lib/net8.0/AtomUI.Desktop.Controls.pdb",
         "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
       ],
-      "reason": "6.1.9 moved the MSBuild task toolset from tools/netstandard2.0 to tools/net10.0 and added the SDK-compiled process adapter. Documented in docs/releases/6.1.9-api-changes.md. Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "6.1.9 moved the MSBuild task toolset from tools/netstandard2.0 to tools/net10.0 and added the SDK-compiled process adapter. Documented in docs/releases/6.1.9-api-changes.md. v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Desktop.Controls.DataGrid": {
       "allowed": [
@@ -36,7 +36,7 @@
         "lib/net8.0/AtomUI.Desktop.Controls.DataGrid.pdb",
         "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
       ],
-      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Desktop.Controls.ColorPicker": {
       "allowed": [
@@ -55,7 +55,7 @@
         "lib/net8.0/AtomUI.Desktop.Controls.ColorPicker.pdb",
         "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
       ],
-      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Desktop.Controls.Extras": {
       "allowed": [
@@ -74,7 +74,7 @@
         "lib/net8.0/AtomUI.Desktop.Controls.Extras.pdb",
         "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
       ],
-      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Generator": {
       "allowed": [
@@ -95,7 +95,7 @@
         "buildTransitive/AtomUI.LinkedRegistration.targets",
         "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
       ],
-      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Toolkits.GalleryBase": {
       "allowed": [
@@ -114,7 +114,7 @@
         "lib/net8.0/AtomUI.Toolkits.GalleryBase.pdb",
         "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
       ],
-      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "Same 6.1.9 build-tooling relocation as AtomUI.Desktop.Controls; documented in docs/releases/6.1.9-api-changes.md. v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Controls": {
       "allowed": [
@@ -142,56 +142,233 @@
         "lib/net8.0/AtomUI.Controls.dll",
         "lib/net8.0/AtomUI.Controls.pdb"
       ],
-      "reason": "Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Controls.Shared": {
       "allowed": [
         "lib/net8.0/AtomUI.Controls.Shared.dll",
         "lib/net8.0/AtomUI.Controls.Shared.pdb"
       ],
-      "reason": "Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Core": {
       "allowed": [
         "lib/net8.0/AtomUI.Core.dll",
         "lib/net8.0/AtomUI.Core.pdb"
       ],
-      "reason": "Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Fonts.AlibabaSans": {
       "allowed": [
         "lib/net8.0/AtomUI.Fonts.AlibabaSans.dll",
         "lib/net8.0/AtomUI.Fonts.AlibabaSans.pdb"
       ],
-      "reason": "Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Icons.AntDesign": {
       "allowed": [
         "lib/net8.0/AtomUI.Icons.AntDesign.dll",
         "lib/net8.0/AtomUI.Icons.AntDesign.pdb"
       ],
-      "reason": "Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Icons.Shared": {
       "allowed": [
         "lib/net8.0/AtomUI.Icons.Shared.dll",
         "lib/net8.0/AtomUI.Icons.Shared.pdb"
       ],
-      "reason": "Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Localization": {
       "allowed": [
         "lib/net8.0/AtomUI.Localization.dll",
         "lib/net8.0/AtomUI.Localization.pdb"
       ],
-      "reason": "Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
     },
     "AtomUI.Native": {
       "allowed": [
         "lib/net8.0/AtomUI.Native.dll",
         "lib/net8.0/AtomUI.Native.pdb"
       ],
-      "reason": "Unreleased net10/TypeMap source transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/unreleased-typemap-registration-migration.md. This acknowledgement does not designate a release version."
+      "reason": "v6.2.2 net10/TypeMap transition: exact retired TFM/registration paths and automatic registration tool assets are documented in docs/releases/6.2.2-api-changes.md."
+    }
+  },
+  "6.2.1": {
+    "AtomUI.Controls": {
+      "allowed": [
+        "buildTransitive/AtomUI.Build.Tasks.Process.cs",
+        "buildTransitive/AtomUI.Controls.targets",
+        "buildTransitive/AtomUI.Generator.props",
+        "buildTransitive/AtomUI.Generator.targets",
+        "buildTransitive/AtomUI.Localization.props",
+        "buildTransitive/AtomUI.Localization.targets",
+        "buildTransitive/AtomUI.Registration.targets",
+        "buildTransitive/AtomUI.ThemeAssets.targets",
+        "tools/net10.0/AtomUI.Build.Tasks.deps.json",
+        "tools/net10.0/AtomUI.Build.Tasks.dll",
+        "tools/net10.0/AtomUI.Build.Tasks.runtimeconfig.json",
+        "tools/net10.0/Microsoft.Build.Framework.dll",
+        "tools/netstandard2.0/AtomUI.Generator.dll",
+        "tools/netstandard2.0/System.Buffers.dll",
+        "tools/netstandard2.0/System.Collections.Immutable.dll",
+        "tools/netstandard2.0/System.Memory.dll",
+        "tools/netstandard2.0/System.Numerics.Vectors.dll",
+        "tools/netstandard2.0/System.Reflection.Metadata.dll",
+        "tools/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll",
+        "tools/typemap/AtomUI.TypeMap.Linker.deps.json",
+        "tools/typemap/AtomUI.TypeMap.Linker.dll",
+        "lib/net8.0/AtomUI.Controls.dll",
+        "lib/net8.0/AtomUI.Controls.pdb"
+      ],
+      "reason": "v6.2.2 removes the net8.0 product assets and adds the TypeMap registration toolchain and buildTransitive assets to this package; see docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Controls.Shared": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Controls.Shared.dll",
+        "lib/net8.0/AtomUI.Controls.Shared.pdb"
+      ],
+      "reason": "v6.2.2 removes the net8.0 product assets; consumers must target net10.0. See docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Core": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Core.dll",
+        "lib/net8.0/AtomUI.Core.pdb"
+      ],
+      "reason": "v6.2.2 removes the net8.0 product assets; consumers must target net10.0. See docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Desktop.Controls": {
+      "allowed": [
+        "buildTransitive/AtomUI.Registration.targets",
+        "tools/typemap/AtomUI.TypeMap.Linker.deps.json",
+        "tools/typemap/AtomUI.TypeMap.Linker.dll",
+        "buildTransitive/AtomUI.LinkedRegistration.props",
+        "buildTransitive/AtomUI.LinkedRegistration.SidecarConsumer.targets",
+        "buildTransitive/AtomUI.LinkedRegistration.targets",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Desktop.Controls.dll",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Desktop.Controls.dll.atomui-link.json",
+        "lib/net8.0/AtomUI.Desktop.Controls.dll",
+        "lib/net8.0/AtomUI.Desktop.Controls.pdb",
+        "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
+      ],
+      "reason": "v6.2.2 removes net8.0 and retires LinkedRegistration/LinkedPublish package assets in favor of TypeMap registration targets and backend; see docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Desktop.Controls.ColorPicker": {
+      "allowed": [
+        "buildTransitive/AtomUI.Registration.targets",
+        "tools/typemap/AtomUI.TypeMap.Linker.deps.json",
+        "tools/typemap/AtomUI.TypeMap.Linker.dll",
+        "buildTransitive/AtomUI.LinkedRegistration.props",
+        "buildTransitive/AtomUI.LinkedRegistration.SidecarConsumer.targets",
+        "buildTransitive/AtomUI.LinkedRegistration.targets",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Desktop.Controls.ColorPicker.dll",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Desktop.Controls.ColorPicker.dll.atomui-link.json",
+        "lib/net8.0/AtomUI.Desktop.Controls.ColorPicker.dll",
+        "lib/net8.0/AtomUI.Desktop.Controls.ColorPicker.pdb",
+        "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
+      ],
+      "reason": "v6.2.2 removes net8.0 and retires LinkedRegistration/LinkedPublish package assets in favor of TypeMap registration targets and backend; see docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Desktop.Controls.DataGrid": {
+      "allowed": [
+        "buildTransitive/AtomUI.Registration.targets",
+        "tools/typemap/AtomUI.TypeMap.Linker.deps.json",
+        "tools/typemap/AtomUI.TypeMap.Linker.dll",
+        "buildTransitive/AtomUI.LinkedRegistration.props",
+        "buildTransitive/AtomUI.LinkedRegistration.SidecarConsumer.targets",
+        "buildTransitive/AtomUI.LinkedRegistration.targets",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Desktop.Controls.DataGrid.dll",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Desktop.Controls.DataGrid.dll.atomui-link.json",
+        "lib/net8.0/AtomUI.Desktop.Controls.DataGrid.dll",
+        "lib/net8.0/AtomUI.Desktop.Controls.DataGrid.pdb",
+        "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
+      ],
+      "reason": "v6.2.2 removes net8.0 and retires LinkedRegistration/LinkedPublish package assets in favor of TypeMap registration targets and backend; see docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Desktop.Controls.Extras": {
+      "allowed": [
+        "buildTransitive/AtomUI.Registration.targets",
+        "tools/typemap/AtomUI.TypeMap.Linker.deps.json",
+        "tools/typemap/AtomUI.TypeMap.Linker.dll",
+        "buildTransitive/AtomUI.LinkedRegistration.props",
+        "buildTransitive/AtomUI.LinkedRegistration.SidecarConsumer.targets",
+        "buildTransitive/AtomUI.LinkedRegistration.targets",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Desktop.Controls.Extras.dll",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Desktop.Controls.Extras.dll.atomui-link.json",
+        "lib/net8.0/AtomUI.Desktop.Controls.Extras.dll",
+        "lib/net8.0/AtomUI.Desktop.Controls.Extras.pdb",
+        "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
+      ],
+      "reason": "v6.2.2 removes net8.0 and retires LinkedRegistration/LinkedPublish package assets in favor of TypeMap registration targets and backend; see docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Fonts.AlibabaSans": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Fonts.AlibabaSans.dll",
+        "lib/net8.0/AtomUI.Fonts.AlibabaSans.pdb"
+      ],
+      "reason": "v6.2.2 removes the net8.0 product assets; consumers must target net10.0. See docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Generator": {
+      "allowed": [
+        "analyzers/dotnet/cs/System.Buffers.dll",
+        "analyzers/dotnet/cs/System.Collections.Immutable.dll",
+        "analyzers/dotnet/cs/System.Memory.dll",
+        "analyzers/dotnet/cs/System.Numerics.Vectors.dll",
+        "analyzers/dotnet/cs/System.Reflection.Metadata.dll",
+        "analyzers/dotnet/cs/System.Runtime.CompilerServices.Unsafe.dll",
+        "buildTransitive/AtomUI.Registration.targets",
+        "tools/typemap/AtomUI.TypeMap.Linker.deps.json",
+        "tools/typemap/AtomUI.TypeMap.Linker.dll",
+        "buildTransitive/AtomUI.LinkedRegistration.props",
+        "buildTransitive/AtomUI.LinkedRegistration.SidecarConsumer.targets",
+        "buildTransitive/AtomUI.LinkedRegistration.targets",
+        "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
+      ],
+      "reason": "v6.2.2 replaces LinkedPublish assets with the TypeMap registration targets/backend and ships the generator dependencies; see docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Icons.AntDesign": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Icons.AntDesign.dll",
+        "lib/net8.0/AtomUI.Icons.AntDesign.pdb"
+      ],
+      "reason": "v6.2.2 removes the net8.0 product assets; consumers must target net10.0. See docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Icons.Shared": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Icons.Shared.dll",
+        "lib/net8.0/AtomUI.Icons.Shared.pdb"
+      ],
+      "reason": "v6.2.2 removes the net8.0 product assets; consumers must target net10.0. See docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Localization": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Localization.dll",
+        "lib/net8.0/AtomUI.Localization.pdb"
+      ],
+      "reason": "v6.2.2 removes the net8.0 product assets; consumers must target net10.0. See docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Native": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Native.dll",
+        "lib/net8.0/AtomUI.Native.pdb"
+      ],
+      "reason": "v6.2.2 removes the net8.0 product assets; consumers must target net10.0. See docs/releases/6.2.2-api-changes.md."
+    },
+    "AtomUI.Toolkits.GalleryBase": {
+      "allowed": [
+        "buildTransitive/AtomUI.Registration.targets",
+        "tools/typemap/AtomUI.TypeMap.Linker.deps.json",
+        "tools/typemap/AtomUI.TypeMap.Linker.dll",
+        "buildTransitive/AtomUI.LinkedRegistration.props",
+        "buildTransitive/AtomUI.LinkedRegistration.SidecarConsumer.targets",
+        "buildTransitive/AtomUI.LinkedRegistration.targets",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Toolkits.GalleryBase.dll",
+        "buildTransitive/AtomUI.LinkedRegistration/AtomUI.Toolkits.GalleryBase.dll.atomui-link.json",
+        "lib/net8.0/AtomUI.Toolkits.GalleryBase.dll",
+        "lib/net8.0/AtomUI.Toolkits.GalleryBase.pdb",
+        "tools/netstandard2.0/AtomUI.Generator.LinkedPublish.dll"
+      ],
+      "reason": "v6.2.2 removes net8.0 and retires LinkedRegistration/LinkedPublish package assets in favor of TypeMap registration targets and backend; see docs/releases/6.2.2-api-changes.md."
     }
   }
 }
