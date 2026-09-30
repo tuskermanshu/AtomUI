@@ -84,6 +84,7 @@ Read the relevant document before touching the corresponding area:
 - Mobile target architecture: [docs/architecture/systems/mobile/overview.md](docs/architecture/systems/mobile/overview.md)
 - Localization target architecture: [docs/architecture/systems/localization/overview.md](docs/architecture/systems/localization/overview.md)
 - AI collaboration and bug-fix discipline: [docs/engineering/contributing/agent-guidelines.md](docs/engineering/contributing/agent-guidelines.md)
+- Test value, lifecycle, and mandatory bug-fix acceptance: [docs/engineering/development/test-value-and-lifecycle.md](docs/engineering/development/test-value-and-lifecycle.md)
 - Reference project source lookup: [docs/engineering/contributing/reference-project-source-guidelines.md](docs/engineering/contributing/reference-project-source-guidelines.md)
 - AOT and trimming architecture: [docs/architecture/foundations/aot-and-trimming.md](docs/architecture/foundations/aot-and-trimming.md)
 - TypeMap registration pipeline: [docs/architecture/foundations/aot-typemap-registration.md](docs/architecture/foundations/aot-typemap-registration.md)
@@ -112,6 +113,7 @@ Detailed AI collaboration rules live in [docs/engineering/contributing/agent-gui
 - Keep changes scoped to the user request and the ownership boundary.
 - When the user asks to reference another project's source, follow the local-first lookup order in [Reference Project Source Lookup](docs/engineering/contributing/reference-project-source-guidelines.md) before using GitHub or relying on memory.
 - Prefer root-cause fixes over trigger-point patches.
+- Every bug fix must satisfy [test value and lifecycle](docs/engineering/development/test-value-and-lifecycle.md): new reproduction tests are temporary by default and must be deleted after validation unless justified as permanent contract tests. Without before/after evidence, test disposition, cleanup, and final module verification, the bug fix is incomplete and must not be reported as fixed. TDD does not require permanently retaining reproduction code.
 - For hover, pointer, hit-testing, wheel, scrolling, clipping, or overlay bugs, preserve the original UX contract and follow the [UI input and scrolling bug discipline](docs/engineering/contributing/agent-guidelines.md#ui-输入与滚动-bug).
 - Treat AOT compatibility as a first-class design constraint for new features and bug fixes.
 - Verify with tests or publish checks that match the risk of the change.
@@ -145,13 +147,13 @@ Detailed AI collaboration rules live in [docs/engineering/contributing/agent-gui
 
 Use [affected verification](docs/engineering/workflows/affected-verification.md) as the default. The following sequence is a mandatory hard constraint for bug fixes and ordinary code changes:
 
-1. For a bug, reproduce with the exact failing test or test class.
-2. Verify only the modules you changed, through `run --scope iterate --path ...` or an exact `dotnet test --filter`; every iterate run must name its module paths explicitly.
-3. Do not run local `change` scope, affected-wide regression, or full regression on your own initiative. Focused tests of the changed modules are the completion gate.
+1. For a bug, reproduce with an existing or temporary failing test; follow the documented manual-evidence exception only when automation is not feasible. Validate the fix, decide test disposition, and delete temporary tests and their dedicated artifacts before final verification.
+2. Verify only the modules you changed in the final cleaned working tree, through `run --scope iterate --path ...` or an exact `dotnet test --filter`; every iterate run must name its module paths explicitly.
+3. Do not run local `change` scope, affected-wide regression, or full regression on your own initiative. Focused tests are the execution gate; bug-fix completion additionally requires the test lifecycle and acceptance checks above.
 4. Run `scripts/run-full-regression.sh` only when the user explicitly asks for it or during a release (`version-release`).
 5. When a full run does happen and fails, let it finish and collect the complete failure list. Repair every failure with focused tests, then run one final full confirmation. Never rerun the full suite after each individual failure.
 
-These steps are enforced by the verification CLI. Local `change` scope requires an explicit branch base, local `full` scope is rejected, and focused iterate scope requires `--path`. CI may continue to use `--base`/`--tests-only` for selected or baseline jobs.
+The verification CLI enforces scope restrictions, not test-value judgments or the complete bug-fix acceptance checklist. Local `change` scope requires an explicit branch base, local `full` scope is rejected, and focused iterate scope requires `--path`. CI may continue to use `--base`/`--tests-only` for selected or baseline jobs.
 
 ```bash
 python3 scripts/verification/test.py plan
