@@ -798,6 +798,7 @@ public partial class TreeView : AvaloniaTreeView,
     
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        FinishDrag();
         base.OnDetachedFromVisualTree(e);
         InteractionHandler.Detach(this);
         

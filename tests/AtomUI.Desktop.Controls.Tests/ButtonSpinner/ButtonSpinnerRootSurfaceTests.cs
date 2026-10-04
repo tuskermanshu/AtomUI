@@ -1,3 +1,6 @@
+using Avalonia.Input.Raw;
+using Avalonia.Input;
+using Avalonia.Headless;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -106,19 +109,42 @@ public class ButtonSpinnerRootSurfaceTests
     /// root BorderBrush change appears not to apply.
     /// </summary>
     [Fact]
-    public void Motion_Setting_Reaches_The_Input_Frame()
+    public void Motion_And_Pointer_Hover_State_Reach_The_Input_Frame()
     {
         var spinner = new AtomUIButtonSpinner
         {
             Width           = 320,
-            IsMotionEnabled = false
+            IsMotionEnabled = false,
+            IsButtonSpinnerFloatable = true
         };
 
         var window = Show(spinner);
         try
         {
-            FrameOf(spinner).IsMotionEnabled.ShouldBeFalse(
+            var frame = FrameOf(spinner);
+            frame.IsMotionEnabled.ShouldBeFalse(
                 "The owner IsMotionEnabled setting must reach the input frame, matching LineEdit.");
+            var point = frame.TranslatePoint(new Point(50, frame.Bounds.Height / 2), window).ShouldNotBeNull();
+            var other = new AvaloniaWindow { Width = 480, Height = 160, Content = new Border { Background = Brushes.Blue } };
+            other.Show();
+            try
+            {
+                other.MouseMove(point);
+                frame.IsSpinnerContentHover.ShouldBeFalse();
+                window.MouseMove(point);
+                frame.IsSpinnerContentHover.ShouldBeTrue();
+                frame.HandleOpacity.ShouldBe(1);
+                using var device = new MouseDevice();
+                var root = window.GetPresentationSource().ShouldNotBeNull().ShouldBeAssignableTo<IInputRoot>();
+                var manager = (IInputManager)AvaloniaLocator.CurrentMutable.GetService(typeof(IInputManager))!;
+                manager.ProcessInput(new RawPointerEventArgs(device, 42, root, RawPointerEventType.LeaveWindow, new Point(-1, -1), default));
+                frame.IsSpinnerContentHover.ShouldBeFalse();
+                frame.HandleOpacity.ShouldBe(0);
+            }
+            finally
+            {
+                other.Close();
+            }
         }
         finally
         {

@@ -1,3 +1,8 @@
+using Avalonia.Input.Raw;
+using Avalonia.Input;
+using Avalonia.Headless;
+using Avalonia.Media;
+using Avalonia;
 using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -75,6 +80,29 @@ public class TimePickerBehaviorTests
 
             popup.IsOpen.ShouldBeTrue();
             popup.IsLightDismissEnabled.ShouldBeFalse();
+
+            var view = popup.Child.ShouldNotBeNull().GetVisualDescendants().OfType<TimeView>().Single();
+            var selector = view.GetVisualDescendants().OfType<DateTimePickerPanel>().First();
+            var owner = TopLevel.GetTopLevel(view).ShouldNotBeNull();
+            var point = selector.TranslatePoint(new Point(selector.Bounds.Width / 2, selector.Bounds.Height / 2), owner).ShouldNotBeNull();
+            var other = new AvaloniaWindow { Width = 640, Height = 600, Content = new Border { Background = Brushes.Blue } };
+            other.Show();
+            try
+            {
+                other.MouseMove(point);
+                view.IsPointerInSelector.ShouldBeFalse();
+                owner.MouseMove(point);
+                view.IsPointerInSelector.ShouldBeTrue();
+                using var device = new MouseDevice();
+                var root = view.GetPresentationSource().ShouldNotBeNull().ShouldBeAssignableTo<IInputRoot>();
+                var manager = (IInputManager)AvaloniaLocator.CurrentMutable.GetService(typeof(IInputManager))!;
+                manager.ProcessInput(new RawPointerEventArgs(device, 42, root, RawPointerEventType.LeaveWindow, new Point(-1, -1), default));
+                view.IsPointerInSelector.ShouldBeFalse();
+            }
+            finally
+            {
+                other.Close();
+            }
 
             timePicker.IsPopupPinnedOpen = false;
             Dispatcher.UIThread.RunJobs();

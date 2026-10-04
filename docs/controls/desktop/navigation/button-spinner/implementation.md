@@ -89,6 +89,8 @@ Public API / ItemsSource / Command / Event
 
 ## 6. 交互与事件处理
 
+浮动步进按钮的悬停观察按当前输入根隔离，命中判断使用输入位置转换后的装饰框局部坐标。本窗口退出或装饰框卸载时关闭悬停反馈；其他窗口的同坐标输入不参与按钮显示和内容偏移。
+
 ButtonSpinner 的交互事件应从输入源收敛到控件级语义事件：
 
 - Pointer、keyboard、focus 和 command 事件不应绕过 Avalonia 基础控件语义。

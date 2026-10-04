@@ -413,7 +413,8 @@ public class SliderTrack : TemplatedControl, ICustomHitTest
         var inputManager = AvaloniaLocator.Current.GetService<IInputManager>()!;
         _focusProcessDisposable = inputManager.Process.Subscribe(args =>
         {
-            if (args is RawPointerEventArgs pointerEventArgs)
+            if (args is RawPointerEventArgs pointerEventArgs &&
+                this.TryGetInputPosition(pointerEventArgs, out var position))
             {
                 var eventType = pointerEventArgs.Type;
                 switch (eventType)
@@ -423,7 +424,7 @@ public class SliderTrack : TemplatedControl, ICustomHitTest
                     case RawPointerEventType.MiddleButtonDown:
                     case RawPointerEventType.XButton1Down:
                     case RawPointerEventType.XButton2Down:
-                        HandleGlobalMousePressed(pointerEventArgs.Position);
+                        HandleGlobalMousePressed(position);
                         break;
                 }
             }
@@ -716,9 +717,7 @@ public class SliderTrack : TemplatedControl, ICustomHitTest
 
     private void HandleGlobalMousePressed(Point point)
     {
-        var globalOffset = GetGlobalOffset();
-        var trailGlobalBounds = new Rect(globalOffset + _railRect.Position, _railRect.Size);
-        if (trailGlobalBounds.Contains(point))
+        if (_railRect.Contains(point))
         {
             return;
         }
@@ -729,17 +728,6 @@ public class SliderTrack : TemplatedControl, ICustomHitTest
         }
     }
 
-    private Point GetGlobalOffset()
-    {
-        var topLevel = TopLevel.GetTopLevel(this);
-        if (topLevel is null)
-        {
-            return default;
-        }
-
-        return this.TranslatePoint(Bounds.Position, topLevel) ?? default;
-    }
-
     private void HandleThumbFocus(SliderThumb sliderThumb, Point point)
     {
         var topLevel = TopLevel.GetTopLevel(this);
@@ -748,10 +736,7 @@ public class SliderTrack : TemplatedControl, ICustomHitTest
             return;
         }
 
-        var offset = GetGlobalOffset();
-        var thumbGOffset = offset + sliderThumb.Bounds.Position;
-        var thumbGBounds = new Rect(thumbGOffset, sliderThumb.Bounds.Size);
-        if (!thumbGBounds.Contains(point) && sliderThumb.IsFocused)
+        if (!sliderThumb.Bounds.Contains(point) && sliderThumb.IsFocused)
         {
             topLevel.FocusManager?.Focus(null);
         }

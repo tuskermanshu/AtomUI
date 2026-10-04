@@ -228,6 +228,7 @@ public abstract class AbstractRate : TemplatedControl,
         base.OnDetachedFromVisualTree(e);
         _pointerEventHandleDisposable?.Dispose();
         _pointerEventHandleDisposable = null;
+        ResetPointerState();
     }
     
     private void HandleGlobalPointerEvent(RawInputEventArgs args)
@@ -236,11 +237,15 @@ public abstract class AbstractRate : TemplatedControl,
         {
             return;
         }
-        if (args is RawPointerEventArgs pointerEventArgs)
+        if (args is RawPointerEventArgs pointerEventArgs &&
+            this.TryGetInputPosition(pointerEventArgs, out var position))
         {
-            var pos      = this.TranslatePoint(new Point(0, 0), TopLevel.GetTopLevel(this)!) ?? default;
-            var bounds   =  new Rect(pos, DesiredSize);
-            var position = pointerEventArgs.Position;
+            var bounds = new Rect(Bounds.Size);
+            if (pointerEventArgs.Type is RawPointerEventType.LeaveWindow or RawPointerEventType.TouchCancel)
+            {
+                ResetPointerState();
+                return;
+            }
             if (pointerEventArgs.Type == RawPointerEventType.Move)
             {
                 if (!bounds.Contains(position))
@@ -255,10 +260,7 @@ public abstract class AbstractRate : TemplatedControl,
             }
             else if (pointerEventArgs.Type == RawPointerEventType.LeftButtonDown)
             {
-                if (bounds.Contains(position))
-                {
-                    _pressedEffectiveValue = EffectiveValue;
-                }
+                _pressedEffectiveValue = bounds.Contains(position) ? EffectiveValue : null;
             }
             else if (pointerEventArgs.Type == RawPointerEventType.LeftButtonUp)
             {
@@ -268,8 +270,8 @@ public abstract class AbstractRate : TemplatedControl,
                     {
                         if (IsAllowClear)
                         {
-                            var localPoint = TopLevel.GetTopLevel(this)?.TranslatePoint(position, this) ?? default;
-                            var value      = CalculateEffectiveValue(localPoint);
+                            var localPoint = _itemsControl is not null ? this.TranslatePoint(position, _itemsControl) : null;
+                            var value = localPoint is { } itemPosition ? CalculateEffectiveValue(itemPosition) : null;
                             if (value != null)
                             {
                                 if ((IsAllowHalf && MathUtils.AreClose(Value, value.Value)) ||
@@ -290,10 +292,17 @@ public abstract class AbstractRate : TemplatedControl,
                         }
                         
                     }
-                    _pressedEffectiveValue = null;
                 }
+                _pressedEffectiveValue = null;
             }
         }
+    }
+
+    private void ResetPointerState()
+    {
+        _isPointerInRate = false;
+        _pressedEffectiveValue = null;
+        SetCurrentValue(EffectiveValueProperty, Value);
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)

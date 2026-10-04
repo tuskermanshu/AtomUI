@@ -90,6 +90,8 @@ Public API / ItemsSource / Command / Event
 
 ## 6. 交互与事件处理
 
+全局指针观察只接收评分控件当前活输入根的事件，原始位置先转换为控件局部坐标，再判断评分区域和星项位置。异窗输入不得改变悬停、按压或 `Value`；本窗口退出、按压结束和控件卸载时清理临时按压/悬停状态。
+
 Rate 的交互事件应从输入源收敛到控件级语义事件：
 
 - Pointer、keyboard、focus 和 command 事件不应绕过 Avalonia 基础控件语义。

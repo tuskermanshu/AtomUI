@@ -129,6 +129,8 @@ Public API / ItemsSource / Command / Event
 
 ## 6. 交互与事件处理
 
+时间列的指针选择状态只消费所属活输入根的事件，原始位置先转换到实际 TopLevel 坐标系，再与列区域比较。原生弹层使用自己的输入根，Overlay 使用宿主输入根；窗口退出或 `TimeView` 卸载时清除临时选择状态，其他窗口不触发选择通知。
+
 TimePicker 的交互事件应从输入源收敛到控件级语义事件：
 
 - Pointer、keyboard、focus 和 command 事件不应绕过 Avalonia 基础控件语义。

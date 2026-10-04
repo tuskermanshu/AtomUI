@@ -2,6 +2,15 @@
 
 本文档记录 Tooltip 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-10-03
+
+- Implementation
+  - Compare input-root identities in `ToolTipService`, allowing a window to close synchronously during routed pointer dispatch before the service receives the same raw event.
+  - Distinguish native Tooltip input roots from overlays sharing the owner root, preserving same-window host switching and same-timestamp native-root transitions.
+  - Release tracked hosts and pending show timers on visual-tree detach, reject stale hits, and preserve desired `IsOpen` state for reconciliation after reattachment.
+- Tests
+  - Replace three visual-root helper assertions with real synchronous-close, Overlay host-switching and detached pending-host lifetime coverage; keep the existing native-root timestamp regression without increasing the permanent test count.
+
 ## 2026-09-17
 
 - Implementation

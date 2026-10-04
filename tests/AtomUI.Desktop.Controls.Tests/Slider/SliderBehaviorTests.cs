@@ -1,3 +1,6 @@
+using Avalonia.Input.Raw;
+using System.Reactive.Linq;
+using Avalonia.VisualTree;
 using System.Globalization;
 using System.Reflection;
 using Avalonia;
@@ -73,6 +76,19 @@ public class SliderBehaviorTests
             Content = slider
         };
 
+        var inputManager = (IInputManager)AvaloniaLocator.CurrentMutable.GetService(typeof(IInputManager))!;
+        IInputRoot? foreignRoot = null;
+        IInputElement? focusAfterRouting = null;
+        // Observe after device routing but before the track's Process subscription. Normal
+        // window activation may move focus; this track must not alter that foreign-root result.
+        using var observation = inputManager.Process.Subscribe(args =>
+        {
+            if (args is RawPointerEventArgs { Type: RawPointerEventType.LeftButtonDown } pointer &&
+                pointer.Root == foreignRoot)
+            {
+                focusAfterRouting = window.FocusManager?.GetFocusedElement();
+            }
+        });
         try
         {
             window.Show();
@@ -81,6 +97,36 @@ public class SliderBehaviorTests
             GetPrivateField<IDisposable?>(slider, "_pointerMovedDispose").ShouldNotBeNull();
             GetPrivateField<IDisposable?>(slider, "_pointerPressDispose").ShouldNotBeNull();
             GetPrivateField<IDisposable?>(slider, "_pointerReleaseDispose").ShouldNotBeNull();
+            var thumb = slider.GetVisualDescendants().OfType<SliderThumb>().First();
+            var other = new AvaloniaWindow { Width = 240, Height = 160, Content = new Border { Background = Brushes.Blue } };
+            other.Show();
+            foreignRoot = other.GetPresentationSource().ShouldNotBeNull().ShouldBeAssignableTo<IInputRoot>();
+            try
+            {
+                thumb.Focus();
+                thumb.IsFocused.ShouldBeTrue();
+                other.MouseDown(new Point(230, 150), MouseButton.Left);
+                window.FocusManager?.GetFocusedElement().ShouldBeSameAs(focusAfterRouting,
+                    "the track must preserve the result of foreign-window input routing");
+                other.MouseUp(new Point(230, 150), MouseButton.Left);
+            }
+            finally
+            {
+                other.Close();
+            }
+
+            var track = new AtomUISliderTrack { Width = 200, Height = 40, Value = 0 };
+            var canvas = new Canvas { Children = { track } };
+            Canvas.SetLeft(track, 25);
+            Canvas.SetTop(track, 35);
+            window.Content = canvas;
+            Dispatcher.UIThread.RunJobs();
+            var trackThumb = track.Thumbs.First();
+            var point = trackThumb.TranslatePoint(new Point(trackThumb.Bounds.Width / 2, trackThumb.Bounds.Height / 2), window).ShouldNotBeNull();
+            window.MouseMove(point);
+            window.MouseDown(point, MouseButton.Left);
+            trackThumb.IsFocused.ShouldBeTrue("offset layout must not duplicate the track origin");
+            window.MouseUp(point, MouseButton.Left);
 
             window.Close();
             Dispatcher.UIThread.RunJobs();

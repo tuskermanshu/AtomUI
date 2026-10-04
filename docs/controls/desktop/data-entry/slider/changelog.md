@@ -8,6 +8,11 @@
 - 不记录临时讨论、纯格式化或没有长期价值的实现细节。
 - 架构文档始终描述最新设计状态；历史变化记录在本文档。
 
+## 2026-10-03
+
+- Implementation
+  - Scope global focus handling to the track input root and compare rail/thumb bounds in track-local coordinates, removing duplicate layout offsets and foreign-window focus clearing.
+
 ## 2026-08-20
 
 - Design
