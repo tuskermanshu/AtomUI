@@ -262,16 +262,29 @@ public class ListBoxSemanticPartTests
     [Fact]
     public void Candidate_And_Cascader_Items_Do_Not_Inherit_The_List_Divider()
     {
-        var candidateItem = new CandidateListItem();
-        var cascaderItem = new CascaderViewFilterListItem();
-
-        ShowInWindow(new Panel { Children = { candidateItem, cascaderItem } }, () =>
+        var candidateList = new CandidateList { ItemsSource = new[] { "Time", "Date" } };
+        var cascaderList = new CascaderViewFilterList
         {
-            foreach (var item in new AtomListBoxItem[] { candidateItem, cascaderItem })
+            ItemsSource = new CascaderViewFilterListItemData[]
+            {
+                new() { Content = "Asia / Shanghai" },
+                new() { Content = "Europe / London" }
+            }
+        };
+
+        ShowInWindow(new StackPanel { Children = { candidateList, cascaderList } }, () =>
+        {
+            var items = candidateList.GetVisualDescendants().OfType<CandidateListItem>().Cast<AtomListBoxItem>()
+                .Concat(cascaderList.GetVisualDescendants().OfType<CascaderViewFilterListItem>())
+                .ToArray();
+            items.Length.ShouldBe(4);
+            foreach (var item in items)
             {
                 var splitLine = GetSplitLineFrame(item);
                 splitLine.IsVisible.ShouldBeFalse();
                 splitLine.BorderThickness.ShouldBe(new Thickness(0));
+                item.EffectiveBorderThickness.ShouldBe(new Thickness(0));
+                item.IsSplitLineEffectiveVisible.ShouldBeFalse();
             }
         });
     }

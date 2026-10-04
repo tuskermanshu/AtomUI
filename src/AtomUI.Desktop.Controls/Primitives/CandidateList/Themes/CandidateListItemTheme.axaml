@@ -6,6 +6,7 @@
     <ControlTheme.BasedOn>
         <atom:ListBoxItemTheme TargetType="atom:CandidateListItem" />
     </ControlTheme.BasedOn>
+    <Setter Property="BorderThickness" Value="0" />
 
     <Style Selector="^:is(atom|CandidateListItem)">
         <Style Selector="^:pointerover:not(:disabled)">

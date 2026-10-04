@@ -353,24 +353,35 @@ public class ListViewSemanticPartTests
     [Fact]
     public void Select_And_Transfer_Items_Do_Not_Inherit_The_List_Divider()
     {
-        var selectItem = new SelectCandidateListItem();
+        var selectList = new SelectCandidateList
+        {
+            ItemsSource = new ISelectOption[]
+            {
+                new SelectOption { Header = "Time", Content = "Time" },
+                new SelectOption { Header = "Date", Content = "Date" }
+            }
+        };
         var transferItem = new TransferListItem();
 
-        ShowInWindow(new Panel { Children = { selectItem, transferItem } }, () =>
+        ShowInWindow(new StackPanel { Children = { selectList, transferItem } }, () =>
         {
-            var selectSplitLine = GetSplitLineFrame(selectItem);
-            selectSplitLine.IsVisible.ShouldBeFalse();
-            selectSplitLine.BorderThickness.ShouldBe(new Thickness(0));
+            var selectItems = selectList.GetVisualDescendants().OfType<SelectCandidateListItem>().ToArray();
+            selectItems.Length.ShouldBe(2);
+            foreach (var selectItem in selectItems)
+            {
+                var selectSplitLine = GetSplitLineFrame(selectItem);
+                selectSplitLine.IsVisible.ShouldBeFalse();
+                selectSplitLine.BorderThickness.ShouldBe(new Thickness(0));
+                selectItem.EffectiveBorderThickness.ShouldBe(new Thickness(0));
+                selectItem.IsSplitLineEffectiveVisible.ShouldBeFalse();
+            }
 
             transferItem.GetVisualDescendants()
                         .OfType<PixelAlignedBorder>()
                         .ShouldNotContain(static border => border.Name == "SplitLineFrame");
 
-            foreach (var item in new AtomListViewItem[] { selectItem, transferItem })
-            {
-                item.EffectiveBorderThickness.ShouldBe(new Thickness(0));
-                item.IsSplitLineEffectiveVisible.ShouldBeFalse();
-            }
+            transferItem.EffectiveBorderThickness.ShouldBe(new Thickness(0));
+            transferItem.IsSplitLineEffectiveVisible.ShouldBeFalse();
         });
     }
 

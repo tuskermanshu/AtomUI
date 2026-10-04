@@ -8,6 +8,11 @@
 - 不记录临时讨论、纯格式化或没有长期价值的实现细节。
 - 架构文档始终描述最新设计状态；历史变化记录在本文档。
 
+## 2026-10-04
+
+- Fix
+  - Remove inherited ListBox item dividers from the shared Mentions candidate dropdown.
+
 ## 2026-09-05
 
 - API
