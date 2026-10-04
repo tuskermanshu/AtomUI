@@ -15,8 +15,8 @@ using Xunit;
 using AtomUICalendar = AtomUI.Desktop.Controls.Calendar;
 using CalendarHeaderControl = AtomUI.Desktop.Controls.Internal.Calendar.CalendarHeader;
 using CalendarHeaderItem = AtomUI.Desktop.Controls.Internal.Calendar.CalendarHeaderItem;
-using CalendarViewControl = AtomUI.Desktop.Controls.Internal.Calendar.CalendarView;
-using CalendarCellControl = AtomUI.Desktop.Controls.Internal.Calendar.CalendarViewCell;
+using CalendarViewControl = AtomUI.Desktop.Controls.Internal.DateViewer.DatePanel;
+using CalendarCellControl = AtomUI.Desktop.Controls.Internal.DateViewer.DateViewerCell;
 using DesktopComboBox = AtomUI.Desktop.Controls.ComboBox;
 using DesktopOptionButton = AtomUI.Desktop.Controls.OptionButton;
 using DesktopOptionButtonGroup = AtomUI.Desktop.Controls.OptionButtonGroup;
@@ -93,7 +93,7 @@ public class CalendarRenderTests
             host.RowDefinitions.Count.ShouldBe(4);
 
             var december = host.Children.OfType<CalendarCellControl>()
-                .Single(cell => cell.Model?.Value.Month == 12);
+                .Single(cell => cell.Model?.Value?.Month == 12);
             Avalonia.Controls.Grid.GetRow(december).ShouldBe(3);
             Avalonia.Controls.Grid.GetColumn(december).ShouldBe(2);
         }
@@ -118,7 +118,7 @@ public class CalendarRenderTests
         {
             var week = calendar.GetVisualDescendants()
                 .OfType<CalendarCellControl>()
-                .First(cell => cell.Model?.Kind == CalendarViewCellKind.Week);
+                .First(cell => cell.Model?.Kind == DateViewerCellType.Week);
             week.Activate();
             Dispatcher.UIThread.RunJobs();
 
@@ -212,7 +212,7 @@ public class CalendarRenderTests
         {
             var dateCell = calendar.GetVisualDescendants()
                 .OfType<CalendarCellControl>()
-                .First(c => c.Model is { Kind: CalendarViewCellKind.Date, Value.Day: 15 });
+                .First(c => c.Model is { Kind: DateViewerCellType.Date, Value: { Day: 15 } });
 
             dateCell.GetVisualDescendants()
                 .OfType<Avalonia.Controls.Control>()
@@ -227,7 +227,7 @@ public class CalendarRenderTests
 
             var weekCell = calendar.GetVisualDescendants()
                 .OfType<CalendarCellControl>()
-                .First(c => c.Model is { Kind: CalendarViewCellKind.Week });
+                .First(c => c.Model is { Kind: DateViewerCellType.Week });
 
             weekCell.GetVisualDescendants()
                 .OfType<Avalonia.Controls.Control>()
@@ -260,7 +260,7 @@ public class CalendarRenderTests
         {
             var cell = calendar.GetVisualDescendants()
                 .OfType<CalendarCellControl>()
-                .First(c => c.Model is { Kind: CalendarViewCellKind.Date, Value.Day: 15 });
+                .First(c => c.Model is { Kind: DateViewerCellType.Date, Value: { Day: 15 } });
 
             cell.GetVisualDescendants()
                 .OfType<Avalonia.Controls.Control>()
@@ -338,7 +338,7 @@ public class CalendarRenderTests
             AssertHeaderLanguage(calendar, "月", "年", "周", "年");
 
             var view = calendar.GetVisualDescendants().OfType<CalendarViewControl>().Single();
-            view.Culture.ShouldBeSameAs(languageManager.Current.FormattingCulture);
+            view.Session!.Input.Culture.ShouldBeSameAs(languageManager.Current.FormattingCulture);
         }
         finally
         {
@@ -364,7 +364,7 @@ public class CalendarRenderTests
 
             var cell = calendar.GetVisualDescendants()
                 .OfType<CalendarCellControl>()
-                .First(c => c.Model is { IsInView: true, IsDisabled: false, Value.Day: 10 });
+                .First(c => c.Model is { IsInView: true, IsDisabled: false, Value: { Day: 10 } });
             cell.Activate();
             Dispatcher.UIThread.RunJobs();
 
@@ -414,7 +414,7 @@ public class CalendarRenderTests
                 .ToList();
             var cell = calendar.GetVisualDescendants()
                 .OfType<CalendarCellControl>()
-                .First(c => c.Model is { IsInView: true, IsDisabled: false, Value.Day: 20 });
+                .First(c => c.Model is { IsInView: true, IsDisabled: false, Value: { Day: 20 } });
             cell.Activate();
             Dispatcher.UIThread.RunJobs();
 
@@ -439,7 +439,7 @@ public class CalendarRenderTests
         try
         {
             var view = calendar.GetVisualDescendants()
-                .OfType<AtomUI.Desktop.Controls.Internal.Calendar.CalendarView>()
+                .OfType<AtomUI.Desktop.Controls.Internal.DateViewer.DatePanel>()
                 .First();
             view.Focus();
             Dispatcher.UIThread.RunJobs();
@@ -465,7 +465,7 @@ public class CalendarRenderTests
         try
         {
             var view = calendar.GetVisualDescendants()
-                .OfType<AtomUI.Desktop.Controls.Internal.Calendar.CalendarView>()
+                .OfType<AtomUI.Desktop.Controls.Internal.DateViewer.DatePanel>()
                 .First();
             view.Focus();
             Dispatcher.UIThread.RunJobs();
@@ -477,7 +477,7 @@ public class CalendarRenderTests
             });
             Dispatcher.UIThread.RunJobs();
 
-            view.FocusedValue.ShouldBe(new DateTime(2026, 7, 16));
+            view.Session!.FocusedValue.ShouldBe(new DateTime(2026, 7, 16));
         }
         finally
         {
@@ -493,15 +493,15 @@ public class CalendarRenderTests
         try
         {
             var view = calendar.GetVisualDescendants()
-                .OfType<AtomUI.Desktop.Controls.Internal.Calendar.CalendarView>()
+                .OfType<AtomUI.Desktop.Controls.Internal.DateViewer.DatePanel>()
                 .First();
-            view.Classes.Contains(":fullscreen").ShouldBeTrue();
-            view.Classes.Contains(":mini").ShouldBeFalse();
+            view.Presentation.ShouldBe(DateViewerPresentation.Content);
+
 
             calendar.Fullscreen = false;
             Dispatcher.UIThread.RunJobs();
-            view.Classes.Contains(":mini").ShouldBeTrue();
-            view.Classes.Contains(":fullscreen").ShouldBeFalse();
+            view.Presentation.ShouldBe(DateViewerPresentation.Compact);
+
         }
         finally
         {
@@ -560,7 +560,7 @@ public class CalendarRenderTests
             var value = cell.GetVisualDescendants().OfType<DesktopTextBlock>()
                 .Single(control => control.Name == "PART_Value");
             var content = cell.GetVisualDescendants().OfType<ContentControl>()
-                .Single(control => control.Name == "PART_ItemContent");
+                .Single(control => control.Name == "PART_CellContent");
 
             Avalonia.Controls.Grid.GetRow(value).ShouldBe(0);
             Avalonia.Controls.Grid.GetRow(content).ShouldBe(1);
@@ -590,7 +590,7 @@ public class CalendarRenderTests
 
             var firstCell = calendar.GetVisualDescendants()
                 .OfType<CalendarCellControl>()
-                .First(cell => cell.Model is { Kind: CalendarViewCellKind.Date });
+                .First(cell => cell.Model is { Kind: DateViewerCellType.Date });
             firstCell.Cursor.ShouldNotBeNull();
             firstCell.Cursor.ToString().ShouldContain("Hand");
 
@@ -711,14 +711,14 @@ public class CalendarRenderTests
                 GetThemeResource<Thickness>(SharedTokenKind.BorderThickness));
 
             var outsideCell = cells.First(cell => cell.Model is
-                { Kind: CalendarViewCellKind.Date, IsInView: false });
+                { Kind: DateViewerCellType.Date, IsInView: false });
             var outsideValue = GetCellValue(outsideCell);
             BrushShouldHaveSameColor(
                 outsideValue.Foreground,
                 GetThemeResource<IBrush>(SharedTokenKind.ColorTextDisabled));
 
             var disabledCell = cells.Single(cell => cell.Model is
-                { Kind: CalendarViewCellKind.Date, IsInView: true, IsDisabled: true });
+                { Kind: DateViewerCellType.Date, IsInView: true, IsDisabled: true });
             BrushShouldHaveSameColor(
                 GetCellValue(disabledCell).Foreground,
                 GetThemeResource<IBrush>(SharedTokenKind.ColorTextDisabled));
@@ -729,7 +729,7 @@ public class CalendarRenderTests
             var weekHeader = calendar.GetVisualDescendants()
                 .OfType<Panel>()
                 .Single(panel => panel.Name == "PART_WeekHeader");
-            var weekText = weekHeader.Children.OfType<DesktopTextBlock>().First();
+            var weekText = weekHeader.Children.OfType<Avalonia.Controls.TextBlock>().First();
             BrushShouldHaveSameColor(
                 weekText.Foreground,
                 GetThemeResource<IBrush>(SharedTokenKind.ColorText));
@@ -863,7 +863,7 @@ public class CalendarRenderTests
         var weekHeader = calendar.GetVisualDescendants()
             .OfType<Panel>()
             .Single(panel => panel.Name == "PART_WeekHeader");
-        var weekText = weekHeader.Children.OfType<DesktopTextBlock>().First();
+        var weekText = weekHeader.Children.OfType<Avalonia.Controls.TextBlock>().First();
         weekText.Text.ShouldBeEmpty();
         AutomationProperties.GetName(weekText).ShouldBe(expectedWeekLabel);
     }

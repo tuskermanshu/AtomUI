@@ -1,0 +1,33 @@
+<ControlTheme xmlns="https://github.com/avaloniaui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:atom="https://atomui.net"
+              xmlns:viewer="clr-namespace:AtomUI.Desktop.Controls.Internal.DateViewer"
+              x:Class="AtomUI.Desktop.Controls.Themes.DateViewerHeaderTheme"
+              x:ClassModifier="internal" TargetType="viewer:DateViewerHeader">
+    <Setter Property="Template">
+        <ControlTemplate TargetType="viewer:DateViewerHeader">
+            <Panel>
+                <ContentControl Content="{TemplateBinding Context}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                IsVisible="{Binding HeaderTemplate, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <DockPanel LastChildFill="True"
+                           IsVisible="{Binding HeaderTemplate, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}">
+                <atom:Button DockPanel.Dock="Left" ButtonType="Text" Content="‹"
+                             AutomationProperties.Name="{atom:DateViewerLangResource PreviousPeriod}"
+                             Command="{Binding Context.NavigateCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                    <atom:Button.CommandParameter><x:Int32>-1</x:Int32></atom:Button.CommandParameter>
+                </atom:Button>
+                <atom:Button DockPanel.Dock="Right" ButtonType="Text" Content="›"
+                             AutomationProperties.Name="{atom:DateViewerLangResource NextPeriod}"
+                             Command="{Binding Context.NavigateCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                    <atom:Button.CommandParameter><x:Int32>1</x:Int32></atom:Button.CommandParameter>
+                </atom:Button>
+                <atom:Button ButtonType="Text"
+                             AutomationProperties.Name="{atom:DateViewerLangResource ChoosePeriod}"
+                             Content="{Binding Context.DisplayText, RelativeSource={RelativeSource TemplatedParent}}"
+                             Command="{Binding Context.ChangePanelCommand, RelativeSource={RelativeSource TemplatedParent}}"
+                             CommandParameter="{TemplateBinding ParentPanelKind}" />
+            </DockPanel>
+            </Panel>
+        </ControlTemplate>
+    </Setter>
+</ControlTheme>

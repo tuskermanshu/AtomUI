@@ -2,6 +2,26 @@
 
 本文档记录 Calendar 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-10-03
+
+- Architecture
+  - Calendar 正文组合 DateViewer，删除独立 View、Cell、Builder、Automation 与旧主题；Value/Mode 仍由 Calendar 拥有，月份选择保留并截断日号，周号选择以 Date 来源提交行首日期。
+  - CalendarCellContext 继承 DateViewerCellContext，构造参数与 CellType 统一使用 DateViewerCellType；Gallery 的业务模板同步消费共享类型。
+  - 农历投影直接消费共享 CellModel，缓存包含真实可见日期首尾；LunarCalendarCellContent 只呈现，统一 Cell 承担交互与 Automation。
+  - RangeBars 消费 DateViewer 的实际 arrange 几何，反向端点按升序绘制，不改写业务对象；移除重复布局输入和网格计算。
+- Theme
+  - header 定制覆盖稳定有效区域，item/itemContent 专用 Style 跨共享面板的真实模板路径，正式测试以编译 AXAML 声明专用样式。
+
+## 2026-10-02
+
+- Docs
+  - 按已批准的共享 DateViewer 架构重写架构、实现、行为、农历、范围条、Token 与 Semantic Part 文档；不宣称源码已迁移。
+  - 日期拓扑、基础 Cell、焦点与范围算法统一引用公共面板设计，删除独立 CalendarView 作为长期架构约束的描述。
+- Architecture
+  - Calendar 负责业务 Header、Value/Mode、事件、呈现与 RangeBars，LunarCalendar 在共享公历模型上扩展内容。
+  - 农历缓存按显示区域与 Provider revision 失效，业务条消费共享拓扑/实际几何，均不创建第二个选择 owner。
+  - 解除旧模板与 Semantic route 兼容约束，要求新专用 Style 按真实组合结构命中。
+
 ## 2026-08-17
 
 - Semantic Part

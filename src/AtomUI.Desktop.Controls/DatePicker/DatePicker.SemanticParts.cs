@@ -49,36 +49,40 @@ namespace AtomUI.Desktop.Controls;
     Since = "6.2.0")]
 [SemanticPart(
     "popup.header",
-    SelectorClass = "semantic-popup-header",
-    SelectorRoute = "/template/ .semantic-popup-root >> .semantic-popup-header",
+    SelectorClass = "semantic-header",
+    SelectorRoute = "/template/ .semantic-popup-root >> .semantic-header",
     CrossVisualRoot = true,
+    CrossNestedOwners = true,
     RuntimeCreated = true,
-    ContractType = typeof(Border),
+    ContractType = typeof(TemplatedControl),
     Since = "6.2.0")]
 [SemanticPart(
     "popup.body",
-    SelectorClass = "semantic-popup-body",
-    SelectorRoute = "/template/ .semantic-popup-root >> .semantic-popup-body",
+    SelectorClass = "semantic-body",
+    SelectorRoute = "/template/ .semantic-popup-root >> .semantic-body",
     CrossVisualRoot = true,
+    CrossNestedOwners = true,
     RuntimeCreated = true,
-    ContractType = typeof(UniformGrid),
+    ContractType = typeof(Panel),
     Since = "6.2.0")]
 [SemanticPart(
     "popup.content",
-    SelectorClass = "semantic-popup-content",
-    SelectorRoute = "/template/ .semantic-popup-root >> .semantic-popup-content",
+    SelectorClass = "semantic-content",
+    SelectorRoute = "/template/ .semantic-popup-root >> .semantic-content",
     CrossVisualRoot = true,
+    CrossNestedOwners = true,
     RuntimeCreated = true,
-    ContractType = typeof(Grid),
+    ContractType = typeof(TemplatedControl),
     Since = "6.2.0")]
 [SemanticPart(
     "popup.cell",
     SelectorClass = "semantic-cell",
     SelectorRoute = "/template/ .semantic-popup-root >> .semantic-cell",
     CrossVisualRoot = true,
+    CrossNestedOwners = true,
     RuntimeCreated = true,
     Cardinality = SemanticPartCardinality.Multiple,
-    ContractType = typeof(AvaloniaButton),
+    ContractType = typeof(TemplatedControl),
     Since = "6.2.0")]
 [SemanticPart(
     "popup.footer",

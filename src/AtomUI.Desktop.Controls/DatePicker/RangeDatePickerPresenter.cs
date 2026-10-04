@@ -1,18 +1,12 @@
-﻿using AtomUI.Desktop.Controls.CalendarView;
+using AtomUI.Desktop.Controls.Internal.DateViewer;
 using Avalonia;
-using Avalonia.Controls.Primitives;
 
 namespace AtomUI.Desktop.Controls;
 
-using PickerCalendar = AtomUI.Desktop.Controls.CalendarView.Calendar;
-
 internal class RangeDatePickerPresenter : DatePickerPresenter
 {
-    #region 公共属性定义
-
     public static readonly StyledProperty<DateTime?> SecondarySelectedDateTimeProperty =
         AvaloniaProperty.Register<RangeDatePickerPresenter, DateTime?>(nameof(SecondarySelectedDateTime));
-
     internal static readonly StyledProperty<bool> IsRangeStartActiveProperty =
         AvaloniaProperty.Register<RangeDatePickerPresenter, bool>(nameof(IsRangeStartActive), true);
 
@@ -21,307 +15,94 @@ internal class RangeDatePickerPresenter : DatePickerPresenter
         get => GetValue(SecondarySelectedDateTimeProperty);
         set => SetValue(SecondarySelectedDateTimeProperty, value);
     }
-
     internal bool IsRangeStartActive
     {
         get => GetValue(IsRangeStartActiveProperty);
         set => SetValue(IsRangeStartActiveProperty, value);
     }
 
-    #endregion
-
-    #region 公共事件定义
-
     public event EventHandler? RangePartConfirmed;
 
-    #endregion
-    
-    RangeDatePickState _pickState = RangeDatePickState.None;
-    private DateTime? _pendingRangeOpenDisplayAnchor;
-
-    protected void EmitRangePartConfirmed()
-    {
-        RangePartConfirmed?.Invoke(this, EventArgs.Empty);
-    }
+    protected override bool IsRangeEditor => true;
+    protected override DateTime? SecondarySelectedDateTimeCore => SecondarySelectedDateTime;
+    protected override DateRangeActivePart ActiveRangePart =>
+        IsRangeStartActive ? DateRangeActivePart.Start : DateRangeActivePart.End;
 
     internal void NotifySelectRangeStart(bool isStart)
     {
         SetCurrentValue(IsRangeStartActiveProperty, isStart);
-        if (CalendarView is RangeCalendar rangeCalendar)
-        {
-            rangeCalendar.SetCurrentValue(RangeCalendar.IsSelectRangeStartProperty, isStart);
-            SyncTimeViewTimeValue();
-        }
+        if (EditSession.IsOpen)
+            ApplyResult(EditSession.Apply(new DatePickerEditAction.ActivatePart(ActiveRangePart)));
+        SyncTimeViewTimeValue();
         SetupConfirmButtonEnableStatus();
     }
 
     internal void ResetRangePickState()
     {
-        _pickState = RangeDatePickState.None;
-        if (SelectedDateTime is not null)
-        {
-            _pickState |= RangeDatePickState.PartStart;
-        }
-
-        if (SecondarySelectedDateTime is not null)
-        {
-            _pickState |= RangeDatePickState.PartEnd;
-        }
+        // Confirmation flags are reconstructed from both committed endpoints on Open.
     }
 
-    internal void ResetRangeOpenPanelState()
-    {
-        _pendingRangeOpenDisplayAnchor = ResolveRangeOpenDisplayAnchor();
-        ApplyPendingRangeOpenPanelState();
-    }
+    internal void ResetRangeOpenPanelState() => ResetOpenPanelState();
 
     internal void NotifyRepairReverseRange(bool isRepair)
     {
-        if (CalendarView is RangeCalendar rangeCalendar)
-        {
-            rangeCalendar.IsRepairReverseRange = isRepair;
-        }
+        // Raw endpoint order is always retained; final date ordering is an editor result.
     }
 
-    protected override void NotifyTimeViewHoverChanged(TimeSpan? newTime)
-    {
-        if (CalendarView is RangeCalendar)
-        {
-            var hoverDateTime = CollectDateTime(GetActiveSelectedDateTime(), newTime);
-            EmitHoverDateTimeChanged(hoverDateTime);
-        }
-    }
+    protected override bool IsRangeProperty(AvaloniaProperty property) =>
+        property == SecondarySelectedDateTimeProperty || property == IsRangeStartActiveProperty;
 
-    protected override void NotifyPointerEnterConfirmButton()
+    protected override DateTime? ResolveOpenDisplayAnchor()
     {
-        if (CalendarView is RangeCalendar)
+        var active = EditSession.OpenAnchor;
+        if (active is null || PanelCount == 1 || ActiveRangePart == DateRangeActivePart.Start)
+            return active;
+        try
         {
-            var hoverDateTime = CollectDateTime(GetActiveSelectedDateTime(), TempSelectedTime ?? TimeView?.SelectedTime);
-            EmitHoverDateTimeChanged(hoverDateTime);
-        }
-    }
-
-    protected override void NotifyCalendarViewDateSelected()
-    {
-        if (CalendarView is RangeCalendar rangeCalendar)
-        {
-            var selectedDateTime = CollectDateTime(
-                GetActiveCalendarDate(rangeCalendar),
-                TempSelectedTime ?? TimeView?.SelectedTime);
-            SetActiveSelectedDateTime(selectedDateTime);
-
-            if (!IsNeedConfirm)
+            return PickerMode switch
             {
-                OnConfirmed();
-            }
+                DatePickerMode.Month or DatePickerMode.Quarter => active.Value.AddYears(-1),
+                DatePickerMode.Year => new DateTime(Math.Max(1, active.Value.Year / 10 * 10 - 10), 1, 1),
+                _ => active.Value.AddMonths(-1)
+            };
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return active;
         }
     }
 
-    protected override void NotifyConfirmButtonClicked()
+    protected override void ApplyDraft(DateViewerRange draft)
     {
-        if (EffectiveDateRange.Contains(GetActiveSelectedDateTime()))
-        {
-            OnConfirmed();
-        }
+        UpdatingCandidate = true;
+        SetCurrentValue(SelectedDateTimeProperty, draft.Start);
+        SetCurrentValue(SecondarySelectedDateTimeProperty, draft.End);
+        UpdatingCandidate = false;
     }
 
-    protected override void OnDismiss()
+    protected override void OnPartialConfirmed(DatePickerEditResult result)
     {
-        base.OnDismiss();
-        SetCurrentValue(SecondarySelectedDateTimeProperty, null);
-    }
-
-    protected override void OnConfirmed()
-    {
-        EmitChoosingStatusChanged(false);
-        MarkActiveRangePartPicked();
-
-        var pickState    = _pickState;
-        var hasPartStart = (pickState & RangeDatePickState.PartStart) == RangeDatePickState.PartStart;
-        var hasPartEnd   = (pickState & RangeDatePickState.PartEnd) == RangeDatePickState.PartEnd;
-        if (hasPartStart && hasPartEnd &&
-            SelectedDateTime is not null &&
-            SecondarySelectedDateTime is not null)
-        {
-            EmitConfirmed();
-        }
-        else
-        {
-            EmitRangePartConfirmed();
-        }
-    }
-
-    private void MarkActiveRangePartPicked()
-    {
-        if (IsRangeStartActive)
-        {
-            if (SelectedDateTime is not null)
-            {
-                _pickState |= RangeDatePickState.PartStart;
-            }
-        }
-        else if (SecondarySelectedDateTime is not null)
-        {
-            _pickState |= RangeDatePickState.PartEnd;
-        }
-    }
-    
-    protected override void NotifyTodayButtonClicked()
-    {
-        if (!EffectiveDateRange.Contains(DateTime.Today))
-        {
-            return;
-        }
-
-        SetActiveSelectedDateTime(DateTime.Today);
-        OnConfirmed();
-    }
-    
-    protected override void NotifyNowButtonClicked()
-    {
-        if (!EffectiveDateRange.Contains(DateTime.Now))
-        {
-            return;
-        }
-
-        SelectNowForActiveRangePart();
-        OnConfirmed();
-    }
-
-    protected void SelectNowForActiveRangePart()
-    {
-        var now = DateTime.Now;
-        SetActiveSelectedDateTime(now);
-        CalendarView?.SetCurrentValue(PickerCalendar.SelectedDateProperty, now);
-
-        if (IsShowTime && TimeView is not null)
-        {
-            TimeView.SelectedTime = now.TimeOfDay;
-        }
-    }
-
-    protected override void SyncTimeViewTimeValue()
-    {
-        if (TimeView is not null)
-        {
-            TimeView.SelectedTime = GetActiveSelectedDateTime()?.TimeOfDay ?? TimeSpan.Zero;
-        }
-    }
-
-    protected override void TimeViewTempTimeSelected(TimeSpan? time)
-    {
-        base.TimeViewTempTimeSelected(time);
-        if (CalendarView is RangeCalendar rangeCalendar)
-        {
-            SetActiveSelectedDateTime(CollectDateTime(GetActiveCalendarDate(rangeCalendar), TempSelectedTime));
-        }
+        SetCurrentValue(IsRangeStartActiveProperty, result.ActivePart == DateRangeActivePart.Start);
+        RangePartConfirmed?.Invoke(this, EventArgs.Empty);
     }
 
     protected override void SetupConfirmButtonEnableStatus()
     {
-        if (ConfirmButton is null)
-        {
-            return;
-        }
-
-        ConfirmButton.IsEnabled = EffectiveDateRange.Contains(GetActiveSelectedDateTime());
+        if (ConfirmButton is not null)
+            ConfirmButton.IsEnabled = EditSession.CanConfirm;
     }
 
-    protected override void SynchronizeCalendarState()
-    {
-        base.SynchronizeCalendarState();
-        if (CalendarView is RangeCalendar rangeCalendar)
-        {
-            rangeCalendar.SetCurrentValue(
-                RangeCalendar.SecondarySelectedDateProperty,
-                GetValidCalendarDate(SecondarySelectedDateTime));
-        }
-    }
+    protected override void NotifyTimeViewHoverChanged(TimeSpan? value) =>
+        ApplyResult(EditSession.Apply(new DatePickerEditAction.PreviewTime(value)));
 
-    private DateTime? GetActiveSelectedDateTime()
-    {
-        return IsRangeStartActive ? SelectedDateTime : SecondarySelectedDateTime;
-    }
+    protected override void NotifyTodayButtonClicked() =>
+        ApplyResult(EditSession.Apply(new DatePickerEditAction.Today(DateTime.Today)));
 
-    private void SetActiveSelectedDateTime(DateTime? dateTime)
-    {
-        if (IsRangeStartActive)
-        {
-            SetCurrentValue(SelectedDateTimeProperty, dateTime);
-        }
-        else
-        {
-            SetCurrentValue(SecondarySelectedDateTimeProperty, dateTime);
-        }
-    }
-
-    private DateTime? GetActiveCalendarDate(RangeCalendar rangeCalendar)
-    {
-        return IsRangeStartActive ? rangeCalendar.SelectedDate : rangeCalendar.SecondarySelectedDate;
-    }
-
-    private DateTime? ResolveRangeOpenDisplayAnchor()
-    {
-        var activeDate = GetActiveSelectedDateTime();
-        if (activeDate is not null)
-        {
-            var normalizedActiveDate = DatePickerFormattingHelper.NormalizeDateTime(activeDate.Value, PickerMode);
-            return IsRangeStartActive
-                ? normalizedActiveDate
-                : ResolveRangeEndDisplayAnchor(normalizedActiveDate);
-        }
-
-        return PickerDisplayDate.HasValue
-            ? DatePickerFormattingHelper.NormalizeDateTime(PickerDisplayDate.Value, PickerMode)
-            : null;
-    }
-
-    protected virtual DateTime ResolveRangeEndDisplayAnchor(DateTime activeEnd)
-    {
-        return activeEnd;
-    }
-
-    private void ApplyPendingRangeOpenPanelState()
-    {
-        if (_pendingRangeOpenDisplayAnchor is null || CalendarView is not RangeCalendar rangeCalendar)
-        {
-            return;
-        }
-
-        var anchor = rangeCalendar.NormalizePickerDate(_pendingRangeOpenDisplayAnchor.Value);
-        ApplyCalendarDisplayAnchor(rangeCalendar, anchor);
-        _pendingRangeOpenDisplayAnchor = null;
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-        if (change.Property == SecondarySelectedDateTimeProperty ||
-            change.Property == SelectedDateTimeProperty)
-        {
-            SynchronizeCalendarState();
-            SetupConfirmButtonEnableStatus();
-        }
-    }
-
-    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
-    {
-        base.OnApplyTemplate(e);
-        ApplyPendingRangeOpenPanelState();
-        SetupConfirmButtonEnableStatus();
-    }
+    protected override void NotifyNowButtonClicked() =>
+        ApplyResult(EditSession.Apply(new DatePickerEditAction.Now(DateTime.Now)));
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        _pickState = RangeDatePickState.None;
     }
-}
-
-[Flags]
-internal enum RangeDatePickState
-{
-    None = 0x00,
-    PartStart = 0x01,
-    PartEnd = 0x02,
 }

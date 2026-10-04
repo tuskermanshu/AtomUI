@@ -505,6 +505,12 @@ internal sealed class RegistrationModelBuilder
 
     private (XElement? Element, bool Opaque) FindInScope(XElement scope, string key, HashSet<string> seen)
     {
+        // A .Resources property can contain either implicit entries or one explicit dictionary.
+        // The latter is the same resource scope, not an entry keyed by its element name.
+        if (scope.Name.LocalName.EndsWith(".Resources", StringComparison.Ordinal) &&
+            scope.Elements().Count() == 1 && scope.Elements().First() is { } dictionary &&
+            dictionary.Name.LocalName == "ResourceDictionary" && dictionary.Attribute(Xaml + "Key") is null)
+            return FindInScope(dictionary, key, seen);
         var local = scope.Elements().LastOrDefault(e => e.Attribute(Xaml + "Key") is { } ownKey && NormalizeResourceKey(e, ownKey.Value) == key);
         if (local is not null) return (local, false);
         foreach (var include in scope.Elements().Where(e => e.Name.LocalName.EndsWith(".MergedDictionaries", StringComparison.Ordinal)).Elements().Reverse())

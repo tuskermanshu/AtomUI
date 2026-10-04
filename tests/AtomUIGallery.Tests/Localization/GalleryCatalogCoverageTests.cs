@@ -43,7 +43,7 @@ public class GalleryCatalogCoverageTests
             .OrderBy(static type => type.FullName, StringComparer.Ordinal)
             .ToArray();
 
-        catalogTypes.Length.ShouldBe(94);
+        catalogTypes.Length.ShouldBe(96);
         var memberOrderBaseline = LoadCatalogMemberOrderBaseline();
         memberOrderBaseline.Keys.ShouldBe(
             catalogTypes.Select(static type => type.FullName!),
@@ -68,7 +68,7 @@ public class GalleryCatalogCoverageTests
                       type.Name == "en_US" || type.Name == "zh_CN" || type.Name == "zh_TW");
 
         var files = LoadLanguageFiles(catalogTypes);
-        files.Length.ShouldBe(363);
+        files.Length.ShouldBe(370);
         files.GroupBy(static file => file.CatalogType)
              .ShouldAllBe(static group => group.Count() == 3 || group.Count() == 4);
         AssertXliffContracts(catalogTypes, files);
@@ -119,11 +119,12 @@ public class GalleryCatalogCoverageTests
                               .OrderBy(static path => path, StringComparer.Ordinal)
                               .ToArray();
 
-        sourceFiles.Length.ShouldBe(81);
+        sourceFiles.Length.ShouldBe(82);
         // 4748（feature/semantic 基线）+ 14（ComboBox Semantic 示例）+ 18（Splash Semantic 示例）
         // + 8（release/6.0 TabControl/TabStrip 溢出搜索示例）
-        // + 3（Pagination 自定义页大小组件示例）+ 1（DataGrid 分页 Extra Content 示例）= 4792。
-        sourceFiles.Sum(CountUnits).ShouldBe(4792);
+        // + 3（Pagination 自定义页大小组件示例）+ 1（DataGrid 分页 Extra Content 示例）
+        // + 38（DateViewer 独立页面）+ 1（DateViewer 导航）= 4831。
+        sourceFiles.Sum(CountUnits).ShouldBe(4831);
         foreach (var sourcePath in sourceFiles)
         {
             var targetPath = Path.Combine(

@@ -2,6 +2,39 @@
 
 本文档记录 DatePicker 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-10-04
+
+- Fixed
+  - Align Week panel headers, week numbers, whole-row hover and default input formatting with the effective language; refresh formatted values when the language changes.
+  - Align Month, Quarter and Year value-frame width, horizontal padding and vertical centering with the shared period-cell geometry.
+  - Define and enforce the RangeDatePicker endpoint-rotation contract: each successful endpoint confirmation moves the active input, popup anchor and date-panel active part to the opposite endpoint before the next hover or selection.
+  - Keep existing complete ranges visible when reopening, but treat the new edit round as unconfirmed so replacing one endpoint does not immediately close the popup before the other endpoint is selected.
+  - Order range hover preview text from the fixed endpoint and hovered endpoint without writing the preview back to committed values.
+  - Align RangeDatePicker preview precedence with the shared range model so reverse start editing renders only the normalized live endpoints instead of retaining a third committed endpoint.
+  - Keep range Hover state atomic across shared panels and preserve the established endpoint corner geometry.
+  - Preserve the opposite endpoint value, input text and DateViewer selected range state when confirming one RangeDatePicker endpoint and rotating the active endpoint.
+
+## 2026-10-03
+
+- Implementation
+  - Replace the private CalendarView/CalendarItem/Button engine with hosted DateViewer and RangeDateViewer panels.
+  - Add DatePickerEditSession for raw candidates, active range parts, time cursors and partial/final confirmation results.
+  - Collapse timed and dual-month range presenter subclasses into one configured RangeDatePickerPresenter.
+- Theme
+  - Rebuild popup header, panel, range, time and footer composition around the shared viewer while preserving the established picker layout.
+- Semantic Parts
+  - Change popup header/body/content/cell contracts to the real shared TemplatedControl/Panel topology; range headers are Multiple.
+
+## 2026-10-02
+
+- Docs
+  - 按已批准的 DateViewer 方案重写架构、实现、Token 与 Semantic Part 文档，明确这是尚未迁入源码的目标设计。
+  - 删除 CalendarView 系统性优化文档，日期内核统一由 DateViewer 家族共享设计拥有。
+  - 校正 internal 类型冒充 public API 的旧描述，取消旧类型、模板、资源与 route 兼容约束。
+- Architecture
+  - 定义公共日期面板、统一 Cell、宿主编辑会话与输入提交 owner 的组合关系。
+  - 将 DatePicker/RangeDatePicker 的视觉、交互、绑定、Form、部分确认及关闭路径逐步等价设为重建验收要求。
+
 ## 2026-09-07
 
 - Fixed

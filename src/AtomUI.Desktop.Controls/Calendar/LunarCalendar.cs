@@ -92,6 +92,12 @@ public partial class LunarCalendar : Calendar
         RefreshPresentation();
     }
 
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        _lunarPresentationAdapter?.InvalidatePanelData();
+        base.OnDetachedFromVisualTree(e);
+    }
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         if (change.Property == ValueProperty && _lunarPresentationAdapter is not null)

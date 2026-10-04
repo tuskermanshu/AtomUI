@@ -156,6 +156,11 @@
         <source>ColorPicker</source>
       </segment>
     </unit>
+    <unit id="DataEntry_DateViewer">
+      <segment>
+        <source>DateViewer</source>
+      </segment>
+    </unit>
     <unit id="DataEntry_DatePicker">
       <segment>
         <source>DatePicker</source>

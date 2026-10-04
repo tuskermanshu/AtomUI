@@ -42,6 +42,7 @@ public enum CaseNavigationLangResourceKind
     DataEntry_CheckBox,
     DataEntry_ColorPicker,
     DataEntry_DatePicker,
+    DataEntry_DateViewer,
     DataEntry_TimePicker,
     DataEntry_Form,
     DataEntry_LineEdit,

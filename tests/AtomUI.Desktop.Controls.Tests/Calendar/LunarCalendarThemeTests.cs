@@ -28,9 +28,9 @@ public class LunarCalendarThemeTests
         calendarResource.ShouldNotBeNull();
         ((ControlTheme)calendarResource!).TargetType.ShouldBe(typeof(LunarCalendarControl));
 
-        application!.TryFindResource(typeof(LunarCalendarViewCell), out var cellResource).ShouldBeTrue();
+        application!.TryFindResource(typeof(LunarCalendarCellContent), out var cellResource).ShouldBeTrue();
         cellResource.ShouldNotBeNull();
-        ((ControlTheme)cellResource!).TargetType.ShouldBe(typeof(LunarCalendarViewCell));
+        ((ControlTheme)cellResource!).TargetType.ShouldBe(typeof(LunarCalendarCellContent));
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class LunarCalendarThemeTests
         var source = ReadRepoFile("src/AtomUI.Desktop.Controls/Calendar/Themes/LunarCalendarTheme.axaml");
 
         source.ShouldContain("CalendarControlTheme");
-        source.ShouldNotContain("/template/");
+        XDocument.Parse(source).Elements().Single().Elements().Where(element => element.Name.LocalName == "Style").ShouldBeEmpty();
         source.ShouldNotContain("CalendarHeader#");
         source.ShouldNotContain("CalendarView#");
         source.ShouldNotContain("ComboBox#");
@@ -84,7 +84,7 @@ public class LunarCalendarThemeTests
     [Fact]
     public void DedicatedCellTheme_OnlyCrossesItsOwnTemplateBoundaryOncePerSelector()
     {
-        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/Calendar/Themes/LunarCalendarViewCellTheme.axaml");
+        var source = ReadRepoFile("src/AtomUI.Desktop.Controls/Calendar/Themes/LunarCalendarCellContentTheme.axaml");
         var document = XDocument.Parse(source);
         var avalonia = XNamespace.Get("https://github.com/avaloniaui");
 
@@ -92,7 +92,8 @@ public class LunarCalendarThemeTests
                      .Select(style => (string?)style.Attribute("Selector"))
                      .Where(selector => selector is not null))
         {
-            selector!.Split("/template/", StringSplitOptions.None).Length.ShouldBeLessThanOrEqualTo(2);
+            foreach (var branch in selector!.Split(','))
+                branch.Split("/template/", StringSplitOptions.None).Length.ShouldBeLessThanOrEqualTo(2);
         }
     }
 

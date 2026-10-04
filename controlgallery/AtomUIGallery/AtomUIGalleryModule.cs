@@ -24,6 +24,7 @@ using AtomUIGallery.ShowCases.ComboBox;
 using AtomUIGallery.ShowCases.CustomizeTheme;
 using AtomUIGallery.ShowCases.DataGrid;
 using AtomUIGallery.ShowCases.DatePicker;
+using AtomUIGallery.ShowCases.DateViewer;
 using AtomUIGallery.ShowCases.Descriptions;
 using AtomUIGallery.ShowCases.Drawer;
 using AtomUIGallery.ShowCases.DropdownButton;
@@ -173,6 +174,7 @@ public static class AtomUIGalleryModule
                   .AddPage(CheckBoxViewModel.ID, Nav(CaseNavigationLangResourceKind.DataEntry_CheckBox, "CheckBox"))
                   .AddPage(ColorPickerViewModel.ID, Nav(CaseNavigationLangResourceKind.DataEntry_ColorPicker, "ColorPicker"))
                   .AddPage(DatePickerViewModel.ID, Nav(CaseNavigationLangResourceKind.DataEntry_DatePicker, "DatePicker"))
+                  .AddPage(DateViewerViewModel.ID, Nav(CaseNavigationLangResourceKind.DataEntry_DateViewer, "DateViewer"))
                   .AddPage(TimePickerViewModel.ID, Nav(CaseNavigationLangResourceKind.DataEntry_TimePicker, "TimePicker"))
                   .AddPage(FormViewModel.ID, Nav(CaseNavigationLangResourceKind.DataEntry_Form, "Form"))
                   .AddPage(LineEditViewModel.ID, Nav(CaseNavigationLangResourceKind.DataEntry_LineEdit, "LineEdit"))
@@ -308,6 +310,7 @@ public static class AtomUIGalleryModule
         routes.Map(MenuViewModel.ID, screen => new MenuViewModel(screen), () => new MenuShowCase());
         routes.Map(TimePickerViewModel.ID, screen => new TimePickerViewModel(screen), () => new TimePickerShowCase());
         routes.Map(DatePickerViewModel.ID, screen => new DatePickerViewModel(screen), () => new DatePickerShowCase());
+        routes.Map(DateViewerViewModel.ID, screen => new DateViewerViewModel(screen), () => new DateViewerShowCase());
         routes.Map(UploadViewModel.ID, screen => new UploadViewModel(screen), () => new UploadShowCase());
         routes.Map(TransferViewModel.ID, screen => new TransferViewModel(screen), () => new TransferShowCase());
         routes.Map(FormViewModel.ID, screen => new FormViewModel(screen), () => new FormShowCase());

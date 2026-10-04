@@ -187,6 +187,12 @@
         <target state="translated">ColorPicker 顏色選擇器</target>
       </segment>
     </unit>
+    <unit id="DataEntry_DateViewer">
+      <segment>
+        <source>DateViewer</source>
+        <target state="translated">日期面板</target>
+      </segment>
+    </unit>
     <unit id="DataEntry_DatePicker">
       <segment>
         <source>DatePicker</source>
