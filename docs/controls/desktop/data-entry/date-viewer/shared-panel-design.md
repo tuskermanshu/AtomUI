@@ -222,6 +222,7 @@ Picker、Calendar 以及 DateViewer 分别拥有自己的 Semantic owner。组�
 提交前重新验证有效性，避免模型生成后约束发生变化使过期 Cell 被提交。
 范围真实端点、候选端点和 hover preview 分别推导；预览中间区域与端点不污染真实选中标记。
 激活有效 Cell 时必须先清理旧 Hover preview，再让宿主提交和切换活动端，防止旧 hover 在新活动端上下文中覆盖已提交范围选中态。
+双面板范围选择中，非本面板周期的 outside cell 只作为浏览填充，不投影 selected、visual endpoint、range endpoint、range middle 或 preview 状态；同一个真实端点只能在所属面板周期内高亮一次。
 周模式按整行输出连续视觉，周号与七个日期参与同一范围；命中区域包含日期格间隙和两个面板，不只依赖 Cell PointerEntered。
 
 ### 7.2 Picker 编辑会话
@@ -241,6 +242,7 @@ Picker、Calendar 以及 DateViewer 分别拥有自己的 Semantic owner。组�
 范围活动端点的显示定位使用该端点与当前面板周期，不允许开始值同步将结束面板拉回开始区域。
 RangeDatePicker 每次打开都重建本次端点确认进度：空范围从 start 到 end；单端点范围把已有端点作为固定端；
 完整范围保留提交值作为初始显示，但本次编辑仍要求从当前活动端开始重新确认两个端点。
+完整范围使用 start 所在周期作为双面板左锚点；active end 只表达当前编辑端点，不能通过倒推一个周期改变左面板月份。
 设置当前端点后，活动端、输入焦点、Popup 箭头和 DatePanel active part 必须同步翻转到另一端。
 端点翻转不得清理对向端点的值或本端刚确认值；清理行为只允许发生在显式 Clear、表单清空或既有关闭路径要求的未完整范围回滚中。
 范围日期时间的有效确认行为与用户原始 IsNeedConfirm 请求分开表示，不需要覆盖 public 属性再保存 backup 来表示内部派生状态；

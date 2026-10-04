@@ -85,6 +85,54 @@ public class DateViewerTests
     }
 
     [Fact]
+    public void Range_Dual_Panel_Does_Not_Select_Duplicate_Outside_Endpoint_Cells()
+    {
+        var start = new DateTime(2026, 9, 28);
+        var end = new DateTime(2026, 10, 4);
+        var viewer = new RangeDateViewer
+        {
+            DisplayDate = new DateTime(2026, 9, 1),
+            Value = new DateViewerRange(start, end)
+        };
+        var window = new Avalonia.Controls.Window { Width = 600, Height = 360, Content = viewer };
+
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+
+            var cells = viewer.GetVisualDescendants().OfType<DateViewerCell>().ToArray();
+            var visibleStart = cells.Single(cell => cell.Model?.Value == start && cell.Model.IsInView);
+            var visibleEnd = cells.Single(cell => cell.Model?.Value == end && cell.Model.IsInView);
+            var duplicateStart = cells.Single(cell => cell.Model?.Value == start && cell.Model.IsInView == false);
+            var duplicateEnd = cells.Single(cell => cell.Model?.Value == end && cell.Model.IsInView == false);
+
+            visibleStart.Model!.IsSelected.ShouldBeTrue();
+            visibleStart.Model.IsVisualEndpoint.ShouldBeTrue();
+            visibleStart.Model.IsRangeStart.ShouldBeTrue();
+            visibleEnd.Model!.IsSelected.ShouldBeTrue();
+            visibleEnd.Model.IsVisualEndpoint.ShouldBeTrue();
+            visibleEnd.Model.IsRangeEnd.ShouldBeTrue();
+
+            duplicateStart.Model!.IsSelected.ShouldBeFalse();
+            duplicateStart.Model.IsVisualEndpoint.ShouldBeFalse();
+            duplicateStart.Model.IsRangeStart.ShouldBeFalse();
+            duplicateStart.Model.IsRangeMiddle.ShouldBeFalse();
+            duplicateStart.Model.IsRangeEnd.ShouldBeFalse();
+            duplicateEnd.Model!.IsSelected.ShouldBeFalse();
+            duplicateEnd.Model.IsVisualEndpoint.ShouldBeFalse();
+            duplicateEnd.Model.IsRangeStart.ShouldBeFalse();
+            duplicateEnd.Model.IsRangeMiddle.ShouldBeFalse();
+            duplicateEnd.Model.IsRangeEnd.ShouldBeFalse();
+        }
+        finally
+        {
+            window.Close();
+            Dispatcher.UIThread.RunJobs();
+        }
+    }
+
+    [Fact]
     public void Header_Commands_Browse_And_Same_Value_Selection_Notifies_Once_Per_Activation()
     {
         var viewer = (DateViewer)Create("DateViewer");

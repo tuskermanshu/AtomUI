@@ -55,21 +55,9 @@ internal class RangeDatePickerPresenter : DatePickerPresenter
     protected override DateTime? ResolveOpenDisplayAnchor()
     {
         var active = EditSession.OpenAnchor;
-        if (active is null || PanelCount == 1 || ActiveRangePart == DateRangeActivePart.Start)
+        if (active is null || PanelCount == 1)
             return active;
-        try
-        {
-            return PickerMode switch
-            {
-                DatePickerMode.Month or DatePickerMode.Quarter => active.Value.AddYears(-1),
-                DatePickerMode.Year => new DateTime(Math.Max(1, active.Value.Year / 10 * 10 - 10), 1, 1),
-                _ => active.Value.AddMonths(-1)
-            };
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            return active;
-        }
+        return EditSession.Draft.Start ?? active;
     }
 
     protected override void ApplyDraft(DateViewerRange draft)

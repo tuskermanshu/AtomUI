@@ -237,12 +237,13 @@ internal static class DatePanelAlgorithms
         bool Matches(DateTime? target) => value is { } candidate && target is { } selection &&
             Normalize(candidate, comparisonUnit, firstDay) == Normalize(selection, comparisonUnit, firstDay);
         var selectableWeek = kind != DateViewerCellType.Week || input.SelectionUnit == DateViewerSelectionUnit.Week;
-        var rangeGrid = input.SelectionUnit == comparisonUnit && input.Range is not null;
+        var rangeVisualEligible = IsRangeVisualEligible(input, inView);
+        var rangeGrid = rangeVisualEligible && input.SelectionUnit == comparisonUnit && input.Range is not null;
         var state = rangeGrid && value is { } rangeValue
             ? GetRangeState(input, rangeValue, firstDay)
             : default;
         var selected = !state.HasPreview && !disabled && selectableWeek && (Matches(input.SelectedDate) ||
-            input.Range is { } range && (Matches(range.Start) || Matches(range.End)));
+            rangeVisualEligible && input.Range is { } range && (Matches(range.Start) || Matches(range.End)));
         var hovered = !disabled && selectableWeek && Matches(input.HoveredValue);
         var visualEndpoint = state.HasPreview ? state.PreviewStart || state.PreviewEnd : selected;
         var weekVisual = input.SelectionUnit == DateViewerSelectionUnit.Week && input.PanelKind == DateViewerPanelKind.Date &&
@@ -265,6 +266,9 @@ internal static class DatePanelAlgorithms
             IsWeekSelectionEnd = weekVisual && column == columns - 1
         };
     }
+
+    private static bool IsRangeVisualEligible(DatePanelInput input, bool isInView) =>
+        input is not { IsRangeSelection: true, PanelCount: > 1 } || isInView;
 
     private static DateViewerSelectionUnit GetCellUnit(DateViewerCellType kind) => kind switch
     {

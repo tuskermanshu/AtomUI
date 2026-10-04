@@ -144,7 +144,7 @@ public class DatePickerViewerBehaviorTests
     }
 
     [Fact]
-    public void Range_End_Open_Uses_The_Previous_Dual_Panel_Period_And_Keeps_The_Host_As_Value_Owner()
+    public void Range_End_Open_Uses_The_Start_Dual_Panel_Period_And_Keeps_The_Host_As_Value_Owner()
     {
         var start = new DateTime(2026, 1, 12);
         var end = new DateTime(2026, 2, 11);
@@ -164,7 +164,7 @@ public class DatePickerViewerBehaviorTests
             var presenter = picker.PickerPresenter.ShouldBeAssignableTo<RangeDatePickerPresenter>()!;
             var viewer = presenter.GetVisualDescendants().OfType<RangeDateViewer>().Single();
 
-            viewer.PanelSession.Input.DisplayDate.ShouldBe(end.AddMonths(-1));
+            viewer.PanelSession.Input.DisplayDate.ShouldBe(start);
             viewer.PanelSession.Input.Range.ShouldBe(new DateViewerRange(start, end));
             viewer.PanelSession.Input.PanelCount.ShouldBe(2);
             viewer.Bounds.Width.ShouldBe(540, 0.5);
@@ -175,6 +175,35 @@ public class DatePickerViewerBehaviorTests
             presenter.GetVisualDescendants().OfType<DateViewerHeader>()
                      .ShouldAllBe(header => header.HeaderTemplate != null);
             viewer.Value.ShouldBeNull();
+        });
+    }
+
+    [Fact]
+    public void Range_End_Open_Keeps_The_Start_Period_As_The_Left_Dual_Panel_When_The_Range_Is_In_One_Month()
+    {
+        var start = new DateTime(2026, 7, 6);
+        var end = new DateTime(2026, 7, 12);
+        var picker = new RangeDatePicker
+        {
+            PickerDisplayDate = new DateTime(2027, 9, 23),
+            RangeStartSelectedDate = start,
+            RangeEndSelectedDate = end
+        };
+        picker.RangeActivatedPart = RangeActivatedPart.End;
+
+        ShowPicker(picker, () =>
+        {
+            picker.IsPickerOpen = true;
+            Drain();
+
+            var presenter = picker.PickerPresenter.ShouldBeAssignableTo<RangeDatePickerPresenter>()!;
+            var viewer = presenter.GetVisualDescendants().OfType<RangeDateViewer>().Single();
+
+            viewer.PanelSession.Input.DisplayDate.ShouldBe(start);
+            viewer.PanelSession.Models[0].Anchor.ShouldBe(new DateTime(2026, 7, 1));
+            viewer.PanelSession.Models[1].Anchor.ShouldBe(new DateTime(2026, 8, 1));
+            viewer.PanelSession.Input.Range.ShouldBe(new DateViewerRange(start, end));
+            viewer.PanelSession.Input.ActiveRangePart.ShouldBe(DateRangeActivePart.End);
         });
     }
 

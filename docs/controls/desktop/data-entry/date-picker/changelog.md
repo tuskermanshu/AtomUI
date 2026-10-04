@@ -13,6 +13,7 @@
   - Align RangeDatePicker preview precedence with the shared range model so reverse start editing renders only the normalized live endpoints instead of retaining a third committed endpoint.
   - Keep range Hover state atomic across shared panels and preserve the established endpoint corner geometry.
   - Preserve the opposite endpoint value, input text and DateViewer selected range state when confirming one RangeDatePicker endpoint and rotating the active endpoint.
+  - Keep complete range popups anchored to the start period and suppress selected/range endpoint projection on duplicate outside cells in dual-panel range viewers.
 
 ## 2026-10-03
 
