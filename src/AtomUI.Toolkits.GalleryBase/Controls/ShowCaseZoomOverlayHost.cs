@@ -76,6 +76,7 @@ public sealed class ShowCaseZoomOverlayHost : UserControl
         _overlay.Title        = e.Title;
         _overlay.Description  = e.Description;
         _overlay.DataContext  = item.DataContext;
+        _overlay.SourceItem   = item;
         // 先恢复逻辑挂载再挂舞台（ImagePreviewer overlay 先例）：内容视觉上迁入
         // overlay，但逻辑上保持对原卡片的挂载——页面级 Styles/Resources 与
         // DataContext 继承沿逻辑树解析，脱离页面树会导致 Grid 展示页等以
@@ -133,6 +134,7 @@ public sealed class ShowCaseZoomOverlayHost : UserControl
 
         _overlay.IsOpen           = false;
         _overlay.StageContent     = null;
+        _overlay.SourceItem       = null;
         _overlay.Title            = null;
         _overlay.Description      = null;
         _overlay.DataContext      = null;

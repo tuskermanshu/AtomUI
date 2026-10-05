@@ -3,6 +3,11 @@
 本文档记录 Segmented 控件级设计、API、主题契约、Token 和实现结构的变化。
 它不替代仓库根目录 CHANGELOG.md，也不作为正式版本发布说明。
 
+## 2026-10-03
+
+- Fixed
+  - 水平自然和 expanding 布局按最终交叉轴高度排列 item，保留自然宽度与 item 尺寸约束。
+
 ## 2026-09-17
 
 - Motion

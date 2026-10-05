@@ -213,6 +213,10 @@ public abstract class AbstractRate : TemplatedControl,
         {
             ConfigureToolTips();
         }
+        else if (change.Property == IsEffectivelyEnabledProperty && !IsEffectivelyEnabled)
+        {
+            CancelPointerInteraction();
+        }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -228,22 +232,28 @@ public abstract class AbstractRate : TemplatedControl,
         base.OnDetachedFromVisualTree(e);
         _pointerEventHandleDisposable?.Dispose();
         _pointerEventHandleDisposable = null;
+        CancelPointerInteraction();
     }
     
     private void HandleGlobalPointerEvent(RawInputEventArgs args)
     {
-        if (!IsEnabled)
+        if (!IsEffectivelyEnabled)
         {
             return;
         }
         if (args is RawPointerEventArgs pointerEventArgs)
         {
-            var pos      = this.TranslatePoint(new Point(0, 0), TopLevel.GetTopLevel(this)!) ?? default;
-            var bounds   =  new Rect(pos, DesiredSize);
-            var position = pointerEventArgs.Position;
+            // Raw 输入的位置属于事件自己的 root。转换到局部坐标会同时处理
+            // RenderTransform，并在跨视觉根时返回 null；Margin 不属于输入区域。
+            var root = pointerEventArgs.Root.FocusRoot.GetPresentationSource()?.RootVisual;
+            var position = root?.TranslatePoint(pointerEventArgs.Position, this);
+            var hit = position.HasValue && new Rect(Bounds.Size).Contains(position.Value)
+                ? (root as IInputElement)?.InputHitTest(pointerEventArgs.Position) as Visual
+                : null;
+            var isPointerInRate = hit is not null && (ReferenceEquals(hit, this) || this.IsVisualAncestorOf(hit));
             if (pointerEventArgs.Type == RawPointerEventType.Move)
             {
-                if (!bounds.Contains(position))
+                if (!isPointerInRate)
                 {
                     _isPointerInRate = false;
                     SetCurrentValue(EffectiveValueProperty, Value);
@@ -255,21 +265,24 @@ public abstract class AbstractRate : TemplatedControl,
             }
             else if (pointerEventArgs.Type == RawPointerEventType.LeftButtonDown)
             {
-                if (bounds.Contains(position))
-                {
-                    _pressedEffectiveValue = EffectiveValue;
-                }
+                _pressedEffectiveValue = isPointerInRate ? EffectiveValue : null;
             }
             else if (pointerEventArgs.Type == RawPointerEventType.LeftButtonUp)
             {
-                if (bounds.Contains(position))
+                // 每次释放都结束当前手势，区域外/跨窗口释放同样不能留下按下状态。
+                // 在 Value 回调前取出并清空，避免回调重入沿用已结束的手势。
+                var pressedValue = _pressedEffectiveValue;
+                _pressedEffectiveValue = null;
+                if (isPointerInRate)
                 {
-                    if (_pressedEffectiveValue != null && MathUtils.AreClose(Math.Round(_pressedEffectiveValue.Value, MidpointRounding.AwayFromZero), Math.Round(EffectiveValue, MidpointRounding.AwayFromZero)))
+                    if (pressedValue != null && MathUtils.AreClose(Math.Round(pressedValue.Value, MidpointRounding.AwayFromZero), Math.Round(EffectiveValue, MidpointRounding.AwayFromZero)))
                     {
                         if (IsAllowClear)
                         {
-                            var localPoint = TopLevel.GetTopLevel(this)?.TranslatePoint(position, this) ?? default;
-                            var value      = CalculateEffectiveValue(localPoint);
+                            var value = _itemsControl is not null &&
+                                        root?.TranslatePoint(pointerEventArgs.Position, _itemsControl) is { } localPoint
+                                ? CalculateEffectiveValue(localPoint)
+                                : null;
                             if (value != null)
                             {
                                 if ((IsAllowHalf && MathUtils.AreClose(Value, value.Value)) ||
@@ -290,15 +303,22 @@ public abstract class AbstractRate : TemplatedControl,
                         }
                         
                     }
-                    _pressedEffectiveValue = null;
                 }
             }
         }
     }
 
+    private void CancelPointerInteraction()
+    {
+        _pressedEffectiveValue = null;
+        _isPointerInRate = false;
+        SetCurrentValue(EffectiveValueProperty, Value);
+    }
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        CancelPointerInteraction();
         _itemsControl = e.NameScope.Find<ItemsControl>("PART_RateItems");
         HandleCountChanged();
         HandleEffectiveValueChanged();

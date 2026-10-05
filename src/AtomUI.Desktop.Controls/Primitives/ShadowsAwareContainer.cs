@@ -157,52 +157,21 @@ internal class ShadowsAwareContainer : Decorator
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        var size   = base.MeasureOverride(availableSize);
-        var width  = size.Width;
-        var height = size.Height;
-        if (HasBoxShadow)
-        {
-            var shadowThickness = BoxShadow.Thickness();
-            var effectiveShadowThickness = GetEffectiveShadowThickness(shadowThickness);
-
-            if (!IsOverlayMode)
-            {
-                width  += effectiveShadowThickness.Left + effectiveShadowThickness.Right;
-                height += effectiveShadowThickness.Top  + effectiveShadowThickness.Bottom;
-            }
-        }
-
-        return new Size(width, height);
+        var shadowThickness = !IsOverlayMode && HasBoxShadow
+            ? GetEffectiveShadowThickness(BoxShadow.Thickness())
+            : default;
+        var size = base.MeasureOverride(availableSize.Deflate(shadowThickness));
+        return size.Inflate(shadowThickness);
     }
 
     protected override Size ArrangeOverride(Size finalSize)
     {
-        var offsetX               = 0.0d;
-        var offsetY               = 0.0d;
         if (!IsOverlayMode)
         {
-            if (HasBoxShadow)
-            {
-                var shadowThickness = BoxShadow.Thickness();
-                offsetX = shadowThickness.Left;
-                offsetY = shadowThickness.Top;
-
-                if (IsArrowVisible)
-                {
-                    if (ArrowDirection == Direction.Left)
-                    {
-                        offsetX = Math.Max(offsetX - ArrowIndicatorLayoutBounds.Width, 0);
-                    }
-                    else if (ArrowDirection == Direction.Top)
-                    {
-                        offsetY = Math.Max(offsetY - ArrowIndicatorLayoutBounds.Height, 0);
-                    }
-                }
-            }
-            if (Child != null)
-            {
-                Child.Arrange(new Rect(offsetX, offsetY, Child.DesiredSize.Width, Child.DesiredSize.Height));
-            }
+            var shadowThickness = HasBoxShadow
+                ? GetEffectiveShadowThickness(BoxShadow.Thickness())
+                : default;
+            Child?.Arrange(new Rect(finalSize).Deflate(shadowThickness).Deflate(Padding));
         }
         else
         {
@@ -217,7 +186,7 @@ internal class ShadowsAwareContainer : Decorator
                 var effectiveDirection = ArrowDirection;
                 if (effectiveDirection == Direction.Top)
                 {
-                    shadowBounds = shadowBounds.WithY(ArrowIndicatorLayoutBounds.Height)
+                    shadowBounds = shadowBounds.WithY(shadowBounds.Y + ArrowIndicatorLayoutBounds.Height)
                                                .WithHeight(shadowBounds.Height - ArrowIndicatorLayoutBounds.Height);
                 }
                 else if (effectiveDirection == Direction.Bottom)
@@ -226,7 +195,7 @@ internal class ShadowsAwareContainer : Decorator
                 }
                 else if (effectiveDirection == Direction.Left)
                 {
-                    shadowBounds = shadowBounds.WithX(ArrowIndicatorLayoutBounds.Width)
+                    shadowBounds = shadowBounds.WithX(shadowBounds.X + ArrowIndicatorLayoutBounds.Width)
                                                .WithWidth(shadowBounds.Width - ArrowIndicatorLayoutBounds.Width);
                 }
                 else

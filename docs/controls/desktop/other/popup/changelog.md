@@ -2,6 +2,11 @@
 
 本文档记录 Popup 控件级 API、Theme、Token、实现结构和设计契约变化，不替代仓库根目录 `CHANGELOG.md`。
 
+## 2026-10-03
+
+- Fixed
+  - native Popup 使用统一阴影内槽测量/排列，尊重 Padding；上/左箭头 frame 保留 Child 原点偏移。
+
 ## 2026-09-28
 
 - native/overlay 翻转预测和 CSD 可见区域约束统一使用扣除 Child Margin 后的有效定位尺寸。

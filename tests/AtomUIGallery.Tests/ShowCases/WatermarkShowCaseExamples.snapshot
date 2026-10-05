@@ -1,20 +1,22 @@
-<gallery:ShowCaseItem Title="{gallery:WatermarkShowCaseLangResource BasicTitle}" Description="{gallery:WatermarkShowCaseLangResource BasicDescription}">
+<gallery:ShowCaseItem Title="{gallery:WatermarkShowCaseLangResource BasicTitle}" Description="{gallery:WatermarkShowCaseLangResource BasicDescription}"
+                          ZoomContentLayout="Stretch">
             <Border Height="300" HorizontalAlignment="Stretch" atom:Watermark.Glyph="{atom:TextGlyph 'AtomUI'}" />
         </gallery:ShowCaseItem>
 
         <gallery:ShowCaseItem Title="{gallery:WatermarkShowCaseLangResource MultiLineTitle}"
+                                  ZoomContentLayout="Stretch"
                                       Description="{gallery:WatermarkShowCaseLangResource MultiLineDescription}">
             <Border Height="200"
                     HorizontalAlignment="Stretch">
                 <atom:Watermark.Glyph>
                     <atom:TextGlyph Text="{gallery:WatermarkShowCaseLangResource P2WatermarkMultiLineText}"
-                                    FontSize="18"
                                     Foreground="Gray" />
                 </atom:Watermark.Glyph>
             </Border>
         </gallery:ShowCaseItem>
 
         <gallery:ShowCaseItem Title="{gallery:WatermarkShowCaseLangResource ImageWatermarkTitle}"
+                                  ZoomContentLayout="Stretch"
                                       Description="{gallery:WatermarkShowCaseLangResource ImageWatermarkDescription}">
             <Border Height="400">
                 <atom:Watermark.Glyph>

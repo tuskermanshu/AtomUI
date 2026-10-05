@@ -154,6 +154,8 @@ Skeleton 的交互事件应从输入源收敛到控件级语义事件：
 - `SkeletonParagraph` 作为唯一状态 owner，在创建运行时 `SkeletonLine` 与 Background 变化时直接同步行背景；
   不引入字符串绑定或额外订阅，行节点在 Paragraph 模板重建时随 Children 清理。
 - `SkeletonTheme` 覆盖主控件根 Background 的默认值为透明，避免根 surface 与子占位层重复绘制；显式 Background 仍由根 Border 投影。
+- `SkeletonLine` 按最终内容盒解析 `LineWidth`：像素值作为上限，百分比相对于最终宽度计算；内部占位层使用最终高度，
+  不计入外部 Margin。`LineWidth` 变化使测量失效，确保运行时修改能够更新布局。
 
 Active shimmer 使用单个无限 Avalonia `Animation` 驱动。该动画必须显式采用 `PlaybackBehavior.OnlyIfVisible`，使 Skeleton 自身或任一 Visual 祖先不可见时暂停时钟；重新可见后由 Avalonia 恢复当前动画，不为每次可见性变化重建动画对象。
 

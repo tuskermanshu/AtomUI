@@ -74,6 +74,28 @@ ShowCase Page
 
 `IconShowCase`、`PaletteShowCase` 这类示例本身需要分组的特殊页面可以继续使用 `TabStrip + ContentControl`。这些 Tab 表示示例分组，例如 `Outlined/Filled/TwoTone` 或 `Light/Dark`，不是标准页面的 API/Design Token 导航。
 
+## 放大布局策略
+
+`ShowCaseItem.ZoomContentLayout` 使用 `ShowCaseZoomContentLayout`，默认值为 `Natural`，保留自然尺寸居中的展示行为。
+
+- `Natural`：以舞台宽度和无界高度测量，按不超过舞台的期望尺寸分配居中的排列槽。按测量约束铺满宽度的内容仍重新布局铺满。
+- `Stretch`：使用舞台的可用宽高测量，并提供完整舞台排列槽。内容自身的 Width/Height、Min/Max、Margin 和对齐继续生效；不修改尺寸属性或添加 RenderTransform 缩放。
+
+需要有效展示面积的空画布、水印区域或受限滚动内容，应在示例卡片声明策略，而不是根据控件类型、对齐属性赋值来源或旧卡片宽度推断：
+
+```xml
+<gallery:ShowCaseItem ZoomContentLayout="Stretch" IsDeferredContentEnabled="True">
+    <gallery:ShowCaseItem.DeferredContentTemplate>
+        <DataTemplate x:DataType="x:Object">
+            <Border Height="300" HorizontalAlignment="Stretch" />
+        </DataTemplate>
+    </gallery:ShowCaseItem.DeferredContentTemplate>
+</gallery:ShowCaseItem>
+```
+
+放大期间修改策略会重新测量和排列同一内容实例。舞台通过编译型 AXAML 绑定读取源卡片策略，关闭后清除源引用并归还内容。
+重新应用 Overlay 模板时，必须先清除旧舞台的视觉子级，再将同一内容实例交给新舞台；内容的逻辑挂载仍遵循源卡片的资源作用域。
+
 ## Semantic Parts Tab 范式
 
 Semantic Part 接入页面迁移到 GalleryBase 统一提供的 `GalleryShowCaseHost`，由页面提供原 Examples 内容和

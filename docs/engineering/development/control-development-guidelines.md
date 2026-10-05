@@ -191,6 +191,15 @@ Theme 中增加 `Custom` selector。
 - 生产 AXAML 应由主题边界回归测试扫描：默认 ControlTheme 的嵌套 Style 遵守 Avalonia 12 单 template selector 限制；应用侧
   Semantic Style 的多段 `/template/` 仅在与 descriptor `SelectorRoute` 完全一致时允许。
 
+## 布局、绘制与输入几何
+
+- `DesiredSize` 是测量请求，包含外部 Margin；它用于自然尺寸、堆叠步进和 Dock 分配，不代表最终绘制或输入区域。
+- 父布局分配排列槽，子控件的 `Arrange` 应用 Width/Height、Min/Max、Margin 和对齐；Stretch 的有效槽不能被期望尺寸意外压成零。
+- `ArrangeOverride` 的 `finalSize` 与控件最终 `Bounds.Size` 是内容盒，不包含外部 Margin。绘制、背景、裁剪与命中使用实际内容盒。
+- 子控件只有一个排列 owner。Canvas、专用面板和外层控件不能各自重复排列同一节点；父级依赖的子项几何必须有明确失效路径，不能只依赖聚合期望尺寸恰好变化。
+- Raw pointer 坐标属于事件自己的 input root。跨根、变换和裁剪通过坐标转换及实际输入命中确认；仅平移原点后拼接未变换尺寸不能代替命中区域。
+- 无界测量必须返回有限的期望尺寸；阴影、Padding 等占用的空间在测量与排列阶段使用同一份分配规则。
+
 ## 持续视觉工作生命周期
 
 无限动画、Compositor 循环动画、自动播放定时器、倒计时刷新和其他周期性视觉工作必须以控件的有效可见性为运行边界。有效可见性同时包含控件自身和当前 Visual 祖先链；只检查实例 `IsVisible` 不能覆盖隐藏页面、隐藏容器或切页后仍保留在 VisualTree 中的场景。

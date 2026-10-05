@@ -334,6 +334,12 @@ public class ScopeAwareAdornerLayer : Canvas
             Detach(visual, oldAdorner);
         }
 
+        // Detach 可同步触发用户更换 adorner；只让当前属性指向的实例进入层。
+        if (!ReferenceEquals(GetAdorner(visual), newAdorner))
+        {
+            return;
+        }
+
         if (newAdorner is { })
         {
             visual.AttachedToVisualTree   += VisualOnAttachedToVisualTree;
@@ -345,15 +351,17 @@ public class ScopeAwareAdornerLayer : Canvas
     private static void Attach(Visual visual, Control adorner)
     {
         var layer = ScopeAwareAdornerLayer.GetLayer(visual);
-        AddVisualAdorner(visual, adorner, layer);
+        // 加入视觉树会同步触发资源绑定与用户回调；回调可能立即移除 adorner。
+        // 必须先记录退出所需的层，避免重入 Detach 找不到尚未写入的宿主。
         visual.SetValue(SavedAdornerLayerProperty, layer);
+        AddVisualAdorner(visual, adorner, layer);
     }
 
     private static void Detach(Visual visual, Control adorner)
     {
         var layer = visual.GetValue(SavedAdornerLayerProperty);
-        RemoveVisualAdorner(visual, adorner, layer);
         visual.ClearValue(SavedAdornerLayerProperty);
+        RemoveVisualAdorner(visual, adorner, layer);
     }
 
     private static void AddVisualAdorner(Visual visual, Control? adorner, ScopeAwareAdornerLayer? layer)
@@ -366,6 +374,11 @@ public class ScopeAwareAdornerLayer : Canvas
         SetAdornedElement(adorner, visual);
 
         adorner.SetLogicalParent(visual);
+        if (!ReferenceEquals(GetAdorner(visual), adorner))
+        {
+            adorner.SetLogicalParent(null);
+            return;
+        }
         layer.Children.Add(adorner);
     }
 

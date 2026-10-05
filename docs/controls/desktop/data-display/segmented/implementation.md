@@ -237,6 +237,10 @@ item 的 hover/pressed 背景遮罩，对齐上游 `thumb ~ item::after` 透明�
 
 水平自然布局沿 X 轴累加 item 的 `DesiredSize.Width`，期望高度取可见 item 最大高度；排列时保持每个 item 的自然宽度。
 
+水平自然和 expanding 布局的交叉轴排列槽使用 Panel 的最终高度，且不小于 item 的期望高度；item 自身的显式高度、
+Margin 和垂直对齐继续由 Avalonia 应用，允许自定义高度的 item 填满最终轨道。
+owner 的轨道背景使用最终 Bounds 绘制，测量宽度与排列宽度不同时仍覆盖实际轨道区域。
+
 垂直自然布局沿 Y 轴累加 item 的 `DesiredSize.Height`，期望宽度取可见 item 最大宽度；排列时每个 item 使用 Panel 的最终宽度和自身自然高度，从而保证纵向轨道内 item 与滑块全宽一致。
 
 ### 7.5 Expanding 布局

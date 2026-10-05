@@ -182,8 +182,8 @@ internal class ColorBlock : TemplatedControl, ICustomizableSizeTypeAware
             {
                 EdgeMode = EdgeMode.Antialias
             });
-            var startPoint = new Point(2, DesiredSize.Height - 2);
-            var endPoint = new Point(DesiredSize.Width - 2, 2);
+            var startPoint = new Point(2, Bounds.Height - 2);
+            var endPoint = new Point(Bounds.Width - 2, 2);
             context.DrawLine(EmptyColorPen, startPoint, endPoint);
         }
     }

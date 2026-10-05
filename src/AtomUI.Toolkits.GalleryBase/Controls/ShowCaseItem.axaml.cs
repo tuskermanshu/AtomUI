@@ -14,6 +14,14 @@ public enum ShowCaseItemSpan
     Full
 }
 
+public enum ShowCaseZoomContentLayout
+{
+    /// <summary>按舞台宽度测量后，以期望尺寸居中展示。</summary>
+    Natural,
+    /// <summary>提供完整舞台排列槽，保留内容自身的尺寸与对齐约束。</summary>
+    Stretch
+}
+
 public class ShowCaseItem : ContentControl
 {
     private const string ShowSourceButtonPart = "PART_ShowSourceButton";
@@ -34,6 +42,9 @@ public class ShowCaseItem : ContentControl
 
     public static readonly StyledProperty<bool> IsZoomEnabledProperty =
         AvaloniaProperty.Register<ShowCaseItem, bool>(nameof(IsZoomEnabled), true);
+
+    public static readonly StyledProperty<ShowCaseZoomContentLayout> ZoomContentLayoutProperty =
+        AvaloniaProperty.Register<ShowCaseItem, ShowCaseZoomContentLayout>(nameof(ZoomContentLayout));
 
     public static readonly StyledProperty<string> DescriptionProperty =
         AvaloniaProperty.Register<ShowCaseItem, string>(nameof(Description));
@@ -124,6 +135,12 @@ public class ShowCaseItem : ContentControl
     {
         get => GetValue(IsZoomEnabledProperty);
         set => SetValue(IsZoomEnabledProperty, value);
+    }
+
+    public ShowCaseZoomContentLayout ZoomContentLayout
+    {
+        get => GetValue(ZoomContentLayoutProperty);
+        set => SetValue(ZoomContentLayoutProperty, value);
     }
 
     public ShowCaseItemSpan Span

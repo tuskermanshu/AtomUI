@@ -12,6 +12,7 @@ ToggleSwitch 的 public 桌面类型位于 `AtomUI.Desktop.Controls`，实际交
 
 - `src/AtomUI.Desktop.Controls/Switch/ToggleSwitch.cs`：public 桌面控件，注册 `ToggleSwitchToken` resource scope。
 - `src/AtomUI.Controls/Switch/AbstractToggleSwitch.cs`：公共 API、测量、布局、内容绑定、loading、hit test、Form 和渲染主逻辑。
+- `src/AtomUI.Controls/Switch/ToggleSwitchContentPanel.cs`：跟踪内容期望尺寸的内部 Canvas，独立拥有两个内容 presenter 的排列。
 - `src/AtomUI.Controls/Switch/SwitchKnob.cs`：把手绘制、加载指示绘制、把手宽度动画和加载动画生命周期。
 - `src/AtomUI.Desktop.Controls/Switch/ToggleSwitchToken.cs`：ToggleSwitch 控件级 Token。
 - `src/AtomUI.Desktop.Controls/Switch/Themes/ToggleSwitchTheme.axaml`：主模板、状态 selector、SizeType 分支和 Token 引用。
@@ -38,11 +39,13 @@ MeasureOverride
       ↓
 Track size + content desired size
       ↓
+ArrangeOverride 的最终内容盒（已应用 Width/Height、Min/Max，不含 Margin）
+      ↓
 CalculateElementsOffset
       ↓
 KnobRect + KnobMovingRect + OnContentOffset + OffContentOffset
       ↓
-ArrangeOverride + Render
+ToggleSwitchContentPanel 排列内容 + Render 绘制最终轨道
 ```
 
 checked 变化时，如果启用 motion，控件先基于当前 groove size 重新计算元素位置，再由 `RectTransition` 和 `PointTransition` 执行动画。`_isCheckedChanged` 用于让 arrange 阶段在 checked 切换后使用 `KnobMovingRect`，保持过渡位置一致。
@@ -123,7 +126,9 @@ loading 状态下 pointer press/release 不进入基类逻辑，因此不会切�
 
 测量阶段分别测量 on/off content presenter，取二者最大宽度作为内容宽度；有内容时再叠加 `InnerMinMargin` 和
 `InnerMaxMargin`，无内容时宽度收敛到 `TrackMinWidth`（与 antd 的 min-width 语义一致）。显式 `Width` 优先于内容
-测量宽度（且不小于 `TrackMinWidth`），内部把手与内容几何随之按显式宽度计算。高度使用 `TrackHeight`。
+测量宽度（且不小于 `TrackMinWidth`）。期望高度使用 `TrackHeight`；把手、内容位置、绘制和命中区域统一使用最终排列内容盒。
+内部内容画布汇报两个 presenter 的最大期望尺寸，使内容高度变化能够沿模板树触发 owner 重新测量。
+owner 的偏移还依赖每个 presenter 的尺寸；画布测量完成时标记 owner 的排列失效，防止把手尺寸掩盖较小内容的尺寸变化。
 
 `TrackHeight`、`TrackMinWidth`、`TrackPadding`、`KnobSize` 是 owner 级公开 StyledProperty（对应 antd Switch
 `ComponentToken` 的 `trackHeight` / `trackMinWidth` / `trackPadding` / `handleSize`），默认值由 SizeType 主题分支从
@@ -136,7 +141,10 @@ loading 状态下 pointer press/release 不进入基类逻辑，因此不会切�
 
 ### 7.3 内容偏移
 
-`ExtraInfoRect` 根据当前状态和内部边距计算内容区域。checked 时 on content 进入可见区域，off content 移到右侧不可见区域；unchecked 时反向处理。内容偏移使用 `PointTransition` 过渡。
+`ExtraInfoRect` 根据当前状态和内部边距计算内容区域，各 presenter 使用自己的期望高度计算垂直居中位置。
+checked 时 on content 进入可见区域，off content 移到右侧不可见区域；unchecked 时反向处理。pressed 内容位移从当前
+把手几何推导，不累计旧偏移。内容偏移使用 `PointTransition` 过渡，并通过 AXAML TemplateBinding 传给内部内容画布；
+画布是 presenter 的唯一排列 owner，负责普通布局和每一帧偏移动画。既有自定义模板仍可使用标准 Canvas，owner 保留原有定位兼容路径；默认模板通过专用画布处理内容尺寸失效与动画排列。
 
 ### 7.4 轨道绘制
 

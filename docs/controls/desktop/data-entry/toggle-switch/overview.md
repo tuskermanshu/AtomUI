@@ -52,7 +52,7 @@ ToggleSwitch 的公共契约由 Avalonia `ToggleButton` 状态和 AtomUI 扩展�
 | Template Part | 类型 | 职责 |
 | --- | --- | --- |
 | `PART_WaveSpirit` | `WaveSpiritDecorator` | checked 变化时播放胶囊波纹。 |
-| `PART_MainContainer` | `Canvas` | 承载内容 presenter 和把手，并提供裁剪边界。 |
+| `PART_MainContainer` | `Canvas` 的内部派生类型 | 承载内容 presenter，传播内容尺寸变化并提供裁剪边界；把手位于画布之外。 |
 | `PART_OnContentPresenter` | `ContentPresenter` | checked 状态下内容承载。 |
 | `PART_OffContentPresenter` | `ContentPresenter` | unchecked 状态下内容承载。 |
 | `PART_SwitchKnob` | `SwitchKnob` | 把手、加载指示和把手动画承载。 |

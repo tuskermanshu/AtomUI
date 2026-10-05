@@ -29,6 +29,15 @@ public class ShowCaseZoomOverlay : TemplatedControl
     public static readonly StyledProperty<bool> IsMotionEnabledProperty =
         MotionAwareControlProperty.IsMotionEnabledProperty.AddOwner<ShowCaseZoomOverlay>();
 
+    internal static readonly StyledProperty<ShowCaseItem?> SourceItemProperty =
+        AvaloniaProperty.Register<ShowCaseZoomOverlay, ShowCaseItem?>(nameof(SourceItem));
+
+    internal ShowCaseItem? SourceItem
+    {
+        get => GetValue(SourceItemProperty);
+        set => SetValue(SourceItemProperty, value);
+    }
+
     public event EventHandler? CloseRequested;
 
     private IconButton? _closeButton;
@@ -82,6 +91,9 @@ public class ShowCaseZoomOverlay : TemplatedControl
         {
             _closeButton.Click -= HandleCloseButtonClick;
         }
+
+        // 原舞台仍持有内容的视觉父级，重新应用模板前释放，供新舞台接管。
+        _stagePanel?.Children.Clear();
 
         _closeButton = e.NameScope.Find<IconButton>(CloseButtonPart);
         _stagePanel  = e.NameScope.Find<ShowCaseZoomStagePanel>(StagePanelPart);

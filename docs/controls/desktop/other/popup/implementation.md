@@ -85,8 +85,10 @@ fill 固定为 `SurfaceBackground ?? Brushes.Transparent`。shadow 为空且 sur
 
 ### 5.2 layout 与 placement
 
-native host 的 measure 根据 box-shadow thickness 扩展尺寸，arrange 将 Child 偏移到 shadow buffer 内；arrow 可见时按方向
-扣除 indicator 已占用的 thickness。overlay host 使用 `IsOverlayMode=true`，不把 native shadow buffer 加入 layout。
+native host 使用同一份有效 box-shadow thickness 分配 measure/arrange 空间：测量先扣除 shadow buffer，再叠加 Child
+期望尺寸；排列将 Child 放入扣除 shadow buffer 和 Decorator Padding 的最终内容槽。arrow 可见时按方向扣除 indicator
+已占用的 thickness；frame body 从 Child 的实际原点继续扣除箭头区域，保留 shadow、Margin 和 Padding 的偏移。
+overlay host 使用 `IsOverlayMode=true`，不把 native shadow buffer 加入 layout。
 
 Popup 将普通 Avalonia placement 转换为 custom placement，并统一计算 anchor、gravity、offset、shadow thickness、arrow
 center 修正和 flip。center 使用 owning `TopLevel.ClientSize`；pointer 使用 owning TopLevel 的 client 坐标。surface 不进入
