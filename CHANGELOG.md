@@ -4,6 +4,31 @@ All notable changes to AtomUI are documented in this file.
 
 `AtomUI` follows Semantic Versioning 2.0.0.
 
+## 6.2.3
+
+`2026-10-05`
+
+- Breaking Changes
+  - Calendar: replace `CalendarCellType` with `DateViewerCellType` and make `CalendarCellContext` inherit `DateViewerCellContext`; rebuild custom cell contexts and templates. See the [6.2.3 API migration guide](docs/releases/6.2.3-api-changes.md).
+  - DatePicker: remove the public legacy `CalendarView` types, move and seal `DateSelectedEventArgs`, and seal `ChoosingStatusEventArgs`; migrate to the shared viewer contracts described in the guide.
+  - Theme and Tokens: replace legacy date-panel templates and Semantic Part targets, remove obsolete DatePicker token keys, rename `RangeCalendarSpacing` to `RangePanelSpacing`, and change generated Calendar/DatePicker token enum values. Rebuild custom themes and use named token members; see the migration guide.
+  - Registration: version-specific generated `ControlPackageGroup_*` identities change in six control packages; rebuild generated-registration consumers and republish trimmed/NativeAOT applications. See the migration guide.
+- DateViewer, Calendar and DatePicker
+  - Add standalone DateViewer and RangeDateViewer with Date, Week, Month, Quarter and Year selection, Compact/Content presentation, typed templates, atomic ranges and Semantic Part styles.
+  - Share date panels across Calendar, LunarCalendar and DatePicker, preserving Calendar business headers, lunar content and range bars.
+  - Improve date-panel geometry, Today/focus visuals, week formatting and language switching; align range highlights and endpoint corners.
+  - Fix RangeDatePicker endpoint rotation, popup anchoring, reverse hover previews and partial confirmation across close/reopen; keep reusable confirm and time controls interactive.
+- Input and Window Lifecycle
+  - Prevent cross-window pointer input from changing Rate, Slider, TimePicker, ButtonSpinner, ToolTip and TreeView drag state; release transient state safely on disable, detach and window close.
+  - Remove inherited dividers from CandidateList, Select and Cascader dropdown items.
+- Watermark and Layout
+  - Fix localized Watermark glyph resources, owner attachment and theme/language updates; skip invalid or fully clipped tiles without changing rotation, stagger or mirror phases.
+  - Correct final-bounds geometry for Rate, ToggleSwitch, Segmented, Skeleton, ColorBlock and popup shadow/arrow layouts, including margins and scaling.
+- Gallery and Generator
+  - Add localized DateViewer examples and Semantic Part previews.
+  - Fix deferred ShowCase materialization and placeholder visuals; improve zoomed content bounds, overlays and hit testing while preserving scrolling.
+  - Cache generated registration descriptors to reduce startup work without changing registration contracts.
+
 ## 6.2.2
 
 `2026-09-30`

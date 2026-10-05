@@ -6,6 +6,31 @@ AtomUI 的重要变更记录在此文件中。
 
 英文版本见 [CHANGELOG.md](CHANGELOG.md)。
 
+## 6.2.3
+
+`2026-10-05`
+
+- Breaking Changes
+  - Calendar：将 `CalendarCellType` 替换为 `DateViewerCellType`，`CalendarCellContext` 改为继承 `DateViewerCellContext`；自定义单元格上下文和模板需要重新编译。详见 [6.2.3 API 迁移指南](docs/releases/6.2.3-api-changes.zh-CN.md)。
+  - DatePicker：移除旧 `CalendarView` 公共类型，迁移并密封 `DateSelectedEventArgs`，密封 `ChoosingStatusEventArgs`；请按迁移指南使用共享面板契约。
+  - Theme 与 Token：替换旧日期面板模板和 Semantic Part 目标，移除过时的 DatePicker Token 键，将 `RangeCalendarSpacing` 更名为 `RangePanelSpacing`，并调整生成的 Calendar/DatePicker Token 枚举值。请重新编译自定义主题并使用具名 Token 成员，详见迁移指南。
+  - Registration：六个控件包中版本相关的生成 `ControlPackageGroup_*` 标识变化；请重新编译生成注册消费方并重新发布 trimming/NativeAOT 应用，详见迁移指南。
+- DateViewer、Calendar 与 DatePicker
+  - 新增独立 DateViewer 和 RangeDateViewer，支持日期、周、月、季度、年选择，Compact/Content 展示、强类型模板、原子范围和 Semantic Part 专用样式。
+  - Calendar、LunarCalendar 与 DatePicker 共享日期面板，保留 Calendar 业务 Header、农历内容和范围条。
+  - 改进日期面板几何、Today/焦点视觉、周格式与语言切换，统一范围高亮和端点圆角。
+  - 修复 RangeDatePicker 端点轮换、弹层锚点、反向 Hover 预览和关闭/重开后的部分确认；保持复用的确认按钮和时间控件可交互。
+- 输入与窗口生命周期
+  - 防止跨窗口指针输入改变 Rate、Slider、TimePicker、ButtonSpinner、ToolTip 和 TreeView 拖拽状态；禁用、卸载和窗口关闭时安全释放临时状态。
+  - 移除 CandidateList、Select 和 Cascader 下拉项继承的分隔线。
+- Watermark 与布局
+  - 修复 Watermark 本地化 Glyph 资源、owner 挂载及主题/语言更新；跳过无效和完全裁剪的平铺项，同时保持旋转、交错和镜像相位。
+  - 修正 Rate、ToggleSwitch、Segmented、Skeleton、ColorBlock 和 Popup 阴影/箭头布局的最终 Bounds 几何，覆盖 Margin 和缩放。
+- Gallery 与 Generator
+  - 新增本地化 DateViewer 示例和 Semantic Part 预览。
+  - 修复 ShowCase 延迟物化和占位视觉，改进放大内容边界、覆盖层与命中，同时保留滚动行为。
+  - 缓存生成的注册描述符，减少启动工作并保持注册契约。
+
 ## 6.2.2
 
 `2026-09-30`
