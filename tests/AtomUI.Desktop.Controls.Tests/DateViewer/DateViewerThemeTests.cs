@@ -9,6 +9,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avalonia.Media;
 using AtomUI.Desktop.Controls.Internal.DateViewer;
+using AtomUI.Theme.Resources;
 using Shouldly;
 using Xunit;
 
@@ -31,6 +32,84 @@ public class DateViewerThemeTests
         viewer.Styles.Add(owner);
         var window = Show(viewer);
         try { viewer.GetVisualDescendants().OfType<DateViewerCell>().ShouldAllBe(cell => Equals(cell.Tag, "dedicated-style-hit")); }
+        finally { window.Close(); Dispatcher.UIThread.RunJobs(); }
+    }
+
+    [Fact]
+    public void Content_Today_Keeps_Its_Surface_When_Disabled_And_Reenabled()
+    {
+        var today = DateTime.Today;
+        var viewer = new DateViewer
+        {
+            Width = 560,
+            DisplayDate = today,
+            Presentation = DateViewerPresentation.Content,
+            MinDate = today.AddDays(1),
+            DisabledDate = date => date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday,
+            CellTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<DateViewerCellContext>(
+                (_, _) => new TextBlock { Text = "Available" })
+        };
+        var window = new Avalonia.Controls.Window { Width = 700, Height = 800, Content = viewer };
+        try
+        {
+            window.Show();
+            Dispatcher.UIThread.RunJobs();
+            DateViewerCell TodayCell() => viewer.GetVisualDescendants().OfType<DateViewerCell>()
+                .Single(cell => cell.Model?.Value == today && cell.Model.IsInView);
+            Border Surface(DateViewerCell cell) => cell.GetVisualDescendants().OfType<Border>()
+                .Single(border => border.Name == "PART_CellSurface");
+            Border ValueFrame(DateViewerCell cell) => cell.GetVisualDescendants().OfType<Border>()
+                .Single(border => border.Name == "PART_ValueFrame");
+            TextBlock ValueText(DateViewerCell cell) => cell.GetVisualDescendants().OfType<TextBlock>()
+                .Single(text => text.Name == "PART_Value");
+            Color? BrushColor(IBrush? brush) => (brush as ISolidColorBrush)?.Color;
+
+            var disabledToday = TodayCell();
+            disabledToday.Model!.IsDisabled.ShouldBeTrue();
+            var otherDisabled = viewer.GetVisualDescendants().OfType<DateViewerCell>()
+                .First(cell => cell.Model is { IsDisabled: true, IsToday: false, IsInView: true });
+            var disabledLineColor = BrushColor(Surface(otherDisabled).BorderBrush);
+            var todayLineColor = BrushColor(Surface(disabledToday).BorderBrush);
+            todayLineColor.ShouldNotBeNull();
+            todayLineColor.ShouldNotBe(disabledLineColor);
+            var todayBackground = BrushColor(Surface(disabledToday).Background);
+            todayBackground.ShouldNotBeNull();
+            todayBackground.ShouldNotBe(BrushColor(Surface(otherDisabled).Background));
+            BrushColor(ValueText(disabledToday).Foreground).ShouldBe(todayLineColor);
+            Surface(disabledToday).BorderThickness.ShouldBe(new Thickness(0, 2, 0, 0));
+            ValueFrame(disabledToday).BorderThickness.ShouldBe(new Thickness(0));
+            BrushColor(ValueFrame(disabledToday).BorderBrush).ShouldBe(Colors.Transparent);
+            disabledToday.Activate();
+            viewer.Value.ShouldBeNull();
+
+            viewer.MinDate = null;
+            viewer.DisabledDate = null;
+            Dispatcher.UIThread.RunJobs();
+            var enabledToday = TodayCell();
+            enabledToday.Model!.IsDisabled.ShouldBeFalse();
+            BrushColor(Surface(enabledToday).BorderBrush).ShouldBe(todayLineColor);
+            BrushColor(Surface(enabledToday).Background).ShouldBe(todayBackground);
+            BrushColor(ValueText(enabledToday).Foreground).ShouldBe(todayLineColor);
+            BrushColor(ValueFrame(enabledToday).BorderBrush).ShouldBe(Colors.Transparent);
+
+            Application.Current!.TryGetResource(SharedTokenKind.MotionDurationSlow,
+                Application.Current.ActualThemeVariant, out var slowDuration).ShouldBeTrue();
+            var selectable = viewer.GetVisualDescendants().OfType<DateViewerCell>()
+                .First(cell => cell.Model is { IsDisabled: false, IsToday: false, IsInView: true, IsSelected: false });
+            BrushColor(Surface(selectable).Background).ShouldBe(Colors.Transparent);
+            Surface(selectable).Transitions.ShouldNotBeNull()
+                .OfType<AtomUI.Animations.SolidColorBrushTransition>()
+                .Single(transition => transition.Property == Border.BackgroundProperty)
+                .Duration.ShouldBe((TimeSpan)slowDuration!);
+            ValueText(selectable).Transitions.ShouldNotBeNull()
+                .OfType<AtomUI.Animations.SolidColorBrushTransition>()
+                .Single(transition => transition.Property == TextBlock.ForegroundProperty)
+                .Duration.ShouldBe((TimeSpan)slowDuration!);
+            selectable.IsMotionEnabled = false;
+            Dispatcher.UIThread.RunJobs();
+            Surface(selectable).Transitions.ShouldBeNull();
+            ValueText(selectable).Transitions.ShouldBeNull();
+        }
         finally { window.Close(); Dispatcher.UIThread.RunJobs(); }
     }
 

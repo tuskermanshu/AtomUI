@@ -185,6 +185,10 @@ public partial class Calendar : TemplatedControl
         AvaloniaProperty.RegisterDirect<Calendar, DateViewerPresentation>(nameof(DatePresentation), calendar => calendar.DatePresentation);
     internal DateViewerPresentation DatePresentation => Fullscreen ? DateViewerPresentation.Content : DateViewerPresentation.Compact;
 
+    internal static readonly DirectProperty<Calendar, DateViewer?> EffectiveDateViewerProperty =
+        AvaloniaProperty.RegisterDirect<Calendar, DateViewer?>(nameof(EffectiveDateViewer), calendar => calendar.EffectiveDateViewer);
+    internal DateViewer? EffectiveDateViewer => _dateViewer;
+
     internal static readonly StyledProperty<double> EffectiveMiniContentHeightProperty =
         AvaloniaProperty.Register<Calendar, double>(nameof(EffectiveMiniContentHeight), double.NaN);
 
@@ -246,7 +250,7 @@ public partial class Calendar : TemplatedControl
         _dateViewer?.SetContentFactory(null);
         _dateViewer?.SetAutomationNameFactory(null);
         _dateViewer?.SetHost(null);
-        _dateViewer = e.NameScope.Find<DateViewer>(DateViewerPart);
+        SetAndRaise(EffectiveDateViewerProperty, ref _dateViewer, e.NameScope.Find<DateViewer>(DateViewerPart));
         _dateViewer?.SetHost(this);
         _dateViewer?.SetContentFactory(CreateDateCellContext);
         _dateViewer?.SetAutomationNameFactory(CreateDateAutomationName);

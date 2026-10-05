@@ -17,14 +17,13 @@ public class DateViewerViewModel : ReactiveObject, IRoutableViewModel
     public Func<DateTime, bool> DisableWeekends { get; } =
         value => value.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
 
-    private DateTime? _value = new DateTime(2026, 10, 15);
+    private DateTime? _value;
     public DateTime? Value
     {
         get => _value;
         set
         {
             this.RaiseAndSetIfChanged(ref _value, value);
-            this.RaisePropertyChanged(nameof(ValueText));
         }
     }
 
@@ -60,7 +59,6 @@ public class DateViewerViewModel : ReactiveObject, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _browseDate, value);
     }
 
-    public string ValueText => Format(Value);
     public string RangeValueText => $"{Format(RangeValue?.Start)} → {Format(RangeValue?.End)}";
     private static string Format(DateTime? value) =>
         value?.ToString("yyyy-MM-dd", GalleryLocalization.GetFormattingCulture()) ?? "—";

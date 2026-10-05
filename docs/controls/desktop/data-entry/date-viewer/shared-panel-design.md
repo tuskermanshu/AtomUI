@@ -125,7 +125,7 @@ DatePicker 的绑定通知、Form 通知、部分确认与最终确认时机以�
 
 | 宿主/模式 | 日期正文 | 附属能力 |
 | --- | --- | --- |
-| 独立 DateViewer | 单面板，Compact 默认 | 浏览 Header、单值选择。 |
+| 独立 DateViewer | 单面板，Compact 默认 | 浏览 Header、单值选择；Date 单位含 Today 页脚。 |
 | 独立 RangeDateViewer | 双周期面板，Compact 默认 | 同一范围会话、端点与连续预览。 |
 | Calendar Month | DateViewer 日期面板 | Calendar Header、业务内容；Fullscreen 可显示 RangeBars。 |
 | Calendar Year | DateViewer 月份面板 | Calendar Header；月份激活保留并截断宿主日号。 |
@@ -184,6 +184,7 @@ CellTemplate 保留默认值，FullCellTemplate 优先替换内部内容。周�
 从 Button 重建为 TemplatedControl 必须明确按下、释放、捕获取消、移出、拖动、禁用切换及嵌套内容的激活规则，
 保证一次操作只提交一次；Pointer、Enter/Space 和 Automation 通过同一有效性检查。
 日期容器按模型运行时生成；Header、Footer、布局结构、Transitions 和固定属性关系仍声明在 AXAML。
+独立 DateViewer 的 Today 页脚在托管时隐藏；Picker 继续拥有弹层 Footer，Calendar 不出现日期面板页脚。
 
 ### 6.2 Theme 与 Token
 
@@ -237,14 +238,15 @@ Picker、Calendar 以及 DateViewer 分别拥有自己的 Semantic owner。组�
 | Today/Now | 接收相应日期状态 | 保持原按钮可用性、时间来源及确认规则。 |
 | 部分确认 | 接收活动端点变化 | 按原时机写回刚确认端点、自动切换到另一端，不伪装成最终确认。 |
 | 最终确认 | 保持选择投影 | 按原顺序校验、交换需要交换的端点、写回与关闭。 |
-| 普通关闭/Escape/light-dismiss | 清理交互状态 | 分别采用原路径；不能统一套用事务回滚。 |
+| 普通关闭/Escape/light-dismiss | 清理交互状态 | 丢弃未确认候选与 Hover 文本，保留已确认端点；关闭后的输入文本只投影提交值。 |
 
 范围活动端点的显示定位使用该端点与当前面板周期，不允许开始值同步将结束面板拉回开始区域。
 RangeDatePicker 每次打开都重建本次端点确认进度：空范围从 start 到 end；单端点范围把已有端点作为固定端；
 完整范围保留提交值作为初始显示，但本次编辑仍要求从当前活动端开始重新确认两个端点。
+活动端或约束变化不把 Presenter 候选端点提升为提交值；只有外部端点更新及有效确认改变提交值。
 完整范围使用 start 所在周期作为双面板左锚点；active end 只表达当前编辑端点，不能通过倒推一个周期改变左面板月份。
 设置当前端点后，活动端、输入焦点、Popup 箭头和 DatePanel active part 必须同步翻转到另一端。
-端点翻转不得清理对向端点的值或本端刚确认值；清理行为只允许发生在显式 Clear、表单清空或既有关闭路径要求的未完整范围回滚中。
+端点翻转和弹层关闭不得清理对向端点的值或本端刚确认值；显式 Clear、表单清空才清除提交值。单端范围重开默认定位到缺失端，用户明确点击某端时以点击端为准。
 范围日期时间的有效确认行为与用户原始 IsNeedConfirm 请求分开表示，不需要覆盖 public 属性再保存 backup 来表示内部派生状态；
 对外可观察结果仍须与原行为逐步比较，属性通知的差异不能被会话封装隐藏。
 

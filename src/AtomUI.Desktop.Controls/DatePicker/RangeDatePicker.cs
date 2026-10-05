@@ -1,4 +1,5 @@
-﻿using AtomUI.Desktop.Controls.Primitives;
+﻿using AtomUI.Desktop.Controls.Internal.DateViewer;
+using AtomUI.Desktop.Controls.Primitives;
 using AtomUI.Icons.AntDesign;
 using AtomUI.Localization;
 using AtomUI.Utils;
@@ -290,6 +291,11 @@ public partial class RangeDatePicker : RangeInfoPickerInput
         base.NotifyPickerOpened();
         if (_pickerPresenter is not null)
         {
+            if (RangeActivatedPart == RangeActivatedPart.None)
+                RangeActivatedPart = RangeStartSelectedDate is null
+                    ? RangeActivatedPart.Start
+                    : RangeEndSelectedDate is null ? RangeActivatedPart.End : RangeActivatedPart.Start;
+
             _pickerPresenter.ChoosingStatusChanged += HandleChoosingStatusChanged;
             _pickerPresenter.HoverDateTimeChanged  += HandleHoverDateTimeChanged;
             _pickerPresenter.Confirmed             += HandleConfirmed;
@@ -320,13 +326,13 @@ public partial class RangeDatePicker : RangeInfoPickerInput
             _pickerPresenter.HoverDateTimeChanged  -= HandleHoverDateTimeChanged;
             _pickerPresenter.Confirmed             -= HandleConfirmed;
             _pickerPresenter.RangePartConfirmed    -= HandleRangePartConfirmed;
-
-            if (RangeStartSelectedDate == null || RangeEndSelectedDate == null)
-            {
-                RangeStartSelectedDate = null;
-                RangeEndSelectedDate   = null;
-            }
+            _pickerPresenter.RestoreCommittedRangeAfterClose(
+                new DateViewerRange(RangeStartSelectedDate, RangeEndSelectedDate));
         }
+        IsChoosing = false;
+        UpdatePseudoClasses();
+        RefreshRangeTexts();
+        CalculatePreferredWidth();
     }
 
     private void HandleChoosingStatusChanged(object? sender, ChoosingStatusEventArgs args)
@@ -391,13 +397,11 @@ public partial class RangeDatePicker : RangeInfoPickerInput
         {
             RangeStartSelectedDate = _pickerPresenter?.SelectedDateTime;
             RangeActivatedPart     = RangeActivatedPart.End;
-            _pickerPresenter?.NotifySelectRangeStart(false);
         }
         else if (RangeActivatedPart == RangeActivatedPart.End)
         {
             RangeEndSelectedDate = _pickerPresenter?.SecondarySelectedDateTime;
             RangeActivatedPart   = RangeActivatedPart.Start;
-            _pickerPresenter?.NotifySelectRangeStart(true);
         }
     }
     

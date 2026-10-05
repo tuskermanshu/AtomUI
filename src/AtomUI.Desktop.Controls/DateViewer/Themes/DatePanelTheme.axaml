@@ -6,18 +6,19 @@
               x:ClassModifier="internal" TargetType="viewer:DatePanel">
     <Setter Property="Width" Value="{atom:DateViewerTokenResource PanelWidth}" />
     <Setter Property="Foreground" Value="{atom:SharedTokenResource ColorText}" />
+    <Setter Property="WeekHeaderTextAlignment" Value="Center" />
+    <Setter Property="WeekHeaderMinHeight" Value="{atom:DateViewerTokenResource CellRowHeight}" />
+    <Setter Property="WeekHeaderPadding" Value="0" />
     <Setter Property="Template">
         <ControlTemplate TargetType="viewer:DatePanel">
-            <DockPanel Classes.semantic-scope-panel="True" LastChildFill="True">
+            <DockPanel Classes.semantic-scope-panel="True" LastChildFill="True"
+                       Margin="{TemplateBinding Padding}">
                 <Grid Name="PART_WeekHeader" DockPanel.Dock="Top" />
                 <Grid Name="PART_CellHost" Classes.semantic-scope-cells="True" />
             </DockPanel>
         </ControlTemplate>
     </Setter>
-    <Style Selector="^ /template/ Grid#PART_WeekHeader > TextBlock">
-        <Setter Property="MinHeight" Value="{atom:SharedTokenResource ControlHeightSM}" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
+    <Setter Property="Padding" Value="{atom:DateViewerTokenResource DateBodyPadding}" />
     <Style Selector="^[Presentation=Content]">
         <Setter Property="Width" Value="NaN" />
     </Style>

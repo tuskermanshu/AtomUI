@@ -1,6 +1,7 @@
 <ControlTheme xmlns="https://github.com/avaloniaui"
               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
               xmlns:atom="https://atomui.net"
+              xmlns:antdicons="https://atomui.net/icons/antdesign"
               xmlns:viewer="clr-namespace:AtomUI.Desktop.Controls.Internal.DateViewer"
               x:Class="AtomUI.Desktop.Controls.Themes.DateViewerHeaderTheme"
               x:ClassModifier="internal" TargetType="viewer:DateViewerHeader">
@@ -9,24 +10,38 @@
             <Panel>
                 <ContentControl Content="{TemplateBinding Context}" ContentTemplate="{TemplateBinding HeaderTemplate}"
                                 IsVisible="{Binding HeaderTemplate, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                <DockPanel LastChildFill="True"
+                <atom:PixelAlignedBorder BorderBrush="{atom:SharedTokenResource ColorBorderSecondary}"
+                                         BorderThickness="0,0,0,1"
+                                         Padding="{atom:DateViewerTokenResource HeaderHorizontalPadding}"
                            IsVisible="{Binding HeaderTemplate, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}">
-                <atom:Button DockPanel.Dock="Left" ButtonType="Text" Content="‹"
-                             AutomationProperties.Name="{atom:DateViewerLangResource PreviousPeriod}"
-                             Command="{Binding Context.NavigateCommand, RelativeSource={RelativeSource TemplatedParent}}">
-                    <atom:Button.CommandParameter><x:Int32>-1</x:Int32></atom:Button.CommandParameter>
-                </atom:Button>
-                <atom:Button DockPanel.Dock="Right" ButtonType="Text" Content="›"
-                             AutomationProperties.Name="{atom:DateViewerLangResource NextPeriod}"
-                             Command="{Binding Context.NavigateCommand, RelativeSource={RelativeSource TemplatedParent}}">
-                    <atom:Button.CommandParameter><x:Int32>1</x:Int32></atom:Button.CommandParameter>
-                </atom:Button>
-                <atom:Button ButtonType="Text"
-                             AutomationProperties.Name="{atom:DateViewerLangResource ChoosePeriod}"
-                             Content="{Binding Context.DisplayText, RelativeSource={RelativeSource TemplatedParent}}"
-                             Command="{Binding Context.ChangePanelCommand, RelativeSource={RelativeSource TemplatedParent}}"
-                             CommandParameter="{TemplateBinding ParentPanelKind}" />
-            </DockPanel>
+                    <Grid MinHeight="{atom:SharedTokenResource ControlHeightLG}" DataContext="{TemplateBinding Context}"
+                          x:DataType="atom:DateViewerHeaderContext">
+                        <atom:Button ButtonType="Text" HorizontalAlignment="Center" FontWeight="Bold"
+                                     AutomationProperties.Name="{atom:DateViewerLangResource ChoosePeriod}"
+                                     Content="{Binding DisplayText}" Command="{Binding ChangePanelCommand}"
+                                     CommandParameter="{Binding ParentPanelKind}" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    IsVisible="{Binding ShowPreviousNavigation}">
+                            <atom:IconButton Icon="{antdicons:AntDesignIconProvider DoubleLeftOutlined}"
+                                             AutomationProperties.Name="{atom:DateViewerLangResource PreviousPage}"
+                                             Command="{Binding NavigateCommand}" CommandParameter="{Binding PreviousPage}" />
+                            <atom:IconButton Icon="{antdicons:AntDesignIconProvider LeftOutlined}"
+                                             AutomationProperties.Name="{atom:DateViewerLangResource PreviousPeriod}"
+                                             IsVisible="{Binding ShowPeriodNavigation}"
+                                             Command="{Binding NavigateCommand}" CommandParameter="{Binding PreviousPeriod}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    IsVisible="{Binding ShowNextNavigation}">
+                            <atom:IconButton Icon="{antdicons:AntDesignIconProvider RightOutlined}"
+                                             AutomationProperties.Name="{atom:DateViewerLangResource NextPeriod}"
+                                             IsVisible="{Binding ShowPeriodNavigation}"
+                                             Command="{Binding NavigateCommand}" CommandParameter="{Binding NextPeriod}" />
+                            <atom:IconButton Icon="{antdicons:AntDesignIconProvider DoubleRightOutlined}"
+                                             AutomationProperties.Name="{atom:DateViewerLangResource NextPage}"
+                                             Command="{Binding NavigateCommand}" CommandParameter="{Binding NextPage}" />
+                        </StackPanel>
+                    </Grid>
+                </atom:PixelAlignedBorder>
             </Panel>
         </ControlTemplate>
     </Setter>

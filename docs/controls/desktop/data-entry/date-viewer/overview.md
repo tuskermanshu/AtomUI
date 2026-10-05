@@ -10,6 +10,7 @@ DateViewer 是无需输入框或 Popup 的单值日期面板，RangeDateViewer �
 公开面板负责日期浏览与选择，支持 Date、Week、Month、Quarter、Year 五种单位。单值和范围各自拥有
 明确的值类型，共享日期算法、交互会话和基础 Cell。日期格式化、输入框、时间编辑、Form、Popup 关闭、
 Calendar 业务 Header 与 RangeBars 属于对应宿主。
+独立 DateViewer 的默认日期视图含四方向导航和 Today 页脚；Today 通过与日期 Cell 相同的有效性检查选择当天。
 
 ## 2. 设计语言
 
@@ -17,9 +18,11 @@ Calendar 业务 Header 与 RangeBars 属于对应宿主。
 | --- | --- |
 | 值与浏览 | Value、DisplayDate、焦点与 Hover 分开；浏览不提交选择。 |
 | 内容 | CellTemplate 增加内容，FullCellTemplate 接管内部内容，保留交互容器。 |
-| 呈现 | Compact 使用面板自然宽度，Content 使用分配宽度和内容高度。 |
+| 呈现 | Compact 使用面板自然宽度；Content 展开列宽，日期位于带顶部分隔线的单元格右上方，内容位于其下。 |
 | 范围 | 一份 DateViewerRange 表达两端和中间状态，左右面板不分别写端点。 |
 | 定制 | 生成专用 Semantic Style 封装真实 owner-relative route。 |
+
+Content 中普通 Today 日期的主色顶边、浅主色整格背景和主色文字独立于日期是否可选择；禁用状态仍阻止选择。
 
 ## 3. API 与契约模型
 
@@ -87,19 +90,22 @@ Sunday 周首与包含元旦的首周，简体中文使用 Monday 周首与包�
 DateViewer、RangeDateViewer、DateViewerHeader、DatePanel、DateViewerCell 分别维护自己的 ControlTheme。
 基础 Cell 是内部 TemplatedControl，使用同一激活路径，不要求用户依赖旧 Button 类型。
 
-DateViewerToken 的十一个资源为独立面板提供默认视觉，状态文字、主色和边框复用 SharedToken。
+DateViewerToken 的十八个资源为独立面板提供默认视觉，状态文字、主色和边框复用 SharedToken。
+Compact 日期网格采用 288 的自然面板宽度、36 的列与行节距、24 的值框和正文左右 18 的留白。
+独立 DateViewer 默认收紧到面板自然宽度；Content 仍使用父布局分配的宽度。
 Compact 的月、季度、年值框应用 PeriodCellWidth 和 PeriodCellPadding，在整行内垂直居中。
 空值浏览不制造选中态。
 内容模板不改变禁用、选择、命中测试、焦点或 Automation。Semantic 支持 root、header、body、content、
-cell、cellContent；类型、数量和专用 Style 见 [完整契约](semantic-part.md)。
+cell、cellContent，以及独立 DateViewer 的 footer；类型、数量和专用 Style 见 [完整契约](semantic-part.md)。
 
 ## 6. 控件家族与集成
 
 单值与范围没有公开抽象基类。DatePanelSession 管理交互 cursor，实际选择只由独立公共组件或产品宿主拥有。
 托管接口和 PanelTheme/CellTheme 等协作入口都是 internal，不作为应用 API。
 
-Calendar 关闭公共面板 Header并保留自己的业务 Header；LunarCalendar提供内容投影；
-Picker 由编辑会话控制候选和提交。家族职责与等价验收由 [共享设计](shared-panel-design.md)定义。
+Calendar 关闭公共面板 Header 并保留自己的业务 Header；LunarCalendar 提供内容投影；
+Picker 由编辑会话控制候选和提交。托管面板隐藏 DateViewer 默认 Today 页脚，由 Picker 自己的 Footer 承担相应操作。
+家族职责与等价验收由 [共享设计](shared-panel-design.md)定义。
 
 ## 7. 重建与定制边界
 
@@ -109,7 +115,7 @@ Picker 由编辑会话控制候选和提交。家族职责与等价验收由 [�
 ## 8. 验证策略
 
 独立控件的模型、模板、事件、Style 和交互使用定向测试。Gallery 独立入口是
-[DateViewerShowCase](../../../../../controlgallery/AtomUIGallery/ShowCases/DataEntry/DateViewer/Views/DateViewerShowCase.axaml)，
+[DateViewerShowCase](../../../../../controlgallery/AtomUIGallery/ShowCases/DataDisplay/DateViewer/Views/DateViewerShowCase.axaml)，
 覆盖原子范围、五种单位、空值浏览、Compact/Content、边界/禁用、内容模板、Header 命令和专用 Style。
 
 公共面板、主题、生成契约及 Calendar/Picker 宿主迁移均已落地；自动化覆盖业务行为、Popup 几何、Gallery 和

@@ -44,6 +44,11 @@ DateViewer 导航 Header 关闭，DatePanel 组合 WeekHeader、CellHost 与统�
 CalendarTheme 的 PART_HeaderPresenter 是稳定 ContentControl 区域，承载 PART_DefaultHeader 与 PART_CustomHeader；
 PART_BodyPresenter 叠放 PART_DateViewer 和 PART_RangeBarPanel。CalendarDateCellTheme 定义产品 Cell 布局，
 LunarCalendarCellContentTheme 只定义农历文本与标记。
+Calendar 在 OnApplyTemplate 已取得 DateViewer 部件，并通过内部只读 EffectiveDateViewer 属性通知模板更换；
+RangeBarPanel 的 LayoutSource 在 ControlTheme 中以 TemplateBinding 连接该属性，沿用面板现有的订阅与解除订阅生命周期。
+Mini 日期值框保持固定尺寸，Today 与键盘可见焦点边框由不参与文字布局的覆盖层绘制；鼠标按下不显示焦点描边，选中状态只改变背景和前景，日期文字保持原位。
+Fullscreen 的顶部单元格边界仍由值框所在的视觉表面绘制。
+日期文字通过继承 DateViewerCell 的 Foreground 获取选中、禁用、跨月和周序号颜色；主题只在状态 owner 上声明这些颜色，避免为每种状态重复匹配模板内的文字节点。
 
 Header 为 internal-observable；业务条对象是 public 数据；DatePanel/Cell 内部节点只通过 Semantic 契约定制。
 FullCellTemplate 不替换正文 overlay 或交互容器。

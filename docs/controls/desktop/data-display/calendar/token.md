@@ -15,13 +15,14 @@ DateViewer 提供共享面板和独立默认资源；Calendar 通过完整产品
 | 分类 | ownership |
 | --- | --- |
 | 根与正文 | Calendar 背景、边界与正文视觉。 |
+| 周标题 | Fullscreen 周标题高度、右侧与底部内边距。 |
 | Header | 年月选择和模式切换的尺寸与间距。 |
 | 日期内容 | Mini 内容高度、月份内容宽度、Fullscreen 最小内容区域与选中反馈。 |
 | 业务条 | 条高与 overlay metrics；单条颜色/高度属于实例。 |
 | 农历次级内容 | 字号、行高、颜色、双行 Cell 尺寸与月份范围宽度。 |
 | 农历状态/避让 | 周末、节假日、工作日 markers 与业务条次级行避让。 |
 
-CalendarToken 持有根/正文背景、Header 宽度、月份内容宽度、Mini 高度、完整内容最小高度与范围条高度；
+CalendarToken 持有根/正文背景、Header 宽度、月份内容宽度、Mini 高度、Fullscreen 周标题高度与内边距、完整内容最小高度与范围条高度；
 LunarCalendarToken 持有双行内容尺寸、文字/标记颜色与范围条避让。
 日期、模式、约束、节日优先级、Provider revision 和确认状态不属于 Token。
 

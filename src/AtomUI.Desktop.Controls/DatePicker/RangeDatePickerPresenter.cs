@@ -44,13 +44,21 @@ internal class RangeDatePickerPresenter : DatePickerPresenter
 
     internal void ResetRangeOpenPanelState() => ResetOpenPanelState();
 
+    internal void RestoreCommittedRangeAfterClose(DateViewerRange committed)
+    {
+        if (!EditSession.IsOpen)
+            return;
+        EditSession.Apply(new DatePickerEditAction.Reconfigure(CreateInput() with { Committed = committed }));
+        ApplyResult(EditSession.Close(DatePickerCloseReason.Outside));
+    }
+
     internal void NotifyRepairReverseRange(bool isRepair)
     {
         // Raw endpoint order is always retained; final date ordering is an editor result.
     }
 
     protected override bool IsRangeProperty(AvaloniaProperty property) =>
-        property == SecondarySelectedDateTimeProperty || property == IsRangeStartActiveProperty;
+        property == SecondarySelectedDateTimeProperty;
 
     protected override DateTime? ResolveOpenDisplayAnchor()
     {
@@ -89,8 +97,4 @@ internal class RangeDatePickerPresenter : DatePickerPresenter
     protected override void NotifyNowButtonClicked() =>
         ApplyResult(EditSession.Apply(new DatePickerEditAction.Now(DateTime.Now)));
 
-    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnDetachedFromVisualTree(e);
-    }
 }

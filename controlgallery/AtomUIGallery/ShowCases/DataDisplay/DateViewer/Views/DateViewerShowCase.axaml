@@ -17,12 +17,20 @@
             </gallery:GalleryShowCaseHost.Header>
             <gallery:GalleryShowCaseHost.SemanticPartsContentTemplate>
                 <DataTemplate x:DataType="vm:DateViewerViewModel">
-                    <gallery:SemanticPartPreview Title="DateViewer / RangeDateViewer"
+                    <gallery:SemanticPartPreview Title="DateViewer"
                         SemanticOwner="{Binding #DateViewerSemanticOwner}"
-                        SemanticOwnerType="{x:Type atom:RangeDateViewer}"
+                        SemanticOwnerType="{x:Type atom:DateViewer}"
                         PreviewStageMinHeight="380">
+                        <gallery:SemanticPartPreview.Styles>
+                            <Style Selector="atom|DateViewer.semantic-footer-demo">
+                                <atom:DateViewerFooterStyle x:SetterTargetType="atom:DashedBorder">
+                                    <Setter Property="Tag" Value="dateviewer-footer-style-hit" />
+                                </atom:DateViewerFooterStyle>
+                            </Style>
+                        </gallery:SemanticPartPreview.Styles>
                         <gallery:SemanticPartPreview.PreviewContent>
-                            <atom:RangeDateViewer Name="DateViewerSemanticOwner" DisplayDate="{Binding SampleDate, Mode=OneWay}" ShowWeek="True" />
+                            <atom:DateViewer Name="DateViewerSemanticOwner" Classes="semantic-footer-demo" HorizontalAlignment="Center"
+                                             DisplayDate="{Binding SampleDate, Mode=OneWay}" ShowWeek="True" />
                         </gallery:SemanticPartPreview.PreviewContent>
                         <gallery:SemanticPartPreview.PartDescriptions>
                             <gallery:SemanticPartDescription Path="root" Description="{gallery:DateViewerShowCaseLangResource SemanticRootDescription}" />
@@ -31,6 +39,7 @@
                             <gallery:SemanticPartDescription Path="content" Description="{gallery:DateViewerShowCaseLangResource SemanticContentDescription}" />
                             <gallery:SemanticPartDescription Path="cell" Description="{gallery:DateViewerShowCaseLangResource SemanticCellDescription}" />
                             <gallery:SemanticPartDescription Path="cellContent" Description="{gallery:DateViewerShowCaseLangResource SemanticCellContentDescription}" />
+                            <gallery:SemanticPartDescription Path="footer" Description="{gallery:DateViewerShowCaseLangResource SemanticFooterDescription}" />
                         </gallery:SemanticPartPreview.PartDescriptions>
                     </gallery:SemanticPartPreview>
                 </DataTemplate>
@@ -50,7 +59,6 @@
                         <DataTemplate x:DataType="vm:DateViewerViewModel">
                             <StackPanel HorizontalAlignment="Left" Spacing="12">
                                 <atom:DateViewer Name="BoundDateViewer" DisplayDate="{Binding SampleDate, Mode=OneWay}" Value="{Binding Value}" />
-                                <TextBlock Text="{Binding ValueText}" />
                                 <atom:RangeDateViewer Name="BoundRangeDateViewer" DisplayDate="{Binding SampleDate, Mode=OneWay}" Value="{Binding RangeValue}" />
                                 <TextBlock Text="{Binding RangeValueText}" />
                                 <atom:Button HorizontalAlignment="Left" Click="ClearSelection" Content="{gallery:DateViewerShowCaseLangResource Clear}" />
@@ -101,7 +109,7 @@
                                 <TextBlock Text="{gallery:DateViewerShowCaseLangResource Compact}" />
                                 <atom:DateViewer HorizontalAlignment="Left" DisplayDate="{Binding SampleDate, Mode=OneWay}" Presentation="Compact" />
                                 <TextBlock Text="{gallery:DateViewerShowCaseLangResource Content}" />
-                                <atom:DateViewer Width="560" MaxWidth="560" HorizontalAlignment="Left" DisplayDate="{Binding SampleDate, Mode=OneWay}" Presentation="Content" />
+                                <atom:DateViewer DisplayDate="{Binding SampleDate, Mode=OneWay}" Presentation="Content" />
                             </StackPanel>
                         </DataTemplate>
                     </gallery:ShowCaseItem.DeferredContentTemplate>
@@ -112,7 +120,7 @@
                                      IsDeferredContentEnabled="True">
                     <gallery:ShowCaseItem.DeferredContentTemplate>
                         <DataTemplate x:DataType="vm:DateViewerViewModel">
-                            <atom:DateViewer Width="560" HorizontalAlignment="Left" DisplayDate="{Binding SampleDate, Mode=OneWay}"
+                            <atom:DateViewer DisplayDate="{Binding SampleDate, Mode=OneWay}"
                                              Presentation="Content" ShowWeek="True" FirstDayOfWeek="Monday"
                                              MinDate="{Binding MinDate}" MaxDate="{Binding MaxDate}" DisabledDate="{Binding DisableWeekends}">
                                 <atom:DateViewer.CellTemplate>
@@ -131,7 +139,7 @@
                                      IsDeferredContentEnabled="True">
                     <gallery:ShowCaseItem.DeferredContentTemplate>
                         <DataTemplate x:DataType="vm:DateViewerViewModel">
-                            <atom:DateViewer Width="560" HorizontalAlignment="Left" DisplayDate="{Binding SampleDate, Mode=OneWay}" Presentation="Content"
+                            <atom:DateViewer DisplayDate="{Binding SampleDate, Mode=OneWay}" Presentation="Content"
                                              MinDate="{Binding MinDate}" MaxDate="{Binding MaxDate}" DisabledDate="{Binding DisableWeekends}">
                                 <atom:DateViewer.FullCellTemplate>
                                     <DataTemplate x:DataType="atom:DateViewerCellContext">

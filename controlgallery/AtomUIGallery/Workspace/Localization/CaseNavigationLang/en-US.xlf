@@ -56,6 +56,11 @@
         <source>DataGrid</source>
       </segment>
     </unit>
+    <unit id="DataDisplay_DateViewer">
+      <segment>
+        <source>DateViewer</source>
+      </segment>
+    </unit>
     <unit id="DataDisplay_Descriptions">
       <segment>
         <source>Descriptions</source>
@@ -154,11 +159,6 @@
     <unit id="DataEntry_ColorPicker">
       <segment>
         <source>ColorPicker</source>
-      </segment>
-    </unit>
-    <unit id="DataEntry_DateViewer">
-      <segment>
-        <source>DateViewer</source>
       </segment>
     </unit>
     <unit id="DataEntry_DatePicker">

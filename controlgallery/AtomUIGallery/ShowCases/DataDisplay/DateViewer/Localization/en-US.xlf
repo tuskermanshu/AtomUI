@@ -13,7 +13,7 @@
     </unit>
     <unit id="ComponentCategory">
       <segment>
-        <source>Data Entry</source>
+        <source>Data Display</source>
       </segment>
     </unit>
     <unit id="ComponentStatusStable">
@@ -178,7 +178,7 @@
     </unit>
     <unit id="SemanticContentDescription">
       <segment>
-        <source>One panel for a value; one or two synchronized panels for a range.</source>
+        <source>The single panel for browsing and selecting dates.</source>
       </segment>
     </unit>
     <unit id="SemanticCellDescription">
@@ -189,6 +189,11 @@
     <unit id="SemanticCellContentDescription">
       <segment>
         <source>Typed template content within the interactive cell.</source>
+      </segment>
+    </unit>
+    <unit id="SemanticFooterDescription">
+      <segment>
+        <source>The Today action below the date panel; shown for standalone date selection.</source>
       </segment>
     </unit>
   </file>

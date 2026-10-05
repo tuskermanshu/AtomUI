@@ -67,6 +67,12 @@
         <target state="translated">DataGrid</target>
       </segment>
     </unit>
+    <unit id="DataDisplay_DateViewer">
+      <segment>
+        <source>DateViewer</source>
+        <target state="translated">Painel de datas</target>
+      </segment>
+    </unit>
     <unit id="DataDisplay_Descriptions">
       <segment>
         <source>Descriptions</source>
@@ -185,12 +191,6 @@
       <segment>
         <source>ColorPicker</source>
         <target state="translated">ColorPicker</target>
-      </segment>
-    </unit>
-    <unit id="DataEntry_DateViewer">
-      <segment>
-        <source>DateViewer</source>
-        <target state="translated">Painel de datas</target>
       </segment>
     </unit>
     <unit id="DataEntry_DatePicker">

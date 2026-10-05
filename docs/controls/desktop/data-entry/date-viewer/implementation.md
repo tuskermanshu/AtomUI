@@ -59,6 +59,7 @@ DateViewer
 └── Border
     └── DockPanel
         ├── DateViewerHeader (.semantic-header)
+        ├── 默认 Today 页脚 (.semantic-footer，仅独立 Date 单位可见)
         └── Panel (.semantic-body)
             └── DatePanel#PART_PrimaryPanel (.semantic-content)
 
@@ -80,15 +81,16 @@ DatePanel
 
 DateViewerCell
 └── Border#PART_CellRoot
-    └── Grid
-        ├── Grid (范围/周背景)
+    └── Grid#PART_Layout
+        ├── Border#PART_CellSurface（内缩状态表面）
+        ├── Grid（完整列宽的范围/周背景）
         │   ├── Border#PART_RangeMiddle
         │   ├── Border#PART_RangeStart
         │   ├── Border#PART_RangeEnd
         │   └── Border#PART_WeekSelection
-        ├── Border#PART_ValueFrame
+        ├── Border#PART_ValueFrame（前景）
         │   └── TextBlock#PART_Value
-        └── ContentControl#PART_CellContent (.semantic-cell-content)
+        └── ContentControl#PART_CellContent (.semantic-cell-content，前景)
 ```
 
 | 节点 | 生命周期 owner | 稳定性 / 使用边界 |
@@ -99,8 +101,18 @@ DateViewerCell
 | DateViewerCell | DatePanel 容器池 | internal-observable；只使用 cell/cellContent Part 和强类型内容上下文。 |
 | PART_* Grid / Border | 对应叶子主题 | 模板维护边界；应用示例不得依赖 Name 或自行穿透子模板。 |
 
-Header 的独立叶子主题通过 Panel 组合自定义 ContentControl 和默认 DockPanel；默认导航按钮消费
-DateViewerHeaderContext 的命令与参数。范围两个 Header 与两个面板共享同一次浏览转换。
+Header 的独立叶子主题通过 Panel 组合自定义 ContentControl 和默认带底边框的 Grid；默认 Header 内容以 HeaderHorizontalPadding 保留左右导航间距，边框仍覆盖整行。默认导航按钮消费
+DateViewerHeaderContext 的命令与参数。默认 Header 使用四个导航箭头和居中周期标题；范围两个 Header 与两个面板共享同一次浏览转换。
+独立 DateViewer 的 Today 命令先回到当天所在日期面板，再经 DatePanelSession 的 Cell 激活防线提交；
+托管状态隐藏该页脚，DatePicker 的 Footer 仍由 Presenter 拥有。
+
+Content 单元格以外层透明 Border 保持整列命中；Grid 中的状态表面、范围/周背景和前景内容按绘制顺序分层。
+范围/周背景直接占完整列宽，状态表面单独内缩并承载顶部边界与状态背景；前景日期和业务内容用共享 Token 推导的留白对齐，不使用负 Margin 补偿列宽。
+普通 Today 日期的主色顶边、浅主色表面与主色文字不依赖可选择状态；边界或 DisabledDate 禁用当天时仍保留这些视觉标识，但 Cell 不接收激活。
+Content 的日期值框将边框画刷覆写为透明，避免在日期文字下方出现额外边线；Week 与范围状态继续由自身的视觉规则负责。
+范围与整周背景延伸到外层 Cell 边界，跨列连接不随内层视觉表面的留白断开；范围端点的值框保持列内居中，与左右半格背景相接。
+DatePanel 的星期标题在模板应用后按模型创建，节点没有 TemplatedParent；主题将对齐、行高与内边距赋给
+DatePanel 的内部属性，DatePanel 在生成或更新标题时应用这些值。
 
 ## 6. 生命周期与模板接入
 
@@ -138,8 +150,11 @@ Calendar 的业务条消费实际 arrange 几何，不复制日期起点算法�
 主题声明默认资源、模板结构和伪类 Setter；公共面板默认不依赖 Picker 或 Calendar Token。
 值框 `PART_ValueFrame` 的背景变化使用 MotionDurationMid；Week 的 `PART_WeekSelection` 保持可见，
 在透明色、选中/悬停主色和范围中段背景色之间使用同一时长过渡。其它范围中段的背景切换不添加额外动画。
+Content 的普通日期由 `PART_CellSurface` 绘制 Hover 与选中背景；该表面以透明画刷为静止基线，
+背景和 `PART_Value` 的文字颜色使用 MotionDurationSlow 过渡。动效关闭时不安装这些过渡，状态颜色立即更新。
 动效由共享 EnableMotion Token 控制，Transitions 声明在 ControlTheme 的 Style Setter 中。
 DatePanel 保持有界容器池，状态改变复用拓扑；内容 revision 独立于拓扑，避免业务内容失效重建所有日期模型。
+原始指针事件仅在 session 已有 Hover 时检查跨面板离开边界；无 Hover 时直接返回。有 Hover 时只检查该 session 已连接的面板，面板注册与 session 订阅同步建立和解除，避免滚动时遍历整个 TopLevel。
 
 主题、Token、Semantic descriptor 与 XLIFF 使用生成器注册；Gallery 通过静态路由和
 GeneratedLanguageModuleRegistration 接入，无反射控件发现。真实 NativeAOT、裁剪后冷消费

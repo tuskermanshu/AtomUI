@@ -42,5 +42,6 @@ public enum DateViewerShowCaseLangResourceKind
     SemanticBodyDescription,
     SemanticContentDescription,
     SemanticCellDescription,
-    SemanticCellContentDescription
+    SemanticCellContentDescription,
+    SemanticFooterDescription
 }

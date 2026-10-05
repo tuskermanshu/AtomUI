@@ -5,7 +5,6 @@ using AtomUI.Localization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -68,7 +67,7 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
         get => _isTimeSelectionVisible;
         private set => SetAndRaise(IsTimeSelectionVisibleProperty, ref _isTimeSelectionVisible, value);
     }
-    internal double PanelHeight => PickerMode == DatePickerMode.Quarter ? 86 : 270;
+    internal double PanelHeight => PickerMode == DatePickerMode.Quarter ? 86 : 301;
 
     public event EventHandler<DateSelectedEventArgs>? HoverDateTimeChanged;
     public event EventHandler<ChoosingStatusEventArgs>? ChoosingStatusChanged;
@@ -142,7 +141,6 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        DetachTemplate();
         SingleViewer?.SetHost(null);
         RangeViewer?.SetHost(null);
         if (_languageManager is not null)
@@ -168,7 +166,17 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
         {
             if (_sessionOpened)
             {
-                EditSession.Apply(new DatePickerEditAction.Reconfigure(CreateInput()));
+                var input = CreateInput();
+                if (IsRangeEditor)
+                {
+                    var committed = EditSession.Input.Committed;
+                    if (change.Property == SelectedDateTimeProperty)
+                        committed = committed with { Start = SelectedDateTime };
+                    else if (IsRangeProperty(change.Property))
+                        committed = committed with { End = SecondarySelectedDateTimeCore };
+                    input = input with { Committed = committed };
+                }
+                EditSession.Apply(new DatePickerEditAction.Reconfigure(input));
                 RefreshViewer();
             }
             SetupButtonStatus();
@@ -220,9 +228,6 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
                 ApplyCommitValue(result.CommitValue ?? result.Draft);
                 EmitChoosingStatusChanged(false);
                 base.OnConfirmed();
-                break;
-            case DatePickerCommitKind.Clear:
-                ApplyCommitValue(result.CommitValue ?? new DateViewerRange(null, null));
                 break;
         }
     }

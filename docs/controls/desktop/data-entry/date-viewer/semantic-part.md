@@ -22,6 +22,7 @@ root 是隐式实例入口，不添加 semantic-root marker。每个表的标题
 | content | `.semantic-content` | `/template/ .semantic-body > .semantic-content` | TemplatedControl | Multiple | Selector | false | false |
 | cell | `.semantic-cell` | `/template/ .semantic-body > .semantic-content /template/ .semantic-scope-panel > .semantic-scope-cells > .semantic-cell` | TemplatedControl | Multiple | Selector | true | true |
 | cellContent | `.semantic-cell-content` | `/template/ .semantic-body > .semantic-content /template/ .semantic-scope-panel > .semantic-scope-cells > .semantic-cell /template/ .semantic-cell-content` | ContentControl | Multiple | Selector | true | true |
+| footer | `.semantic-footer` | `/template/ .semantic-footer` | DashedBorder | Optional | Selector | false | false |
 
 ### RangeDateViewer
 
@@ -84,6 +85,12 @@ CellTemplate 在默认日期下方添加内容；FullCellTemplate 隐藏默认�
 适合内容槽的 Padding、对齐和前景；模板内容子树不成为额外公开 Part，
 不能把用户控件内部模板或农历业务内容视为 DateViewer 的稳定结构。
 
+### footer
+
+DateViewer 的默认 Today 页脚，ContractType 为 DashedBorder。仅独立使用且 SelectionUnit 为 Date 时显示；
+作为 Picker 托管面板或选择其他单位时隐藏，但模板中的 marker 保留。可通过 DateViewerFooterStyle 定制页脚表面与边框，
+不借此改变 Today 命令的可用性或选择规则。RangeDateViewer 没有独立的默认页脚，因此不声明 footer Part。
+
 ## 3. Selector 与专用 Style
 
 应用在 owner-scoped Style 内使用生成专用类，Setter 的编译类型必须匹配 ContractType。
@@ -105,9 +112,9 @@ CellTemplate 在默认日期下方添加内容；FullCellTemplate 隐藏默认�
 ```
 
 其他生成类按同一 owner + Part 命名：DateViewerHeaderStyle、DateViewerBodyStyle、
-DateViewerContentStyle、DateViewerCellContentStyle，以及 RangeDateViewer 对应类。
+DateViewerContentStyle、DateViewerCellContentStyle、DateViewerFooterStyle，以及 RangeDateViewer 对应的已声明 Part 类。
 DateViewerCellContentStyle 的 Setter 上下文是 ContentControl；
-DateViewerBodyStyle 的 Setter 上下文是 Panel。root 使用实例或 owner Style。
+DateViewerBodyStyle 的 Setter 上下文是 Panel，DateViewerFooterStyle 为 DashedBorder。root 使用实例或 owner Style。
 
 Picker、Calendar 与公共面板属于不同 owner；组合 route 必须由各自 descriptor 明确声明。
 专用 Style 不命中目标属于 route 契约缺陷，不能获取私有节点直接赋值作为回退。
@@ -120,7 +127,7 @@ Picker、Calendar 与公共面板属于不同 owner；组合 route 必须由各�
 
 ## 5. Composition Model
 
-DateViewerTheme 的 Border/DockPanel 组合 DateViewerHeader 和 Panel/DatePanel。
+DateViewerTheme 的 Border/DockPanel 组合 DateViewerHeader、Panel/DatePanel 和默认 Today 页脚。
 RangeDateViewerTheme 通过水平 Header 行与正文行组合两个 Header 和两个 DatePanel；
 每个 DatePanel 的 DockPanel 组合周 Header Grid 与 CellHost Grid。
 CellHost 的运行时 Cell 在自己的叶子主题中提供 ContentControl。
@@ -140,7 +147,7 @@ RangeBars、Picker Footer、TimeView、用户内容子树和农历算法不属�
 
 定向验证检查生成 descriptor 与全部默认模板 marker 一致、Style Setter 实际生效、
 单/双面板、四种网格、模板内容、re-template 和容器回收。
-Gallery [独立页面](../../../../../controlgallery/AtomUIGallery/ShowCases/DataEntry/DateViewer/Views/DateViewerShowCase.axaml)
-提供 Semantic Parts Tab 和专用 Cell Style 示例，页面验证同时禁止私有节点赋值的代码回退。
+Gallery [独立页面](../../../../../controlgallery/AtomUIGallery/ShowCases/DataDisplay/DateViewer/Views/DateViewerShowCase.axaml)
+的 Semantic Parts Tab 使用单个 DateViewer 预览；Examples 保留单值和范围各自的专用 Cell Style 示例，页面验证同时禁止私有节点赋值的代码回退。
 
 宿主完整视觉等价、冷消费与 NativeAOT 验收独立记录；公共面板 Style 命中不证明 Picker 迁移已完成。

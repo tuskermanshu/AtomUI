@@ -18,12 +18,14 @@
                                     Text="{Binding Context.SecondaryText, RelativeSource={RelativeSource TemplatedParent}}"
                                     TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center"
                                     FontSize="{atom:LunarCalendarTokenResource SecondaryTextFontSize}"
-                                    LineHeight="{atom:LunarCalendarTokenResource SecondaryTextLineHeight}"
-                                    Foreground="{atom:LunarCalendarTokenResource SecondaryTextColor}" />
+                                    LineHeight="{atom:LunarCalendarTokenResource SecondaryTextLineHeight}" />
                 </Grid>
             </Grid>
         </ControlTemplate>
     </Setter>
+    <Style Selector="^ /template/ atom|TextBlock#PART_SecondaryText">
+        <Setter Property="Foreground" Value="{atom:LunarCalendarTokenResource SecondaryTextColor}" />
+    </Style>
     <Style Selector="^[Presentation=Content] /template/ atom|TextBlock#PART_Value">
         <Setter Property="HorizontalAlignment" Value="Right" />
         <Setter Property="VerticalAlignment" Value="Top" />
@@ -41,10 +43,10 @@
     <Style Selector="^:workday /template/ Border#PART_Marker">
         <Setter Property="Background" Value="{atom:LunarCalendarTokenResource WorkdayMarkerColor}" />
     </Style>
-    <Style Selector="^[Presentation=Compact]:selected:not(:disabled) /template/ atom|TextBlock#PART_SecondaryText">
+    <Style Selector="^:selected:not(:disabled) /template/ atom|TextBlock#PART_SecondaryText">
         <Setter Property="Foreground" Value="{atom:SharedTokenResource ColorTextLightSolid}" />
     </Style>
-    <Style Selector="^[Presentation=Compact]:selected:not(:disabled) /template/ atom|TextBlock#PART_Value">
+    <Style Selector="^:selected:not(:disabled) /template/ atom|TextBlock#PART_Value">
         <Setter Property="Foreground" Value="{atom:SharedTokenResource ColorTextLightSolid}" />
     </Style>
     <Style Selector="^:outside /template/ atom|TextBlock#PART_SecondaryText, ^:disabled /template/ atom|TextBlock#PART_SecondaryText, ^:outside /template/ atom|TextBlock#PART_Value, ^:disabled /template/ atom|TextBlock#PART_Value">

@@ -119,16 +119,17 @@ internal sealed class DatePickerEditSession
 
     public DatePickerEditResult Close(DatePickerCloseReason reason)
     {
+        if (Input.IsRange)
+        {
+            Draft = Input.Committed;
+            _shortcutDate = null;
+            TimeCursor = null;
+            return Snapshot();
+        }
         if (reason == DatePickerCloseReason.Dismissed)
         {
             Draft = new DateViewerRange(null, null);
             _shortcutDate = null;
-        }
-        if (Input.IsRange && (Input.Committed.Start is null || Input.Committed.End is null))
-        {
-            // The input owner clears committed endpoints; bound source changes determine
-            // which candidates change. Outside close is not a blanket draft rollback.
-            return Snapshot() with { CommitKind = DatePickerCommitKind.Clear, CommitValue = new DateViewerRange(null, null) };
         }
         return Snapshot();
     }

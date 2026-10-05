@@ -5,6 +5,7 @@
 ## 2026-10-04
 
 - Fixed
+  - Adjust the hosted date panel height to fit the shared 36-unit date rows and body padding, while keeping the picker-owned Today footer.
   - Align Week panel headers, week numbers, whole-row hover and default input formatting with the effective language; refresh formatted values when the language changes.
   - Align Month, Quarter and Year value-frame width, horizontal padding and vertical centering with the shared period-cell geometry.
   - Define and enforce the RangeDatePicker endpoint-rotation contract: each successful endpoint confirmation moves the active input, popup anchor and date-panel active part to the opposite endpoint before the next hover or selection.
@@ -14,6 +15,8 @@
   - Keep range Hover state atomic across shared panels and preserve the established endpoint corner geometry.
   - Preserve the opposite endpoint value, input text and DateViewer selected range state when confirming one RangeDatePicker endpoint and rotating the active endpoint.
   - Keep complete range popups anchored to the start period and suppress selected/range endpoint projection on duplicate outside cells in dual-panel range viewers.
+  - Preserve individually confirmed range endpoints across popup close and reopen; discard unconfirmed candidates and hover text as soon as the popup closes.
+  - Keep reusable DatePicker presenter template handlers connected across Popup hide and reopen so the confirm button and time controls remain interactive.
 
 ## 2026-10-03
 

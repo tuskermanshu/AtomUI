@@ -3,6 +3,8 @@ using AtomUI.Desktop.Controls.Primitives;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Headless;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -57,8 +59,8 @@ public class DatePickerViewerBehaviorTests
                         .Single(border => border.Name == "PART_WeekSelection").IsVisible.ShouldBeTrue();
                 }
             }
-            viewer.Bounds.Width.ShouldBe(260, 0.5);
-            viewer.Bounds.Height.ShouldBe(pickerMode == DatePickerMode.Quarter ? 86 : 270, 0.5);
+            viewer.Bounds.Width.ShouldBe(288, 0.5);
+            viewer.Bounds.Height.ShouldBe(pickerMode == DatePickerMode.Quarter ? 86 : 301, 0.5);
             var cell = viewer.GetVisualDescendants()
                              .OfType<DateViewerCell>()
                              .First(candidate => candidate.Model is
@@ -167,11 +169,11 @@ public class DatePickerViewerBehaviorTests
             viewer.PanelSession.Input.DisplayDate.ShouldBe(start);
             viewer.PanelSession.Input.Range.ShouldBe(new DateViewerRange(start, end));
             viewer.PanelSession.Input.PanelCount.ShouldBe(2);
-            viewer.Bounds.Width.ShouldBe(540, 0.5);
-            viewer.Bounds.Height.ShouldBe(270, 0.5);
+            viewer.Bounds.Width.ShouldBe(596, 0.5);
+            viewer.Bounds.Height.ShouldBe(301, 0.5);
             var panels = viewer.GetVisualDescendants().OfType<DatePanel>().ToArray();
-            panels[0].Bounds.Width.ShouldBe(260, 0.5);
-            panels[1].Bounds.X.ShouldBe(280, 0.5);
+            panels[0].Bounds.Width.ShouldBe(288, 0.5);
+            panels[1].Bounds.X.ShouldBe(308, 0.5);
             presenter.GetVisualDescendants().OfType<DateViewerHeader>()
                      .ShouldAllBe(header => header.HeaderTemplate != null);
             viewer.Value.ShouldBeNull();
@@ -207,13 +209,16 @@ public class DatePickerViewerBehaviorTests
         });
     }
 
-    [Fact]
-    public void Range_Partial_Confirmation_Stays_Open_And_Final_Confirmation_Orders_Dates()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Range_Partial_Confirmation_Survives_Reopen_And_Final_Confirmation_Orders_Dates(bool showTime)
     {
         var picker = new RangeDatePicker
         {
             PickerDisplayDate = new DateTime(2026, 7, 15),
-            IsNeedConfirm = true
+            IsNeedConfirm = true,
+            IsShowTime = showTime
         };
         picker.RangeActivatedPart = RangeActivatedPart.Start;
 
@@ -235,11 +240,76 @@ public class DatePickerViewerBehaviorTests
             picker.RangeActivatedPart.ShouldBe(RangeActivatedPart.End);
             viewer.Value.ShouldBeNull();
 
+            picker.IsPickerOpen = false;
+            Drain();
+            picker.RangeStartSelectedDate.ShouldBe(new DateTime(2026, 7, 25));
+            picker.RangeEndSelectedDate.ShouldBeNull();
+            picker.SecondaryText.ShouldBe(string.Empty);
+
+            picker.IsPickerOpen = true;
+            Drain();
+            picker.RangeActivatedPart.ShouldBe(RangeActivatedPart.End);
+            viewer.PanelSession.Input.Range.ShouldBe(new DateViewerRange(new DateTime(2026, 7, 25), null));
+
             Activate(viewer, new DateTime(2026, 7, 20));
-            Confirm(presenter);
+            var window = TopLevel.GetTopLevel(picker).ShouldBeAssignableTo<AvaloniaWindow>()!;
+            ClickConfirm(window, presenter);
 
             picker.RangeStartSelectedDate.ShouldBe(new DateTime(2026, 7, 20));
             picker.RangeEndSelectedDate.ShouldBe(new DateTime(2026, 7, 25));
+            picker.IsPickerOpen.ShouldBeFalse();
+        });
+    }
+
+    [Fact]
+    public void End_First_Time_Range_Discards_Unconfirmed_Preview_But_Preserves_Confirmed_End_Across_Reopen()
+    {
+        var picker = new RangeDatePicker
+        {
+            PickerDisplayDate = new DateTime(2026, 10, 4),
+            IsNeedConfirm = true,
+            IsShowTime = true
+        };
+        picker.RangeActivatedPart = RangeActivatedPart.End;
+
+        ShowPicker(picker, () =>
+        {
+            picker.IsPickerOpen = true;
+            Drain();
+            var presenter = picker.PickerPresenter.ShouldBeAssignableTo<RangeDatePickerPresenter>()!;
+            var viewer = presenter.GetVisualDescendants().OfType<RangeDateViewer>().Single();
+
+            Activate(viewer, new DateTime(2026, 10, 16));
+            Hover(viewer, new DateTime(2026, 10, 31));
+            (picker.SecondaryText ?? string.Empty).ShouldContain("2026-10-31");
+            picker.IsPickerOpen = false;
+            Drain();
+            picker.RangeEndSelectedDate.ShouldBeNull();
+            picker.SecondaryText.ShouldBe(string.Empty);
+
+            picker.RangeActivatedPart = RangeActivatedPart.End;
+            picker.IsPickerOpen = true;
+            Drain();
+            Activate(viewer, new DateTime(2026, 10, 16));
+            Confirm(presenter);
+            picker.RangeStartSelectedDate.ShouldBeNull();
+            picker.RangeEndSelectedDate.ShouldBe(new DateTime(2026, 10, 16));
+            picker.RangeActivatedPart.ShouldBe(RangeActivatedPart.Start);
+
+            picker.IsPickerOpen = false;
+            Drain();
+            picker.RangeEndSelectedDate.ShouldBe(new DateTime(2026, 10, 16));
+            (picker.SecondaryText ?? string.Empty).ShouldContain("2026-10-16");
+
+            picker.IsPickerOpen = true;
+            Drain();
+            picker.RangeActivatedPart.ShouldBe(RangeActivatedPart.Start);
+            Activate(viewer, new DateTime(2026, 10, 12));
+            var window = TopLevel.GetTopLevel(picker).ShouldBeAssignableTo<AvaloniaWindow>()!;
+            ClickConfirm(window, presenter);
+
+            picker.RangeStartSelectedDate.ShouldBe(new DateTime(2026, 10, 12));
+            picker.RangeEndSelectedDate.ShouldBe(new DateTime(2026, 10, 16));
             picker.IsPickerOpen.ShouldBeFalse();
         });
     }
@@ -374,8 +444,8 @@ public class DatePickerViewerBehaviorTests
                 var viewer = presenter.GetVisualDescendants().OfType<RangeDateViewer>().Single();
 
                 viewer.PanelSession.Input.PanelCount.ShouldBe(showTime ? 1 : 2);
-                viewer.Bounds.Width.ShouldBe(showTime ? 260 : 540, 0.5);
-                viewer.Bounds.Height.ShouldBe(270, 0.5);
+                viewer.Bounds.Width.ShouldBe(showTime ? 288 : 596, 0.5);
+                viewer.Bounds.Height.ShouldBe(301, 0.5);
                 presenter.GetVisualDescendants()
                          .OfType<DateViewerCell>()
                          .Count()
@@ -437,6 +507,18 @@ public class DatePickerViewerBehaviorTests
                               .OfType<AtomUIButton>()
                               .Single(candidate => candidate.Name == "PART_ConfirmButton");
         button.RaiseEvent(new RoutedEventArgs(AvaloniaButton.ClickEvent));
+        Drain();
+    }
+
+    private static void ClickConfirm(AvaloniaWindow window, DatePickerPresenter presenter)
+    {
+        var button = presenter.GetVisualDescendants().OfType<AtomUIButton>()
+            .Single(candidate => candidate.Name == "PART_ConfirmButton");
+        var point = button.TranslatePoint(
+            new Avalonia.Point(button.Bounds.Width / 2, button.Bounds.Height / 2), window).ShouldNotBeNull();
+        window.MouseMove(point);
+        window.MouseDown(point, MouseButton.Left);
+        window.MouseUp(point, MouseButton.Left);
         Drain();
     }
 

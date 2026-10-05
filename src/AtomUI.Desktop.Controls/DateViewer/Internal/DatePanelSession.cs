@@ -12,8 +12,10 @@ internal sealed class DatePanelSession
     internal long ContentRevision { get; private set; }
     public event EventHandler? Changed;
     public event EventHandler? FocusRequested;
+    internal IReadOnlyList<DatePanel> ConnectedPanels => _connectedPanels;
 
     private readonly IDatePanelHost _host;
+    private readonly List<DatePanel> _connectedPanels = new(2);
     private DatePanelInput _input;
     private DatePanelInput? _topologyInput;
 
@@ -24,6 +26,14 @@ internal sealed class DatePanelSession
         FocusedValue = _input.SelectedDate ?? _input.Range?.Start ?? _input.DisplayDate;
         UpdateInput();
     }
+
+    internal void ConnectPanel(DatePanel panel)
+    {
+        if (!_connectedPanels.Contains(panel))
+            _connectedPanels.Add(panel);
+    }
+
+    internal void DisconnectPanel(DatePanel panel) => _connectedPanels.Remove(panel);
 
     public void UpdateInput(bool refreshAvailability = false)
     {

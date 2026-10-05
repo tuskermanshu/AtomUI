@@ -13,7 +13,6 @@
         </ResourceDictionary.MergedDictionaries>
         <ControlTheme x:Key="DatePickerDatePanelTheme" TargetType="viewer:DatePanel">
             <ControlTheme.BasedOn><themes:DatePanelTheme TargetType="viewer:DatePanel" /></ControlTheme.BasedOn>
-            <Setter Property="Margin" Value="0,8,0,0" />
         </ControlTheme>
         </ResourceDictionary>
     </ControlTheme.Resources>

@@ -1,5 +1,6 @@
 // The standalone DateViewer Gallery page is a public consumption and Semantic Style contract.
 using System.Xml.Linq;
+using AtomUI.Controls.Primitives;
 using AtomUI.Desktop.Controls;
 using AtomUI.Toolkits.GalleryBase.Controls;
 using AtomUI.Toolkits.GalleryBase.SourceCode;
@@ -13,7 +14,7 @@ using ReactiveUI;
 using Shouldly;
 using Xunit;
 
-namespace AtomUIGallery.Tests.ShowCases.DataEntry;
+namespace AtomUIGallery.Tests.ShowCases;
 
 public class DateViewerShowCaseTests
 {
@@ -68,8 +69,17 @@ public class DateViewerShowCaseTests
             host.SelectedTab = GalleryShowCaseTab.SemanticParts;
             Dispatcher.UIThread.RunJobs();
             var preview = page.GetVisualDescendants().OfType<SemanticPartPreview>().Single();
-            preview.SemanticOwner.ShouldBeOfType<RangeDateViewer>();
-            ((RangeDateViewer)preview.SemanticOwner).Bounds.Width.ShouldBeGreaterThan(0);
+            preview.Title.ShouldBe("DateViewer");
+            preview.SemanticOwnerType.ShouldBe(typeof(AtomUI.Desktop.Controls.DateViewer));
+            preview.SemanticOwner.ShouldBeOfType<AtomUI.Desktop.Controls.DateViewer>();
+            ((AtomUI.Desktop.Controls.DateViewer)preview.SemanticOwner).Bounds.Width.ShouldBeGreaterThan(0);
+            preview.GetVisualDescendants().OfType<RangeDateViewer>().ShouldBeEmpty();
+            preview.GetVisualDescendants().OfType<TextBlock>().ShouldContain(text => text.Text == "footer");
+            var footer = ((AtomUI.Desktop.Controls.DateViewer)preview.SemanticOwner)
+                .GetVisualDescendants().OfType<DashedBorder>()
+                .Single(border => border.Classes.Contains("semantic-footer"));
+            footer.IsVisible.ShouldBeTrue();
+            footer.Tag.ShouldBe("dateviewer-footer-style-hit");
         }
         finally
         {
@@ -82,7 +92,7 @@ public class DateViewerShowCaseTests
     public void Standalone_DateViewer_Page_Preserves_Public_Examples_And_Semantic_Styles()
     {
         var root = FindRoot();
-        var page = Path.Combine(root, "controlgallery/AtomUIGallery/ShowCases/DataEntry/DateViewer/Views/DateViewerShowCase.axaml");
+        var page = Path.Combine(root, "controlgallery/AtomUIGallery/ShowCases/DataDisplay/DateViewer/Views/DateViewerShowCase.axaml");
         File.Exists(page).ShouldBeTrue("DateViewer requires its own standalone Gallery page.");
         var source = File.ReadAllText(page);
         source.ShouldContain("GalleryShowCaseHost");
@@ -90,6 +100,10 @@ public class DateViewerShowCaseTests
         source.ShouldContain("IsDeferredLoadingEnabled=\"True\"");
         source.ShouldContain("IsScrollEnabled=\"False\"");
         source.ShouldContain("atom:DateViewerCellStyle");
+        source.ShouldContain("atom:DateViewerFooterStyle");
+        source.ShouldContain("x:SetterTargetType=\"atom:DashedBorder\"");
+        source.ShouldContain("Property=\"Tag\" Value=\"dateviewer-footer-style-hit\"");
+        source.ShouldContain("Path=\"footer\"");
         source.ShouldContain("atom:RangeDateViewerCellStyle");
         source.ShouldContain("x:SetterTargetType=\"TemplatedControl\"");
         source.ShouldContain("Property=\"FontWeight\" Value=\"Bold\"");
@@ -123,12 +137,12 @@ public class DateViewerShowCaseTests
     public void Range_Value_Is_Atomic_And_All_Five_Units_Are_Demonstrated()
     {
         var root = FindRoot();
-        var model = File.ReadAllText(Path.Combine(root, "controlgallery/AtomUIGallery/ShowCases/DataEntry/DateViewer/ViewModels/DateViewerViewModel.cs"));
+        var model = File.ReadAllText(Path.Combine(root, "controlgallery/AtomUIGallery/ShowCases/DataDisplay/DateViewer/ViewModels/DateViewerViewModel.cs"));
         model.ShouldContain("DateViewerRange? RangeValue");
         model.ShouldContain("DateViewerSelectionUnit SelectionUnit");
         model.ShouldNotContain("RangeStartSelectedDate");
         model.ShouldNotContain("RangeEndSelectedDate");
-        var page = File.ReadAllText(Path.Combine(root, "controlgallery/AtomUIGallery/ShowCases/DataEntry/DateViewer/Views/DateViewerShowCase.axaml"));
+        var page = File.ReadAllText(Path.Combine(root, "controlgallery/AtomUIGallery/ShowCases/DataDisplay/DateViewer/Views/DateViewerShowCase.axaml"));
         foreach (var unit in new[] { "Date", "Week", "Month", "Quarter", "Year" })
             page.ShouldContain($"DateViewerShowCaseLangResource Unit{unit}");
         page.ShouldContain("<atom:RangeDateViewer");

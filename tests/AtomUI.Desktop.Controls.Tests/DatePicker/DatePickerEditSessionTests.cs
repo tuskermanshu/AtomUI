@@ -148,15 +148,21 @@ public class DatePickerEditSessionTests
     }
 
     [Fact]
-    public void Incomplete_Range_Close_Requests_Input_Clear_Without_Blanket_Candidate_Rollback()
+    public void Incomplete_Range_Close_Discards_Candidate_And_Preserves_Confirmed_Endpoint()
     {
-        var input = new DatePickerEditInput { IsRange = true, RequestedConfirmation = true };
+        var confirmedEnd = new DateTime(2026, 7, 25);
+        var input = new DatePickerEditInput
+        {
+            IsRange = true,
+            RequestedConfirmation = true,
+            Committed = new DateViewerRange(null, confirmedEnd),
+            ActivePart = DateRangeActivePart.Start
+        };
         var session = Open(input);
-        var candidate = Apply(session, new DatePickerEditAction.ChooseDate(new DateTime(2026, 7, 20)));
+        Apply(session, new DatePickerEditAction.ChooseDate(new DateTime(2026, 7, 20)));
         var result = Close(session, DatePickerCloseReason.Outside);
-        result.CommitKind.ShouldBe(DatePickerCommitKind.Clear);
-        result.CommitValue.ShouldBe(new DateViewerRange(null, null));
-        result.Draft.ShouldBe(candidate.Draft);
+        result.CommitKind.ShouldBe(DatePickerCommitKind.None);
+        result.Draft.ShouldBe(input.Committed);
     }
 
     private static object Open(DatePickerEditInput input)

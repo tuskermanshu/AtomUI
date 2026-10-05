@@ -6,7 +6,10 @@ namespace AtomUI.Desktop.Controls.Localization;
 public enum DateViewerLangResourceKind
 {
     PreviousPeriod,
+    PreviousPage,
     NextPeriod,
+    NextPage,
     ChoosePeriod,
-    Week
+    Week,
+    Today
 }

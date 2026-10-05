@@ -67,6 +67,12 @@
         <target state="translated">DataGrid 数据表格</target>
       </segment>
     </unit>
+    <unit id="DataDisplay_DateViewer">
+      <segment>
+        <source>DateViewer</source>
+        <target state="translated">日期面板</target>
+      </segment>
+    </unit>
     <unit id="DataDisplay_Descriptions">
       <segment>
         <source>Descriptions</source>
@@ -185,12 +191,6 @@
       <segment>
         <source>ColorPicker</source>
         <target state="translated">ColorPicker 颜色选择器</target>
-      </segment>
-    </unit>
-    <unit id="DataEntry_DateViewer">
-      <segment>
-        <source>DateViewer</source>
-        <target state="translated">日期面板</target>
       </segment>
     </unit>
     <unit id="DataEntry_DatePicker">

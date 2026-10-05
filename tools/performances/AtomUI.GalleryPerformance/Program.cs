@@ -393,8 +393,8 @@ internal static class Program
             ["datepicker"] = new(
                 "DatePickerShowCase",
                 DatePickerViewModel.ID,
-                "AtomUIGallery.ShowCases.Views.DatePickerShowCase",
-                "controlgallery/AtomUIGallery/ShowCases/Views/DataEntry/DatePickerShowCase.axaml",
+                "AtomUIGallery.ShowCases.DatePicker.DatePickerShowCase",
+                "controlgallery/AtomUIGallery/ShowCases/DataEntry/DatePicker/Views/DatePickerShowCase.axaml",
                 stats => stats.DatePickerCount > 0 || stats.RangeDatePickerCount > 0),
             ["timepicker"] = new(
                 "TimePickerShowCase",

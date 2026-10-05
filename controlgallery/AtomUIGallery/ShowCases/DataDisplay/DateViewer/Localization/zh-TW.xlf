@@ -15,8 +15,8 @@
     </unit>
     <unit id="ComponentCategory">
       <segment>
-        <source>Data Entry</source>
-        <target state="translated">資料輸入</target>
+        <source>Data Display</source>
+        <target state="translated">資料展示</target>
       </segment>
     </unit>
     <unit id="ComponentStatusStable">
@@ -213,8 +213,8 @@
     </unit>
     <unit id="SemanticContentDescription">
       <segment>
-        <source>One panel for a value; one or two synchronized panels for a range.</source>
-        <target state="translated">單值一個面板，範圍一個或兩個同步面板。</target>
+        <source>The single panel for browsing and selecting dates.</source>
+        <target state="translated">用於瀏覽與選擇日期的單一面板。</target>
       </segment>
     </unit>
     <unit id="SemanticCellDescription">
@@ -227,6 +227,12 @@
       <segment>
         <source>Typed template content within the interactive cell.</source>
         <target state="translated">互動儲存格內的強型別範本內容。</target>
+      </segment>
+    </unit>
+    <unit id="SemanticFooterDescription">
+      <segment>
+        <source>The Today action below the date panel; shown for standalone date selection.</source>
+        <target state="translated">日期面板下方的「今天」操作；僅在獨立日期選取時顯示。</target>
       </segment>
     </unit>
   </file>

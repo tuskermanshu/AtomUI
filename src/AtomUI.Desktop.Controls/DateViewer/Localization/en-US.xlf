@@ -11,6 +11,16 @@
         <source>Next period</source>
       </segment>
     </unit>
+    <unit id="PreviousPage">
+      <segment>
+        <source>Previous page</source>
+      </segment>
+    </unit>
+    <unit id="NextPage">
+      <segment>
+        <source>Next page</source>
+      </segment>
+    </unit>
     <unit id="ChoosePeriod">
       <segment>
         <source>Choose month or year</source>
@@ -19,6 +29,11 @@
     <unit id="Week">
       <segment>
         <source>Week</source>
+      </segment>
+    </unit>
+    <unit id="Today">
+      <segment>
+        <source>Today</source>
       </segment>
     </unit>
   </file>

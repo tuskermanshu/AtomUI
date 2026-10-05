@@ -17,8 +17,14 @@
         <ControlTheme x:Key="CalendarDatePanelTheme" TargetType="viewer:DatePanel">
             <ControlTheme.BasedOn><themes:DatePanelTheme TargetType="viewer:DatePanel" /></ControlTheme.BasedOn>
             <Setter Property="Width" Value="NaN" />
-            <Style Selector="^[Presentation=Compact] /template/ Grid#PART_WeekHeader > TextBlock">
-                <Setter Property="MinHeight" Value="{atom:SharedTokenResource FontHeightSM}" />
+            <Setter Property="Padding" Value="0" />
+            <Style Selector="^[Presentation=Compact]">
+                <Setter Property="WeekHeaderMinHeight" Value="{atom:SharedTokenResource FontHeightSM}" />
+            </Style>
+            <Style Selector="^[Presentation=Content]">
+                <Setter Property="WeekHeaderTextAlignment" Value="Right" />
+                <Setter Property="WeekHeaderMinHeight" Value="{atom:CalendarTokenResource WeekHeaderHeight}" />
+                <Setter Property="WeekHeaderPadding" Value="{atom:CalendarTokenResource WeekHeaderPadding}" />
             </Style>
         </ControlTheme>
         </ResourceDictionary>
@@ -53,7 +59,8 @@
                                ClipToBounds="True">
                         <Border DockPanel.Dock="Top"
                                 Height="{atom:SharedTokenResource LineWidth}"
-                                Background="{atom:SharedTokenResource ColorSplit}" />
+                                Background="{atom:SharedTokenResource ColorSplit}"
+                                IsVisible="{TemplateBinding Fullscreen, Converter={x:Static BoolConverters.Not}}" />
                         <Border DockPanel.Dock="Top"
                                 Height="{atom:SharedTokenResource UniformlyPaddingXS}" />
                         <Border DockPanel.Dock="Bottom"
@@ -72,7 +79,7 @@
                                                    VerticalAlignment="Stretch"
                                                    ZIndex="0" />
                             <calendar:CalendarRangeBarPanel Name="PART_RangeBarPanel"
-                                                            LayoutSource="{Binding #PART_DateViewer}"
+                                                            LayoutSource="{TemplateBinding EffectiveDateViewer}"
                                                             Mode="{TemplateBinding Mode}"
                                                             Fullscreen="{TemplateBinding Fullscreen}"
                                                             RangeBars="{TemplateBinding RangeBars}"
@@ -99,8 +106,8 @@
         <Setter Property="Background" Value="{atom:CalendarTokenResource FullPanelBg}" />
     </Style>
     <Style Selector="^:mini /template/ controls|DateViewer">
-        <Setter Property="Height" Value="{Binding EffectiveMiniContentHeight, RelativeSource={RelativeSource TemplatedParent}}" />
-        <Setter Property="MaxHeight" Value="{Binding EffectiveMiniContentHeight, RelativeSource={RelativeSource TemplatedParent}}" />
+        <Setter Property="Height" Value="{TemplateBinding EffectiveMiniContentHeight}" />
+        <Setter Property="MaxHeight" Value="{TemplateBinding EffectiveMiniContentHeight}" />
     </Style>
 
     <Style Selector="^:fullscreen">

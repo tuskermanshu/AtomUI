@@ -13,6 +13,18 @@
         <target state="translated">下一周期</target>
       </segment>
     </unit>
+    <unit id="PreviousPage">
+      <segment>
+        <source>Previous page</source>
+        <target state="translated">上一页</target>
+      </segment>
+    </unit>
+    <unit id="NextPage">
+      <segment>
+        <source>Next page</source>
+        <target state="translated">下一页</target>
+      </segment>
+    </unit>
     <unit id="ChoosePeriod">
       <segment>
         <source>Choose month or year</source>
@@ -23,6 +35,12 @@
       <segment>
         <source>Week</source>
         <target state="translated">周</target>
+      </segment>
+    </unit>
+    <unit id="Today">
+      <segment>
+        <source>Today</source>
+        <target state="translated">今天</target>
       </segment>
     </unit>
   </file>

@@ -197,6 +197,7 @@ public class DatePickerSemanticPartTests
 
         AssertMarkers(GetRepoFile(DateViewerThemePath), [
             "Classes.semantic-header:DateViewerHeader",
+            "Classes.semantic-footer:PixelAlignedBorder",
             "Classes.semantic-body:Panel",
             "Classes.semantic-content:DatePanel"
         ]);

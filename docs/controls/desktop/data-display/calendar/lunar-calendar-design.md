@@ -63,6 +63,7 @@ Calendar 拥有值/模式与事件；农历投影拥有缓存与 Provider revisi
 
 农历增量资源只拥有次级字号/行高/颜色、日期/月 Cell 内容尺寸、周末/节假日标记和 overlay 避让。
 根、Header 和普通选中视觉由 Calendar/DateViewer 表达，不复制完整普通面板 Token。
+农历 Content 日期选中时使用主色值框，公历与农历副文字统一使用浅色；默认副文字颜色由内容主题的 Style 提供，使选中状态能够覆盖。
 根主题不穿透子 Cell；专用主题维护次级内容。Semantic 使用 Calendar 家族与统一 Cell 的真实 route。
 
 ## 8. AOT 与验证

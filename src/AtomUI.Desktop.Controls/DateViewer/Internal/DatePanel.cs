@@ -8,7 +8,9 @@ using Avalonia.VisualTree;
 using Avalonia.Automation;
 using AtomUI.Desktop.Controls.Localization;
 using AtomUI.Controls;
+using AtomUI.Utils;
 using Avalonia.Input.Raw;
+using Avalonia.Media;
 using AvaloniaGrid = Avalonia.Controls.Grid;
 using DateViewerControl = AtomUI.Desktop.Controls.DateViewer;
 
@@ -26,6 +28,12 @@ internal sealed class DatePanel : TemplatedControl
     public static readonly StyledProperty<DateViewerPresentation> PresentationProperty = DateViewerControl.PresentationProperty.AddOwner<DatePanel>();
     public static readonly StyledProperty<IDataTemplate?> DefaultFullCellTemplateProperty = DateViewerControl.DefaultFullCellTemplateProperty.AddOwner<DatePanel>();
     public static readonly StyledProperty<Avalonia.Styling.ControlTheme?> CellThemeProperty = DateViewerControl.CellThemeProperty.AddOwner<DatePanel>();
+    public static readonly StyledProperty<TextAlignment> WeekHeaderTextAlignmentProperty =
+        AvaloniaProperty.Register<DatePanel, TextAlignment>(nameof(WeekHeaderTextAlignment), TextAlignment.Center);
+    public static readonly StyledProperty<double> WeekHeaderMinHeightProperty =
+        AvaloniaProperty.Register<DatePanel, double>(nameof(WeekHeaderMinHeight));
+    public static readonly StyledProperty<Thickness> WeekHeaderPaddingProperty =
+        AvaloniaProperty.Register<DatePanel, Thickness>(nameof(WeekHeaderPadding));
 
     public DatePanelSession? Session
     {
@@ -43,6 +51,9 @@ internal sealed class DatePanel : TemplatedControl
     public DateViewerPresentation Presentation { get => GetValue(PresentationProperty); set => SetValue(PresentationProperty, value); }
     public IDataTemplate? DefaultFullCellTemplate { get => GetValue(DefaultFullCellTemplateProperty); set => SetValue(DefaultFullCellTemplateProperty, value); }
     public Avalonia.Styling.ControlTheme? CellTheme { get => GetValue(CellThemeProperty); set => SetValue(CellThemeProperty, value); }
+    public TextAlignment WeekHeaderTextAlignment { get => GetValue(WeekHeaderTextAlignmentProperty); set => SetValue(WeekHeaderTextAlignmentProperty, value); }
+    public double WeekHeaderMinHeight { get => GetValue(WeekHeaderMinHeightProperty); set => SetValue(WeekHeaderMinHeightProperty, value); }
+    public Thickness WeekHeaderPadding { get => GetValue(WeekHeaderPaddingProperty); set => SetValue(WeekHeaderPaddingProperty, value); }
 
     private AvaloniaGrid? _headers;
     private AvaloniaGrid? _cells;
@@ -96,7 +107,7 @@ internal sealed class DatePanel : TemplatedControl
                 SubscribeSession();
             Realize();
         }
-        else if (change.Property == PanelIndexProperty || change.Property == CellTemplateProperty || change.Property == FullCellTemplateProperty || change.Property == DefaultFullCellTemplateProperty || change.Property == CellThemeProperty || change.Property == PresentationProperty)
+        else if (change.Property == PanelIndexProperty || change.Property == CellTemplateProperty || change.Property == FullCellTemplateProperty || change.Property == DefaultFullCellTemplateProperty || change.Property == CellThemeProperty || change.Property == PresentationProperty || change.Property == WeekHeaderTextAlignmentProperty || change.Property == WeekHeaderMinHeightProperty || change.Property == WeekHeaderPaddingProperty)
             Realize();
     }
 
@@ -108,6 +119,7 @@ internal sealed class DatePanel : TemplatedControl
         _subscribedSession = Session;
         if (_subscribedSession is not null)
         {
+            _subscribedSession.ConnectPanel(this);
             _subscribedSession.Changed += OnSessionChanged;
             _subscribedSession.FocusRequested += OnFocusRequested;
         }
@@ -119,6 +131,7 @@ internal sealed class DatePanel : TemplatedControl
             return;
         _subscribedSession.Changed -= OnSessionChanged;
         _subscribedSession.FocusRequested -= OnFocusRequested;
+        _subscribedSession.DisconnectPanel(this);
         _subscribedSession = null;
     }
 
@@ -148,10 +161,19 @@ internal sealed class DatePanel : TemplatedControl
             while (_headers.Children.Count > model.ColumnHeaders.Count)
                 _headers.Children.RemoveAt(_headers.Children.Count - 1);
             while (_headers.Children.Count < model.ColumnHeaders.Count)
-                _headers.Children.Add(new TextBlock { TextAlignment = Avalonia.Media.TextAlignment.Center });
+                _headers.Children.Add(new TextBlock { VerticalAlignment = VerticalAlignment.Center });
             for (var index = 0; index < model.ColumnHeaders.Count; index++)
             {
-                ((TextBlock)_headers.Children[index]).Text = model.ColumnHeaders[index];
+                var header = (TextBlock)_headers.Children[index];
+                // Runtime-created headers have no TemplatedParent, so ControlTheme cannot select them through /template/.
+                // The theme sets these metrics on DatePanel; the panel applies them to its pooled headers.
+                if (header.TextAlignment != WeekHeaderTextAlignment)
+                    header.TextAlignment = WeekHeaderTextAlignment;
+                if (!MathUtils.AreClose(header.MinHeight, WeekHeaderMinHeight))
+                    header.MinHeight = WeekHeaderMinHeight;
+                if (header.Padding != WeekHeaderPadding)
+                    header.Padding = WeekHeaderPadding;
+                header.Text = model.ColumnHeaders[index];
                 var automationName = index == 0 && model.ColumnHeaders[index].Length == 0 && session.Input.ShowWeek
                     ? GetWeekAutomationName() : null;
                 AutomationProperties.SetName(_headers.Children[index], automationName);
@@ -269,17 +291,26 @@ internal sealed class DatePanel : TemplatedControl
 
     private void HandleRawPointer(RawInputEventArgs args)
     {
-        if (args is not RawPointerEventArgs pointer || Session is null)
+        if (args is not RawPointerEventArgs pointer || Session is not { HoveredValue: not null } session)
             return;
-        var root = TopLevel.GetTopLevel(this);
-        var isInsideSharedPanel = pointer.Type is not (RawPointerEventType.LeaveWindow or RawPointerEventType.TouchCancel) &&
-                                  root?.GetVisualDescendants().OfType<DatePanel>().Any(panel =>
-                                      ReferenceEquals(panel.Session, Session) && panel.IsVisible &&
-                                      panel.TryGetInputPosition(pointer, out var position) &&
-                                      new Rect(panel.Bounds.Size).Contains(position)) == true;
-        if (!isInsideSharedPanel && Session.HoveredValue.HasValue)
+        var isInsideSharedPanel = false;
+        if (pointer.Type is not (RawPointerEventType.LeaveWindow or RawPointerEventType.TouchCancel))
         {
-            Session.Apply(new DatePanelAction.Hover(null));
+            var panels = session.ConnectedPanels;
+            for (var index = 0; index < panels.Count; index++)
+            {
+                var panel = panels[index];
+                if (panel.IsVisible && panel.TryGetInputPosition(pointer, out var position) &&
+                    new Rect(panel.Bounds.Size).Contains(position))
+                {
+                    isInsideSharedPanel = true;
+                    break;
+                }
+            }
+        }
+        if (!isInsideSharedPanel && session.HoveredValue.HasValue)
+        {
+            session.Apply(new DatePanelAction.Hover(null));
         }
     }
 

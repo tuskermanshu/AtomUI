@@ -5,6 +5,9 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using Avalonia.Headless;
+using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using System.Reflection;
@@ -77,6 +80,9 @@ public class LunarCalendarRenderTests
             secondary.Text.ShouldBe(((LunarCalendarCellContext)cell.Context!).SecondaryText);
             secondary.Text.ShouldNotBeEmpty();
             secondary.IsVisible.ShouldBeTrue();
+            var lightText = BrushColor(GetThemeResource<IBrush>(SharedTokenKind.ColorTextLightSolid));
+            BrushColor(value.Foreground).ShouldBe(lightText);
+            BrushColor(secondary.Foreground).ShouldBe(lightText);
         }
         finally
         {
@@ -135,9 +141,46 @@ public class LunarCalendarRenderTests
             var secondary = cell.GetVisualDescendants()
                 .OfType<AtomUI.Desktop.Controls.TextBlock>()
                 .Single(text => text.Name == "PART_SecondaryText");
+            var value = cell.GetVisualDescendants()
+                .OfType<AtomUI.Desktop.Controls.TextBlock>()
+                .Single(text => text.Name == "PART_Value" && text.IsVisible);
 
             presenter.HorizontalAlignment.ShouldBe(Avalonia.Layout.HorizontalAlignment.Right);
             secondary.TextAlignment.ShouldBe(Avalonia.Media.TextAlignment.Right);
+            var primary = BrushColor(GetThemeResource<IBrush>(SharedTokenKind.ColorPrimary));
+            var lightText = BrushColor(GetThemeResource<IBrush>(SharedTokenKind.ColorTextLightSolid));
+            var selectedInner = GetCellInner(cell);
+            BrushColor(selectedInner.Background).ShouldBe(primary);
+            selectedInner.CornerRadius.TopLeft.ShouldBeGreaterThan(0);
+            BrushColor(value.Foreground).ShouldBe(lightText);
+            BrushColor(secondary.Foreground).ShouldBe(lightText);
+
+            var pressedCell = calendar.GetVisualDescendants()
+                .OfType<AtomUI.Desktop.Controls.Internal.DateViewer.DateViewerCell>()
+                .Single(item => item.Model?.Value == new DateTime(2024, 2, 14));
+            var normalCell = calendar.GetVisualDescendants()
+                .OfType<AtomUI.Desktop.Controls.Internal.DateViewer.DateViewerCell>()
+                .Single(item => item.Model?.Value == new DateTime(2024, 2, 15));
+            var center = pressedCell.TranslatePoint(
+                new Point(pressedCell.Bounds.Width / 2, pressedCell.Bounds.Height / 2), window)!.Value;
+            window.MouseMove(center);
+            window.MouseDown(center, MouseButton.Left);
+            Dispatcher.UIThread.RunJobs();
+            calendar.Value.ShouldBe(new DateTime(2024, 2, 10));
+            BrushColor(GetCellInner(pressedCell).GetBaseValue(Border.BorderBrushProperty).Value)
+                .ShouldBe(BrushColor(GetCellInner(normalCell).GetBaseValue(Border.BorderBrushProperty).Value));
+            window.MouseUp(center, MouseButton.Left);
+            Dispatcher.UIThread.RunJobs();
+            calendar.Value.ShouldBe(new DateTime(2024, 2, 14));
+            var newSelected = calendar.GetVisualDescendants()
+                .OfType<AtomUI.Desktop.Controls.Internal.DateViewer.DateViewerCell>()
+                .Single(item => item.Model?.Value == calendar.Value);
+            BrushColor(GetCellInner(newSelected).GetBaseValue(Border.BackgroundProperty).Value)
+                .ShouldBe(primary);
+            var selectedContent = newSelected.GetVisualDescendants().OfType<LunarCalendarCellContent>().Single();
+            BrushColor(selectedContent.GetVisualDescendants().OfType<AtomUI.Desktop.Controls.TextBlock>()
+                    .Single(text => text.Name == "PART_SecondaryText").Foreground)
+                .ShouldBe(lightText);
         }
         finally
         {
@@ -287,6 +330,8 @@ public class LunarCalendarRenderTests
         value.ShouldBeAssignableTo<T>();
         return (T)value!;
     }
+
+    private static Color? BrushColor(IBrush? brush) => (brush as ISolidColorBrush)?.Color;
 
     private static AvaloniaWindow Show(Control content, double width = 420, double height = 420)
     {

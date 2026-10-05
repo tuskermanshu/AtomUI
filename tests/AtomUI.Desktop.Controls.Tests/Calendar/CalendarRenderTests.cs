@@ -358,6 +358,13 @@ public class CalendarRenderTests
             // 强制重新应用模板：旧 CalendarView/Header 订阅应被解绑
             calendar.ApplyTemplate();
             Dispatcher.UIThread.RunJobs();
+            var currentDateViewer = calendar.GetVisualDescendants()
+                .OfType<AtomUI.Desktop.Controls.DateViewer>()
+                .Single();
+            calendar.GetVisualDescendants()
+                .OfType<CalendarRangeBarPanel>()
+                .Single()
+                .LayoutSource.ShouldBeSameAs(currentDateViewer);
 
             var fired = 0;
             calendar.Selected += (_, _) => fired++;
@@ -450,6 +457,10 @@ public class CalendarRenderTests
                 .FirstOrDefault(c => c.Classes.Contains(":focused"));
             focusedCell.ShouldNotBeNull();
             focusedCell!.Model!.Value.ShouldBe(new DateTime(2026, 7, 15));
+            var focusedInner = GetCellBorder(focusedCell, "PART_CellInner");
+            BrushShouldHaveSameColor(
+                focusedInner.GetBaseValue(Border.BorderBrushProperty).Value,
+                GetThemeResource<IBrush>(SharedTokenKind.ColorPrimary));
         }
         finally
         {
@@ -495,13 +506,19 @@ public class CalendarRenderTests
             var view = calendar.GetVisualDescendants()
                 .OfType<AtomUI.Desktop.Controls.Internal.DateViewer.DatePanel>()
                 .First();
+            var dateViewer = calendar.GetVisualDescendants()
+                .OfType<AtomUI.Desktop.Controls.DateViewer>()
+                .Single();
+            var rangeBarPanel = calendar.GetVisualDescendants()
+                .OfType<CalendarRangeBarPanel>()
+                .Single();
+            rangeBarPanel.LayoutSource.ShouldBeSameAs(dateViewer);
             view.Presentation.ShouldBe(DateViewerPresentation.Content);
-
 
             calendar.Fullscreen = false;
             Dispatcher.UIThread.RunJobs();
+            rangeBarPanel.LayoutSource.ShouldBeSameAs(dateViewer);
             view.Presentation.ShouldBe(DateViewerPresentation.Compact);
-
         }
         finally
         {
@@ -673,6 +690,17 @@ public class CalendarRenderTests
             BrushShouldHaveSameColor(
                 selectedValue.Foreground,
                 GetThemeResource<IBrush>(SharedTokenKind.ColorTextLightSolid));
+
+            var nextDate = new DateTime(2026, 7, 16);
+            var nextCell = calendar.GetVisualDescendants().OfType<CalendarCellControl>()
+                .Single(cell => cell.Model?.Value == nextDate && cell.Model.IsInView);
+            var valueTopBefore = GetCellValue(nextCell).TranslatePoint(default, window)!.Value.Y;
+            nextCell.Activate();
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+            calendar.Value.ShouldBe(nextDate);
+            var valueTopAfter = GetCellValue(nextCell).TranslatePoint(default, window)!.Value.Y;
+            valueTopAfter.ShouldBe(valueTopBefore, 0.5);
         }
         finally
         {
@@ -704,11 +732,13 @@ public class CalendarRenderTests
 
             var todayCell = cells.Single(cell => cell.Model is { IsToday: true });
             var todayInner = GetCellBorder(todayCell, "PART_CellInner");
+            var todayOutline = GetCellBorder(todayCell, "PART_CellOutline");
             BrushShouldHaveSameColor(
-                todayInner.BorderBrush,
+                todayOutline.BorderBrush,
                 GetThemeResource<IBrush>(SharedTokenKind.ColorPrimary));
-            todayInner.BorderThickness.ShouldBe(
+            todayOutline.BorderThickness.ShouldBe(
                 GetThemeResource<Thickness>(SharedTokenKind.BorderThickness));
+            todayInner.BorderThickness.ShouldBe(default);
 
             var outsideCell = cells.First(cell => cell.Model is
                 { Kind: DateViewerCellType.Date, IsInView: false });

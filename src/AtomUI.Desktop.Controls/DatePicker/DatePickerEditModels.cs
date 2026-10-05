@@ -2,7 +2,7 @@ using AtomUI.Desktop.Controls.Internal.DateViewer;
 
 namespace AtomUI.Desktop.Controls;
 
-internal enum DatePickerCommitKind { None, Partial, Final, Clear }
+internal enum DatePickerCommitKind { None, Partial, Final }
 internal enum DatePickerCloseReason { Accepted, Outside, Escape, Dismissed, OwnerDetached }
 
 internal sealed record DatePickerEditInput

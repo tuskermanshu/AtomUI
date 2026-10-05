@@ -7,11 +7,20 @@
     <unit id="NextPeriod">
       <segment><source>Next period</source><target state="final">Próximo período</target></segment>
     </unit>
+    <unit id="PreviousPage">
+      <segment><source>Previous page</source><target state="final">Página anterior</target></segment>
+    </unit>
+    <unit id="NextPage">
+      <segment><source>Next page</source><target state="final">Próxima página</target></segment>
+    </unit>
     <unit id="ChoosePeriod">
       <segment><source>Choose month or year</source><target state="final">Escolher mês ou ano</target></segment>
     </unit>
     <unit id="Week">
       <segment><source>Week</source><target state="final">Semana</target></segment>
+    </unit>
+    <unit id="Today">
+      <segment><source>Today</source><target state="final">Hoje</target></segment>
     </unit>
   </file>
 </xliff>

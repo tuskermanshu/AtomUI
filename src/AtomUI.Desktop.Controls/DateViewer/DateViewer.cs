@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Windows.Input;
 using AtomUI.Desktop.Controls.Internal.DateViewer;
 using AtomUI.Localization;
 using Avalonia;
@@ -65,6 +66,10 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
     internal DatePanelSession PanelSession => _session;
     internal static readonly DirectProperty<DateViewer, DateViewerHeaderContext?> HeaderContextProperty = AvaloniaProperty.RegisterDirect<DateViewer, DateViewerHeaderContext?>(nameof(HeaderContext), control => control.HeaderContext);
     internal DateViewerHeaderContext? HeaderContext => _headerContext;
+    internal static readonly DirectProperty<DateViewer, bool> IsDefaultFooterVisibleProperty = AvaloniaProperty.RegisterDirect<DateViewer, bool>(nameof(IsDefaultFooterVisible), control => control.IsDefaultFooterVisible);
+    internal bool IsDefaultFooterVisible => _host is null && SelectionUnit == DateViewerSelectionUnit.Date;
+    internal static readonly DirectProperty<DateViewer, ICommand> TodayCommandProperty = AvaloniaProperty.RegisterDirect<DateViewer, ICommand>(nameof(TodayCommand), control => control.TodayCommand);
+    internal ICommand TodayCommand => _todayCommand;
     #endregion
 
     private readonly DatePanelSession _session;
@@ -75,6 +80,7 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
     internal event EventHandler? CellLayoutChanged;
     private DatePanelInput? _headerInput;
     private DateViewerHeaderContext? _headerContext;
+    private readonly DateViewerCommand _todayCommand;
     private DateViewerPanelKind _panelKind;
     private CultureInfo _culture = CultureInfo.CurrentCulture;
     private ILanguageManager? _languageManager;
@@ -83,6 +89,7 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
 
     public DateViewer()
     {
+        _todayCommand = new DateViewerCommand(_ => SelectToday(), _ => CanSelectToday());
         SetCurrentValue(DisplayDateProperty, DateTime.Today);
         _session = new DatePanelSession(this);
         _session.Changed += OnSessionChanged;
@@ -94,6 +101,9 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
         base.OnPropertyChanged(change);
         if (change.Property == SelectionUnitProperty)
         {
+            RaisePropertyChanged(IsDefaultFooterVisibleProperty,
+                _host is null && change.GetOldValue<DateViewerSelectionUnit>() == DateViewerSelectionUnit.Date,
+                IsDefaultFooterVisible);
             var old = _panelKind;
             _panelKind = TargetPanel(SelectionUnit);
             RaisePropertyChanged(PanelKindProperty, old, _panelKind);
@@ -102,6 +112,9 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
             change.Property == MinDateProperty || change.Property == MaxDateProperty || change.Property == DisabledDateProperty ||
             change.Property == FirstDayOfWeekProperty || change.Property == ShowWeekProperty)
             _session?.UpdateInput();
+        if (change.Property == SelectionUnitProperty || change.Property == MinDateProperty ||
+            change.Property == MaxDateProperty || change.Property == DisabledDateProperty)
+            _todayCommand?.RaiseCanExecuteChanged();
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -209,7 +222,10 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
         if (ReferenceEquals(_host, host))
             return;
         var oldKind = PanelKind;
+        var oldFooterVisible = IsDefaultFooterVisible;
         _host = host;
+        RaisePropertyChanged(IsDefaultFooterVisibleProperty, oldFooterVisible, IsDefaultFooterVisible);
+        _todayCommand.RaiseCanExecuteChanged();
         _session.ResetInteraction();
         RaisePropertyChanged(PanelKindProperty, oldKind, PanelKind);
     }
@@ -228,6 +244,24 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
         _session.SetAutomationNameFactory(factory);
 
     internal void RefreshContent() => _session.RefreshContent();
+
+    private bool CanSelectToday()
+    {
+        var today = DateTime.Today;
+        return IsDefaultFooterVisible &&
+               (MinDate is null || today >= MinDate.Value.Date) &&
+               (MaxDate is null || today <= MaxDate.Value.Date) &&
+               DisabledDate?.Invoke(today) != true;
+    }
+
+    private void SelectToday()
+    {
+        if (!CanSelectToday())
+            return;
+        var today = DateTime.Today;
+        ((IDatePanelHost)this).NavigateTo(today, DateViewerPanelKind.Date);
+        _session.Apply(new DatePanelAction.Activate(today, DateViewerCellType.Date));
+    }
 
     DatePanelInput IDatePanelHost.ReadInput() => _host?.ReadInput() ?? new()
     {

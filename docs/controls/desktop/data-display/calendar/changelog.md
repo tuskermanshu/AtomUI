@@ -2,6 +2,17 @@
 
 本文档记录 Calendar 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-10-04
+
+- Theme
+  - Mini DateViewer 高度改用模板绑定读取 Calendar 的有效展示资源，消除 IDE 对普通绑定路径的无法解析提示，保持 Gregorian 与 LunarCalendar 的动态尺寸。
+  - RangeBarPanel 通过 Calendar 已拥有的 DateViewer 模板部件只读属性与 TemplateBinding 获取布局源，消除模板兄弟节点名称绑定的 IDE 解析提示。
+  - 鼠标按下不再触发日期焦点描边，键盘可见焦点仍有提示；LunarCalendar Content 选中日期改为主色背景，公历和农历文字统一使用浅色。
+  - Mini 日期 Today/焦点边框改为独立覆盖层，选中与焦点切换不再缩小值框内容区或移动日期文字。
+  - Fullscreen 面板移除顶部横线，Mini 保留；Fullscreen 星期标题右对齐，并使用 Ant Design 6.0 的行高与右侧/底部留白。
+- Token
+  - CalendarToken 增加 WeekHeaderHeight 与 WeekHeaderPadding，按共享尺寸资源计算 Fullscreen 星期标题布局。
+
 ## 2026-10-03
 
 - Architecture
