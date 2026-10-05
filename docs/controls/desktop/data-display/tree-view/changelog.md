@@ -3,6 +3,11 @@
 本文档记录 TreeView 控件级设计、API、主题契约、Token 和实现结构的变化。
 它不替代仓库根目录 CHANGELOG.md，也不作为正式版本发布说明。
 
+## 2026-10-03
+
+- Implementation
+  - Establish drag state synchronously and finish it before completion callbacks. Release previews through their actual visual parent; detach cancels pending drops and ends the drag without queued access to a cleared node.
+
 ## 2026-08-25
 
 - Docs

@@ -2,6 +2,11 @@
 
 本文档记录 ButtonSpinner 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-10-03
+
+- Implementation
+  - Scope floating-handle hover to the live owner input root and local bounds; reset hover on window leave and detach without changing inline or floating handle geometry.
+
 ## 2026-09-16
 
 - Behavior

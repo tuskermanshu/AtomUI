@@ -2,6 +2,7 @@ using System.Xml.Linq;
 using AtomUI;
 using AtomUI.Controls;
 using AtomUI.Controls.Primitives;
+using AtomUI.Desktop.Controls.Internal.DateViewer;
 using AtomUI.Desktop.Controls.Primitives;
 using AtomUI.Theme;
 using AtomUI.Theme.Schema;
@@ -9,7 +10,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
-using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -31,9 +31,9 @@ public class DatePickerSemanticPartTests
     private const string ClearClass = "semantic-clear";
     private const string PopupRootClass = "semantic-popup-root";
     private const string PopupContainerClass = "semantic-popup-container";
-    private const string PopupHeaderClass = "semantic-popup-header";
-    private const string PopupBodyClass = "semantic-popup-body";
-    private const string PopupContentClass = "semantic-popup-content";
+    private const string PopupHeaderClass = "semantic-header";
+    private const string PopupBodyClass = "semantic-body";
+    private const string PopupContentClass = "semantic-content";
     private const string CellClass = "semantic-cell";
     private const string PopupFooterClass = "semantic-popup-footer";
 
@@ -45,14 +45,16 @@ public class DatePickerSemanticPartTests
         "src/AtomUI.Desktop.Controls/Primitives/InfoPickerInput/Themes/PickerClearUpButtonTheme.axaml";
     private const string DatePickerPresenterThemePath =
         "src/AtomUI.Desktop.Controls/DatePicker/Themes/DatePickerPresenterTheme.axaml";
-    private const string DualMonthPresenterThemePath =
-        "src/AtomUI.Desktop.Controls/DatePicker/Themes/DualMonthRangeDatePickerPresenterTheme.axaml";
-    private const string TimedRangePresenterThemePath =
-        "src/AtomUI.Desktop.Controls/DatePicker/Themes/TimedRangeDatePickerPresenterTheme.axaml";
-    private const string CalendarItemThemePath =
-        "src/AtomUI.Desktop.Controls/DatePicker/Themes/CalendarView/CalendarItemTheme.axaml";
-    private const string DualMonthCalendarItemThemePath =
-        "src/AtomUI.Desktop.Controls/DatePicker/Themes/CalendarView/DualMonthCalendarItemTheme.axaml";
+    private const string RangeDatePickerPresenterThemePath =
+        "src/AtomUI.Desktop.Controls/DatePicker/Themes/RangeDatePickerPresenterTheme.axaml";
+    private const string DateViewerThemePath =
+        "src/AtomUI.Desktop.Controls/DateViewer/Themes/DateViewerTheme.axaml";
+    private const string RangeDateViewerThemePath =
+        "src/AtomUI.Desktop.Controls/DateViewer/Themes/RangeDateViewerTheme.axaml";
+    private const string DatePanelThemePath =
+        "src/AtomUI.Desktop.Controls/DateViewer/Themes/DatePanelTheme.axaml";
+    private const string DateViewerCellThemePath =
+        "src/AtomUI.Desktop.Controls/DateViewer/Themes/DateViewerCellTheme.axaml";
 
     private static readonly string[] SemanticThemePaths =
     [
@@ -61,10 +63,11 @@ public class DatePickerSemanticPartTests
         PickerClearUpButtonThemePath,
         RangeInfoPickerInputHostPath,
         DatePickerPresenterThemePath,
-        DualMonthPresenterThemePath,
-        TimedRangePresenterThemePath,
-        CalendarItemThemePath,
-        DualMonthCalendarItemThemePath
+        RangeDatePickerPresenterThemePath,
+        DateViewerThemePath,
+        RangeDateViewerThemePath,
+        DatePanelThemePath,
+        DateViewerCellThemePath
     ];
 
     private static readonly string[] ApprovedDatePickerPartNames =
@@ -105,13 +108,13 @@ public class DatePickerSemanticPartTests
             "/template/ .semantic-popup-root");
         AssertPart(descriptor, "popup.container", PopupContainerClass, typeof(DockPanel),
             "/template/ .semantic-popup-root >> .semantic-popup-container");
-        AssertPart(descriptor, "popup.header", PopupHeaderClass, typeof(Border),
-            "/template/ .semantic-popup-root >> .semantic-popup-header");
-        AssertPart(descriptor, "popup.body", PopupBodyClass, typeof(UniformGrid),
-            "/template/ .semantic-popup-root >> .semantic-popup-body");
-        AssertPart(descriptor, "popup.content", PopupContentClass, typeof(Avalonia.Controls.Grid),
-            "/template/ .semantic-popup-root >> .semantic-popup-content");
-        AssertPart(descriptor, "popup.cell", CellClass, typeof(Avalonia.Controls.Button),
+        AssertPart(descriptor, "popup.header", PopupHeaderClass, typeof(TemplatedControl),
+            "/template/ .semantic-popup-root >> .semantic-header");
+        AssertPart(descriptor, "popup.body", PopupBodyClass, typeof(Panel),
+            "/template/ .semantic-popup-root >> .semantic-body");
+        AssertPart(descriptor, "popup.content", PopupContentClass, typeof(TemplatedControl),
+            "/template/ .semantic-popup-root >> .semantic-content");
+        AssertPart(descriptor, "popup.cell", CellClass, typeof(TemplatedControl),
             "/template/ .semantic-popup-root >> .semantic-cell",
             SemanticPartCardinality.Multiple);
         AssertPart(descriptor, "popup.footer", PopupFooterClass, typeof(PixelAlignedBorder),
@@ -141,14 +144,15 @@ public class DatePickerSemanticPartTests
             "/template/ .semantic-popup-root");
         AssertPart(descriptor, "popup.container", PopupContainerClass, typeof(DockPanel),
             "/template/ .semantic-popup-root >> .semantic-popup-container");
-        AssertPart(descriptor, "popup.header", PopupHeaderClass, typeof(Border),
-            "/template/ .semantic-popup-root >> .semantic-popup-header");
-        AssertPart(descriptor, "popup.body", PopupBodyClass, typeof(UniformGrid),
-            "/template/ .semantic-popup-root >> .semantic-popup-body");
-        AssertPart(descriptor, "popup.content", PopupContentClass, typeof(Avalonia.Controls.Grid),
-            "/template/ .semantic-popup-root >> .semantic-popup-content",
+        AssertPart(descriptor, "popup.header", PopupHeaderClass, typeof(TemplatedControl),
+            "/template/ .semantic-popup-root >> .semantic-header",
             SemanticPartCardinality.Multiple);
-        AssertPart(descriptor, "popup.cell", CellClass, typeof(Avalonia.Controls.Button),
+        AssertPart(descriptor, "popup.body", PopupBodyClass, typeof(Panel),
+            "/template/ .semantic-popup-root >> .semantic-body");
+        AssertPart(descriptor, "popup.content", PopupContentClass, typeof(TemplatedControl),
+            "/template/ .semantic-popup-root >> .semantic-content",
+            SemanticPartCardinality.Multiple);
+        AssertPart(descriptor, "popup.cell", CellClass, typeof(TemplatedControl),
             "/template/ .semantic-popup-root >> .semantic-cell",
             SemanticPartCardinality.Multiple);
         AssertPart(descriptor, "popup.footer", PopupFooterClass, typeof(PixelAlignedBorder),
@@ -189,19 +193,30 @@ public class DatePickerSemanticPartTests
             "Classes.semantic-popup-footer:PixelAlignedBorder"
         };
         AssertMarkers(GetRepoFile(DatePickerPresenterThemePath), presenterMarkers);
-        AssertMarkers(GetRepoFile(DualMonthPresenterThemePath), presenterMarkers);
-        AssertMarkers(GetRepoFile(TimedRangePresenterThemePath), presenterMarkers);
+        AssertMarkers(GetRepoFile(RangeDatePickerPresenterThemePath), presenterMarkers);
 
-        AssertMarkers(GetRepoFile(CalendarItemThemePath), [
-            "Classes.semantic-popup-header:PixelAlignedBorder",
-            "Classes.semantic-popup-body:UniformGrid",
-            "Classes.semantic-popup-content:Grid"
+        AssertMarkers(GetRepoFile(DateViewerThemePath), [
+            "Classes.semantic-header:DateViewerHeader",
+            "Classes.semantic-footer:PixelAlignedBorder",
+            "Classes.semantic-body:Panel",
+            "Classes.semantic-content:DatePanel"
         ]);
-        AssertMarkers(GetRepoFile(DualMonthCalendarItemThemePath), [
-            "Classes.semantic-popup-header:Border",
-            "Classes.semantic-popup-body:UniformGrid",
-            "Classes.semantic-popup-content:Grid",
-            "Classes.semantic-popup-content:Grid"
+        AssertMarkers(GetRepoFile(RangeDateViewerThemePath), [
+            "Classes.semantic-header:DateViewerHeader",
+            "Classes.semantic-header:DateViewerHeader",
+            "Classes.semantic-body:StackPanel",
+            "Classes.semantic-content:DatePanel",
+            "Classes.semantic-content:DatePanel",
+            "Classes.semantic-header:DateViewerHeader",
+            "Classes.semantic-body:Panel",
+            "Classes.semantic-content:DatePanel"
+        ]);
+        AssertMarkers(GetRepoFile(DatePanelThemePath), [
+            "Classes.semantic-scope-panel:DockPanel",
+            "Classes.semantic-scope-cells:Grid"
+        ]);
+        AssertMarkers(GetRepoFile(DateViewerCellThemePath), [
+            "Classes.semantic-cell-content:ContentControl"
         ]);
     }
 
@@ -313,18 +328,21 @@ public class DatePickerSemanticPartTests
             popupRoot.ShouldNotBeNull();
 
             AssertSingleMarker<Control>(window, PopupContainerClass);
-            AssertSingleMarker<Control>(window, PopupHeaderClass);
-            AssertSingleMarker<Control>(window, PopupBodyClass);
-            AssertSingleMarker<Control>(window, PopupContentClass);
+            var viewer = window.GetVisualDescendants().OfType<DateViewer>().Single();
+            viewer.GetVisualDescendants().OfType<DateViewerHeader>().Count().ShouldBe(1);
+            viewer.GetVisualDescendants().OfType<DatePanel>().Count().ShouldBe(1);
             AssertSingleMarker<Control>(window, PopupFooterClass);
 
             var cells = CountMarkers(window, CellClass);
             cells.ShouldBeGreaterThanOrEqualTo(28);
+            window.GetVisualDescendants()
+                  .OfType<DateViewerCell>()
+                  .ShouldAllBe(cell => cell.Classes.Contains(CellClass));
         });
     }
 
     [Fact]
-    public void Range_Popup_Parts_Expose_Dual_Month_Content_Markers()
+    public void Range_Popup_Parts_Expose_Two_Shared_Panel_Content_Markers()
     {
         var rangePicker = CreatePicker<AtomUIRangeDatePicker>();
         rangePicker.IsPickerOpen = true;
@@ -332,14 +350,14 @@ public class DatePickerSemanticPartTests
 
         ShowInWindow(rangePicker, window =>
         {
-            CountMarkers(window, PopupContentClass).ShouldBe(2);
-            CountMarkers(window, PopupBodyClass).ShouldBe(1);
+            window.GetVisualDescendants().OfType<RangeDateViewer>().Single()
+                  .GetVisualDescendants().OfType<DatePanel>().Count().ShouldBe(2);
             CountMarkers(window, CellClass).ShouldBeGreaterThanOrEqualTo(56);
         });
     }
 
     [Fact]
-    public void Timed_Range_Popup_Falls_Back_To_Single_Month_Content_Markers()
+    public void Timed_Range_Popup_Exposes_One_Visible_Shared_Panel()
     {
         var rangePicker = CreatePicker<AtomUIRangeDatePicker>();
         rangePicker.IsShowTime = true;
@@ -348,7 +366,10 @@ public class DatePickerSemanticPartTests
 
         ShowInWindow(rangePicker, window =>
         {
-            CountMarkers(window, PopupContentClass).ShouldBe(1);
+            window.GetVisualDescendants().OfType<RangeDateViewer>().Single()
+                  .GetVisualDescendants().OfType<DatePanel>()
+                  .Count(control => control.IsVisible)
+                  .ShouldBe(1);
             CountMarkers(window, CellClass).ShouldBeGreaterThanOrEqualTo(28);
         });
     }

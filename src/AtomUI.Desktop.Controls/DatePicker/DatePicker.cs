@@ -1,6 +1,6 @@
-﻿using AtomUI.Desktop.Controls.CalendarView;
-using AtomUI.Desktop.Controls.Primitives;
+﻿using AtomUI.Desktop.Controls.Primitives;
 using AtomUI.Icons.AntDesign;
+using AtomUI.Localization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -166,6 +166,36 @@ public partial class DatePicker : InfoPickerInput
     }
 
     private DatePickerPresenter? _pickerPresenter;
+    private ILanguageManager? _languageManager;
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _languageManager = Application.Current is { } app ? global::AtomUI.ApplicationExtensions.GetLanguageManager(app) : null;
+        if (_languageManager is not null)
+        {
+            _languageManager.LanguageChanged += OnLanguageChanged;
+        }
+
+        Text = FormatDateTime(SelectedDateTime);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        if (_languageManager is not null)
+        {
+            _languageManager.LanguageChanged -= OnLanguageChanged;
+        }
+
+        _languageManager = null;
+        base.OnDetachedFromVisualTree(e);
+    }
+
+    private void OnLanguageChanged(object? sender, LanguageChangedEventArgs e)
+    {
+        Text = FormatDateTime(SelectedDateTime);
+        CalculatePreferredWidth();
+    }
 
     /// <summary>
     /// 清除时间选择器的值，不考虑默认值

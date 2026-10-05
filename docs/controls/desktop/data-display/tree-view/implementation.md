@@ -256,6 +256,8 @@ items 集合变化都不增删 marker；`IconEffectiveVisible`、`IsFilterMatch`
 
 ## 6. 交互与事件处理
 
+拖拽状态在发起流程中同步建立，外部拖拽事件回调返回后继续处理前确认拖拽仍有效。完成、失去捕获或控件卸载时统一释放节点状态、预览和指示器；卸载取消拖拽而不提交待定 drop。预览通过自身实际视觉父容器释放，不依赖已消失的 TreeView 根；完成通知在清理后发布，回调可以关闭窗口而不会重复清理或访问旧状态。
+
 TreeView pointer 流程：
 
 - `OnPointerPressed` 在可选择节点上更新选择；开启拖拽时记录起始点并阻止 gesture recognition。

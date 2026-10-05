@@ -72,7 +72,10 @@ internal sealed class ThemeAssetInfo
             // Other valid AXAML roots (for example Styles or UserControl) may live under
             // Themes/. They are not registration assets and must retain normal compilation.
             if (isResourceDictionary || root?.Name.LocalName == "ControlTheme")
+            {
                 resourceClassName = root?.Attribute(xamlNamespace + "Class")?.Value;
+            }
+
             if (root is not null &&
                 string.Equals(root.Name.LocalName, "ControlTheme", StringComparison.Ordinal))
             {

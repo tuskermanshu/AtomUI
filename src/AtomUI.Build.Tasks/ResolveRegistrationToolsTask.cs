@@ -33,17 +33,35 @@ public sealed class ResolveRegistrationToolsTask : ITask
                     _ => throw new InvalidDataException($"Unknown AtomUI tool kind '{group.Key}'.") };
                 foreach (var path in group.Select(c => Path.GetFullPath(c.ItemSpec)).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal))
                 {
-                    if (Path.GetFileName(path) != files[0]) throw new InvalidDataException($"Unexpected {group.Key} tool '{path}'.");
+                    if (Path.GetFileName(path) != files[0])
+                    {
+                        throw new InvalidDataException($"Unexpected {group.Key} tool '{path}'.");
+                    }
+
                     var current = BundleFingerprint(path, files);
                     if (fingerprint is not null && current != fingerprint)
+                    {
                         return Fail("ATOMUIREG005", $"Conflicting {group.Key} build-tool identities or content: '{selected}' and '{path}'. Use one matching AtomUI toolset.");
+                    }
+
                     fingerprint = current;
                     selected ??= path;
                 }
-                if (group.Key == "Generator") GeneratorAssembly = selected!;
-                if (group.Key == "Backend") BackendAssembly = selected!;
+                if (group.Key == "Generator")
+                {
+                    GeneratorAssembly = selected!;
+                }
+
+                if (group.Key == "Backend")
+                {
+                    BackendAssembly = selected!;
+                }
             }
-            if (IncludeBackend && BackendAssembly.Length == 0) throw new InvalidDataException("The required AtomUI Browser TypeMap backend is missing.");
+            if (IncludeBackend && BackendAssembly.Length == 0)
+            {
+                throw new InvalidDataException("The required AtomUI Browser TypeMap backend is missing.");
+            }
+
             return true;
         }
         catch (Exception error) when (error is InvalidDataException or IOException or UnauthorizedAccessException or BadImageFormatException or ArgumentException)
@@ -54,9 +72,17 @@ public sealed class ResolveRegistrationToolsTask : ITask
     {
         var directory = Path.GetDirectoryName(main)!;
         var identity = AssemblyName.GetAssemblyName(main);
-        if (identity.Name != Path.GetFileNameWithoutExtension(main)) throw new InvalidDataException($"Unexpected AtomUI tool assembly identity '{identity}' in '{main}'.");
+        if (identity.Name != Path.GetFileNameWithoutExtension(main))
+        {
+            throw new InvalidDataException($"Unexpected AtomUI tool assembly identity '{identity}' in '{main}'.");
+        }
+
         var content = new StringBuilder(identity.FullName);
-        foreach (var name in names.Order(StringComparer.Ordinal)) content.Append('\n').Append(name).Append('=').Append(Hash(Path.Combine(directory, name)));
+        foreach (var name in names.Order(StringComparer.Ordinal))
+        {
+            content.Append('\n').Append(name).Append('=').Append(Hash(Path.Combine(directory, name)));
+        }
+
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(content.ToString())));
     }
     internal static string Hash(string path)

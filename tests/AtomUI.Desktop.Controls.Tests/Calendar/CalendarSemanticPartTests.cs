@@ -14,8 +14,8 @@ using Xunit;
 using AtomUICalendar = AtomUI.Desktop.Controls.Calendar;
 using AtomUILunarCalendar = AtomUI.Desktop.Controls.LunarCalendar;
 using CalendarHeaderControl = AtomUI.Desktop.Controls.Internal.Calendar.CalendarHeader;
-using CalendarViewControl = AtomUI.Desktop.Controls.Internal.Calendar.CalendarView;
-using CalendarCellControl = AtomUI.Desktop.Controls.Internal.Calendar.CalendarViewCell;
+using CalendarViewControl = AtomUI.Desktop.Controls.Internal.DateViewer.DatePanel;
+using CalendarCellControl = AtomUI.Desktop.Controls.Internal.DateViewer.DateViewerCell;
 using ComboBoxControl = AtomUI.Desktop.Controls.ComboBox;
 using AvaloniaWindow = Avalonia.Controls.Window;
 
@@ -26,15 +26,15 @@ public class CalendarSemanticPartTests
     private const string HeaderClass = "semantic-header";
     private const string BodyClass = "semantic-body";
     private const string ContentClass = "semantic-content";
-    private const string ItemClass = "semantic-item";
-    private const string ItemContentClass = "semantic-item-content";
+    private const string ItemClass = "semantic-cell";
+    private const string ItemContentClass = "semantic-cell-content";
     private const string HeaderSelectorRoute = "/template/ .semantic-header";
     private const string BodySelectorRoute = "/template/ .semantic-body";
     private const string ContentSelectorRoute = "/template/ .semantic-content";
     private const string ItemSelectorRoute =
-        "/template/ .semantic-content > .semantic-scope-body > .semantic-scope-cells > .semantic-item";
+        "/template/ .semantic-content /template/ .semantic-body > .semantic-content /template/ .semantic-scope-panel > .semantic-scope-cells > .semantic-cell";
     private const string ItemContentSelectorRoute =
-        "/template/ .semantic-content > .semantic-scope-body > .semantic-scope-cells > .semantic-item /template/ .semantic-item-content";
+        "/template/ .semantic-content /template/ .semantic-body > .semantic-content /template/ .semantic-scope-panel > .semantic-scope-cells > .semantic-cell /template/ .semantic-cell-content";
 
     static CalendarSemanticPartTests()
     {
@@ -62,7 +62,7 @@ public class CalendarSemanticPartTests
             HeaderSelectorRoute);
         AssertPart(descriptor.Parts.Single(static part => part.Name == "body"),
             BodyClass,
-            typeof(Avalonia.Controls.DockPanel),
+            typeof(Panel),
             SemanticPartCardinality.Single,
             false,
             BodySelectorRoute);
@@ -107,18 +107,12 @@ public class CalendarSemanticPartTests
     [Fact]
     public void Templates_Implement_Only_The_Approved_Static_Markers()
     {
-        AssertThemeMarkers(
-            "src/AtomUI.Desktop.Controls/Calendar/Themes/CalendarTheme.axaml",
-            ["semantic-body:DockPanel", "semantic-content:CalendarView", "semantic-header:CalendarHeader"]);
-        AssertThemeMarkers(
-            "src/AtomUI.Desktop.Controls/Calendar/Themes/CalendarViewTheme.axaml",
-            ["semantic-scope-body:DockPanel", "semantic-scope-cells:Grid"]);
-        AssertThemeMarkers(
-            "src/AtomUI.Desktop.Controls/Calendar/Themes/CalendarViewCellTheme.axaml",
-            ["semantic-item-content:ContentControl"]);
-        AssertThemeMarkers(
-            "src/AtomUI.Desktop.Controls/Calendar/Themes/LunarCalendarViewCellTheme.axaml",
-            ["semantic-item-content:ContentControl"]);
+        AssertThemeMarkers("src/AtomUI.Desktop.Controls/Calendar/Themes/CalendarTheme.axaml",
+            ["semantic-body:DockPanel", "semantic-content:DateViewer", "semantic-header:ContentControl"]);
+        AssertThemeMarkers("src/AtomUI.Desktop.Controls/DateViewer/Themes/DatePanelTheme.axaml",
+            ["semantic-scope-cells:Grid", "semantic-scope-panel:DockPanel"]);
+        AssertThemeMarkers("src/AtomUI.Desktop.Controls/Calendar/Themes/CalendarDateCellTheme.axaml",
+            ["semantic-cell-content:ContentControl"]);
     }
 
     [Theory]
@@ -187,7 +181,7 @@ public class CalendarSemanticPartTests
     }
 
     [Fact]
-    public void HeaderTemplate_Hides_Default_Header_But_Preserves_Marker_And_Excludes_Custom_Header()
+    public void HeaderTemplate_PreservesVisibleSemanticRegionForCustomHeader()
     {
         var calendar = new AtomUICalendar { Value = new DateTime(2026, 7, 15) };
 
@@ -201,7 +195,8 @@ public class CalendarSemanticPartTests
             Dispatcher.UIThread.RunJobs();
 
             GetSemanticHeader(calendar).ShouldBeSameAs(header);
-            header.IsVisible.ShouldBeFalse();
+            header.IsVisible.ShouldBeTrue();
+            header.GetVisualDescendants().OfType<CalendarHeaderControl>().Single().IsVisible.ShouldBeFalse();
             header.Classes.ShouldContain(HeaderClass);
 
             var customHeader = calendar.GetVisualDescendants()
@@ -271,64 +266,10 @@ public class CalendarSemanticPartTests
     [Fact]
     public void Semantic_Selectors_Match_Their_Declared_Owner_Routes()
     {
-        var calendar = new AtomUICalendar { Value = new DateTime(2026, 7, 15) };
-        calendar.Classes.Add("semantic-owner");
-        calendar.Styles.Add(new Style(selector =>
-            selector.OfType<AtomUICalendar>()
-                    .Class("semantic-owner")
-                    .Template()
-                    .Class(HeaderClass))
-        {
-            Setters = { new Setter(Control.TagProperty, "header") }
-        });
-        calendar.Styles.Add(new Style(selector =>
-            selector.OfType<AtomUICalendar>()
-                    .Class("semantic-owner")
-                    .Template()
-                    .Class(BodyClass))
-        {
-            Setters = { new Setter(Control.TagProperty, "body") }
-        });
-        calendar.Styles.Add(new Style(selector =>
-            selector.OfType<AtomUICalendar>()
-                    .Class("semantic-owner")
-                    .Template()
-                    .Class(ContentClass))
-        {
-            Setters = { new Setter(Control.TagProperty, "content") }
-        });
-        calendar.Styles.Add(new Style(selector =>
-            selector.OfType<AtomUICalendar>()
-                    .Class("semantic-owner")
-                    .Template()
-                    .Class(ContentClass)
-                    .Child()
-                    .Class("semantic-scope-body")
-                    .Child()
-                    .Class("semantic-scope-cells")
-                    .Child()
-                    .Class(ItemClass))
-        {
-            Setters = { new Setter(Control.TagProperty, "item") }
-        });
-        calendar.Styles.Add(new Style(selector =>
-            selector.OfType<AtomUICalendar>()
-                    .Class("semantic-owner")
-                    .Template()
-                    .Class(ContentClass)
-                    .Child()
-                    .Class("semantic-scope-body")
-                    .Child()
-                    .Class("semantic-scope-cells")
-                    .Child()
-                    .Class(ItemClass)
-                    .Template()
-                    .Class(ItemContentClass))
-        {
-            Setters = { new Setter(Control.TagProperty, "item-content") }
-        });
+        var view = new CalendarSemanticStylesView();
+        var calendar = view.Calendar;
 
-        ShowInWindow(calendar, () =>
+        ShowInWindow(view, () =>
         {
             GetSemanticHeader(calendar).Tag.ShouldBe("header");
             GetSemanticBody(calendar).Tag.ShouldBe("body");
@@ -342,48 +283,25 @@ public class CalendarSemanticPartTests
     [Fact]
     public void Item_Semantic_Background_Is_Projected_To_The_Cell_Item_Border()
     {
-        var calendar = new AtomUICalendar { Value = new DateTime(2026, 7, 15) };
-        calendar.Classes.Add("semantic-owner");
-        calendar.Styles.Add(new Style(selector =>
-            selector.OfType<AtomUICalendar>()
-                    .Class("semantic-owner")
-                    .Template()
-                    .Class(ContentClass)
-                    .Child()
-                    .Class("semantic-scope-body")
-                    .Child()
-                    .Class("semantic-scope-cells")
-                    .Child()
-                    .Class(ItemClass))
-        {
-            Setters = { new Setter(TemplatedControl.BackgroundProperty, Brushes.Silver) }
-        });
+        var view = new CalendarSemanticStylesView();
+        var calendar = view.Calendar;
 
-        ShowInWindow(calendar, () =>
+        ShowInWindow(view, () =>
         {
-            GetSemanticItemCells(calendar).ShouldAllBe(static cell =>
-                ReferenceEquals(GetItemBorder(cell).Background, Brushes.Silver));
+            GetSemanticItemCells(calendar).ShouldAllBe(static cell => HasColor(GetItemBorder(cell).Background, Colors.Silver));
         });
     }
 
     [Fact]
     public void Content_Semantic_Background_Overrides_The_Fullscreen_Panel_Background()
     {
-        var calendar = new AtomUICalendar { Value = new DateTime(2026, 7, 15) };
-        calendar.Classes.Add("semantic-owner");
-        calendar.Styles.Add(new Style(selector =>
-            selector.OfType<AtomUICalendar>()
-                    .Class("semantic-owner")
-                    .Template()
-                    .Class(ContentClass))
-        {
-            Setters = { new Setter(TemplatedControl.BackgroundProperty, Brushes.Gold) }
-        });
+        var view = new CalendarSemanticStylesView();
+        var calendar = view.Calendar;
 
-        ShowInWindow(calendar, () =>
+        ShowInWindow(view, () =>
         {
-            GetSemanticContent(calendar).Background.ShouldBeSameAs(Brushes.Gold);
-            GetContentViewBody(calendar).Background.ShouldBeSameAs(Brushes.Gold);
+            ((ISolidColorBrush)GetSemanticContent(calendar).Background!).Color.ShouldBe(Colors.Gold);
+            ((ISolidColorBrush)GetContentViewBody(calendar).Background!).Color.ShouldBe(Colors.Gold);
         });
     }
 
@@ -466,7 +384,7 @@ public class CalendarSemanticPartTests
             GetSemanticItemContentPresenters(calendar).Length.ShouldBe(42);
             GetSemanticItemCells(calendar).ShouldAllBe(static cell =>
                 cell.Classes.Contains(ItemClass) &&
-                cell.GetType() == typeof(AtomUI.Desktop.Controls.Internal.Calendar.LunarCalendarViewCell));
+                cell.GetType() == typeof(AtomUI.Desktop.Controls.Internal.DateViewer.DateViewerCell));
         });
     }
 
@@ -475,15 +393,18 @@ public class CalendarSemanticPartTests
         return background is ISolidColorBrush brush && brush.Color == Color.Parse("#FFFFFF");
     }
 
+    private static bool HasColor(IBrush? background, Color color) =>
+        background is ISolidColorBrush brush && brush.Color == color;
+
     private static bool HasBorderColor(IBrush? borderBrush)
     {
         return borderBrush is ISolidColorBrush brush && brush.Color == Color.Parse("#D9D9D9");
     }
 
-    private static CalendarHeaderControl GetSemanticHeader(AtomUICalendar calendar)
+    private static ContentControl GetSemanticHeader(AtomUICalendar calendar)
     {
         return calendar.GetVisualDescendants()
-                       .OfType<CalendarHeaderControl>()
+                       .OfType<ContentControl>()
                        .Single(static header => header.Classes.Contains(HeaderClass));
     }
 
@@ -494,10 +415,10 @@ public class CalendarSemanticPartTests
                        .Single(static panel => panel.Classes.Contains(BodyClass));
     }
 
-    private static CalendarViewControl GetSemanticContent(AtomUICalendar calendar)
+    private static AtomUI.Desktop.Controls.DateViewer GetSemanticContent(AtomUICalendar calendar)
     {
         return calendar.GetVisualDescendants()
-                       .OfType<CalendarViewControl>()
+                       .OfType<AtomUI.Desktop.Controls.DateViewer>()
                        .Single(static view => view.Classes.Contains(ContentClass));
     }
 
@@ -514,7 +435,7 @@ public class CalendarSemanticPartTests
         return calendar.GetVisualDescendants()
                        .OfType<ContentControl>()
                        .Where(static presenter =>
-                           presenter.Name == "PART_ItemContent" &&
+                           presenter.Name == "PART_CellContent" &&
                            presenter.Classes.Contains(ItemContentClass))
                        .ToArray();
     }
@@ -533,15 +454,8 @@ public class CalendarSemanticPartTests
                    .Single(static border => border.Name == "PART_Item");
     }
 
-    private static Avalonia.Controls.DockPanel GetContentViewBody(AtomUICalendar calendar)
-    {
-        return calendar.GetVisualDescendants()
-                       .OfType<CalendarViewControl>()
-                       .Single()
-                       .GetVisualDescendants()
-                       .OfType<Avalonia.Controls.DockPanel>()
-                       .Single(static panel => panel.Name == "PART_Body");
-    }
+    private static Border GetContentViewBody(AtomUICalendar calendar) =>
+        GetSemanticContent(calendar).GetVisualDescendants().OfType<Border>().First();
 
     private static void AssertThemeMarkers(string relativePath, string[] expectedMarkers)
     {

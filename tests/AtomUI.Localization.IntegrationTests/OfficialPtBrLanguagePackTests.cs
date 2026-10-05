@@ -28,6 +28,7 @@ public sealed partial class LanguagePackEndToEndTests
             [
                 "Calendar/pt-BR.xlf",
                 "DatePicker/pt-BR.xlf",
+                "DateViewer/pt-BR.xlf",
                 "Dialog/pt-BR.xlf",
                 "ImagePreviewer/pt-BR.xlf",
                 "Pagination/pt-BR.xlf",

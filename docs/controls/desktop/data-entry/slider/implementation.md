@@ -103,6 +103,8 @@ Tooltip 文本和 placement 由 Slider 在模板应用、thumb 数量变化、�
 
 ## 7. 交互与事件处理
 
+滑块外点焦点处理只接收轨道所属活输入根的事件。输入位置先转换为轨道局部坐标，轨道和滑块区域直接在同一坐标系判断，不重复叠加 `Bounds.Position`；轨道不得通过异窗原始事件主动改变焦点；正常窗口切换和原生焦点路由仍由框架负责。
+
 `SliderThumb` 在 pointer press 时记录本地坐标并捕获 pointer，move 时产生 `DragDelta`，release 或 capture lost 时产生 `DragCompleted`。Slider 在 tunnel 阶段监听 pointer press / move / release，以一个 owner 处理轨道点击、handle 拖动和整体活动范围拖动，避免 Slider 与 SliderTrack 同时提交值。
 
 轨道按下路径：

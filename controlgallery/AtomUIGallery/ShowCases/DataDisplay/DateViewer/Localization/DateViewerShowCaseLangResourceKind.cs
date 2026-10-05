@@ -1,0 +1,47 @@
+using AtomUI.Localization;
+
+namespace AtomUIGallery.Localization;
+
+[LanguageCatalog]
+public enum DateViewerShowCaseLangResourceKind
+{
+    PageSubtitle,
+    PageDescription,
+    ComponentCategory,
+    ComponentStatusStable,
+    BasicTitle,
+    BasicDescription,
+    UnitsTitle,
+    UnitsDescription,
+    BrowsingTitle,
+    BrowsingDescription,
+    ContentTitle,
+    ContentDescription,
+    CellTitle,
+    CellDescription,
+    FullCellTitle,
+    FullCellDescription,
+    HeaderTitle,
+    HeaderDescription,
+    SemanticTitle,
+    SemanticDescription,
+    UnitDate,
+    UnitWeek,
+    UnitMonth,
+    UnitQuarter,
+    UnitYear,
+    Clear,
+    Previous,
+    Next,
+    ChooseYear,
+    Compact,
+    Content,
+    CellNote,
+    SemanticRootDescription,
+    SemanticHeaderDescription,
+    SemanticBodyDescription,
+    SemanticContentDescription,
+    SemanticCellDescription,
+    SemanticCellContentDescription,
+    SemanticFooterDescription
+}

@@ -204,11 +204,17 @@ public partial class WorkspaceWindow : ReactiveWindow<WorkspaceWindowViewModel>
 
     private void HandleMenuItemClick(object? sender, RoutedEventArgs e)
     {
-        if (ViewModel is null) return;
+        if (ViewModel is null)
+        {
+            return;
+        }
 
         if (e.Source is MenuItem menuItem && menuItem.Tag is WindowMenuItemKind kind)
         {
-            if (menuItem.ToggleType == MenuItemToggleType.None) return;
+            if (menuItem.ToggleType == MenuItemToggleType.None)
+            {
+                return;
+            }
 
             switch (kind)
             {

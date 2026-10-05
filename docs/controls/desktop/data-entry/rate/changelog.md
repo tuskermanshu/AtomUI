@@ -12,6 +12,9 @@
 - Fixed
   - Rate 输入按事件所属视觉根、最终 Bounds 和实际命中判断归属；修复 Margin、缩放、跨窗口与遮罩下的误判。RateCharacter 按实际排列盒绘制。
 
+- Implementation
+  - Scope rating pointer input to its live presentation source, convert positions before hit testing, and release temporary press/hover state on exit and detach; foreign-window clicks cannot write back Value.
+
 ## 2026-07-06
 
 - Behavior

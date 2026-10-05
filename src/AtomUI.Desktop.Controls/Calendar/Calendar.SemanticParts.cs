@@ -12,7 +12,7 @@ namespace AtomUI.Desktop.Controls;
 [SemanticPart(
     "body",
     SelectorClass = "semantic-body",
-    ContractType = typeof(DockPanel),
+    ContractType = typeof(Panel),
     Since = "6.2.0")]
 [SemanticPart(
     "content",
@@ -21,16 +21,18 @@ namespace AtomUI.Desktop.Controls;
     Since = "6.2.0")]
 [SemanticPart(
     "item",
-    SelectorClass = "semantic-item",
-    SelectorRoute = "/template/ .semantic-content > .semantic-scope-body > .semantic-scope-cells > .semantic-item",
+    SelectorClass = "semantic-cell",
+    SelectorRoute = "/template/ .semantic-content /template/ .semantic-body > .semantic-content /template/ .semantic-scope-panel > .semantic-scope-cells > .semantic-cell",
+    CrossNestedOwners = true,
     ContractType = typeof(TemplatedControl),
     Cardinality = SemanticPartCardinality.Multiple,
     Since = "6.2.0",
     RuntimeCreated = true)]
 [SemanticPart(
     "itemContent",
-    SelectorClass = "semantic-item-content",
-    SelectorRoute = "/template/ .semantic-content > .semantic-scope-body > .semantic-scope-cells > .semantic-item /template/ .semantic-item-content",
+    SelectorClass = "semantic-cell-content",
+    SelectorRoute = "/template/ .semantic-content /template/ .semantic-body > .semantic-content /template/ .semantic-scope-panel > .semantic-scope-cells > .semantic-cell /template/ .semantic-cell-content",
+    CrossNestedOwners = true,
     ContractType = typeof(ContentControl),
     Cardinality = SemanticPartCardinality.Multiple,
     Since = "6.2.0",

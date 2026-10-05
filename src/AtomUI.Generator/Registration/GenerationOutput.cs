@@ -14,8 +14,14 @@ internal sealed class GenerationOutput
     public static implicit operator GenerationOutput(SourceProductionContext context) => new(context);
     internal void AddSource(string hintName, SourceText text)
     {
-        if (_forward is { } context) context.AddSource(hintName, text);
-        else _files.Add(new(hintName, text.ToString()));
+        if (_forward is { } context)
+        {
+            context.AddSource(hintName, text);
+        }
+        else
+        {
+            _files.Add(new(hintName, text.ToString()));
+        }
     }
     internal void ReportDiagnostic(Diagnostic diagnostic)
     {
@@ -46,7 +52,14 @@ internal sealed record GenerationResult(ValueArray<GeneratedFile> Files, ValueAr
 {
     internal void Write(SourceProductionContext context)
     {
-        foreach (var file in Files) context.AddSource(file.HintName, GeneratedSourceText.From(file.Text));
-        foreach (var diagnostic in Diagnostics) context.ReportDiagnostic(diagnostic.ToDiagnostic());
+        foreach (var file in Files)
+        {
+            context.AddSource(file.HintName, GeneratedSourceText.From(file.Text));
+        }
+
+        foreach (var diagnostic in Diagnostics)
+        {
+            context.ReportDiagnostic(diagnostic.ToDiagnostic());
+        }
     }
 }

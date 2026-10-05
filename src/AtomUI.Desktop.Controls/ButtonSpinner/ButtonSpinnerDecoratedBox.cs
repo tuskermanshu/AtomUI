@@ -1,4 +1,5 @@
 using AtomUI.Animations;
+using AtomUI.Controls;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -207,6 +208,8 @@ internal class ButtonSpinnerDecoratedBox : AddOnDecoratedBox
         base.OnDetachedFromVisualTree(e);
         _mouseMoveDisposable?.Dispose();
         _mouseMoveDisposable = null;
+        IsSpinnerContentHover = false;
+        UpdateHandleVisualState();
     }
 
     private void ConfigureMoveProcessor()
@@ -226,20 +229,21 @@ internal class ButtonSpinnerDecoratedBox : AddOnDecoratedBox
             return;
         }
 
-        if (args is RawPointerEventArgs pointerEventArgs)
+        if (args is RawPointerEventArgs pointerEventArgs &&
+            this.TryGetInputPosition(pointerEventArgs, out var position))
         {
+            if (pointerEventArgs.Type is RawPointerEventType.LeaveWindow or RawPointerEventType.TouchCancel)
+            {
+                IsSpinnerContentHover = false;
+                UpdateHandleVisualState();
+                return;
+            }
             if (pointerEventArgs.Type == RawPointerEventType.Move ||
                 pointerEventArgs.Type == RawPointerEventType.LeftButtonUp || 
                 pointerEventArgs.Type == RawPointerEventType.RightButtonDown)
             {
-                var pos = this.TranslatePoint(new Point(0, 0), TopLevel.GetTopLevel(this)!);
-                if (!pos.HasValue)
-                {
-                    return;
-                }
-
-                var bounds = new Rect(pos.Value, Bounds.Size);
-                if (bounds.Contains(pointerEventArgs.Position))
+                var bounds = new Rect(Bounds.Size);
+                if (bounds.Contains(position))
                 {
                     if (IsShowHandle && IsHandleFloatable)
                     {

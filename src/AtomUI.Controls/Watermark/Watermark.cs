@@ -263,13 +263,19 @@ public sealed class Watermark : Control
                         }
 
                         var nextColumn = l + columnStep;
-                        if (nextColumn <= l) break;
+                        if (nextColumn <= l)
+                        {
+                            break;
+                        }
                         l = nextColumn;
                         isOddColumn = !isOddColumn;
                     }
 
                     var nextRow = t + rowStep;
-                    if (nextRow <= t) break;
+                    if (nextRow <= t)
+                    {
+                        break;
+                    }
                     t = nextRow;
                     isOddRow = !isOddRow;
                 }
@@ -287,9 +293,15 @@ public sealed class Watermark : Control
 
         // 分别取余，避免巨大商乘回 step 与 offset 相消，并保持隔行/隔列相位。
         var phase = (offset % period - boundary % period) % period;
-        if (phase < 0) phase += period;
+        if (phase < 0)
+        {
+            phase += period;
+        }
         var isOdd = phase >= step;
-        if (isOdd) phase -= step;
+        if (isOdd)
+        {
+            phase -= step;
+        }
         return (boundary + phase, isOdd);
     }
 }

@@ -128,7 +128,11 @@ internal sealed class ThemeSchemaRegistry
         var fingerprint = new SchemaFingerprintBuilder();
         AddAssetSchema(ref fingerprint, descriptor);
         fingerprint.Add(compiledGlobalTokenNames.Count);
-        foreach (var name in compiledGlobalTokenNames) fingerprint.Add(name);
+        foreach (var name in compiledGlobalTokenNames)
+        {
+            fingerprint.Add(name);
+        }
+
         return fingerprint.Value;
     }
 
@@ -170,7 +174,11 @@ internal sealed class ThemeSchemaRegistry
             fingerprint.Add(binding.TargetType.FullName!);
         }
         fingerprint.Add(compiledGlobalTokenNames.Count);
-        foreach (var name in compiledGlobalTokenNames) fingerprint.Add(name);
+        foreach (var name in compiledGlobalTokenNames)
+        {
+            fingerprint.Add(name);
+        }
+
         return fingerprint.Value;
     }
 

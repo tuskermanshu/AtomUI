@@ -66,7 +66,10 @@ internal static class TaskProcessHost
         {
             var property = GetInputProperty(type, pair.Key);
             if (property.PropertyType != typeof(ITaskItem[]))
+            {
                 throw new ArgumentException($"Unsupported item parameter '{pair.Key}'.");
+            }
+
             property.SetValue(task, pair.Value.Cast<ITaskItem>().ToArray());
         }
 
@@ -75,9 +78,13 @@ internal static class TaskProcessHost
         {
             var value = property.GetValue(task);
             if (property.PropertyType == typeof(ITaskItem[]))
+            {
                 response.Items.Add(property.Name, ((ITaskItem[]?)value ?? []).Select(TaskWireItem.FromItem).ToArray());
+            }
             else
+            {
                 response.Properties.Add(property.Name, Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty);
+            }
         }
         return response;
     }
@@ -87,7 +94,10 @@ internal static class TaskProcessHost
         var property = type.GetProperty(name);
         if (property?.SetMethod?.IsPublic != true || property.IsDefined(typeof(OutputAttribute)) ||
             name is nameof(ITask.BuildEngine) or nameof(ITask.HostObject))
+        {
             throw new ArgumentException($"Unknown task input '{type.Name}.{name}'.");
+        }
+
         return property;
     }
 

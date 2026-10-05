@@ -64,6 +64,7 @@ public enum CaseNavigationLangResourceKind
     DataDisplay_Collapse,
     DataDisplay_Descriptions,
     DataDisplay_DataGrid,
+    DataDisplay_DateViewer,
     DataDisplay_Expander,
     DataDisplay_Empty,
     DataDisplay_ImagePreviewer,

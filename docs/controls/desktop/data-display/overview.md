@@ -15,6 +15,7 @@
 - [Badge Changelog](badge/changelog.md)
 - [Calendar 桌面版架构设计](calendar/overview.md)
 - [Calendar 桌面版实现原理](calendar/implementation.md)
+- [日期面板共享设计](../data-entry/date-viewer/shared-panel-design.md)
 - [Calendar 行为设计](calendar/behavior-design.md)
 - [LunarCalendar 农历能力设计](calendar/lunar-calendar-design.md)
 - [Calendar 范围条设计](calendar/range-bar-design.md)

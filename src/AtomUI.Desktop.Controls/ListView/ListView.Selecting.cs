@@ -432,7 +432,14 @@ public partial class ListView
         }
         else if (toggle && !multi && !fromFocus)
         {
-            if (_selection.IsSelected(index)) _selection.Clear(); else _selection.Select(index);
+            if (_selection.IsSelected(index))
+            {
+                _selection.Clear();
+            }
+            else
+            {
+                _selection.Select(index);
+            }
         }
         else
         {
@@ -447,7 +454,14 @@ public partial class ListView
         if (!_ignoreContainerSelectionChanged && e.Source is Control control && control.Parent == this &&
             TryGetSourceIndexFromContainer(control, out var index))
         {
-            if (GetIsSelected(control)) _selection.Select(index); else _selection.Deselect(index);
+            if (GetIsSelected(control))
+            {
+                _selection.Select(index);
+            }
+            else
+            {
+                _selection.Deselect(index);
+            }
         }
 
         if (e.Source != this)
@@ -479,7 +493,10 @@ public partial class ListView
         if (AlwaysSelected && SelectedIndex < 0)
         {
             var first = EnumerateCurrentViewSourceIndexes().FirstOrDefault(-1);
-            if (first >= 0) _selection.Select(first);
+            if (first >= 0)
+            {
+                _selection.Select(first);
+            }
         }
     }
 
@@ -587,7 +604,11 @@ public partial class ListView
             return;
         }
 
-        if (!TryGetViewIndexFromSourceIndex(sourceIndex, out var viewIndex)) return;
+        if (!TryGetViewIndexFromSourceIndex(sourceIndex, out var viewIndex))
+        {
+            return;
+        }
+
         Dispatcher.Post(() => { ScrollIntoView(viewIndex); _hasScrolledToSelectedItem = true; });
     }
 
@@ -608,18 +629,28 @@ public partial class ListView
         {
             _textSearchTerm += e.Text;
             var index = GetIndexFromTextSearch(_textSearchTerm);
-            if (index >= 0) SelectedIndex = index;
+            if (index >= 0)
+            {
+                SelectedIndex = index;
+            }
+
             e.Handled = true;
         }
     }
 
     private int GetIndexFromTextSearch(string term)
     {
-        if (_entryView is null) return -1;
+        if (_entryView is null)
+        {
+            return -1;
+        }
+
         foreach (var sourceIndex in EnumerateCurrentViewSourceIndexes())
         {
             if (_entryView.TryGetSourceEntry(sourceIndex, out var entry) && entry!.Item?.ToString()?.StartsWith(term, StringComparison.CurrentCultureIgnoreCase) == true)
+            {
                 return sourceIndex;
+            }
         }
         return -1;
     }

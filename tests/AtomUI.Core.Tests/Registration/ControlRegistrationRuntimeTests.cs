@@ -70,7 +70,7 @@ public class ControlRegistrationRuntimeTests
             ControlRegistrationRuntime.RegisterPackage(other, "Test", static () => new Provider("Test"), static _ => { });
             using var manager = other.ThemeManagerBuilder.Build();
             return;
-            void Fail(string at) { if (phase == at) throw new InvalidOperationException(at); }
+            void Fail(string at) { if (phase == at) { throw new InvalidOperationException(at); } }
         });
     }
 
@@ -85,7 +85,7 @@ public class ControlRegistrationRuntimeTests
         void Register() => ControlRegistrationRuntime.RegisterPackage(builder, "Test", static () => new Provider("Test"), static _ => { }, prepare);
         if (recurse)
         {
-            prepare = _ => { prepares++; if (prepares == 1) Register(); };
+            prepare = _ => { prepares++; if (prepares == 1) { Register(); } };
             Should.Throw<InvalidOperationException>(Register);
         }
         else
@@ -307,7 +307,10 @@ public class ControlRegistrationRuntimeTests
             ControlRegistrationRuntime.RegisterPackage(builder, "Asset", static () => new Provider("Asset"), collection =>
                 collection.AddThemeAsset(asset, new(asset.AssetId, ControlResourcePhase.Control, 0, CreateResource)));
             ControlRegistrationRuntime.RegisterPackage(builder, "Semantic", static () => new Provider("Semantic"), collection => collection.AddSemanticControl(semantic));
-            if (wrongTarget) Should.Throw<ThemeSchemaException>(() => builder.ThemeManagerBuilder.Build());
+            if (wrongTarget)
+            {
+                Should.Throw<ThemeSchemaException>(() => builder.ThemeManagerBuilder.Build());
+            }
             else { using var manager = builder.ThemeManagerBuilder.Build(); }
         });
     }

@@ -34,9 +34,16 @@ internal sealed class VerificationReceipt : IStep
 
     internal static string? Prepare(LinkContext context)
     {
-        if (!context.TryGetCustomData("AtomUITypeMapReceipt", out var path)) return null;
+        if (!context.TryGetCustomData("AtomUITypeMapReceipt", out var path))
+        {
+            return null;
+        }
+
         if (string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path))
+        {
             throw BackendDiagnostic.Unsupported("AtomUITypeMapReceipt must be an absolute build-output file path.");
+        }
+
         File.Delete(path);
         return path;
     }
@@ -44,9 +51,16 @@ internal sealed class VerificationReceipt : IStep
     internal static VerificationReceipt? Schedule(LinkContext context, string? path, IReadOnlyList<MapSlot> slots,
         RegistrationMetadataIndex? metadata = null)
     {
-        if (path is null) return null;
+        if (path is null)
+        {
+            return null;
+        }
+
         if (!context.Pipeline.ContainsStep(typeof(OutputStep)))
+        {
             throw BackendDiagnostic.Unsupported("The TypeMap receipt requires the standard ILLink OutputStep after Sweep.");
+        }
+
         var receipt = new VerificationReceipt(context, path, slots, metadata ?? new RegistrationMetadataIndex());
         context.Pipeline.AddStepAfter(typeof(OutputStep), receipt);
         return receipt;
@@ -54,15 +68,27 @@ internal sealed class VerificationReceipt : IStep
 
     public void Process(LinkContext context)
     {
-        if (context.ErrorsCount != 0) return;
+        if (context.ErrorsCount != 0)
+        {
+            return;
+        }
+
         try
         {
-            if (!SweepVerified) throw BackendDiagnostic.Unlowered("TypeMap output receipt cannot be emitted without successful post-Sweep verification.");
+            if (!SweepVerified)
+            {
+                throw BackendDiagnostic.Unlowered("TypeMap output receipt cannot be emitted without successful post-Sweep verification.");
+            }
+
             var artifacts = new List<object>();
             foreach (var (assembly, inputHash) in _inputHashes)
             {
                 var output = Path.Combine(context.OutputDirectory, assembly.MainModule.Name);
-                if (!File.Exists(output)) throw BackendDiagnostic.Unlowered($"Verified assembly '{assembly.Name.FullName}' was not emitted by ILLink.");
+                if (!File.Exists(output))
+                {
+                    throw BackendDiagnostic.Unlowered($"Verified assembly '{assembly.Name.FullName}' was not emitted by ILLink.");
+                }
+
                 var symbols = Path.ChangeExtension(output, ".pdb");
                 var readSymbols = _symbolOutputs.Contains(assembly) || File.Exists(symbols);
                 using var emitted = AssemblyDefinition.ReadAssembly(output, new ReaderParameters
@@ -71,20 +97,31 @@ internal sealed class VerificationReceipt : IStep
                     AssemblyResolver = context.Resolver
                 });
                 if (readSymbols && !emitted.MainModule.HasSymbols)
+                {
                     throw BackendDiagnostic.Unlowered($"Expected emitted symbols for '{assembly.Name.FullName}' are missing or unreadable.");
+                }
+
                 if (emitted.Name.FullName != assembly.Name.FullName)
+                {
                     throw BackendDiagnostic.Unlowered($"Output identity for '{assembly.Name.FullName}' changed after Sweep.");
+                }
+
                 var emittedMethods = _metadata.Methods(emitted);
                 foreach (var slot in _slots.Where(s => s.Accessor.Module.Assembly == assembly))
                 {
                     var methods = emittedMethods
                         .Where(m => m.FullName == slot.AccessorIdentity).Take(2).ToArray();
                     if (methods.Length != 1 || !methods[0].HasBody)
+                    {
                         throw BackendDiagnostic.Unlowered($"Emitted accessor '{slot.AccessorIdentity}' is missing, ambiguous or has no body.");
+                    }
+
                     var method = methods[0];
                     slot.Contract.Validate(emitted, method, _metadata);
                     if (HashBody(method) != _bodyHashes[slot.Accessor])
+                    {
                         throw BackendDiagnostic.Unlowered($"Emitted accessor '{slot.Accessor.FullName}' does not match its verified lowered body.");
+                    }
                 }
                 artifacts.Add(new { identity = assembly.Name.FullName, inputSha256 = inputHash, outputSha256 = HashFile(output), outputSymbolsSha256 = File.Exists(symbols) ? HashFile(symbols) : null });
             }

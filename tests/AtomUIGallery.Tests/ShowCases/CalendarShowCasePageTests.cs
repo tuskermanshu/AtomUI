@@ -155,11 +155,11 @@ public class CalendarShowCasePageTests
             calendar.Name.ShouldBe("CalendarSemanticOwner");
             calendar.GetVisualDescendants()
                     .OfType<TemplatedControl>()
-                    .Count(static cell => cell.Classes.Contains("semantic-item"))
+                    .Count(static cell => cell.Classes.Contains("semantic-cell"))
                     .ShouldBe(42);
             calendar.GetVisualDescendants()
                     .OfType<ContentControl>()
-                    .Count(static content => content.Classes.Contains("semantic-item-content"))
+                    .Count(static content => content.Classes.Contains("semantic-cell-content"))
                     .ShouldBe(42);
 
             var previewItemsValue = typeof(SemanticPartPreview)
@@ -211,7 +211,7 @@ public class CalendarShowCasePageTests
             objectDemo.Padding.ShouldBe(new Thickness(10));
             AssertSolidColor(objectDemo.Background, "#E6F4FF");
             var objectContent = objectDemo.GetVisualDescendants()
-                                           .OfType<TemplatedControl>()
+                                           .OfType<AtomUI.Desktop.Controls.DateViewer>()
                                            .Single(static control => control.Classes.Contains("semantic-content"));
             AssertSolidColor(objectContent.Background, "#FFFFFF");
 
@@ -223,7 +223,7 @@ public class CalendarShowCasePageTests
             functionDemo.Padding.ShouldBe(new Thickness(10));
             AssertSolidColor(functionDemo.Background, "#4DBDE3C3");
             var functionContent = functionDemo.GetVisualDescendants()
-                                              .OfType<TemplatedControl>()
+                                              .OfType<AtomUI.Desktop.Controls.DateViewer>()
                                               .Single(static control => control.Classes.Contains("semantic-content"));
             AssertSolidColor(functionContent.Background, "#FFFFFF");
         });

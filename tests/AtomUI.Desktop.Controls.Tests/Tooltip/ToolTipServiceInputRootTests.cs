@@ -1,10 +1,12 @@
 using System.Reflection;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
+using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Shouldly;
@@ -21,104 +23,125 @@ public class ToolTipServiceInputRootTests
     }
 
     [Fact]
-    public void GetRootVisual_Returns_Window_Presentation_Root()
+    public void Pointer_Release_Can_Close_Window_Before_ToolTip_Service_Processes_Input()
     {
-        var content = new Border();
-        var window = new AvaloniaWindow { Content = content };
-        window.Show();
+        var owner = new AvaloniaWindow { Width = 300, Height = 200 };
+        var content = new Border { Background = Brushes.Red };
+        var window = new AvaloniaWindow { Content = content, Width = 200, Height = 100 };
+        owner.Show();
+        window.Show(owner);
         Dispatcher.UIThread.RunJobs();
+        var source = content.GetPresentationSource().ShouldNotBeNull();
+        content.PointerReleased += (_, _) => window.Close();
 
         try
         {
-            var source = content.GetPresentationSource().ShouldNotBeNull();
-            var inputRoot = source.ShouldBeAssignableTo<IInputRoot>();
+            window.MouseMove(new Point(50, 50));
+            window.MouseDown(new Point(50, 50), MouseButton.Left);
+            Should.NotThrow(() => window.MouseUp(new Point(50, 50), MouseButton.Left));
 
-            ToolTipService.GetRootVisual(inputRoot).ShouldBeSameAs(source.RootVisual);
+            source.RootVisual.ShouldBeNull();
+            window.IsVisible.ShouldBeFalse();
+            owner.IsVisible.ShouldBeTrue();
+            Should.NotThrow(() => owner.MouseMove(new Point(50, 50)));
         }
         finally
         {
             window.Close();
+            owner.Close();
         }
     }
 
     [Fact]
-    public void GetRootVisual_Returns_Popup_Presentation_Root()
+    public void Overlay_ToolTip_Allows_Switching_Hosts_In_The_Owner_Window()
     {
-        var anchor = new Border();
-        var popupContent = new Border();
-        var popup = new Popup
+        var first = new Border();
+        var second = new Border();
+        var window = new AtomUI.Desktop.Controls.Window
         {
-            PlacementTarget = anchor,
-            Child = popupContent,
-            ShouldUseOverlayLayer = true
+            Content = new StackPanel { Children = { first, second } },
+            Width = 300,
+            Height = 200
         };
-        var canvas = new Canvas { Children = { anchor, popup } };
-        var layers = new VisualLayerManager { Child = canvas };
-        typeof(VisualLayerManager).GetProperty(
-                "EnablePopupOverlayLayer",
-                BindingFlags.Instance | BindingFlags.NonPublic)!
-            .SetValue(layers, true);
-        var window = new AvaloniaWindow { Content = layers };
         window.Show();
-        popup.IsOpen = true;
         Dispatcher.UIThread.RunJobs();
 
+        using var inputManager = new TestInputManager();
+        using var service = new ToolTipService(inputManager);
         try
         {
-            var source = popupContent.GetPresentationSource().ShouldNotBeNull();
-            var anchorSource = anchor.GetPresentationSource().ShouldNotBeNull();
-            var inputRoot = source.ShouldBeAssignableTo<IInputRoot>();
+            ToolTip.SetTip(first, "first");
+            ToolTip.SetTip(second, "second");
+            ToolTip.SetIsUseOverlayHost(first, true);
+            ToolTip.SetIsUseOverlayHost(second, true);
+            ToolTip.SetShowDelay(first, 0);
+            ToolTip.SetShowDelay(second, 0);
+            var root = GetInputRoot(first);
+            service.Update(root, first);
+            Dispatcher.UIThread.RunJobs();
 
-            ToolTipService.GetRootVisual(inputRoot).ShouldBeSameAs(source.RootVisual);
-            source.ShouldBeSameAs(anchorSource,
-                "an overlay popup must remain in the owning window's presentation source");
-            source.RootVisual.ShouldNotBeNull().GetType().Name.ShouldBe("TopLevelHost");
+            var tip = first.GetValue(ToolTip.ToolTipProperty).ShouldNotBeNull();
+            GetInputRoot(tip).ShouldBeSameAs(root);
+            service.Update(root, tip);
+            ToolTip.GetIsOpen(first).ShouldBeTrue("pointer movement within the overlay must keep it open");
+
+            service.Update(root, second);
+            ToolTip.GetIsOpen(first).ShouldBeFalse();
+            ToolTip.GetIsOpen(second).ShouldBeTrue();
         }
         finally
         {
-            popup.IsOpen = false;
+            ToolTip.SetIsOpen(first, false);
+            ToolTip.SetIsOpen(second, false);
             window.Close();
         }
     }
 
     [Fact]
-    public void GetRootVisual_Returns_Native_PopupRoot()
+    public void Service_Does_Not_Retain_Detached_Host_With_Pending_Show_Timer()
     {
-        var anchor = new Border();
-        var popupContent = new Border();
-        var popup = new Popup
-        {
-            PlacementTarget = anchor,
-            Child = popupContent
-        };
-        var canvas = new Canvas { Children = { anchor, popup } };
-        var window = new AvaloniaWindow { Content = canvas };
-        window.Show();
-        SetHeadlessOverlayPopups(window, false);
-        popup.IsOpen = true;
+        using var inputManager = new TestInputManager();
+        using var service = new ToolTipService(inputManager);
+        var host = TrackAndDetachHost(service);
         Dispatcher.UIThread.RunJobs();
 
+        for (var attempt = 0; attempt < 3; ++attempt)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
+
+        host.IsAlive.ShouldBeFalse("the global tooltip service must release a detached pending host");
+        GC.KeepAlive(service);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference TrackAndDetachHost(ToolTipService service)
+    {
+        var host = new Border();
+        var window = new AvaloniaWindow { Content = host };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
         try
         {
-            var source = popupContent.GetPresentationSource().ShouldNotBeNull();
-            var anchorSource = anchor.GetPresentationSource().ShouldNotBeNull();
-            var inputRoot = source.ShouldBeAssignableTo<IInputRoot>();
-
-            source.ShouldNotBeSameAs(anchorSource,
-                "a native popup must own a distinct presentation source");
-            source.RootVisual.ShouldNotBeNull().GetType().Name.ShouldBe("TopLevelHost");
-            ToolTipService.GetRootVisual(inputRoot).ShouldBeSameAs(source.RootVisual);
+            ToolTip.SetTip(host, "pending");
+            ToolTip.SetShowDelay(host, 60000);
+            service.Update(GetInputRoot(host), host);
+            var root = GetInputRoot(host);
+            window.Content = null;
+            // A hit computed before detach must not restart tracking or the show timer.
+            service.Update(root, host);
+            return new WeakReference(host);
         }
         finally
         {
-            popup.IsOpen = false;
-            SetHeadlessOverlayPopups(window, true);
             window.Close();
         }
     }
 
     [Fact]
-    public void Native_ToolTip_LeaveWindow_Preserves_Same_Timestamp_Root_Transition()
+    public void Native_ToolTip_Root_Transitions_And_Detach_Preserve_Open_State()
     {
         var host = new Border();
         var window = new AvaloniaWindow { Content = host };
@@ -154,6 +177,23 @@ public class ToolTipServiceInputRootTests
 
             inputManager.ProcessInput(CreatePointerEvent(mouseDevice, windowRoot, RawPointerEventType.LeaveWindow, timestamp + 1, null));
             ToolTip.GetIsOpen(host).ShouldBeFalse();
+
+            service.Update(windowRoot, host);
+            Dispatcher.UIThread.RunJobs();
+            var tipWindow = TopLevel.GetTopLevel(tip).ShouldNotBeNull();
+            var point = tip.TranslatePoint(
+                new Point(tip.Bounds.Width / 2, tip.Bounds.Height / 2), tipWindow).ShouldNotBeNull();
+            tipWindow.MouseMove(point);
+            tip.IsPointerOver.ShouldBeTrue();
+
+            window.Content = null;
+            Dispatcher.UIThread.RunJobs();
+            ToolTip.GetIsOpen(host).ShouldBeTrue("pointer exits during popup teardown must preserve desired IsOpen");
+
+            window.Content = host;
+            Dispatcher.UIThread.RunJobs();
+            ToolTip.GetIsOpen(host).ShouldBeTrue();
+            tip.Classes.Contains(ToolTipPseudoClass.Open).ShouldBeTrue();
         }
         finally
         {

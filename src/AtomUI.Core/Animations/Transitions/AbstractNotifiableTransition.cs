@@ -29,7 +29,11 @@ internal abstract class AbstractNotifiableTransition<T> : InterpolatingTransitio
     
     protected void NotifyTransitionCompleted(bool status)
     {
-        if (_subject == null) return;
+        if (_subject == null)
+        {
+            return;
+        }
+
         _subject.OnNext(status);
         _subject.OnCompleted();
         TransitionCompleted?.Invoke(this, new TransitionCompletedEventArgs(status));

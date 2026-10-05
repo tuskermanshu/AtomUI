@@ -203,16 +203,12 @@ internal class TimeView : TemplatedControl
 
     private void DetectPointerPosition(RawInputEventArgs args)
     {
-        if (args is RawPointerEventArgs pointerEventArgs)
+        if (args is RawPointerEventArgs pointerEventArgs && this.IsAttachedToVisualTree() &&
+            TopLevel.GetTopLevel(this) is { } topLevel &&
+            topLevel.TryGetInputPosition(pointerEventArgs, out var position))
         {
-            if (!CheckPointerInSelectors(pointerEventArgs.Position))
-            {
-                IsPointerInSelector = false;
-            }
-            else
-            {
-                IsPointerInSelector = true;
-            }
+            IsPointerInSelector = pointerEventArgs.Type is not (RawPointerEventType.LeaveWindow or RawPointerEventType.TouchCancel)
+                                  && CheckPointerInSelectors(position);
         }
     }
 
@@ -239,13 +235,15 @@ internal class TimeView : TemplatedControl
         }
 
         var globalRect = GetSelectorGlobalRect(selector);
-        return globalRect.Contains(position);
+        return globalRect.Width > 0 && globalRect.Height > 0 && globalRect.Contains(position);
     }
 
     private Rect GetSelectorGlobalRect(DateTimePickerPanel selector)
     {
-        var pos = selector.TranslatePoint(new Point(0, 0), TopLevel.GetTopLevel(selector)!) ?? default;
-        return new Rect(pos, selector.Bounds.Size);
+        return TopLevel.GetTopLevel(selector) is { } topLevel &&
+               selector.TranslatePoint(new Point(0, 0), topLevel) is { } position
+            ? new Rect(position, selector.Bounds.Size)
+            : default;
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -273,6 +271,7 @@ internal class TimeView : TemplatedControl
         _spacerWidthDisposable?.Dispose();
         _pointerPositionDisposable = null;
         _spacerWidthDisposable     = null;
+        IsPointerInSelector = false;
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -318,6 +317,8 @@ internal class TimeView : TemplatedControl
             _periodSelector.SelectionChanged += HandleSelectionChanged;
             _periodSelector.CellHovered      += HandleSelectorCellHovered;
             _periodSelector.CellDbClicked    += HandleSelectorCellDbClicked;
+            // Keep LocalValue priority for the internal locale relay. ControlTheme TemplateBinding
+            // would lower the target priority and let style setters replace the locale text.
             _periodSelector[!DateTimePickerPanel.AmTextProperty] = this[!AmTextProperty];
             _periodSelector[!DateTimePickerPanel.PmTextProperty] = this[!PmTextProperty];
         }

@@ -196,7 +196,10 @@ internal static class ControlThemeModelBuilder
 
     private static void AddPublicControlsByName(INamespaceSymbol ns, string name, ISet<INamedTypeSymbol> result)
     {
-        foreach (var type in RegistrationModelBuilder.Types(ns).Where(type => type.Name == name && IsPublicControl(type))) result.Add(type);
+        foreach (var type in RegistrationModelBuilder.Types(ns).Where(type => type.Name == name && IsPublicControl(type)))
+        {
+            result.Add(type);
+        }
     }
 
     private static ControlThemeInfo CreateInfo(

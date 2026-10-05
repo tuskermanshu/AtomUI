@@ -43,6 +43,10 @@ Popup 接入边界：`ToolTip` 负责业务状态和内容准备，manually crea
 - 数据对象、选项对象、任务对象或节点对象只保存业务数据，不应反向持有不可释放的视觉对象。
 - 弹层、窗口、计时器、异步 loader 和全局管理器必须有明确关闭、解绑或释放路径。
 
+悬停服务按输入根节点身份识别宿主窗口和原生 Tooltip 窗口。原始输入进入服务前，控件事件可能已同步关闭窗口，
+因此事件根节点仍存在不代表其 `RootVisual` 仍存在。Overlay Tooltip 与宿主共享输入根，服务通过命中元素的祖先链
+识别 Tooltip 内部移动，不能把同窗全部输入都当作 Tooltip 窗口输入。
+
 ## 4. 状态与数据流
 
 Tooltip 的状态流遵循下面路径：
@@ -104,6 +108,10 @@ attached properties + target text/font
 - 控件卸载、弹层关闭、窗口关闭、集合替换或 container recycle 时释放事件订阅和资源宿主。
 - DynamicResource、TokenResourceBinder 或 C# binding 必须有明确 owner 和释放点。
 - Browser 和 Desktop 宿主下的主题加载顺序不得影响 public API 语义。
+- `ToolTipService` 跟踪宿主时订阅其 visual-tree detach，宿主切换、移出窗口、detach 或服务 dispose 时解除该跟踪。
+  detach 同步停止待显示定时器、清空定时器宿主引用并释放当前宿主；陈旧命中结果不能重新跟踪已卸载或属于其他输入根的宿主。
+  detach 先解除 Tooltip 的指针退出处理器，避免原生弹层销毁时的退出事件被解释为用户关闭；关闭事件继续记录关闭时间并退订。
+  服务结束跟踪不重置声明式 `IsOpen`，物理弹层关闭与重新挂载后的重开继续由 `ToolTip` 调和流程负责。
 - `OverflowTipState` 对 owner bounds、文本、字体、tooltip 和内部 text viewport metric 的订阅必须由同一个 disposable owner 管理；禁用 behavior 时统一释放。
 - TextBox/TextArea 的 template part 由输入控件自己获取和管理。`OverflowTip` 不得调用 `GetVisualDescendants()`、查找 `PART_TextPresenter` 或持有输入控件的 presenter/scroller。
 - `IsOpen` 为 `true` 且宿主尚未挂入 visual tree 时，`ToolTip` 对宿主的 `AttachedToVisualTree` 建立一次性订阅；宿主挂入或 `IsOpen` 转为 `false` 时退订。该订阅生命周期自限，不随控件树重建累积。
@@ -210,6 +218,8 @@ Tooltip 的交互事件应从输入源收敛到控件级语义事件：
 
 - 纯文档改动运行 `git diff --check` 并检查相对链接。
 - 打开状态调和回归：XAML 声明式 `IsOpen=True` 打开、`Tip` 晚于 `IsOpen` 就绪、宿主 detach/reattach 重开、`ToolTipOpening` 否决、attach 订阅无残留。
+- 悬停服务回归使用真实输入分发验证指针事件中同步关闭窗口后仍能处理该条原始输入，并覆盖 Overlay 同窗宿主切换、
+  原生 Tooltip 同时间戳跨根移动，以及待显示宿主卸载后定时器和强引用释放。
 - Semantic Part 回归：descriptor 三键、`ToolTipTheme.axaml` scope 锚点、共享 `ArrowDecoratedBoxTheme.axaml` 两个 marker、生成 Style 跨嵌套 owner 命中最低 `ContractType`（见 `tests/AtomUI.Desktop.Controls.Tests/Tooltip/ToolTipSemanticPartTests.cs`）。
 - 控件 API 或行为变更运行对应 `tests/AtomUI.Desktop.Controls.Tests` 或专用包测试。
 - DataGrid 相关变更运行 `tests/AtomUI.Desktop.Controls.DataGrid.Tests`。

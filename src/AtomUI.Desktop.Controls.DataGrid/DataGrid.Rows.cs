@@ -2013,7 +2013,10 @@ public partial class DataGrid
         {
             object? dataItem = null;
             if (VisibleSlotCount > 0)
+            {
                 dataItem = RangeDataAccess.GetDataItem(0);
+            }
+
             var detailsContent = RowDetailsTemplate.Build(dataItem);
             if (detailsContent != null)
             {

@@ -215,7 +215,7 @@ public abstract class AbstractRate : TemplatedControl,
         }
         else if (change.Property == IsEffectivelyEnabledProperty && !IsEffectivelyEnabled)
         {
-            CancelPointerInteraction();
+            ResetPointerState();
         }
     }
 
@@ -232,7 +232,7 @@ public abstract class AbstractRate : TemplatedControl,
         base.OnDetachedFromVisualTree(e);
         _pointerEventHandleDisposable?.Dispose();
         _pointerEventHandleDisposable = null;
-        CancelPointerInteraction();
+        ResetPointerState();
     }
     
     private void HandleGlobalPointerEvent(RawInputEventArgs args)
@@ -241,13 +241,18 @@ public abstract class AbstractRate : TemplatedControl,
         {
             return;
         }
-        if (args is RawPointerEventArgs pointerEventArgs)
+        if (args is RawPointerEventArgs pointerEventArgs &&
+            this.TryGetInputPosition(pointerEventArgs, out var position))
         {
-            // Raw 输入的位置属于事件自己的 root。转换到局部坐标会同时处理
-            // RenderTransform，并在跨视觉根时返回 null；Margin 不属于输入区域。
-            var root = pointerEventArgs.Root.FocusRoot.GetPresentationSource()?.RootVisual;
-            var position = root?.TranslatePoint(pointerEventArgs.Position, this);
-            var hit = position.HasValue && new Rect(Bounds.Size).Contains(position.Value)
+            if (pointerEventArgs.Type is RawPointerEventType.LeaveWindow or RawPointerEventType.TouchCancel)
+            {
+                ResetPointerState();
+                return;
+            }
+
+            // 共用输入根校验已排除异窗事件；命中仍从整个 root 检查遮罩与裁剪。
+            var root = this.GetPresentationSource()?.RootVisual;
+            var hit = new Rect(Bounds.Size).Contains(position)
                 ? (root as IInputElement)?.InputHitTest(pointerEventArgs.Position) as Visual
                 : null;
             var isPointerInRate = hit is not null && (ReferenceEquals(hit, this) || this.IsVisualAncestorOf(hit));
@@ -279,10 +284,8 @@ public abstract class AbstractRate : TemplatedControl,
                     {
                         if (IsAllowClear)
                         {
-                            var value = _itemsControl is not null &&
-                                        root?.TranslatePoint(pointerEventArgs.Position, _itemsControl) is { } localPoint
-                                ? CalculateEffectiveValue(localPoint)
-                                : null;
+                            var localPoint = _itemsControl is not null ? this.TranslatePoint(position, _itemsControl) : null;
+                            var value = localPoint is { } itemPosition ? CalculateEffectiveValue(itemPosition) : null;
                             if (value != null)
                             {
                                 if ((IsAllowHalf && MathUtils.AreClose(Value, value.Value)) ||
@@ -308,7 +311,7 @@ public abstract class AbstractRate : TemplatedControl,
         }
     }
 
-    private void CancelPointerInteraction()
+    private void ResetPointerState()
     {
         _pressedEffectiveValue = null;
         _isPointerInRate = false;
@@ -318,7 +321,7 @@ public abstract class AbstractRate : TemplatedControl,
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        CancelPointerInteraction();
+        ResetPointerState();
         _itemsControl = e.NameScope.Find<ItemsControl>("PART_RateItems");
         HandleCountChanged();
         HandleEffectiveValueChanged();

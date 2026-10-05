@@ -114,11 +114,16 @@ public sealed class TaskProcessHostTests : IDisposable
     public async Task MSBuild_Can_Overwrite_And_Delete_Toolset_After_Execution()
     {
         if (!OperatingSystem.IsWindows())
+        {
             return; // Windows file sharing is the regression this fixture exercises.
+        }
 
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory != null && !File.Exists(Path.Combine(directory.FullName, "AtomUI.slnx")))
+        {
             directory = directory.Parent;
+        }
+
         directory.ShouldNotBeNull();
         var script = Path.Combine(directory.FullName, "scripts/verification/verify-build-task-isolation.ps1");
         var configuration = typeof(TaskProcessHostTests).Assembly

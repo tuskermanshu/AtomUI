@@ -36,11 +36,19 @@ public class TokenResourceKeyGenerator : IIncrementalGenerator
             {
                 var info = ThemeAssetInfo.Create(asset.AsAdditionalText(), asset.Directory, asset.Link,
                     cancellationToken, out var root);
-                if (root is not null && !documents.ContainsKey(info.Path)) documents.Add(info.Path, root);
+                if (root is not null && !documents.ContainsKey(info.Path))
+                {
+                    documents.Add(info.Path, root);
+                }
+
                 return info;
             }).ToArray();
             var context = new GenerationOutput();
-            if (compilation.GetTypeByMetadataName("AtomUI.Theme.Resources.TokenResourceExtension`1") is null) return context.Freeze();
+            if (compilation.GetTypeByMetadataName("AtomUI.Theme.Resources.TokenResourceExtension`1") is null)
+            {
+                return context.Freeze();
+            }
+
             var assemblyName = compilation.AssemblyName ?? "AtomUI";
             var packageId = ThemeGeneratorOptions.GetPackageId(options, assemblyName);
             var catalog = ThemeGeneratorOptions.GetControlCatalog(options, assemblyName);
@@ -48,12 +56,20 @@ public class TokenResourceKeyGenerator : IIncrementalGenerator
             foreach (var name in declarations.Left.Left.Left.Distinct(StringComparer.Ordinal))
             {
                 var symbol = compilation.GetTypeByMetadataName(name);
-                if (symbol is null) continue;
+                if (symbol is null)
+                {
+                    continue;
+                }
+
                 foreach (var reference in symbol.DeclaringSyntaxReferences)
                 {
                     var walker = new TokenPropertyWalker(compilation.GetSemanticModel(reference.SyntaxTree));
                     walker.Visit(reference.GetSyntax(cancellationToken));
-                    foreach (var token in walker.TokenNames) info.Tokens.Add(new(token, walker.TokenResourceCatalog!));
+                    foreach (var token in walker.TokenNames)
+                    {
+                        info.Tokens.Add(new(token, walker.TokenResourceCatalog!));
+                    }
+
                     info.SchemaTokens.UnionWith(walker.SchemaTokens);
                 }
             }
@@ -62,7 +78,11 @@ public class TokenResourceKeyGenerator : IIncrementalGenerator
             {
                 var symbol = compilation.GetTypeByMetadataName(name);
                 var reference = symbol?.DeclaringSyntaxReferences.FirstOrDefault();
-                if (reference is null) continue;
+                if (reference is null)
+                {
+                    continue;
+                }
+
                 var walker = new ControlTokenPropertyWalker(compilation.GetSemanticModel(reference.SyntaxTree), cancellationToken);
                 walker.Visit(reference.GetSyntax(cancellationToken));
                 ownTokens.Add(walker.ControlTokenInfo);
@@ -75,7 +95,11 @@ public class TokenResourceKeyGenerator : IIncrementalGenerator
                 .Where(static field => field.HasConstantValue && field.Name != "value__")
                 .OrderBy(static field => Convert.ToInt64(field.ConstantValue, System.Globalization.CultureInfo.InvariantCulture))
                 .Select(static field => field.Name).ToArray() ?? Array.Empty<string>();
-            if (info.SchemaTokens.Count > 0) globalNames = info.SchemaTokens.OrderBy(t => t.Name, StringComparer.Ordinal).Select(t => t.Name).ToArray();
+            if (info.SchemaTokens.Count > 0)
+            {
+                globalNames = info.SchemaTokens.OrderBy(t => t.Name, StringComparer.Ordinal).Select(t => t.Name).ToArray();
+            }
+
             info.AvailableGlobalTokenNames.UnionWith(globalNames);
             info.AvailableGlobalTokenNames.UnionWith(info.Tokens.Select(t => t.Name));
             var controlInfos = ControlThemeModelBuilder.Build(compilation, ownTokens,
@@ -93,9 +117,16 @@ public class TokenResourceKeyGenerator : IIncrementalGenerator
             info.ControlThemeInfos.AddRange(controlInfos);
             ThemeControlCatalogMetadataWriter.Write(context, catalog);
             if (info.SchemaTokens.Count > 0 || controlInfos.Count > 0 || algorithms.Length > 0)
+            {
                 new GeneratedThemeSchemaWriter(context, assemblyName, catalog, info.SchemaTokens, controlInfos, algorithms).Write();
-            if (hasSemanticRuntime) new SemanticPartManifestWriter(context, assemblyName, catalog, semanticControls,
+            }
+
+            if (hasSemanticRuntime)
+            {
+                new SemanticPartManifestWriter(context, assemblyName, catalog, semanticControls,
                 !SemanticPartStyleContract.HasCanonicalXmlnsDefinition(compilation.Assembly)).Write();
+            }
+
             new ResourceKeyClassWriter(context, info, catalog).Write();
             return context.Freeze();
         }).WithTrackingName("ControlRegistrationOutput");

@@ -218,7 +218,7 @@ public class RangePickerPreferredWidthTests
 
     [Theory]
     [InlineData(DatePickerMode.Date, "2026-07-08")]
-    [InlineData(DatePickerMode.Week, "2026-28周")]
+    [InlineData(DatePickerMode.Week, "2026-28th")]
     [InlineData(DatePickerMode.Month, "2026-07")]
     [InlineData(DatePickerMode.Quarter, "2026-Q3")]
     [InlineData(DatePickerMode.Year, "2026")]
@@ -235,6 +235,21 @@ public class RangePickerPreferredWidthTests
             var input = FindEmbeddedTextBoxPart(picker, "PART_InfoInputBox");
 
             input.Text.ShouldBe(expectedText);
+            if (pickerMode == DatePickerMode.Week)
+            {
+                var languageManager = global::AtomUI.ApplicationExtensions.GetLanguageManager(Application.Current!)!;
+                var previous = languageManager.Current.CurrentLanguage;
+                try
+                {
+                    languageManager.ChangeLanguage(AtomUI.Localization.LanguageTags.ZhCN);
+                    Dispatcher.UIThread.RunJobs();
+                    input.Text.ShouldBe("2026-28周", $"value={picker.SelectedDateTime:O}; culture={DatePickerFormattingHelper.GetFormattingCulture().Name}; firstDay={DatePickerFormattingHelper.GetFormattingCulture().DateTimeFormat.FirstDayOfWeek}");
+                    languageManager.ChangeLanguage(AtomUI.Localization.LanguageTags.ZhTW);
+                    Dispatcher.UIThread.RunJobs();
+                    input.Text.ShouldBe("2026-28週");
+                }
+                finally { languageManager.ChangeLanguage(previous); Dispatcher.UIThread.RunJobs(); }
+            }
         });
     }
 
@@ -244,7 +259,7 @@ public class RangePickerPreferredWidthTests
         (DatePickerMode PickerMode, int SourceMonth, int ExpectedMonth, int ExpectedDay)[] modes =
         [
             (DatePickerMode.Date, 7, 7, 8),
-            (DatePickerMode.Week, 7, 7, 6),
+            (DatePickerMode.Week, 7, 7, 5),
             (DatePickerMode.Month, 7, 7, 1),
             (DatePickerMode.Quarter, 8, 7, 1),
             (DatePickerMode.Year, 7, 1, 1)
