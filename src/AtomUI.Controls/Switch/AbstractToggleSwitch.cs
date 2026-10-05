@@ -374,10 +374,9 @@ public abstract class AbstractToggleSwitch : ToggleButton,
             ? Math.Max(Width, TrackMinWidth)
             : Math.Max(switchWidth, TrackMinWidth);
         var targetSize = new Size(switchWidth, switchHeight);
-        CalculateElementsOffset(targetSize);
         if (_switchKnob is not null)
         {
-            _switchKnob.Measure(KnobRect.Size);
+            _switchKnob.Measure(HandleRect(IsChecked == true, targetSize).Size);
         }
         
         return targetSize;
@@ -385,7 +384,17 @@ public abstract class AbstractToggleSwitch : ToggleButton,
 
     protected override Size ArrangeOverride(Size finalSize)
     {
-        _mainLayout?.Arrange(new Rect(DesiredSize));
+        // Arrange 的内容盒已应用 Width/Min/Max，且不包含外部 Margin；把手与轨道
+        // 必须使用这一最终几何，而不是测量阶段尚未应用约束的目标尺寸。
+        CalculateElementsOffset(finalSize);
+        _mainLayout?.Arrange(new Rect(finalSize));
+        // 应用提供的既有模板仍可使用标准 Canvas；其布局不能由库的 ControlTheme
+        // 声明式接管。只在这条兼容路径由 owner 排列，默认专用画布保持唯一排列 owner。
+        if (_mainLayout is not ToggleSwitchContentPanel)
+        {
+            _offContentPresenter?.Arrange(new Rect(OffContentOffset, _offContentPresenter.DesiredSize));
+            _onContentPresenter?.Arrange(new Rect(OnContentOffset, _onContentPresenter.DesiredSize));
+        }
         if (!_isCheckedChanged)
         {
             _switchKnob?.Arrange(KnobRect);
@@ -395,9 +404,7 @@ public abstract class AbstractToggleSwitch : ToggleButton,
             _switchKnob?.Arrange(KnobMovingRect);
         }
         
-        _offContentPresenter?.Arrange(new Rect(new Point(OffContentOffset.X, OffContentOffset.Y), _offContentPresenter.DesiredSize));
-        _onContentPresenter?.Arrange(new Rect(new Point(OnContentOffset.X, OnContentOffset.Y), _onContentPresenter.DesiredSize));
-        _waveSpiritDecorator?.Arrange(new Rect(new Point(0, 0), DesiredSize.Deflate(Margin)));
+        _waveSpiritDecorator?.Arrange(new Rect(finalSize));
         
         return finalSize;
     }
@@ -405,7 +412,7 @@ public abstract class AbstractToggleSwitch : ToggleButton,
     public sealed override void Render(DrawingContext context)
     {
         using var state = context.PushOpacity(SwitchOpacity);
-        var       size  = DesiredSize.Deflate(Margin);
+        var       size  = Bounds.Size;
         context.DrawPilledRect(GrooveBackground, null, new Rect(new Point(0, 0), size));
     }
 
@@ -532,12 +539,14 @@ public abstract class AbstractToggleSwitch : ToggleButton,
         var offExtraInfoRect = ExtraInfoRect(false, controlSize);
         if (isChecked)
         {
-            OnContentOffset  = onExtraInfoRect.TopLeft;
+            var pressedOffset = IsPressed ? KnobRect.Width * (STRETCH_FACTOR - 1) : 0;
+            OnContentOffset  = new Point(onExtraInfoRect.X - pressedOffset, onExtraInfoRect.Y);
             OffContentOffset = new Point(controlSize.Width + 1, onExtraInfoRect.Top);
         }
         else
         {
-            OffContentOffset = offExtraInfoRect.TopLeft;
+            var pressedOffset = IsPressed ? KnobRect.Width * (STRETCH_FACTOR - 1) : 0;
+            OffContentOffset = new Point(offExtraInfoRect.X + pressedOffset, offExtraInfoRect.Y);
             OnContentOffset  = new Point(-offExtraInfoRect.Width, offExtraInfoRect.Top);
         }
     }
@@ -577,12 +586,7 @@ public abstract class AbstractToggleSwitch : ToggleButton,
 
     private Rect GrooveRect()
     {
-        return new Rect(new Point(0, 0), DesiredSize.Deflate(Margin));
-    }
-
-    private Rect HandleRect()
-    {
-        return HandleRect(IsChecked.HasValue && IsChecked.Value, GrooveRect().Size);
+        return new Rect(Bounds.Size);
     }
 
     private Rect HandleRect(bool isChecked, Size controlSize)
@@ -619,18 +623,18 @@ public abstract class AbstractToggleSwitch : ToggleButton,
         var    targetRect     = new Rect(new Point(0, 0), controlSize);
         if (isChecked)
         {
-            if (_offContentPresenter != null)
+            if (_onContentPresenter != null)
             {
-                yAdjustValue = (controlSize.Height - _offContentPresenter.DesiredSize.Height) / 2;
+                yAdjustValue = (controlSize.Height - _onContentPresenter.DesiredSize.Height) / 2;
             }
 
             targetRect = targetRect.Inflate(new Thickness(-innerMinMargin, -yAdjustValue, innerMaxMargin, 0));
         }
         else
         {
-            if (_onContentPresenter != null)
+            if (_offContentPresenter != null)
             {
-                yAdjustValue = (controlSize.Height - _onContentPresenter.DesiredSize.Height) / 2;
+                yAdjustValue = (controlSize.Height - _offContentPresenter.DesiredSize.Height) / 2;
             }
 
             targetRect = targetRect.Inflate(new Thickness(-innerMaxMargin, -yAdjustValue, innerMinMargin, 0));
@@ -641,28 +645,12 @@ public abstract class AbstractToggleSwitch : ToggleButton,
 
     private void AdjustOffsetOnPressed()
     {
-        var handleRect = HandleRect();
-        var handleSize = handleRect.Width;
-
-        var contentOffsetDelta = handleSize * (STRETCH_FACTOR - 1);
-
-        if (IsChecked.HasValue && IsChecked.Value)
-        {
-            // 点击的时候如果是选中，需要调整坐标
-            OnContentOffset = new Point(OnContentOffset.X - contentOffsetDelta, OffContentOffset.Y);
-        }
-        else
-        {
-            OffContentOffset = new Point(OffContentOffset.X + contentOffsetDelta, OffContentOffset.Y);
-        }
+        CalculateElementsOffset(GrooveRect().Size);
 
         if (_switchKnob is not null)
         {
-            _switchKnob.KnobSize = new Size(handleSize, KnobSize.Height);
+            _switchKnob.KnobSize = KnobRect.Size;
         }
-
-        KnobRect       = handleRect;
-        KnobMovingRect = KnobRect;
     }
 
     private void AdjustOffsetOnReleased()

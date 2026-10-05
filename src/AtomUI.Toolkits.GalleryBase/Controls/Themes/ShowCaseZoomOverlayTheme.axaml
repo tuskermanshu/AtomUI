@@ -9,7 +9,8 @@
                   TargetType="{x:Type gallery:ShowCaseZoomOverlay}">
         <Setter Property="KeyboardNavigation.TabNavigation" Value="Cycle" />
         <Setter Property="Template">
-            <ControlTemplate TargetType="{x:Type gallery:ShowCaseZoomOverlay}">
+            <ControlTemplate TargetType="{x:Type gallery:ShowCaseZoomOverlay}"
+                             x:DataType="gallery:ShowCaseZoomOverlay">
                 <Border Name="PART_RootBorder"
                         Background="{atom:SharedTokenResource ColorBgLayout}"
                         ClipToBounds="True">
@@ -44,7 +45,8 @@
                                             Text="{TemplateBinding Description}"
                                             IsVisible="{TemplateBinding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                             <Grid Name="PART_StageRoot">
-                                <gallery:ShowCaseZoomStagePanel Name="PART_StagePanel" />
+                                <gallery:ShowCaseZoomStagePanel Name="PART_StagePanel"
+                                                               ZoomContentLayout="{CompiledBinding SourceItem.ZoomContentLayout, RelativeSource={RelativeSource TemplatedParent}}" />
                             </Grid>
                         </DockPanel>
                     </Border>

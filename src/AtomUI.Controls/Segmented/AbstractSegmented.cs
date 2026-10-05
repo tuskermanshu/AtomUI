@@ -288,7 +288,7 @@ public abstract class AbstractSegmented : SelectingItemsControl,
     
     public sealed override void Render(DrawingContext context)
     {
-        context.DrawRectangle(Background, null, new RoundedRect(new Rect(DesiredSize.Deflate(Margin)), CornerRadius));
+        context.DrawRectangle(Background, null, new RoundedRect(new Rect(Bounds.Size), CornerRadius));
         if (_isThumbVisible)
         {
             context.DrawRectangle(SelectedThumbBg, null,

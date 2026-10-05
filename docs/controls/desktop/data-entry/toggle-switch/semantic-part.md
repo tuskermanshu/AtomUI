@@ -126,7 +126,7 @@ root 不表示模板中的 `PART_MainContainer`（`Canvas`）、`PART_WaveSpirit
 - 在 checked、unchecked、loading、disabled 下保持同一 Part 身份。
 
 适合定制 `Foreground`、`FontSize`、`FontWeight`、`FontStyle`、`Opacity` 等文本与视觉属性。on/off 内容的可见位置由
-owner 的 `CalculateElementsOffset` 计算并作为 `Canvas` 子节点显式 `Arrange`，因此 `Margin`、对齐等定位型 Setter 不作为
+owner 的 `CalculateElementsOffset` 计算，经 TemplateBinding 传给内部内容画布，由画布统一执行 `Arrange`，因此 `Margin`、对齐等定位型 Setter 不作为
 公共定制路径；需要调整内容与把手的间距时，应通过 `InnerMinMargin` / `InnerMaxMargin` 等 Token 或主题分支实现。
 
 content 不公开内容模板生成的用户子树、文本内部 presenter、内容值的具体 CLR 类型，也不承诺 on/off 两个 presenter 之间

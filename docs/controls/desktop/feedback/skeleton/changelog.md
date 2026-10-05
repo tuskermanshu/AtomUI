@@ -2,6 +2,11 @@
 
 本文档记录 Skeleton 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-10-03
+
+- Fixed
+  - SkeletonLine 按最终内容盒解析像素/百分比 LineWidth，排除外部 Margin；LineWidth 变化触发重新测量。
+
 ## 2026-08-25
 
 - Fixed

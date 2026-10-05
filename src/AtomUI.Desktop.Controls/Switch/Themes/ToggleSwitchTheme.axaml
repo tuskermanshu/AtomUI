@@ -10,8 +10,10 @@
                     <atom:WaveSpiritDecorator Name="PART_WaveSpirit"
                                               IsMotionEnabled="{TemplateBinding IsMotionEnabled}"
                                               IsWaveSpiritEnabled="{TemplateBinding IsWaveSpiritEnabled}"/>
-                    <Canvas Name="PART_MainContainer"
-                            ClipToBounds="True">
+                    <atom:ToggleSwitchContentPanel Name="PART_MainContainer"
+                                                   ClipToBounds="True"
+                                                   OnContentOffset="{TemplateBinding OnContentOffset}"
+                                                   OffContentOffset="{TemplateBinding OffContentOffset}">
                         <ContentPresenter Name="PART_OnContentPresenter"
                                           Classes.semantic-content="True"
                                           Content="{TemplateBinding OnContent}"
@@ -22,7 +24,7 @@
                                           Content="{TemplateBinding OffContent}"
                                           ContentTemplate="{TemplateBinding OffContentTemplate}"
                                           IsVisible="{TemplateBinding OffContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                    </Canvas>
+                    </atom:ToggleSwitchContentPanel>
                     <atom:SwitchKnob Name="PART_SwitchKnob"
                                      Classes.semantic-indicator="True"
                                      IsMotionEnabled="{TemplateBinding IsMotionEnabled}"

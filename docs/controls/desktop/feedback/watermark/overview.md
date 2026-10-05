@@ -6,8 +6,8 @@
 
 | 项 | 值 |
 | --- | --- |
-| NuGet 包 | `AtomUI.Desktop.Controls` |
-| .NET 命名空间 | `AtomUI.Desktop.Controls` |
+| NuGet 包 | `AtomUI.Controls` |
+| .NET 命名空间 | `AtomUI.Controls` |
 | AXAML 命名空间 | `https://atomui.net` |
 | Gallery 页面 | `controlgallery/AtomUIGallery/ShowCases/Feedback/Watermark` |
 | 控件状态 | Stable |
@@ -15,6 +15,9 @@
 Watermark 是 AtomUI 桌面控件体系中的水印控件，用于在目标元素上绘制文本或图片水印。
 
 Watermark 不负责背景装饰、权限控制或图片处理服务。这些职责应由业务层、组合控件或更专用的 AtomUI 控件承担。
+
+Glyph 支持作用域动态资源与语言资源，随目标资源和语言切换更新。共享同一个 Glyph 时，其属性值来自最后挂载且
+仍活动的目标；该目标退出后恢复到最后一个存活目标的资源作用域。
 
 主要源码入口：
 

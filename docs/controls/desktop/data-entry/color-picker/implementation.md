@@ -160,6 +160,7 @@ ColorPicker 的交互事件应从输入源收敛到控件级语义事件：
 - 主题资源、Token 和 SharedToken 计算后的视觉更新。
 - ItemsSource、selection、checked、expanded、filter、paging 或 upload task 的集合同步。
 - 动效启停、初始加载阶段 transition 抑制和卸载取消。
+- `ColorBlock` 的空颜色斜线使用最终 Bounds 定位端点，不计入外部 Margin，也不使用测量阶段的尺寸代替绘制区域。
 
 实现文档不逐行解释私有方法。若某个私有算法成为稳定维护入口，应在本节补充算法不变量，而不是把代码复述为说明书。
 
