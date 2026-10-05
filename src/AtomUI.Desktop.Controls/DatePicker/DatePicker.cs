@@ -173,14 +173,20 @@ public partial class DatePicker : InfoPickerInput
         base.OnAttachedToVisualTree(e);
         _languageManager = Application.Current is { } app ? global::AtomUI.ApplicationExtensions.GetLanguageManager(app) : null;
         if (_languageManager is not null)
+        {
             _languageManager.LanguageChanged += OnLanguageChanged;
+        }
+
         Text = FormatDateTime(SelectedDateTime);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         if (_languageManager is not null)
+        {
             _languageManager.LanguageChanged -= OnLanguageChanged;
+        }
+
         _languageManager = null;
         base.OnDetachedFromVisualTree(e);
     }

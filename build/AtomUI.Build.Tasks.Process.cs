@@ -56,7 +56,10 @@ namespace AtomUI.Build.Tasks.Isolation
         {
             string value;
             if (Metadata.TryGetValue(name, out value))
+            {
                 return value;
+            }
+
             return name.Equals("FullPath", StringComparison.OrdinalIgnoreCase) ? FullPath ?? string.Empty : string.Empty;
         }
         public void SetMetadata(string name, string value) { Metadata[name] = value; }
@@ -65,14 +68,20 @@ namespace AtomUI.Build.Tasks.Isolation
         public void CopyMetadataTo(ITaskItem destination)
         {
             foreach (var pair in Metadata)
+            {
                 if (string.IsNullOrEmpty(destination.GetMetadata(pair.Key)))
                 {
                     var literalDestination = destination as ITaskItem2;
                     if (literalDestination != null)
+                    {
                         literalDestination.SetMetadataValueLiteral(pair.Key, pair.Value);
+                    }
                     else
+                    {
                         destination.SetMetadata(pair.Key, pair.Value);
+                    }
                 }
+            }
         }
 
         [OnDeserialized]
@@ -85,7 +94,10 @@ namespace AtomUI.Build.Tasks.Isolation
         {
             var result = new TaskWireItem { ItemSpec = item.ItemSpec, FullPath = item.GetMetadata("FullPath") };
             foreach (DictionaryEntry entry in item.CloneCustomMetadata())
+            {
                 result.Metadata.Add((string)entry.Key, (string)entry.Value);
+            }
+
             return result;
         }
     }
@@ -111,19 +123,25 @@ namespace AtomUI.Build.Tasks.Isolation
         public static void Write<T>(string path, T value)
         {
             using (var stream = File.Create(path))
+            {
                 Serializer<T>().WriteObject(stream, value);
+            }
         }
 
         public static T Read<T>(string json)
         {
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+            {
                 return (T)Serializer<T>().ReadObject(stream);
+            }
         }
 
         public static void WriteResponse(TaskResponse response)
         {
             using (var stream = Console.OpenStandardOutput())
+            {
                 Serializer<TaskResponse>().WriteObject(stream, response);
+            }
         }
 
         private static DataContractJsonSerializer Serializer<T>()

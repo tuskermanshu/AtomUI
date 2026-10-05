@@ -58,13 +58,22 @@ internal sealed class ContentExpansionAnimator : IMotionActorLayout
         {
             _actor.SetValue(ContentExpansionProgressProperty, 0);
             if (!ReferenceEquals(_execution, execution))
+            {
                 return false;
+            }
+
             _actor.Opacity = startOpacity;
             if (!ReferenceEquals(_execution, execution))
+            {
                 return false;
+            }
+
             _actor.IsVisible = true;
             if (!ReferenceEquals(_execution, execution))
+            {
                 return false;
+            }
+
             _actor.InvalidateMeasure();
             _preStart?.Invoke();
             if (!ReferenceEquals(_execution, execution))
@@ -136,16 +145,28 @@ internal sealed class ContentExpansionAnimator : IMotionActorLayout
         var version = ++_version;
         Cancel();
         if (version != _version)
+        {
             return false;
+        }
+
         _actor.Opacity = expanded ? 1 : 0;
         if (version != _version)
+        {
             return false;
+        }
+
         _actor.IsVisible = expanded;
         if (version != _version)
+        {
             return false;
+        }
+
         _actor.ClearValue(ContentExpansionProgressProperty);
         if (version != _version)
+        {
             return false;
+        }
+
         _actor.Animating = false;
         _actor.InvalidateMeasure();
         return true;

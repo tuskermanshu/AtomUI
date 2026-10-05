@@ -19,6 +19,7 @@
 - [测试价值与生命周期规范](development/test-value-and-lifecycle.md)：Bug 修复强制验收、临时测试默认删除、常驻测试准入与清理。
 - [AOT 编程规范](development/aot-programming-guidelines.md)
 - [编译期诊断规范](development/compiler-diagnostics-guidelines.md)
+- [代码风格规范](development/code-style-guidelines.md)
 - [Control 研发规范](development/control-development-guidelines.md)
 - [Control Token 规范](development/control-token-guidelines.md)
 - [Scoped Resource Host](development/scoped-resource-host.md)

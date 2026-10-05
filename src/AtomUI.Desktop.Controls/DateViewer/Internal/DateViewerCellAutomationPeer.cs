@@ -16,9 +16,15 @@ internal sealed class DateViewerCellAutomationPeer(DateViewerCell owner) : Contr
     protected override string? GetNameCore()
     {
         if (owner.Model is not { Value: { } value } model)
+        {
             return string.Empty;
+        }
+
         if (owner.Session is { AutomationNameFactory: { } factory } session)
+        {
             return factory(session, model) ?? string.Empty;
+        }
+
         var culture = owner.Session?.Input.Culture;
         return model.Kind switch
         {

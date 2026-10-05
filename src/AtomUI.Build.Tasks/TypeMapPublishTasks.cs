@@ -41,13 +41,29 @@ internal static class TypeMapBuildContract
         foreach (var handle in reader.GetAssemblyDefinition().GetCustomAttributes())
         {
             var attribute = reader.GetCustomAttribute(handle);
-            if (attribute.Constructor.Kind != HandleKind.MemberReference) continue;
+            if (attribute.Constructor.Kind != HandleKind.MemberReference)
+            {
+                continue;
+            }
+
             var member = reader.GetMemberReference((MemberReferenceHandle)attribute.Constructor);
-            if (member.Parent.Kind != HandleKind.TypeReference) continue;
+            if (member.Parent.Kind != HandleKind.TypeReference)
+            {
+                continue;
+            }
+
             var type = reader.GetTypeReference((TypeReferenceHandle)member.Parent);
-            if (reader.GetString(type.Namespace) != "System.Reflection" || reader.GetString(type.Name) != "AssemblyInformationalVersionAttribute") continue;
+            if (reader.GetString(type.Namespace) != "System.Reflection" || reader.GetString(type.Name) != "AssemblyInformationalVersionAttribute")
+            {
+                continue;
+            }
+
             var value = reader.GetBlobReader(attribute.Value);
-            if (value.ReadUInt16() != 1) break;
+            if (value.ReadUInt16() != 1)
+            {
+                break;
+            }
+
             return value.ReadSerializedString() ?? string.Empty;
         }
         throw new InvalidDataException($"Missing informational identity: '{path}'.");
@@ -94,16 +110,33 @@ public sealed class PrepareTypeMapLinkTask : RegistrationBuildTask
     {
         try
         {
-            if (SdkVersion != "10.0.300") throw new InvalidDataException($"Unsupported SDK '{SdkVersion}'; AtomUI TypeMap publish requires SDK 10.0.300.");
-            if (Capability != TypeMapBuildContract.Capability) throw new InvalidDataException($"Unsupported backend capability '{Capability}'.");
-            if (!Path.IsPathFullyQualified(ReceiptPath)) throw new InvalidDataException("AtomUITypeMapReceipt must be an absolute path.");
+            if (SdkVersion != "10.0.300")
+            {
+                throw new InvalidDataException($"Unsupported SDK '{SdkVersion}'; AtomUI TypeMap publish requires SDK 10.0.300.");
+            }
+
+            if (Capability != TypeMapBuildContract.Capability)
+            {
+                throw new InvalidDataException($"Unsupported backend capability '{Capability}'.");
+            }
+
+            if (!Path.IsPathFullyQualified(ReceiptPath))
+            {
+                throw new InvalidDataException("AtomUITypeMapReceipt must be an absolute path.");
+            }
+
             if (AssemblyName.GetAssemblyName(LinkerAssembly).FullName != TypeMapBuildContract.LinkerIdentity ||
                 TypeMapBuildContract.InformationalVersion(LinkerAssembly) != TypeMapBuildContract.LinkerVersion)
+            {
                 throw new InvalidDataException($"Unsupported actual ILLink binary '{LinkerAssembly}'. Expected ILLink 10.0.8.");
+            }
             // Resolve the SDK tasks to its installed pack. The running task assembly's metadata, not a TFM guess,
             // supplies the actual workload patch identity (the task version starts with the pack version).
             if (!File.Exists(WasmSdkTasksPath) || !TypeMapBuildContract.InformationalVersion(WasmSdkTasksPath).StartsWith("10.0.10", StringComparison.Ordinal))
+            {
                 throw new InvalidDataException($"Unsupported actual WASM SDK tasks '{WasmSdkTasksPath}'. Expected 10.0.10.");
+            }
+
             var toolDirectory = Path.GetDirectoryName(BackendAssembly)!;
             var linkerDirectory = Path.GetDirectoryName(LinkerAssembly)!;
             var assemblies = Assemblies.Select(i => new TypeMapLinkInput(Path.GetFullPath(i.ItemSpec),
@@ -132,9 +165,20 @@ public sealed class PrepareTypeMapLinkTask : RegistrationBuildTask
             BuildEngine.LogMessageEvent(new BuildMessageEventArgs($"AtomUI TypeMap link inputs: signatureExists={File.Exists(SignaturePath)}, contentChanged={changed}, receiptExists={File.Exists(ReceiptPath)}.", null, nameof(PrepareTypeMapLinkTask), MessageImportance.High));
             if (changed || !File.Exists(ReceiptPath))
             {
-                if (File.Exists(LinkSemaphore)) File.Delete(LinkSemaphore);
-                if (File.Exists(ReceiptPath)) File.Delete(ReceiptPath);
-                if (File.Exists(ReceiptPath + ".binding")) File.Delete(ReceiptPath + ".binding");
+                if (File.Exists(LinkSemaphore))
+                {
+                    File.Delete(LinkSemaphore);
+                }
+
+                if (File.Exists(ReceiptPath))
+                {
+                    File.Delete(ReceiptPath);
+                }
+
+                if (File.Exists(ReceiptPath + ".binding"))
+                {
+                    File.Delete(ReceiptPath + ".binding");
+                }
             }
             if (changed)
             {
@@ -161,45 +205,90 @@ public sealed class VerifyTypeMapReceiptTask : RegistrationBuildTask
         try
         {
             if (RequireConsumedAssemblies && ConsumedAssemblies.Length == 0)
+            {
                 throw new InvalidDataException("The TypeMap consumption gate received no actual AOT/bundle input assemblies.");
-            if (!File.Exists(ReceiptPath)) throw new InvalidDataException($"Missing AtomUI TypeMap output receipt '{ReceiptPath}'. The required converter did not complete.");
+            }
+
+            if (!File.Exists(ReceiptPath))
+            {
+                throw new InvalidDataException($"Missing AtomUI TypeMap output receipt '{ReceiptPath}'. The required converter did not complete.");
+            }
+
             var signature = JsonSerializer.Deserialize<TypeMapLinkSignature>(File.ReadAllText(SignaturePath))
                 ?? throw new InvalidDataException("Invalid TypeMap input signature.");
             if (signature.ReceiptPath != ReceiptPath || signature.Capability != TypeMapBuildContract.Capability)
+            {
                 throw new InvalidDataException("TypeMap receipt/configuration mismatch.");
+            }
+
             foreach (var file in signature.Files)
-                if (TypeMapBuildContract.Hash(file.Path) != file.Hash) throw new InvalidDataException($"TypeMap build input changed after linking: '{file.Path}'.");
+            {
+                if (TypeMapBuildContract.Hash(file.Path) != file.Hash)
+                {
+                    throw new InvalidDataException($"TypeMap build input changed after linking: '{file.Path}'.");
+                }
+            }
+
             foreach (var assembly in signature.Assemblies)
-                if (TypeMapBuildContract.Hash(assembly.Path) != assembly.Hash) throw new InvalidDataException($"TypeMap assembly input changed after linking: '{assembly.Path}'.");
+            {
+                if (TypeMapBuildContract.Hash(assembly.Path) != assembly.Hash)
+                {
+                    throw new InvalidDataException($"TypeMap assembly input changed after linking: '{assembly.Path}'.");
+                }
+            }
+
             using var receipt = JsonDocument.Parse(File.ReadAllText(ReceiptPath));
             var root = receipt.RootElement;
             void Require(string field, string expected)
             {
-                if (root.GetProperty(field).GetString() != expected) throw new InvalidDataException($"TypeMap receipt '{field}' mismatch.");
+                if (root.GetProperty(field).GetString() != expected)
+                {
+                    throw new InvalidDataException($"TypeMap receipt '{field}' mismatch.");
+                }
             }
             Require("status", "output-verified"); Require("capability", signature.Capability);
             Require("toolIdentity", signature.BackendIdentity); Require("toolSha256", signature.BackendHash);
             Require("linkerIdentity", signature.LinkerIdentity); Require("linkerVersion", signature.LinkerVersion);
-            if (root.GetProperty("abi").GetInt32() != 1) throw new InvalidDataException("Unsupported TypeMap receipt ABI.");
+            if (root.GetProperty("abi").GetInt32() != 1)
+            {
+                throw new InvalidDataException("Unsupported TypeMap receipt ABI.");
+            }
+
             var seen = new HashSet<string>(StringComparer.Ordinal);
             foreach (var artifact in root.GetProperty("assemblies").EnumerateArray())
             {
                 var identity = artifact.GetProperty("identity").GetString()!;
-                if (!seen.Add(identity)) throw new InvalidDataException($"Duplicate TypeMap output identity '{identity}'.");
+                if (!seen.Add(identity))
+                {
+                    throw new InvalidDataException($"Duplicate TypeMap output identity '{identity}'.");
+                }
+
                 var input = signature.Assemblies.Single(a => a.Identity == identity);
-                if (input.Hash != artifact.GetProperty("inputSha256").GetString()) throw new InvalidDataException($"Stale TypeMap input hash '{identity}'.");
+                if (input.Hash != artifact.GetProperty("inputSha256").GetString())
+                {
+                    throw new InvalidDataException($"Stale TypeMap input hash '{identity}'.");
+                }
+
                 var output = Path.Combine(signature.OutputDirectory, Path.GetFileName(input.Path));
                 var expectedHash = artifact.GetProperty("outputSha256").GetString();
                 if (TypeMapBuildContract.Hash(output) != expectedHash || AssemblyName.GetAssemblyName(output).FullName != identity)
+                {
                     throw new InvalidDataException($"TypeMap linked output was replaced: '{output}'.");
+                }
+
                 if (artifact.TryGetProperty("outputSymbolsSha256", out var symbolHash) && symbolHash.ValueKind == JsonValueKind.String &&
                     TypeMapBuildContract.Hash(Path.ChangeExtension(output, ".pdb")) != symbolHash.GetString())
+                {
                     throw new InvalidDataException($"TypeMap linked symbols were replaced: '{output}'.");
+                }
+
                 if (ConsumedAssemblies.Length != 0)
                 {
                     var consumed = ConsumedAssemblies.Where(i => Path.GetFileName(i.ItemSpec) == Path.GetFileName(input.Path)).ToArray();
                     if (consumed.Length != 1 || TypeMapBuildContract.Hash(consumed[0].ItemSpec) != expectedHash)
+                    {
                         throw new InvalidDataException($"AOT/bundle input does not match the verified TypeMap output '{identity}'.");
+                    }
                 }
             }
             var slots = new HashSet<string>(StringComparer.Ordinal);
@@ -208,12 +297,20 @@ public sealed class VerifyTypeMapReceiptTask : RegistrationBuildTask
                 var assembly = slot.GetProperty("assembly").GetString()!;
                 if (!seen.Contains(assembly) || !slots.Add(assembly + "::" + slot.GetProperty("method").GetString()) ||
                     slot.GetProperty("bodySha256").GetString()?.Length != 64 || string.IsNullOrWhiteSpace(slot.GetProperty("group").GetString()))
+                {
                     throw new InvalidDataException("Invalid TypeMap verified accessor inventory.");
+                }
             }
             var binding = TypeMapBuildContract.Hash(SignaturePath) + "\n" + TypeMapBuildContract.Hash(ReceiptPath);
-            if (BindReceipt) File.WriteAllText(ReceiptPath + ".binding", binding);
+            if (BindReceipt)
+            {
+                File.WriteAllText(ReceiptPath + ".binding", binding);
+            }
             else if (!File.Exists(ReceiptPath + ".binding") || File.ReadAllText(ReceiptPath + ".binding") != binding)
+            {
                 throw new InvalidDataException("TypeMap receipt does not belong to the current verified link invocation.");
+            }
+
             return true;
         }
         catch (Exception error) when (error is InvalidDataException or IOException or UnauthorizedAccessException or BadImageFormatException or ArgumentException or
@@ -232,8 +329,11 @@ public sealed class ValidateRegistrationToolchainTask : RegistrationBuildTask
         {
             if (!string.IsNullOrEmpty(LinkerAssembly) && !TypeMapBuildContract.IsSupportedDesktopLinker(
                     AssemblyName.GetAssemblyName(LinkerAssembly).FullName, TypeMapBuildContract.InformationalVersion(LinkerAssembly)))
+            {
                 throw new InvalidDataException(
                     $"Unsupported actual ILLink binary '{LinkerAssembly}'. Expected official ILLink {TypeMapBuildContract.DesktopToolchainFloor} or later.");
+            }
+
             if (!string.IsNullOrEmpty(NativeCompiler))
             {
                 using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(NativeCompiler)
@@ -244,8 +344,10 @@ public sealed class ValidateRegistrationToolchainTask : RegistrationBuildTask
                 var errors = process.StandardError.ReadToEnd();
                 process.WaitForExit();
                 if (process.ExitCode != 0 || !TypeMapBuildContract.IsSupportedDesktopToolchain(version))
+                {
                     throw new InvalidDataException(
                         $"Unsupported actual NativeAOT compiler '{NativeCompiler}': {version} {errors}. Expected ILCompiler {TypeMapBuildContract.DesktopToolchainFloor} or later.");
+                }
             }
             return true;
         }

@@ -121,7 +121,10 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
         RangeViewer?.SetHost(this);
         AttachTemplate();
         if (_sessionOpened)
+        {
             RefreshViewer();
+        }
+
         SetupButtonStatus();
         SetupConfirmButtonEnableStatus();
     }
@@ -144,7 +147,10 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
         SingleViewer?.SetHost(null);
         RangeViewer?.SetHost(null);
         if (_languageManager is not null)
+        {
             _languageManager.LanguageChanged -= OnLanguageChanged;
+        }
+
         _languageManager = null;
         base.OnDetachedFromVisualTree(e);
     }
@@ -153,7 +159,10 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
     {
         base.OnPropertyChanged(change);
         if (UpdatingCandidate)
+        {
             return;
+        }
+
         if (change.Property == IsShowTimeProperty || change.Property == PickerModeProperty)
         {
             UpdateTimeVisibility();
@@ -171,9 +180,14 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
                 {
                     var committed = EditSession.Input.Committed;
                     if (change.Property == SelectedDateTimeProperty)
+                    {
                         committed = committed with { Start = SelectedDateTime };
+                    }
                     else if (IsRangeProperty(change.Property))
+                    {
                         committed = committed with { End = SecondarySelectedDateTimeCore };
+                    }
+
                     input = input with { Committed = committed };
                 }
                 EditSession.Apply(new DatePickerEditAction.Reconfigure(input));
@@ -218,7 +232,10 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
         SetupConfirmButtonEnableStatus();
         RefreshViewer();
         if (result.HasPreview)
+        {
             EmitHoverDateTimeChanged(result.PreviewValue);
+        }
+
         switch (result.CommitKind)
         {
             case DatePickerCommitKind.Partial:
@@ -245,7 +262,9 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
     protected virtual void SetupConfirmButtonEnableStatus()
     {
         if (ConfirmButton is not null)
+        {
             ConfirmButton.IsEnabled = EditSession.CanConfirm;
+        }
     }
 
     protected virtual void NotifyConfirmButtonClicked() =>
@@ -278,7 +297,9 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
     protected virtual void SyncTimeViewTimeValue()
     {
         if (TimeView is not null)
+        {
             TimeView.SelectedTime = EditSession.TimeDisplayValue;
+        }
     }
 
     internal void EmitConfirmed() => base.OnConfirmed();
@@ -435,7 +456,10 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
     {
         UpdateTimeVisibility();
         if (NowButton is null || TodayButton is null || ConfirmButton is null)
+        {
             return;
+        }
+
         var input = CreateInput();
         ConfirmButton.IsVisible = input.RequiresConfirmation;
         TodayButton.IsEnabled = EffectiveDateRange.Contains(DateTime.Today);
@@ -461,7 +485,9 @@ internal class DatePickerPresenter : PickerPresenterBase, IDatePanelHost
     private void OnTimeSelected(object? sender, TimeSelectedEventArgs e)
     {
         if (!CreateInput().RequiresConfirmation)
+        {
             ApplyResult(EditSession.Apply(new DatePickerEditAction.SubmitTime(e.Time ?? TimeSpan.Zero)));
+        }
     }
     private void OnTodayClick(object? sender, RoutedEventArgs e) => NotifyTodayButtonClicked();
     private void OnNowClick(object? sender, RoutedEventArgs e) => NotifyNowButtonClicked();

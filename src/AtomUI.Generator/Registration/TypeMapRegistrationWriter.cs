@@ -11,7 +11,11 @@ internal static class TypeMapRegistrationWriter
         RegistrationPackage package,
         Func<string, string>? keyHash = null)
     {
-        if (package.Controls.Count == 0 && package.Assets.Count == 0) return;
+        if (package.Controls.Count == 0 && package.Assets.Count == 0)
+        {
+            return;
+        }
+
         var groupName = "ControlPackageGroup_" + RegistrationNames.Hash(package.AssemblyIdentity);
         var (mapEntries, collisions) = CreateMapEntries(package, groupName, keyHash ?? RegistrationNames.Hash);
         if (collisions.Count != 0)
@@ -59,7 +63,10 @@ internal static class TypeMapRegistrationWriter
         source.AppendLine("internal static partial class GeneratedControlPackageRegistration\n{");
         source.AppendLine("    private static readonly string[] CandidateKeys = new string[]\n    {");
         foreach (var entry in mapEntries)
+        {
             source.Append("        ").Append(L(entry.Key)).AppendLine(",");
+        }
+
         source.AppendLine("    };");
         source.AppendLine("    internal static global::AtomUI.IAtomUIBuilder Register(global::AtomUI.IAtomUIBuilder builder,");
         source.AppendLine("        global::System.Func<global::AtomUI.Theme.Resources.IControlThemesProvider> createProvider,");
@@ -73,7 +80,11 @@ internal static class TypeMapRegistrationWriter
         source.AppendLine("        if (global::AtomUI.Registration.ControlRegistrationRuntime.IsTrimmed)\n        {");
         source.AppendLine("            global::AtomUI.Registration.ControlRegistrationRuntime.CollectFragments(builder, GetTypeMap(), CandidateKeys);");
         source.AppendLine("        }\n        else\n        {");
-        foreach (var control in package.Controls) source.Append("            new ").Append(RegistrationNames.Proxy(control)).AppendLine("().Add(builder);");
+        foreach (var control in package.Controls)
+        {
+            source.Append("            new ").Append(RegistrationNames.Proxy(control)).AppendLine("().Add(builder);");
+        }
+
         source.AppendLine("        }\n    }");
         source.Append("    [global::AtomUI.Registration.GeneratedTypeMapAccessor(typeof(").Append(group).AppendLine("))]");
         source.Append("    [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods, typeof(").Append(group).AppendLine(".BrowserMap))]");
@@ -103,10 +114,26 @@ internal static class TypeMapRegistrationWriter
             }
             source.Append("    public override string FragmentId => ").Append(L(package.Id + ":" + control.Type.AssemblyQualifiedName)).AppendLine(";");
             source.AppendLine("    public override void Add(global::AtomUI.Registration.ControlPackageRegistrationBuilder builder)\n    {");
-            foreach (var guard in control.Guards) source.Append("        if (").Append(guard).AppendLine(") return;");
-            if (control.TokenFactory is not null) source.AppendLine("        builder.AddControl(CachedDescriptors.Token);");
-            if (control.SemanticFactory is not null) source.AppendLine("        builder.AddSemanticControl(CachedDescriptors.Semantic);");
-            foreach (var asset in package.Assets.Where(a => control.Assets.Contains(a.Id))) WriteAssetReference(source, asset, "        ");
+            foreach (var guard in control.Guards)
+            {
+                source.Append("        if (").Append(guard).AppendLine(") return;");
+            }
+
+            if (control.TokenFactory is not null)
+            {
+                source.AppendLine("        builder.AddControl(CachedDescriptors.Token);");
+            }
+
+            if (control.SemanticFactory is not null)
+            {
+                source.AppendLine("        builder.AddSemanticControl(CachedDescriptors.Semantic);");
+            }
+
+            foreach (var asset in package.Assets.Where(a => control.Assets.Contains(a.Id)))
+            {
+                WriteAssetReference(source, asset, "        ");
+            }
+
             source.AppendLine("    }\n}");
         }
         source.AppendLine("internal static class GeneratedRegistrationFactories\n{");
@@ -114,13 +141,21 @@ internal static class TypeMapRegistrationWriter
         {
             source.AppendLine("    // Compile-time global schema evidence: strings only, no Type or factory roots.");
             source.AppendLine("    private static readonly string[] CompiledGlobalTokenNames = new string[]\n    {");
-            foreach (var name in package.CompiledGlobalTokenNames) source.Append("        ").Append(L(name)).AppendLine(",");
+            foreach (var name in package.CompiledGlobalTokenNames)
+            {
+                source.Append("        ").Append(L(name)).AppendLine(",");
+            }
+
             source.AppendLine("    };");
         }
         foreach (var asset in package.Assets)
         {
             source.Append("    internal static void AddAsset_").Append(RegistrationNames.Hash(asset.Id)).AppendLine("(global::AtomUI.Registration.ControlPackageRegistrationBuilder builder)\n    {");
-            foreach (var guard in asset.Guards) source.Append("        if (").Append(guard).AppendLine(") return;");
+            foreach (var guard in asset.Guards)
+            {
+                source.Append("        if (").Append(guard).AppendLine(") return;");
+            }
+
             WriteAssetRegistration(source, asset, "        ");
             source.AppendLine("    }");
             source.Append("    internal static global::Avalonia.Controls.IResourceProvider ").Append(RegistrationNames.AssetFactory(asset.Id)).Append("() => new ").Append(asset.Wrapper).AppendLine("();");
@@ -128,11 +163,22 @@ internal static class TypeMapRegistrationWriter
             source.Append("        ").Append(L(asset.Id)).Append(", new global::System.Uri(").Append(L(asset.Uri)).AppendLine("),");
             source.AppendLine("        new global::AtomUI.Theme.Schema.ControlThemeExportDescriptor[]\n        {");
             foreach (var export in asset.Exports)
+            {
                 source.Append("            new(typeof(").Append(export.Target.Name).Append("), ").Append(export.KeyType is null ? L(export.Key!) : "typeof(" + export.KeyType.Name + ")").AppendLine("),");
+            }
+
             source.AppendLine("        },\n        new global::AtomUI.Theme.Schema.ControlTokenIdentity[]\n        {");
-            foreach (var owner in asset.Owners) source.Append("            ").Append(Identity(owner)).AppendLine(",");
+            foreach (var owner in asset.Owners)
+            {
+                source.Append("            ").Append(Identity(owner)).AppendLine(",");
+            }
+
             source.AppendLine("        },\n        new global::AtomUI.Theme.Schema.ControlThemeBindingDescriptor[]\n        {");
-            foreach (var binding in asset.Bindings) source.Append("            new(").Append(Identity(binding.Owner)).Append(", ").Append(L(binding.Property)).Append(", typeof(").Append(binding.Target.Name).AppendLine(")),");
+            foreach (var binding in asset.Bindings)
+            {
+                source.Append("            new(").Append(Identity(binding.Owner)).Append(", ").Append(L(binding.Property)).Append(", typeof(").Append(binding.Target.Name).AppendLine(")),");
+            }
+
             source.Append("        }, CompiledGlobalTokenNames, 0x").Append(asset.CompiledContractFingerprint.ToString("X16")).AppendLine("UL);");
             source.Append("    private static class CachedAsset_").Append(RegistrationNames.Hash(asset.Id)).AppendLine("\n    {");
             WriteCachedDescriptor(source, "Descriptor", "global::AtomUI.Theme.Schema.ControlThemeAssetDescriptor",
@@ -179,7 +225,8 @@ internal static class TypeMapRegistrationWriter
         var entries = new List<TypeMapEntry>();
         var collisions = new List<string>();
         foreach (var control in package.Controls)
-        foreach (var trigger in control.Triggers)
+        {
+            foreach (var trigger in control.Triggers)
         {
             var fullIdentity = groupIdentity + "\n" + control.Type.AssemblyQualifiedName + "\n" + trigger;
             var key = RegistrationNames.TypeMapKey(
@@ -196,6 +243,8 @@ internal static class TypeMapRegistrationWriter
             identities[key] = fullIdentity;
             entries.Add(new(control, trigger, key));
         }
+        }
+
         return (entries, collisions);
     }
 

@@ -38,7 +38,10 @@ internal sealed class LunarCalendarPresentationAdapter : ICalendarPresentationAd
     public DateViewerCellContext? CreateCellContext(Internal.DateViewer.DatePanelSession session, Internal.DateViewer.DateViewerCellModel model)
     {
         if (model.Value is null || model.Kind == DateViewerCellType.Week)
+        {
             return null;
+        }
+
         var visibleDates = session.Models.SelectMany(panel => panel.Cells)
             .Where(cell => cell.Kind == DateViewerCellType.Date && cell.Value.HasValue)
             .Select(cell => cell.Value!.Value).ToArray();
@@ -50,7 +53,10 @@ internal sealed class LunarCalendarPresentationAdapter : ICalendarPresentationAd
     {
         var baseName = DefaultCalendarPresentationAdapter.Instance.GetAutomationName(session, model);
         if (CreateCellContext(session, model) is not LunarCalendarCellContext context)
+        {
             return baseName;
+        }
+
         if (model.Kind == DateViewerCellType.Month)
         {
             var fullRange = string.Join(", ", context.LunarMonths.Select(LunarCalendarFormatter.FormatLunarMonth));
@@ -174,7 +180,10 @@ internal sealed class LunarCalendarPresentationAdapter : ICalendarPresentationAd
             culture.Name, _owner.ShowSolarTerms, _owner.ShowTraditionalFestivals, _owner.ShowHolidays,
             _owner.HighlightWeekends, _owner.HolidayProvider, _providerRevision);
         if (_panelData is not null && _panelDataKey?.Matches(key) == true)
+        {
             return _panelData;
+        }
+
         _panelData = panelKind == DateViewerPanelKind.Date
             ? BuildMonthPanelData(visibleDates, culture) : BuildYearPanelData(displayDate.Year);
         _panelDataKey = key;

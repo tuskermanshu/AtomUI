@@ -42,7 +42,10 @@ public class TypeMapPublishGateTests
             });
 
             result.Success.ShouldBe(accepted);
-            if (!accepted) result.Diagnostics.ShouldContain(d => d.Code == "ATOMUIREG006");
+            if (!accepted)
+            {
+                result.Diagnostics.ShouldContain(d => d.Code == "ATOMUIREG006");
+            }
         }
         finally
         {

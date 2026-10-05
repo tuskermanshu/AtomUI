@@ -12,7 +12,11 @@ public class RegistrationSourceConsumerTests
     public void Analyzer_does_not_export_build_host_runtime_files_as_application_content()
     {
         var root = new DirectoryInfo(AppContext.BaseDirectory);
-        while (root is not null && !File.Exists(Path.Combine(root.FullName, "AtomUI.slnx"))) root = root.Parent;
+        while (root is not null && !File.Exists(Path.Combine(root.FullName, "AtomUI.slnx")))
+        {
+            root = root.Parent;
+        }
+
         using var process = Process.Start(new ProcessStartInfo("dotnet")
         {
             WorkingDirectory = root!.FullName,
@@ -35,7 +39,11 @@ public class RegistrationSourceConsumerTests
     public void Source_and_test_projects_receive_only_the_applicable_registration_generator(bool hasGenerator, bool isTestProject)
     {
         var root = new DirectoryInfo(AppContext.BaseDirectory);
-        while (root is not null && !File.Exists(Path.Combine(root.FullName, "AtomUI.slnx"))) root = root.Parent;
+        while (root is not null && !File.Exists(Path.Combine(root.FullName, "AtomUI.slnx")))
+        {
+            root = root.Parent;
+        }
+
         var directory = Path.Combine(Path.GetTempPath(), "atomui-source-consumer-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         try

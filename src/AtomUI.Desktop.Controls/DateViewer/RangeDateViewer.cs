@@ -107,11 +107,16 @@ public partial class RangeDateViewer : TemplatedControl, IDatePanelHost
             RaisePropertyChanged(PanelKindProperty, old, _panelKind);
         }
         if (change.Property == ValueProperty)
+        {
             _activePart = Value is { Start: not null, End: null } ? DateRangeActivePart.End : DateRangeActivePart.Start;
+        }
+
         if (change.Property == ValueProperty || change.Property == DisplayDateProperty || change.Property == SelectionUnitProperty ||
             change.Property == MinDateProperty || change.Property == MaxDateProperty || change.Property == DisabledDateProperty ||
             change.Property == FirstDayOfWeekProperty || change.Property == ShowWeekProperty)
+        {
             _session?.UpdateInput();
+        }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -129,7 +134,10 @@ public partial class RangeDateViewer : TemplatedControl, IDatePanelHost
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         if (_languageManager is not null)
+        {
             _languageManager.LanguageChanged -= OnLanguageChanged;
+        }
+
         _languageManager = null;
         base.OnDetachedFromVisualTree(e);
     }
@@ -161,7 +169,10 @@ public partial class RangeDateViewer : TemplatedControl, IDatePanelHost
             previous.PanelKind == input.PanelKind && previous.SelectionUnit == input.SelectionUnit &&
             previous.PanelCount == input.PanelCount &&
             Equals(previous.Culture, input.Culture))
+        {
             return;
+        }
+
         _headerInput = input;
         var old = _headerContext;
         var oldSecondary = _secondaryHeaderContext;
@@ -175,7 +186,10 @@ public partial class RangeDateViewer : TemplatedControl, IDatePanelHost
     internal void SetHost(IDatePanelHost? host)
     {
         if (ReferenceEquals(_host, host))
+        {
             return;
+        }
+
         var oldKind = PanelKind;
         _host = host;
         _session.ResetInteraction();
@@ -219,7 +233,9 @@ public partial class RangeDateViewer : TemplatedControl, IDatePanelHost
         RaisePropertyChanged(PanelKindProperty, old, _panelKind);
         _session.UpdateInput();
         if (old != _panelKind || oldAnchor != DatePanelAlgorithms.GetPanelAnchor(DisplayDate, _panelKind))
+        {
             PanelChanged?.Invoke(this, new DateViewerPanelChangedEventArgs(DisplayDate, _panelKind));
+        }
     }
 
     void IDatePanelHost.Activate(DateCellSelection selection)
@@ -260,15 +276,22 @@ public partial class RangeDateViewer : TemplatedControl, IDatePanelHost
         SetCurrentValue(ValueProperty, result);
         _session.UpdateInput();
         if (old != result)
+        {
             ValueChanged?.Invoke(this, new RangeDateViewerValueChangedEventArgs(old, result));
+        }
+
         Selected?.Invoke(this, new RangeDateViewerSelectedEventArgs(result, value, SelectionUnit));
     }
 
     void IDatePanelHost.Preview(DateTime? value)
     {
         if (_host is { } host)
+        {
             host.Preview(value);
+        }
         else
+        {
             HoveredValueChanged?.Invoke(this, new DateViewerHoveredValueChangedEventArgs(value));
+        }
     }
 }

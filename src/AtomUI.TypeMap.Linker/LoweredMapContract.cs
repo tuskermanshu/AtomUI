@@ -77,9 +77,11 @@ internal sealed class LoweredMapContract
                 target.Methods.Any(m => m.IsConstructor && m.HasBody && Signature(m) == entry.Constructor),
                 $"target '{entry.Name}' lost its self attribute/constructor");
             foreach (var member in entry.Members)
+            {
                 Require(target.Methods.Any(m => m.HasBody && m.IsIL && m.IsManaged && !m.IsPInvokeImpl && !m.IsInternalCall &&
                     m.IsVirtual == member.IsVirtual && m.IsNewSlot == member.IsNewSlot && Signature(m) == member.Signature),
                     $"target '{entry.Name}' lost a marked fragment member");
+            }
         }
 
         var body = method.Body;
@@ -110,9 +112,19 @@ internal sealed class LoweredMapContract
 
     private static bool SupportedDefinition(MethodDefinition method)
     {
-        if (!RegistrationAbi.IsManagedStatic(method) || method.HasGenericParameters || !method.HasBody) return false;
+        if (!RegistrationAbi.IsManagedStatic(method) || method.HasGenericParameters || !method.HasBody)
+        {
+            return false;
+        }
+
         for (var owner = method.DeclaringType; owner is not null; owner = owner.DeclaringType)
-            if (owner.HasGenericParameters) return false;
+        {
+            if (owner.HasGenericParameters)
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -123,7 +135,10 @@ internal sealed class LoweredMapContract
     private string TypeIdentity(TypeReference type)
     {
         if (type is GenericInstanceType generic)
+        {
             return TypeIdentity(generic.ElementType) + "<" + string.Join(",", generic.GenericArguments.Select(TypeIdentity)) + ">";
+        }
+
         return RegistrationAbi.Identity(_resolve(type));
     }
 
@@ -135,6 +150,9 @@ internal sealed class LoweredMapContract
     }
     private static void Require(bool condition, string reason)
     {
-        if (!condition) throw BackendDiagnostic.Unlowered(reason);
+        if (!condition)
+        {
+            throw BackendDiagnostic.Unlowered(reason);
+        }
     }
 }

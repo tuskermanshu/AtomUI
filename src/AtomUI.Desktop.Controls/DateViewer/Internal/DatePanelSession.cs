@@ -30,7 +30,9 @@ internal sealed class DatePanelSession
     internal void ConnectPanel(DatePanel panel)
     {
         if (!_connectedPanels.Contains(panel))
+        {
             _connectedPanels.Add(panel);
+        }
     }
 
     internal void DisconnectPanel(DatePanel panel) => _connectedPanels.Remove(panel);
@@ -39,7 +41,10 @@ internal sealed class DatePanelSession
     {
         _input = _host.ReadInput();
         if (_input.PanelCount is < 1 or > 2)
+        {
             throw new InvalidOperationException("A date viewer has one or two panels.");
+        }
+
         Rebuild(refreshAvailability);
         if (!FindFocusCell(FocusedValue)?.IsFocusable ?? true)
         {
@@ -62,7 +67,10 @@ internal sealed class DatePanelSession
     internal void SetContentFactory(Func<DatePanelSession, DateViewerCellModel, DateViewerCellContext?>? factory)
     {
         if (ReferenceEquals(ContentFactory, factory))
+        {
             return;
+        }
+
         ContentFactory = factory;
         RefreshContent();
     }
@@ -79,9 +87,15 @@ internal sealed class DatePanelSession
     internal DateViewerCellContext? CreateContext(DateViewerCellModel model)
     {
         if (ContentFactory is { } factory)
+        {
             return factory(this, model);
+        }
+
         if (model.Value is not { } value)
+        {
             return null;
+        }
+
         return new DateViewerCellContext(value, Input.Today, model.Kind, model.DisplayText, model.IsToday,
             model.IsInView, model.IsSelected, model.IsDisabled, model.IsFocused, model.IsRangeStart, model.IsRangeEnd,
             model.IsRangeMiddle, model.IsRangePreviewStart, model.IsRangePreviewEnd, model.IsRangePreviewMiddle);
@@ -114,7 +128,10 @@ internal sealed class DatePanelSession
             case DatePanelAction.Hover hover:
                 var target = hover.Value?.Date;
                 if (target.HasValue && FindFocusCell(target) is not { IsDisabled: false })
+                {
                     target = null;
+                }
+
                 if (HoveredValue != target)
                 {
                     HoveredValue = target;
@@ -129,7 +146,10 @@ internal sealed class DatePanelSession
             case DatePanelAction.ActivateFocused:
                 UpdateInput();
                 if (FindFocusCell(FocusedValue) is { Value: { } value } cell)
+                {
                     Activate(value, cell.Kind);
+                }
+
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action));
@@ -141,11 +161,17 @@ internal sealed class DatePanelSession
         // A delegate may close over mutable business state; revalidate on activation.
         UpdateInput(refreshAvailability: true);
         if (kind == DateViewerCellType.Week && _input.SelectionUnit != DateViewerSelectionUnit.Week && !_input.AllowWeekActivation)
+        {
             return;
+        }
+
         var cell = Models.SelectMany(model => model.Cells)
             .FirstOrDefault(candidate => candidate.Value == value.Date && candidate.Kind == kind && !candidate.IsDisabled);
         if (cell?.Period is not { } period)
+        {
             return;
+        }
+
         FocusedValue = value.Date;
         HoveredValue = null;
         _host.Activate(new DateCellSelection(value.Date, kind, period));
@@ -156,7 +182,10 @@ internal sealed class DatePanelSession
     {
         UpdateInput();
         if (FocusedValue is not { } current)
+        {
             return;
+        }
+
         var columns = _input.PanelKind == DateViewerPanelKind.Date ? 7 : _input.PanelKind == DateViewerPanelKind.Quarter ? 4 : 3;
         var step = direction switch
         {
@@ -171,9 +200,15 @@ internal sealed class DatePanelSession
         {
             var cell = FindFocusCell(candidate);
             if (cell is null)
+            {
                 return;
+            }
+
             if (!cell.IsFocusable)
+            {
                 continue;
+            }
+
             FocusedValue = candidate;
             Rebuild();
             Changed?.Invoke(this, EventArgs.Empty);

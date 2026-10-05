@@ -17,7 +17,10 @@ internal sealed record RegistrationType(string Name, string MetadataName, string
     {
         var names = new Stack<string>();
         for (var current = symbol; current is not null; current = current.ContainingType)
+        {
             names.Push(current.MetadataName);
+        }
+
         return (symbol.ContainingNamespace.IsGlobalNamespace ? "" : symbol.ContainingNamespace.ToDisplayString() + ".") + string.Join("+", names);
     }
 }
@@ -44,7 +47,11 @@ internal readonly struct ValueArray<T> : IEquatable<ValueArray<T>>, IEnumerable<
     public override int GetHashCode()
     {
         var hash = 17;
-        foreach (var item in this) hash = unchecked(hash * 31 + (item is null ? 0 : item.GetHashCode()));
+        foreach (var item in this)
+        {
+            hash = unchecked(hash * 31 + (item is null ? 0 : item.GetHashCode()));
+        }
+
         return hash;
     }
     public IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)(_items.IsDefault ? ImmutableArray<T>.Empty : _items)).GetEnumerator();

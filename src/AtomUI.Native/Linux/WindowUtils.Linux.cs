@@ -169,9 +169,20 @@ internal static class WindowUtilsLinux
     /// </summary>
     public static void SetInputRectangle(IntPtr handle, int x, int y, int width, int height)
     {
-        if (handle == IntPtr.Zero) return;
-        if (width <= 0 || height <= 0) return;
-        if (!XcbConnectionHolder.IsShapeSupported) return;
+        if (handle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (width <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        if (!XcbConnectionHolder.IsShapeSupported)
+        {
+            return;
+        }
 
         uint windowId = (uint)handle.ToInt64();
 

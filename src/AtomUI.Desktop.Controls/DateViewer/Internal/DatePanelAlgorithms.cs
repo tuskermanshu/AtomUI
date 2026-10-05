@@ -25,9 +25,14 @@ internal static class DatePanelAlgorithms
         var start = GetWeekRange(value, firstDay).Start;
         var year = value.Year;
         if (year < 9999 && start >= FirstWeek(year + 1))
+        {
             year++;
+        }
         else if (year > 1 && start < FirstWeek(year))
+        {
             year--;
+        }
+
         return (year, (int)((start - FirstWeek(year)).TotalDays / 7) + 1);
     }
 
@@ -76,7 +81,9 @@ internal static class DatePanelAlgorithms
     {
         ArgumentNullException.ThrowIfNull(input);
         if (panelIndex is < 0 or > 1)
+        {
             throw new ArgumentOutOfRangeException(nameof(panelIndex));
+        }
 
         var anchor = Navigate(input.DisplayDate, input.PanelKind, panelIndex);
         var firstDay = input.FirstDayOfWeek ?? GetWeekFirstDay(input.Culture);
@@ -86,7 +93,10 @@ internal static class DatePanelAlgorithms
         {
             date = date.Date;
             if (bounds.Empty || bounds.Start is { } start && date < start || bounds.End is { } end && date > end)
+            {
                 return false;
+            }
+
             if (!availability.TryGetValue(date, out var enabled))
             {
                 enabled = !(input.DisabledDate?.Invoke(date) ?? false);
@@ -98,19 +108,29 @@ internal static class DatePanelAlgorithms
         bool IsPeriodEnabled(DateUnitRange period)
         {
             if (input.ConstraintMode == DatePanelConstraintMode.Calendar)
+            {
                 return IsDateEnabled(period.Start) || IsDateEnabled(period.End);
+            }
+
             if (bounds.Empty || bounds.Start is { } start && period.End < start ||
                 bounds.End is { } end && period.Start > end)
+            {
                 return false;
+            }
+
             if (input.DisabledDate is null)
+            {
                 return true;
+            }
 
             var first = bounds.Start is { } minimum && minimum > period.Start ? minimum : period.Start;
             var last = bounds.End is { } maximum && maximum < period.End ? maximum : period.End;
             for (var ticks = first.Ticks; ticks <= last.Ticks; ticks += TimeSpan.TicksPerDay)
             {
                 if (IsDateEnabled(new DateTime(ticks)))
+                {
                     return true;
+                }
             }
             return false;
         }
@@ -132,7 +152,10 @@ internal static class DatePanelAlgorithms
                 original.DisplayText, original.IsInView, firstDay, topology.Columns,
                 _ => !original.IsDisabled, _ => !original.IsDisabled);
             if (projected == original)
+            {
                 continue;
+            }
+
             changed ??= new List<DateViewerCellModel>(topology.Cells);
             changed[index] = projected;
         }
@@ -175,9 +198,15 @@ internal static class DatePanelAlgorithms
         }
         var headers = new List<string>(columns);
         if (showWeek)
+        {
             headers.Add(string.Empty);
+        }
+
         for (var index = 0; index < 7; index++)
+        {
             headers.Add((input.AbbreviatedWeekdays ? input.Culture.DateTimeFormat.AbbreviatedDayNames : input.Culture.DateTimeFormat.ShortestDayNames)[((int)firstDay + index) % 7]);
+        }
+
         return new DatePanelModel(anchor, input.PanelKind, 6, columns, cells.AsReadOnly())
         {
             ColumnHeaders = headers.AsReadOnly()
@@ -291,9 +320,11 @@ internal static class DatePanelAlgorithms
                 ? Normalize(end.Value, input.SelectionUnit, firstDay)
                 : GetUnitRange(end.Value, input.SelectionUnit, firstDay).End) : null;
             if (start > end)
+            {
                 end = input.ConstraintMode == DatePanelConstraintMode.Picker
                     ? start
                     : GetUnitRange(start!.Value, input.SelectionUnit, firstDay).End;
+            }
         }
         return (start, end, start > end);
     }
@@ -311,9 +342,15 @@ internal static class DatePanelAlgorithms
         var previewEnd = input.ActiveRangePart == DateRangeActivePart.End ? Key(input.HoveredValue) : end;
         var hasCommittedRange = start.HasValue && end.HasValue;
         if (start > end)
+        {
             (start, end) = (end, start);
+        }
+
         if (previewStart > previewEnd)
+        {
             (previewStart, previewEnd) = (previewEnd, previewStart);
+        }
+
         var preview = input.HoveredValue.HasValue && previewStart.HasValue && previewEnd.HasValue;
         return new RangeState(hasCommittedRange && !preview && start == key, hasCommittedRange && !preview && end == key,
             hasCommittedRange && !preview && start < key && key < end, preview,

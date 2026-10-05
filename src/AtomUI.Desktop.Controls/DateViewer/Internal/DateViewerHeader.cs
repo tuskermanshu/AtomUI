@@ -20,6 +20,8 @@ internal sealed class DateViewerHeader : TemplatedControl
     {
         base.OnPropertyChanged(change);
         if (change.Property == ContextProperty)
+        {
             RaisePropertyChanged(ParentPanelKindProperty, default, ParentPanelKind);
+        }
     }
 }

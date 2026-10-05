@@ -93,6 +93,7 @@ Read the relevant document before touching the corresponding area:
 - Control registration generator: [docs/modules/generator/control-registration.md](docs/modules/generator/control-registration.md)
 - AOT programming, dynamic data, source generators: [docs/engineering/development/aot-programming-guidelines.md](docs/engineering/development/aot-programming-guidelines.md)
 - Compiler diagnostics: [docs/engineering/development/compiler-diagnostics-guidelines.md](docs/engineering/development/compiler-diagnostics-guidelines.md)
+- Code style: [docs/engineering/development/code-style-guidelines.md](docs/engineering/development/code-style-guidelines.md)
 - Documentation structure and file naming: [docs/engineering/contributing/documentation-structure-guidelines.md](docs/engineering/contributing/documentation-structure-guidelines.md)
 - Mobile documentation contract: [docs/engineering/contributing/mobile-documentation-guidelines.md](docs/engineering/contributing/mobile-documentation-guidelines.md)
 - Changelog and release notes: [docs/engineering/contributing/changelog-guidelines.md](docs/engineering/contributing/changelog-guidelines.md)
@@ -116,6 +117,7 @@ Detailed AI collaboration rules live in [docs/engineering/contributing/agent-gui
 - Every new feature and bug fix must satisfy [test value and lifecycle](docs/engineering/development/test-value-and-lifecycle.md): new tests are temporary by default, must be written in the prescribed temporary location, and must be deleted after validation. The global suite defaults to zero net-new permanent tests; exceptions require proof of independent value, global-run necessity and reasonable cost. Without before/after evidence, test disposition, cleanup and final module verification, the work is incomplete. TDD does not require permanently retaining validation code.
 - For hover, pointer, hit-testing, wheel, scrolling, clipping, or overlay bugs, preserve the original UX contract and follow the [UI input and scrolling bug discipline](docs/engineering/contributing/agent-guidelines.md#ui-输入与滚动-bug).
 - Treat AOT compatibility as a first-class design constraint for new features and bug fixes.
+- Follow the code style rule that C# control-flow bodies must always use `{}`; even a single-line body may not omit braces.
 - Verify with tests or publish checks that match the risk of the change.
 - Follow the mandatory Superpowers workflow before any creation, change, implementation, or bug fix: invoke `superpowers:using-superpowers`, then route through `superpowers:brainstorming` (new features/components), `superpowers:systematic-debugging` (bugs), `superpowers:test-driven-development` (implementation), `superpowers:writing-plans`/`superpowers:executing-plans` (multi-step work), and `superpowers:verification-before-completion` (before claiming done). Never skip a skill that could apply; only an explicit user instruction may narrow it.
 

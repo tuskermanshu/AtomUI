@@ -94,14 +94,19 @@ internal class DateViewerCell : TemplatedControl
     public void Activate()
     {
         if (IsEffectivelyEnabled && _session is { } session && _model is { Value: { } value, IsDisabled: false } model)
+        {
             session.Apply(new DatePanelAction.Activate(value, model.Kind));
+        }
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
         if (e.Handled || !IsEffectivelyEnabled || IsNestedInput(e.Source) || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
             return;
+        }
+
         SetPressed(true);
         e.Handled = true;
     }
@@ -110,11 +115,16 @@ internal class DateViewerCell : TemplatedControl
     {
         base.OnPointerReleased(e);
         if (!_pressed || e.InitialPressMouseButton != MouseButton.Left)
+        {
             return;
+        }
+
         SetPressed(false);
         e.Handled = true;
         if (this.GetVisualsAt(e.GetPosition(this)).Any(visual => visual == this || this.IsVisualAncestorOf(visual)))
+        {
             Activate();
+        }
     }
 
     protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
@@ -133,14 +143,19 @@ internal class DateViewerCell : TemplatedControl
     {
         base.OnGotFocus(e);
         if (ReferenceEquals(e.Source, this) && _model is { Value: { } value })
+        {
             _session?.Apply(new DatePanelAction.Focus(value));
+        }
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
         if (e.Handled || !IsEffectivelyEnabled || IsNestedInput(e.Source))
+        {
             return;
+        }
+
         if (e.Key == Key.Enter)
         {
             Activate();
@@ -168,7 +183,10 @@ internal class DateViewerCell : TemplatedControl
     {
         base.OnPropertyChanged(change);
         if (change.Property == IsEnabledProperty && !IsEnabled)
+        {
             SetPressed(false);
+        }
+
         if (change.Property == CellTemplateProperty || change.Property == FullCellTemplateProperty || change.Property == DefaultFullCellTemplateProperty || change.Property == PresentationProperty)
         {
             PseudoClasses.Set(":cell-template", CellTemplate is not null);
@@ -183,7 +201,9 @@ internal class DateViewerCell : TemplatedControl
         for (var visual = source as Visual; visual is not null && !ReferenceEquals(visual, this); visual = visual.GetVisualParent())
         {
             if (visual is InputElement { Focusable: true })
+            {
                 return true;
+            }
         }
         return false;
     }

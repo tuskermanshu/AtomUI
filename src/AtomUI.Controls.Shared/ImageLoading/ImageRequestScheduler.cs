@@ -81,7 +81,11 @@ internal sealed class ImageRequestScheduler : IDisposable
 
         internal int QueuedCount
         {
-            get { lock (_gate) return _queue.Count; }
+            get { lock (_gate)
+                {
+                    return _queue.Count;
+                }
+            }
         }
 
         internal Task<T> ScheduleAsync<T>(

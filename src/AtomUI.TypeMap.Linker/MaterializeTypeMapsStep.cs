@@ -14,13 +14,20 @@ public sealed class MaterializeTypeMapsStep : IStep
         try
         {
             var receiptPath = VerificationReceipt.Prepare(context);
-            if (_processed) throw BackendDiagnostic.Unsupported("The same TypeMap materialization step was invoked twice.");
+            if (_processed)
+            {
+                throw BackendDiagnostic.Unsupported("The same TypeMap materialization step was invoked twice.");
+            }
+
             _processed = true;
             ToolchainContract.Validate(context);
             // Validate every slot before modifying any body. A bad package never leaves a partially lowered pipeline.
             var readMetadata = new RegistrationMetadataIndex();
             var slots = new RegistrationAbi(context, readMetadata).Read();
-            foreach (var slot in slots) Materialize(slot);
+            foreach (var slot in slots)
+            {
+                Materialize(slot);
+            }
             // Sweep mutates the Cecil model, so post-Sweep validation must use a fresh lazy index.
             var outputMetadata = new RegistrationMetadataIndex();
             var receipt = VerificationReceipt.Schedule(context, receiptPath, slots, outputMetadata);

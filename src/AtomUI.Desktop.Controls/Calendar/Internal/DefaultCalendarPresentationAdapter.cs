@@ -31,7 +31,10 @@ internal sealed class DefaultCalendarPresentationAdapter : ICalendarPresentation
     public string GetAutomationName(Internal.DateViewer.DatePanelSession session, Internal.DateViewer.DateViewerCellModel model)
     {
         if (model.Value is not { } value)
+        {
             return string.Empty;
+        }
+
         var culture = session.Input.Culture;
         var localizer = Application.Current is { } application
             ? global::AtomUI.ApplicationExtensions.GetLocalizer(application)

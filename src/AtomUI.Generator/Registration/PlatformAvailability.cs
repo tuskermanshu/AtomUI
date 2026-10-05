@@ -34,11 +34,17 @@ internal sealed class PlatformAvailability : IEquatable<PlatformAvailability>
     {
         var result = All;
         for (var current = type; current is not null; current = current.ContainingType)
+        {
             result = result.Intersect(FromAttributes(current.GetAttributes(), type.Locations.FirstOrDefault() ?? Location.None, report));
+        }
+
         result = result.Intersect(FromAssembly(type.ContainingAssembly, report));
         if (result.IsEmpty)
+        {
             report(Diagnostic.Create(AtomUIDiagnosticDescriptors.RegistrationUnsupportedBackend, type.Locations.FirstOrDefault(),
                 "type platform declarations have no common supported domain; child annotations may narrow parent availability, not re-enable an excluded platform"));
+        }
+
         return result;
     }
 
@@ -52,8 +58,16 @@ internal sealed class PlatformAvailability : IEquatable<PlatformAvailability>
         foreach (var attribute in attributes)
         {
             var name = attribute.AttributeClass?.ToDisplayString();
-            if (name is not ("System.Runtime.Versioning.SupportedOSPlatformAttribute" or "System.Runtime.Versioning.UnsupportedOSPlatformAttribute")) continue;
-            if (attribute.ConstructorArguments.FirstOrDefault().Value is not string value) continue;
+            if (name is not ("System.Runtime.Versioning.SupportedOSPlatformAttribute" or "System.Runtime.Versioning.UnsupportedOSPlatformAttribute"))
+            {
+                continue;
+            }
+
+            if (attribute.ConstructorArguments.FirstOrDefault().Value is not string value)
+            {
+                continue;
+            }
+
             switch (name)
             {
                 case "System.Runtime.Versioning.SupportedOSPlatformAttribute": supported.Add(value); break;
@@ -67,10 +81,17 @@ internal sealed class PlatformAvailability : IEquatable<PlatformAvailability>
     {
         var allow = Parse(supported).ToArray();
         var deny = Parse(unsupported).ToArray();
-        if (allow.Length == 0 && deny.Length == 0) return All;
+        if (allow.Length == 0 && deny.Length == 0)
+        {
+            return All;
+        }
+
         if (allow.Any(min => deny.Any(max => max.OS == min.OS && max.Version <= min.Version)))
+        {
             report(Diagnostic.Create(AtomUIDiagnosticDescriptors.RegistrationUnsupportedBackend, location,
                 "platform re-enablement after an unsupported range requires an explicit non-overlapping availability declaration"));
+        }
+
         var ranges = Platforms.Select(platform =>
         {
             var included = allow.Where(p => Matches(p.OS, platform)).Select(p => p.Version).ToArray();
@@ -87,7 +108,11 @@ internal sealed class PlatformAvailability : IEquatable<PlatformAvailability>
                 var value = raw.Trim();
                 var os = new string(value.TakeWhile(char.IsLetter).ToArray()).ToLowerInvariant();
                 var versionText = value.Substring(os.Length);
-                if (os == "osx") os = "macos";
+                if (os == "osx")
+                {
+                    os = "macos";
+                }
+
                 var version = Zero;
                 if (!Platforms.Contains(os) || os == "other" || versionText.Length != 0 &&
                     (!Version.TryParse(versionText, out version) || os is "browser" or "linux" || os != "windows" && version.Revision >= 0))
@@ -113,7 +138,11 @@ internal sealed class PlatformAvailability : IEquatable<PlatformAvailability>
 
     internal IEnumerable<string> Guards()
     {
-        if (Equals(All)) yield break;
+        if (Equals(All))
+        {
+            yield break;
+        }
+
         var otherAllowed = !_ranges[Platforms.Length - 1].IsEmpty;
         var conditions = new List<string>();
         for (var i = 0; i < Platforms.Length - 1; i++)
@@ -122,18 +151,36 @@ internal sealed class PlatformAvailability : IEquatable<PlatformAvailability>
             var range = _ranges[i];
             if (otherAllowed)
             {
-                if (range.IsEmpty) conditions.Add(IsOS(platform));
+                if (range.IsEmpty)
+                {
+                    conditions.Add(IsOS(platform));
+                }
                 else
                 {
-                    if (range.Minimum > Zero) conditions.Add("(" + IsOS(platform) + " && !" + AtLeast(platform, range.Minimum) + ")");
-                    if (range.Maximum is not null) conditions.Add("(" + IsOS(platform) + " && " + AtLeast(platform, range.Maximum) + ")");
+                    if (range.Minimum > Zero)
+                    {
+                        conditions.Add("(" + IsOS(platform) + " && !" + AtLeast(platform, range.Minimum) + ")");
+                    }
+
+                    if (range.Maximum is not null)
+                    {
+                        conditions.Add("(" + IsOS(platform) + " && " + AtLeast(platform, range.Maximum) + ")");
+                    }
                 }
             }
             else if (!range.IsEmpty)
             {
                 var condition = range.Minimum == Zero ? IsOS(platform) : AtLeast(platform, range.Minimum);
-                if (platform == "ios" && range.Minimum > Zero) condition = "(" + condition + " && !" + OS("maccatalyst") + "())";
-                if (range.Maximum is not null) condition = "(" + condition + " && !" + AtLeast(platform, range.Maximum) + ")";
+                if (platform == "ios" && range.Minimum > Zero)
+                {
+                    condition = "(" + condition + " && !" + OS("maccatalyst") + "())";
+                }
+
+                if (range.Maximum is not null)
+                {
+                    condition = "(" + condition + " && !" + AtLeast(platform, range.Maximum) + ")";
+                }
+
                 conditions.Add(condition);
             }
         }

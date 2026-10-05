@@ -24,7 +24,10 @@ public partial class Calendar : IDatePanelHost
     {
         // Calendar navigation is a business Value/Mode operation, including clamping the day.
         if (panelKind is not (DateViewerPanelKind.Date or DateViewerPanelKind.Month))
+        {
             return;
+        }
+
         var day = Math.Min(Value.Day, DateTime.DaysInMonth(displayDate.Year, displayDate.Month));
         CommitUserSelection(new DateTime(displayDate.Year, displayDate.Month, day), CalendarSelectSource.Customize);
     }

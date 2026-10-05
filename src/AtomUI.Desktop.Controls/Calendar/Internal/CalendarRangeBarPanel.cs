@@ -114,7 +114,10 @@ internal sealed class CalendarRangeBarPanel : Panel
         {
             UnsubscribeLayoutSource();
             if (this.IsAttachedToVisualTree())
+            {
                 SubscribeLayoutSource();
+            }
+
             InvalidateRangeBars();
         }
         if (LayoutTriggers.Contains(change.Property))
@@ -140,13 +143,18 @@ internal sealed class CalendarRangeBarPanel : Panel
         UnsubscribeLayoutSource();
         _subscribedLayoutSource = LayoutSource;
         if (_subscribedLayoutSource is not null)
+        {
             _subscribedLayoutSource.CellLayoutChanged += OnCellLayoutChanged;
+        }
     }
 
     private void UnsubscribeLayoutSource()
     {
         if (_subscribedLayoutSource is not null)
+        {
             _subscribedLayoutSource.CellLayoutChanged -= OnCellLayoutChanged;
+        }
+
         _subscribedLayoutSource = null;
     }
 
@@ -200,19 +208,28 @@ internal sealed class CalendarRangeBarPanel : Panel
     {
         _segments.Clear();
         if (!CanRender(size) || LayoutSource is not { } source || source.TransformToVisual(this) is not { } transform)
+        {
             return;
+        }
+
         var dates = source.CellLayouts.Where(cell => cell.Kind == DateViewerCellType.Date)
             .Select(cell => cell with { Bounds = cell.Bounds.TransformToAABB(transform) })
             .OrderBy(cell => cell.Value).ToArray();
         if (dates.Length == 0)
+        {
             return;
+        }
+
         var gridStart = dates[0].Value;
         var gridEnd = dates[^1].Value;
         var laneEnds = new List<DateTime>();
         foreach (var rangeBar in RangeBars!)
         {
             if (!TryNormalizeRange(rangeBar, gridStart, gridEnd, out var rangeStart, out var rangeEnd, out var height))
+            {
                 continue;
+            }
+
             var lane = AllocateLane(laneEnds, rangeStart, rangeEnd);
             AddRowSegments(rangeBar, rangeStart, rangeEnd, lane, dates, height);
         }
@@ -247,7 +264,10 @@ internal sealed class CalendarRangeBarPanel : Panel
         rangeStart = rangeBar.StartDate.Value.Date;
         rangeEnd = rangeBar.EndDate.Value.Date;
         if (rangeEnd < rangeStart)
+        {
             (rangeStart, rangeEnd) = (rangeEnd, rangeStart);
+        }
+
         if (rangeStart > gridEnd || rangeEnd < gridStart)
         {
             return false;
@@ -294,7 +314,10 @@ internal sealed class CalendarRangeBarPanel : Panel
         {
             var included = row.Where(cell => cell.Value >= rangeStart && cell.Value <= rangeEnd).ToArray();
             if (included.Length == 0)
+            {
                 continue;
+            }
+
             var left = included.Min(cell => cell.Bounds.Left);
             var right = included.Max(cell => cell.Bounds.Right);
             var top = included.Min(cell => cell.Bounds.Top);
@@ -304,7 +327,10 @@ internal sealed class CalendarRangeBarPanel : Panel
             var width = right - left - inset * 2;
             var height = Math.Min(requestedHeight, Math.Max(0, bottom - top - offset));
             if (width <= 0 || height <= 0)
+            {
                 continue;
+            }
+
             _segments.Add(new CalendarRangeBarSegment(
                 new Rect(left + inset, top + offset, width, height),
                 rangeBar.Background ?? Brushes.Transparent,

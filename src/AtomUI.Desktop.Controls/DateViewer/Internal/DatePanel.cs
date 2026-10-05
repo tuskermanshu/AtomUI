@@ -104,17 +104,25 @@ internal sealed class DatePanel : TemplatedControl
             UnsubscribeSession();
             ReleaseCells();
             if (this.IsAttachedToVisualTree())
+            {
                 SubscribeSession();
+            }
+
             Realize();
         }
         else if (change.Property == PanelIndexProperty || change.Property == CellTemplateProperty || change.Property == FullCellTemplateProperty || change.Property == DefaultFullCellTemplateProperty || change.Property == CellThemeProperty || change.Property == PresentationProperty || change.Property == WeekHeaderTextAlignmentProperty || change.Property == WeekHeaderMinHeightProperty || change.Property == WeekHeaderPaddingProperty)
+        {
             Realize();
+        }
     }
 
     private void SubscribeSession()
     {
         if (ReferenceEquals(_subscribedSession, Session))
+        {
             return;
+        }
+
         UnsubscribeSession();
         _subscribedSession = Session;
         if (_subscribedSession is not null)
@@ -128,7 +136,10 @@ internal sealed class DatePanel : TemplatedControl
     private void UnsubscribeSession()
     {
         if (_subscribedSession is null)
+        {
             return;
+        }
+
         _subscribedSession.Changed -= OnSessionChanged;
         _subscribedSession.FocusRequested -= OnFocusRequested;
         _subscribedSession.DisconnectPanel(this);
@@ -146,7 +157,10 @@ internal sealed class DatePanel : TemplatedControl
     private void Realize()
     {
         if (_cells is null)
+        {
             return;
+        }
+
         if (Session is not { } session || PanelIndex < 0 || PanelIndex >= session.Models.Count)
         {
             ReleaseCells();
@@ -159,20 +173,35 @@ internal sealed class DatePanel : TemplatedControl
             _headers.IsVisible = model.ColumnHeaders.Count > 0;
             ConfigureGrid(_headers, 1, model.Columns);
             while (_headers.Children.Count > model.ColumnHeaders.Count)
+            {
                 _headers.Children.RemoveAt(_headers.Children.Count - 1);
+            }
+
             while (_headers.Children.Count < model.ColumnHeaders.Count)
+            {
                 _headers.Children.Add(new TextBlock { VerticalAlignment = VerticalAlignment.Center });
+            }
+
             for (var index = 0; index < model.ColumnHeaders.Count; index++)
             {
                 var header = (TextBlock)_headers.Children[index];
                 // Runtime-created headers have no TemplatedParent, so ControlTheme cannot select them through /template/.
                 // The theme sets these metrics on DatePanel; the panel applies them to its pooled headers.
                 if (header.TextAlignment != WeekHeaderTextAlignment)
+                {
                     header.TextAlignment = WeekHeaderTextAlignment;
+                }
+
                 if (!MathUtils.AreClose(header.MinHeight, WeekHeaderMinHeight))
+                {
                     header.MinHeight = WeekHeaderMinHeight;
+                }
+
                 if (header.Padding != WeekHeaderPadding)
+                {
                     header.Padding = WeekHeaderPadding;
+                }
+
                 header.Text = model.ColumnHeaders[index];
                 var automationName = index == 0 && model.ColumnHeaders[index].Length == 0 && session.Input.ShowWeek
                     ? GetWeekAutomationName() : null;
@@ -184,7 +213,10 @@ internal sealed class DatePanel : TemplatedControl
         // Model positions include the optional week column and quarter topology;
         // a bounded pool keeps all runtime cells under this single grid owner.
         while (_pool.Count < model.Cells.Count)
+        {
             _pool.Add(new DateViewerCell());
+        }
+
         for (var index = _cells.Children.Count - 1; index >= model.Cells.Count; index--)
         {
             ((DateViewerCell)_cells.Children[index]).Unbind();
@@ -207,11 +239,16 @@ internal sealed class DatePanel : TemplatedControl
             cell.Theme = CellTheme;
             cell.Presentation = Presentation;
             if (contentChanged || cell.ContentRevision != session.ContentRevision || !ReferenceEquals(cell.Model, state) || !ReferenceEquals(cell.Session, session))
+            {
                 cell.Bind(session, state);
+            }
+
             AvaloniaGrid.SetRow(cell, state.Row);
             AvaloniaGrid.SetColumn(cell, state.Column);
             if (_cells.Children.Count <= index)
+            {
                 _cells.Children.Add(cell);
+            }
         }
     }
 
@@ -220,7 +257,10 @@ internal sealed class DatePanel : TemplatedControl
         _cells?.Children.Clear();
         _headers?.Children.Clear();
         foreach (var cell in _pool)
+        {
             cell.Unbind();
+        }
+
         if (_layouts.Count > 0)
         {
             _layouts = Array.Empty<DateCellLayout>();
@@ -234,13 +274,17 @@ internal sealed class DatePanel : TemplatedControl
         {
             grid.RowDefinitions.Clear();
             for (var index = 0; index < rows; index++)
+            {
                 grid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+            }
         }
         if (grid.ColumnDefinitions.Count != columns)
         {
             grid.ColumnDefinitions.Clear();
             for (var index = 0; index < columns; index++)
+            {
                 grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            }
         }
     }
 
@@ -248,11 +292,17 @@ internal sealed class DatePanel : TemplatedControl
     {
         base.OnKeyDown(e);
         if (e.Handled || Session is null || !IsEffectivelyEnabled)
+        {
             return;
+        }
+
         var source = e.Source as Visual;
         var sourceCell = source as DateViewerCell ?? source?.GetVisualAncestors().OfType<DateViewerCell>().FirstOrDefault();
         if (sourceCell?.IsNestedInput(e.Source) == true)
+        {
             return;
+        }
+
         var direction = e.Key switch
         {
             Key.Left => DateFocusDirection.Left,
@@ -273,26 +323,38 @@ internal sealed class DatePanel : TemplatedControl
     {
         base.OnGotFocus(e);
         if (ReferenceEquals(e.Source, this))
+        {
             OnFocusRequested(this, EventArgs.Empty);
+        }
     }
 
     protected override void OnPointerMoved(PointerEventArgs e)
     {
         base.OnPointerMoved(e);
         if (Session is not { } session || _cells is null)
+        {
             return;
+        }
+
         var point = e.GetPosition(_cells);
         var hit = _cells.Children.OfType<DateViewerCell>().FirstOrDefault(cell => cell.Bounds.Contains(point));
         if (hit?.Model is { Value: { } value, IsDisabled: false })
+        {
             session.Apply(new DatePanelAction.Hover(value));
+        }
         else
+        {
             session.Apply(new DatePanelAction.Hover(null));
+        }
     }
 
     private void HandleRawPointer(RawInputEventArgs args)
     {
         if (args is not RawPointerEventArgs pointer || Session is not { HoveredValue: not null } session)
+        {
             return;
+        }
+
         var isInsideSharedPanel = false;
         if (pointer.Type is not (RawPointerEventType.LeaveWindow or RawPointerEventType.TouchCancel))
         {

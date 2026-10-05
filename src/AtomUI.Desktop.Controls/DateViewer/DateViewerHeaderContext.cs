@@ -55,7 +55,9 @@ internal sealed class DateViewerCommand(Action<object?> execute, Func<object?, b
     public void Execute(object? parameter)
     {
         if (CanExecute(parameter))
+        {
             execute(parameter);
+        }
     }
     public event EventHandler? CanExecuteChanged;
     internal void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);

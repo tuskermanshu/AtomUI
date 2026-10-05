@@ -111,10 +111,15 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
         if (change.Property == ValueProperty || change.Property == DisplayDateProperty || change.Property == SelectionUnitProperty ||
             change.Property == MinDateProperty || change.Property == MaxDateProperty || change.Property == DisabledDateProperty ||
             change.Property == FirstDayOfWeekProperty || change.Property == ShowWeekProperty)
+        {
             _session?.UpdateInput();
+        }
+
         if (change.Property == SelectionUnitProperty || change.Property == MinDateProperty ||
             change.Property == MaxDateProperty || change.Property == DisabledDateProperty)
+        {
             _todayCommand?.RaiseCanExecuteChanged();
+        }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -133,9 +138,15 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         if (_geometryPanel is not null)
+        {
             _geometryPanel.GeometryChanged -= OnPanelGeometryChanged;
+        }
+
         if (_languageManager is not null)
+        {
             _languageManager.LanguageChanged -= OnLanguageChanged;
+        }
+
         _languageManager = null;
         base.OnDetachedFromVisualTree(e);
     }
@@ -143,7 +154,10 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         if (_geometryPanel is not null)
+        {
             _geometryPanel.GeometryChanged -= OnPanelGeometryChanged;
+        }
+
         base.OnApplyTemplate(e);
         _geometryPanel = e.NameScope.Find<DatePanel>("PART_PrimaryPanel");
         SubscribePanelGeometry();
@@ -153,7 +167,10 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
     private void SubscribePanelGeometry()
     {
         if (_geometryPanel is null)
+        {
             return;
+        }
+
         _geometryPanel.GeometryChanged -= OnPanelGeometryChanged;
         _geometryPanel.GeometryChanged += OnPanelGeometryChanged;
     }
@@ -173,7 +190,10 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
         var layouts = _geometryPanel?.GetCellLayouts().Select(cell => cell with { Bounds = cell.Bounds.TransformToAABB(transform) }).ToArray()
             ?? Array.Empty<DateCellLayout>();
         if (_cellLayouts.SequenceEqual(layouts))
+        {
             return;
+        }
+
         _cellLayouts = layouts;
         CellLayoutChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -210,7 +230,10 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
         if (_headerInput is { } previous && previous.DisplayDate == input.DisplayDate &&
             previous.PanelKind == input.PanelKind && previous.SelectionUnit == input.SelectionUnit &&
             Equals(previous.Culture, input.Culture))
+        {
             return;
+        }
+
         _headerInput = input;
         var old = _headerContext;
         _headerContext = DateViewerHeaderContext.Create(input, _session.Apply);
@@ -220,7 +243,10 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
     internal void SetHost(IDatePanelHost? host)
     {
         if (ReferenceEquals(_host, host))
+        {
             return;
+        }
+
         var oldKind = PanelKind;
         var oldFooterVisible = IsDefaultFooterVisible;
         _host = host;
@@ -257,7 +283,10 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
     private void SelectToday()
     {
         if (!CanSelectToday())
+        {
             return;
+        }
+
         var today = DateTime.Today;
         ((IDatePanelHost)this).NavigateTo(today, DateViewerPanelKind.Date);
         _session.Apply(new DatePanelAction.Activate(today, DateViewerCellType.Date));
@@ -284,7 +313,9 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
         RaisePropertyChanged(PanelKindProperty, oldKind, _panelKind);
         _session.UpdateInput();
         if (oldKind != _panelKind || oldAnchor != DatePanelAlgorithms.GetPanelAnchor(DisplayDate, _panelKind))
+        {
             PanelChanged?.Invoke(this, new DateViewerPanelChangedEventArgs(DisplayDate, _panelKind));
+        }
     }
 
     void IDatePanelHost.Activate(DateCellSelection selection)
@@ -317,17 +348,27 @@ public partial class DateViewer : TemplatedControl, IDatePanelHost
         SetCurrentValue(DisplayDateProperty, selection.Value);
         _session.UpdateInput();
         if (oldAnchor != DatePanelAlgorithms.GetPanelAnchor(DisplayDate, _panelKind))
+        {
             PanelChanged?.Invoke(this, new DateViewerPanelChangedEventArgs(DisplayDate, _panelKind));
+        }
+
         if (old != value)
+        {
             ValueChanged?.Invoke(this, new DateViewerValueChangedEventArgs(old, value));
+        }
+
         Selected?.Invoke(this, new DateViewerSelectedEventArgs(value, SelectionUnit));
     }
 
     void IDatePanelHost.Preview(DateTime? hoveredValue)
     {
         if (_host is { } host)
+        {
             host.Preview(hoveredValue);
+        }
         else
+        {
             HoveredValueChanged?.Invoke(this, new DateViewerHoveredValueChangedEventArgs(hoveredValue));
+        }
     }
 }

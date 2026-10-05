@@ -32,7 +32,10 @@ internal class RangeDatePickerPresenter : DatePickerPresenter
     {
         SetCurrentValue(IsRangeStartActiveProperty, isStart);
         if (EditSession.IsOpen)
+        {
             ApplyResult(EditSession.Apply(new DatePickerEditAction.ActivatePart(ActiveRangePart)));
+        }
+
         SyncTimeViewTimeValue();
         SetupConfirmButtonEnableStatus();
     }
@@ -47,7 +50,10 @@ internal class RangeDatePickerPresenter : DatePickerPresenter
     internal void RestoreCommittedRangeAfterClose(DateViewerRange committed)
     {
         if (!EditSession.IsOpen)
+        {
             return;
+        }
+
         EditSession.Apply(new DatePickerEditAction.Reconfigure(CreateInput() with { Committed = committed }));
         ApplyResult(EditSession.Close(DatePickerCloseReason.Outside));
     }
@@ -64,7 +70,10 @@ internal class RangeDatePickerPresenter : DatePickerPresenter
     {
         var active = EditSession.OpenAnchor;
         if (active is null || PanelCount == 1)
+        {
             return active;
+        }
+
         return EditSession.Draft.Start ?? active;
     }
 
@@ -85,7 +94,9 @@ internal class RangeDatePickerPresenter : DatePickerPresenter
     protected override void SetupConfirmButtonEnableStatus()
     {
         if (ConfirmButton is not null)
+        {
             ConfirmButton.IsEnabled = EditSession.CanConfirm;
+        }
     }
 
     protected override void NotifyTimeViewHoverChanged(TimeSpan? value) =>

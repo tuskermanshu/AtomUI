@@ -12,7 +12,9 @@ public partial class DateViewerShowCase : GalleryReactiveUserControl<DateViewerV
     private void HandleSelectionUnitChanged(object? sender, OptionCheckedChangedEventArgs args)
     {
         if (DataContext is DateViewerViewModel viewModel && args.Index is >= 0 and <= 4)
+        {
             viewModel.SelectionUnit = (AtomUI.Desktop.Controls.DateViewerSelectionUnit)args.Index;
+        }
     }
 
     private void ClearSelection(object? sender, RoutedEventArgs args)
@@ -27,6 +29,8 @@ public partial class DateViewerShowCase : GalleryReactiveUserControl<DateViewerV
     private void ClearBrowsingSelection(object? sender, RoutedEventArgs args)
     {
         if (DataContext is DateViewerViewModel viewModel)
+        {
             viewModel.EmptyValue = null;
+        }
     }
 }

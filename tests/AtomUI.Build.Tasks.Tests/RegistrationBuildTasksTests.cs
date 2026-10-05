@@ -63,7 +63,10 @@ public class RegistrationBuildTasksTests
         internal string CopyGenerator()
         {
             foreach (var source in Directory.EnumerateFiles(Path.GetDirectoryName(Generator)!, "*.dll"))
+            {
                 File.Copy(source, Path.Combine(_directory, Path.GetFileName(source)), true);
+            }
+
             return Path.Combine(_directory, "AtomUI.Generator.dll");
         }
         internal TaskResponse Resolve(params string[] paths) => TaskProcessHost.Execute(new TaskRequest

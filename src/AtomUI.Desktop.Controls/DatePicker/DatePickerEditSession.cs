@@ -52,7 +52,9 @@ internal sealed class DatePickerEditSession
             _confirmedEnd = input.Committed.End.HasValue;
         }
         if (previous is null || input.IsRange)
+        {
             TimeDisplayValue = ActiveValue?.TimeOfDay ?? TimeSpan.Zero;
+        }
     }
 
     public DatePickerEditResult Apply(DatePickerEditAction action)
@@ -62,7 +64,10 @@ internal sealed class DatePickerEditSession
         {
             case DatePickerEditAction.ChooseDate choice:
                 if (!Constraints.Contains(choice.Value))
+                {
                     return Snapshot();
+                }
+
                 _shortcutDate = null;
                 SetActiveValue(Combine(Constraints.Normalize(choice.Value), TimeCursor ?? TimeDisplayValue));
                 return Input.RequiresConfirmation ? Snapshot() : Confirm();
@@ -71,7 +76,10 @@ internal sealed class DatePickerEditSession
                 // Single time clicks alter the cursor/header, not the previously joined candidate.
                 // Range time clicks join the active date immediately (recorded original host behavior).
                 if (Input.IsRange)
+                {
                     SetActiveValue(Combine(ActiveValue, time.Value));
+                }
+
                 return Snapshot();
             case DatePickerEditAction.SubmitTime time:
                 TimeDisplayValue = time.Value;
@@ -90,27 +98,44 @@ internal sealed class DatePickerEditSession
                 var old = Input;
                 _input = configuration.Input;
                 if (old.Committed.Start != Input.Committed.Start)
+                {
                     Draft = Draft with { Start = Input.Committed.Start };
+                }
+
                 if (old.Committed.End != Input.Committed.End)
+                {
                     Draft = Draft with { End = Input.Committed.End };
+                }
+
                 _shortcutDate = null;
                 return Snapshot();
             case DatePickerEditAction.Confirm:
                 return Confirm();
             case DatePickerEditAction.Today today:
                 if (!Constraints.Contains(today.Value))
+                {
                     return Snapshot();
+                }
+
                 _shortcutDate = null;
                 SetActiveValue(today.Value.Date);
                 return Input.IsRange || !Input.RequiresConfirmation ? Confirm() : Snapshot();
             case DatePickerEditAction.Now now:
                 if (!Constraints.Contains(now.Value))
+                {
                     return Snapshot();
+                }
+
                 TimeDisplayValue = now.Value.TimeOfDay;
                 if (Input.IsRange)
+                {
                     SetActiveValue(now.Value);
+                }
                 else
+                {
                     _shortcutDate = now.Value;
+                }
+
                 return Input.RequiresConfirmation ? Snapshot() : Confirm(allowEmptySingle: true);
             default:
                 throw new ArgumentOutOfRangeException(nameof(action));
@@ -137,16 +162,24 @@ internal sealed class DatePickerEditSession
     private DatePickerEditResult Confirm(bool allowEmptySingle = false)
     {
         if (!CanConfirm && !(allowEmptySingle && !Input.IsRange))
+        {
             return Snapshot();
+        }
+
         if (!Input.IsRange)
         {
             _shortcutDate = null;
             return Snapshot() with { CommitKind = DatePickerCommitKind.Final, CommitValue = Draft, ShouldClose = true };
         }
         if (ActivePart == DateRangeActivePart.Start)
+        {
             _confirmedStart = Draft.Start.HasValue;
+        }
         else
+        {
             _confirmedEnd = Draft.End.HasValue;
+        }
+
         if (!_confirmedStart || !_confirmedEnd || Draft.Start is null || Draft.End is null)
         {
             ActivePart = ActivePart == DateRangeActivePart.Start
@@ -169,7 +202,10 @@ internal sealed class DatePickerEditSession
     private DateTime? Combine(DateTime? date, TimeSpan? time)
     {
         if (date is not { } value)
+        {
             return null;
+        }
+
         return Input.HasTimePanel && time is { } clock ? value.Date.Add(clock) : value.Date;
     }
 }
