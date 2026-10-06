@@ -63,6 +63,8 @@ TypeMapAssemblyTarget。包引用本身不执行 provider 或 initializer，普�
 
 所有需要任务 worker 的 feature target 使用唯一的 AtomUIBuildTasksAssembly；该产物由 Toolchain 的 Tasks profile 编译，
 内部文件名仍为 `AtomUI.Build.Tasks.dll`。
+生成器解析仅在项目实际包含 Generator 候选时启动 worker。仓库声明的 Tasks/Backend 路径不代表项目消费生成器；
+没有生成器引用的普通测试项目不得因此依赖 Toolchain 构建或已有工具缓存。
 任务通过 RoslynCodeTaskFactory 的薄适配器启动独立 `dotnet AtomUI.Build.Tasks.dll` 进程，等待退出后返回结果；不加载到常驻
 MSBuild 节点。取消时终止本次 worker，清理请求目录，不留下后台 worker。
 

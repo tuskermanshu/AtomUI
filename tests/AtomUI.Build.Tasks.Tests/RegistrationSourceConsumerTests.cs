@@ -69,6 +69,27 @@ public class RegistrationSourceConsumerTests
                 .Select(i => Path.GetFileName(i.GetProperty("Identity").GetString())).ToArray();
             references.Count(n => n == "AtomUI.Generator.csproj").ShouldBe(hasGenerator || !isTestProject ? 1 : 0);
             references.ShouldContain("UnrelatedAnalyzer.csproj");
+
+            if (!hasGenerator && isTestProject)
+            {
+                // Exercise the real resolver with references already resolved to no AtomUI analyzer.
+                // Advertised repository tool paths must not make this project start a missing worker.
+                var resolveProject = Path.Combine(directory, "Resolve.proj");
+                File.WriteAllText(resolveProject,
+                    $"<Project><Import Project=\"{repo}/Directory.Build.props\"/>" +
+                    $"<PropertyGroup><AtomUIBuildTasksAssembly>{SecurityElement.Escape(Path.Combine(directory, "missing-worker.dll"))}</AtomUIBuildTasksAssembly></PropertyGroup>" +
+                    $"<Import Project=\"{repo}/build/AtomUI.Registration.targets\"/><Target Name=\"ResolveReferences\"/></Project>");
+                using var resolve = Process.Start(new ProcessStartInfo("dotnet")
+                {
+                    WorkingDirectory = root.FullName,
+                    ArgumentList = { "msbuild", resolveProject, "-nologo", "-target:AtomUIResolveRegistrationGenerator" },
+                    UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true
+                })!;
+                var resolveOutput = resolve.StandardOutput.ReadToEnd();
+                var resolveError = resolve.StandardError.ReadToEnd();
+                resolve.WaitForExit();
+                resolve.ExitCode.ShouldBe(0, resolveOutput + resolveError);
+            }
         }
         finally { Directory.Delete(directory, true); }
     }

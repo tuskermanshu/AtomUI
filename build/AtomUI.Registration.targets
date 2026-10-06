@@ -20,7 +20,9 @@
             <_AtomUIRegistrationCandidate Include="@(AtomUIRegistrationToolCandidate)" />
             <_AtomUIRegistrationCandidate Include="@(Analyzer)" Kind="Generator" Condition="'%(Analyzer.Filename)' == 'AtomUI.Generator'" />
         </ItemGroup>
-        <AtomUI.Build.Tasks.ResolveRegistrationToolsTask Condition="'@(_AtomUIRegistrationCandidate)' != ''" TaskAssembly="$(AtomUIBuildTasksAssembly)" DotNetPath="$(DOTNET_HOST_PATH)" Candidates="@(_AtomUIRegistrationCandidate)">
+        <!-- Repository tool paths alone do not mean this project consumes the generator.
+             Plain test projects have no tool build dependency and must not start its worker. -->
+        <AtomUI.Build.Tasks.ResolveRegistrationToolsTask Condition="'@(_AtomUIRegistrationCandidate->WithMetadataValue('Kind', 'Generator'))' != ''" TaskAssembly="$(AtomUIBuildTasksAssembly)" DotNetPath="$(DOTNET_HOST_PATH)" Candidates="@(_AtomUIRegistrationCandidate)">
             <Output TaskParameter="GeneratorAssembly" PropertyName="_AtomUIResolvedGenerator" />
         </AtomUI.Build.Tasks.ResolveRegistrationToolsTask>
         <ItemGroup Condition="'$(_AtomUIResolvedGenerator)' != ''">

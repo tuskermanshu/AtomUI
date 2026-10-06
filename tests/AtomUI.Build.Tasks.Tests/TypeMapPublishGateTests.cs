@@ -32,7 +32,11 @@ public class TypeMapPublishGateTests
     [InlineData("not-a-version", "v10.0", false)]
     public void Desktop_native_compiler_matches_target_and_verified_servicing_floor(string reportedVersion, string targetVersion, bool accepted)
     {
-        Assert.SkipWhen(OperatingSystem.IsWindows(), "The fake compiler is a POSIX shell script.");
+        if (OperatingSystem.IsWindows())
+        {
+            Assert.Skip("The fake compiler is a POSIX shell script.");
+            return;
+        }
         var directory = Directory.CreateTempSubdirectory("atomui-fake-ilc-");
         try
         {
