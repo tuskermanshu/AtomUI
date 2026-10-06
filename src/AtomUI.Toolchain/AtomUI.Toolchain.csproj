@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.NET.Sdk"
+         TreatAsLocalProperty="TargetFramework;TargetFrameworks;IsTrimmable;IsAotCompatible;EnableAotAnalyzer;EnableTrimAnalyzer;EnableSingleFileAnalyzer;PublishAot;PublishTrimmed;PublishSingleFile;RunAOTCompilation;SelfContained;RuntimeIdentifier">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <TargetFrameworks></TargetFrameworks>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <UseAppHost>false</UseAppHost>
+        <RollForward>LatestPatch</RollForward>
+        <IsPackable>false</IsPackable>
+        <IncludeInPublish>false</IncludeInPublish>
+        <IsAotCompatible>false</IsAotCompatible>
+        <IsTrimmable>false</IsTrimmable>
+        <RuntimeIdentifier></RuntimeIdentifier>
+        <EnableAotAnalyzer>false</EnableAotAnalyzer>
+        <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+        <EnableSingleFileAnalyzer>false</EnableSingleFileAnalyzer>
+        <PublishAot>false</PublishAot>
+        <PublishTrimmed>false</PublishTrimmed>
+        <PublishSingleFile>false</PublishSingleFile>
+        <RunAOTCompilation>false</RunAOTCompilation>
+        <SelfContained>false</SelfContained>
+    </PropertyGroup>
+
+    <!-- One source project, separately restored engine ABIs. Never load ILLink8 and ILLink10
+         into one process or make normal product compilation build the native compiler. -->
+    <PropertyGroup Condition="'$(AtomUIToolchainProfile)' == 'Tasks'">
+        <AssemblyName>AtomUI.Build.Tasks</AssemblyName>
+        <OutputType>Exe</OutputType>
+        <OutputPath>$(AtomUIBuildTasksOutputDirectory)/</OutputPath>
+        <DefineConstants>$(DefineConstants);ATOMUI_BUILD_TASK_HOST</DefineConstants>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(AtomUIToolchainProfile)' == 'Tasks'">
+        <PackageReference Include="Microsoft.Build.Framework" PrivateAssets="all" />
+        <Compile Include="Tasks/**/*.cs;Common/Localization/**/*.cs;Common/SourceGeneration/**/*.cs;Common/Registration/*.cs" />
+        <Compile Include="../../build/AtomUI.Build.Tasks.Process.cs" Link="Tasks/Isolation/TaskProtocol.cs" />
+        <InternalsVisibleTo Include="AtomUI.Build.Tasks.Tests" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(AtomUIToolchainProfile)' == 'ILLink8'">
+        <AssemblyName>AtomUI.Registration.ILLink8</AssemblyName>
+        <OutputPath>$(AtomUIToolchainOutputDirectory)/illink8/</OutputPath>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(AtomUIToolchainProfile)' == 'ILLink8'">
+        <PackageReference Include="Microsoft.NET.ILLink.Tasks" VersionOverride="8.0.27" GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" />
+        <Reference Include="illink" HintPath="$(PkgMicrosoft_NET_ILLink_Tasks)/tools/net8.0/illink.dll" Private="false" />
+        <Reference Include="Mono.Cecil" HintPath="$(PkgMicrosoft_NET_ILLink_Tasks)/tools/net8.0/Mono.Cecil.dll" Private="false" />
+        <Compile Include="Backends/ILLink8/**/*.cs" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(AtomUIToolchainProfile)' == 'ILLink10'">
+        <AssemblyName>AtomUI.TypeMap.Linker</AssemblyName>
+        <OutputType>Exe</OutputType>
+        <OutputPath>$(AtomUIToolchainOutputDirectory)/illink10/</OutputPath>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(AtomUIToolchainProfile)' == 'ILLink10'">
+        <PackageReference Include="Microsoft.NET.ILLink.Tasks" GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" />
+        <Reference Include="illink" HintPath="$(PkgMicrosoft_NET_ILLink_Tasks)/tools/net/illink.dll" Private="false" />
+        <Reference Include="Mono.Cecil" HintPath="$(PkgMicrosoft_NET_ILLink_Tasks)/tools/net/Mono.Cecil.dll" Private="true" />
+        <Compile Include="Backends/ILLink10/**/*.cs" />
+        <InternalsVisibleTo Include="AtomUI.TypeMap.Linker.Tests" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(AtomUIToolchainProfile)' == 'ILLink8' or '$(AtomUIToolchainProfile)' == 'ILLink10'">
+        <Compile Include="Common/Registration/Cecil/**/*.cs;Common/Registration/ConditionalRegistrationMetadata.cs;Common/Registration/ConditionalRegistrationManifest.cs;Common/Registration/RegistrationContractJson.cs" />
+    </ItemGroup>
+
+    <Target Name="ValidateToolchainProfile" BeforeTargets="PrepareForBuild;CollectPackageReferences">
+        <Error Condition="'$(AtomUIToolchainProfile)' != 'Tasks' and '$(AtomUIToolchainProfile)' != 'ILLink8' and '$(AtomUIToolchainProfile)' != 'ILLink10'"
+               Text="Unknown AtomUIToolchainProfile '$(AtomUIToolchainProfile)'. Expected Tasks, ILLink8 or ILLink10." />
+    </Target>
+
+    <!-- Packaging/source-publish preparation is explicit. Ordinary Build only builds its profile. -->
+    <Target Name="BuildManagedToolchain" DependsOnTargets="Build">
+        <PropertyGroup><AtomUIToolchainBackendProfiles Condition="'$(AtomUIToolchainBackendProfiles)' == ''">ILLink8;ILLink10</AtomUIToolchainBackendProfiles></PropertyGroup>
+        <ItemGroup><_AtomUILinkerProfile Include="$(AtomUIToolchainBackendProfiles)" /></ItemGroup>
+        <!-- Restore without package imports, then evaluate a distinct build instance with the
+             newly generated imports. A combined Restore;Build breaks a clean checkout. -->
+        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Restore"
+                 Properties="AtomUIToolchainProfile=%(_AtomUILinkerProfile.Identity);Configuration=$(Configuration);ExcludeRestorePackageImports=true"
+                 BuildInParallel="false" />
+        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Build"
+                 Properties="AtomUIToolchainProfile=%(_AtomUILinkerProfile.Identity);Configuration=$(Configuration);_AtomUIToolchainAfterRestore=true"
+                 BuildInParallel="false" />
+    </Target>
+    <Target Name="PrepareNativeCompiler">
+        <PropertyGroup>
+            <AtomUIRegistrationPython Condition="'$(AtomUIRegistrationPython)' == '' and $([MSBuild]::IsOSPlatform('Windows'))">python</AtomUIRegistrationPython>
+            <AtomUIRegistrationPython Condition="'$(AtomUIRegistrationPython)' == ''">python3</AtomUIRegistrationPython>
+            <_AtomUINative8SourceArgument Condition="'$(AtomUINative8CompilerSourceRoot)' != ''">--source-root &quot;$(AtomUINative8CompilerSourceRoot)&quot;</_AtomUINative8SourceArgument>
+        </PropertyGroup>
+        <Exec Command="&quot;$(AtomUIRegistrationPython)&quot; &quot;$(MSBuildProjectDirectory)/../../scripts/registration/prepare-native8-compiler.py&quot; --bundle &quot;$(AtomUINative8ManagedCompilerBundle)&quot; $(_AtomUINative8SourceArgument)" />
+    </Target>
+    <Target Name="BuildToolchain" DependsOnTargets="BuildManagedToolchain;PrepareNativeCompiler" />
+</Project>

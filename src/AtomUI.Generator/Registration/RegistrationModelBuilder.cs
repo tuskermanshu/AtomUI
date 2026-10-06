@@ -256,24 +256,30 @@ internal sealed class RegistrationModelBuilder
             }
 
             if (!IsAccessible(symbol)) { _report(Diagnostic.Create(AtomUIDiagnosticDescriptors.RegistrationInaccessibleType, symbol.Locations.FirstOrDefault(), type.Name)); continue; }
-            var triggers = new List<string> { type.Name };
+            var triggers = new List<RegistrationTrigger> { new(type, "control") };
+            RegistrationTrigger GeneratedTrigger(string name, string kind)
+            {
+                var metadataName = name.Substring("global::".Length);
+                return new(new(name, metadataName, metadataName + ", " + _compilation.Assembly.Identity.GetDisplayName()), kind);
+            }
             if (token is not null)
             {
                 var ns = "global::" + token.ControlNamespace + ".DesignTokens.";
-                triggers.Add(ns + token.ResourceExtensionType); triggers.Add(ns + token.TokenKeyType);
+                triggers.Add(GeneratedTrigger(ns + token.ResourceExtensionType, "token"));
+                triggers.Add(GeneratedTrigger(ns + token.TokenKeyType, "token"));
                 if (token.HasOwnToken)
                 {
-                    triggers.Add(ns + token.TokenKindType);
+                    triggers.Add(GeneratedTrigger(ns + token.TokenKindType, "token"));
                 }
             }
             if (semantic is not null)
             {
-                triggers.AddRange(semantic.Parts.Select(p => "global::AtomUI.Theme.Styling." + SemanticPartStyleContract.GetTypeName(semantic, p)));
+                triggers.AddRange(semantic.Parts.Select(p => GeneratedTrigger("global::AtomUI.Theme.Styling." + SemanticPartStyleContract.GetTypeName(semantic, p), "style")));
             }
 
             controls.Add(new(type, token is null ? null : GeneratedThemeSchemaWriter.GetControlDescriptorFactoryMethodName(token),
-                semantic is null ? null : SemanticPartManifestWriter.GetFactoryName(semantic), new(triggers.Distinct().OrderBy(t => t, StringComparer.Ordinal)),
-                new(Availability(symbol).Guards()), new(refs)));
+                semantic is null ? null : SemanticPartManifestWriter.GetFactoryName(semantic), new(triggers.Select(t => t.Type.Name).Distinct().OrderBy(t => t, StringComparer.Ordinal)),
+                new(Availability(symbol).Guards()), new(refs), new(triggers.Distinct().OrderBy(t => t.Type.Name, StringComparer.Ordinal))));
         }
         foreach (var conflict in tokens.Where(t => t.HasDescriptor).GroupBy(t => t.ControlName, StringComparer.Ordinal).Where(g => g.Select(t => t.ControlTypeName).Distinct().Count() > 1))
         {
@@ -290,7 +296,9 @@ internal sealed class RegistrationModelBuilder
             _report(Diagnostic.Create(AtomUIDiagnosticDescriptors.RegistrationIdentityConflict, Location.None, "resource factory hash collision: " + conflict.Key));
         }
 
-        return new(_packageId, _compilation.Assembly.Identity.GetDisplayName(), GeneratedCodeNamespace.ForAssembly(_compilation.AssemblyName), new(controls), new(assets), new(globalNames));
+        var builderType = _compilation.GetTypeByMetadataName("AtomUI.Registration.ControlPackageRegistrationBuilder");
+        return new(_packageId, _compilation.Assembly.Identity.GetDisplayName(), GeneratedCodeNamespace.ForAssembly(_compilation.AssemblyName), new(controls), new(assets), new(globalNames),
+            builderType is null ? null : RegistrationType.From(builderType), RegistrationType.From(_compilation.GetSpecialType(SpecialType.System_Void)));
     }
 
     private PlatformAvailability Availability(INamedTypeSymbol type)

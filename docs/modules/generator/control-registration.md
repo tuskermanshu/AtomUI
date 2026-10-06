@@ -143,7 +143,8 @@ Token、主题和 Semantic writer 共享普通契约模型，或使用由完整 
 
 ## 7. 构建工具协作
 
-`AtomUI.Build.Tasks` 保留资源 wrapper、Localization 和隔离任务宿主。普通生成器及这些构建资产由产品 NuGet 自动分发，
+`AtomUI.Toolchain` 的 Tasks profile 保留资源 wrapper、Localization 和隔离任务宿主，产物继续名为
+`AtomUI.Build.Tasks.dll`。普通生成器及这些构建资产由产品 NuGet 自动分发，
 不进入 lib/runtime/publish 输出。
 
 Browser 发布由 [TypeMap Linker](../typemap-linker/overview.md)在官方标记完成后转换自有 accessor。

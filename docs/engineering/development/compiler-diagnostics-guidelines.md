@@ -85,7 +85,7 @@ dotnet_diagnostic.ATOMUIAOT001.severity = error
 | `ATOMUIREG003` | Registration | Error | 主题目标不可访问、开放泛型或不是 StyledElement；资源 x:Class 不能绑定到本程序集的可访问具体资源类 | 使用可访问的具体主题目标 | Registration generator |
 | `ATOMUIREG004` | Registration | Error | include 非常量、缺失、构造环，或 StaticResource 没有词法/显式 include 来源或可验证默认 type-key 条件（全包同名字符串导出不算依赖） | 修正 URI、依赖或资源作用域 | Registration generator |
 | `ATOMUIREG005` | Registration | Error | package、Group、Token owner、资产或生成符号身份冲突 | 保留唯一且一致的完整身份 | Registration generator / TypeMap linker |
-| `ATOMUIREG006` | Registration | Error | marker ABI/Group 无效、平台字符串/资源域不兼容（多目标或所需 owner），或 Browser 链接后端/工具链不受支持 | 重新构建匹配 ABI 的包/后端并修正平台或链接配置 | Registration generator / TypeMap linker |
+| `ATOMUIREG006` | Registration | Error | marker ABI/Group 无效、目标框架不受支持或与官方 TypeMap API/实际工具版本不匹配、平台字符串/资源域不兼容，或链接后端不受支持 | 重新构建匹配 ABI 的包/后端并修正平台或链接配置 | Registration generator / TypeMap linker |
 | `ATOMUIREG007` | Registration | Error | 可达 TypeMap accessor 未正确转换，或 Sweep/输出产物与转换结果不一致 | 启用匹配后端，重新链接并验证生成 accessor/helper | TypeMap linker |
 | `ATOMUIAOT001` | AOT | Warning | 已知 data member path 的 model type，但找不到 generated accessor | 给类型、接口或基类添加 `[GenerateDataMemberAccessors]`，或显式传入 `IDataMemberAccessorDescriptor` | DataMemberAccessors |
 | `ATOMUIAOT002` | AOT | Warning | model type 有 generated accessor，但目标 path 不会被生成 | 改成可访问实例属性、修正 path，或显式传入 descriptor | DataMemberAccessors |

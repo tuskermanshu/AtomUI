@@ -1,9 +1,10 @@
-# AtomUI.TypeMap.Linker 模块概览
+# AtomUI.Toolchain 的 ILLink10 后端
 
 > 后端、产品源码/buildTransitive 自动接线及冷 NuGet 消费已在本地实现和验证；不表示已发布或全部平台已验收。总体状态见
 > [AOT 与裁剪架构](../../architecture/foundations/aot-and-trimming.md#1-状态与事实边界)。
 
-`AtomUI.TypeMap.Linker` 是 Browser/Mono 裁剪发布使用的独立构建工具。它在官方 ILLink 完成条件类型映射的标记后，
+本页详解统一 [Toolchain 项目](../toolchain/overview.md)的 `Backends/ILLink10`。其内部产物仍名为
+`AtomUI.TypeMap.Linker.dll`，在 Browser/Mono 裁剪发布的独立链接宿主中执行。它在官方 ILLink 完成条件类型映射的标记后，
 把 AtomUI 自有 map accessor 转换为仅含已选目标的静态映射。Browser 的 trimmed interpreter 与 AOT 都必须使用此后端，
 保持与 Desktop 相同的自动精细裁剪契约。
 
@@ -13,7 +14,7 @@
 | --- | --- |
 | 普通 `AtomUI.Generator` | 输出包 marker、条件 TypeMap、具体 Group 的 accessor、预先保留的 helper |
 | 官方 ILLink | 计算类型可达性和 TypeMap 条件标记闭包 |
-| `AtomUI.TypeMap.Linker` | 读取官方已标记结果，验证生成 ABI，转换自有 accessor 并验证转换完整性 |
+| Toolchain 的 `ILLink10` profile | 读取官方已标记结果，验证生成 ABI，转换自有 accessor 并验证转换完整性 |
 | 构建资产 | 自动接入后端、检查工具链、维护增量输入和发布门禁 |
 | Core 注册代码 | 查询映射、收集片段、统一校验/挂载/冻结 |
 
@@ -48,8 +49,10 @@
 accessor 是内部、静态、非泛型、无参数方法，返回 `IReadOnlyDictionary<string, Type>`。转换前的方法体直接调用
 具体 Group 的官方 TypeMapping API。字典 helper 是不引用具体控件/代理的闭合实现；它及其传递依赖必须在 Mark 前可达。
 
-本模块在 Mark 后不能引入新的、尚未分析的辅助代码。NativeAOT/CoreCLR 使用官方映射后端，不加载此转换器。
+本模块在 Mark 后不能引入新的、尚未分析的辅助代码。纯 net10 NativeAOT/CoreCLR 使用官方映射后端，不加载此转换器。
 同一普通 NuGet 输出必须支持这些后端，不能按包编译时的 Debug/Release 常量固化选择。
+net10 消费 net8-only 包时的分析前 ABI 转换另见[混合 ABI 桥接](../../architecture/foundations/aot-net8-conditional-backends.md#net-10-消费-net8-only-包)；
+这一步不替代任何正式引擎的依赖闭包。
 
 ## 分发与增量构建
 
@@ -82,11 +85,12 @@ custom-step 接口随工具链演进，发布构建只能使用已经验证的�
 
 ## 独立工具入口与验证回执
 
-工具项目为 `src/AtomUI.TypeMap.Linker`，目标 `net10.0`。它不引用 Core、Generator 或产品运行时，
-并显式关闭发布调用者传播的 trim/AOT 属性。ILLink/Cecil 编译引用来自固定还原包路径，`Private=false`；
-宿主提供这些程序集，不将它们复制进应用。
+工具项目为 `src/AtomUI.Toolchain/AtomUI.Toolchain.csproj`，选择 `AtomUIToolchainProfile=ILLink10`，
+源码位于 `Backends/ILLink10`，目标 `net10.0`。它不引用 Core、Generator 或产品运行时，
+并隔离发布调用者传播的 trim/AOT 属性。ILLink/Cecil 编译引用来自定版还原包：ILLink 由对应链接宿主提供，
+Cecil 随离线桥接 CLI 的工具闭包交付。所有工具依赖都不得复制进应用。
 
-唯一公开 custom-step 入口为 `AtomUI.TypeMap.Linker.MaterializeTypeMapsStep`。构建资产通过
+Browser 映射物化入口仍为 `AtomUI.TypeMap.Linker.MaterializeTypeMapsStep`。构建资产通过
 `_TrimmerCustomSteps` 的 `AfterStep=MarkStep` 注入，并传入 `AtomUITypeMapBackend` custom-data。
 能力标识属于工具版本契约，由实现中的 `ToolchainContract` 定义；未知或缺失标识导致错误。
 后端另行读取当前已加载 ILLink 的完整程序集身份与 informational version，不能只相信调用者传入的字符串。
@@ -95,7 +99,7 @@ ILLink `10.0.8`（informational version `10.0.8-servicing.26229.119+94ea82652cdd
 WASM SDK/runtime assets `10.0.10`，能力值为 `atomui-typemap-v1-illink-10.0.8`。
 这是一组已适配工具链，版本升级需要重新验证，不能仅修改版本门禁。
 
-上述精确组合只约束 Browser 后端，因为它读取 ILLink 的内部管线。桌面 trimmed CoreCLR 与 NativeAOT 只消费官方
+上述精确组合约束 Browser 后端，因为它读取 ILLink 的内部管线。纯 net10 桌面 trimmed CoreCLR 与 NativeAOT 只消费官方
 TypeMap 契约，不加载本工具，也不校验 SDK 版本字符串；它们只要求实际 ILLink（官方身份）与 NativeAOT 编译器的
 版本不低于已验证的 `10.0.8`，不设上限，因此运行时补丁前滚（例如 ILCompiler `10.0.9`）不会阻断桌面发布。
 

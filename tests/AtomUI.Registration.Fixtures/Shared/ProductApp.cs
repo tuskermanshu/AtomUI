@@ -52,6 +52,9 @@ public class ProductApp : Application
             GC.KeepAlive(IdentityOnlyTokens.Identity);
             GC.KeepAlive(EnumOnlyTokenKind.FixtureValue);
             GC.KeepAlive(TokenKeyOnlyTokenKey.FixtureValue);
+            // Both stock ILC10 and ILC8 may remove KeepAlive of a boxed enum constant in no-scanner
+            // builds. Exercise the enum observably so this scenario actually requires its CLR type.
+            Console.WriteLine(TokenKeyOnlyTokenKey.FixtureValue);
             GC.KeepAlive(new ExtensionOnlyTokenResourceExtension());
             Styles.Add(new SemanticOnlyLeafStyle());
             builder.UseFixtureControls();

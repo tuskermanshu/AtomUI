@@ -12,24 +12,29 @@ public sealed class ResolveRegistrationToolsTask : ITask
     public ITaskHost HostObject { get; set; } = null!;
     public ITaskItem[] Candidates { get; set; } = [];
     public bool IncludeBackend { get; set; }
+    public bool IncludeNet8Backend { get; set; }
     [Output] public string GeneratorAssembly { get; set; } = string.Empty;
     [Output] public string BackendAssembly { get; set; } = string.Empty;
+    [Output] public string Net8BackendAssembly { get; set; } = string.Empty;
 
     internal static readonly string[] GeneratorFiles = ["AtomUI.Generator.dll", "System.Reflection.Metadata.dll",
         "System.Collections.Immutable.dll", "System.Memory.dll", "System.Buffers.dll", "System.Numerics.Vectors.dll", "System.Runtime.CompilerServices.Unsafe.dll"];
-    internal static readonly string[] BackendFiles = ["AtomUI.TypeMap.Linker.dll", "AtomUI.TypeMap.Linker.deps.json"];
+    internal static readonly string[] BackendFiles = ["AtomUI.TypeMap.Linker.dll", "AtomUI.TypeMap.Linker.deps.json",
+        "AtomUI.TypeMap.Linker.runtimeconfig.json", "Mono.Cecil.dll"];
+    internal static readonly string[] Net8BackendFiles = ["AtomUI.Registration.ILLink8.dll"];
     internal static readonly string[] TaskFiles = ["AtomUI.Build.Tasks.dll", "AtomUI.Build.Tasks.deps.json", "AtomUI.Build.Tasks.runtimeconfig.json", "Microsoft.Build.Framework.dll"];
 
     public bool Execute()
     {
         try
         {
-            foreach (var group in Candidates.Where(c => IncludeBackend || c.GetMetadata("Kind") != "Backend")
+            foreach (var group in Candidates.Where(c => (IncludeBackend || c.GetMetadata("Kind") != "Backend") &&
+                                                       (IncludeNet8Backend || c.GetMetadata("Kind") != "Net8Backend"))
                          .GroupBy(c => c.GetMetadata("Kind"), StringComparer.Ordinal))
             {
                 string? fingerprint = null;
                 string? selected = null;
-                var files = group.Key switch { "Generator" => GeneratorFiles, "Backend" => BackendFiles, "Tasks" => TaskFiles,
+                var files = group.Key switch { "Generator" => GeneratorFiles, "Backend" => BackendFiles, "Net8Backend" => Net8BackendFiles, "Tasks" => TaskFiles,
                     _ => throw new InvalidDataException($"Unknown AtomUI tool kind '{group.Key}'.") };
                 foreach (var path in group.Select(c => Path.GetFullPath(c.ItemSpec)).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal))
                 {
@@ -56,10 +61,18 @@ public sealed class ResolveRegistrationToolsTask : ITask
                 {
                     BackendAssembly = selected!;
                 }
+                if (group.Key == "Net8Backend")
+                {
+                    Net8BackendAssembly = selected!;
+                }
             }
             if (IncludeBackend && BackendAssembly.Length == 0)
             {
                 throw new InvalidDataException("The required AtomUI Browser TypeMap backend is missing.");
+            }
+            if (IncludeNet8Backend && Net8BackendAssembly.Length == 0)
+            {
+                throw new InvalidDataException("The required AtomUI .NET 8 conditional registration backend is missing.");
             }
 
             return true;

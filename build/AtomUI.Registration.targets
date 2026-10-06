@@ -1,27 +1,21 @@
 <Project>
+    <Import Project="$(MSBuildThisFileDirectory)AtomUI.Registration.Framework.targets" Condition="'$(AtomUIRegistrationFrameworkImported)' != 'true'" />
+    <Import Project="$(MSBuildThisFileDirectory)AtomUI.Toolchain.Tasks.targets" Condition="'$(AtomUIToolchainTasksImported)' != 'true'" />
+    <Import Project="$(MSBuildThisFileDirectory)AtomUI.Registration.Net8.targets" />
+    <Import Project="$(MSBuildThisFileDirectory)AtomUI.Registration.Native8.targets" />
+    <Import Project="$(MSBuildThisFileDirectory)AtomUI.Registration.Bridge.targets" />
     <PropertyGroup>
         <AtomUITypeMapCapability Condition="'$(AtomUITypeMapCapability)' == ''">atomui-typemap-v1-illink-10.0.8</AtomUITypeMapCapability>
     </PropertyGroup>
-    <UsingTask TaskName="AtomUI.Build.Tasks.ResolveRegistrationToolsTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
-        <Task><Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)AtomUI.Build.Tasks.Process.cs" /></Task>
-    </UsingTask>
-    <UsingTask TaskName="AtomUI.Build.Tasks.PrepareTypeMapLinkTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
-        <Task><Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)AtomUI.Build.Tasks.Process.cs" /></Task>
-    </UsingTask>
-    <UsingTask TaskName="AtomUI.Build.Tasks.VerifyTypeMapReceiptTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
-        <Task><Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)AtomUI.Build.Tasks.Process.cs" /></Task>
-    </UsingTask>
 
-    <UsingTask TaskName="AtomUI.Build.Tasks.ValidateRegistrationToolchainTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
-        <Task><Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)AtomUI.Build.Tasks.Process.cs" /></Task>
-    </UsingTask>
-    <Target Name="AtomUIValidateNativeCompiler" BeforeTargets="IlcCompile" Condition="'$(PublishAot)' == 'true'">
+    <Target Name="AtomUIValidateNativeCompiler" BeforeTargets="IlcCompile" Condition="'$(PublishAot)' == 'true' and '$(_AtomUINative8Registration)' != 'true'">
         <AtomUI.Build.Tasks.ValidateRegistrationToolchainTask TaskAssembly="$(AtomUIBuildTasksAssembly)" DotNetPath="$(DOTNET_HOST_PATH)"
+            TargetFrameworkIdentifier="$(_AtomUIRegistrationFrameworkIdentifier)" TargetFrameworkVersion="$(_AtomUIRegistrationFrameworkVersion)"
             NativeCompiler="$(IlcToolsPath)/ilc$(_ExeExt)" />
     </Target>
 
     <Target Name="AtomUIResolveRegistrationGenerator" BeforeTargets="CoreCompile" DependsOnTargets="ResolveReferences"
-            Condition="'$(IsRoslynComponent)' != 'true' and '$(MSBuildProjectName)' != 'AtomUI.Build.Tasks' and '$(MSBuildProjectName)' != 'AtomUI.TypeMap.Linker'">
+            Condition="'$(IsRoslynComponent)' != 'true' and '$(MSBuildProjectName)' != 'AtomUI.Toolchain'">
         <ItemGroup>
             <_AtomUIRegistrationCandidate Include="@(AtomUIRegistrationToolCandidate)" />
             <_AtomUIRegistrationCandidate Include="@(Analyzer)" Kind="Generator" Condition="'%(Analyzer.Filename)' == 'AtomUI.Generator'" />
@@ -39,7 +33,8 @@
          Ordinary builds (even with inherited PublishTrimmed) retain the ordinary full collector. -->
     <Target Name="AtomUISetRegistrationPublishMode" BeforeTargets="PrepareForILLink"
             Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'">
-        <AtomUI.Build.Tasks.ValidateRegistrationToolchainTask TaskAssembly="$(AtomUIBuildTasksAssembly)" DotNetPath="$(DOTNET_HOST_PATH)"
+        <AtomUI.Build.Tasks.ValidateRegistrationToolchainTask Condition="'$(_AtomUINet8ManagedRegistration)' != 'true' and '$(_AtomUINative8Registration)' != 'true'" TaskAssembly="$(AtomUIBuildTasksAssembly)" DotNetPath="$(DOTNET_HOST_PATH)"
+            TargetFrameworkIdentifier="$(_AtomUIRegistrationFrameworkIdentifier)" TargetFrameworkVersion="$(_AtomUIRegistrationFrameworkVersion)"
             LinkerAssembly="$([System.IO.Path]::Combine($([System.IO.Path]::GetDirectoryName('$(ILLinkTasksAssembly)')), 'illink.dll'))" />
         <ItemGroup>
             <RuntimeHostConfigurationOption Remove="AtomUI.Registration.Trimmed" />
@@ -51,9 +46,6 @@
             Condition="'$(RuntimeIdentifier)' == 'browser-wasm' and '$(PublishTrimmed)' == 'true' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">
         <Error Condition="'$(NETCoreSdkVersion)' != '10.0.300'" Code="ATOMUIREG006" Text="AtomUI Browser TypeMap publish supports SDK 10.0.300; actual SDK is $(NETCoreSdkVersion)." />
         <Error Condition="'$(TargetFramework)' != 'net10.0-browser' or '$(TrimMode)' != 'full' or '$(RunILLink)' == 'false'" Code="ATOMUIREG006" Text="AtomUI Browser TypeMap requires net10.0-browser with actual full ILLink processing." />
-        <MSBuild Projects="$(AtomUITypeMapBackendProject)" Targets="Build" BuildInParallel="false"
-                 RemoveProperties="RuntimeIdentifier;PublishAot;PublishTrimmed;RunAOTCompilation;SelfContained;TargetFramework;_IsPublishing"
-                 Properties="Configuration=$(Configuration)" Condition="'$(AtomUITypeMapBackendProject)' != ''" />
         <AtomUI.Build.Tasks.ResolveRegistrationToolsTask TaskAssembly="$(AtomUIBuildTasksAssembly)" DotNetPath="$(DOTNET_HOST_PATH)" Candidates="@(AtomUIRegistrationToolCandidate)" IncludeBackend="true">
             <Output TaskParameter="BackendAssembly" PropertyName="_AtomUIResolvedBackend" />
         </AtomUI.Build.Tasks.ResolveRegistrationToolsTask>
@@ -72,6 +64,14 @@
             <_TrimmerCustomSteps Include="$(_AtomUIResolvedBackend)" Type="AtomUI.TypeMap.Linker.MaterializeTypeMapsStep" AfterStep="MarkStep" />
             <_TrimmerCustomData Include="AtomUITypeMapBackend" Value="$(AtomUITypeMapCapability)" />
             <_TrimmerCustomData Include="AtomUITypeMapReceipt" Value="$(AtomUITypeMapReceipt)" />
+        </ItemGroup>
+    </Target>
+
+    <!-- An optional ABI-only bridge runs after step injection and before this exact input capture.
+         The ordinary net10 path retains the same ordering and the same official linker inputs. -->
+    <Target Name="AtomUICaptureTypeMapBackendInputs" AfterTargets="AtomUIPrepareTypeMapBackend" BeforeTargets="_RunILLink"
+            Condition="'$(RuntimeIdentifier)' == 'browser-wasm' and '$(PublishTrimmed)' == 'true' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">
+        <ItemGroup>
             <_AtomUITypeMapInput Include="$(MSBuildAllProjects);@(TrimmerRootDescriptor);@(AtomUITypeMapAdditionalLinkInput)" />
             <!-- Custom steps must declare any additional opaque configuration/dynamic dependencies as
                  AtomUITypeMapAdditionalLinkInput files; ordinary AtomUI consumers need no such items. -->

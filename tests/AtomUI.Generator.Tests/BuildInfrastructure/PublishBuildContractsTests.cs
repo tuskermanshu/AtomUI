@@ -25,7 +25,7 @@ public sealed class PublishBuildContractsTests
     [Theory]
     [InlineData("AtomUI.Probe", "net10.0", "Library", false, false, true)]
     [InlineData("AtomUI.Probe", "net10.0-browser", "Library", false, false, true)]
-    [InlineData("AtomUI.Probe", "net8.0", "Library", false, false, false)]
+    [InlineData("AtomUI.Probe", "net8.0", "Library", false, false, true)]
     [InlineData("AtomUI.Probe", "netstandard2.0", "Library", false, false, false)]
     [InlineData("Other.Probe", "net10.0", "Library", false, false, false)]
     [InlineData("AtomUI.Probe", "net10.0", "Exe", false, false, false)]

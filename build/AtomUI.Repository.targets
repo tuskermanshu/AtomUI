@@ -23,7 +23,7 @@
                               '$(OutputType)' == 'Library' and
                               '$(IsTestProject)' != 'true' and
                               '$(IsRoslynComponent)' != 'true' and
-                              $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
+                              $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
         <IsTrimmable Condition="'$(IsTrimmable)' == ''">true</IsTrimmable>
         <IsAotCompatible Condition="'$(IsAotCompatible)' == ''">true</IsAotCompatible>
     </PropertyGroup>
@@ -37,7 +37,7 @@
         <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(IsRoslynComponent)' != 'true' and '$(MSBuildProjectName)' != 'AtomUI.Build.Tasks' and '$(MSBuildProjectName)' != 'AtomUI.TypeMap.Linker'">
+    <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(IsRoslynComponent)' != 'true' and '$(MSBuildProjectName)' != 'AtomUI.Toolchain'">
         <ProjectReference Include="$(MSBuildThisFileDirectory)../src/AtomUI.Generator/AtomUI.Generator.csproj"
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false" Private="false" PrivateAssets="all"
                           Condition="'@(ProjectReference->WithMetadataValue('Filename', 'AtomUI.Generator'))' == ''" />
@@ -78,6 +78,14 @@
         <RemoveDir Directories="@(_AtomUITestResultsDirectoryToCleanAfterRun)" />
     </Target>
 
+    <!-- Package assembly owns tool preparation, not the source generator project. -->
+    <Target Name="AtomUIPrepareRepositoryPackageTools"
+            BeforeTargets="AtomUIPrepareGeneratorConsumerPackageAssets;_GetPackageFiles"
+            Condition="'$(NoBuild)' != 'true' and '$(IsPackable)' == 'true' and ('$(AtomUIRegistrationPackageId)' != '' or '$(MSBuildProjectName)' == 'AtomUI.Generator')">
+        <MSBuild Projects="$(AtomUIToolchainProject)" Targets="BuildToolchain"
+                 Properties="Configuration=$(Configuration);AtomUIToolchainProfile=Tasks" />
+    </Target>
+
     <Target Name="AtomUIPrepareGeneratorConsumerPackageAssets"
             BeforeTargets="_GetPackageFiles"
             Condition="'$(IsPackable)' == 'true' and '$(AtomUIRegistrationPackageId)' != ''">
@@ -99,6 +107,25 @@
         <Error Condition="!Exists('%(AtomUINuGetBuildAsset.Identity)')"
                Text="AtomUI Generator build asset could not be found at '%(AtomUINuGetBuildAsset.Identity)'." />
         <Error Condition="!Exists('%(AtomUIGeneratorToolAsset.Identity)')"
-               Text="AtomUI Generator tool asset could not be found at '%(AtomUIGeneratorToolAsset.Identity)'. Build AtomUI.Generator before packing registration product packages." />
+               Text="Prepared AtomUI.Toolchain asset is missing at '%(AtomUIGeneratorToolAsset.Identity)'. Prepare the toolchain with BuildToolchain before packing with --no-build." />
+    </Target>
+    <!-- Source checkout publishing prepares the same toolchain that packages ship. This hook
+         is absent from NuGet consumers and is never reached by an ordinary product Build. -->
+    <Target Name="AtomUIPrepareRepositoryPublishTools"
+            BeforeTargets="AtomUIPrepareTypeMapBackend;AtomUIPrepareNet8ManagedRegistration;AtomUIPrepareConditionalBridgeManaged;AtomUIPrepareConditionalBridgeNative;AtomUIPrepareNative8Registration"
+            Condition="'$(MSBuildProjectName)' != 'AtomUI.Toolchain' and ('$(PublishTrimmed)' == 'true' or '$(PublishAot)' == 'true')">
+        <PropertyGroup>
+            <_AtomUIRepositoryToolchainTarget>BuildManagedToolchain</_AtomUIRepositoryToolchainTarget>
+            <_AtomUIRepositoryToolchainTarget Condition="'$(_AtomUINative8Registration)' == 'true'">Build</_AtomUIRepositoryToolchainTarget>
+            <_AtomUIRepositoryBackendProfile Condition="'$(_AtomUIRegistrationFrameworkFamily)' == 'OfficialTypeMap'">ILLink10</_AtomUIRepositoryBackendProfile>
+            <_AtomUIRepositoryBackendProfile Condition="'$(_AtomUIRegistrationFrameworkFamily)' == 'Net8Compatibility'">ILLink8</_AtomUIRepositoryBackendProfile>
+        </PropertyGroup>
+        <MSBuild Projects="$(AtomUIToolchainProject)" Targets="$(_AtomUIRepositoryToolchainTarget)"
+                 RemoveProperties="NoBuild;NoRestore"
+                 Properties="Configuration=$(Configuration);AtomUIToolchainProfile=Tasks;AtomUIToolchainBackendProfiles=$(_AtomUIRepositoryBackendProfile)" />
+        <MSBuild Condition="'$(_AtomUINative8Registration)' == 'true'"
+                 Projects="$(AtomUIToolchainProject)" Targets="PrepareNativeCompiler"
+                 RemoveProperties="NoBuild;NoRestore"
+                 Properties="Configuration=$(Configuration);AtomUIToolchainProfile=Tasks" />
     </Target>
 </Project>

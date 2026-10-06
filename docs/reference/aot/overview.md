@@ -9,7 +9,9 @@
 | 文档 | 所有权 |
 | --- | --- |
 | [TypeMap 生成 ABI](typemap-contract.md) | 包 marker、映射 accessor、片段代理、身份和失败规则 |
+| [条件注册生成 ABI](conditional-registration-contract.md) | net8 候选记录、规范 JSON/摘要、受控 collector 与输入快照；发布接线仍在验收 |
 
 系统结构见 [TypeMap 注册体系](../../architecture/foundations/aot-typemap-registration.md)，类型与资源语义见
 [控件注册契约](../../architecture/foundations/control-registration-contracts.md)，Browser 编译后端见
-[Browser 链接架构](../../architecture/foundations/aot-browser-linking.md)。
+[Browser 链接架构](../../architecture/foundations/aot-browser-linking.md)，net8 工具与发布边界见
+[.NET 8 条件后端](../../architecture/foundations/aot-net8-conditional-backends.md)。

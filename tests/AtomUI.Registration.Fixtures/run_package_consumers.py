@@ -79,7 +79,7 @@ def main():
 
     # Explicit source prerequisites. The staged checkout has no existing build outputs or package cache.
     run("build-adapter", ["dotnet", "build", str(FIXTURES / "BinaryAdapter/BinaryAdapter.csproj"), "-c", "Release"])
-    run("build-linker", ["dotnet", "build", "src/AtomUI.TypeMap.Linker/AtomUI.TypeMap.Linker.csproj", "-c", "Release"])
+    run("build-linker", ["dotnet", "build", "src/AtomUI.Toolchain/AtomUI.Toolchain.csproj", "-t:BuildManagedToolchain", "-c", "Release"])
     version = subprocess.check_output(["dotnet", "msbuild", "src/AtomUI.Core/AtomUI.Core.csproj", "-getProperty:AtomUIVersion"], cwd=source, env=env, text=True).strip()
     for project in PRODUCTS:
         run("pack-" + project, ["dotnet", "pack", f"src/{project}/{project}.csproj", "-c", "Release", "--no-build", "--no-restore", "-o", str(feed)])

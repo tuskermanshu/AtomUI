@@ -75,6 +75,7 @@ Chrome 自动化在本轮不可用，Browser 执行证据来自真实 IAB；此�
 | [控件注册生成器](../../modules/generator/control-registration.md) | 普通生成器的职责与实现入口 |
 | [TypeMap 链接工具](../../modules/typemap-linker/overview.md) | 浏览器构建工具的模块边界 |
 | [TypeMap ABI 契约](../../reference/aot/typemap-contract.md) | 隐藏生成 ABI、标记与版本化协议 |
+| [.NET 8 条件后端](aot-net8-conditional-backends.md) | 真实 ILLink8/ILC8 接线、混合 ABI、工具分发与当前支持边界 |
 | [AOT 编程规范](../../engineering/development/aot-programming-guidelines.md) | 日常实现与审查规则 |
 | [第三方 Control Package 指南](../../guides/theming/third-party-control-packages.md) | 包作者正常接入步骤 |
 
@@ -127,8 +128,11 @@ Package Core，其控件主题也按实际契约选择；不能继续用 Common 
 非裁剪全量是正常执行模式，不能作为裁剪发布失败后的恢复路径。模式由构建资产与官方 linker feature switch 选择，
 不能由产品包的 Debug/Release 编译常量决定；同一个 NuGet 包必须能服务不同消费发布模式。
 
-目标产品基线为 `net10.0`，浏览器为 `net10.0-browser`；不携带旧目标框架的注册兼容实现。具体 SDK、ILLink 与 workload
-组合由发布工具的能力门禁拥有，不能把一个实验版本当成永久支持承诺。
+产品库 Debug 只构建 `net10.0`，Release 同时构建 `net8.0` 和 `net10.0`；浏览器宿主仍为 `net10.0-browser`。
+上述官方 TypeMap 精细裁剪路径用于 .NET 10。.NET 8 从相同片段事实生成字符串候选 ABI，普通执行收集完整集合，
+裁剪发布则由受控 ILLink8 / ILC8 在真实依赖图内选择片段，不引用运行时不存在的 TypeMap API，也不回退到完整注册。
+后端按[目标框架规则](../../modules/toolchain/framework-routing.md)自动选择；工具组合、发布阶段和平台门禁见 [.NET 8 条件后端](aot-net8-conditional-backends.md)。
+普通 .NET 8 构建成功不能证明其裁剪/NativeAOT 发布通过。该实现尚未完成跨平台正式交付验收。
 
 源码、直接或传递 ProjectReference、普通预编译 adapter DLL、NuGet 消费均使用已解析包标记完成引导。
 不要求消费类库导出 usage 清单，不沿 ProjectReference 传播旧 linked context，也不恢复旧 DLL 的方法体使用分析。

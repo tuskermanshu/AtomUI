@@ -7,6 +7,11 @@
 
 ## 1. 单一生成事实源
 
+TypeMap 元数据和 accessor 仅在目标 Compilation 提供官方 TypeMap API 时生成。Release 的 .NET 8 产品目标
+从同一套片段事实生成 [ConditionalRecord ABI](../../reference/aot/conditional-registration-contract.md)，由受控后端计算
+裁剪选择，普通非裁剪运行仍完整收集。.NET 10 的条件映射、候选 key 与链接契约保持不变；消费 net8-only 包时，
+发布前的隔离桥接将已验证的候选 ABI 转成官方 TypeMap 输入，实际选择仍由最终 ILLink/ILC 完成。
+
 普通 `AtomUI.Generator` 从 Control、Token、Semantic Part 与包内 AXAML 产生：
 
 - 逐 Control 的单项 descriptor factory 与注册片段。

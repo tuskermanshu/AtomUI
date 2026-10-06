@@ -9,6 +9,8 @@ namespace AtomUI.Generator;
 // only Core materialization reads the canonical runtime AQN used by the final schema fingerprint.
 internal sealed record RegistrationType(string Name, string MetadataName, string AssemblyQualifiedName)
 {
+    internal string AssemblyIdentity => AssemblyQualifiedName.Substring(MetadataName.Length + 2);
+
     internal static RegistrationType From(INamedTypeSymbol symbol) => new(
         symbol.ToDisplayString(GeneratorSymbolDisplay.FullyQualifiedType), MetadataNameOf(symbol),
         MetadataNameOf(symbol) + ", " + symbol.ContainingAssembly.Identity.GetDisplayName());
@@ -32,9 +34,12 @@ internal sealed record RegistrationAsset(string Id, string Uri, string Wrapper, 
     ValueArray<RegistrationExport> Exports, ValueArray<RegistrationOwner> Owners,
     ValueArray<RegistrationBinding> Bindings, ulong CompiledContractFingerprint, ValueArray<string> Guards, ValueArray<string> ExplicitIncludes, ValueArray<string> ExternalDynamicKeys);
 internal sealed record RegistrationControl(RegistrationType Type, string? TokenFactory, string? SemanticFactory,
-    ValueArray<string> Triggers, ValueArray<string> Guards, ValueArray<string> Assets);
+    ValueArray<string> Triggers, ValueArray<string> Guards, ValueArray<string> Assets,
+    ValueArray<RegistrationTrigger> ConditionalTriggers = default);
+internal sealed record RegistrationTrigger(RegistrationType Type, string Kind);
 internal sealed record RegistrationPackage(string Id, string AssemblyIdentity, string Namespace,
-    ValueArray<RegistrationControl> Controls, ValueArray<RegistrationAsset> Assets, ValueArray<string> CompiledGlobalTokenNames);
+    ValueArray<RegistrationControl> Controls, ValueArray<RegistrationAsset> Assets, ValueArray<string> CompiledGlobalTokenNames,
+    RegistrationType? RegistrationBuilderType = null, RegistrationType? VoidType = null);
 
 internal readonly struct ValueArray<T> : IEquatable<ValueArray<T>>, IEnumerable<T>
 {

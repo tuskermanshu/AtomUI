@@ -663,11 +663,19 @@ public sealed partial class LanguagePackEndToEndTests
                 new XElement("OutputPathWithoutFramework", Path.Combine(artifactsRoot, "bin", "$(Configuration)")),
                 new XElement("OutputPath", "$(OutputPathWithoutFramework)"),
                 new XElement("BaseIntermediateOutputPath", Path.Combine(artifactsRoot, "$(MSBuildProjectName)", "obj") + Path.DirectorySeparatorChar),
+                new XElement("BaseIntermediateOutputPath",
+                    new XAttribute("Condition", "'$(MSBuildProjectName)' == 'AtomUI.Toolchain'"),
+                    "$(BaseIntermediateOutputPath)$(AtomUIToolchainProfile)/"),
                 new XElement("IntermediateOutputPathWithoutFramework", "$(BaseIntermediateOutputPath)"),
                 new XElement("IntermediateOutputPath", "$(BaseIntermediateOutputPath)$(Configuration)/"),
                 // Repository.props computed these properties before the test path overrides.
                 // Its tool asset Items are evaluated afterwards and use the new output root.
-                new XElement("AtomUIBuildTasksOutputDirectory", "$(OutputPathWithoutFramework)/build-tasks"),
+                new XElement("AtomUIToolchainOutputDirectory", "$(OutputPathWithoutFramework)/toolchain"),
+                new XElement("AtomUIBuildTasksOutputDirectory", "$(AtomUIToolchainOutputDirectory)/tasks"),
+                new XElement("AtomUITypeMapBackendOutputDirectory", "$(AtomUIToolchainOutputDirectory)/illink10/net10.0"),
+                new XElement("AtomUINet8LinkerBackendAssembly", "$(AtomUIToolchainOutputDirectory)/illink8/net10.0/AtomUI.Registration.ILLink8.dll"),
+                new XElement("AtomUIConditionalBridgeAssembly", "$(AtomUITypeMapBackendOutputDirectory)/AtomUI.TypeMap.Linker.dll"),
+                new XElement("AtomUINative8ManagedCompilerBundle", Path.Combine(artifactsRoot, "tools", "registration", "net8", "ilc", "managed-bundle")),
                 new XElement("AtomUIBuildTasksAssembly", "$(AtomUIBuildTasksOutputDirectory)/net10.0/AtomUI.Build.Tasks.dll"),
                 new XElement("AtomUIToolsetCacheRoot", Path.Combine(artifactsRoot, "tools")))))
             .Save(propsPath);

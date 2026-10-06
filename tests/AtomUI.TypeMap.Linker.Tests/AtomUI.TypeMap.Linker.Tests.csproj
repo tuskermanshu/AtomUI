@@ -8,8 +8,15 @@
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" />
     <Reference Include="illink" HintPath="$(PkgMicrosoft_NET_ILLink_Tasks)/tools/net/illink.dll" />
     <Reference Include="Mono.Cecil" HintPath="$(PkgMicrosoft_NET_ILLink_Tasks)/tools/net/Mono.Cecil.dll" />
-    <ProjectReference Include="../../src/AtomUI.TypeMap.Linker/AtomUI.TypeMap.Linker.csproj" />
+    <ProjectReference Include="../../src/AtomUI.Toolchain/AtomUI.Toolchain.csproj" ReferenceOutputAssembly="false" />
+    <Reference Include="AtomUI.TypeMap.Linker" HintPath="$(AtomUITypeMapBackendOutputDirectory)/AtomUI.TypeMap.Linker.dll" />
     <ProjectReference Include="Fixtures/Empty/Empty.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="Fixtures/PackageA/PackageA.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
+  <!-- NuGet restores the single default project. Engine profiles have separate assets and
+       are prepared explicitly by its build API, rather than hidden ProjectReference metadata. -->
+  <Target Name="PrepareTypeMapTestBackend" BeforeTargets="ResolveAssemblyReferences">
+    <MSBuild Projects="$(AtomUIToolchainProject)" Targets="BuildManagedToolchain"
+             Properties="Configuration=$(Configuration);AtomUIToolchainProfile=Tasks;AtomUIToolchainBackendProfiles=ILLink10" />
+  </Target>
 </Project>

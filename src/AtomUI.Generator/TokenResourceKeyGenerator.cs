@@ -112,7 +112,19 @@ public class TokenResourceKeyGenerator : IIncrementalGenerator
             {
                 controlInfos.RemoveAll(static control => !control.HasOwnToken);
                 var package = resourceFacts.Build(controlInfos, semanticControls, globalNames);
-                TypeMapRegistrationWriter.Write(context, package);
+                if (package.Controls.Count != 0 || package.Assets.Count != 0)
+                {
+                    if (RegistrationFrameworkResolver.TryResolve(compilation, options.GlobalOptions, out var framework, out var error))
+                    {
+                        TypeMapRegistrationWriter.Write(context, package,
+                            supportsTypeMap: framework == AtomUI.Build.Tasks.Registration.RegistrationFrameworkFamily.OfficialTypeMap);
+                    }
+                    else
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            Diagnostics.AtomUIDiagnosticDescriptors.RegistrationUnsupportedBackend, Location.None, error));
+                    }
+                }
             }
             info.ControlThemeInfos.AddRange(controlInfos);
             ThemeControlCatalogMetadataWriter.Write(context, catalog);

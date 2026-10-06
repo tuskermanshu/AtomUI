@@ -43,12 +43,12 @@ class RealPolicyContracts(unittest.TestCase):
                 self.assertIn(expected, names)
 
     def test_registration_and_shared_generator_inputs_preserve_publish_obligations(self):
-        for changed in ["src/AtomUI.Core/Theme/ControlPackageRegistration.cs", "src/AtomUI.Desktop.Controls/AtomUI.Desktop.Controls.csproj", "src/AtomUI.Build.Tasks/SourceGeneration/GeneratedCodeNamespace.cs"]:
+        for changed in ["src/AtomUI.Core/Theme/ControlPackageRegistration.cs", "src/AtomUI.Desktop.Controls/AtomUI.Desktop.Controls.csproj", "src/AtomUI.Toolchain/Common/SourceGeneration/GeneratedCodeNamespace.cs"]:
             with self.subTest(changed=changed):
                 self.assertIn("native-aot", {o["id"] for o in self.planner.plan([changed])["obligations"]})
 
     def test_typemap_backend_and_fixture_changes_select_backend_tests_and_publish_checks(self):
-        for changed in ["src/AtomUI.TypeMap.Linker/RegistrationAbi.cs",
+        for changed in ["src/AtomUI.Toolchain/Backends/ILLink10/RegistrationAbi.cs",
                         "tests/AtomUI.TypeMap.Linker.Tests/Fixtures/Contracts/FixtureContracts.cs"]:
             with self.subTest(changed=changed):
                 plan = self.planner.plan([changed])

@@ -43,6 +43,7 @@ AtomUI/
 │   ├── AtomUI.Toolkits.GalleryBase # Product-neutral Gallery base controls and themes
 │   ├── AtomUI.Icons.*            # Icon infrastructure and Ant Design icon package
 │   ├── AtomUI.Fonts.*            # Font packages
+│   ├── AtomUI.Toolchain          # Build tasks, shared build models, ILLink/ILC registration backends
 │   └── AtomUI.Generator          # Roslyn source generators
 ├── controlgallery/              # AtomUIGallery and desktop host
 ├── tests/                       # Unit and regression tests
@@ -60,6 +61,7 @@ Important source boundaries:
 - `AtomUI.Desktop.Controls.DataGrid`, `AtomUI.Desktop.Controls.ColorPicker`, and `AtomUI.Desktop.Controls.Extras`: optional desktop packages.
 - `AtomUI.Toolkits.GalleryBase`: product-neutral Gallery base controls, models, themes, and runtime helpers.
 - `AtomUI.Generator`: Roslyn source generators referenced as analyzers.
+- `AtomUI.Toolchain`: one build-tool project with isolated Tasks/ILLink8/ILLink10 profiles and the ILC8 adapter recipe; never an application runtime dependency.
 - `AtomUIGallery`: Gallery shell, showcases, API tables, token tables, and NativeAOT publish target.
 
 Approved Mobile target boundary: `AtomUI.Mobile.Controls` is a product package parallel to `AtomUI.Desktop.Controls`, with iOS-first
@@ -81,6 +83,7 @@ Read the relevant document before touching the corresponding area:
 
 - Overall architecture: [docs/architecture/overview.md](docs/architecture/overview.md)
 - Module boundaries: [docs/architecture/foundations/dependency-graph.md](docs/architecture/foundations/dependency-graph.md)
+- Build-tool ownership and profiles: [docs/modules/toolchain/overview.md](docs/modules/toolchain/overview.md)
 - Mobile target architecture: [docs/architecture/systems/mobile/overview.md](docs/architecture/systems/mobile/overview.md)
 - Localization target architecture: [docs/architecture/systems/localization/overview.md](docs/architecture/systems/localization/overview.md)
 - AI collaboration and bug-fix discipline: [docs/engineering/contributing/agent-guidelines.md](docs/engineering/contributing/agent-guidelines.md)

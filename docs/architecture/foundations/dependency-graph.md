@@ -16,7 +16,7 @@
 - `src/AtomUI.Desktop.Controls.ColorPicker`
 - `src/AtomUI.Desktop.Controls.Extras`
 - `src/AtomUI.Generator`
-- `src/AtomUI.Build.Tasks`
+- `src/AtomUI.Toolchain`
 - `src/AtomUI.LanguagePack.Template`
 - `src/AtomUI.Icons.Shared`
 - `src/AtomUI.Icons.AntDesign`
@@ -35,7 +35,7 @@
 | `AtomUI.Native` | `Avalonia`, `NWayland` | 内部原生平台能力层；封装 Win32、Objective-C、Xlib/XCB、Wayland protocol 等底层调用 |
 | `AtomUI.Localization` | `AtomUI.Generator`, `Avalonia` | BCP 47、Catalog、Snapshot、Manager、Localizer 和 Avalonia 资源桥 |
 | `AtomUI.Core` | `AtomUI.Localization`, `AtomUI.Generator` | 框架入口、主题、Token、动画基础设施 |
-| `AtomUI.Build.Tasks` | 构建期共享源码、`Microsoft.Build.Framework` | XLIFF 校验、模板导出和静态语言包构建，不进入运行时 |
+| `AtomUI.Toolchain` | 按 profile 引用 MSBuild 或定版 ILLink/Cecil；ILC8 使用隔离缓存中的上游源码工程 | 统一任务、协议与注册后端源码；产物和引擎宿主仍隔离，不进入运行时 |
 | `AtomUI.LanguagePack.Template` | 无运行时引用 | `dotnet new atomui-language-pack` 模板包 |
 | `AtomUI.Controls.Shared` | `AtomUI.Core`, `AtomUI.Generator` | 控件共享契约和协调器 |
 | `AtomUI.Controls` | `AtomUI.Core`, `AtomUI.Controls.Shared`, `AtomUI.Fonts.AlibabaSans`, `AtomUI.Icons.AntDesign`, `AtomUI.Generator` | 公共控件、Primitives、公共主题 |
@@ -50,6 +50,9 @@
 | `AtomUIGallery` | `AtomUI.Toolkits.GalleryBase`, `AtomUI.Desktop.Controls`, `AtomUI.Desktop.Controls.DataGrid`, `AtomUI.Desktop.Controls.ColorPicker`, `AtomUI.Generator` | AtomUI 产品示例主体 |
 | `AtomUIGallery.Desktop` | `AtomUIGallery` | 桌面宿主 |
 | `AtomUIGallery.Browser` | `AtomUIGallery`, `AtomUI.Fonts.AlibabaPuHuiTi` | 浏览器宿主 |
+
+构建工具的 profile、源码目录与稳定内部 DLL 名称见 [Toolchain 模块](../../modules/toolchain/overview.md)。
+单一项目不合并 ILLink8、ILLink10 与 ILC8 的依赖图或运行宿主。
 
 ## 内部可见性
 

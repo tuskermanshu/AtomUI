@@ -4,6 +4,8 @@
         <OutputPathWithoutFramework>$(MSBuildThisFileDirectory)../.artifacts/bin/$(Configuration)</OutputPathWithoutFramework>
         <OutputPath>$(OutputPathWithoutFramework)</OutputPath>
         <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../.artifacts/$(MSBuildProjectName)/obj</BaseIntermediateOutputPath>
+        <AtomUIToolchainProfile Condition="'$(MSBuildProjectName)' == 'AtomUI.Toolchain' and '$(AtomUIToolchainProfile)' == ''">Tasks</AtomUIToolchainProfile>
+        <BaseIntermediateOutputPath Condition="'$(MSBuildProjectName)' == 'AtomUI.Toolchain'">$(BaseIntermediateOutputPath)/$(AtomUIToolchainProfile)</BaseIntermediateOutputPath>
         <IntermediateOutputPathWithoutFramework>$(BaseIntermediateOutputPath)</IntermediateOutputPathWithoutFramework>
         <IntermediateOutputPath>$(BaseIntermediateOutputPath)/$(Configuration)</IntermediateOutputPath>
 

@@ -38,13 +38,12 @@ def main():
     options = parser.parse_args()
     output = options.output.resolve(); output.mkdir(parents=True, exist_ok=True)
     log = output / "signature-target.log"
-    run(["dotnet", "build", "src/AtomUI.Build.Tasks/AtomUI.Build.Tasks.csproj", "-c", "Release"], log)
-    run(["dotnet", "build", "src/AtomUI.TypeMap.Linker/AtomUI.TypeMap.Linker.csproj", "-c", "Release"], log)
+    run(["dotnet", "build", "src/AtomUI.Toolchain/AtomUI.Toolchain.csproj", "-t:BuildManagedToolchain", "-c", "Release"], log)
     browser = "tests/AtomUI.Registration.Fixtures/Browser/Browser.csproj"
     run(["dotnet", "restore", browser], log)
     names = "AtomUIBuildTasksAssembly,ILLinkTasksAssembly,WasmAppBuilderTasksAssemblyPath,NETCoreSdkVersion,DOTNET_HOST_PATH"
     props = json.loads(run(["dotnet", "msbuild", browser, "-p:Configuration=Release", "-p:RuntimeIdentifier=browser-wasm", "-getProperty:" + names], log))["Properties"]
-    backend = ROOT / ".artifacts/bin/Release/net10.0/AtomUI.TypeMap.Linker.dll"
+    backend = ROOT / ".artifacts/bin/Release/toolchain/illink10/net10.0/AtomUI.TypeMap.Linker.dll"
     results = []
     with tempfile.TemporaryDirectory(prefix="atomui-link-signature-") as temporary:
         directory = Path(temporary)

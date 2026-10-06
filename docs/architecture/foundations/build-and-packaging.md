@@ -11,10 +11,17 @@ AtomUI 使用集中化 MSBuild 配置。顶层 Directory.Build.props/targets 导
 ```text
 build/
 ├── AtomUI.Build.Tasks.Process.cs
+├── AtomUI.Toolchain.Tasks.targets
+├── AtomUI.Net8.ILLink.Task.cs
 ├── AtomUI.Generator.props
 ├── AtomUI.Generator.targets
 ├── AtomUI.GeneratorConsumer.targets
 ├── AtomUI.Registration.targets
+├── AtomUI.Registration.Net8.targets
+├── AtomUI.Registration.Net8.Host.targets
+├── AtomUI.Registration.Net8.Transforms.targets
+├── AtomUI.Registration.Native8.targets
+├── AtomUI.Registration.Bridge.targets
 ├── AtomUI.Localization.props
 ├── AtomUI.Localization.targets
 ├── AtomUI.Repository.props
@@ -35,8 +42,15 @@ build/
 Repository.props 管理版本、项目默认值、输出路径和唯一的 NuGet build/tool asset 白名单；Repository.targets 执行一致的
 注入与打包规则。包项目不复制另一套工具清单。
 
-普通 AtomUI.Generator 仍以 netstandard2.0 Analyzer 交付；构建任务使用独立 .NET 构建宿主；Browser 映射转换器位于独立
-`AtomUI.TypeMap.Linker` 构建项目。目标项目与状态见[TypeMap Linker 模块](../../modules/typemap-linker/overview.md)。
+`AtomUIPrepareRepositoryPackageTools` 在产品包或 Generator 收集包资产前调用统一项目的 `BuildToolchain`。
+Generator 项目自身不再实现另一套 pack 准备目标，只保留默认 Tasks profile 的 build-only 项目引用和中立共享源码。
+源码 publish 在相应注册后端准备阶段之前准备 `BuildManagedToolchain`；只有 net8 NativeAOT 路径需要
+`PrepareNativeCompiler`。普通 Build 仍只构建 Tasks profile，不因此构建所有后端或 runtime 编译器。
+
+普通 AtomUI.Generator 仍以 netstandard2.0 Analyzer 交付。构建工具统一由
+`src/AtomUI.Toolchain/AtomUI.Toolchain.csproj` 维护；Tasks、ILLink8 与 ILLink10 通过
+`AtomUIToolchainProfile` 隔离源码、依赖及产物，ILC8 适配器与生成上游缓存工程的配方也在同一目录。
+源码职责及稳定内部 DLL 名称见 [Toolchain 模块](../../modules/toolchain/overview.md)。
 
 产品包提供 package-specific `buildTransitive/<PackageId>.props/.targets` 并幂等注入工具。多个产品包同时引用时只允许一份
 兼容的普通生成器与一份 Browser 转换器；编译工具不得进入 lib/、runtime 依赖图或应用 publish 输出。
@@ -47,12 +61,16 @@ TypeMapAssemblyTarget。包引用本身不执行 provider 或 initializer，普�
 
 ## 构建任务与文件生命周期
 
-所有需要 AtomUI.Build.Tasks 的 feature target 使用唯一的 AtomUIBuildTasksAssembly。
+所有需要任务 worker 的 feature target 使用唯一的 AtomUIBuildTasksAssembly；该产物由 Toolchain 的 Tasks profile 编译，
+内部文件名仍为 `AtomUI.Build.Tasks.dll`。
 任务通过 RoslynCodeTaskFactory 的薄适配器启动独立 `dotnet AtomUI.Build.Tasks.dll` 进程，等待退出后返回结果；不加载到常驻
 MSBuild 节点。取消时终止本次 worker，清理请求目录，不留下后台 worker。
 
 worker 的 DLL、deps.json、runtimeconfig、必要依赖和适配器源码一起交付；协议只传值，不跨进程传自定义任务对象。
 它不发起嵌套项目构建。新任务或参数同时更新适配器、分发与隔离测试，语言/资源功能继续使用该宿主。
+
+通用任务的 `UsingTask` 定义集中在 `build/AtomUI.Toolchain.Tasks.targets`。各 feature target 通过单次导入 guard
+复用这一入口，不复制独立任务声明或另一份 worker 加载策略。
 
 Browser linker 扩展必须加载到其对应 ILLink 阶段，不能混入上述 worker 的常驻加载策略，也不进入应用 Runtime。
 其专用 ABI、增量输入和清理边界由[Browser TypeMap 链接](aot-browser-linking.md)定义。
@@ -77,8 +95,14 @@ Browser 后端继续消费同一份已生成 TypeMap 和官方标记结果，无
 
 ## Target Framework 与工具链
 
-新控件注册体系的产品目标统一到 net10.0；Browser 使用 net10.0-browser，不携带旧 TFM 的注册兼容分支。
-产品项目已使用上述 TFM；Generator 保留 netstandard2.0 工具目标。历史发布版本的 TFM 记录仍按对应版本保留。
+产品库在 Debug 下只构建 `net10.0`，Release 下同时构建 `net8.0` 和 `net10.0`；配置由
+`ProjectDefaults.props` 统一管理。Browser 宿主仍使用 `net10.0-browser`，Generator 与语言包保留
+`netstandard2.0` 工具/资源目标，构建 worker 和 TypeMap 后端仍使用 .NET 10。
+
+.NET 10 保留现有 TypeMap 注册与裁剪路径。.NET 8 不具备官方 TypeMap API，生成器从同一套单项 factory
+与注册片段生成条件候选 ABI；普通执行完整收集，裁剪发布由受控 ILLink8 / ILC8 选择片段。
+后端按[框架规则](../../modules/toolchain/framework-routing.md)自动分流，工具版本和平台范围见 [.NET 8 条件后端](aot-net8-conditional-backends.md)。历史发布版本的
+实际 TFM 记录仍按对应版本保留。
 
 TFM 不能代表全部工具兼容性。实际 SDK、ILLink、NativeAOT 与 WebAssembly workload 组合必须经过发布验证；普通构建资产
 自动检查支持范围。不支持的 Browser linker ABI、缺工具或未转换 accessor 应阻止发布，不能改成保留全包。
@@ -140,6 +164,12 @@ scripts/run-full-regression.sh
   后，Avalonia 只在 `CoreCompile` 前加入真实拆分程序集；ApiCompat 不执行到该阶段，因此校验 target 会在 SDK 收集完
   每个 TFM 的引用后，把同一组 Avalonia implementation DLL 追加到现有 `PackageValidationReferencePath`。发布日志中若
   出现 `Could not resolve reference`，表示 API 校验引用图不完整，不能按普通 warning 忽略。
+- **产品框架验收**：`BuildNuGetPackages.ps1` 独立读取实际 nupkg 的 `lib/` DLL 路径。Release 产品库必须同时包含
+  `net8.0` 和 `net10.0`，Debug 必须只包含 `net10.0`；生成器、语言包和模板包保留自己的目标，不套用产品库规则。
+  包角色来自唯一发布清单；检查 DLL 的真实 TargetFrameworkAttribute、程序集身份/版本及 nuspec 依赖组，不能只看目录名。
+  此检查不依赖上一版基线，避免上一版已经错误时继续漏检。
+- **构建资产验收**：`PackageBuildContract.ps1` 核对 SDK 生成的依赖、文件清单与内容 hash，并检查包内本地 Import
+  闭包。漏装后端或被导入 targets、丢失依赖组和额外未知工具资产均阻止发布。自定义 nuspec 使用实际评估的来源与 base path。
 - **包布局校验**：`scripts/verification/verify-package-layout.ps1` 比对 `lib/` 的 TFM 集合、`tools/`、`build/`、
   `buildTransitive/`。ApiCompat 看不到这些路径，而 6.1.9 的 `tools/netstandard2.0 → tools/net10.0` 正属于此类。
 

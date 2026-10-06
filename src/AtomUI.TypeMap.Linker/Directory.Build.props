@@ -1,8 +1,0 @@
-<Project>
-  <!-- Build-host tool: deliberately does not inherit runtime/analyzer project wiring. -->
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <Import Project="../../build/OutputPaths.props" />
-</Project>

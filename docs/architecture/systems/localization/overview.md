@@ -1,7 +1,7 @@
 # AtomUI 本地化系统架构
 
 本地化系统是面向整个应用的跨模块基础设施，不只服务 Control。它由 `AtomUI.Localization` 运行时、
-`AtomUI.Generator`、`AtomUI.Build.Tasks`、静态语言包和应用构建入口共同组成；语言状态、Catalog、编译后翻译表和
+`AtomUI.Generator`、Toolchain 的 Tasks worker、静态语言包和应用构建入口共同组成；语言状态、Catalog、编译后翻译表和
 Avalonia 资源桥与主题系统保持独立。
 
 ## 设计目标
@@ -36,13 +36,14 @@ Avalonia 资源桥与主题系统保持独立。
 | `src/AtomUI.Localization` / `AtomUI.Localization` | 公共类型、运行时 Registry、Snapshot、Manager、Localizer 和 Avalonia 资源桥 | 是 |
 | `src/AtomUI.Core` / `AtomUI.Core` | 主题、Token、动画等基础设施；引用 `AtomUI.Localization` | 是 |
 | `src/AtomUI.Generator` / `AtomUI.Generator` | Catalog、翻译表、Markup Extension 和注册代码生成 | 否，Analyzer |
-| `src/AtomUI.Build.Tasks` | 静态语言包 pack 前校验、模板导出/合并、manifest/props 和包内容安全 | 否，MSBuild Task |
+| `src/AtomUI.Toolchain` 的 Tasks profile | 静态语言包 pack 前校验、模板导出/合并、manifest/props 和包内容安全 | 否，隔离 MSBuild worker |
 | `AtomUI.LanguagePack.Template` | 创建静态 I18n NuGet 项目的模板 | 否 |
 | `src/LanguagePacks/<language-tag>` | AtomUI 官方附加语言的模块级静态包与纯依赖聚合包 | 否 |
 
 `AtomUI.Localization` 是运行时基础设施包。构建期共享源码位于
-`src/AtomUI.Build.Tasks/LocalizationBuild`，使用内部命名空间 `AtomUI.Build.Tasks.LocalizationBuild`，但没有同名项目或
-NuGet 包；构建任务物理归属 `AtomUI.Build.Tasks`，Generator 只通过源码链接复用这层无副作用模型。
+`src/AtomUI.Toolchain/Common/Localization`，使用内部命名空间 `AtomUI.Build.Tasks.LocalizationBuild`，但没有同名项目或
+NuGet 包；构建任务物理归属统一 Toolchain 项目的 `Tasks/`，Generator 只通过源码链接复用这层无副作用模型。
+profile 与工具产物的隔离见 [Toolchain 模块](../../../modules/toolchain/overview.md)。
 
 ## 构建期权威边界
 

@@ -76,6 +76,7 @@ public class ThemeAssetPackagingContractTests
     public void Theme_Asset_Target_Uses_The_Shared_Process_Adapter()
     {
         var target = XDocument.Load(GetRepoFile("build/AtomUI.ThemeAssets.targets"));
+        var registry = XDocument.Load(GetRepoFile("build/AtomUI.Toolchain.Tasks.targets"));
         var wrapperTarget = target.Descendants()
                                   .Single(element =>
                                       element.Name.LocalName == "Target" &&
@@ -85,20 +86,21 @@ public class ThemeAssetPackagingContractTests
         wrapperCondition.ShouldNotBeNull();
         wrapperCondition.ShouldContain("'@(AvaloniaXaml)' != ''");
 
-        target.Descendants()
+        registry.Descendants()
               .Where(element => element.Name.LocalName == "UsingTask")
               .ShouldContain(element =>
                   (string?)element.Attribute("TaskName") ==
                   "AtomUI.Build.Tasks.GenerateThemeAssetWrappersTask");
-        target.Descendants()
+        registry.Descendants()
               .Where(element => element.Name.LocalName == "UsingTask")
               .ShouldAllBe(element =>
                   (string?)element.Attribute("TaskFactory") == "RoslynCodeTaskFactory");
-        target.Descendants("UsingTask")
+        registry.Descendants("UsingTask")
               .ShouldAllBe(element =>
                   (string?)element.Attribute("AssemblyFile") == "$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll");
-        target.Descendants("Import").ShouldBeEmpty();
-        target.Descendants()
+        target.Descendants().Where(element => element.Name.LocalName == "Import").ShouldContain(element =>
+            (string?)element.Attribute("Project") == "$(MSBuildThisFileDirectory)AtomUI.Toolchain.Tasks.targets");
+        registry.Descendants()
               .Where(element => element.Name.LocalName == "Code")
               .ShouldAllBe(element => (string?)element.Attribute("Source") == "$(MSBuildThisFileDirectory)AtomUI.Build.Tasks.Process.cs");
     }

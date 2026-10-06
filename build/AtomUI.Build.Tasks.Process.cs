@@ -303,8 +303,123 @@ namespace AtomUI.Build.Tasks
 
 namespace AtomUI.Build.Tasks
 {
+    public sealed class ConditionalPublishTransformTask : IsolatedBuildTask
+    {
+        public string Operation { get; set; } = string.Empty;
+        public string InputsPath { get; set; } = string.Empty;
+        public string VerifiedReceiptPath { get; set; } = string.Empty;
+        public string StatePath { get; set; } = string.Empty;
+        public string PublishDirectory { get; set; } = string.Empty;
+        public string BundlePath { get; set; } = string.Empty;
+        public string Options { get; set; } = string.Empty;
+        public ITaskItem[] Files { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] References { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] Tools { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] ExtraOutputs { get; set; } = Array.Empty<ITaskItem>();
+        [Output] public ITaskItem[] PreparedTools { get; set; } = Array.Empty<ITaskItem>();
+    }
+    public sealed class PrepareNative8RegistrationTask : IsolatedBuildTask
+    {
+        public string ManagedCompilerBundle { get; set; } = string.Empty;
+        public string IlcHostPackagePath { get; set; } = string.Empty;
+        public string HostRid { get; set; } = string.Empty;
+        public string TargetRid { get; set; } = string.Empty;
+        public string IntermediateRoot { get; set; } = string.Empty;
+        public string DotNetHostPath { get; set; } = string.Empty;
+        public string NativeObject { get; set; } = string.Empty;
+        public string ExportsFile { get; set; } = string.Empty;
+        public string NativeBinary { get; set; } = string.Empty;
+        public string NativeLinker { get; set; } = string.Empty;
+        public string InvocationId { get; set; } = string.Empty;
+        public string OwnedRoot { get; set; } = string.Empty;
+        [Output] public string ScopedIlcToolsPath { get; set; } = string.Empty;
+        [Output] public string PrepareInputsRoot { get; set; } = string.Empty;
+        [Output] public string ReceiptPointer { get; set; } = string.Empty;
+        [Output] public string HostFingerprint { get; set; } = string.Empty;
+        [Output] public string ScopedNativeLinkerPath { get; set; } = string.Empty;
+    }
+    public sealed class VerifyNative8RegistrationTask : IsolatedBuildTask
+    {
+        public string ReceiptPointer { get; set; } = string.Empty;
+        public string NativeObject { get; set; } = string.Empty;
+        public string ExportsFile { get; set; } = string.Empty;
+        public string NativeBinary { get; set; } = string.Empty;
+        public string InvocationId { get; set; } = string.Empty;
+        public string OwnedRoot { get; set; } = string.Empty;
+        public string Phase { get; set; } = string.Empty;
+        public string ExpectedLinkedReceiptHash { get; set; } = string.Empty;
+        [Output] public string VerifiedReceipt { get; set; } = string.Empty;
+        [Output] public string LinkedReceiptHash { get; set; } = string.Empty;
+    }
+    public sealed class PrepareConditionalRegistrationBridgeTask : IsolatedBuildTask
+    {
+        public string OutputRoot { get; set; } = string.Empty;
+        public string Configuration { get; set; } = string.Empty;
+        public ITaskItem[] Assemblies { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] AdditionalInputs { get; set; } = Array.Empty<ITaskItem>();
+        public string EngineArguments { get; set; } = string.Empty;
+        public string BridgeAssembly { get; set; } = string.Empty;
+        public string CecilAssembly { get; set; } = string.Empty;
+        public string RuntimePackDirectory { get; set; } = string.Empty;
+        public string ApplicationAssemblyIdentity { get; set; } = string.Empty;
+        public string DotNetExecutable { get; set; } = string.Empty;
+        public bool ProbeOnly { get; set; }
+        [Output] public bool NeedsBridge { get; set; }
+        [Output] public string InputsPath { get; set; } = string.Empty;
+        [Output] public string TransformationPath { get; set; } = string.Empty;
+        [Output] public ITaskItem[] PreparedAssemblies { get; set; } = Array.Empty<ITaskItem>();
+        [Output] public ITaskItem[] PreparedAdditionalInputs { get; set; } = Array.Empty<ITaskItem>();
+        [Output] public string PreparedEngineArguments { get; set; } = string.Empty;
+    }
+    public sealed class VerifyConditionalRegistrationBridgeTask : IsolatedBuildTask
+    {
+        public string InputsPath { get; set; } = string.Empty;
+        public string TransformationPath { get; set; } = string.Empty;
+        public ITaskItem[] ConsumedAssemblies { get; set; } = Array.Empty<ITaskItem>();
+        public string OutputDirectory { get; set; } = string.Empty;
+        public string ReceiptPath { get; set; } = string.Empty;
+        public string Phase { get; set; } = string.Empty;
+        public string EngineKind { get; set; } = string.Empty;
+        public ITaskItem[] OutputFiles { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] ConsumedAdditionalInputs { get; set; } = Array.Empty<ITaskItem>();
+    }
+    public sealed class VerifyConditionalRegistrationOutputTask : IsolatedBuildTask
+    {
+        public string InputsPath { get; set; } = string.Empty;
+        public string OutputDirectory { get; set; } = string.Empty;
+        public string ReceiptPath { get; set; } = string.Empty;
+        public string LinkerAssembly { get; set; } = string.Empty;
+        public bool VerifyConsumed { get; set; }
+    }
+    public sealed class PrepareNet8LinkHostTask : IsolatedBuildTask
+    {
+        public string LinkerTaskAssembly { get; set; } = string.Empty;
+        public string BackendAssembly { get; set; } = string.Empty;
+        public string OutputRoot { get; set; } = string.Empty;
+        public string OverrideSourceTemplate { get; set; } = string.Empty;
+        public string OverrideSourceText { get; set; } = string.Empty;
+        [Output] public string LinkerPath { get; set; } = string.Empty;
+        [Output] public string TaskOverrideSource { get; set; } = string.Empty;
+        [Output] public string HostFingerprint { get; set; } = string.Empty;
+        [Output] public ITaskItem[] HostInputs { get; set; } = Array.Empty<ITaskItem>();
+    }
+    public sealed class PrepareConditionalRegistrationInputsTask : IsolatedBuildTask
+    {
+        public string OutputRoot { get; set; } = string.Empty;
+        public string Configuration { get; set; } = string.Empty;
+        public string EngineArguments { get; set; } = string.Empty;
+        public ITaskItem[] Assemblies { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] AdditionalInputs { get; set; } = Array.Empty<ITaskItem>();
+        [Output] public string InputsPath { get; set; } = string.Empty;
+        [Output] public string InputFingerprint { get; set; } = string.Empty;
+        [Output] public string PreparedEngineArguments { get; set; } = string.Empty;
+        [Output] public ITaskItem[] PreparedAssemblies { get; set; } = Array.Empty<ITaskItem>();
+        [Output] public ITaskItem[] PreparedAdditionalInputs { get; set; } = Array.Empty<ITaskItem>();
+    }
     public sealed class ValidateRegistrationToolchainTask : IsolatedBuildTask
     {
+        public string TargetFrameworkIdentifier { get; set; } = string.Empty;
+        public string TargetFrameworkVersion { get; set; } = string.Empty;
         public string LinkerAssembly { get; set; } = string.Empty;
         public string NativeCompiler { get; set; } = string.Empty;
     }
@@ -337,8 +452,10 @@ namespace AtomUI.Build.Tasks
     {
         public ITaskItem[] Candidates { get; set; } = Array.Empty<ITaskItem>();
         public bool IncludeBackend { get; set; }
+        public bool IncludeNet8Backend { get; set; }
         [Output] public string GeneratorAssembly { get; set; } = string.Empty;
         [Output] public string BackendAssembly { get; set; } = string.Empty;
+        [Output] public string Net8BackendAssembly { get; set; } = string.Empty;
     }
     public sealed class GenerateThemeAssetWrappersTask : IsolatedBuildTask
     {

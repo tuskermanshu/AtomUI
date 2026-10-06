@@ -11,15 +11,28 @@
 
     <PropertyGroup>
         <AtomUIRepositoryBuild>true</AtomUIRepositoryBuild>
-        <AtomUIBuildTasksOutputDirectory Condition="'$(AtomUIBuildTasksOutputDirectory)' == ''">$(OutputPathWithoutFramework)/build-tasks</AtomUIBuildTasksOutputDirectory>
+        <AtomUIToolchainProject>$(MSBuildThisFileDirectory)../src/AtomUI.Toolchain/AtomUI.Toolchain.csproj</AtomUIToolchainProject>
+        <AtomUIToolchainOutputDirectory Condition="'$(AtomUIToolchainOutputDirectory)' == ''">$(OutputPathWithoutFramework)/toolchain</AtomUIToolchainOutputDirectory>
+        <AtomUIBuildTasksOutputDirectory Condition="'$(AtomUIBuildTasksOutputDirectory)' == ''">$(AtomUIToolchainOutputDirectory)/tasks</AtomUIBuildTasksOutputDirectory>
         <AtomUIBuildTasksAssembly Condition="'$(AtomUIBuildTasksAssembly)' == ''">$(AtomUIBuildTasksOutputDirectory)/net10.0/AtomUI.Build.Tasks.dll</AtomUIBuildTasksAssembly>
-        <AtomUITypeMapBackendProject>$(MSBuildThisFileDirectory)../src/AtomUI.TypeMap.Linker/AtomUI.TypeMap.Linker.csproj</AtomUITypeMapBackendProject>
+        <AtomUITypeMapBackendOutputDirectory>$(AtomUIToolchainOutputDirectory)/illink10/net10.0</AtomUITypeMapBackendOutputDirectory>
+        <AtomUINet8LinkerBackendAssembly>$(AtomUIToolchainOutputDirectory)/illink8/net10.0/AtomUI.Registration.ILLink8.dll</AtomUINet8LinkerBackendAssembly>
+        <AtomUIConditionalBridgeAssembly>$(AtomUITypeMapBackendOutputDirectory)/AtomUI.TypeMap.Linker.dll</AtomUIConditionalBridgeAssembly>
+        <AtomUINative8ManagedCompilerBundle Condition="'$(AtomUINative8ManagedCompilerBundle)' == ''">$(MSBuildThisFileDirectory)../.artifacts/tools/registration/net8/ilc/managed-bundle</AtomUINative8ManagedCompilerBundle>
     </PropertyGroup>
 
     <ItemGroup>
         <AtomUINuGetBuildAsset Include="$(MSBuildThisFileDirectory)AtomUI.Generator.props;
+                                         $(MSBuildThisFileDirectory)AtomUI.Toolchain.Tasks.targets;
                                          $(MSBuildThisFileDirectory)AtomUI.Generator.targets;
                                          $(MSBuildThisFileDirectory)AtomUI.Registration.targets;
+                                         $(MSBuildThisFileDirectory)AtomUI.Registration.Framework.targets;
+                                         $(MSBuildThisFileDirectory)AtomUI.Registration.Net8.targets;
+                                         $(MSBuildThisFileDirectory)AtomUI.Registration.Net8.Host.targets;
+                                         $(MSBuildThisFileDirectory)AtomUI.Registration.Net8.Transforms.targets;
+                                         $(MSBuildThisFileDirectory)AtomUI.Registration.Native8.targets;
+                                         $(MSBuildThisFileDirectory)AtomUI.Registration.Bridge.targets;
+                                         $(MSBuildThisFileDirectory)AtomUI.Net8.ILLink.Task.cs;
                                          $(MSBuildThisFileDirectory)AtomUI.Localization.props;
                                          $(MSBuildThisFileDirectory)AtomUI.Localization.targets;
                                          $(MSBuildThisFileDirectory)AtomUI.ThemeAssets.targets;
@@ -45,10 +58,35 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AtomUIGeneratorToolAsset Include="$(OutputPathWithoutFramework)/net10.0/AtomUI.TypeMap.Linker.dll;$(OutputPathWithoutFramework)/net10.0/AtomUI.TypeMap.Linker.deps.json">
+        <AtomUIGeneratorToolAsset Include="$(AtomUITypeMapBackendOutputDirectory)/AtomUI.TypeMap.Linker.dll;
+                                          $(AtomUITypeMapBackendOutputDirectory)/AtomUI.TypeMap.Linker.deps.json;
+                                          $(AtomUITypeMapBackendOutputDirectory)/AtomUI.TypeMap.Linker.runtimeconfig.json;
+                                          $(AtomUITypeMapBackendOutputDirectory)/Mono.Cecil.dll">
             <PackagePath>tools/typemap/%(Filename)%(Extension)</PackagePath>
         </AtomUIGeneratorToolAsset>
-        <AtomUIRegistrationToolCandidate Include="$(OutputPathWithoutFramework)/net10.0/AtomUI.TypeMap.Linker.dll" Kind="Backend" />
+        <AtomUIGeneratorToolAsset Include="$(AtomUINet8LinkerBackendAssembly)">
+            <PackagePath>tools/registration/net8/illink/%(Filename)%(Extension)</PackagePath>
+        </AtomUIGeneratorToolAsset>
+        <!-- Maintainer-built managed compiler only. Native helpers come from the consumer SDK's
+             matching official package and are never treated as portable package payload. -->
+        <AtomUIGeneratorToolAsset Include="$(AtomUINative8ManagedCompilerBundle)/ilc.dll;
+                                          $(AtomUINative8ManagedCompilerBundle)/ilc.deps.json;
+                                          $(AtomUINative8ManagedCompilerBundle)/ilc.runtimeconfig.json;
+                                          $(AtomUINative8ManagedCompilerBundle)/ILCompiler.Compiler.dll;
+                                          $(AtomUINative8ManagedCompilerBundle)/ILCompiler.TypeSystem.dll;
+                                          $(AtomUINative8ManagedCompilerBundle)/ILCompiler.MetadataTransform.dll;
+                                          $(AtomUINative8ManagedCompilerBundle)/ILCompiler.DependencyAnalysisFramework.dll;
+                                          $(AtomUINative8ManagedCompilerBundle)/ILCompiler.RyuJit.dll;
+                                          $(AtomUINative8ManagedCompilerBundle)/System.CommandLine.dll;
+                                          $(AtomUINative8ManagedCompilerBundle)/atomui-ilc8-capability.json">
+            <PackagePath>tools/registration/net8/ilc/managed-bundle/%(Filename)%(Extension)</PackagePath>
+        </AtomUIGeneratorToolAsset>
+        <AtomUIGeneratorToolAsset Include="$(AtomUINative8ManagedCompilerBundle)/../LICENSE.runtime.txt;
+                                          $(AtomUINative8ManagedCompilerBundle)/../THIRD-PARTY-NOTICES.runtime.txt">
+            <PackagePath>tools/registration/net8/ilc/%(Filename)%(Extension)</PackagePath>
+        </AtomUIGeneratorToolAsset>
+        <AtomUIRegistrationToolCandidate Include="$(AtomUITypeMapBackendOutputDirectory)/AtomUI.TypeMap.Linker.dll" Kind="Backend" />
+        <AtomUIRegistrationToolCandidate Include="$(AtomUINet8LinkerBackendAssembly)" Kind="Net8Backend" />
         <AtomUIRegistrationToolCandidate Include="$(AtomUIBuildTasksAssembly)" Kind="Tasks" />
     </ItemGroup>
 

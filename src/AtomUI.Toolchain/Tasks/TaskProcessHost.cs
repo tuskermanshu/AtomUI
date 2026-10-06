@@ -38,6 +38,14 @@ internal static class TaskProcessHost
         // application code or trimmed. Keep dispatch explicit and bounded.
         ITask task = request.TaskName switch
         {
+            nameof(PrepareConditionalRegistrationInputsTask) => new PrepareConditionalRegistrationInputsTask(),
+            nameof(PrepareNet8LinkHostTask) => new PrepareNet8LinkHostTask(),
+            nameof(PrepareNative8RegistrationTask) => new PrepareNative8RegistrationTask(),
+            nameof(VerifyNative8RegistrationTask) => new VerifyNative8RegistrationTask(),
+            nameof(PrepareConditionalRegistrationBridgeTask) => new PrepareConditionalRegistrationBridgeTask(),
+            nameof(VerifyConditionalRegistrationBridgeTask) => new VerifyConditionalRegistrationBridgeTask(),
+            nameof(ConditionalPublishTransformTask) => new ConditionalPublishTransformTask(),
+            nameof(VerifyConditionalRegistrationOutputTask) => new VerifyConditionalRegistrationOutputTask(),
             nameof(ValidateRegistrationToolchainTask) => new ValidateRegistrationToolchainTask(),
             nameof(PrepareTypeMapLinkTask) => new PrepareTypeMapLinkTask(),
             nameof(VerifyTypeMapReceiptTask) => new VerifyTypeMapReceiptTask(),

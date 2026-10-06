@@ -25,7 +25,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all"/>
-        <ProjectReference Include="../AtomUI.Build.Tasks/AtomUI.Build.Tasks.csproj"
+        <ProjectReference Include="../AtomUI.Toolchain/AtomUI.Toolchain.csproj"
                           ReferenceOutputAssembly="false"
                           SkipGetTargetFrameworkProperties="true"
                           Private="false"
@@ -33,9 +33,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="../AtomUI.Build.Tasks/LocalizationBuild/**/*.cs"
+        <Compile Include="../AtomUI.Toolchain/Common/Registration/RegistrationFrameworkPolicy.cs"
+                 Link="Registration/RegistrationFrameworkPolicy.cs" />
+        <Compile Include="../AtomUI.Toolchain/Common/Localization/**/*.cs"
                  Link="LocalizationBuild/%(RecursiveDir)%(Filename)%(Extension)" />
-        <Compile Include="../AtomUI.Build.Tasks/SourceGeneration/GeneratedCodeNamespace.cs"
+        <Compile Include="../AtomUI.Toolchain/Common/SourceGeneration/GeneratedCodeNamespace.cs"
                  Link="SourceGeneration/GeneratedCodeNamespace.cs" />
         <InternalsVisibleTo Include="AtomUI.Generator.Tests" />
     </ItemGroup>
@@ -53,9 +55,4 @@
               Visible="false" />
     </ItemGroup>
 
-    <Target Name="AtomUIPrepareTypeMapBackendForPack" BeforeTargets="_GetPackageFiles" Condition="'$(IsPackable)' == 'true'">
-        <MSBuild Projects="$(AtomUITypeMapBackendProject)" Targets="Build" BuildInParallel="false"
-                 Properties="Configuration=$(Configuration)" RemoveProperties="RuntimeIdentifier;PublishAot;PublishTrimmed;RunAOTCompilation;SelfContained;TargetFramework"
-                 Condition="'$(NoBuild)' != 'true'" />
-    </Target>
 </Project>

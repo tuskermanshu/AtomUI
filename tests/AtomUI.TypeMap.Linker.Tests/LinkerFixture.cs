@@ -161,7 +161,7 @@ internal sealed class OutputFixture : IDisposable
         _packageName = packageName;
         Directory.CreateDirectory(DirectoryPath);
         var root = new DirectoryInfo(AppContext.BaseDirectory);
-        while (root is not null && !Directory.Exists(Path.Combine(root.FullName, "src", "AtomUI.TypeMap.Linker"))) root = root.Parent;
+        while (root is not null && !Directory.Exists(Path.Combine(root.FullName, "src", "AtomUI.Toolchain"))) root = root.Parent;
         if (root is null) throw new InvalidOperationException("Cannot locate the source fixture root.");
         var configuration = typeof(OutputFixture).Assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyConfigurationAttribute), false)
             .Cast<System.Reflection.AssemblyConfigurationAttribute>().Single().Configuration;

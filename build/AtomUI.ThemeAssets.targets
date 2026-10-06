@@ -1,4 +1,5 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildThisFileDirectory)AtomUI.Toolchain.Tasks.targets" Condition="'$(AtomUIToolchainTasksImported)' != 'true'" />
     <PropertyGroup>
         <AtomUIGenerateControlThemeAssetResources
             Condition="'$(AtomUIGenerateControlThemeAssetResources)' == ''">true</AtomUIGenerateControlThemeAssetResources>
@@ -14,11 +15,6 @@
         <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="Link" />
     </ItemGroup>
 
-    <UsingTask TaskName="AtomUI.Build.Tasks.GenerateThemeAssetWrappersTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
-        <Task>
-            <Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)AtomUI.Build.Tasks.Process.cs" />
-        </Task>
-    </UsingTask>
 
     <Target Name="GenerateAtomUIThemeAssetWrappers"
             BeforeTargets="GenerateAvaloniaResources"

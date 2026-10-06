@@ -9,8 +9,16 @@ public sealed class BuildLayoutTests
     private static readonly string[] s_expectedNuGetBuildAssets =
     [
         "AtomUI.Generator.props",
+        "AtomUI.Toolchain.Tasks.targets",
         "AtomUI.Generator.targets",
         "AtomUI.Registration.targets",
+        "AtomUI.Registration.Framework.targets",
+        "AtomUI.Registration.Net8.targets",
+        "AtomUI.Registration.Net8.Host.targets",
+        "AtomUI.Registration.Net8.Transforms.targets",
+        "AtomUI.Registration.Native8.targets",
+        "AtomUI.Registration.Bridge.targets",
+        "AtomUI.Net8.ILLink.Task.cs",
         "AtomUI.Localization.props",
         "AtomUI.Localization.targets",
         "AtomUI.ThemeAssets.targets",
@@ -181,10 +189,18 @@ public sealed class BuildLayoutTests
                          .ShouldContain(element =>
                              (string?)element.Attribute("Include") == "@(AtomUIGeneratorToolAsset)");
 
-        var backendPackTarget = generatorProject.Descendants("Target")
-            .Single(element => (string?)element.Attribute("Name") == "AtomUIPrepareTypeMapBackendForPack");
-        ((string?)backendPackTarget.Attribute("BeforeTargets")).ShouldBe("_GetPackageFiles");
-        backendPackTarget.Descendants("MSBuild").Single().Attribute("Projects")!.Value.ShouldBe("$(AtomUITypeMapBackendProject)");
+        // Normal generator builds depend only on the worker. Packaging explicitly asks the
+        // single toolchain owner to restore/build all engine profiles before collecting files.
+        var reference = generatorProject.Descendants("ProjectReference").ShouldHaveSingleItem();
+        ((string?)reference.Attribute("Include")).ShouldBe("../AtomUI.Toolchain/AtomUI.Toolchain.csproj");
+        ((string?)reference.Attribute("ReferenceOutputAssembly")).ShouldBe("false");
+        ((string?)reference.Attribute("PrivateAssets")).ShouldBe("all");
+        generatorProject.Descendants("MSBuild").ShouldBeEmpty();
+        var prepare = repositoryTargets.Descendants("Target")
+            .Single(element => (string?)element.Attribute("Name") == "AtomUIPrepareRepositoryPackageTools")
+            .Descendants("MSBuild").ShouldHaveSingleItem();
+        ((string?)prepare.Attribute("Projects")).ShouldBe("$(AtomUIToolchainProject)");
+        ((string?)prepare.Attribute("Targets")).ShouldBe("BuildToolchain");
     }
 
     [Fact]
@@ -263,6 +279,7 @@ public sealed class BuildLayoutTests
                    .ShouldHaveSingleItem()
                    .Value.ShouldBe("$(OutputPathWithoutFramework)");
         outputPaths.Descendants("BaseIntermediateOutputPath")
+                   .Where(element => element.Attribute("Condition") is null)
                    .ShouldHaveSingleItem()
                    .Value.ShouldBe(
                        "$(MSBuildThisFileDirectory)../.artifacts/$(MSBuildProjectName)/obj");
@@ -424,7 +441,7 @@ public sealed class BuildLayoutTests
     {
         var targets = XDocument.Load(GetRepoFile("build/AtomUI.Localization.targets"));
 
-        GetImports("build/AtomUI.Localization.targets").ShouldBeEmpty();
+        GetImports("build/AtomUI.Localization.targets").ShouldBe(["$(MSBuildThisFileDirectory)AtomUI.Toolchain.Tasks.targets"]);
         targets.Descendants("AdditionalFiles").ShouldNotBeEmpty();
         targets.Descendants("CompilerVisibleItemMetadata").ShouldNotBeEmpty();
         GetTargetNames(targets).ShouldBe([

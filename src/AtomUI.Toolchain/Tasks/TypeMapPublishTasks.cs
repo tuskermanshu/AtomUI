@@ -4,6 +4,7 @@ using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using AtomUI.Build.Tasks.Registration;
 using Microsoft.Build.Framework;
 
 namespace AtomUI.Build.Tasks;
@@ -13,24 +14,28 @@ internal static class TypeMapBuildContract
     internal const string Capability = "atomui-typemap-v1-illink-10.0.8";
     internal const string LinkerIdentity = "illink, Version=10.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
     internal const string LinkerVersion = "10.0.8-servicing.26229.119+94ea82652cdd4e0f8046b5bd5becbd11461482ca";
-    // Desktop trimming consumes only the official TypeMap contract, so any official toolchain at or after the
-    // verified servicing build is accepted. The Browser backend depends on ILLink internals and keeps exact pins.
+    // Desktop trimming consumes the official TypeMap contract with a toolchain matching the target framework.
+    // The verified servicing floor still applies; the Browser backend keeps its separate exact pins.
     internal static readonly Version DesktopToolchainFloor = new(10, 0, 8);
     private const string MicrosoftPublicKeyToken = "31BF3856AD364E35";
 
-    internal static bool IsSupportedDesktopToolchain(string informationalVersion)
+    internal static bool IsSupportedDesktopToolchain(string informationalVersion, Version targetFrameworkVersion)
     {
         var end = informationalVersion.IndexOfAny(['-', '+']);
         var numeric = end < 0 ? informationalVersion : informationalVersion[..end];
-        return Version.TryParse(numeric.Trim(), out var version) && version >= DesktopToolchainFloor;
+        return Version.TryParse(numeric.Trim(), out var version) &&
+               version.Major == targetFrameworkVersion.Major &&
+               version >= new Version(targetFrameworkVersion.Major, targetFrameworkVersion.Minor) &&
+               version >= DesktopToolchainFloor;
     }
 
-    internal static bool IsSupportedDesktopLinker(string identity, string informationalVersion)
+    internal static bool IsSupportedDesktopLinker(string identity, string informationalVersion, Version targetFrameworkVersion)
     {
         var name = new AssemblyName(identity);
         return name.Name == "illink" &&
+               name.Version?.Major == targetFrameworkVersion.Major &&
                Convert.ToHexString(name.GetPublicKeyToken() ?? []) == MicrosoftPublicKeyToken &&
-               IsSupportedDesktopToolchain(informationalVersion);
+               IsSupportedDesktopToolchain(informationalVersion, targetFrameworkVersion);
     }
     internal static string Hash(string path) => ResolveRegistrationToolsTask.Hash(path);
     internal static string InformationalVersion(string path)
@@ -323,15 +328,24 @@ public sealed class ValidateRegistrationToolchainTask : RegistrationBuildTask
 {
     public string LinkerAssembly { get; set; } = string.Empty;
     public string NativeCompiler { get; set; } = string.Empty;
+    public string TargetFrameworkIdentifier { get; set; } = string.Empty;
+    public string TargetFrameworkVersion { get; set; } = string.Empty;
     public override bool Execute()
     {
         try
         {
-            if (!string.IsNullOrEmpty(LinkerAssembly) && !TypeMapBuildContract.IsSupportedDesktopLinker(
-                    AssemblyName.GetAssemblyName(LinkerAssembly).FullName, TypeMapBuildContract.InformationalVersion(LinkerAssembly)))
+            if (RegistrationFrameworkPolicy.Classify(TargetFrameworkIdentifier, TargetFrameworkVersion) != RegistrationFrameworkFamily.OfficialTypeMap ||
+                !RegistrationFrameworkPolicy.TryParseVersion(TargetFrameworkVersion, out var targetVersion))
             {
                 throw new InvalidDataException(
-                    $"Unsupported actual ILLink binary '{LinkerAssembly}'. Expected official ILLink {TypeMapBuildContract.DesktopToolchainFloor} or later.");
+                    $"Unsupported official TypeMap target framework '{TargetFrameworkIdentifier},Version={TargetFrameworkVersion}'. Expected .NETCoreApp 10.0 or later.");
+            }
+
+            if (!string.IsNullOrEmpty(LinkerAssembly) && !TypeMapBuildContract.IsSupportedDesktopLinker(
+                    AssemblyName.GetAssemblyName(LinkerAssembly).FullName, TypeMapBuildContract.InformationalVersion(LinkerAssembly), targetVersion))
+            {
+                throw new InvalidDataException(
+                    $"Unsupported actual ILLink binary '{LinkerAssembly}'. Expected official ILLink major {targetVersion.Major}, version at least {targetVersion.Major}.{targetVersion.Minor} and {TypeMapBuildContract.DesktopToolchainFloor}.");
             }
 
             if (!string.IsNullOrEmpty(NativeCompiler))
@@ -343,10 +357,10 @@ public sealed class ValidateRegistrationToolchainTask : RegistrationBuildTask
                 var version = process.StandardOutput.ReadToEnd().Trim();
                 var errors = process.StandardError.ReadToEnd();
                 process.WaitForExit();
-                if (process.ExitCode != 0 || !TypeMapBuildContract.IsSupportedDesktopToolchain(version))
+                if (process.ExitCode != 0 || !TypeMapBuildContract.IsSupportedDesktopToolchain(version, targetVersion))
                 {
                     throw new InvalidDataException(
-                        $"Unsupported actual NativeAOT compiler '{NativeCompiler}': {version} {errors}. Expected ILCompiler {TypeMapBuildContract.DesktopToolchainFloor} or later.");
+                        $"Unsupported actual NativeAOT compiler '{NativeCompiler}': {version} {errors}. Expected ILCompiler major {targetVersion.Major}, version at least {targetVersion.Major}.{targetVersion.Minor} and {TypeMapBuildContract.DesktopToolchainFloor}.");
                 }
             }
             return true;

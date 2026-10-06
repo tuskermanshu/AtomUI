@@ -109,7 +109,8 @@ Cecil 类型/方法索引，但 Sweep 后和输出重读必须建立独立索引
 - 使用陈旧缓存绕过本次工具链或后端输入检查。
 
 诊断只检查自有生成 ABI，不扩展为任意应用方法体的使用分析。
-`AtomUI.TypeMap.Linker` 与普通 Generator、Build Tasks 宿主物理隔离；其 DLL、依赖和配置属于构建工具，
+`AtomUI.TypeMap.Linker.dll` 由统一 Toolchain 项目的 ILLink10 profile 产出；它与普通 Generator、Tasks worker
+以及 ILLink8 的编译依赖、输出和执行宿主保持隔离。其 DLL、依赖和配置属于构建工具，
 不得进入产品 lib/runtime 依赖、应用输出或发布目录。
 
 ## 7. 验证矩阵

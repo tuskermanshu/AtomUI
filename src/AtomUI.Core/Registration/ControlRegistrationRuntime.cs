@@ -11,7 +11,9 @@ public static class ControlRegistrationRuntime
     public const int AbiVersion = 1;
     internal const string TrimmedSwitchName = "AtomUI.Registration.Trimmed";
 
+#if NET10_0_OR_GREATER
     [FeatureSwitchDefinition(TrimmedSwitchName)]
+#endif
     public static bool IsTrimmed => AppContext.TryGetSwitch(TrimmedSwitchName, out var trimmed) && trimmed;
 
     public static IAtomUIBuilder RegisterPackage(

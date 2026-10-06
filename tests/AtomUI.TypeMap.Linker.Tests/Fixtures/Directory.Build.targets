@@ -1,7 +1,7 @@
 <Project>
   <!-- Fixture-only injection. Product source/NuGet wiring belongs to Task 4. -->
   <PropertyGroup Condition="'$(OutputType)' == 'Exe'">
-    <TypeMapToolPath Condition="'$(TypeMapToolPath)' == ''">$(MSBuildThisFileDirectory)../../../.artifacts/bin/Release/net10.0/AtomUI.TypeMap.Linker.dll</TypeMapToolPath>
+    <TypeMapToolPath Condition="'$(TypeMapToolPath)' == ''">$(MSBuildThisFileDirectory)../../../.artifacts/bin/Release/toolchain/illink10/net10.0/AtomUI.TypeMap.Linker.dll</TypeMapToolPath>
     <TypeMapCapability Condition="'$(TypeMapCapability)' == ''">atomui-typemap-v1-illink-10.0.8</TypeMapCapability>
   </PropertyGroup>
   <ItemGroup Condition="'$(OutputType)' == 'Exe' and '$(EnableTypeMapBackend)' != 'false'">

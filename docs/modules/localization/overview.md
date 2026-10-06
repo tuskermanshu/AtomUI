@@ -25,7 +25,7 @@ LanguageManager、Localizer 和 Avalonia 动态资源桥，不拥有 XLIFF 构�
 
 - `AtomUI.Core` 引用本模块并在根 Builder 中暴露本地化配置入口。
 - `AtomUI.Generator` 生成 Catalog、Bundle、模块注册和应用 bootstrap。
-- `AtomUI.Build.Tasks` 负责静态语言包文件与打包副作用。
+- `AtomUI.Toolchain` 的 Tasks profile（产物 `AtomUI.Build.Tasks.dll`）负责静态语言包文件与打包副作用。
 - Control 包只注册自身 Catalog 和内置 Bundle，不实现独立语言状态。
 
 ## 相关文档

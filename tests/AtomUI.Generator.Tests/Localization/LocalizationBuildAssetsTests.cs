@@ -156,7 +156,12 @@ public class LocalizationBuildAssetsTests
             ["PackageId", "AssemblyName", "AtomUILanguageModuleId", "AtomUIBuildLanguagePackage"],
             ignoreOrder: true);
 
-        var usingTasks = targets.Descendants("UsingTask")
+        targets.Descendants("Import").ShouldContain(element =>
+            (string?)element.Attribute("Project") == "$(MSBuildThisFileDirectory)AtomUI.Toolchain.Tasks.targets");
+        var invokedTasks = targets.Descendants().Select(element => element.Name.LocalName).ToHashSet();
+        var usingTasks = XDocument.Load(GetRepoFile("build/AtomUI.Toolchain.Tasks.targets"))
+                                .Descendants("UsingTask")
+                                .Where(element => invokedTasks.Contains((string?)element.Attribute("TaskName") ?? string.Empty))
                                 .Select(element => (string?)element.Attribute("TaskName"))
                                 .ToArray();
         usingTasks.ShouldBe(
@@ -442,7 +447,10 @@ public class LocalizationBuildAssetsTests
     public void Localization_Targets_Registers_Build_Tasks_Before_Source_Outputs_Exist()
     {
         var targets = XDocument.Load(GetRepoFile("build/AtomUI.Localization.targets"));
-        var usingTasks = targets.Descendants("UsingTask")
+        targets.Descendants("Import").ShouldContain(element =>
+            (string?)element.Attribute("Project") == "$(MSBuildThisFileDirectory)AtomUI.Toolchain.Tasks.targets");
+        var usingTasks = XDocument.Load(GetRepoFile("build/AtomUI.Toolchain.Tasks.targets"))
+                                .Descendants("UsingTask")
                                 .Where(element =>
                                     ((string?)element.Attribute("TaskName"))?.StartsWith(
                                         "AtomUI.Build.Tasks.",
@@ -470,6 +478,7 @@ public class LocalizationBuildAssetsTests
         var condition = (string?)moduleLanguageFiles.Attribute("Condition");
         condition.ShouldNotBeNull();
         condition.ShouldContain("'%(AtomUILanguageSourceKind)' == 'ModuleBuiltIn'");
+        condition.ShouldContain("'%(AtomUILanguageSourceIdentity)' == '$(AtomUILanguageModuleId)'");
         condition.ShouldContain("'%(Filename)%(Extension)' == 'en-US.xlf'");
     }
 
@@ -517,7 +526,7 @@ public class LocalizationBuildAssetsTests
                   .Value.ShouldBe("tools/netstandard2.0/%(Filename)%(Extension)");
 
         var buildTasksProject = XDocument.Load(GetRepoFile(
-            "src/AtomUI.Build.Tasks/AtomUI.Build.Tasks.csproj"));
+            "src/AtomUI.Toolchain/AtomUI.Toolchain.csproj"));
         buildTasksProject.Descendants("CopyLocalLockFileAssemblies")
                          .Single()
                          .Value.Trim()
@@ -526,7 +535,7 @@ public class LocalizationBuildAssetsTests
         project.Descendants("ProjectReference")
                .Single(element =>
                    ((string?)element.Attribute("Include"))?.EndsWith(
-                       "AtomUI.Build.Tasks/AtomUI.Build.Tasks.csproj",
+                       "AtomUI.Toolchain/AtomUI.Toolchain.csproj",
                        StringComparison.Ordinal) == true &&
                    (string?)element.Attribute("ReferenceOutputAssembly") == "false")
                .ShouldNotBeNull();

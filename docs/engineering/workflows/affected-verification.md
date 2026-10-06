@@ -162,3 +162,42 @@ CI 没有定期全量任务，不改仓库 branch protection；是否要求该 j
 测试价值规范要求的测试处置与清理记录。CLI 成功仅是执行证据，不自动完成价值审查和修复验收。
 若精确选择频繁退回整个 owner，先完善对应功能域与共享规则，再考虑拆分测试项目。按测试价值规范删除低价值或
 临时测试，但不得靠削弱仍有效的契约或原始复现条件降低耗时；清理同步维护映射，不能忽略 gap 或零测试。
+
+<a id="conditional-registration-backends"></a>
+
+## Conditional registration backends
+
+`src/AtomUI.Toolchain/Backends/ILLink8`、`src/AtomUI.Toolchain/Backends/ILC8`、
+`src/AtomUI.Toolchain/Common/Registration` 与 `scripts/registration` 有独立的策略所有权。
+这四个区域的 `tests: []` 表示目前没有可以直接证明其编译器闭包语义的常驻单测；
+它不是忽略项，也不把其他后端的测试冒充为这些实现的覆盖。计划保留
+`conditional-registration-engines`、`native-aot` 和 `package-layout` 专项义务；
+即使编译成功或没有可选单测，也不能把结果称为后端验收通过。
+
+已有测试继续属于其真实实现：`AtomUI.TypeMap.Linker.Tests` 验证官方 net10 后端的
+元数据、物化和回执契约；`AtomUI.Build.Tasks.Tests` 验证工具身份、任务进程、链接输入
+和发布回执；生成器测试验证生成的公共注册契约。修改这些模块时，现有区域映射仍选择
+对应测试。Toolchain 的 Common 由相应 profile 编译复用，需验证真正消费被改文件的 Tasks、ILLink8、ILLink10
+或 ILC8 构建入口。统一项目的默认 Tasks build 不等于验证其他 profile；只有 Common 的零测试计划不提供
+全部工具 profile 的编译或运行证据。
+
+`src/AtomUI.Toolchain` 根区域维护单一项目和 profile 接线，继续选择已有的任务宿主、生成器注入边界与
+TypeMap 后端测试。`Common/Localization` 和 `Common/SourceGeneration` 分别选择其已有语言模型、代码命名与
+资源 wrapper 测试；最长路径归属使这些规则不会吞并 ILLink8/ILC8 的按需专项边界。
+策略中的 `toolchain-consolidated-source-deletions` 仅为工程合并保留旧路径删除的影响选择：Git 仍跟踪的
+旧文件删除会触发原有 Tasks/TypeMap 测试。它不表示旧目录或项目仍存在，也不创建兼容源码副本。
+
+专项按实际改动选择，不能用 .NET 10 单测或手工标记来注销 .NET 8 引擎义务：
+
+| 影响范围 | 必须执行的专项与现有入口 |
+| --- | --- |
+| ILLink8 hook、Common binder、Core8 发布视图 | 固定 ILLink 8.0.27 的真实 SDK trim；覆盖实例化、反射/type checks、泛型晚到达、static/signature-only 否定、传递闭包/循环/组请求、选中 thunk 的 builder 参数，以及实际执行和输出 PE；输入/模板变坏必须在 Mark 前失败。构建入口及冷消费要求见 [Toolchain 构建与验证](../../modules/toolchain/build-and-verification.md)和注册契约。 |
+| ILC8 adapter、driver、upstream 或 maintainer bootstrap | 按 `src/AtomUI.Toolchain/Backends/ILC8/README.md` 构建固定源码/工具，并执行 `verification/verify_backend.py --compiler-output <owned-output>`；scanner 与 no-scanner、优化、原生表/GC/预初始化分别验证。该机制脚本只证明其实际执行的组合，正式字符串 ABI、SDK 输入、资源和冷包仍须独立消费。 |
+| net10 混合 ABI bridge、SDK 输入/输出阶段 | 用预编译 net8-only 包验证所改 managed/NativeAOT/Browser 路径，记录原件→转换副本→实际引擎输入→正式输出→部署字节；纯 net10 不依赖桥工具且不改写；伪造 accessor、缺协议、未知模板和工具冲突须拒绝。Browser AOT 的 IL stripping 是新的编译输出阶段，不能与转换前 DLL 哈希混为一谈。 |
+| 工具打包或消费 targets | 正常构建的 nupkg、全新包/HTTP cache、一次 restore、随后 `publish --no-restore`；不手工补 cache/包文件，不在消费者里构建 runtime 或工具。核对应用运行依赖不含工具，验证实际最终输出、平台启动与资源行为。 |
+
+以上义务包含依赖主机和平台的多阶段检查，当前没有一个固定、无参数命令能完整验证全部
+组合，因此没有在策略中把某个部分脚本登记为完整 `verifier`。runner 会保留 pending；
+交付记录须逐项说明实际命令、输入版本、运行结果、未验证平台及临时测试清理。
+不得注入旧日志或伪造 specialist receipt 使 pending 消失。临时消费者和探针仍按测试生命周期
+规范在验证后删除；必要的短日志与版本摘要不进入默认测试集合。

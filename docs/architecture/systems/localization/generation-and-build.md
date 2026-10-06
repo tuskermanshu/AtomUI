@@ -1,6 +1,6 @@
 # 本地化生成与构建架构
 
-本文定义 `AtomUI.Generator`、`AtomUI.Build.Tasks` 和 MSBuild targets 如何把 Catalog/XLIFF 转换为 AOT 友好的
+本文定义 `AtomUI.Generator`、Toolchain 的 Tasks worker（`AtomUI.Build.Tasks.dll`）和 MSBuild targets 如何把 Catalog/XLIFF 转换为 AOT 友好的
 运行时代码。运行时设计见 [runtime.md](runtime.md)，语言包协议见
 [language-packs.md](language-packs.md)。
 
@@ -78,6 +78,10 @@ Desktop、Browser、测试宿主的声明。
 
 产品级聚合语言包不追加 `AtomUILanguage` item。它只通过 NuGet 依赖传递模块语言包，因而同一模块包无论由聚合包
 还是应用显式引用，都只产生一组 `buildTransitive` 输入。
+
+普通模块打包只再导出 `SourceKind=ModuleBuiltIn`、`SourceIdentity` 属于当前 `AtomUILanguageModuleId` 的权威
+`en-US.xlf`。依赖包提供的 Catalog 仍参与编译和契约验证，但不能被当前包复制并重新声明为自己的来源，
+否则下游同时引用原包与当前包时会得到重复的内置 Bundle。
 
 ## Generator 输入
 
@@ -232,15 +236,16 @@ active，并在同一次编译中完成校验和生成；不需要新增运行�
 - 运行时 XML/XLIFF 解析、路径 glob 或 NuGet 包探测。
 - 依赖字符串类型名构造资源键。
 
-## AtomUI.Build.Tasks
+## Toolchain 的 Tasks profile
 
-物理项目位于：
+物理项目与任务源码位于：
 
 ```text
-src/AtomUI.Build.Tasks
+src/AtomUI.Toolchain/AtomUI.Toolchain.csproj  # AtomUIToolchainProfile=Tasks
+src/AtomUI.Toolchain/Tasks/
 ```
 
-它是内部编译型 MSBuild Task 程序集，不作为应用运行时引用，也不单独发布
+该 profile 继续产出内部 MSBuild worker `AtomUI.Build.Tasks.dll`，不作为应用运行时引用，也不单独发布
 `AtomUI.Build.Tasks.LocalizationBuild`。主要 Task 为：
 
 | Task | 职责 |
@@ -253,7 +258,7 @@ src/AtomUI.Build.Tasks
 Task 内部协作组件包括：
 
 ```text
-src/AtomUI.Build.Tasks/LocalizationBuild/
+src/AtomUI.Toolchain/Common/Localization/
 Xliff21Parser
 Xliff21Writer
 XliffMergeEngine
@@ -263,7 +268,7 @@ PackagePropsWriter
 ```
 
 Generator 与 Build Tasks 对 XLIFF 使用同一规范化模型、fingerprint 和文件级中立诊断。这些共享源码由
-`AtomUI.Build.Tasks` 物理拥有，使用 `AtomUI.Build.Tasks.LocalizationBuild` 命名空间，并以源码链接方式编译进
+`AtomUI.Toolchain/Common/Localization` 物理拥有，保留 `AtomUI.Build.Tasks.LocalizationBuild` 命名空间，并以源码链接方式编译进
 Generator；共享模型不依赖 Roslyn `Diagnostic` 或 MSBuild
 `BuildEngine`。Generator 通过 `LocalizationDiagnosticFactory` 映射源位置和诊断描述符，Build Tasks 映射为
 MSBuild error/warning。该目录不增加公开运行时包，也不让 MSBuild Task 依赖 Roslyn workspace。
@@ -280,7 +285,10 @@ MSBuild error/warning。该目录不增加公开运行时包，也不让 MSBuild
 ```text
 AtomUI.Generator.nupkg
 ├── analyzers/dotnet/cs/AtomUI.Generator.dll
-├── tools/netstandard2.0/AtomUI.Build.Tasks.dll
+├── tools/net10.0/AtomUI.Build.Tasks.dll
+├── tools/net10.0/AtomUI.Build.Tasks.deps.json
+├── tools/net10.0/AtomUI.Build.Tasks.runtimeconfig.json
+├── tools/net10.0/Microsoft.Build.Framework.dll
 ├── tools/netstandard2.0/System.Reflection.Metadata.dll
 ├── tools/netstandard2.0/System.Collections.Immutable.dll
 ├── tools/netstandard2.0/System.Memory.dll
@@ -295,7 +303,8 @@ AtomUI.Generator.nupkg
     └── AtomUI.ThemeAssets.targets
 ```
 
-`AtomUI.Build.Tasks` 的依赖必须随 tools 目录完整发布。Generator 项目继续隔离 `PublishAot`、trim、single-file 和
+该树仅列本地化相关资产；完整后端/工具白名单由[构建与打包](../../foundations/build-and-packaging.md)定义。
+`AtomUI.Build.Tasks.dll` 的依赖必须随 tools 目录完整发布。Generator 项目继续隔离 `PublishAot`、trim、single-file 和
 RuntimeIdentifier 等全局发布属性，不能被最终应用当作运行时项目参与 NativeAOT publish。
 
 `AtomUI.Localization.targets` 在 NuGet `_GetPackageFiles` 收集之前准备模块/语言包资产，保证动态加入的 XLIFF、
@@ -311,8 +320,8 @@ Build Tasks 校验和打包；它自身不运行 Localization Generator 生成 C
 传递 XLIFF、manifest、props、analyzer、AdditionalFiles、build targets、DLL、runtime asset 或组件包依赖。
 
 源码仓库构建中，`AtomUI.Build.Tasks.dll` 可能在消费项目完成 MSBuild 求值之后才由 Generator 的项目依赖生成。
-因此 targets 必须无条件登记 `UsingTask`，让 MSBuild 在任务首次执行时延迟加载程序集；不得在 `UsingTask` 上使用
-求值期 `Exists(...)` 条件。需要任务的 Target 仍在执行期检查程序集是否存在，这样冷构建、静态图构建和
+因此 targets 必须无条件登记 `UsingTask` 薄适配器，在实际执行时启动独立 worker；不得在 `UsingTask` 上使用
+求值期 `Exists(...)` 条件。需要任务的 Target 仍在执行期检查工具是否存在，这样冷构建、静态图构建和
 NativeAOT publish 都不会因“文件已经生成但任务未登记”而产生 `MSB4036`。
 
 ## 编译期与启动期校验边界

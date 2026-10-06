@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-$toolSource = Join-Path $repoRoot ".artifacts/bin/$Configuration/build-tasks/net10.0"
+$toolSource = Join-Path $repoRoot ".artifacts/bin/$Configuration/toolchain/tasks/net10.0"
 $testRoot = Join-Path ([IO.Path]::GetTempPath()) ("atomui-task-isolation-" + [Guid]::NewGuid().ToString('N'))
 $toolRoot = Join-Path $testRoot 'tools with spaces'
 
