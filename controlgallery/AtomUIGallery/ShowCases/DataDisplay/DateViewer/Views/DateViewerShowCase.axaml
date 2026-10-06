@@ -47,7 +47,7 @@
             <gallery:ShowCasePanel Name="ExamplesContent"
                                    IsScrollEnabled="False"
                                    IsDeferredLoadingEnabled="True"
-                                   InitialDeferredLoadItemCount="4"
+                                   InitialDeferredLoadItemCount="1"
                                    DeferredLoadBatchSize="2"
                                    MaxColumns="1"
                                    ContentMargin="28,10,28,28">
