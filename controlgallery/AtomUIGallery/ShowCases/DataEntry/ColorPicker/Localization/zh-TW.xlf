@@ -277,5 +277,17 @@
         <target state="translated">Value 綁定</target>
       </segment>
     </unit>
+    <unit id="NeedConfirmTitle">
+      <segment>
+        <source>Need Confirm</source>
+        <target state="translated">需要確認</target>
+      </segment>
+    </unit>
+    <unit id="NeedConfirmDescription">
+      <segment>
+        <source>Try a color or gradient in the panel, then choose Confirm to update the bound value. Cancel, Escape, or dismissing the panel discards the draft. Clearing a color also requires confirmation.</source>
+        <target state="translated">在面板中試選純色或漸層，點擊確定後才更新繫結值。取消、Escape 或關閉面板會放棄本次修改；清除顏色同樣需要確認。</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

@@ -277,5 +277,17 @@
         <target state="translated">Valor vinculação</target>
       </segment>
     </unit>
+    <unit id="NeedConfirmTitle">
+      <segment>
+        <source>Need Confirm</source>
+        <target state="translated">Confirmar seleção</target>
+      </segment>
+    </unit>
+    <unit id="NeedConfirmDescription">
+      <segment>
+        <source>Try a color or gradient in the panel, then choose Confirm to update the bound value. Cancel, Escape, or dismissing the panel discards the draft. Clearing a color also requires confirmation.</source>
+        <target state="translated">Experimente uma cor ou um gradiente no painel e escolha Confirmar para atualizar o valor vinculado. Cancelar, Escape ou fechar o painel descarta as alterações. Limpar a cor também exige confirmação.</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

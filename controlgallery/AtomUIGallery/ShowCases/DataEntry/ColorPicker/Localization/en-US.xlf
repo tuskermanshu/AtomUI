@@ -231,5 +231,15 @@
         <source>Value binding</source>
       </segment>
     </unit>
+    <unit id="NeedConfirmTitle">
+      <segment>
+        <source>Need Confirm</source>
+      </segment>
+    </unit>
+    <unit id="NeedConfirmDescription">
+      <segment>
+        <source>Try a color or gradient in the panel, then choose Confirm to update the bound value. Cancel, Escape, or dismissing the panel discards the draft. Clearing a color also requires confirmation.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

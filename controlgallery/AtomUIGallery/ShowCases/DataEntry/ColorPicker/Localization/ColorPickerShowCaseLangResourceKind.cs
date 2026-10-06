@@ -50,5 +50,7 @@ public enum ColorPickerShowCaseLangResourceKind
     SemanticDescriptionDescription,
     SemanticPopupRootDescription,
     StyleClassTitle,
-    StyleClassDescription
+    StyleClassDescription,
+    NeedConfirmTitle,
+    NeedConfirmDescription
 }

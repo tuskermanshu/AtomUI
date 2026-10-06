@@ -143,7 +143,9 @@ public class DesktopCatalogCoverageTests
     {
         AssertCatalog(
             "AtomUI.Desktop.Controls.ColorPickerLang",
-            new ExpectedEntry<ColorPickerLangResourceKind>(ColorPickerLangResourceKind.EmptyColorText, "Transparent", "无色", "無色"));
+            new ExpectedEntry<ColorPickerLangResourceKind>(ColorPickerLangResourceKind.EmptyColorText, "Transparent", "无色", "無色"),
+            new ExpectedEntry<ColorPickerLangResourceKind>(ColorPickerLangResourceKind.Confirm, "Confirm", "确定", "確定"),
+            new ExpectedEntry<ColorPickerLangResourceKind>(ColorPickerLangResourceKind.Cancel, "Cancel", "取消", "取消"));
     }
 
     private static void AssertCatalog<TResourceKind>(

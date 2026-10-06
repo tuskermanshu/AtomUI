@@ -281,6 +281,31 @@
     </gallery:ShowCaseItem>
 
     <gallery:ShowCaseItem
+        Title="{gallery:ColorPickerShowCaseLangResource NeedConfirmTitle}"
+        Description="{gallery:ColorPickerShowCaseLangResource NeedConfirmDescription}"
+        IsDeferredContentEnabled="True">
+        <gallery:ShowCaseItem.DeferredContentTemplate>
+            <DataTemplate x:DataType="vm:ColorPickerViewModel">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <atom:ColorPicker IsNeedConfirm="True"
+                                          IsClearEnabled="True"
+                                          IsTextVisible="True"
+                                          Value="{Binding BoundColorValue, Mode=TwoWay}" />
+                        <TextBlock Text="{Binding BoundColorValueText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <atom:GradientColorPicker IsNeedConfirm="True"
+                                                  IsClearEnabled="True"
+                                                  Value="{Binding BoundGradientValue, Mode=TwoWay}" />
+                        <TextBlock Text="{Binding BoundGradientValueText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+        </gallery:ShowCaseItem.DeferredContentTemplate>
+    </gallery:ShowCaseItem>
+
+    <gallery:ShowCaseItem
         Title="{gallery:ColorPickerShowCaseLangResource CustomTriggerEventTitle}"
         Description="{gallery:ColorPickerShowCaseLangResource CustomTriggerEventDescription}"
         IsDeferredContentEnabled="True">

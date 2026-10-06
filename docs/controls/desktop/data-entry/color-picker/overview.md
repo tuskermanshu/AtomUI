@@ -2,6 +2,8 @@
 
 本文档定义 `ColorPicker` 桌面版的最新设计定位、公共契约、状态模型、视觉主题关系和兼容边界。通用控件研发约束见 [控件研发标准](../../../../engineering/development/control-development-guidelines.md)，内部实现原理见 [ColorPicker 桌面版实现原理](implementation.md)，ColorPicker Token 的专项设计见 [ColorPicker Token 设计](token.md)，设计和契约变化记录见 [ColorPicker Changelog](changelog.md)。
 
+纯色与渐变选择器通过 `IsNeedConfirm` 控制显式确认：面板编辑候选值，宿主 `Value` 保存提交值。完整模式矩阵、事件、取消及宿主边界见 [ColorPicker 确认与取消设计](confirmation-design.md)。
+
 该控件的 Popup 钉住打开属于共享弹层契约，详见 [Popup 钉住打开设计](../../other/popup/popup-pinned-open-design.md)。`AbstractColorPicker` 提供 public `IsPopupPinnedOpen`：设置为 true 时保持 picker open state 并 relay 到 color panel Popup，使 Gallery 语义预览等场景可以持续展示 `popup.root` 部件；设置为 false 时只解除关闭拦截。控件卸载、锚点失效、TopLevel 改变和模板重建仍按共享生命周期规则清理。
 
 ColorPicker 与 GradientColorPicker 各自公开 5 个 Semantic Part（`root`、`body`、`content`、`description`、`popup.root`），与上游 ColorPicker 的公开语义 API 逐一对齐；完整 Part 表、Selector 用法与定制边界见 [ColorPicker Semantic Part 契约](semantic-part.md)。
@@ -11,7 +13,7 @@ ColorPicker 与 GradientColorPicker 各自公开 5 个 Semantic Part（`root`、
 | 项 | 值 |
 | --- | --- |
 | NuGet 包 | `AtomUI.Desktop.Controls.ColorPicker` |
-| .NET 命名空间 | `AtomUI.Desktop.Controls.ColorPicker` |
+| .NET 命名空间 | `AtomUI.Desktop.Controls` |
 | AXAML 命名空间 | `https://atomui.net` |
 | Gallery 页面 | `controlgallery/AtomUIGallery/ShowCases/DataEntry/ColorPicker` |
 | 控件状态 | Stable |
@@ -45,12 +47,16 @@ ColorPicker 的公共契约由 public/protected 类型成员、Avalonia 属性�
 | --- | --- | --- |
 | 内容与数据 | `ColorValue`、`ColorValueBrush`、`DefaultValue`、`EmptyColorText`、`GradientValue`、`IsTextVisible`、`MaxValue`、`MinValue`、`Value`、`ValueSyncStrategy` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `ColorModel`、`IsEmptyColorMode`、`IsPaletteGroupEnabled` | 维护选择、展开、过滤、分页、分组或集合状态。 |
-| 交互与状态 | `IsActivated`、`IsAlphaEnabled`、`IsAlphaVisible`、`IsArrowVisible`、`IsClearEnabled`、`IsColorSpectrumSliderVisible`、`IsFormatEnabled`、`IsMotionEnabled`、`IsPerceptive`、`IsPointAtCenter` 等 15 项 | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
+| 交互与状态 | `IsNeedConfirm`、`IsActivated`、`IsAlphaEnabled`、`IsAlphaVisible`、`IsArrowVisible`、`IsClearEnabled`、`IsColorSpectrumSliderVisible`、`IsFormatEnabled`、`IsMotionEnabled`、`IsPerceptive`、`IsPointAtCenter` | 表达确认策略、用户可观察状态、可用性、清除和反馈语义。 |
 | 视觉与布局 | `Color`、`ColorComponent`、`ColorSpectrumComponents`、`HsvColor`、`MarginToAnchor`、`Placement`、`PlacementAnchor`、`PlacementGravity`、`Shape`、`Size` 等 12 项 | 影响尺寸、位置、颜色、形状、密度和模板视觉变量。 |
 | 动效与异步 | `MouseEnterDelay`、`MouseLeaveDelay` | 约束动效开关、异步加载、播放速度、超时和任务边界。 |
 | 其他稳定入口 | `ActivatedThumb`、`Components`、`DecreaseButton`、`Format`、`IncreaseButton`、`MaxHue`、`MaxSaturation`、`Maximum`、`MinHue`、`MinSaturation` 等 14 项 | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
-`ColorPicker.Value` 和 `GradientColorPicker.Value` 是用户拥有的当前值：纯色选择器使用 `Color?`，渐变选择器使用 `LinearGradientBrush?`。两个 `Value` CLR wrapper 均可公开设置，默认 `TwoWay` 绑定，并接入 Avalonia `DataValidationErrors`。清除按钮、Form clear 和外部绑定写入 `null` 都必须让 `Value` 变为 `null`，不能只清空触发器文字或色块视觉。
+`ColorPicker.Value` 和 `GradientColorPicker.Value` 是用户拥有的提交值：纯色选择器使用 `Color?`，渐变选择器使用 `LinearGradientBrush?`。两个 `Value` CLR wrapper 均可公开设置，默认 `TwoWay` 绑定，并接入 Avalonia `DataValidationErrors`。Form clear 和外部绑定写入 `null` 直接清空提交值；面板清除在确认模式下先将候选值置为 `null`，确认后才清空提交值。清空提交值必须由 `Value=null` 驱动文字、色块和 Form 状态，不能只清空视觉。
+
+`AbstractColorPicker.IsNeedConfirm` 是默认值为 `false` 的布尔 Avalonia 属性，由 `ColorPicker` 和 `GradientColorPicker` 共同继承。为 `false` 时保留原有值同步与关闭事件语义；为 `true` 时仅显式确认提交，并优先于纯色选择器的 `ValueSyncStrategy`。`ValueSyncStrategy` 默认 `Immediate`，`OnCompleted` 表示关闭时提交，两者均不是取消策略；渐变选择器不因此增加 `ValueSyncStrategy`。
+
+`ValueChanged` / `GradientValueChanged` 报告提交值变化。确认模式下，面板编辑与取消不触发宿主值事件，确认非空值后 `ValueSelected` 触发一次；确认清空通过值变化事件报告 `null`，保持既有事件参数契约。默认模式保留原有关闭时 `ValueSelected` 的语义。
 
 稳定事件包括 `ClearRequest`、`GradientActiveStopChanged`。事件触发顺序属于兼容契约，不能因内部状态重排而改变。
 
@@ -108,7 +114,8 @@ Public API / inherited command / item source / user input
 - Disabled 或不可交互状态优先屏蔽 pointer、keyboard、motion 和提交类反馈。
 - open/close、collection/filter、input/value、motion、visual option 状态由控件实例或明确的数据 owner 推导，不能在 template part 之间双向竞争。
 - `IsPickerOpen` 是 picker 的业务打开状态，`Popup.IsOpen` 是物理宿主状态；pinned 期间普通关闭不能改变业务状态，锚点隐藏、detach 或 TopLevel 失效仍可关闭物理宿主，并在有效性恢复后重新打开。
-- `Value`、trigger 色块、trigger 文本、picker presenter 和 Form 值必须由同一份 current value 派生；清空状态以 `Value=null` 为源头。
+- `Value`、trigger 色块、trigger 文本和 Form 值由宿主提交值派生。确认模式下，picker presenter 的输入与预览由独立候选值派生；候选值不能通过 TwoWay 绑定提前写回宿主。
+- 确认模式下，取消、Escape、外点、失焦等普通关闭丢弃草稿；重开从当前提交值重新开始。外部值写入与确认配置变化重置草稿，生命周期结束清理草稿及订阅。钉住弹层中的确认与取消不改变钉住打开契约，详见确认专项设计。
 - 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
 - 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
 
@@ -144,6 +151,7 @@ ColorPicker 拥有独立 Control identity；`ColorPickerToken` 只表达 ColorPi
 - 不把可由 AXAML 表达的模板状态迁移为 C# 动态创建视觉。
 - 不把 hover、pressed、selected、expanded、loading、filter、popup open 等运行时状态写入 Token。
 - Browser 或平台特化主题必须保持同一 API 的语义一致。
+- 确认模式的“取消 / 确定”操作区声明在面板 ControlTheme 中，默认模式不占布局空间；原有调色区、预设色、输入区和 trigger 尺寸保持原契约。按钮文案使用控件本地化资源，视觉复用 Button 与 SharedToken。
 
 ## 6. 控件家族或集成关系
 
@@ -199,7 +207,7 @@ ColorPicker 与同分类控件共享尺寸、状态、Token、Gallery 展示和�
 
 ### 8.1 选择与当前项模型
 
-ColorPicker 的当前项状态必须由单一 owner 推导。public 选择属性、集合项容器和伪类之间只能做单向同步，集合替换、清空和模板重套用时必须回放当前状态。
+ColorPicker 的提交值由宿主唯一拥有，打开期间候选值由面板编辑状态唯一拥有；颜色预览与已提交 trigger 分别投影对应状态。纯色、渐变、空值及确认模式的状态转换见 [确认与取消设计](confirmation-design.md)。
 
 ### 8.2 弹层与宿主模型
 
@@ -222,6 +230,7 @@ ColorPicker 的视觉选项通过 public API 归一为 theme variables、伪类�
 关联文档：
 
 - [ColorPicker 桌面版实现原理](implementation.md)
+- [ColorPicker 确认与取消设计](confirmation-design.md)
 - [ColorPicker Semantic Part 契约](semantic-part.md)
 - [ColorPicker Token 设计](token.md)
 - [ColorPicker Changelog](changelog.md)
