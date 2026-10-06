@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+using static AtomUI.Build.Tasks.RegistrationFiles;
 using System.Text.Json;
 
 namespace AtomUI.Build.Tasks.Registration;
@@ -41,7 +41,7 @@ internal static class ConditionalRegistrationOutputVerifier
         {
             throw new InvalidDataException("Registration receipt contains no verified output to consume.");
         }
-        WriteReceipt(receiptPath, JsonSerializer.Serialize(new
+        RegistrationFiles.ReplaceText(receiptPath, JsonSerializer.Serialize(new
         {
             format = 1, stage = "consumed",
             inputHash = root.GetProperty("inputHash").GetString(),
@@ -66,7 +66,7 @@ internal static class ConditionalRegistrationOutputVerifier
         var reportBytes = File.ReadAllBytes(reportPath);
         using var report = JsonDocument.Parse(reportBytes);
         var root = report.RootElement;
-        ValidateUniqueFields(root);
+        RegistrationContractJson.ValidateUniqueFields(root);
         RegistrationContractJson.Fields(root, "format", "stage", "inputHash", "backend", "runtimeModeNormalization", "result");
         RegistrationContractJson.Fields(root.GetProperty("result"), "Groups", "Observations");
         if (root.GetProperty("format").GetInt32() != 1 || root.GetProperty("stage").GetString() != "analyzed-materialized" ||
@@ -157,32 +157,12 @@ internal static class ConditionalRegistrationOutputVerifier
             linkerHash = Hash(File.ReadAllBytes(linkerAssembly)),
             outputs = outputs.Select(file => new { path = file.Path, relativePath = file.RelativePath, assemblyIdentity = file.Identity, sha256 = file.Hash })
         });
-        WriteReceipt(receiptPath, receipt);
+        RegistrationFiles.ReplaceText(receiptPath, receipt);
     }
-
-    private static void WriteReceipt(string receiptPath, string receipt)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(receiptPath))!);
-        var temporary = receiptPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        try
-        {
-            File.WriteAllText(temporary, receipt);
-            File.Move(temporary, receiptPath, overwrite: true);
-        }
-        finally
-        {
-            if (File.Exists(temporary))
-            {
-                File.Delete(temporary);
-            }
-        }
-    }
-
-    private static string Hash(byte[] bytes) => Convert.ToHexStringLower(SHA256.HashData(bytes));
 
     private static void ValidateAdditionalInputs(JsonElement inputs)
     {
-        ValidateUniqueFields(inputs);
+        RegistrationContractJson.ValidateUniqueFields(inputs);
         RegistrationContractJson.Fields(inputs, "format", "coreAssemblyIdentity", "assemblies", "analysisReportPath", "additionalInputs");
         if (inputs.GetProperty("format").GetInt32() != 2 || inputs.GetProperty("additionalInputs").ValueKind != JsonValueKind.Array)
         {
@@ -204,27 +184,5 @@ internal static class ConditionalRegistrationOutputVerifier
         }
     }
 
-    private static void ValidateUniqueFields(JsonElement value)
-    {
-        if (value.ValueKind == JsonValueKind.Object)
-        {
-            var names = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var property in value.EnumerateObject())
-            {
-                if (!names.Add(property.Name))
-                {
-                    throw new InvalidDataException("Duplicate registration report field: " + property.Name);
-                }
-                ValidateUniqueFields(property.Value);
-            }
-        }
-        else if (value.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var item in value.EnumerateArray())
-            {
-                ValidateUniqueFields(item);
-            }
-        }
-    }
     private sealed record VerifiedOutput(string Path, string RelativePath, string Identity, string Hash);
 }

@@ -12,6 +12,8 @@
     <PropertyGroup>
         <AtomUIRepositoryBuild>true</AtomUIRepositoryBuild>
         <AtomUIToolchainProject>$(MSBuildThisFileDirectory)../src/AtomUI.Toolchain/AtomUI.Toolchain.csproj</AtomUIToolchainProject>
+        <!-- Application targeting belongs to the caller, not the portable build tools. -->
+        <AtomUIToolchainGlobalPropertiesToRemove>TargetFramework;TargetFrameworks;RuntimeIdentifier;RuntimeIdentifiers</AtomUIToolchainGlobalPropertiesToRemove>
         <AtomUIToolchainOutputDirectory Condition="'$(AtomUIToolchainOutputDirectory)' == ''">$(OutputPathWithoutFramework)/toolchain</AtomUIToolchainOutputDirectory>
         <AtomUIBuildTasksOutputDirectory Condition="'$(AtomUIBuildTasksOutputDirectory)' == ''">$(AtomUIToolchainOutputDirectory)/tasks</AtomUIBuildTasksOutputDirectory>
         <AtomUIBuildTasksAssembly Condition="'$(AtomUIBuildTasksAssembly)' == ''">$(AtomUIBuildTasksOutputDirectory)/net10.0/AtomUI.Build.Tasks.dll</AtomUIBuildTasksAssembly>

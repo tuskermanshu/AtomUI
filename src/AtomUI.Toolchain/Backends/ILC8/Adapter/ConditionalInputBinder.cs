@@ -132,19 +132,15 @@ internal static class ConditionalInputBinder
             {
                 foreach (ConditionalRegistrationCondition condition in manifest.Conditions.Where(c => c.Fragment == fragment.Identity))
                 {
-                    var definition = new RegistrationDefinitions.EntryDefinition
-                    {
-                        Key = condition.Identity,
-                        FragmentId = fragment.FragmentId,
-                        Condition = new RegistrationDefinitions.TypeIdentity { Assembly = condition.Trigger.Assembly, Name = condition.Trigger.MetadataName }
-                    };
-                    entries.Add(new RegistrationDefinitions.Entry(definition, BindType(context, condition.Trigger), fragmentMethods[fragment.Identity]));
+                    entries.Add(new RegistrationDefinitions.Entry(condition.Identity, fragment.FragmentId, condition.Trigger,
+                        BindType(context, condition.Trigger), fragmentMethods[fragment.Identity]));
                 }
             }
             string symbol = "__atomui_registration_" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(package.Group.QualifiedName)));
             groups.Add(new RegistrationDefinitions.Group
             {
-                Definition = new RegistrationDefinitions.GroupDefinition { Id = package.Group.QualifiedName, PackageId = package.Id },
+                Id = package.Group.QualifiedName,
+                PackageId = package.Id,
                 Builder = builder,
                 Entry = collect,
                 FullCollector = full,

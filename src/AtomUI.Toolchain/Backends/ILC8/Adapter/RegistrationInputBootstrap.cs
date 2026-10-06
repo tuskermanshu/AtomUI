@@ -41,18 +41,9 @@ internal static class RegistrationInputBootstrap
     private static readonly List<string> AttemptOutputs = new();
     internal static void CleanupFailedAttempt()
     {
-        if (Invocation != null)
-        {
-            Invocation.DeleteOwned(AttemptOutputs);
-        }
-        else
-        {
-            foreach (string path in AttemptOutputs)
-            {
-                File.Delete(path);
-            }
-        }
+        Invocation?.DeleteOwned(AttemptOutputs);
     }
+
     private static readonly HashSet<string> Kinds = new(StringComparer.Ordinal)
     {
         "root-descriptor", "reference", "custom-step", "custom-step-file", "tool", "symbol", "configuration", "opaque"
@@ -64,7 +55,6 @@ internal static class RegistrationInputBootstrap
     {
         string supplied = Environment.GetEnvironmentVariable("ATOMUI_ILC8_INPUTS");
         string prepareRoot = Environment.GetEnvironmentVariable("ATOMUI_ILC8_PREPARE_ROOT");
-        bool development = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ATOMUI_ILC8_MANIFEST"));
         string[] originalPaths = inputs.Values.Concat(references.Values).Select(Path.GetFullPath).Distinct(StringComparer.Ordinal).ToArray();
         bool formal = !string.IsNullOrEmpty(supplied) || !string.IsNullOrEmpty(prepareRoot);
         if (formal)
@@ -81,7 +71,7 @@ internal static class RegistrationInputBootstrap
             exportsFile = Invocation.RequireOwned(Path.GetFullPath(exportsFile));
             Invocation.RequireExact(Environment.GetEnvironmentVariable("ATOMUI_ILC8_RECEIPT"), "receipt.json");
         }
-        if (development || formal)
+        if (formal)
         {
             var protectedPaths = originalPaths.Concat(additional.Values.SelectMany(p => p).Select(Path.GetFullPath)).ToHashSet(StringComparer.Ordinal);
             if (protectedPaths.Contains(Path.GetFullPath(objectFile)) ||
@@ -94,11 +84,8 @@ internal static class RegistrationInputBootstrap
             {
                 AttemptOutputs.Add(exportsFile);
             }
-            if (formal)
-            {
-                AttemptOutputs.Add(Invocation.File("receipt.json"));
-                AttemptOutputs.Add(Invocation.File("analysis.json"));
-            }
+            AttemptOutputs.Add(Invocation.File("receipt.json"));
+            AttemptOutputs.Add(Invocation.File("analysis.json"));
             CleanupFailedAttempt();
         }
         if (string.IsNullOrEmpty(supplied) && string.IsNullOrEmpty(prepareRoot))

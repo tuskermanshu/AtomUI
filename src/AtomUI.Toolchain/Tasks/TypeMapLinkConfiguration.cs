@@ -15,7 +15,7 @@ internal sealed record TypeMapLinkConfiguration(TypeMapLinkOption[] Options, Typ
         "UnreachableBodies", "UnusedInterfaces", "IPConstProp", "Sealer", "TrimmerSingleWarn"];
 
     internal static TypeMapLinkConfiguration Capture(ITaskItem[] options, ITaskItem[] items,
-        ITaskItem[] assemblies, ITaskItem[] references)
+                                                     ITaskItem[] assemblies, ITaskItem[] references)
     {
         var result = items.Select(i => new TypeMapLinkItem(i.GetMetadata("Kind"), i.ItemSpec, Metadata(i, i.GetMetadata("Kind") switch
         {
@@ -103,9 +103,9 @@ internal sealed record TypeMapLinkConfiguration(TypeMapLinkOption[] Options, Typ
                             if (library.Value.TryGetProperty(kind, out var assets))
                             {
                                 foreach (var asset in assets.EnumerateObject())
-                        {
-                            var dependency = Path.Combine(Path.GetDirectoryName(path)!, Path.GetFileName(asset.Name));
-                            if (File.Exists(dependency))
+                                {
+                                    var dependency = Path.Combine(Path.GetDirectoryName(path)!, Path.GetFileName(asset.Name));
+                                    if (File.Exists(dependency))
                                     {
                                         Tool(dependency);
                                     }
@@ -121,7 +121,7 @@ internal sealed record TypeMapLinkConfiguration(TypeMapLinkOption[] Options, Typ
             }
 
             using var stream = File.OpenRead(path);
-            using var pe = new PEReader(stream);
+            using var pe     = new PEReader(stream);
             if (!pe.HasMetadata)
             {
                 return;
@@ -130,7 +130,7 @@ internal sealed record TypeMapLinkConfiguration(TypeMapLinkOption[] Options, Typ
             var metadata = pe.GetMetadataReader();
             foreach (var reference in metadata.AssemblyReferences)
             {
-                var name = metadata.GetString(metadata.GetAssemblyReference(reference).Name);
+                var name       = metadata.GetString(metadata.GetAssemblyReference(reference).Name);
                 var dependency = Path.Combine(Path.GetDirectoryName(path)!, name + ".dll");
                 if (File.Exists(dependency))
                 {

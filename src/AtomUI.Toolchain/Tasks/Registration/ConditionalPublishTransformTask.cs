@@ -1,3 +1,4 @@
+using static AtomUI.Build.Tasks.RegistrationFiles;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
@@ -330,18 +331,7 @@ public sealed class ConditionalPublishTransformTask : RegistrationBuildTask
             }
         }
     }
-    private static string Hash(string path)
-    {
-        using var input = File.OpenRead(path);
-        return Convert.ToHexStringLower(SHA256.HashData(input));
-    }
-    private void WriteState(TransformState state)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(StatePath))!);
-        var temporary = StatePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(state));
-        File.Move(temporary, StatePath, overwrite: true);
-    }
+    private void WriteState(TransformState state) => RegistrationFiles.ReplaceText(StatePath, JsonSerializer.Serialize(state));
     internal sealed record TransformFile(string Path, string RelativePath, string Hash);
     internal sealed record R2REntry(TransformFile Input, string Output, string ManagedHash);
     internal sealed class TransformState

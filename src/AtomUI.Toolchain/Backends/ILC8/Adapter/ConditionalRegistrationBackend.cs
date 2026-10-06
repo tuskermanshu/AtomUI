@@ -27,35 +27,25 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
     private readonly string _receiptSymbol;
     private readonly AtomUI.Build.Tasks.Registration.Native8Invocation _invocation;
     private string _objectFile;
-    public IEnumerable<string> ExportSymbols(IEnumerable<string> symbols) => _receiptSymbol == null
-        ? symbols : (symbols ?? Array.Empty<string>()).Append(_receiptSymbol);
+    public IEnumerable<string> ExportSymbols(IEnumerable<string> symbols) => (symbols ?? Array.Empty<string>()).Append(_receiptSymbol);
 
 
     public ILProvider PreinitializationView { get; }
 
-    public ConditionalRegistrationBackend(ILProvider inner, CompilerTypeSystemContext context, string manifest, bool useScanner, bool frozenInputs = false)
+    public ConditionalRegistrationBackend(ILProvider inner, CompilerTypeSystemContext context, string inputs, bool useScanner)
     {
         _inner = inner;
-        _inputPath = Path.GetFullPath(manifest);
+        _inputPath = Path.GetFullPath(inputs);
         _useScanner = useScanner;
-        if (frozenInputs)
-        {
-            ConditionalInputBinding binding = ConditionalInputBinder.Read(manifest, context, inner);
-            _groups = binding.Groups;
-            _recordAttribute = binding.RecordAttribute;
-            _reportPath = binding.ReportPath;
-            _inputHash = binding.InputHash;
-            _trimmedGetter = binding.TrimmedGetter;
-            _invocation = RegistrationInputBootstrap.Invocation ?? throw new InvalidDataException("Missing caller invocation");
-            _invocation.RequireExact(binding.ReportPath, "analysis.json");
-            _receiptSymbol = "__atomui_compile_" + _invocation.Id;
-        }
-        else
-        {
-            _groups = RegistrationDefinitions.Read(manifest, context, inner);
-            _reportPath = Environment.GetEnvironmentVariable("ATOMUI_ILC8_REPORT");
-            _inputHash = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(manifest)));
-        }
+        ConditionalInputBinding binding = ConditionalInputBinder.Read(inputs, context, inner);
+        _groups = binding.Groups;
+        _recordAttribute = binding.RecordAttribute;
+        _reportPath = binding.ReportPath;
+        _inputHash = binding.InputHash;
+        _trimmedGetter = binding.TrimmedGetter;
+        _invocation = RegistrationInputBootstrap.Invocation ?? throw new InvalidDataException("Missing caller invocation");
+        _invocation.RequireExact(binding.ReportPath, "analysis.json");
+        _receiptSymbol = "__atomui_compile_" + _invocation.Id;
         foreach (RegistrationDefinitions.Group group in _groups)
         {
             group.Table = new RegistrationTableNode(group);
@@ -64,17 +54,12 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
         Console.WriteLine("[AtomUI ILC8] host=" + RuntimeInformation.FrameworkDescription + " scanner=" + _useScanner);
     }
 
-    public MetadataBlockingPolicy WrapMetadataBlockingPolicy(MetadataBlockingPolicy inner) => _recordAttribute == null
-        ? inner
-        : new RegistrationMetadataPolicy(inner, _recordAttribute);
+    public MetadataBlockingPolicy WrapMetadataBlockingPolicy(MetadataBlockingPolicy inner) => new RegistrationMetadataPolicy(inner, _recordAttribute);
 
     public void AddCompilationRoots(IRootingServiceProvider rootProvider)
     {
-        if (_receiptSymbol != null)
-        {
-            rootProvider.RootReadOnlyDataBlob(System.Text.Encoding.ASCII.GetBytes(_receiptSymbol), 1,
-                "AtomUI compilation receipt", _receiptSymbol);
-        }
+        rootProvider.RootReadOnlyDataBlob(System.Text.Encoding.ASCII.GetBytes(_receiptSymbol), 1,
+            "AtomUI compilation receipt", _receiptSymbol);
         if (_useScanner && _frozen)
         {
             return;
@@ -99,7 +84,7 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
             {
                 if (factory.MethodEntrypoint(entry.Method) is not ScannedMethodNode scanned || !scanned.StaticDependenciesAreComputed || scanned.Exception != null)
                 {
-                    throw new InvalidOperationException("Selected registration method did not complete scanner analysis: " + entry.Definition.Key);
+                    throw new InvalidOperationException("Selected registration method did not complete scanner analysis: " + entry.Key);
                 }
             }
         }
@@ -108,21 +93,7 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
 
     public void AbortCompilation(string objectFile, string exportsFile)
     {
-        if (_invocation != null)
-        {
-            _invocation.DeleteOwned(new[] { objectFile, exportsFile, _invocation.File("analysis.json"), _invocation.File("receipt.json") });
-            return;
-        }
-        // Development manifests have explicit caller-owned outputs.
-        File.Delete(objectFile);
-        if (!string.IsNullOrEmpty(exportsFile))
-        {
-            File.Delete(exportsFile);
-        }
-        if (!string.IsNullOrEmpty(_reportPath))
-        {
-            File.Delete(_reportPath);
-        }
+        _invocation.DeleteOwned(new[] { objectFile, exportsFile, _invocation.File("analysis.json"), _invocation.File("receipt.json") });
     }
 
     public void VerifyAndWriteReport(NodeFactory factory, string objectFile)
@@ -130,7 +101,7 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
         _objectFile = Path.GetFullPath(objectFile);
         var groups = _groups.Select(group =>
         {
-            if (group.FullCollector != null && factory.MethodEntrypoint(group.FullCollector).Marked)
+            if (factory.MethodEntrypoint(group.FullCollector).Marked)
             {
                 throw new InvalidOperationException("Full registration collector survived selected codegen: " + group.FullCollector);
             }
@@ -142,16 +113,16 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
                 // A native table, however, requires an emitted addressable entrypoint.
                 if (!_useScanner && !factory.MethodEntrypoint(entry.Method).Marked)
                 {
-                    throw new InvalidOperationException("Selected entrypoint is missing from final codegen graph: " + entry.Definition.Key);
+                    throw new InvalidOperationException("Selected entrypoint is missing from final codegen graph: " + entry.Key);
                 }
             }
             return new
             {
-                group.Definition.Id,
-                group.Definition.PackageId,
+                group.Id,
+                group.PackageId,
                 Requested = requested,
-                Selected = selected.Select(e => e.Definition.Key).ToArray(),
-                SelectedFragments = selected.Select(e => e.Definition.FragmentId).Where(id => id != null).Distinct().ToArray(),
+                Selected = selected.Select(e => e.Key).ToArray(),
+                SelectedFragments = selected.Select(e => e.FragmentId).Distinct().ToArray(),
                 UniqueMethods = selected.Select(e => e.Method).Distinct().Count(),
                 SelectedMethodSymbols = selected.Select(e => e.Method).Distinct().Select(m => factory.NameMangler.GetMangledMethodName(m).ToString()).ToArray(),
                 NativeTableEmitted = !_useScanner && group.Table.Marked,
@@ -159,28 +130,25 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
                 group.SymbolName,
                 Conditions = group.Entries.Select(e => new
                 {
-                    e.Definition.Key,
-                    e.Definition.Condition,
+                    e.Key,
+                    Condition = new { e.Trigger.Assembly, Name = e.Trigger.MetadataName },
                     FinalTypeMarked = factory.NecessaryTypeSymbol(e.Condition).Marked,
                     FinalMethodMarked = factory.MethodEntrypoint(e.Method).Marked,
                     MethodSymbol = factory.NameMangler.GetMangledMethodName(e.Method).ToString()
                 }).ToArray()
             };
         }).ToArray();
-        string report = _invocation?.File("analysis.json") ?? _reportPath;
-        if (!string.IsNullOrEmpty(report))
-        {
-            File.WriteAllText(report, JsonSerializer.Serialize(new
+        File.WriteAllText(_reportPath, JsonSerializer.Serialize(new
             {
                 Backend = "AtomUI.Registration.ILC8",
-                InputKind = _recordAttribute == null ? "development-manifest" : "conditional-record-v1",
+                InputKind = "conditional-record-v1",
                 InputHash = _inputHash,
                 InputPath = _inputPath,
                 Stage = "codegen-verified",
                 ReceiptSymbol = _receiptSymbol,
-                InvocationId = _invocation?.Id,
+                InvocationId = _invocation.Id,
                 ExecutingHost = typeof(ConditionalRegistrationBackend).Assembly.Location,
-                TrimmedSwitchTemplate = _trimmedGetter == null ? null : ILCompiler.TrimmedSwitchTemplate.Id,
+                TrimmedSwitchTemplate = ILCompiler.TrimmedSwitchTemplate.Id,
                 HostRuntime = RuntimeInformation.FrameworkDescription,
                 Scanner = _useScanner,
                 TargetPointerSize = factory.Target.PointerSize,
@@ -188,7 +156,6 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
                 ObjectHash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(objectFile))).ToLowerInvariant(),
                 Groups = groups
             }, new JsonSerializerOptions { WriteIndented = true }));
-        }
         foreach (var group in groups)
         {
             Console.WriteLine("[AtomUI ILC8] group=" + group.Id + " requested=" + group.Requested + " selectedEntries=" + group.Selected.Length + " selectedMethods=" + group.UniqueMethods);
@@ -197,10 +164,6 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
 
     public void CompleteCompilation(string exportsFile)
     {
-        if (_receiptSymbol == null)
-        {
-            return;
-        }
         if (string.IsNullOrEmpty(exportsFile) || !File.Exists(exportsFile) ||
             !File.ReadAllLines(exportsFile).Contains("_" + _receiptSymbol, StringComparer.Ordinal))
         {
@@ -213,17 +176,14 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
         report["ExportsHash"] = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(exportsFile)));
         File.WriteAllText(_invocation.File("analysis.json"), report.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
         string pointer = _invocation.RequireExact(Environment.GetEnvironmentVariable("ATOMUI_ILC8_RECEIPT"), "receipt.json");
-        if (!string.IsNullOrEmpty(pointer))
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(pointer)));
+        string temporary = _invocation.RequireOwned(pointer + "." + Guid.NewGuid().ToString("N") + ".tmp");
+        File.WriteAllText(temporary, JsonSerializer.Serialize(new
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(pointer)));
-            string temporary = _invocation.RequireOwned(pointer + "." + Guid.NewGuid().ToString("N") + ".tmp");
-            File.WriteAllText(temporary, JsonSerializer.Serialize(new
-            {
-                format = 2, invocationId = _invocation.Id, reportPath = _reportPath,
-                reportHash = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(_reportPath)))
-            }));
-            File.Move(temporary, pointer, true);
-        }
+            format = 2, invocationId = _invocation.Id, reportPath = _reportPath,
+            reportHash = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(_reportPath)))
+        }));
+        File.Move(temporary, pointer, true);
     }
 
     public override MethodIL GetMethodIL(MethodDesc method)
@@ -236,7 +196,7 @@ internal sealed class ConditionalRegistrationBackend : ILProvider, ICompilationR
             foldedBody.Emit(ILOpcode.ret);
             return folded.Link(method);
         }
-        RegistrationDefinitions.Group normalized = _groups.FirstOrDefault(g => g.Entry == method && g.Entry != g.Collector);
+        RegistrationDefinitions.Group normalized = _groups.FirstOrDefault(g => g.Entry == method);
         if (normalized != null)
         {
             var normalization = new ILEmitter();

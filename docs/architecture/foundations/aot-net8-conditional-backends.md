@@ -34,6 +34,12 @@ ILC8 的上游工程只在隔离缓存中生成；项目合并不共享引擎状
 普通 Core getter 保持原语义。后端核验其 Core/BCL 身份与布尔模板后，仅在发布视图中折叠裁剪模式为 true。
 未物化 selected 入口抛错；不能把失败变成空注册或完整注册。
 
+ILC8 的按需机制专项也使用实际 ConditionalRecord、输入格式 2 和独立 invocation，不再保留开发期 manifest
+解析器。夹具先预编译两个包程序集，各自一个 Group，并保留 scanner/无 scanner、优化开关、OR 去重、
+组门禁、静态构造器与异常传播、静态成员负例、未用工厂删除、原生表/符号和 .NET 8 实际运行检查。
+泛型消费保持 `new GenericControl<Payload>()`，以真实泛型依赖闭包中的非泛型 `Payload` 为合法候选；
+不扩展 format 1 的候选类型域，也不增加人为根。专项仍按需运行，不进入默认全局测试集合。
+
 ## SDK 接线与产物证据
 
 托管裁剪与原生发布按框架及 `PublishTrimmed` / `PublishAot` 自动分流，不再需要 net8 专用选择开关。

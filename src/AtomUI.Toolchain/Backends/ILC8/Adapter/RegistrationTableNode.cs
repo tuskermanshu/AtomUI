@@ -48,7 +48,7 @@ internal sealed class RegistrationTableNode : ObjectNode, ISymbolDefinitionNode
             // For the admitted non-generic static managed signature, ILC8 ldftn uses
             // this same MethodEntrypoint; no fat pointer/unboxing/context thunk applies.
             yield return new CombinedDependencyListEntry(factory.MethodEntrypoint(entry.Method),
-                factory.NecessaryTypeSymbol(entry.Condition), "AtomUI condition " + entry.Definition.Key);
+                factory.NecessaryTypeSymbol(entry.Condition), "AtomUI condition " + entry.Key);
         }
     }
 

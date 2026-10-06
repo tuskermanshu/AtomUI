@@ -11,6 +11,9 @@ import struct
 import subprocess
 import sys
 import tempfile
+import uuid
+
+from fixture_records import prepare_fixture
 
 FIXTURES = pathlib.Path(__file__).resolve().parent / 'fixtures'
 CASES = {
@@ -96,16 +99,14 @@ def main():
     parser.add_argument('--rids',nargs='+',default=['osx-arm64'])
     parser.add_argument('--no-optimization-crosscheck',action='store_true')
     args=parser.parse_args()
-    root=(args.work_root or pathlib.Path(tempfile.mkdtemp(prefix='atomui-test-ilc8-p1-'))).resolve()
+    root=(args.work_root or pathlib.Path(tempfile.mkdtemp(prefix='atomui-test-ilc8-records-'))).resolve()
     root.mkdir(parents=True,exist_ok=True)
     logs=root/'logs'; logs.mkdir(exist_ok=True)
     compiler=args.compiler_output.resolve()
-    fixture=root/'fixture'
-    components=fixture/'components'; app=fixture/'app'
-    components.mkdir(parents=True,exist_ok=True); app.mkdir(parents=True,exist_ok=True)
-    for name,dest in [('Components.cs.txt',components/'Components.cs'),('Components.csproj.txt',components/'P1.Components.csproj'),('Program.cs.txt',app/'Program.cs'),('App.csproj.txt',app/'P1.App.csproj'),('map.json',root/'map.json')]:
-        shutil.copyfile(FIXTURES/name,dest)
-    run_logged(['dotnet','build','-c','Release'],logs/'components-build.log',cwd=components)
+    fixture, primary_group, second_group, aliases = prepare_fixture(root, FIXTURES)
+    app=fixture/'app'
+    for project in ('core', 'components', 'second'):
+        run_logged(['dotnet','build','-c','Release'],logs/(project+'-build.log'),cwd=fixture/project)
     results=[]
     configurations=[(case,scanner,True,rid) for rid in args.rids for case in args.cases for scanner in (False,True)]
     if not args.no_optimization_crosscheck:
@@ -114,22 +115,50 @@ def main():
         for case,scanner,optimize,rid in configurations:
             label=f'{rid}-{case}-scan{int(scanner)}-opt{int(optimize)}'
             directory=root/'out'/label
-            report_path=logs/(label+'-selection.json')
-            env=dict(os.environ,ATOMUI_ILC8_MANIFEST=str(root/'map.json'),ATOMUI_ILC8_REPORT=str(report_path))
-            command=['dotnet','publish','-c','Release','-r',rid,f'-p:Case={case}',f'-p:NoScanner={str(not scanner).lower()}',f'-p:Optimize={str(optimize).lower()}',f'-p:IlcToolsPath={compiler}/tools/',f'-p:BaseIntermediateOutputPath={root}/obj/{label}/',f'-p:BaseOutputPath={root}/bin/{label}/','-o',str(directory)]
+            invocation_id=uuid.uuid4().hex
+            owned=root/'invocations'/invocation_id
+            owned.mkdir(parents=True)
+            (owned/'invocation.json').write_text(json.dumps(dict(invocationId=invocation_id, ownedRoot=str(owned))))
+            report_path=owned/'analysis.json'
+            env=dict(os.environ,ATOMUI_ILC8_PREPARE_ROOT=str(root/'cache'),
+                     ATOMUI_ILC8_INVOCATION_ID=invocation_id,ATOMUI_ILC8_OWNED_ROOT=str(owned),
+                     ATOMUI_ILC8_RECEIPT=str(owned/'receipt.json'))
+            for variable in ('ATOMUI_ILC8_INPUTS','ATOMUI_ILC8_FROZEN_CHILD'):
+                env.pop(variable,None)
+            command=['dotnet','publish','-c','Release','-r',rid,f'-p:Case={case}',f'-p:NoScanner={str(not scanner).lower()}',f'-p:Optimize={str(optimize).lower()}',f'-p:IlcToolsPath={compiler}/tools/',f'-p:BaseIntermediateOutputPath={root}/obj/{label}/',f'-p:BaseOutputPath={root}/bin/{label}/',f'-p:NativeIntermediateOutputPath={owned}/native/','-o',str(directory)]
             run_logged(command,logs/(label+'-publish.log'),cwd=app,env=env)
             report=json.loads(report_path.read_text())
+            shutil.copyfile(report_path,logs/(label+'-selection.json'))
+            assert report['InputKind']=='conditional-record-v1'
+            assert report['Stage']=='compiler-complete'
+            assert report['InvocationId']==invocation_id
+            receipt=json.loads((owned/'receipt.json').read_text())
+            assert receipt['invocationId']==invocation_id
+            assert receipt['reportHash']==hashlib.sha256(report_path.read_bytes()).hexdigest()
+            snapshot=json.loads((owned/'inputs.json').read_text())
+            assert snapshot['format']==2
+            assert report['InputHash']==hashlib.sha256((owned/'inputs.json').read_bytes()).hexdigest()
+            for entry in snapshot['assemblies']+snapshot['additionalInputs']:
+                assert hashlib.sha256(pathlib.Path(entry['path']).read_bytes()).hexdigest()==entry['sha256']
+            assert any(entry['path']==report['ExecutingHost'] and entry['kind']=='tool' for entry in snapshot['additionalInputs'])
+            assert report['TrimmedSwitchTemplate']=='atomui.trimmed-switch.v1'
+            assert pathlib.Path(report['ObjectFile']).is_relative_to(owned)
+            assert pathlib.Path(report['ExportsFile']).is_relative_to(owned)
+            assert report['ObjectHash']==hashlib.sha256(pathlib.Path(report['ObjectFile']).read_bytes()).hexdigest()
+            assert report['ExportsHash']==hashlib.sha256(pathlib.Path(report['ExportsFile']).read_bytes()).hexdigest()
+            assert '_'+report['ReceiptSymbol'] in pathlib.Path(report['ExportsFile']).read_text().splitlines()
             assert report['HostRuntime'].startswith('.NET 10.'),report['HostRuntime']
             assert report['Scanner']==scanner
             executable=directory/'AtomUIRegistrationProbe'
             data,sections,symbols=macho_symbols(executable)
             tables=[]
-            assert {g['Id'] for g in report['Groups']}=={'P1.Components/default','P1.Components/second'}
+            assert {g['Id'] for g in report['Groups']}=={primary_group,second_group}
             for group in report['Groups']:
-                second=group['Id']=='P1.Components/second'
+                second=group['Id']==second_group
                 expected=(['direct'] if case in ('SECOND','BOTH') else []) if second else CASES[case]
                 requested=case in ('SECOND','BOTH') if second else case not in ('OFF','SECOND')
-                assert group['Selected']==expected,(label,group['Id'],group['Selected'],expected)
+                selected_aliases=sorted(aliases[key] for key in group['Selected'])
+                assert selected_aliases==expected,(label,group['Id'],selected_aliases,expected)
                 assert group['Requested']==requested,(label,group['Id'])
                 selected=set(group['SelectedMethodSymbols'])
                 for condition in group['Conditions']:
@@ -140,12 +169,12 @@ def main():
             sentinel='UNUSED_FACTORY_SENTINEL_9DBC2310'
             assert sentinel.encode() not in data and sentinel.encode('utf-16le') not in data
             runtime_expected={'OR':['direct'],'CCTOR_THROW':[],'SECOND':['second'],'BOTH':['direct','second']}.get(case,CASES[case])
-            actual=subprocess.run([str(executable)],env=dict(os.environ,P1_EXPECT=','.join(runtime_expected)),capture_output=True,text=True)
+            actual=subprocess.run([str(executable)],env=dict(os.environ,ATOMUI_EXPECT=','.join(runtime_expected)),capture_output=True,text=True)
             execution={'exitCode':actual.returncode,'stdout':actual.stdout,'stderr':actual.stderr}
             (logs/(label+'-run.json')).write_text(json.dumps(execution,indent=2))
             assert actual.returncode==0,(label,execution)
             assert 'runtime=.NET 8.0.27' in actual.stdout,execution
-            result={'case':case,'rid':rid,'scanner':scanner,'optimize':optimize,'host':report['HostRuntime'],'selected':{g['Id']:g['Selected'] for g in report['Groups']},'nativeTables':tables,'nativeSha256':hashlib.sha256(data).hexdigest(),'runtimeExit':actual.returncode,'runtime':'.NET 8.0.27'}
+            result={'case':case,'rid':rid,'scanner':scanner,'optimize':optimize,'host':report['HostRuntime'],'selected':{g['Id']:sorted(aliases[key] for key in g['Selected']) for g in report['Groups']},'nativeTables':tables,'nativeSha256':hashlib.sha256(data).hexdigest(),'runtimeExit':actual.returncode,'runtime':'.NET 8.0.27'}
             results.append(result)
             (logs/'matrix-results.json').write_text(json.dumps(results,indent=2))
             print(json.dumps(result),flush=True)
@@ -154,9 +183,8 @@ def main():
         print('FAILED: evidence and runnable artifacts retained at '+str(root),file=sys.stderr)
         raise
     if not args.keep_artifacts:
-        for name in ('fixture','obj','bin','out'):
+        for name in ('fixture','obj','bin','out','cache','invocations'):
             shutil.rmtree(root/name,ignore_errors=True)
-        (root/'map.json').unlink(missing_ok=True)
     return 0
 
 

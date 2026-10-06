@@ -17,6 +17,7 @@
        are prepared explicitly by its build API, rather than hidden ProjectReference metadata. -->
   <Target Name="PrepareTypeMapTestBackend" BeforeTargets="ResolveAssemblyReferences">
     <MSBuild Projects="$(AtomUIToolchainProject)" Targets="BuildManagedToolchain"
+             RemoveProperties="$(AtomUIToolchainGlobalPropertiesToRemove)"
              Properties="Configuration=$(Configuration);AtomUIToolchainProfile=Tasks;AtomUIToolchainBackendProfiles=ILLink10" />
   </Target>
 </Project>

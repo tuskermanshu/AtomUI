@@ -150,19 +150,13 @@ def build(args):
     modified = replace_once(modified,
         '            CompilerGeneratedState compilerGeneratedState = new CompilerGeneratedState(ilProvider, logger);',
         '''            ConditionalRegistrationBackend registrationBackend = null;
-            string registrationManifest = Environment.GetEnvironmentVariable("ATOMUI_ILC8_MANIFEST");
-            string registrationInputs = registrationInputPlan?.SnapshotPath;
-            if (!string.IsNullOrEmpty(registrationInputs) && !string.IsNullOrEmpty(registrationManifest))
-            {
-                throw new CommandLineException("Choose frozen product inputs or a development manifest, not both");
-            }
-            if (!string.IsNullOrEmpty(registrationInputs) || !string.IsNullOrEmpty(registrationManifest))
+            if (registrationInputPlan != null)
             {
                 if (multiFile || singleMethod != null)
                 {
                     throw new CommandLineException("Conditional registration requires whole-program app compilation");
                 }
-                registrationBackend = new ConditionalRegistrationBackend(ilProvider, typeSystemContext, registrationInputs ?? registrationManifest, useScanner, registrationInputs != null);
+                registrationBackend = new ConditionalRegistrationBackend(ilProvider, typeSystemContext, registrationInputPlan.SnapshotPath, useScanner);
                 ilProvider = registrationBackend;
                 compilationRoots.Add(registrationBackend);
             }

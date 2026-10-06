@@ -1,5 +1,5 @@
+using static AtomUI.Build.Tasks.RegistrationFiles;
 using System.Buffers.Binary;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using AtomUI.Build.Tasks.Registration;
@@ -135,7 +135,7 @@ public sealed class VerifyNative8RegistrationTask : RegistrationBuildTask
                 }
                 if (Phase == "published")
                 {
-                    WriteNew(VerifiedReceipt, new { format = 2, invocationId = InvocationId, stage = "published-copy-verified",
+                    RegistrationFiles.CreateJson(VerifiedReceipt, new { format = 2, invocationId = InvocationId, stage = "published-copy-verified",
                         linkedReceiptPath = linkedPath, linkedReceiptHash = LinkedReceiptHash,
                         binaryPath = NativeBinary, binaryHash });
                 }
@@ -151,7 +151,7 @@ public sealed class VerifyNative8RegistrationTask : RegistrationBuildTask
             }
             byte[] native = System.IO.File.ReadAllBytes(NativeBinary);
             MachOReceipt.Verify(native, "_" + symbol, Encoding.ASCII.GetBytes(symbol));
-            WriteNew(linkedPath, new { format = 2, invocationId = InvocationId, backend = "AtomUI.Registration.ILC8", stage = "sdk-link-verified",
+            RegistrationFiles.CreateJson(linkedPath, new { format = 2, invocationId = InvocationId, backend = "AtomUI.Registration.ILC8", stage = "sdk-link-verified",
                 reportPath, reportHash = Hash(reportPath), inputPath = inputsPath, objectPath = NativeObject, objectHash = Hash(NativeObject),
                 exportsPath = ExportsFile, exportsHash = Hash(ExportsFile), binaryPath = NativeBinary, binaryHash, receiptSymbol = symbol });
             VerifiedReceipt = linkedPath;
@@ -166,30 +166,7 @@ public sealed class VerifyNative8RegistrationTask : RegistrationBuildTask
         }
     }
 
-    private static void WriteNew(string path, object value)
-    {
-        string temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        try
-        {
-            using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-            {
-                JsonSerializer.Serialize(stream, value, new JsonSerializerOptions { WriteIndented = true });
-            }
-            System.IO.File.Move(temporary, path, overwrite: false);
-        }
-        finally
-        {
-            if (System.IO.File.Exists(temporary))
-            {
-                System.IO.File.Delete(temporary);
-            }
-        }
-    }
-    private static string Hash(string path)
-    {
-        using var stream = System.IO.File.OpenRead(path);
-        return Convert.ToHexStringLower(SHA256.HashData(stream));
-    }
+
 }
 
 internal static class MachOReceipt

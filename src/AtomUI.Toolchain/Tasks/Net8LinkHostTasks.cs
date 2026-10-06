@@ -1,8 +1,7 @@
-using System.Diagnostics;
+using static AtomUI.Build.Tasks.RegistrationFiles;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using AtomUI.Build.Tasks.Isolation;
@@ -60,44 +59,10 @@ public sealed class PrepareNet8LinkHostTask : RegistrationBuildTask
             var state = JsonSerializer.Serialize(new { format = 1, linkerVersion = LinkerVersion, files = records });
             var fingerprint = Hash(Encoding.UTF8.GetBytes(state));
             var root = Path.GetFullPath(OutputRoot);
-            Directory.CreateDirectory(root);
-            using var ownership = Acquire(Path.Combine(root, fingerprint + ".lock"));
+            using var ownership = ToolBundleCache.Acquire(Path.Combine(root, fingerprint + ".lock"), TimeSpan.FromSeconds(30), 25);
             var destination = Path.Combine(root, fingerprint);
-            if (Directory.Exists(destination))
-            {
-                if (!File.Exists(Path.Combine(destination, "host-state.json")) || File.ReadAllText(Path.Combine(destination, "host-state.json")) != state ||
-                    !Directory.GetFiles(destination, "*", SearchOption.AllDirectories)
-                        .Select(path => Path.GetRelativePath(destination, path).Replace('\\', '/')).ToHashSet(StringComparer.Ordinal)
-                        .SetEquals(records.Select(record => record.path).Append("host-state.json")) ||
-                    records.Any(record => !File.Exists(Path.Combine(destination, record.path)) ||
-                        Hash(File.ReadAllBytes(Path.Combine(destination, record.path))) != record.sha256))
-                {
-                    throw new InvalidDataException("Prepared ILLink8 host was changed or is incomplete; refusing stale tool reuse.");
-                }
-            }
-            else
-            {
-                var staging = Path.Combine(root, ".staging-" + Guid.NewGuid().ToString("N"));
-                Directory.CreateDirectory(staging);
-                try
-                {
-                    foreach (var file in files)
-                    {
-                        var target = Path.Combine(staging, file.Key);
-                        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-                        File.WriteAllBytes(target, file.Value);
-                    }
-                    File.WriteAllText(Path.Combine(staging, "host-state.json"), state);
-                    Directory.Move(staging, destination);
-                }
-                finally
-                {
-                    if (Directory.Exists(staging))
-                    {
-                        Directory.Delete(staging, recursive: true);
-                    }
-                }
-            }
+            files.Add("host-state.json", Encoding.UTF8.GetBytes(state));
+            ToolBundleCache.Prepare(destination, files, "Prepared ILLink8 host was changed or is incomplete; refusing stale tool reuse.");
             LinkerPath = Path.Combine(destination, "official", "illink.dll");
             TaskOverrideSource = Path.Combine(destination, "AtomUI.Net8.ILLink.Task.cs");
             HostFingerprint = fingerprint;
@@ -136,20 +101,4 @@ public sealed class PrepareNet8LinkHostTask : RegistrationBuildTask
         }
     }
 
-    private static string Hash(byte[] bytes) => Convert.ToHexStringLower(SHA256.HashData(bytes));
-    private static FileStream Acquire(string path)
-    {
-        var timer = Stopwatch.StartNew();
-        while (true)
-        {
-            try
-            {
-                return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-            }
-            catch (IOException) when (timer.Elapsed < TimeSpan.FromSeconds(30))
-            {
-                Thread.Sleep(25);
-            }
-        }
-    }
 }

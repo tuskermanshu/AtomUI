@@ -1,6 +1,6 @@
+using static AtomUI.Build.Tasks.RegistrationFiles;
 using System.Diagnostics;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using AtomUI.Build.Tasks.Isolation;
@@ -140,7 +140,7 @@ public sealed class PrepareConditionalRegistrationBridgeTask : RegistrationBuild
             TransformationPath = Path.Combine(output, "transformation.json");
             using var transformation = JsonDocument.Parse(File.ReadAllText(TransformationPath));
             var root = transformation.RootElement;
-            BridgeVerificationJson.ValidateUniqueFields(root);
+            RegistrationContractJson.ValidateUniqueFields(root);
             if (root.GetProperty("format").GetInt32() != 1 || root.GetProperty("inputFormat").GetInt32() != 2 ||
                 root.GetProperty("originalInputHash").GetString() != Hash(InputsPath) ||
                 root.GetProperty("applicationIdentity").GetString() != ApplicationAssemblyIdentity)
@@ -211,47 +211,14 @@ public sealed class PrepareConditionalRegistrationBridgeTask : RegistrationBuild
             ["Mono.Cecil.dll"] = File.ReadAllBytes(cecil)
         };
         var state = string.Join("\n", files.OrderBy(file => file.Key, StringComparer.Ordinal).Select(file =>
-            file.Key + ":" + Convert.ToHexStringLower(SHA256.HashData(file.Value))));
-        var fingerprint = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(state)));
+            file.Key + ":" + Hash(file.Value)));
+        var fingerprint = Hash(Encoding.UTF8.GetBytes(state));
         var destination = Path.Combine(Path.GetFullPath(OutputRoot), "host", fingerprint);
-        if (!Directory.Exists(destination))
-        {
-            var staging = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
-            Directory.CreateDirectory(staging);
-            try
-            {
-                foreach (var file in files)
-                {
-                    File.WriteAllBytes(Path.Combine(staging, file.Key), file.Value);
-                }
-                try
-                {
-                    Directory.Move(staging, destination);
-                }
-                catch (IOException) when (Directory.Exists(destination)) { }
-            }
-            finally
-            {
-                if (Directory.Exists(staging))
-                {
-                    Directory.Delete(staging, recursive: true);
-                }
-            }
-        }
-        if (!Directory.GetFiles(destination).Select(Path.GetFileName).ToHashSet(StringComparer.Ordinal).SetEquals(files.Keys) ||
-            files.Any(file => Hash(Path.Combine(destination, file.Key)) != Convert.ToHexStringLower(SHA256.HashData(file.Value))))
-        {
-            throw new InvalidDataException("The frozen bridge tool bundle is incomplete or changed.");
-        }
+        ToolBundleCache.Prepare(destination, files, "The frozen bridge tool bundle is incomplete or changed.");
         return destination;
     }
 
     private static string FrozenTool(IEnumerable<ITaskItem> items, string original) => items.Single(item =>
         item.GetMetadata("Kind") == "tool" && item.GetMetadata("AtomUIOriginalPath") == original).ItemSpec;
 
-    private static string Hash(string path)
-    {
-        using var stream = File.OpenRead(path);
-        return Convert.ToHexStringLower(SHA256.HashData(stream));
-    }
 }

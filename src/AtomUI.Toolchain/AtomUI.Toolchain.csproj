@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk"
-         TreatAsLocalProperty="TargetFramework;TargetFrameworks;IsTrimmable;IsAotCompatible;EnableAotAnalyzer;EnableTrimAnalyzer;EnableSingleFileAnalyzer;PublishAot;PublishTrimmed;PublishSingleFile;RunAOTCompilation;SelfContained;RuntimeIdentifier">
+         TreatAsLocalProperty="TargetFramework;IsTrimmable;IsAotCompatible;EnableAotAnalyzer;EnableTrimAnalyzer;EnableSingleFileAnalyzer;PublishAot;PublishTrimmed;PublishSingleFile;RunAOTCompilation;SelfContained">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
-        <TargetFrameworks></TargetFrameworks>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <UseAppHost>false</UseAppHost>
         <RollForward>LatestPatch</RollForward>
@@ -10,7 +9,6 @@
         <IncludeInPublish>false</IncludeInPublish>
         <IsAotCompatible>false</IsAotCompatible>
         <IsTrimmable>false</IsTrimmable>
-        <RuntimeIdentifier></RuntimeIdentifier>
         <EnableAotAnalyzer>false</EnableAotAnalyzer>
         <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
         <EnableSingleFileAnalyzer>false</EnableSingleFileAnalyzer>
@@ -65,6 +63,8 @@
     </ItemGroup>
 
     <Target Name="ValidateToolchainProfile" BeforeTargets="PrepareForBuild;CollectPackageReferences">
+        <Error Condition="'$(TargetFrameworks)' != '' or '$(RuntimeIdentifier)' != '' or '$(RuntimeIdentifiers)' != ''"
+               Text="AtomUI.Toolchain is a portable net10.0 build tool. Build it without application TargetFrameworks or runtime identifiers; project callers must remove these properties at the build boundary." />
         <Error Condition="'$(AtomUIToolchainProfile)' != 'Tasks' and '$(AtomUIToolchainProfile)' != 'ILLink8' and '$(AtomUIToolchainProfile)' != 'ILLink10'"
                Text="Unknown AtomUIToolchainProfile '$(AtomUIToolchainProfile)'. Expected Tasks, ILLink8 or ILLink10." />
     </Target>

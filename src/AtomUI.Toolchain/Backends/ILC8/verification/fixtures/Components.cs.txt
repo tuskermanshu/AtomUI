@@ -1,14 +1,6 @@
 using System.Runtime.CompilerServices;
+using Builder = AtomUI.Registration.ControlPackageRegistrationBuilder;
 namespace P1;
-public sealed class Builder
-{
-    public readonly List<string> Items = new();
-    [MethodImpl(MethodImplOptions.NoInlining)] public void Add(string value) { GC.Collect(); Items.Add(value); }
-}
-public static class Package
-{
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Collect(Builder builder) { }
-}
 public sealed class DirectControl { }
 public sealed class TokenOnly { }
 public sealed class StyleOnly { }
@@ -76,9 +68,4 @@ public static class AdditionalFragments
         builder.Add("throw");
         throw new InvalidOperationException("EXPECTED_MANAGED_CALLI_EXCEPTION");
     }
-}
-public static class SecondPackage
-{
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Collect(Builder builder) { }
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Register(Builder builder) { builder.Add("second"); }
 }

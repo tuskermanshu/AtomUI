@@ -1,5 +1,5 @@
+using static AtomUI.Build.Tasks.RegistrationFiles;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Build.Framework;
@@ -113,48 +113,18 @@ public sealed class PrepareNative8RegistrationTask : RegistrationBuildTask
             var state = JsonSerializer.Serialize(new { format = 1, HostRid, TargetRid,
                 files = files.Select(file => new { path = file.Key, sha256 = Hash(file.Value) }).ToArray() });
             HostFingerprint = Hash(Encoding.UTF8.GetBytes(state));
-            Directory.CreateDirectory(root);
             var destination = Path.Combine(root, "hosts", HostFingerprint);
-            Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-            using var ownership = Acquire(Path.Combine(root, HostFingerprint + ".lock"));
-            if (Directory.Exists(destination))
-            {
-                if (!Directory.GetFiles(destination, "*", SearchOption.AllDirectories).Select(path => Path.GetRelativePath(destination, path))
-                    .ToHashSet(StringComparer.Ordinal).SetEquals(files.Keys.Append("host-state.json")) ||
-                    File.ReadAllText(Path.Combine(destination, "host-state.json")) != state || files.Any(file =>
-                    !File.Exists(Path.Combine(destination, file.Key)) || Hash(File.ReadAllBytes(Path.Combine(destination, file.Key))) != Hash(file.Value)))
+            using var ownership = ToolBundleCache.Acquire(Path.Combine(root, HostFingerprint + ".lock"), TimeSpan.FromSeconds(60), 50);
+            files.Add("host-state.json", Encoding.UTF8.GetBytes(state));
+            ToolBundleCache.Prepare(destination, files, "Prepared native host was changed; refusing cache reuse.",
+                static (relative, path) =>
                 {
-                    throw new InvalidDataException("Prepared native host was changed; refusing cache reuse.");
-                }
-            }
-            else
-            {
-                var staging = destination + "." + Guid.NewGuid().ToString("N");
-                Directory.CreateDirectory(staging);
-                try
-                {
-                    foreach (var file in files)
+                    if (relative.StartsWith("tools/", StringComparison.Ordinal) && !OperatingSystem.IsWindows())
                     {
-                        var path = Path.Combine(staging, file.Key);
-                        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-                        File.WriteAllBytes(path, file.Value);
-                        if (file.Key.StartsWith("tools/", StringComparison.Ordinal))
-                        {
-                            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
-                                UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
-                        }
+                        File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                            UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
                     }
-                    File.WriteAllText(Path.Combine(staging, "host-state.json"), state);
-                    Directory.Move(staging, destination);
-                }
-                finally
-                {
-                    if (Directory.Exists(staging))
-                    {
-                        Directory.Delete(staging, recursive: true);
-                    }
-                }
-            }
+                });
             ScopedIlcToolsPath = Path.Combine(destination, "tools") + Path.DirectorySeparatorChar;
             ScopedNativeLinkerPath = Path.Combine(destination, "tools", "native-linker");
             return true;
@@ -168,20 +138,4 @@ public sealed class PrepareNative8RegistrationTask : RegistrationBuildTask
     }
 
     private static string Quote(string value) => "'" + value.Replace("'", "'\\''", StringComparison.Ordinal) + "'";
-    private static string Hash(byte[] bytes) => Convert.ToHexStringLower(SHA256.HashData(bytes));
-    private static FileStream Acquire(string path)
-    {
-        var deadline = DateTime.UtcNow.AddSeconds(60);
-        while (true)
-        {
-            try
-            {
-                return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-            }
-            catch (IOException) when (DateTime.UtcNow < deadline)
-            {
-                Thread.Sleep(50);
-            }
-        }
-    }
 }

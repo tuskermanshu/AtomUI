@@ -1,5 +1,5 @@
+using static AtomUI.Build.Tasks.RegistrationFiles;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text.Json;
 using AtomUI.Build.Tasks.Registration;
 using Microsoft.Build.Framework;
@@ -30,8 +30,8 @@ public sealed class VerifyConditionalRegistrationBridgeTask : RegistrationBuildT
             }
             using var inputs = JsonDocument.Parse(File.ReadAllBytes(InputsPath));
             using var transformation = JsonDocument.Parse(File.ReadAllBytes(TransformationPath));
-            BridgeVerificationJson.ValidateUniqueFields(inputs.RootElement);
-            BridgeVerificationJson.ValidateUniqueFields(transformation.RootElement);
+            RegistrationContractJson.ValidateUniqueFields(inputs.RootElement);
+            RegistrationContractJson.ValidateUniqueFields(transformation.RootElement);
             var source = inputs.RootElement;
             var map = transformation.RootElement;
             RegistrationContractJson.Fields(source, "format", "coreAssemblyIdentity", "assemblies", "analysisReportPath", "additionalInputs");
@@ -117,7 +117,7 @@ public sealed class VerifyConditionalRegistrationBridgeTask : RegistrationBuildT
             {
                 using var previous = JsonDocument.Parse(File.ReadAllBytes(ReceiptPath));
                 var prior = previous.RootElement;
-                BridgeVerificationJson.ValidateUniqueFields(prior);
+                RegistrationContractJson.ValidateUniqueFields(prior);
                 if (prior.GetProperty("inputHash").GetString() != inputHash || prior.GetProperty("transformationHash").GetString() != transformHash ||
                     prior.GetProperty("engine").GetString() != EngineKind ||
                     prior.GetProperty("stage").GetString() != (Phase == "linked-output" ? "analysis-input" : "linked-output"))
@@ -171,21 +171,7 @@ public sealed class VerifyConditionalRegistrationBridgeTask : RegistrationBuildT
                         linkedReceiptHash = Hash(ReceiptPath), outputs };
                 }
             }
-            var destination = Path.GetFullPath(ReceiptPath);
-            Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-            var temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
-            try
-            {
-                File.WriteAllText(temporary, JsonSerializer.Serialize(receipt, new JsonSerializerOptions { WriteIndented = true }));
-                File.Move(temporary, destination, overwrite: true);
-            }
-            finally
-            {
-                if (File.Exists(temporary))
-                {
-                    File.Delete(temporary);
-                }
-            }
+            RegistrationFiles.ReplaceJson(ReceiptPath, receipt);
             return true;
         }
         catch (Exception error) when (error is InvalidDataException or IOException or UnauthorizedAccessException or ArgumentException or
@@ -276,32 +262,5 @@ public sealed class VerifyConditionalRegistrationBridgeTask : RegistrationBuildT
         }
     }
 
-    private static string Hash(string path) => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path)));
     private sealed record VerifiedBridgeOutput(string path, string relativePath, string sha256);
-}
-
-internal static class BridgeVerificationJson
-{
-    internal static void ValidateUniqueFields(JsonElement value)
-    {
-        if (value.ValueKind == JsonValueKind.Object)
-        {
-            var names = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var property in value.EnumerateObject())
-            {
-                if (!names.Add(property.Name))
-                {
-                    throw new InvalidDataException("Duplicate bridge report field: " + property.Name);
-                }
-                ValidateUniqueFields(property.Value);
-            }
-        }
-        else if (value.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var item in value.EnumerateArray())
-            {
-                ValidateUniqueFields(item);
-            }
-        }
-    }
 }

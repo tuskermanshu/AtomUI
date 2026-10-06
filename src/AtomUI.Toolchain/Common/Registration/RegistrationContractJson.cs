@@ -7,7 +7,11 @@ namespace AtomUI.Build.Tasks.Registration;
 
 internal static class RegistrationContractJson
 {
-    internal static void ValidateShape(JsonElement value)
+    internal static void ValidateShape(JsonElement value) => Validate(value, restrictScalars: true);
+
+    internal static void ValidateUniqueFields(JsonElement value) => Validate(value, restrictScalars: false);
+
+    private static void Validate(JsonElement value, bool restrictScalars)
     {
         if (value.ValueKind == JsonValueKind.Object)
         {
@@ -18,17 +22,17 @@ internal static class RegistrationContractJson
                 {
                     throw new InvalidDataException($"Duplicate registration JSON field '{field.Name}'.");
                 }
-                ValidateShape(field.Value);
+                Validate(field.Value, restrictScalars);
             }
         }
         else if (value.ValueKind == JsonValueKind.Array)
         {
             foreach (var item in value.EnumerateArray())
             {
-                ValidateShape(item);
+                Validate(item, restrictScalars);
             }
         }
-        else if (value.ValueKind != JsonValueKind.String &&
+        else if (restrictScalars && value.ValueKind != JsonValueKind.String &&
                  !(value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out _)))
         {
             throw new InvalidDataException("Registration format 1 permits only objects, arrays, strings and int32 values.");

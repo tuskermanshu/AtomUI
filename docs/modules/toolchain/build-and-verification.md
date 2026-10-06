@@ -14,6 +14,13 @@
 | `ILLink8` | `AtomUI.Registration.ILLink8.dll` | `illink8/net10.0/` |
 | `ILLink10` | `AtomUI.TypeMap.Linker.dll`、CLI 配置及 Cecil | `illink10/net10.0/` |
 
+应用的框架和 RID 在调用边界隔离：Repository 为 Toolchain 的项目引用设置 `GlobalPropertiesToRemove`，
+显式 MSBuild 调用使用同一属性列表的 `RemoveProperties`。NuGet restore 将项目引用转换成路径列表时会丢失
+引用元数据，因此 Repository 同时在路径遍历和最终恢复图调度前补回 Toolchain 的 `UndefineProperties`。
+工具项目只声明 `TargetFramework=net10.0`，
+不再用空的 `TargetFrameworks` 或 `RuntimeIdentifier` 覆盖应用参数。直接构建 Toolchain 时不要传入应用的
+`TargetFrameworks`、`-r` 或 `RuntimeIdentifiers`；误传会明确失败，避免恢复与工具查找路径发生偏移。
+
 每个 profile 的恢复根为 `.artifacts/AtomUI.Toolchain/obj/<Profile>/`；配置/TFM 的编译中间文件位于其下。
 独立的 NuGet imports、assets 与输出避免 ILLink8/10 的同名依赖相互覆盖。旧 DLL 名称和已有命名空间属于内部
 分发、任务和 custom-step 契约，保留名称不表示仍有多个源码项目。

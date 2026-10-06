@@ -75,6 +75,13 @@ Generator 的 build-only 项目引用只准备 Tasks；共享模型通过 `Commo
 Tasks 负责资源包装、语言包、工具身份解析、输入快照、构建结果和发布副本校验。MSBuild 的薄适配器通过值协议调用
 独立 worker，避免把工具程序集及其状态长期留在 MSBuild 节点中。worker 不加载应用程序集，也不发起消费项目的嵌套构建。
 
+普通编译的语言语义校验由 Generator 拥有，Tasks 不保留另一套未接入构建入口的 Catalog 收集、语言文件验证任务。
+主题与语言任务共用 `GeneratedTaskItem`，避免同一元数据规则在不同任务内分别维护。
+
+`ToolBundleCache` 只负责工具文件集合的暂存、原子发布和完整性核对；各调用方仍拥有版本准入、缓存摘要、锁等待
+策略及可执行权限。`RegistrationFiles` 统一文件摘要与原子写入，明确区分可替换阶段回执和仅能首次创建的 Native
+证明。这些内部函数不合并各后端的分析状态，也不替代最终产物与发布副本的独立验证。
+
 Repository targets 负责准备工具和衔接 SDK 阶段。它与 worker 的职责不同：源码仓库可以在发布前构建工具，
 已安装 NuGet 包的消费者只运行已交付工具。跨项目接线由[构建与打包架构](../../architecture/foundations/build-and-packaging.md)拥有。
 
@@ -82,6 +89,8 @@ Repository targets 负责准备工具和衔接 SDK 阶段。它与 worker 的职
 
 Common 保存严格协议、身份、快照和中立校验模型。Cecil 相关校验只编译到相应后端，Tasks 不因此获得 Cecil 依赖。
 ILLink 的 marking 状态、ILC 的条件节点和生成代码图留在各自后端，不把它们抽象成另一套通用依赖分析器。
+
+JSON 的重复字段遍历共用一处实现，候选记录仍启用严格标量约束；允许 null 或布尔值的报告不会因此改变候选 ABI。
 
 ### Backends：明确表达引擎差异
 
