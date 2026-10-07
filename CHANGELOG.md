@@ -4,6 +4,28 @@ All notable changes to AtomUI are documented in this file.
 
 `AtomUI` follows Semantic Versioning 2.0.0.
 
+## 6.2.4
+
+`2026-10-07`
+
+- Breaking Changes
+  - TimePicker and RangeTimePicker: enable `IsNeedConfirm` by default, use the 24-hour clock and make ordinary scrolling browse without selection. Configure individual modes explicitly and review changed submission/Now timing; review the [6.2.4 API migration guide](docs/releases/6.2.4-api-changes.md).
+  - TimePicker themes: update column sizing, item padding and cyclic scrolling templates; review custom themes and scroll assumptions against the migration guide.
+  - Packaging and registration: restore Release `net8.0` alongside `net10.0` and add .NET 8 trimming/AOT build assets. Upgrade AtomUI packages together, rebuild precompiled consumers and republish trimmed/AOT applications; see the migration guide for build prerequisites and platform limits.
+- TimePicker
+  - Separate committed values, candidates and hover previews; apply valid candidates consistently on explicit confirmation or on close/focus loss when confirmation is disabled.
+  - Add `IsChangeOnScroll`, keep cyclic hour/minute/second selections centered, and prevent column focus scrolling from moving the surrounding page.
+  - Fix invalid text, external updates, range endpoint switching and repeated confirmation in pinned popups; align Gallery examples with committed-value feedback.
+- ColorPicker
+  - Add optional `IsNeedConfirm` to ColorPicker and GradientColorPicker, with localized confirmation and cancellation actions.
+  - Keep draft edits and clearing cancellable, isolate gradient drafts, and commit valid input once while preserving the existing default synchronization mode.
+- NativeAOT, Build and Packaging
+  - Use the .NET 8 compatibility dependency backend only for .NET 8 targets; modern targets use the matching official TypeMap engine, with automatic input conversion for supported precompiled .NET 8 packages.
+  - Consolidate tooling in AtomUI.Toolchain, validate package framework/content contracts, and keep tool runtime files out of application output.
+  - Fix clean/parallel builds of test projects without Generator references and prevent re-export of imported localization catalogs.
+- Gallery
+  - Fix fractional-scale ShowCase layout loops that hide Form labels and start DateViewer deferred examples with one materialized item.
+
 ## 6.2.3
 
 `2026-10-05`

@@ -370,5 +370,264 @@
       ],
       "reason": "v6.2.2 removes net8.0 and retires LinkedRegistration/LinkedPublish package assets in favor of TypeMap registration targets and backend; see docs/releases/6.2.2-api-changes.md."
     }
+  },
+  "6.2.3": {
+    "AtomUI.Controls": {
+      "allowed": [
+        "buildTransitive/AtomUI.Net8.ILLink.Task.cs",
+        "buildTransitive/AtomUI.Registration.Bridge.targets",
+        "buildTransitive/AtomUI.Registration.Framework.targets",
+        "buildTransitive/AtomUI.Registration.Native8.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Host.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Transforms.targets",
+        "buildTransitive/AtomUI.Registration.Net8.targets",
+        "buildTransitive/AtomUI.Toolchain.Tasks.targets",
+        "lib/net8.0/AtomUI.Controls.dll",
+        "lib/net8.0/AtomUI.Controls.pdb",
+        "tools/registration/net8/ilc/LICENSE.runtime.txt",
+        "tools/registration/net8/ilc/THIRD-PARTY-NOTICES.runtime.txt",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.Compiler.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.DependencyAnalysisFramework.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.MetadataTransform.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.RyuJit.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.TypeSystem.dll",
+        "tools/registration/net8/ilc/managed-bundle/System.CommandLine.dll",
+        "tools/registration/net8/ilc/managed-bundle/atomui-ilc8-capability.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.deps.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.dll",
+        "tools/registration/net8/ilc/managed-bundle/ilc.runtimeconfig.json",
+        "tools/registration/net8/illink/AtomUI.Registration.ILLink8.dll",
+        "tools/typemap/AtomUI.TypeMap.Linker.runtimeconfig.json",
+        "tools/typemap/Mono.Cecil.dll"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Controls.Shared": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Controls.Shared.dll",
+        "lib/net8.0/AtomUI.Controls.Shared.pdb"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Core": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Core.dll",
+        "lib/net8.0/AtomUI.Core.pdb"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Desktop.Controls": {
+      "allowed": [
+        "buildTransitive/AtomUI.Net8.ILLink.Task.cs",
+        "buildTransitive/AtomUI.Registration.Bridge.targets",
+        "buildTransitive/AtomUI.Registration.Framework.targets",
+        "buildTransitive/AtomUI.Registration.Native8.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Host.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Transforms.targets",
+        "buildTransitive/AtomUI.Registration.Net8.targets",
+        "buildTransitive/AtomUI.Toolchain.Tasks.targets",
+        "lib/net8.0/AtomUI.Desktop.Controls.dll",
+        "lib/net8.0/AtomUI.Desktop.Controls.pdb",
+        "tools/registration/net8/ilc/LICENSE.runtime.txt",
+        "tools/registration/net8/ilc/THIRD-PARTY-NOTICES.runtime.txt",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.Compiler.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.DependencyAnalysisFramework.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.MetadataTransform.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.RyuJit.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.TypeSystem.dll",
+        "tools/registration/net8/ilc/managed-bundle/System.CommandLine.dll",
+        "tools/registration/net8/ilc/managed-bundle/atomui-ilc8-capability.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.deps.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.dll",
+        "tools/registration/net8/ilc/managed-bundle/ilc.runtimeconfig.json",
+        "tools/registration/net8/illink/AtomUI.Registration.ILLink8.dll",
+        "tools/typemap/AtomUI.TypeMap.Linker.runtimeconfig.json",
+        "tools/typemap/Mono.Cecil.dll"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Desktop.Controls.ColorPicker": {
+      "allowed": [
+        "buildTransitive/AtomUI.Net8.ILLink.Task.cs",
+        "buildTransitive/AtomUI.Registration.Bridge.targets",
+        "buildTransitive/AtomUI.Registration.Framework.targets",
+        "buildTransitive/AtomUI.Registration.Native8.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Host.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Transforms.targets",
+        "buildTransitive/AtomUI.Registration.Net8.targets",
+        "buildTransitive/AtomUI.Toolchain.Tasks.targets",
+        "lib/net8.0/AtomUI.Desktop.Controls.ColorPicker.dll",
+        "lib/net8.0/AtomUI.Desktop.Controls.ColorPicker.pdb",
+        "tools/registration/net8/ilc/LICENSE.runtime.txt",
+        "tools/registration/net8/ilc/THIRD-PARTY-NOTICES.runtime.txt",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.Compiler.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.DependencyAnalysisFramework.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.MetadataTransform.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.RyuJit.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.TypeSystem.dll",
+        "tools/registration/net8/ilc/managed-bundle/System.CommandLine.dll",
+        "tools/registration/net8/ilc/managed-bundle/atomui-ilc8-capability.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.deps.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.dll",
+        "tools/registration/net8/ilc/managed-bundle/ilc.runtimeconfig.json",
+        "tools/registration/net8/illink/AtomUI.Registration.ILLink8.dll",
+        "tools/typemap/AtomUI.TypeMap.Linker.runtimeconfig.json",
+        "tools/typemap/Mono.Cecil.dll"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Desktop.Controls.DataGrid": {
+      "allowed": [
+        "buildTransitive/AtomUI.Net8.ILLink.Task.cs",
+        "buildTransitive/AtomUI.Registration.Bridge.targets",
+        "buildTransitive/AtomUI.Registration.Framework.targets",
+        "buildTransitive/AtomUI.Registration.Native8.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Host.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Transforms.targets",
+        "buildTransitive/AtomUI.Registration.Net8.targets",
+        "buildTransitive/AtomUI.Toolchain.Tasks.targets",
+        "lib/net8.0/AtomUI.Desktop.Controls.DataGrid.dll",
+        "lib/net8.0/AtomUI.Desktop.Controls.DataGrid.pdb",
+        "tools/registration/net8/ilc/LICENSE.runtime.txt",
+        "tools/registration/net8/ilc/THIRD-PARTY-NOTICES.runtime.txt",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.Compiler.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.DependencyAnalysisFramework.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.MetadataTransform.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.RyuJit.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.TypeSystem.dll",
+        "tools/registration/net8/ilc/managed-bundle/System.CommandLine.dll",
+        "tools/registration/net8/ilc/managed-bundle/atomui-ilc8-capability.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.deps.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.dll",
+        "tools/registration/net8/ilc/managed-bundle/ilc.runtimeconfig.json",
+        "tools/registration/net8/illink/AtomUI.Registration.ILLink8.dll",
+        "tools/typemap/AtomUI.TypeMap.Linker.runtimeconfig.json",
+        "tools/typemap/Mono.Cecil.dll"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Desktop.Controls.Extras": {
+      "allowed": [
+        "buildTransitive/AtomUI.Net8.ILLink.Task.cs",
+        "buildTransitive/AtomUI.Registration.Bridge.targets",
+        "buildTransitive/AtomUI.Registration.Framework.targets",
+        "buildTransitive/AtomUI.Registration.Native8.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Host.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Transforms.targets",
+        "buildTransitive/AtomUI.Registration.Net8.targets",
+        "buildTransitive/AtomUI.Toolchain.Tasks.targets",
+        "lib/net8.0/AtomUI.Desktop.Controls.Extras.dll",
+        "lib/net8.0/AtomUI.Desktop.Controls.Extras.pdb",
+        "tools/registration/net8/ilc/LICENSE.runtime.txt",
+        "tools/registration/net8/ilc/THIRD-PARTY-NOTICES.runtime.txt",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.Compiler.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.DependencyAnalysisFramework.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.MetadataTransform.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.RyuJit.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.TypeSystem.dll",
+        "tools/registration/net8/ilc/managed-bundle/System.CommandLine.dll",
+        "tools/registration/net8/ilc/managed-bundle/atomui-ilc8-capability.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.deps.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.dll",
+        "tools/registration/net8/ilc/managed-bundle/ilc.runtimeconfig.json",
+        "tools/registration/net8/illink/AtomUI.Registration.ILLink8.dll",
+        "tools/typemap/AtomUI.TypeMap.Linker.runtimeconfig.json",
+        "tools/typemap/Mono.Cecil.dll"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Fonts.AlibabaSans": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Fonts.AlibabaSans.dll",
+        "lib/net8.0/AtomUI.Fonts.AlibabaSans.pdb"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Generator": {
+      "allowed": [
+        "buildTransitive/AtomUI.Net8.ILLink.Task.cs",
+        "buildTransitive/AtomUI.Registration.Bridge.targets",
+        "buildTransitive/AtomUI.Registration.Framework.targets",
+        "buildTransitive/AtomUI.Registration.Native8.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Host.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Transforms.targets",
+        "buildTransitive/AtomUI.Registration.Net8.targets",
+        "buildTransitive/AtomUI.Toolchain.Tasks.targets",
+        "tools/registration/net8/ilc/LICENSE.runtime.txt",
+        "tools/registration/net8/ilc/THIRD-PARTY-NOTICES.runtime.txt",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.Compiler.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.DependencyAnalysisFramework.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.MetadataTransform.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.RyuJit.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.TypeSystem.dll",
+        "tools/registration/net8/ilc/managed-bundle/System.CommandLine.dll",
+        "tools/registration/net8/ilc/managed-bundle/atomui-ilc8-capability.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.deps.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.dll",
+        "tools/registration/net8/ilc/managed-bundle/ilc.runtimeconfig.json",
+        "tools/registration/net8/illink/AtomUI.Registration.ILLink8.dll",
+        "tools/typemap/AtomUI.TypeMap.Linker.runtimeconfig.json",
+        "tools/typemap/Mono.Cecil.dll"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Icons.AntDesign": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Icons.AntDesign.dll",
+        "lib/net8.0/AtomUI.Icons.AntDesign.pdb"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Icons.Shared": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Icons.Shared.dll",
+        "lib/net8.0/AtomUI.Icons.Shared.pdb"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Localization": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Localization.dll",
+        "lib/net8.0/AtomUI.Localization.pdb"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Native": {
+      "allowed": [
+        "lib/net8.0/AtomUI.Native.dll",
+        "lib/net8.0/AtomUI.Native.pdb"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    },
+    "AtomUI.Toolkits.GalleryBase": {
+      "allowed": [
+        "buildTransitive/AtomUI.Net8.ILLink.Task.cs",
+        "buildTransitive/AtomUI.Registration.Bridge.targets",
+        "buildTransitive/AtomUI.Registration.Framework.targets",
+        "buildTransitive/AtomUI.Registration.Native8.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Host.targets",
+        "buildTransitive/AtomUI.Registration.Net8.Transforms.targets",
+        "buildTransitive/AtomUI.Registration.Net8.targets",
+        "buildTransitive/AtomUI.Toolchain.Tasks.targets",
+        "lib/net8.0/AtomUI.Toolkits.GalleryBase.dll",
+        "lib/net8.0/AtomUI.Toolkits.GalleryBase.pdb",
+        "tools/registration/net8/ilc/LICENSE.runtime.txt",
+        "tools/registration/net8/ilc/THIRD-PARTY-NOTICES.runtime.txt",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.Compiler.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.DependencyAnalysisFramework.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.MetadataTransform.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.RyuJit.dll",
+        "tools/registration/net8/ilc/managed-bundle/ILCompiler.TypeSystem.dll",
+        "tools/registration/net8/ilc/managed-bundle/System.CommandLine.dll",
+        "tools/registration/net8/ilc/managed-bundle/atomui-ilc8-capability.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.deps.json",
+        "tools/registration/net8/ilc/managed-bundle/ilc.dll",
+        "tools/registration/net8/ilc/managed-bundle/ilc.runtimeconfig.json",
+        "tools/registration/net8/illink/AtomUI.Registration.ILLink8.dll",
+        "tools/typemap/AtomUI.TypeMap.Linker.runtimeconfig.json",
+        "tools/typemap/Mono.Cecil.dll"
+      ],
+      "reason": "6.2.4 restores net8.0 Release libraries and adds the target-selected compatibility toolchain assets while preserving existing net10.0 payload paths; see docs/releases/6.2.4-api-changes.md sections 3-4."
+    }
   }
 }

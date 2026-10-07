@@ -6,6 +6,28 @@ AtomUI 的重要变更记录在此文件中。
 
 英文版本见 [CHANGELOG.md](CHANGELOG.md)。
 
+## 6.2.4
+
+`2026-10-07`
+
+- Breaking Changes
+  - TimePicker 和 RangeTimePicker：`IsNeedConfirm` 默认启用、24 小时制，普通滚动默认只浏览。需要旧模式时显式设置，并复核提交/Now 时机；详见 [6.2.4 API 迁移指南](docs/releases/6.2.4-api-changes.zh-CN.md)。
+  - TimePicker 主题：调整列宽、单元格内边距与循环滚动模板；自定义主题及滚动假设需按迁移指南复核。
+  - 包与注册：Release 在 `net10.0` 之外恢复 `net8.0`，增加 .NET 8 裁剪/AOT 构建资产。请同步升级 AtomUI 包、重编译预编译消费方并重新发布裁剪/AOT 应用；构建前提及平台限制见迁移指南。
+- TimePicker
+  - 分离提交值、候选值和悬停预览；显式确认统一提交有效候选，关闭确认时在关闭或失焦提交。
+  - 新增 `IsChangeOnScroll`，时/分/秒循环选择保持居中，列内焦点滚动不再推动外围页面。
+  - 修复无效文本、外部值更新、范围端点切换和钉住弹层重复确认；Gallery 示例同步展示实际提交值。
+- ColorPicker
+  - 为 ColorPicker 和 GradientColorPicker 增加可选 `IsNeedConfirm`，提供本地化确认和取消操作。
+  - 草稿编辑与清除可取消，渐变草稿独立，有效输入仅提交一次；保留默认同步模式。
+- NativeAOT、构建与打包
+  - 仅 .NET 8 目标使用兼容依赖后端；现代目标使用匹配的官方 TypeMap 引擎，并自动转换受支持的预编译 .NET 8 包输入。
+  - 将构建工具统一到 AtomUI.Toolchain，校验包的框架与内容契约，工具运行文件不进入应用输出。
+  - 修复无 Generator 引用测试项目的冷构建/并行构建错误，避免重复导出导入的本地化 Catalog。
+- Gallery
+  - 修复分数缩放下 ShowCase 布局循环导致 Form 标签消失；DateViewer 延迟示例初次只物化一项。
+
 ## 6.2.3
 
 `2026-10-05`
