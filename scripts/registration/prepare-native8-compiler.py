@@ -30,6 +30,8 @@ def prepare_source(path, upstream):
     staging.mkdir()
     try:
         run(["git", "init", "--quiet"], staging)
+        # Runtime source paths exceed Windows MAX_PATH, especially in the staging directory.
+        run(["git", "config", "--local", "core.longpaths", "true"], staging)
         run(["git", "remote", "add", "origin", upstream["repository"]], staging)
         run(["git", "sparse-checkout", "init", "--cone"], staging)
         run(["git", "sparse-checkout", "set", "eng", "src/coreclr/tools",

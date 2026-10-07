@@ -85,6 +85,10 @@ Generator 自身不维护一套独立 pack 准备逻辑。`pack --no-build` 只�
 `src/AtomUI.Toolchain/Backends/ILC8/upstream.json` 的精确来源和版本构建受控 bundle。可通过
 `AtomUINative8CompilerSourceRoot` 或 `ATOMUI_RUNTIME8_SOURCE` 指定已有的匹配源码；不匹配的源码不能复用。
 
+自动准备源码时，在临时 Git checkout 中启用仓库局部的 `core.longpaths`，再检出定版源码，避免 Windows
+工作区与 staging 路径叠加后超过传统路径长度限制。不修改全局 Git 配置；已有 checkout 仍须通过精确 HEAD
+和源码完整性校验，缺失或被修改的源码不会被自动修复或忽略。
+
 默认 bundle 位于 `.artifacts/tools/registration/net8/ilc/managed-bundle`，由
 `AtomUINative8ManagedCompilerBundle` 配置。配方校验源码身份、适配器/公共源码内容与既有产物，使用锁和 staging
 目录管理构建与发布；原生 helper 由消费发布的 SDK 按受支持版本恢复，不混入通用托管 bundle。
