@@ -14,7 +14,8 @@ internal static class BridgeInputProbe
 {
     internal static bool RequiresBridge(IEnumerable<ITaskItem> assemblies)
     {
-        var paths = assemblies.Select(item => Path.GetFullPath(item.ItemSpec)).Distinct(StringComparer.Ordinal).ToArray();
+        var paths = assemblies.Select(item => Path.GetFullPath(item.ItemSpec)).Distinct(StringComparer.Ordinal)
+            .Where(IsManagedAssembly).ToArray();
         var cores = paths.Select(path => AssemblyName.GetAssemblyName(path)).Where(name => name.Name == "AtomUI.Core")
             .Select(name => name.FullName!).Distinct(StringComparer.Ordinal).ToArray();
         if (cores.Length == 0)
@@ -40,6 +41,34 @@ internal static class BridgeInputProbe
             }
         }
         return conditional;
+    }
+
+    private static bool IsManagedAssembly(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var pe = new PEReader(stream);
+            if (!pe.HasMetadata)
+            {
+                if (pe.PEHeaders.CorHeader is not null)
+                {
+                    throw new InvalidDataException("Bridge input has a CLR header but no metadata: " + path);
+                }
+                // Windows NativeAOT SDK references also contain native PE DLLs. They
+                // cannot carry registration records; leave the SDK input items untouched.
+                return false;
+            }
+            if (!pe.GetMetadataReader().IsAssembly)
+            {
+                throw new InvalidDataException("Bridge input must have an assembly manifest: " + path);
+            }
+            return true;
+        }
+        catch (BadImageFormatException error)
+        {
+            throw new InvalidDataException("Invalid bridge probe input: " + path, error);
+        }
     }
 
     private static bool HasOfficialProtocol(string path, string core)

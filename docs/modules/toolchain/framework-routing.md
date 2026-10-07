@@ -40,6 +40,10 @@ NativeAOT 编译器报告版本也必须匹配目标 major。版本还须不低�
 现代发布先探测实际输入的注册 ABI。纯官方包验证通过后不转换、不要求桥接工具；发现旧 net8 ConditionalRecord
 时，才在能力允许的组合中转换副本。转换只调整 ABI，最终依赖闭包仍由目标版本的官方引擎计算。
 
+Windows NativeAOT 的 SDK 引用集合也包含没有 CLR 元数据的原生 PE DLL。探测仅检查具有有效 CLR 元数据和
+程序集 manifest 的输入；原生 PE 不参与注册协议探测，SDK 的原始输入集合保持不变。损坏的 PE、存在 CLR header
+但缺少元数据，以及没有程序集 manifest 的托管模块仍明确失败，不能通过忽略解析异常来跳过旧包或错误输入。
+
 探测按每个包自己的 TFA 与框架引用 major 验证官方 accessor。例如 net11 应用引用正常 net10 控件包时，
 该包仍按其 net10 身份验证；不能把所有包一律当成应用的目标版本。没有记录、也没有合法官方协议的包明确失败。
 转换的具体能力范围见 [.NET 8 条件后端](../../architecture/foundations/aot-net8-conditional-backends.md#net-10-消费-net8-only-包)。
