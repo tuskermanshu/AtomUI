@@ -286,5 +286,15 @@
         <source>Variants</source>
       </segment>
     </unit>
+    <unit id="NeedConfirmTitle">
+      <segment>
+        <source>Confirm selection</source>
+      </segment>
+    </unit>
+    <unit id="NeedConfirmDescription">
+      <segment>
+        <source>IsNeedConfirm is enabled by default. Selecting a time updates the input immediately; OK submits the value. With IsNeedConfirm=False, closing the panel submits the candidate. Hover and ordinary scrolling do not submit.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

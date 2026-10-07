@@ -32,6 +32,7 @@
                                     <atom:DateTimePickerPanel Name="PART_HourSelector"
                                                               PanelType="Hour"
                                                               ShouldLoop="True"
+                                                              IsChangeOnScroll="{TemplateBinding IsChangeOnScroll}"
                                                               IsMotionEnabled="{TemplateBinding IsMotionEnabled}" />
                                 </atom:ScrollViewer>
                             </Panel>
@@ -49,6 +50,7 @@
                                     <atom:DateTimePickerPanel Name="PART_MinuteSelector"
                                                               PanelType="Minute"
                                                               ShouldLoop="True"
+                                                              IsChangeOnScroll="{TemplateBinding IsChangeOnScroll}"
                                                               IsMotionEnabled="{TemplateBinding IsMotionEnabled}" />
                                 </atom:ScrollViewer>
                             </Panel>
@@ -66,6 +68,7 @@
                                     <atom:DateTimePickerPanel Name="PART_SecondSelector"
                                                               PanelType="Second"
                                                               ShouldLoop="True"
+                                                              IsChangeOnScroll="{TemplateBinding IsChangeOnScroll}"
                                                               IsMotionEnabled="{TemplateBinding IsMotionEnabled}" />
                                 </atom:ScrollViewer>
                             </Panel>
@@ -79,10 +82,10 @@
                                 <atom:ScrollViewer
                                     IsScrollChainingEnabled="False"
                                     HorizontalScrollBarVisibility="Disabled"
-                                    VerticalScrollBarVisibility="Hidden">
+                                    VerticalScrollBarVisibility="Auto">
                                     <atom:DateTimePickerPanel Name="PART_PeriodSelector"
                                                               PanelType="TimePeriod"
-                                                              ShouldLoop="False"
+                                                              IsChangeOnScroll="{TemplateBinding IsChangeOnScroll}"
                                                               IsMotionEnabled="{TemplateBinding IsMotionEnabled}" />
                                 </atom:ScrollViewer>
                             </Panel>

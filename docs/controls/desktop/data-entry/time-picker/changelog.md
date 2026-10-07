@@ -2,6 +2,22 @@
 
 本文档记录 TimePicker 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-10-07
+
+- API / Behavior
+  - 保留 `IsNeedConfirm` 属性名并默认启用确认；默认 24 小时制，新增默认关闭的 `IsChangeOnScroll`。
+  - 分离提交值、面板候选与悬停预览；输入立即显示候选，显式 false 在关闭/失焦提交，OK、Enter 与 Now 统一显式提交。
+  - 修正已有值确认、无效文本、外部值重置、范围端点切换及钉住弹层重复确认路径。
+- Theme
+  - 时、分、秒使用循环列表和独立物理滚动，选中项始终垂直居中，首尾由真实周期值填充；隐藏这三列的纵向滚动条，保留滚轮、触控板和键盘操作，保持既有 Semantic Part；列内焦点滚动请求不传播至页面滚动容器。
+  - 格子内部文字按自然文本行高垂直居中，最小行高只由 TimeViewCell 承载，避免内部 presenter 重复约束高度导致文字顶端绘制。
+  - Gallery 确认模式对照示例改为独立的提交值与结果显示，并使用等宽、可换行的分组布局。
+  - footer 与行视觉由 ControlTheme 声明，单时间面板展示 8 行；共享 DatePicker 宿主保留自己的高度与提交策略。
+- Gallery / Docs
+  - 基础示例展示默认确认，增加两种确认模式及提交值反馈；同步示例快照、本地化与控件文档。
+- Compatibility
+  - 默认确认和默认时钟制变化需调用方复核；显式设置 `IsNeedConfirm=false` 或 `ClockIdentifier=HourClock12` 保留对应配置。
+
 ## 2026-10-03
 
 - Implementation

@@ -343,5 +343,17 @@
         <target state="translated">变体</target>
       </segment>
     </unit>
+    <unit id="NeedConfirmTitle">
+      <segment>
+        <source>Confirm selection</source>
+        <target state="translated">确认选择</target>
+      </segment>
+    </unit>
+    <unit id="NeedConfirmDescription">
+      <segment>
+        <source>IsNeedConfirm is enabled by default. Selecting a time updates the input immediately; OK submits the value. With IsNeedConfirm=False, closing the panel submits the candidate. Hover and ordinary scrolling do not submit.</source>
+        <target state="translated">IsNeedConfirm 默认启用。选时立即更新输入框，点击 OK 提交绑定值；设为 False 时，关闭面板提交候选时间。悬停和普通滚动不提交值。</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

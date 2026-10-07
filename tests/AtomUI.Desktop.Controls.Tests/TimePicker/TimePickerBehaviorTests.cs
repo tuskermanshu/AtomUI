@@ -84,7 +84,8 @@ public class TimePickerBehaviorTests
             var view = popup.Child.ShouldNotBeNull().GetVisualDescendants().OfType<TimeView>().Single();
             var selector = view.GetVisualDescendants().OfType<DateTimePickerPanel>().First();
             var owner = TopLevel.GetTopLevel(view).ShouldNotBeNull();
-            var point = selector.TranslatePoint(new Point(selector.Bounds.Width / 2, selector.Bounds.Height / 2), owner).ShouldNotBeNull();
+            var viewport = selector.GetVisualAncestors().OfType<Avalonia.Controls.Presenters.ScrollContentPresenter>().First();
+            var point = viewport.TranslatePoint(new Point(viewport.Bounds.Width / 2, viewport.Bounds.Height / 2), owner).ShouldNotBeNull();
             var other = new AvaloniaWindow { Width = 640, Height = 600, Content = new Border { Background = Brushes.Blue } };
             other.Show();
             try

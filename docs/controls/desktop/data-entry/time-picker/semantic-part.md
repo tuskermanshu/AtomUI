@@ -37,8 +37,8 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 - `popup.content` / `popup.column` 标注 `TimeViewTheme.axaml` 模板节点：`popup.content` 为时间列布局容器
   `Grid #PART_PickerContainer`，`popup.column` 为四个列宿主 Panel（`PART_HourHost` / `PART_MinuteHost` /
   `PART_SecondHost` / `PART_PeriodHost`）。
-- `popup.item` 为运行时注入：`DateTimePickerPanel.CreateOrDestroyItems` 创建 `TimeViewCell` 时追加生成
-  selector class 常量，覆盖滚动复用与循环搬移路径。
+- `popup.item` 为运行时注入：`DateTimePickerPanel.RefreshItems` 创建 `TimeViewCell` 时追加生成
+  selector class 常量，覆盖滚动复用与列表滚动路径。
 - `popup.*` 除 `popup.root` 外统一声明 `RuntimeCreated=true`（presenter 子树在运行时组装，生成器豁免宿主模板
   marker 校验，由控件行为测试兜底），其中 `popup.root` 为宿主模板静态节点、`RuntimeCreated=false`。
 - **TimeView 子树类名避让**：`TimeView` 同时被 DatePicker 带时间弹层内嵌（`DatePickerPresenterTheme.axaml` 与
@@ -262,7 +262,7 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 | Customization | `Selector` |
 | CrossVisualRoot | `true` |
 | RuntimeCreated | `true` |
-| AtomUI 节点 | `DateTimePickerPanel` 视口内运行时创建的 `TimeViewCell`（`CreateOrDestroyItems` 创建路径，创建时注入 marker） |
+| AtomUI 节点 | `DateTimePickerPanel` 视口内运行时创建的 `TimeViewCell`（`RefreshItems` 创建路径，创建时注入 marker） |
 | 职责 | 时间格子项，承载可选时间值与选中 / hover 状态视觉。 |
 | 相关 API | 无（随 `popup.column` 呈现） |
 | 相关 Token | TimePickerToken（`ItemHeight`） |
@@ -327,9 +327,9 @@ Semantic owner：单值 `TimePicker` 与范围 `RangeTimePicker`（语义对齐�
 `popup.column` 为 `Multiple`：TimeView 模板静态声明 4 个列宿主 marker；12 小时制运行时可见 4 个，24 小时制
 时段列隐藏后可见 3 个，marker 本体不增删。
 
-`popup.item` 为 `Multiple`：`DateTimePickerPanel` 按 `SelectorRowCount`（7）与视口尺寸只保留所需数量的
-`TimeViewCell`，随滚动与循环模式（`ShouldLoop`）以 `MoveRange` 原地复用、超界销毁重建；创建路径统一注入
-marker，保证滚动复用、增量变化与弹层重开后 marker 保持。
+`popup.item` 为 `Multiple`：`DateTimePickerPanel` 按允许值及步长创建
+`TimeViewCell`（默认视口下每列最多 60 个）；短步长序列重复有效值以填满循环视口，AM/PM 保持两项。滚动只改变物理偏移与周期位置，行容器保持身份；增量改变时复用或增删容器。创建路径统一注入
+marker，保证滚动、增量变化与弹层重开后 marker 保持。
 
 ## 4. Selector 用法
 
@@ -388,7 +388,7 @@ Style 遵循 Avalonia 原生属性优先级。`popup.column` 的 `Width` Setter 
 
 - **TimeView 头部**：`TextBlock #PART_HeaderText` 与分隔线在 TimePicker 弹层中恒隐藏（`IsShowHeader=False`），
   上游 TimePicker 面板同样无 header 槽位，不发布。
-- **列内滚动与虚拟化机制**：`ScrollViewer` 滚动宿主、`DateTimePickerPanel` 的视口复用 / 循环搬移
+- **列内滚动机制**：`ScrollViewer` 滚动宿主、`DateTimePickerPanel` 的周期定位与容器复用
   （`ShouldLoop`、`SelectorRowCount`）与列间分隔 `Rectangle` 是内部实现，上游无对应槽位，不发布。
 - **格子内部结构**：`TimeViewCell` 模板内的 `ContentPresenter` 与 motion 转场由其自身模板拥有，
   `popup.item` 只承诺格子项本体。
@@ -444,7 +444,7 @@ class，不影响其弹层视觉与行为。
   `RangeInfoPickerInputTheme.axaml` 不携带任何 semantic 选择器。
 - `TimePickerPresenterTheme.axaml` 携带 `popup.container` / `popup.footer` marker；`TimeViewTheme.axaml`
   携带 `popup.content` / `popup.column`（×4）marker。
-- `popup.item` marker 在 `DateTimePickerPanel` 格子创建路径注入；滚动复用、`ShouldLoop` 循环搬移、
+- `popup.item` marker 在 `DateTimePickerPanel` 格子创建路径注入；循环与非循环滚动、
   `MinuteIncrement` / `SecondIncrement` 变化、`ClockIdentifier` 12↔24 切换与弹层重开后 marker 保持。
 - 生成的 `TimePicker*Style` / `RangeTimePicker*Style` 可编译并命中目标节点（见
   `tests/AtomUI.Desktop.Controls.Tests/TimePicker/TimePickerSemanticPartTests.cs`）。
@@ -452,7 +452,7 @@ class，不影响其弹层视觉与行为。
   marker 存在。
 - 状态变化（清除模式、12/24 小时制、disabled、只读）不改变 marker 身份与数量语义。
 - 默认主题不消费 `.semantic-*`，未声明用户 Semantic Style 时不增加 selector activator；`TimeViewTheme` 的
-  `semantic-time-*` marker 对 DatePicker 弹层既有视觉零影响。
+  `semantic-time-*` marker 不改变共享 DatePicker 弹层的语义部件契约。
 - Gallery Semantic Parts Tab 延迟创建 Preview，弹层钉住常开并呈现 12/24 小时制四列，11 个 Part 均可解析
   高亮。
 - descriptor、生成 Style 与 NativeAOT 路径使用编译期生成数据，不依赖运行时反射或 VisualTree 扫描。

@@ -56,10 +56,10 @@ public class TimePickerShowCasePageTests
         source.ShouldNotContain("LineHeight=\"22\"");
         source.ShouldContain("Description=\"{gallery:TimePickerShowCaseLangResource PageDescription}\"");
         source.ShouldContain("<gallery:ShowCaseItem");
-        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(12);
-        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(12);
-        // 12 个示例模板 + 1 个语义部件预览模板
-        CountOccurrences(source, "DataTemplate x:DataType=\"vm:TimePickerViewModel\"").ShouldBe(13);
+        CountOccurrences(source, "IsDeferredContentEnabled=\"True\"").ShouldBe(13);
+        CountOccurrences(source, "<gallery:ShowCaseItem.DeferredContentTemplate>").ShouldBe(13);
+        // 13 个示例模板 + 1 个语义部件预览模板
+        CountOccurrences(source, "DataTemplate x:DataType=\"vm:TimePickerViewModel\"").ShouldBe(14);
         source.ShouldContain("TimePickerShowCaseLangResource BasicTitle");
         source.ShouldContain("TimePickerShowCaseLangResource BindingTitle");
         source.ShouldContain("SelectedTime=\"{Binding BoundSelectedTime}\"");

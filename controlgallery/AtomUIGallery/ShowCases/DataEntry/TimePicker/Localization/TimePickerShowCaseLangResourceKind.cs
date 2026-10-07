@@ -6,6 +6,8 @@ namespace AtomUIGallery.Localization;
 public enum TimePickerShowCaseLangResourceKind
 {
     BasicTitle,
+    NeedConfirmTitle,
+    NeedConfirmDescription,
     BasicDescription,
     BindingTitle,
     BindingDescription,

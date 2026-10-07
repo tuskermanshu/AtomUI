@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using AtomUI.Controls;
 using AtomUI.Controls.Utils;
 using AtomUI.Data;
@@ -121,6 +121,9 @@ internal class TimeView : TemplatedControl
     internal static readonly StyledProperty<bool> IsPointerInSelectorProperty =
         AvaloniaProperty.Register<TimeView, bool>(nameof(IsPointerInSelector), false);
 
+    internal static readonly StyledProperty<bool> IsChangeOnScrollProperty =
+        TimePicker.IsChangeOnScrollProperty.AddOwner<TimeView>();
+
     internal static readonly StyledProperty<bool> IsMotionEnabledProperty
         = MotionAwareControlProperty.IsMotionEnabledProperty.AddOwner<TimeView>();
     
@@ -142,18 +145,24 @@ internal class TimeView : TemplatedControl
         set => SetAndRaise(SpacerWidthProperty, ref _spacerWidth, value);
     }
 
-    internal bool IsPointerInSelector
-    {
-        get => GetValue(IsPointerInSelectorProperty);
-        set => SetValue(IsPointerInSelectorProperty, value);
-    }
-
     private double _itemHeight;
 
     internal double ItemHeight
     {
         get => _itemHeight;
         set => SetAndRaise(ItemHeightProperty, ref _itemHeight, value);
+    }
+
+    internal bool IsPointerInSelector
+    {
+        get => GetValue(IsPointerInSelectorProperty);
+        set => SetValue(IsPointerInSelectorProperty, value);
+    }
+
+    internal bool IsChangeOnScroll
+    {
+        get => GetValue(IsChangeOnScrollProperty);
+        set => SetValue(IsChangeOnScrollProperty, value);
     }
 
     internal bool IsMotionEnabled
@@ -181,12 +190,6 @@ internal class TimeView : TemplatedControl
 
     #endregion
     
-    static TimeView()
-    {
-        KeyboardNavigation.TabNavigationProperty
-                          .OverrideDefaultValue<TimeView>(KeyboardNavigationMode.Cycle);
-    }
-
     // TemplateItems
     private Grid? _pickerSelectorContainer;
     private Rectangle? _spacer3;
@@ -200,6 +203,25 @@ internal class TimeView : TemplatedControl
     private IDisposable? _pointerPositionDisposable;
     private TimeSpan? _pendingDisplayTime;
     private bool _isSyncingPanelValue;
+
+    static TimeView()
+    {
+        KeyboardNavigation.TabNavigationProperty
+                          .OverrideDefaultValue<TimeView>(KeyboardNavigationMode.Cycle);
+    }
+
+    public TimeView()
+    {
+        // Each column handles its own scrolling first. Unconsumed focus requests
+        // must not continue through the popup's logical owner into the page.
+        AddHandler(RequestBringIntoViewEvent, (_, e) =>
+        {
+            if (e.TargetObject != this)
+            {
+                e.Handled = true;
+            }
+        });
+    }
 
     private void DetectPointerPosition(RawInputEventArgs args)
     {
@@ -240,10 +262,12 @@ internal class TimeView : TemplatedControl
 
     private Rect GetSelectorGlobalRect(DateTimePickerPanel selector)
     {
-        return TopLevel.GetTopLevel(selector) is { } topLevel &&
-               selector.TranslatePoint(new Point(0, 0), topLevel) is { } position
-            ? new Rect(position, selector.Bounds.Size)
-            : default;
+        // The physical content can be taller than its viewport. Pointer geometry
+        // belongs to the clipped scroll presenter, not the whole item extent.
+        var viewport = selector.GetVisualAncestors().OfType<Avalonia.Controls.Presenters.ScrollContentPresenter>().FirstOrDefault();
+        var target = (Control?)viewport ?? selector;
+        return TopLevel.GetTopLevel(target) is { } topLevel && target.TranslatePoint(default, topLevel) is { } position
+            ? new Rect(position, target.Bounds.Size) : default;
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -276,6 +300,7 @@ internal class TimeView : TemplatedControl
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
+        DetachSelectorHandlers();
         base.OnApplyTemplate(e);
 
         _pickerSelectorContainer = e.NameScope.Get<Grid>("PART_PickerContainer");
@@ -336,6 +361,11 @@ internal class TimeView : TemplatedControl
 
     private void HandleSelectorCellHovered(object? sender, CellHoverEventArgs args)
     {
+        if (args.CellHoverInfo == null)
+        {
+            HoverTimeChanged?.Invoke(this, new TimeSelectedEventArgs(null));
+            return;
+        }
         var selectedTime  = CollectValue(false);
         var hour          = selectedTime.Hours;
         var minute        = selectedTime.Minutes;
@@ -434,9 +464,9 @@ internal class TimeView : TemplatedControl
 
         if (change.Property == SelectedTimeProperty)
         {
-            if (this.IsAttachedToVisualTree() && SelectedTime is not null)
+            if (this.IsAttachedToVisualTree())
             {
-                SyncTimeValueToPanel(SelectedTime.Value);
+                SyncTimeValueToPanel(SelectedTime ?? TimeSpan.Zero);
             }
         }
 
@@ -473,11 +503,36 @@ internal class TimeView : TemplatedControl
 
     private void SyncTimeValueToPanel(TimeSpan time)
     {
+        if (_hourSelector == null || _minuteSelector == null || _secondSelector == null || _periodSelector == null)
+        {
+            return;
+        }
         _isSyncingPanelValue = true;
         try
         {
             var clock12 = ClockIdentifier == ClockIdentifierType.HourClock12;
-            var hour    = time.Hours;
+            _hourSelector!.MaximumValue = clock12 ? 12 : 23;
+            _hourSelector.MinimumValue = clock12 ? 1 : 0;
+            _hourSelector.ItemFormat = clock12 ? "%h" : "hh";
+            _minuteSelector!.MaximumValue = 59;
+            _minuteSelector.MinimumValue = 0;
+            _minuteSelector.Increment = MinuteIncrement;
+            _minuteSelector.ItemFormat = "mm";
+            _secondSelector!.MaximumValue = 59;
+            _secondSelector.MinimumValue = 0;
+            _secondSelector.Increment = SecondIncrement;
+            _secondSelector.ItemFormat = "ss";
+            _periodSelector!.MaximumValue = 1;
+            _periodSelector.MinimumValue = 0;
+            if (_spacer3 != null)
+            {
+                _spacer3.IsVisible = clock12;
+            }
+            if (_periodHost != null)
+            {
+                _periodHost.IsVisible = clock12;
+            }
+            var hour = time.Hours;
             if (_hourSelector is not null)
             {
                 _hourSelector.SelectedValue = !clock12 ? hour :
@@ -514,31 +569,20 @@ internal class TimeView : TemplatedControl
         {
             return;
         }
+        SyncTimeValueToPanel(SelectedTime ?? TimeSpan.Zero);
+    }
 
-        var selectedTime   = SelectedTime ?? TimeSpan.Zero;
-        var clock12        = ClockIdentifier == ClockIdentifierType.HourClock12;
-        var use24HourClock = ClockIdentifier == ClockIdentifierType.HourClock24;
-        _hourSelector!.MaximumValue = clock12 ? 12 : 23;
-        _hourSelector.MinimumValue  = clock12 ? 1 : 0;
-        _hourSelector.ItemFormat    = "%h";
-
-        _minuteSelector!.MaximumValue = 59;
-        _minuteSelector.MinimumValue  = 0;
-        _minuteSelector.Increment     = MinuteIncrement;
-        _minuteSelector.ItemFormat    = "mm";
-
-        _secondSelector!.MaximumValue = 59;
-        _secondSelector.MinimumValue  = 0;
-        _secondSelector.Increment     = SecondIncrement;
-        _secondSelector.ItemFormat    = "ss";
-
-        _periodSelector!.MaximumValue = 1;
-        _periodSelector.MinimumValue  = 0;
-
-        SyncTimeValueToPanel(selectedTime);
-
-        _spacer3!.IsVisible    = !use24HourClock;
-        _periodHost!.IsVisible = !use24HourClock;
+    private void DetachSelectorHandlers()
+    {
+        foreach (var selector in new[] { _hourSelector, _minuteSelector, _secondSelector, _periodSelector })
+        {
+            if (selector != null)
+            {
+                selector.SelectionChanged -= HandleSelectionChanged;
+                selector.CellHovered -= HandleSelectorCellHovered;
+                selector.CellDbClicked -= HandleSelectorCellDbClicked;
+            }
+        }
     }
 
     private void ApplyPendingDisplayTime()

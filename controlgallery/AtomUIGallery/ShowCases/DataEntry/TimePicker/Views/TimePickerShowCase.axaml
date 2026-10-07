@@ -95,7 +95,47 @@
         Description="{gallery:TimePickerShowCaseLangResource BasicDescription}">
         <gallery:ShowCaseItem.DeferredContentTemplate>
             <DataTemplate x:DataType="vm:TimePickerViewModel">
-        <atom:TimePicker PlaceholderText="{gallery:TimePickerShowCaseLangResource P2PlaceholderTextSelectTime}" IsNeedConfirm="False" IsShowNow="True" />
+        <atom:TimePicker PlaceholderText="{gallery:TimePickerShowCaseLangResource P2PlaceholderTextSelectTime}" PickerDisplayTime="00:00:00" IsShowNow="True" />
+            </DataTemplate>
+        </gallery:ShowCaseItem.DeferredContentTemplate>
+    </gallery:ShowCaseItem>
+
+    <gallery:ShowCaseItem
+        Title="{gallery:TimePickerShowCaseLangResource NeedConfirmTitle}"
+        Description="{gallery:TimePickerShowCaseLangResource NeedConfirmDescription}"
+        IsDeferredContentEnabled="True">
+        <gallery:ShowCaseItem.DeferredContentTemplate>
+            <DataTemplate x:DataType="vm:TimePickerViewModel">
+                <WrapPanel ItemSpacing="24" LineSpacing="20">
+                    <StackPanel Width="190" Spacing="8">
+                        <TextBlock Text="IsNeedConfirm=True" FontWeight="Medium" />
+                        <atom:TimePicker IsNeedConfirm="True"
+                                         Width="160"
+                                         HorizontalAlignment="Left"
+                                         PickerDisplayTime="00:00:00"
+                                         PlaceholderText="{gallery:TimePickerShowCaseLangResource P2PlaceholderTextSelectTime}"
+                                         SelectedTime="{Binding ConfirmRequiredSelectedTime}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{gallery:TimePickerShowCaseLangResource P2TextSelectedTime}"
+                                       Foreground="{atom:SharedTokenResource ColorTextSecondary}" />
+                            <TextBlock Text="{Binding ConfirmRequiredSelectedTimeText}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Width="190" Spacing="8">
+                        <TextBlock Text="IsNeedConfirm=False" FontWeight="Medium" />
+                        <atom:TimePicker IsNeedConfirm="False"
+                                         Width="160"
+                                         HorizontalAlignment="Left"
+                                         PickerDisplayTime="00:00:00"
+                                         PlaceholderText="{gallery:TimePickerShowCaseLangResource P2PlaceholderTextSelectTime}"
+                                         SelectedTime="{Binding NoConfirmSelectedTime}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{gallery:TimePickerShowCaseLangResource P2TextSelectedTime}"
+                                       Foreground="{atom:SharedTokenResource ColorTextSecondary}" />
+                            <TextBlock Text="{Binding NoConfirmSelectedTimeText}" />
+                        </StackPanel>
+                    </StackPanel>
+                </WrapPanel>
             </DataTemplate>
         </gallery:ShowCaseItem.DeferredContentTemplate>
     </gallery:ShowCaseItem>

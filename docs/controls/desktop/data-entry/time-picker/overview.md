@@ -4,7 +4,7 @@
 
 该控件的 Popup 钉住打开属于共享弹层契约，详见 [Popup 钉住打开设计](../../other/popup/popup-pinned-open-design.md)。本控件的语义 owner 为 `InfoPickerInput`，其 `IsPopupPinnedOpen` 供测试、内部诊断和 Semantic Parts 预览钉住弹层使用；设置为 true 时保持 picker open state 并 relay 到 `PickerPopup`，设置为 false 时只解除关闭拦截。控件卸载、锚点失效、TopLevel 改变和模板重建仍按共享生命周期规则清理。
 
-TimePicker 家族包含 `TimePicker` 与 `RangeTimePicker` 两个 Semantic owner，分别公开 11 个和 12 个 Semantic Part（触发区 `root` / `prefix` / `input` / `suffix` / `clear`，Range 额外有 `secondaryInput`；弹层 `popup.root` / `popup.container` / `popup.content` / `popup.column` / `popup.item` / `popup.footer`），与 Ant Design TimePicker / TimePicker.RangePicker 共用的 Semantic Part 语义对齐（TimeView 头部与滚动虚拟化机制等内部实现不经 TimePicker 发布）；完整 Part 表、单值/范围存在条件、Selector 用法与定制边界见 [TimePicker Semantic Part 契约](semantic-part.md)。
+TimePicker 家族包含 `TimePicker` 与 `RangeTimePicker` 两个 Semantic owner，分别公开 11 个和 12 个 Semantic Part（触发区 `root` / `prefix` / `input` / `suffix` / `clear`，Range 额外有 `secondaryInput`；弹层 `popup.root` / `popup.container` / `popup.content` / `popup.column` / `popup.item` / `popup.footer`），与 Ant Design TimePicker / TimePicker.RangePicker 共用的 Semantic Part 语义对齐（TimeView 头部与列内滚动机制等内部实现不经 TimePicker 发布）；完整 Part 表、单值/范围存在条件、Selector 用法与定制边界见 [TimePicker Semantic Part 契约](semantic-part.md)。
 
 ## 1. 控件定位
 
@@ -45,7 +45,7 @@ TimePicker 的公共契约由 public/protected 类型成员、Avalonia 属性、
 | --- | --- | --- |
 | 内容与数据 | `IsShowHeader`、`ItemFormat`、`ItemHeight` | 定义控件展示内容、输入数据、模板或业务对象入口。 |
 | 选择与集合 | `RangeEndSelectedTime`、`RangeStartSelectedTime`、`SelectedTime`、`SelectorRowCount` | 维护选择、展开、过滤、分页、分组或集合状态。 |
-| 交互与状态 | `IsNeedConfirm`、`IsShowNow`、`ShouldLoop` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
+| 交互与状态 | `IsNeedConfirm`、`IsShowNow`、`IsChangeOnScroll` | 表达用户可观察状态、可用性、清除、加载或反馈语义。 |
 | 其他稳定入口 | `ClockIdentifier`、`DefaultTime`、`MinuteIncrement`、`PanelType`、`PickerDisplayTime`、`RangeEndDefaultTime`、`RangeStartDefaultTime`、`SecondIncrement` | 保留为 public surface，变更前需确认 Gallery 和用户 XAML 依赖。 |
 
 当前没有抽取到控件专属 public 事件；交互通知主要来自继承事件、命令或 Gallery 可观察状态。
@@ -87,6 +87,10 @@ TimePicker 的公共契约由 public/protected 类型成员、Avalonia 属性、
 
 当前未抽取到控件专属伪类；主题主要依赖 Avalonia 标准伪类、模板绑定和内部 StyledProperty。
 
+`TimePicker.IsNeedConfirm` 与 `RangeTimePicker.IsNeedConfirm` 默认 `true`，沿用该属性名。`ClockIdentifier` 默认 `HourClock24`，显式 `HourClock12` 保留 12 小时制。`IsChangeOnScroll` 默认 `false`，用于独立控制滚动是否产生候选选择。
+
+宿主的 `SelectedTime` / 范围端点是提交值，Presenter 的候选值驱动输入文本。选择每一列后立即显示完整候选时间，弹层保持打开；悬停只临时预览，离开选项恢复候选文本。`IsNeedConfirm=false` 时关闭或失焦提交最后的有效候选；为 `true` 时普通关闭丢弃未确认候选。OK、Enter 和 Now 使用显式提交流程，Now 在有效步进范围内选取当前时间并提交。已有值与 `PickerDisplayTime` 显示锚点可以通过 OK 显式确认；打开显示锚点本身不提交。
+
 ## 4. 行为与状态模型
 
 TimePicker 的状态流按以下路径收敛：
@@ -107,6 +111,17 @@ Public API / inherited command / item source / user input
 - `PickerDisplayTime` 只定义弹出面板打开时的显示锚点；它不得写入 `SelectedTime`，也不得改变 `DefaultTime` 的 reset 语义。
 - 模板重套用时必须把 public API 对应状态回放到新的 part、伪类和主题变量。
 - 集合、弹层、异步、动效或窗口相关状态必须能处理 reset、close、cancel、detach 和 owner 释放。
+
+| 操作 | `IsNeedConfirm=true` | `IsNeedConfirm=false` |
+| --- | --- | --- |
+| 面板点选 | 更新候选和输入文本，继续编辑。 | 更新候选和输入文本，继续编辑。 |
+| 悬停结束 | 恢复当前候选。 | 恢复当前候选。 |
+| 普通关闭或焦点离开组合控件 | 丢弃未确认候选，恢复提交值。 | 提交有效候选，通知绑定/Form。 |
+| OK / Enter | 校验并提交，然后关闭。 | Enter 校验并提交，OK 隐藏。 |
+| Now | 直接提交有效当前时间并关闭。 | 相同行为。 |
+| 普通滚动 | 浏览时间列表，不改变候选。 | 相同行为。 |
+
+时、分、秒列循环展示允许值，选中项始终位于视口垂直中心；`00` 上方显示上一周期的 `23` / `59`，首尾不补空白。步长列表按有效值循环，例如分钟步长 15 时 `00` 上方为 `45`。AM/PM 保持两项非循环列表。各列独立滚动；时、分、秒循环列隐藏纵向滚动条，仍支持滚轮、触控板和键盘操作；普通滚动只浏览，不产生候选。时间列的焦点滚动请求止于 TimeView，点击列值不会推动宿主页面滚动。单独的 TimePicker 面板展示 8 行；共享 TimeView 的 DatePicker 宿主保留其显式/默认行数与提交策略。
 
 ## 5. 视觉与主题模型
 
