@@ -68,9 +68,9 @@ Part 明细：
 | Cardinality | Optional |
 | RuntimeCreated / CrossVisualRoot / CrossNestedOwners | true / true / true |
 | AtomUI 节点 | `OverlayDialogMaskTheme.axaml` 的 `Border#Frame`（静态 marker） |
-| 职责 | modal 遮罩：`ColorBgMask` 背景、`CornerRadius`、指针命中与 fade motion 的视觉承载体 |
+| 职责 | 静态 modal 遮罩：`ColorBgMask` 背景、`CornerRadius` 与指针命中；随 presenter 显示和移除，不执行淡入淡出 |
 | 相关 API | `IsModal`、`IsMaskClosable` |
-| 相关 Token | `ColorBgMask`、`MotionDurationMid` |
+| 相关 Token | `ColorBgMask` |
 | Customization | Selector |
 | Stability | stable |
 

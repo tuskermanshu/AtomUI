@@ -191,11 +191,6 @@ internal sealed class OverlayDialogPresenter : ContentControl,
             _surfaceMotionActor.Opacity = IsMotionEnabled ? 0 : 1;
         }
 
-        if (_maskMotionActor is not null)
-        {
-            _maskMotionActor.Opacity = IsMotionEnabled && IsModal ? 0 : 1;
-        }
-
         await Dispatcher.UIThread.InvokeAsync(
             () => UpdateLayerBounds(_dialogLayer?.AvailableSize ?? default),
             DispatcherPriority.Loaded);
@@ -208,22 +203,8 @@ internal sealed class OverlayDialogPresenter : ContentControl,
             var motionToken = _openingMotionCancellationSource.Token;
             if (!await TryRunCompositorOpeningMotionAsync(motionToken))
             {
-                var motionTasks = new List<Task>
-                {
-                    CreateSurfaceMotion(isOpening: true)
-                        .RunAsync(
-                            _surfaceMotionActor,
-                            cancellationToken: motionToken)
-                };
-                if (IsModal && _maskMotionActor is not null)
-                {
-                    motionTasks.Add(new FadeInMotion(MotionDuration)
-                        .RunAsync(
-                            _maskMotionActor,
-                            cancellationToken: motionToken));
-                }
-
-                await Task.WhenAll(motionTasks);
+                await CreateSurfaceMotion(isOpening: true)
+                    .RunAsync(_surfaceMotionActor, cancellationToken: motionToken);
             }
         }
     }
@@ -260,12 +241,6 @@ internal sealed class OverlayDialogPresenter : ContentControl,
                 if (_surface.SurfaceContentLayer is { } surfaceContentLayer)
                 {
                     motionTasks.Add(RunSurfaceContentCloseMotionAsync(surfaceContentLayer));
-                }
-
-                if (IsModal && _maskMotionActor is not null)
-                {
-                    motionTasks.Add(new FadeOutMotion(MotionDuration, new CubicEaseIn())
-                        .RunAsync(_maskMotionActor));
                 }
 
                 await Task.WhenAll(motionTasks);
@@ -320,16 +295,6 @@ internal sealed class OverlayDialogPresenter : ContentControl,
             return false;
         }
 
-        CompositionVisual? maskVisual = null;
-        if (IsModal && _maskMotionActor is not null)
-        {
-            maskVisual = ElementComposition.GetElementVisual(_maskMotionActor);
-            if (maskVisual is null)
-            {
-                return false;
-            }
-        }
-
         var isZoom = motion is DialogZoomInMotion;
         try
         {
@@ -355,22 +320,18 @@ internal sealed class OverlayDialogPresenter : ContentControl,
                 ZoomBigMotionDefinition.Visible.Opacity,
                 motion.Easing,
                 motion.Duration);
-            if (maskVisual is not null)
-            {
-                StartOpacityAnimation(maskVisual, 0.0, 1.0, new LinearEasing(), MotionDuration);
-            }
-
             await WaitForCompositionMotionAsync(
+                surfaceVisual.Compositor,
                 motion.Duration + CompositionMotionCompletionSlack,
                 cancellationToken);
         }
         catch (OperationCanceledException)
         {
-            CompleteCompositorOpeningMotion(surfaceVisual, maskVisual, isZoom);
+            CompleteCompositorOpeningMotion(surfaceVisual, isZoom);
             throw;
         }
 
-        CompleteCompositorOpeningMotion(surfaceVisual, maskVisual, isZoom);
+        CompleteCompositorOpeningMotion(surfaceVisual, isZoom);
         return true;
     }
 
@@ -381,16 +342,6 @@ internal sealed class OverlayDialogPresenter : ContentControl,
         if (surfaceVisual is null)
         {
             return false;
-        }
-
-        CompositionVisual? maskVisual = null;
-        if (IsModal && _maskMotionActor is not null)
-        {
-            maskVisual = ElementComposition.GetElementVisual(_maskMotionActor);
-            if (maskVisual is null)
-            {
-                return false;
-            }
         }
 
         CompositionVisual? contentVisual = null;
@@ -425,22 +376,17 @@ internal sealed class OverlayDialogPresenter : ContentControl,
             endOpacity,
             motion.Easing,
             motion.Duration);
-        if (maskVisual is not null)
-        {
-            StartOpacityAnimation(maskVisual, 1.0, 0.0, new CubicEaseIn(), MotionDuration);
-        }
-
         if (contentVisual is not null)
         {
             StartOpacityAnimation(contentVisual, 1.0, 0.0, new LinearEasing(), MotionDuration);
         }
 
         await WaitForCompositionMotionAsync(
+            surfaceVisual.Compositor,
             motion.Duration + CompositionMotionCompletionSlack,
             CancellationToken.None);
         CompleteCompositorClosingMotion(
             surfaceVisual,
-            maskVisual,
             contentVisual,
             isZoom,
             endOpacity);
@@ -448,7 +394,6 @@ internal sealed class OverlayDialogPresenter : ContentControl,
     }
 
     private void CompleteCompositorOpeningMotion(CompositionVisual surfaceVisual,
-                                                 CompositionVisual? maskVisual,
                                                  bool includesScale)
     {
         var visible = ZoomBigMotionDefinition.Visible;
@@ -461,21 +406,10 @@ internal sealed class OverlayDialogPresenter : ContentControl,
             surfaceVisual.CenterPoint = default;
         }
 
-        maskVisual?.StopAnimation("Opacity");
-        if (maskVisual is not null)
-        {
-            maskVisual.Opacity = 1;
-        }
-
         _surfaceMotionActor!.Opacity = visible.Opacity;
-        if (_maskMotionActor is not null)
-        {
-            _maskMotionActor.Opacity = 1;
-        }
     }
 
     private static void CompleteCompositorClosingMotion(CompositionVisual surfaceVisual,
-                                                        CompositionVisual? maskVisual,
                                                         CompositionVisual? contentVisual,
                                                         bool includesScale,
                                                         double endOpacity)
@@ -487,12 +421,6 @@ internal sealed class OverlayDialogPresenter : ContentControl,
             var closingEnd = ZoomBigMotionDefinition.ClosingEnd;
             surfaceVisual.StopAnimation("Scale");
             surfaceVisual.Scale = new Vector3D(closingEnd.Scale, closingEnd.Scale, 1);
-        }
-
-        maskVisual?.StopAnimation("Opacity");
-        if (maskVisual is not null)
-        {
-            maskVisual.Opacity = 0;
         }
 
         contentVisual?.StopAnimation("Opacity");
@@ -525,12 +453,19 @@ internal sealed class OverlayDialogPresenter : ContentControl,
         animation.Duration = duration;
         animation.InsertKeyFrame(0, new Vector3D(from, from, 1), easing);
         animation.InsertKeyFrame(1, new Vector3D(to, to, 1), easing);
+        // StartAnimation does not update the client base value. Keep it distinct from the
+        // endpoint so completing or cancelling the motion serializes the final scale.
+        visual.Scale = new Vector3D(from, from, 1);
         visual.StartAnimation("Scale", animation);
     }
 
-    private static async Task WaitForCompositionMotionAsync(TimeSpan duration,
+    private static async Task WaitForCompositionMotionAsync(Compositor compositor,
+                                                            TimeSpan duration,
                                                             CancellationToken cancellationToken)
     {
+        // Submission may wait behind layout/render work. Count the motion from the batch
+        // reaching the render thread, otherwise a delayed batch can be stopped mid-motion.
+        await compositor.RequestCommitAsync().WaitAsync(cancellationToken);
         var completionSource = new TaskCompletionSource();
         using var timer = DispatcherTimer.RunOnce(
             completionSource.SetResult,

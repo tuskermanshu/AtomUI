@@ -2,6 +2,17 @@
 
 本文档记录 Modal 控件级设计、API、主题契约、Token 和实现结构的变化。它不替代仓库根目录 `CHANGELOG.md`，也不作为正式版本发布说明。
 
+## 2026-10-07
+
+- Behavior
+  - Overlay modal mask 改为直接显示，关闭期间保持固定透明度，随 presenter 移除；compositor、fallback 和 mask 主题均不再执行遮罩淡入淡出。保留 Surface 的锚点位移、缩放及透明度动画。
+- Fix
+  - Overlay opening/closing 的完成计时改为从动画批次到达渲染线程后开始，避免 UI 提交延迟截断 Surface 位移/缩放。
+  - Scale 动画同步初始基值，确保完成或取消时最终比例实际提交，避免重置缩放中心后出现残留缩放与 X/Y 跳变。
+- Validation
+  - 在 Linux Wayland 的当前 Gallery 场景中，启用 BasicDialog 的 modal mask，使用偏离弹窗中心的真实按钮覆盖 X/Y 位移，并以延迟提交对照验证动画终态；不据此声明跨平台帧率提升。
+  - 此前带 mask 动画版本的诊断中，ModalShowCase 的 21 个 Overlay 点击入口各完成三次打开/关闭，另检查两个常开语义预览；逐例绘制节奏仍显示部分带 mask 场景存在长帧，不能将终态修复视为所有场景的流畅度达标。
+
 ## 2026-09-26
 
 - Performance

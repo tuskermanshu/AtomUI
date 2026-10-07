@@ -153,7 +153,7 @@ Window 宿主同样上报：跨根是原生 `DialogWindow`（`GetCrossRoots()` �
 
 `DialogSurface.OnApplyTemplate` 先释放旧 Header/ButtonBox/Resizer 订阅，再接入新 parts。`DialogButtonBox` 在 template 为空或重套用时立即清空旧 panel 和视觉父级。
 
-Overlay presenter 在外层 Surface、内容层和 modal mask 的关闭任务全部完成后，先断开 `DialogSurface` 子树的 composition children，再释放 Surface 并移除 Overlay layer；空的 `DialogOverlayLayer` 随后从实际 host 删除并解绑 size 事件。Window presenter 先等待原生 Window 关闭，再在 dispose 中断开 composition children、释放 Surface、bindings、资源 bridge 和 `Window.Content`。两条路径都防止调用方保留 Content/CustomButton 等子控件时，其旧 `CompositionVisual.Parent` 链反向保留 Presenter 和 Surface；原生关闭或后续释放抛出时仍继续 teardown，最后传播首个异常。
+Overlay presenter 在外层 Surface 与内容层的关闭任务全部完成后，先断开 `DialogSurface` 子树的 composition children，再释放 Surface 并连同静态 mask 一并移除 Overlay layer；空的 `DialogOverlayLayer` 随后从实际 host 删除并解绑 size 事件。Window presenter 先等待原生 Window 关闭，再在 dispose 中断开 composition children、释放 Surface、bindings、资源 bridge 和 `Window.Content`。两条路径都防止调用方保留 Content/CustomButton 等子控件时，其旧 `CompositionVisual.Parent` 链反向保留 Presenter 和 Surface；原生关闭或后续释放抛出时仍继续 teardown，最后传播首个异常。
 
 ## 7. 交互与事件处理
 
@@ -198,9 +198,11 @@ Overlay 首次 placement 完成前收到 `StructuralMinimumChanged` 时，只重
 
 ### 8.4 Motion
 
-Overlay 优先把 Surface 的 `Opacity`/`Scale`、modal mask 的 `Opacity` 和关闭时内容层的 `Opacity` 直接提交给 Avalonia Composition visual。动画由 compositor 时钟驱动；UI Dispatcher 只在开始、取消和结束时参与，不逐帧写 `MotionActor.MotionTransform` 或 `Visual.Opacity`。opening 在新挂载 visual 上启动动画前先等待一次 `RequestCommitAsync`，保证服务端 visual 已建立；之后由一个 duration 加固定安全余量的一次性 Dispatcher timer 定义 presenter task 的完成边界。timer 的 disposable 由等待方法持有，正常完成或 opening 取消都会释放。
+Overlay 优先把 Surface 的 `Opacity`/`Scale` 和关闭时内容层的 `Opacity` 直接提交给 Avalonia Composition visual。动画由 compositor 时钟驱动；UI Dispatcher 只在开始、取消和结束时参与，不逐帧写 `MotionActor.MotionTransform` 或 `Visual.Opacity`。opening 在新挂载 visual 上启动动画前先等待一次 `RequestCommitAsync`，保证服务端 visual 已建立；opening/closing 的动画批次提交到渲染线程后，再启动 duration 加固定安全余量的一次性 Dispatcher timer 定义 presenter task 的完成边界，提交等待不占用动画播放时间。timer 的 disposable 由等待方法持有，正常完成或 opening 取消都会释放。Scale 动画启动时同步初始基值，保证正常完成或取消时的最终 Scale 写入会提交到服务端，恢复缩放中心前必须收敛到完整可见状态。
 
-当 Surface、mask 或已存在的内容层拿不到 Composition visual 时，presenter 整体回退到现有 `AbstractMotion`/Avalonia `Animation` 路径，避免同一次 choreography 混用两套时钟。fallback 仍用 `Task.WhenAll` 聚合 Surface、内容层和 mask；`AbstractMotion` 保留最长 duration 加安全余量的 completion timeout。opening 被取消时，presenter 先停止 server animation，把 Composition visual 和 actor 基值收敛到完整可见状态，再启动 close motion，关闭动效始终从确定基态开始。
+当 Surface 或已存在的内容层拿不到 Composition visual 时，presenter 整体回退到现有 `AbstractMotion`/Avalonia `Animation` 路径，避免同一次 choreography 混用两套时钟。fallback opening 只等待 Surface，closing 用 `Task.WhenAll` 聚合 Surface 与内容层；`AbstractMotion` 保留最长 duration 加安全余量的 completion timeout。opening 被取消时，presenter 先停止 server animation，把 Composition visual 和 actor 基值收敛到完整可见状态，再启动 close motion，关闭动效始终从确定基态开始。
+
+modal mask 不参与 opening/closing motion：模板挂载时直接显示，退出动画期间保持固定透明度和输入遮挡，随 presenter 一并移除。`PART_MaskMotionActor` 保留既有名称及树结构，仅承载 mask 的几何和可见性。mask 主题不配置 Opacity transition。
 
 全部关闭 motion 完成后才断开 composition children、Dispose Surface 和移除 presenter。Window host 不创建 Surface `MotionActor`：它在 native `Show()` 前完成初始尺寸和 placement，首个可见帧直接使用已解析的几何。`DialogWindow.Opened` 和 `DialogWindow.Closed` 是 Window presenter 的原生生命周期边界；关闭流程等待原生 Window 关闭和资源清理，不依赖 Surface close motion。Overlay duration 继续来自 Dialog scope 的 `MotionDurationMid`。详细 choreography 见 [Modal Dialog 关闭动效设计](dialog-close-motion-design.md)。
 
@@ -214,7 +216,7 @@ Overlay 优先把 Surface 的 `Opacity`/`Scale`、modal mask 的 `Opacity` 和�
 
 | 几何 | 真源 | 用途 |
 | --- | --- | --- |
-| mask bounds | 完整 `DialogOverlayLayer.AvailableSize` | mask、mask motion 和 modal pointer 阻断。 |
+| mask bounds | 完整 `DialogOverlayLayer.AvailableSize` | mask 绘制和 modal pointer 阻断。 |
 | Window visible frame | 完整 layer 按 `FrameShadowThickness` 内缩 | Window 统一外轮廓和透明 shadow buffer。 |
 | Dialog body owner bounds | visible frame 按当前有效 drawn `FrameThickness` 内缩 | Surface 正文测量、placement、drag、resize、maximize 和 restore。 |
 | Dialog BoxShadow extents | `DialogSurface` 主题绘制 | 仅绘制，不参与正文尺寸和位置约束。 |
@@ -250,8 +252,8 @@ Dialog 内容区内的 popup 沿 placement target 解析同一 Window `TopLevel`
 - 普通 veto 发生在结果提交前；结果提交后只允许完成 teardown 和传播异常。
 - Overlay 与 Window 的 `ShowAsync`/`CloseAsync` 都等待真实 presentation 边界。
 - mask 与 Surface 必须保留在同一个 Overlay presenter 中。
-- Overlay 关闭时 Surface 外层、`PART_SurfaceContentLayer` 和 modal mask 的任务必须由同一个 presenter 聚合；所有任务完成前不得断开 composition children、Dispose Surface 或移除 presenter。
-- Overlay server animation 必须在新挂载 visual 完成首次 commit 后启动；opening 取消必须先停止 animation 并恢复 actor 基值。Composition visual 不完整时必须整体回退，不允许 Surface 与 mask/content 分别使用不同的动画时钟。
+- Overlay 关闭时 Surface 外层与 `PART_SurfaceContentLayer` 的任务必须由同一个 presenter 聚合；modal mask 保持可见直到 presenter 移除；所有任务完成前不得断开 composition children、Dispose Surface 或移除 presenter。
+- Overlay server animation 必须在新挂载 visual 完成首次 commit 后启动；opening 取消必须先停止 animation 并恢复 actor 基值。Composition visual 不完整时必须整体回退，不允许 Surface 与 content 分别使用不同的动画时钟。
 - fallback `AbstractMotion` 只能在全部 transition 完成或安全 timeout 后报告 Motion 完成；不能按首个 transition 的完成通知 teardown。
 - `PART_SurfaceContentLayer` 是可选内部协作节点；缺失时仅退化为外层 motion，不能阻断基本关闭流程。动画期间不得改变 Surface Bounds、布局或 visual parent。
 - 所有平台的 Overlay presenter 必须保留在 owning `TopLevel` 的 `OverlayLayer`；drawn decorations overlay 只绘制 chrome，不能承载业务 presentation。

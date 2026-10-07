@@ -23,6 +23,7 @@ Modal 不承担通知队列、轻量 Tooltip、Popup 菜单或业务级导航服
 - 对话表面由标题、内容、Footer 和操作按钮组成，Overlay 与 Window 共享同一个内容模型。
 - modal 通过 mask 或原生 owner 关系阻断底层输入；modeless 保持底层可交互。
 - Presenter 的真实展示边界属于 Session 生命周期的一部分。Overlay 在入场 motion 完成后触发 `Opened`，Window 在原生 `DialogWindow.Opened` 后触发；关闭任务分别等待 Overlay 退出 motion 或原生 `DialogWindow.Closed`，并在宿主移除和资源释放完成后结束。
+- Overlay modal mask 打开时直接显示，关闭期间保持固定透明度，随 presenter 移除；不执行淡入淡出。
 - Overlay 关闭时，外层 Surface motion 与 `DialogSurface` 内容层的前景 opacity 动画并行；内容和按钮保持附着，直到所有关闭任务完成后才 teardown。Window 继续使用原生 Window 生命周期。
 - `MessageBoxStyle` 只表达消息语义和默认图标/按钮策略，不改变 Dialog 生命周期。
 
@@ -84,7 +85,7 @@ Dialog 公开 `Opened`、`Closing`、`Accepted`、`Rejected`、`Finished`、`Clo
 | `PART_ButtonBox` | `DialogSurface` | 当前标准/自定义按钮序列。 |
 | `PART_Resizer` | `DialogSurface` | Overlay resize handles。 |
 | `PART_LeftGroup` / `PART_CenterGroup` / `PART_RightGroup` | `DialogButtonBox` | 按按钮角色布局。 |
-| `PART_MaskMotionActor` | `OverlayDialogPresenter` | modal mask 及其 motion。 |
+| `PART_MaskMotionActor` | `OverlayDialogPresenter` | modal mask 容器；保留现有部件名，不执行 motion。 |
 | `PART_SurfaceMotionActor` | `OverlayDialogPresenter` | DialogSurface 入场/退出 motion。 |
 | `PART_SurfaceContentLayer` | `DialogSurface` 内部模板节点 | 包围 Header、ContentFrame 和 FooterFrame；Overlay 关闭时承载前景 opacity 动画，不是 public Semantic Part。 |
 
@@ -102,7 +103,7 @@ Dialog 公开 `Opened`、`Closing`、`Accepted`、`Rejected`、`Finished`、`Clo
 - Enter/Escape 根据当前有效按钮序列查找 default/escape 按钮，运行时修改标准按钮或自定义按钮会立即生效。
 - `IsConfirmLoading=true` 只阻止用户发起的普通关闭，不阻止 owner close、detach、取消和失败 teardown。
 - 打开后焦点进入 DialogSurface；嵌套 Dialog 关闭时恢复下层 Surface，最后一层关闭时恢复原触发控件。
-- Overlay 等待 mask 与 Surface 的 opening/closing motion；关闭时同一 presenter 还等待内容层 opacity 动画，并在聚合任务完成后才断开 composition children、释放 Surface 和移除 layer。`IsMotionEnabled=false` 只跳过这些 motion，不跳过宿主附加、移除和释放。Window 不创建 Surface `MotionActor`，其打开与关闭分别等待原生 `DialogWindow.Opened` 和 `DialogWindow.Closed`。
+- Overlay 等待 Surface 的 opening/closing motion；关闭时同一 presenter 还等待内容层 opacity 动画，并在聚合任务完成后才断开 composition children、释放 Surface 和移除 layer。`IsMotionEnabled=false` 只跳过这些 motion，不跳过宿主附加、移除和释放。Window 不创建 Surface `MotionActor`，其打开与关闭分别等待原生 `DialogWindow.Opened` 和 `DialogWindow.Closed`。
 - `IsResizable=true` 允许在有效尺寸区间内交互缩放，不表示无约束 resize。结构性最小尺寸在宿主容量允许时始终保留标题、Footer 和非零正文 viewport；`HostMin*` 只能提高该下限，`HostMax*=PositiveInfinity` 仍受 owner 或 screen capacity 限制。Overlay handle 捕获 pointer，release 或 capture lost 都会完整结束当前 resize，不复用上一次拖拽 origin。
 
 ## 5. 视觉与主题模型

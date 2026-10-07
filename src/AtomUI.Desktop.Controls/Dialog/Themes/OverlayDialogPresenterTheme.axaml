@@ -13,8 +13,7 @@
                                       IsVisible="{TemplateBinding IsModal}"
                                       ClipToBounds="False">
                         <atom:OverlayDialogMask Name="PART_DialogMask"
-                                                Classes.semantic-scope-mask="True"
-                                                IsMotionEnabled="{TemplateBinding IsMotionEnabled}" />
+                                                Classes.semantic-scope-mask="True" />
                     </atom:MotionActor>
                     <atom:MotionActor Name="PART_SurfaceMotionActor"
                                       Classes.semantic-wrapper="True"

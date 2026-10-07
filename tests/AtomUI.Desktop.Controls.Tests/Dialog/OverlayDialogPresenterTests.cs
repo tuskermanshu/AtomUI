@@ -199,7 +199,7 @@ public class OverlayDialogPresenterTests
                 var actors = presenter.GetVisualDescendants().OfType<MotionActor>().ToArray();
 
                 actors.Single(actor => actor.Name == "PART_SurfaceMotionActor").Opacity.ShouldBe(0);
-                actors.Single(actor => actor.Name == "PART_MaskMotionActor").Opacity.ShouldBe(0);
+                actors.Single(actor => actor.Name == "PART_MaskMotionActor").Opacity.ShouldBe(1);
 
                 WaitWithDispatcherPump(showTask);
             }
