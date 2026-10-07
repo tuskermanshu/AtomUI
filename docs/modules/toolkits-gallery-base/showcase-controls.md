@@ -143,6 +143,7 @@ public class ShowCasePanel : TemplatedControl
 - 新挂载、恢复可见或不再占满整行的 item 在首次重新进入普通布局时放入当前最短列。
 - 有效列数变化时清除旧列假设，并按当前最短列重新建立全部归属。
 - `ShowCaseItemSpan.Full` 或 `IsOccupyEntireRow=true` 占满整行，不进入普通列归属。
+- 测量与实际排列宽度不同时，按排列宽度重新测量子项，并在输入测量宽度不变的后续布局中沿用该宽度，避免分数缩放下重复失效；输入宽度变化或脱离视觉树时清除该记录。
 - 不做虚拟化，只负责已挂载 children 的测量和排列。
 
 该面板保持简单，不引入 ItemsControl、ItemsSource 或数据模板。ShowCase 页面是文档式页面，不是无限列表。
